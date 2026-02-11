@@ -1,0 +1,62 @@
+/* SoilFER-LIMS GitBook Custom Styles */
+
+:root {
+    --soilfer-green: #2d6a4f;
+    --soilfer-gold: #b08d3b;
+    --fao-blue: #0066b3;
+}
+
+/* Title styling */
+.sidebar .sidebar-scrollbox .chapter li a.active {
+    color: var(--soilfer-green);
+}
+
+/* Info boxes */
+blockquote {
+    border-left: 4px solid var(--soilfer-green);
+    background-color: rgba(45, 106, 79, 0.05);
+    padding: 0.8em 1em;
+    margin: 1em 0;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+table th {
+    background-color: var(--soilfer-green);
+    color: white;
+    padding: 0.7em 1em;
+    text-align: left;
+}
+
+table td {
+    padding: 0.6em 1em;
+    border-bottom: 1px solid #ddd;
+}
+
+table tr:nth-child(even) {
+    background-color: rgba(45, 106, 79, 0.03);
+}
+
+/* Code blocks */
+pre {
+    border-left: 3px solid var(--soilfer-green);
+}
+
+/* External links */
+a[href^="http"]::after {
+    content: " ↗";
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+/* Print-friendly */
+@media print {
+    .sidebar, .menu-bar {
+        display: none !important;
+    }
+}

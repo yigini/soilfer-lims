@@ -1,0 +1,20 @@
+[book]
+title = "SoilFER-LIMS — Complete Deployment & User Guide"
+authors = ["FAO Global Soil Partnership / SoilFER Programme"]
+description = "Step-by-step guide for deploying and using the SoilFER Laboratory Information Management System"
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/yigini/soilfer-lims"
+edit-url-template = "https://github.com/yigini/soilfer-lims/edit/main/docs/book/src/{path}"
+site-url = "/soilfer-lims/"
+additional-css = ["src/custom.css"]
+
+[output.html.print]
+enable = true
+
+[output.html.search]
+enable = true
