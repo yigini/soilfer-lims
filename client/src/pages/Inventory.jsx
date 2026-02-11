@@ -526,7 +526,8 @@ const Inventory = () => {
     const [showCreate, setShowCreate] = useState(false);
     const [showQuickConsume, setShowQuickConsume] = useState(false);
     const [quickConsumeItem, setQuickConsumeItem] = useState(null);
-    const [showAlerts, setShowAlerts] = useState(false);
+    const [showExportMenu, setShowExportMenu] = useState(false);
+    const [alertFilter, setAlertFilter] = useState(null);
     const [alertsList, setAlertsList] = useState([]);
 
     const fetchAll = useCallback(async () => {
@@ -595,13 +596,13 @@ const Inventory = () => {
                         </>
                     )}
                     <div className="relative">
-                        <button onClick={() => setShowAlerts(!showAlerts)} className="p-2 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 relative">
+                        <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 relative">
                             <Download size={16} className="text-gray-500" />
                         </button>
-                        {showAlerts && (
+                        {showExportMenu && (
                             <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 py-1 z-30">
                                 {['stock', 'expiry', 'transactions'].map(t => (
-                                    <button key={t} onClick={() => { handleExport(t); setShowAlerts(false); }}
+                                    <button key={t} onClick={() => { handleExport(t); setShowExportMenu(false); }}
                                         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 capitalize">{t} Report</button>
                                 ))}
                             </div>
@@ -610,7 +611,14 @@ const Inventory = () => {
                 </div>
             </div>
 
-            <AlertBanner alerts={alertCounts} onViewAlerts={() => setShowAlerts(true)} />
+            <AlertBanner alerts={alertCounts} onViewAlerts={() => setAlertFilter(alertFilter ? null : 'LOW_STOCK')} />
+            {alertFilter && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 text-sm">
+                    <Filter size={14} className="text-orange-500" />
+                    <span className="text-orange-700 dark:text-orange-300 font-medium">Showing: Low Stock Items</span>
+                    <button onClick={() => setAlertFilter(null)} className="ml-auto p-0.5 rounded hover:bg-orange-100 dark:hover:bg-orange-800/40 text-orange-500"><X size={14} /></button>
+                </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 max-w-md">
@@ -651,7 +659,7 @@ const Inventory = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y dark:divide-gray-700">
-                            {items.map(item => (
+                            {items.filter(item => !alertFilter || (alertFilter === 'LOW_STOCK' && item.isLowStock)).map(item => (
                                 <tr key={item.id} onClick={() => openItem(item)} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 cursor-pointer transition-colors group">
                                     <td className="px-4 py-3">
                                         <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
