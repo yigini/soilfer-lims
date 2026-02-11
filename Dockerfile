@@ -3,12 +3,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install client dependencies
-COPY client/package.json client/package-lock.json* ./client/
+# Copy client package files (lockfile included for reproducible builds)
+COPY client/package.json client/package-lock.json ./client/
 RUN cd client && npm ci --ignore-scripts
 
-# Install server dependencies (for Prisma generate)
-COPY server/package.json server/package-lock.json* ./server/
+# Copy server package files (for Prisma generate)
+COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --ignore-scripts
 
 # Copy source
@@ -32,7 +32,7 @@ LABEL org.opencontainers.image.description="Laboratory Information Management Sy
 WORKDIR /app
 
 # Install production server dependencies only
-COPY server/package.json server/package-lock.json* ./server/
+COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --omit=dev --ignore-scripts
 
 # Copy server source
