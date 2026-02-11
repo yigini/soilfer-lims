@@ -1,6 +1,567 @@
-# 📦 SoilFER-LIMS — Installation Guide
+# 📦 SoilFER-LIMS — Deployment Guide
 
-Complete installation guide for deploying SoilFER-LIMS on any server.
+A step-by-step guide for deploying SoilFER-LIMS on a Linux server. Written for non-IT users — no prior server experience needed.
+
+> **What you'll get:** A public website (e.g. `https://lims.yourdomain.com`) where your lab team can log in and manage samples.
+
+---
+
+## Which Scenario Are You?
+
+| | **Scenario A** | **Scenario B** |
+|---|---|---|
+| **You have** | A fresh domain + fresh server | An existing server with other websites |
+| **Example** | `soillab.org` (nothing running yet) | Adding `lims.mainsite.org` next to existing sites |
+| **Server** | Brand new Linux VPS | Already has NGINX/Apache + other services |
+| **Difficulty** | ⭐ Easier | ⭐⭐ Moderate |
+
+**Both scenarios use Docker** — the recommended deployment method. It packages everything (Node.js, database, web server) into one container, so you don't need to install anything manually.
+
+---
+
+## Before You Start
+
+You will need:
+
+1. **A Linux server** — Ubuntu 22.04+ recommended (DigitalOcean, Hetzner, OVH, AWS, or any VPS provider)  
+   - Minimum: 1 CPU, 1 GB RAM, 10 GB disk
+2. **A domain name** — Either a new domain (`soillab.org`) or a subdomain (`lims.existing-site.org`)
+3. **SSH access** — Your server's IP address, username, and password or SSH key
+4. **An SSH client** — Terminal (Mac/Linux) or [PuTTY](https://www.putty.org/) (Windows)
+
+---
+
+## Step 0: Connect to Your Server
+
+Open your terminal (or PuTTY) and connect:
+
+```bash
+ssh root@YOUR_SERVER_IP
+# Example: ssh root@46.19.33.37
+# Enter your password when prompted
+```
+
+> 💡 **Tip:** Most VPS providers email you the IP + password after you create a server.
+
+---
+
+## Step 1: Install Docker (Both Scenarios)
+
+If Docker is not yet installed, run these commands one by one:
+
+```bash
+# Update your system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+
+# Allow your user to run Docker without sudo
+sudo usermod -aG docker $USER
+
+# IMPORTANT: Log out and log back in for the group change to take effect
+exit
+```
+
+Log back in:
+
+```bash
+ssh root@YOUR_SERVER_IP
+```
+
+Verify Docker is working:
+
+```bash
+docker --version
+# Should show: Docker version 24.x or higher
+
+docker compose version
+# Should show: Docker Compose version v2.x
+```
+
+> ⚠️ If `docker compose version` doesn't work, you may need to install it separately:
+> ```bash
+> sudo apt install docker-compose-plugin
+> ```
+
+---
+
+## Step 2: Install Git (if not already installed)
+
+```bash
+sudo apt install -y git
+```
+
+---
+
+## Step 3: Download SoilFER-LIMS
+
+```bash
+# Navigate to a good location
+cd /opt
+
+# Download the code
+git clone https://github.com/yigini/soilfer-lims.git
+cd soilfer-lims
+```
+
+---
+
+## Step 4: Configure Your Environment
+
+```bash
+# Copy the example configuration
+cp .env.example .env
+
+# Edit the configuration
+nano .env
+```
+
+In the editor, set these values:
+
+```bash
+PORT=3000
+JWT_SECRET=          # LEAVE BLANK — auto-generated on first boot
+NODE_ENV=production
+DEPLOYMENT_MODE=local   # Use 'local' for single lab, 'global' for multi-lab
+```
+
+> 💡 **Which mode?**
+> - `local` = One laboratory with one admin. Best for individual soil labs.
+> - `global` = Multiple laboratories, each with their own manager. Best for national programs or research networks.
+
+Press **Ctrl+O** to save, then **Ctrl+X** to exit nano.
+
+---
+
+# 🅰️ Scenario A: Fresh Domain + Fresh Server
+
+*You just bought `soillab.org` and have a brand new server with nothing on it.*
+
+### A1. Point Your Domain to Your Server
+
+Go to your domain provider (GoDaddy, Namecheap, Cloudflare, etc.) and add a **DNS record**:
+
+| Setting | Value |
+|---------|-------|
+| **Type** | A |
+| **Name** | `@` (or leave blank — means the root domain) |
+| **Value** | Your server's IP address (e.g. `46.19.33.37`) |
+| **TTL** | Auto or 3600 |
+
+> ⏳ DNS changes take **5 minutes to 1 hour** to propagate. You can check at [whatsmydns.net](https://www.whatsmydns.net/).
+
+If you also want `www.soillab.org` to work, add a second record:
+
+| Type | Name | Value |
+|------|------|-------|
+| A | `www` | Your server IP |
+
+### A2. Update the NGINX Config with Your Domain
+
+```bash
+nano deploy/nginx.conf
+```
+
+Replace `server_name _;` with your actual domain:
+
+```nginx
+server_name soillab.org www.soillab.org;
+```
+
+Save and exit (Ctrl+O, Ctrl+X).
+
+### A3. Start SoilFER-LIMS
+
+```bash
+# For single-lab deployment:
+docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+
+# Wait about 30-60 seconds for first boot (it downloads, builds, and seeds the database)
+```
+
+> **Why `docker-compose.global.yml`?** This adds NGINX (web server) which listens on port 80 — standard for websites. Without it, you'd access the site on port 3000, which is unusual and won't work with SSL.
+
+Verify it's running:
+
+```bash
+docker ps
+# You should see two containers: soilfer-lims and soilfer-nginx
+
+# Check if the website responds:
+curl http://localhost/api/health
+# Should return: {"status":"ok", ...}
+```
+
+### A4. Open Your Browser
+
+Go to **http://soillab.org** — you should see the LIMS login page!
+
+- **Username:** `admin`
+- **Password:** `password`
+- You'll be asked to change the password on first login.
+
+### A5. Add SSL (HTTPS) — Recommended
+
+This makes your site secure (`https://`) and removes browser warnings.
+
+```bash
+# Install Certbot (the free SSL tool)
+sudo apt install -y certbot
+
+# Stop NGINX temporarily so Certbot can verify your domain
+docker compose -f docker-compose.yml -f docker-compose.global.yml stop nginx
+
+# Get your SSL certificate (replace with YOUR domain)
+sudo certbot certonly --standalone -d soillab.org -d www.soillab.org
+
+# You'll be asked for your email and to agree to the terms
+```
+
+Certbot creates the certificate files at `/etc/letsencrypt/live/soillab.org/`.
+
+Now update the NGINX config to use HTTPS:
+
+```bash
+nano deploy/nginx.conf
+```
+
+**Replace the entire file** with this (change `soillab.org` to your domain):
+
+```nginx
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name soillab.org www.soillab.org;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl http2;
+    server_name soillab.org www.soillab.org;
+
+    ssl_certificate /etc/letsencrypt/live/soillab.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/soillab.org/privkey.pem;
+
+    location / {
+        proxy_pass http://lims:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400;
+    }
+
+    client_max_body_size 100M;
+}
+```
+
+Update `docker-compose.global.yml` to mount the SSL certificates:
+
+```bash
+nano docker-compose.global.yml
+```
+
+Uncomment the SSL volume line:
+
+```yaml
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro     # ← ADD THIS LINE
+```
+
+Restart everything:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+```
+
+Visit **https://soillab.org** — you should see the green lock icon! 🔒
+
+### A6. Auto-Renew SSL Certificates
+
+Let's Encrypt certificates expire every 90 days. Set up automatic renewal:
+
+```bash
+# Create a renewal script
+sudo tee /etc/cron.d/certbot-renew << 'EOF'
+0 3 * * 1 root certbot renew --pre-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.global.yml stop nginx" --post-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.global.yml start nginx"
+EOF
+```
+
+This checks every Monday at 3 AM and renews the certificate if needed.
+
+---
+
+# 🅱️ Scenario B: Existing Server with Subdomain
+
+*Your server already runs other websites (e.g. `mainsite.org`). You want to add LIMS at `lims.mainsite.org`.*
+
+### B1. Create a Subdomain DNS Record
+
+Go to your domain provider and add:
+
+| Setting | Value |
+|---------|-------|
+| **Type** | A |
+| **Name** | `lims` |
+| **Value** | Your server's IP address |
+| **TTL** | Auto or 3600 |
+
+This creates `lims.mainsite.org` pointing to your server.
+
+### B2. Start LIMS (Without the Built-in NGINX)
+
+Since your server already has a web server (NGINX or Apache), we'll use the **base** docker-compose only — LIMS runs on port 3000 and your existing NGINX/Apache handles the public-facing connection.
+
+```bash
+cd /opt/soilfer-lims
+
+# Start LIMS on port 3000 (not exposed publicly yet)
+docker compose up -d
+
+# Verify it's running
+curl http://localhost:3000/api/health
+# Should return: {"status":"ok", ...}
+```
+
+### B3. Configure Your Existing NGINX
+
+Add a new site configuration for the LIMS subdomain:
+
+```bash
+sudo nano /etc/nginx/sites-available/lims.mainsite.org
+```
+
+Paste this (replace `lims.mainsite.org` with your subdomain):
+
+```nginx
+server {
+    listen 80;
+    server_name lims.mainsite.org;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket support
+        proxy_read_timeout 86400;
+    }
+
+    # Spectral data uploads can be large
+    client_max_body_size 100M;
+}
+```
+
+Enable the site:
+
+```bash
+# Link the config
+sudo ln -s /etc/nginx/sites-available/lims.mainsite.org /etc/nginx/sites-enabled/
+
+# Test for errors
+sudo nginx -t
+
+# If "syntax is ok" appears, reload:
+sudo systemctl reload nginx
+```
+
+### B4. Test It
+
+Open **http://lims.mainsite.org** in your browser. You should see the LIMS login page.
+
+- **Username:** `admin`
+- **Password:** `password`
+
+### B5. Add SSL for the Subdomain
+
+If you already use Certbot on this server:
+
+```bash
+sudo certbot --nginx -d lims.mainsite.org
+```
+
+Certbot will automatically:
+1. Get a certificate for `lims.mainsite.org`
+2. Update your NGINX config to use HTTPS
+3. Set up auto-renewal
+
+Visit **https://lims.mainsite.org** — done! 🔒
+
+> ⚠️ **If you use Apache** instead of NGINX, the proxy config is different. See the section below.
+
+### B5-alt. Using Apache Instead of NGINX
+
+If your server uses Apache:
+
+```bash
+# Enable required modules
+sudo a2enmod proxy proxy_http proxy_wstunnel rewrite ssl
+
+# Create a virtual host
+sudo nano /etc/apache2/sites-available/lims.mainsite.org.conf
+```
+
+Paste:
+
+```apache
+<VirtualHost *:80>
+    ServerName lims.mainsite.org
+
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+
+    # WebSocket support
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteRule /(.*) ws://127.0.0.1:3000/$1 [P,L]
+</VirtualHost>
+```
+
+Enable and reload:
+
+```bash
+sudo a2ensite lims.mainsite.org.conf
+sudo systemctl reload apache2
+
+# For SSL:
+sudo certbot --apache -d lims.mainsite.org
+```
+
+---
+
+# 📋 After Deployment (Both Scenarios)
+
+### First Login
+
+1. Open your LIMS URL
+2. Log in with `admin` / `password`
+3. **Change the password immediately** (you'll be prompted)
+4. Go to **Settings** → update your laboratory name, address, contact details
+5. Create user accounts for your team
+
+### Backup Your Database
+
+Your data lives in a single SQLite file. Back it up regularly:
+
+```bash
+# Create a backup
+docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db
+
+# Set up daily automatic backups at 2 AM
+mkdir -p /opt/backups
+echo "0 2 * * * root docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-\$(date +\%Y\%m\%d).db" | sudo tee /etc/cron.d/lims-backup
+```
+
+### Updating to a New Version
+
+```bash
+cd /opt/soilfer-lims
+git pull origin main
+docker compose down
+docker compose up -d --build     # or add -f docker-compose.global.yml for Scenario A
+```
+
+> Your database is preserved across updates — it lives in a Docker volume.
+
+### Checking Logs
+
+```bash
+# View live server logs
+docker logs soilfer-lims -f --tail 50
+
+# Check container status
+docker ps
+
+# Restart if needed
+docker compose restart
+```
+
+---
+
+## Troubleshooting
+
+### "Connection refused" when opening the website
+
+```bash
+# Check if containers are running
+docker ps
+
+# If no containers, start them
+cd /opt/soilfer-lims && docker compose up -d
+
+# Check for errors in logs
+docker logs soilfer-lims --tail 30
+```
+
+### "502 Bad Gateway" from NGINX
+
+The LIMS container hasn't finished starting yet. Wait 30 seconds and refresh.
+
+```bash
+# Check if LIMS is healthy
+docker inspect soilfer-lims --format='{{.State.Health.Status}}'
+# Should say "healthy"
+```
+
+### DNS not working (can't access by domain name)
+
+1. Check DNS propagation at [whatsmydns.net](https://www.whatsmydns.net/)
+2. Verify the A record points to the correct server IP
+3. Try accessing by IP directly: `http://YOUR_SERVER_IP:3000`
+
+### SSL certificate errors
+
+```bash
+# Check certificate status
+sudo certbot certificates
+
+# Force renewal
+sudo certbot renew --force-renewal
+```
+
+### Port 80 or 443 already in use
+
+If another web server is using these ports (Scenario B), don't use the global docker-compose. Use the base compose and your existing NGINX/Apache.
+
+```bash
+# Check what's using port 80
+sudo lsof -i :80
+```
+
+### Forgot admin password
+
+```bash
+# Access the container shell
+docker exec -it soilfer-lims sh
+
+# Reset via database (inside container)
+cd /app/server
+node -e "
+const {PrismaClient}=require('./prisma_client');
+const bcrypt=require('bcryptjs');
+const p=new PrismaClient();
+(async()=>{
+  const hash=await bcrypt.hash('password',10);
+  await p.user.updateMany({where:{username:'admin'},data:{password:hash,mustChangePassword:true}});
+  console.log('Password reset to: password');
+})()
+"
+
+# Exit container
+exit
+```
 
 ---
 
@@ -8,371 +569,19 @@ Complete installation guide for deploying SoilFER-LIMS on any server.
 
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
-| **Node.js** | v18+ | v20 LTS |
-| **RAM** | 512 MB | 1 GB+ |
-| **Disk** | 500 MB | 2 GB+ (for spectral data) |
-| **OS** | Any (Linux, Windows, macOS) | Ubuntu 22.04+ / Debian 12+ |
-
-> **Docker deployment** only requires Docker Engine 20+ and Docker Compose v2.
-
----
-
-## Table of Contents
-
-1. [Docker Deploy (Recommended)](#1-docker-deploy-recommended)
-2. [Manual Deploy — Linux](#2-manual-deploy--linux)
-3. [Manual Deploy — Windows](#3-manual-deploy--windows)
-4. [Reverse Proxy & SSL](#4-reverse-proxy--ssl)
-5. [Process Management (PM2)](#5-process-management-pm2)
-6. [Backup & Restore](#6-backup--restore)
-7. [Updating](#7-updating)
-8. [Troubleshooting](#8-troubleshooting)
+| **CPU** | 1 core | 2 cores |
+| **RAM** | 1 GB | 2 GB |
+| **Disk** | 10 GB | 20 GB+ (for spectral data) |
+| **OS** | Ubuntu 22.04+ / Debian 12+ | Ubuntu 24.04 LTS |
+| **Docker** | 20+ | Latest stable |
 
 ---
 
-## 1. Docker Deploy (Recommended)
-
-The fastest way to get running. Works on any OS with Docker.
-
-### Prerequisites
-
-- [Docker Engine](https://docs.docker.com/engine/install/) 20+
-- [Docker Compose](https://docs.docker.com/compose/install/) v2+
-
-### Steps
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-
-# 2. Create your environment file
-cp .env.example .env
-
-# 3. Generate a secure JWT secret
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-# Copy the output and paste it as JWT_SECRET in .env
-
-# 4. Set your deployment mode in .env
-#    DEPLOYMENT_MODE=local   (single laboratory — default)
-#    DEPLOYMENT_MODE=global  (multi-laboratory network)
-```
-
-### Start — Local Mode
-
-```bash
-docker compose up -d
-```
-
-### Start — Global Mode (with NGINX)
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
-```
-
-### Verify
-
-```bash
-# Check container health
-docker ps
-
-# Check API
-curl http://localhost:3000/api/health
-
-# View logs
-docker logs soilfer-lims -f
-```
-
-Open **http://localhost:3000** and log in with `admin` / `password`.
-
----
-
-## 2. Manual Deploy — Linux
-
-### Prerequisites
-
-```bash
-# Ubuntu/Debian
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify
-node -v   # Should show v20.x
-npm -v    # Should show 10.x+
-```
-
-### Install
-
-```bash
-# Clone
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-
-# Run setup (choose mode)
-chmod +x setup.sh
-./setup.sh          # Local mode (default)
-# OR
-./setup.sh global   # Global mode
-
-# Start
-cd server && node index.js
-```
-
-### Run as a Service (systemd)
-
-```bash
-sudo tee /etc/systemd/system/soilfer-lims.service <<EOF
-[Unit]
-Description=SoilFER-LIMS
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/opt/soilfer-lims/server
-ExecStart=/usr/bin/node index.js
-Restart=on-failure
-RestartSec=10
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable soilfer-lims
-sudo systemctl start soilfer-lims
-```
-
----
-
-## 3. Manual Deploy — Windows
-
-### Prerequisites
-
-1. Download and install [Node.js 20 LTS](https://nodejs.org/)
-2. Open **PowerShell** as Administrator
-
-### Install
-
-```powershell
-# Clone
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-
-# Install server dependencies
-cd server
-npm install
-npx prisma generate
-npx prisma db push --skip-generate
-cd ..
-
-# Install and build client
-cd client
-npm install
-npm run build
-cd ..
-
-# Create environment file
-copy .env.example .env
-# Edit .env with notepad: notepad .env
-# Set JWT_SECRET to a long random string
-# Set DEPLOYMENT_MODE to 'local' or 'global'
-
-# Seed the database
-cd server
-node seed.js
-cd ..
-
-# Start
-cd server
-node index.js
-```
-
-Open **http://localhost:3000** in your browser.
-
----
-
-## 4. Reverse Proxy & SSL
-
-### NGINX (included in Global mode Docker)
-
-If deploying manually, install NGINX and use the provided config:
-
-```bash
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/soilfer-lims
-sudo ln -s /etc/nginx/sites-available/soilfer-lims /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-Edit the file to set your domain name in `server_name`.
-
-### SSL with Let's Encrypt
-
-```bash
-# Install certbot
-sudo apt install certbot python3-certbot-nginx
-
-# Obtain certificate
-sudo certbot --nginx -d your-domain.com
-
-# Auto-renewal is configured automatically
-sudo certbot renew --dry-run
-```
-
-After obtaining the certificate, uncomment the HTTPS block in `deploy/nginx.conf` and update the domain.
-
----
-
-## 5. Process Management (PM2)
-
-For production manual deployments, use PM2 to keep the server running:
-
-```bash
-# Install PM2
-npm install -g pm2
-
-# Start LIMS
-cd /opt/soilfer-lims/server
-pm2 start index.js --name soilfer-lims
-
-# Auto-start on boot
-pm2 startup
-pm2 save
-
-# Useful commands
-pm2 status
-pm2 logs soilfer-lims
-pm2 restart soilfer-lims
-```
-
----
-
-## 6. Backup & Restore
-
-LIMS uses SQLite — backups are simple file copies.
-
-### Manual Backup
-
-```bash
-# Create backup directory
-mkdir -p backups
-
-# Backup database
-cp server/prisma/dev.db backups/lims-$(date +%Y%m%d-%H%M).db
-
-# Backup uploads (if any)
-tar -czf backups/uploads-$(date +%Y%m%d).tar.gz server/uploads/
-```
-
-### Docker Backup
-
-```bash
-docker cp soilfer-lims:/app/server/prisma/dev.db ./backup-$(date +%Y%m%d).db
-```
-
-### Restore
-
-```bash
-# Manual
-cp backups/lims-20240101-0900.db server/prisma/dev.db
-
-# Docker
-docker cp ./backup-20240101.db soilfer-lims:/app/server/prisma/dev.db
-docker restart soilfer-lims
-```
-
-### Automated Daily Backup (cron)
-
-```bash
-# Edit crontab
-crontab -e
-
-# Add this line (daily backup at 2 AM)
-0 2 * * * cp /opt/soilfer-lims/server/prisma/dev.db /opt/backups/lims-$(date +\%Y\%m\%d).db
-```
-
----
-
-## 7. Updating
-
-### Docker
-
-```bash
-cd soilfer-lims
-git pull origin main
-docker compose down
-docker compose up -d --build
-```
-
-### Manual
-
-```bash
-cd soilfer-lims
-git pull origin main
-./setup.sh        # Re-runs full build
-cd server && node index.js
-```
-
-> **Note:** The seed script is safe to re-run — it skips if users already exist.
-
----
-
-## 8. Troubleshooting
-
-### Port already in use
-
-```bash
-# Find what's using port 3000
-lsof -i :3000          # Linux/macOS
-netstat -ano | findstr 3000  # Windows
-
-# Use a different port
-PORT=8080 node index.js
-```
-
-### Database locked
-
-```bash
-# Stop all LIMS processes, then restart
-pkill -f "node index.js"
-cd server && node index.js
-```
-
-### Prisma client not found
-
-```bash
-cd server
-npx prisma generate
-node index.js
-```
-
-### Docker build fails
-
-```bash
-# Clean rebuild
-docker compose down
-docker system prune -f
-docker compose up -d --build
-```
-
-### Check logs
-
-```bash
-# Docker
-docker logs soilfer-lims -f --tail 100
-
-# Manual
-# Server logs directly to console
-```
-
----
-
-## Environment Variables Reference
+## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `3000` | Server port |
-| `JWT_SECRET` | *(required)* | Secret for JWT tokens. Generate with `node -e "..."` |
-| `NODE_ENV` | `production` | `production` or `development` |
-| `DEPLOYMENT_MODE` | `local` | `local` (single lab) or `global` (multi-lab) |
+| `PORT` | `3000` | Internal server port |
+| `JWT_SECRET` | *(auto-generated)* | Secret for login tokens. Auto-generated if left blank |
+| `NODE_ENV` | `production` | Leave as `production` |
+| `DEPLOYMENT_MODE` | `local` | `local` (single lab) or `global` (multi-lab network) |

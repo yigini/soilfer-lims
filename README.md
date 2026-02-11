@@ -6,6 +6,22 @@ A full-featured, open-source LIMS designed for soil fertility laboratories. Trac
 
 ---
 
+## 🚀 Quick Start
+
+```bash
+git clone https://github.com/yigini/soilfer-lims.git
+cd soilfer-lims
+cp .env.example .env
+docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+```
+
+Open **http://localhost** → Login: `admin` / `password`  
+You'll be prompted to change the password on first login.
+
+> **📖 Full deployment guide:** See **[docs/INSTALL.md](docs/INSTALL.md)** for step-by-step instructions covering DNS setup, SSL certificates, and deploying alongside existing websites.
+
+---
+
 ## 🚀 Two Deployment Modes
 
 | | **Local** | **Global** |
@@ -16,44 +32,7 @@ A full-featured, open-source LIMS designed for soil fertility laboratories. Trac
 | **Default account** | `admin` (LAB_MANAGER) | `admin` (SUPER_ADMIN) |
 | **Best for** | Individual soil labs | National soil programs, research networks |
 
----
-
-## ⚡ Quick Start (Docker)
-
-```bash
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-cp .env.example .env
-# Edit .env — set JWT_SECRET (or leave blank for auto-generation)
-# Set DEPLOYMENT_MODE=local or DEPLOYMENT_MODE=global
-
-# Start (local mode — default)
-docker compose up -d
-
-# Or start in global mode (multi-lab with NGINX reverse proxy)
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
-```
-
-Open **http://localhost:3000** → Login: `admin` / `password`
-
-> The server auto-seeds the database on first boot. You'll be prompted to change your password.
-
----
-
-## ⚡ Quick Start (Manual)
-
-```bash
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-chmod +x setup.sh
-
-./setup.sh          # Local mode (default)
-./setup.sh global   # Global mode
-
-cd server && node index.js
-```
-
-> **Windows users:** See [docs/INSTALL.md](docs/INSTALL.md#3-manual-deploy--windows) for PowerShell instructions.
+Set `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=global` in your `.env` file.
 
 ---
 
@@ -73,6 +52,7 @@ cd server && node index.js
 | **QC Batches** | Analytical batch management with QC checks |
 | **Audit Trail** | Complete logging of all system actions |
 | **Dark Mode** | Full dark/light theme support |
+| **Multilingual** | English, French, Spanish, Portuguese |
 
 ---
 
@@ -104,49 +84,21 @@ cd server && node index.js
 
 ---
 
-## 📋 Project Structure
+## 📚 Documentation
 
-```
-soilfer-lims/
-├── client/                 # React frontend (Vite)
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── context/        # React context providers
-│   │   └── pages/          # Page components
-│   └── public/             # Static assets
-├── server/                 # Express backend
-│   ├── controllers/        # Route handlers
-│   ├── middleware/          # Auth & RBAC middleware
-│   ├── routes/             # API route definitions
-│   ├── services/           # Business logic
-│   ├── utils/              # Audit logger, scope guard, workflow engine
-│   ├── prisma/             # Database schema & migrations
-│   └── seed.js             # Auto-provisioning script
-├── deploy/                 # Deployment configs
-│   └── nginx.conf          # NGINX reverse proxy
-├── docs/                   # Documentation
-│   ├── INSTALL.md          # Full installation guide
-│   └── ADMIN_GUIDE.md      # Post-install admin guide
-├── docker-compose.yml      # Base Docker config
-├── docker-compose.local.yml  # Local mode override
-├── docker-compose.global.yml # Global mode + NGINX
-├── docker-entrypoint.sh    # Container boot script
-├── Dockerfile              # Container build
-├── setup.sh                # Manual setup script
-└── .env.example            # Configuration template
-```
+- **[Deployment Guide](docs/INSTALL.md)** — Step-by-step deployment for fresh servers and existing infrastructure
+- **[Admin Guide](docs/ADMIN_GUIDE.md)** — Post-deploy configuration & management
 
 ---
 
 ## 💾 Backup & Restore
 
 ```bash
-# Docker
+# Backup
 docker cp soilfer-lims:/app/server/prisma/dev.db ./backup-$(date +%Y%m%d).db
-docker cp ./backup.db soilfer-lims:/app/server/prisma/dev.db && docker restart soilfer-lims
 
-# Manual
-cp server/prisma/dev.db backups/lims-$(date +%Y%m%d).db
+# Restore
+docker cp ./backup.db soilfer-lims:/app/server/prisma/dev.db && docker restart soilfer-lims
 ```
 
 ---
@@ -154,16 +106,10 @@ cp server/prisma/dev.db backups/lims-$(date +%Y%m%d).db
 ## 🔄 Updating
 
 ```bash
+cd /opt/soilfer-lims
 git pull origin main
 docker compose down && docker compose up -d --build
 ```
-
----
-
-## 📚 Documentation
-
-- **[Installation Guide](docs/INSTALL.md)** — Docker, Linux, Windows, SSL, PM2, backups
-- **[Admin Guide](docs/ADMIN_GUIDE.md)** — Post-deploy configuration & management
 
 ---
 

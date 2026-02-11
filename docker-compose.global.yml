@@ -15,8 +15,8 @@ services:
       - "443:443"
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      # Uncomment for SSL:
-      # - ./deploy/ssl:/etc/nginx/ssl:ro
+      # Mount SSL certificates from host (after running certbot)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       lims:
         condition: service_healthy
