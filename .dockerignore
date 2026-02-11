@@ -1,0 +1,38 @@
+node_modules
+.git
+.gitignore
+.env
+.env.*
+.gemini
+
+# Build artifacts (rebuilt in Docker)
+client/dist
+client/build
+server/prisma_client
+server/prisma/dev.db
+server/prisma/dev.db-journal
+
+# Data
+server/data
+server/uploads
+server/database.json
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests (not needed in production image)
+server/tests
+**/*.test.js
+
+# Docs (not needed in production image)
+docs
+*.md
+!README.md
+
+# Logs
+*.log

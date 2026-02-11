@@ -1,0 +1,9 @@
+# Docker Compose override for Local mode (single laboratory)
+# Usage: docker compose up -d
+#   (this is the default — no override file needed)
+#   OR: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+
+services:
+  lims:
+    environment:
+      - DEPLOYMENT_MODE=local

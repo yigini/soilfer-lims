@@ -1,0 +1,42 @@
+# ─── Dependencies ───
+node_modules/
+package-lock.json
+
+# ─── Production builds ───
+dist/
+build/
+
+# ─── Environment (secrets) ───
+.env
+.env.local
+.env.*.local
+
+# ─── Database ───
+server/prisma/dev.db
+server/prisma/dev.db-journal
+server/prisma/dev - Copy*
+server/prisma_client/
+
+# ─── Data & Uploads ───
+server/data/
+server/uploads/
+server/database.json
+
+# ─── IDE & Editor ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Logs ───
+*.log
+npm-debug.log*
+
+# ─── Agent/AI directories ───
+.gemini/

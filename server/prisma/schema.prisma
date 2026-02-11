@@ -1,0 +1,654 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../prisma_client"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// --- CORE MODELS ---
+
+model User {
+  id                 String     @id
+  username           String     @unique
+  password           String
+  email              String     @unique
+  role               String     // SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN, SAMPLE_RECEPTION, etc.
+  name               String?
+  labId             String?
+  countries          String?    // JSON string: Array of country codes: ["GTM", "HND"]
+  projects           String?    // JSON string: Array of project codes: ["SoilFER-USA"]
+  isActive           Boolean    @default(true)
+  mustChangePassword Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  assignedWorkItems  WorkItem[] @relation("AssignedTo")
+  createdWorkItems   WorkItem[] @relation("AssignedBy")
+  submissions        Submission[]
+  
+  sentMessages       Message[]  @relation("SentMessages")
+  receivedMessages   Message[]  @relation("ReceivedMessages")
+}
+
+model Message {
+  id              String   @id
+  senderId        String
+  recipientId     String?
+  subject         String
+  body            String
+  status          String   // SENT, DRAFT
+  folderSender    String?  // SENT, TRASH, DRAFT
+  folderRecipient String?  // INBOX, ARCHIVE, TRASH
+  isRead          Boolean  @default(false)
+  isDelivered     Boolean  @default(false)
+  isChat          Boolean  @default(false)  // true = instant chat, false = formal message
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt // Added for drafts
+
+  sender          User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipient       User?    @relation("ReceivedMessages", fields: [recipientId], references: [id])
+}
+
+model Project {
+  id                     String    @id
+  code                   String    @unique
+  name                   String
+  description            String?   // General description
+  notes                  String?   // Lab specific instructions
+  client                 String?   
+  startDate              DateTime?
+  deliveryDeadline       DateTime?
+  status                 String    // ACTIVE, PAUSED, CLOSED
+  projectType            String    @default("OPEN_INTAKE") // TEMPLATE_PREDEFINED_IDS, OPEN_INTAKE
+  expectedSampleCount    Int?      @default(0)
+  priority               String?   @default("NORMAL") // LOW, NORMAL, HIGH
+  defaultAnalysisBundle  String?
+  labId                  String?   // Legacy: Single lab (kept for backward compatibility)
+  countries              String?   // Legacy JSON list
+  assignedLabIds         String?   // Legacy JSON string: Array of lab IDs for Global projects
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  samples                Sample[]
+  projectLabs            ProjectLab[]  // Many-to-many: labs assigned to this project
+}
+
+model Sample {
+  id                String     @id
+  originalId        String     @unique
+  projectCode       String?
+  projectId         String?
+  project           Project?   @relation(fields: [projectId], references: [id])
+  countryName       String?
+  country           String?
+  assignedLab       String?
+  labId             String?    // Generated Lab ID: LAB-2026-KE-001
+  status            String     // EXPECTED, RECEIVED, ACCEPTED, PROCESSING, etc.
+  
+  // Workflow Gates
+  dryingStatus      String?    // PENDING, DONE, FAILED
+  preparationStatus String?    // PENDING, DONE
+  receptionDate     DateTime?
+  receivedBy        String?
+
+  // Metadata
+  clientName        String?
+  metadata          String?    // JSON string: Raw metadata from external sources
+  fieldMetadata     String?    // JSON string: Structured field provenance data
+  receptionData     String?    // JSON string: Intake checklist/photos/notes
+  requiredAnalyses  String?    // JSON string: Array of analysis codes
+  analysisGroupIds  String?    // JSON string: Array of analysis group IDs
+  history           String?    // JSON string: Audit trail for this sample
+
+  // Approvals
+  acceptedBy        String?
+  acceptedAt        DateTime?
+  approvedBy        String?
+  approvedAt        DateTime?
+
+  // Submission Tracking
+  lastSubmissionId   String?
+  lastSubmissionType String?
+  lastSubmissionAt   DateTime?
+
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  workItems         WorkItem[]
+  results           Result[]
+}
+
+model WorkItem {
+  id             String    @id
+  sampleId       String
+  sample         Sample    @relation(fields: [sampleId], references: [id])
+  labId          String?
+  assignedLab    String?
+  analysis       String    // DRYING, PREPARATION, PH_H2O, etc.
+  category       String?   // Operational Gates, Spectroscopy, etc.
+  status         String    // NOT_ASSIGNED, ASSIGNED, IN_PROGRESS, COMPLETED, ACCEPTED
+  
+  assignedTo     String?
+  assignee       User?     @relation("AssignedTo", fields: [assignedTo], references: [username])
+  
+  assignedBy     String?
+  manager        User?     @relation("AssignedBy", fields: [assignedBy], references: [username])
+  
+  assignedAt     DateTime?
+  priority       String    @default("NORMAL")
+  dueDate        DateTime?
+  
+  result         String?
+  equipmentId    String?
+  completedAt    DateTime?
+  version        Int       @default(0)
+
+  // Submission Link
+  submissionId   String?
+  submission     Submission? @relation(fields: [submissionId], references: [id])
+  submittedAt    DateTime?
+
+  // QC Batch Link
+  batchId        String?
+  batch          Batch?      @relation(fields: [batchId], references: [id])
+
+  // Review status
+  reanalysisReason      String?
+  reanalysisRequestedBy String?
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewDecision        String?
+  waiveReason           String?
+
+  history        String?     // JSON string: Array of status change events
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  equipmentUsage WorkItemEquipmentUse[]
+}
+
+model Batch {
+  id          String   @id
+  labId       String?
+  analysis    String
+  instrument  String?
+  status      String   // OPEN, RUNNING, QC_PASS, QC_FAIL, CLOSED
+  createdBy   String
+  createdAt   DateTime @default(now())
+  notes       String?
+  qcResults   String?  // JSON string: { blanks: [], controls: [], duplicates: [] }
+  workItemIds String?  // JSON string: Array of strings
+  disposition String?  // JSON string: { decision, reason, by, at }
+  history     String?  // JSON string: Array of events
+
+  // Relations
+  workItems   WorkItem[]
+}
+
+// --- MANAGEMENT MODELS ---
+
+model Submission {
+  id          String     @id
+  sampleId    String
+  labId       String?
+  assignedLab String?
+  type        String     // PARTIAL, FULL
+  status      String     // PENDING_REVIEW, ACCEPTED, REJECTED
+  note        String?
+  
+  submittedBy String
+  submitter   User       @relation(fields: [submittedBy], references: [username])
+  submittedAt DateTime   @default(now())
+  
+  workItemIds   String?   // JSON string: Array of IDs
+  workItemCount Int       @default(0)
+  
+  reviewNote  String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  // Relations
+  workItems   WorkItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model AuditLog {
+  id              String   @id
+  entity          String   // SAMPLE, WORKITEM, USER
+  entityId        String
+  action          String   // STATUS_CHANGE, CREATE, DELETE
+  details         String?
+  performedBy     String
+  performedByName String?
+  timestamp       DateTime @default(now())
+  
+  // Contextual Data (Flattened for easy querying)
+  sampleId        String?
+  labId           String?
+  analysisCode    String?
+  before          String?    // JSON string
+  after           String?    // JSON string
+}
+
+// --- ASSET & CONFIG MODELS ---
+
+model Lab {
+  id          String   @id
+  code        String   @unique
+  name        String
+  country     String
+  location    String?
+  address     String?    // Full address
+  city        String?
+  phone       String?
+  email       String?
+  website     String?
+  capacity    Int?       // Max samples per month
+  timezone    String?    // e.g., "America/Guatemala"
+  projectCode String?    // Legacy: Primary project association
+  branding    String?    // JSON string: { title, colors, logoUrl }
+  settings    String?    // JSON string: { dateFormat, language, etc. }
+  notes       String?    // Admin notes about the lab
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+
+  // Relations
+  projectLabs ProjectLab[]  // Many-to-many: projects this lab is assigned to
+}
+
+// Junction table for many-to-many Project <-> Lab relationship
+model ProjectLab {
+  id           String   @id @default(uuid())
+  projectCode  String   // References Project.code
+  labId        String   // References Lab.id
+  role         String   @default("PRIMARY")  // PRIMARY, BACKUP, OVERFLOW
+  priority     Int      @default(1)          // For ordering labs (1 = highest priority)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  project      Project  @relation(fields: [projectCode], references: [code], onDelete: Cascade)
+  lab          Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([projectCode, labId])  // Each lab can only be assigned once per project
+  @@index([projectCode])
+  @@index([labId])
+}
+
+// --- INVENTORY MODULE ---
+
+model InventoryItem {
+  id                 String   @id
+  labId              String
+  itemType           String   // REAGENT | CHEMICAL | CONSUMABLE | STANDARD | CRM | CONTAINER | OTHER
+  name               String
+  shortCode          String?
+  grade              String?  // Purity/grade text (e.g., "ACS Grade", "99.9%")
+  unitOfMeasure      String   // g, mL, L, pcs
+  defaultLocationId  String?
+  storageConditions  String?  // JSON: { tempMin, tempMax, lightSensitive, humidity }
+  hazardClass        String?  // GHS classification text
+  sopLink            String?
+  reorderPoint       Float    @default(0)
+  reorderQuantity    Float    @default(0)
+  preferredVendor    String?
+  notes              String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  lots               InventoryLot[]
+  methodRequirements MethodRequirement[]
+
+  @@index([labId])
+  @@index([itemType])
+}
+
+model InventoryLot {
+  id               String    @id
+  inventoryItemId  String
+  item             InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  labId            String
+  lotNumber        String
+  receivedDate     DateTime  @default(now())
+  expiryDate       DateTime?
+  initialQuantity  Float
+  currentQuantity  Float
+  unitOfMeasure    String
+  locationId       String?
+  location         InventoryLocation? @relation(fields: [locationId], references: [id])
+  status           String    @default("AVAILABLE") // AVAILABLE | QUARANTINED | EXPIRED | DISPOSED
+  coaAttachment    String?   // JSON: { filename, url }
+  preparedBy       String?   // For in-house prepared reagents/standards
+  concentration    String?   // For standards (e.g., "1000 ppm")
+  traceabilityNotes String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  transactions     InventoryTransaction[]
+  reservations     InventoryReservation[]
+
+  @@index([inventoryItemId])
+  @@index([labId])
+  @@index([status])
+  @@index([expiryDate])
+}
+
+model InventoryLocation {
+  id               String   @id
+  labId            String
+  name             String
+  locationType     String   @default("SHELF") // ROOM | FRIDGE | FREEZER | CABINET | SHELF | OTHER
+  parentLocationId String?
+  temperatureRange String?  // e.g., "2-8°C"
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  // Relations
+  lots             InventoryLot[]
+
+  @@index([labId])
+}
+
+model InventoryTransaction {
+  id             String   @id
+  labId          String
+  timestamp      DateTime @default(now())
+  userId         String
+  userName       String?
+  actionType     String   // RECEIVE | ADJUST | CONSUME | TRANSFER | QUARANTINE | RELEASE | EXPIRE | DISPOSE
+  inventoryLotId String
+  lot            InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Cascade)
+  deltaQuantity  Float    // Positive for additions, negative for reductions
+  unit           String
+  reasonCode     String?  // Structured reason category
+  freeTextReason String?  // Required for ADJUST, QUARANTINE, DISPOSE, overrides
+  sampleId       String?
+  workItemId     String?
+  analysisCode   String?
+
+  @@index([inventoryLotId])
+  @@index([labId])
+  @@index([timestamp])
+  @@index([actionType])
+}
+
+model InventoryReservation {
+  id               String    @id
+  labId            String
+  inventoryLotId   String
+  lot              InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Cascade)
+  reservedQuantity Float
+  reservedByUserId String
+  purpose          String    @default("GENERAL") // WORK_ITEM | BATCH_RUN | GENERAL
+  workItemId       String?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([inventoryLotId])
+  @@index([labId])
+}
+
+model MethodRequirement {
+  id                 String  @id
+  analysisCode       String
+  methodId           String?
+  inventoryItemId    String
+  item               InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  defaultConsumption Float?
+  unit               String?
+  isRequired         Boolean @default(true)
+  labId              String?
+  createdAt          DateTime @default(now())
+
+  @@index([analysisCode])
+  @@index([inventoryItemId])
+}
+
+// --- EQUIPMENT MODULE ---
+
+model EquipmentAsset {
+  id                 String     @id
+  labId              String
+  assetType          String     // SPECTROMETER | BALANCE | PH_METER | ICP | AAS | UV_VIS | EC_METER | OVEN | MuffleFurnace | SHAKER | CENTRIFUGE | AUTO_ANALYZER | OTHER
+  name               String
+  manufacturer       String?
+  model              String?
+  serialNumber       String?
+  internalAssetTag   String?
+  locationId         String?
+  status             String     // IN_SERVICE | OUT_OF_SERVICE | DECOMMISSIONED
+  criticality        String     // CRITICAL | IMPORTANT | NON_CRITICAL
+  commissioningDate  DateTime?
+  notes              String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  qualification      EquipmentQualification?
+  scheduleRules      EquipmentScheduleRule[]
+  events             EquipmentEvent[]
+  usage              WorkItemEquipmentUse[]
+}
+
+model EquipmentQualification {
+  id                     String    @id
+  equipmentId            String    @unique
+  labId                  String
+  calibrationStatus      String    // OK | DUE_SOON | OVERDUE | NOT_CONFIGURED
+  verificationStatus     String    // OK | DUE_SOON | OVERDUE | NOT_CONFIGURED
+  lastCalibrationDate    DateTime?
+  nextCalibrationDueDate DateTime?
+  lastVerificationDate   DateTime?
+  nextVerificationDueDate DateTime?
+  toleranceProfileId     String?
+  lastUpdatedBy          String?
+  lastUpdatedAt          DateTime  @updatedAt
+
+  equipment              EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentScheduleRule {
+  id             String    @id
+  equipmentId    String
+  labId          String
+  scheduleType   String    // CALIBRATION | VERIFICATION | MAINTENANCE
+  frequencyDays  Int?
+  dueSoonDays    Int       @default(30)
+  responsibleRole String?  // LAB_MANAGER | TECHNICIAN | QA_OFFICER
+  active         Boolean   @default(true)
+
+  equipment      EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentEvent {
+  id                     String    @id
+  equipmentId            String
+  labId                  String
+  ts                     DateTime  @default(now())
+  userId                 String
+  eventType              String    // REGISTER | EDIT | STATUS_CHANGE | CALIBRATION_PERFORMED | CALIBRATION_FAILED | VERIFICATION_PERFORMED | VERIFICATION_FAILED | MAINTENANCE_PERFORMED | MAINTENANCE_FAILED | INCIDENT | DOWNTIME_START | DOWNTIME_END | DECOMMISSION
+  summary                String
+  details                String?   // JSON string
+  attachmentIds          String?   // JSON string
+  outcome                String?   // PASS | FAIL | NA
+  requiresManagerSignoff Boolean   @default(false)
+  managerDecision        String?   // APPROVED | REJECTED | NA
+  managerReason          String?
+  
+  equipment              EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentMethodEligibility {
+  id                     String    @id
+  labId                  String
+  analysisCode           String
+  methodId               String?
+  equipmentTypeRequired  String?
+  eligibleEquipmentIds   String?   // JSON string: list
+  isRequired             Boolean   @default(true)
+}
+
+model WorkItemEquipmentUse {
+  id             String    @id
+  labId          String
+  workItemId     String
+  sampleId       String
+  equipmentId    String
+  usedAt         DateTime  @default(now())
+  runId          String?
+  notes          String?
+  attachments    String?   // JSON string
+  
+  equipment      EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  workItem       WorkItem       @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+}
+
+model SpectralData {
+  id             String   @id
+  sampleId       String?   // Nullable: spectra can be uploaded without a sample link
+  labId          String?
+  modality       String   // NIR, MIR
+  filename       String
+  scanIp         String?
+  uploadedBy     String?
+  timestamp      DateTime @default(now())
+  metadata       String?    // JSON string
+  
+  wavelengths    String?    // JSON string: Array of numbers
+  values         String?    // JSON string: Array of numbers
+  qcStatus       String?    // PASS, WARN, FAIL
+  qcFlags        String?    // JSON string: Array of flags
+  
+  // Workflow Status: PENDING -> VALIDATED -> APPROVED (or REJECTED)
+  status         String?    @default("PENDING") // PENDING, VALIDATED, APPROVED, REJECTED, ARCHIVED, DELETED
+  reviewedBy     String?    // Manager who approved/rejected
+  reviewedAt     DateTime?  // When it was approved/rejected
+  reviewNotes    String?    // Optional notes from manager
+}
+
+// --- ADMIN & SYSTEM MODELS ---
+
+model SystemSetting {
+  id        String @id // 'global'
+  branding  String // JSON string: { title, colors, logoUrl }
+}
+
+model Language {
+  code         String  @id
+  name         String
+  isDefault    Boolean @default(false)
+  translations String? // JSON string
+}
+
+// Updated Notification
+model Notification {
+  id          String   @id
+  userId      String
+  title       String
+  message     String
+  type        String   // INFO, WARNING, SUCCESS
+  isRead      Boolean  @default(false)
+  link        String?
+  senderId    String?
+  createdAt   DateTime @default(now())
+}
+
+// --- KOBO INTEGRATION ---
+
+model KoboConfig {
+  id               String    @id @default(uuid())
+  labId            String             // Lab code: GTM-LAB1, HND-LAB1, etc.
+  labName          String?            // Display name
+  projectCode      String?            // Link to Project.code (nullable for legacy configs)
+  koboServerUrl    String    @default("https://kf.kobotoolbox.org")
+  formId           String             // Kobo asset UID
+  apiToken         String             // Kobo API token
+  fieldMapping     String?            // JSON: Maps Kobo fields to sample fields
+  lastSyncAt       DateTime?
+  lastSubmissionId String?            // Track last synced submission
+  syncIntervalMins Int       @default(15)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([labId, projectCode])
+}
+
+// --- ANALYSIS & RESULTS MODELS ---
+
+model Result {
+  id        String   @id
+  sampleId  String
+  sample    Sample   @relation(fields: [sampleId], references: [id])
+  param     String
+  value     String
+  unit      String?
+  flags     String?  // JSON string: validation flags
+  isValid   Boolean?
+  updatedAt DateTime @updatedAt
+
+  @@unique([sampleId, param])
+}
+
+model AnalysisCategory {
+  id       String     @id
+  name     String
+  labId    String?
+  analyses Analysis[]
+}
+
+model Analysis {
+  code          String            @id
+  name          String
+  description   String?
+  categoryId    String?
+  category      AnalysisCategory? @relation(fields: [categoryId], references: [id])
+  units         String?
+  status        String?           // active, inactive
+  validation    String?           // JSON string: validation rules
+  labId         String?
+  methodologies Methodology[]
+}
+
+model AnalysisGroup {
+  id       String  @id
+  name     String
+  analyses String? // JSON string: list of analysis codes
+  labId    String?
+}
+
+model Methodology {
+  id           String   @id @default(uuid())
+  analysisCode String
+  analysis     Analysis @relation(fields: [analysisCode], references: [code])
+  name         String   // e.g. "pH in Water (1:2.5)"
+  standard     String?  // e.g. "ISO 10390:2021"
+  isDefault    Boolean  @default(false)
+  labId        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model OperationalGate {
+  id        String  @id @default(uuid())
+  code      String  // e.g. DRYING, SIEVING, PREPARATION
+  name      String  // e.g. "Air Drying (40°C)"
+  sortOrder Int     @default(0)
+  labId     String? // null = global default
+  isActive  Boolean @default(true)
+
+  @@unique([code, labId])
+}
+

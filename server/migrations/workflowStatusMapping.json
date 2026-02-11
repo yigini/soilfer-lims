@@ -1,0 +1,34 @@
+{
+    "sample": {
+        "status_mapping": {
+            "QA_PENDING": "PROCESSING",
+            "QA_COMPLETED": "PROCESSING",
+            "RECEIVED": "ACCEPTED",
+            "LAB_ID_ASSIGNED": "ACCEPTED",
+            "COLLECTED": "ACCEPTED",
+            "REJECTED": "DISPOSED"
+        },
+        "gate_mapping": {
+            "drying": {
+                "FAILED": "FAILED",
+                "PENDING": "PENDING",
+                "DONE": "DONE",
+                "SKIPPED": "DONE"
+            },
+            "preparation": {
+                "FAILED": "PENDING",
+                "PENDING": "PENDING",
+                "DONE": "DONE"
+            }
+        }
+    },
+    "workItem": {
+        "status_mapping": {
+            "QA_PENDING": "COMPLETED",
+            "QA_REJECTED": "REANALYSIS_REQUIRED",
+            "REVIEW_PENDING": "COMPLETED",
+            "PENDING": "NOT_ASSIGNED",
+            "APPROVED": "ACCEPTED"
+        }
+    }
+}

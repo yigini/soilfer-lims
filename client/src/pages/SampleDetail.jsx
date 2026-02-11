@@ -1,0 +1,543 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
+import { useNotifications } from '../context/NotificationContext';
+import ContextPanel from '../components/sample/ContextPanel';
+import WorkItemsTable from '../components/sample/WorkItemsTable';
+import SubmissionPanel from '../components/sample/SubmissionPanel';
+import CollapsibleDrawer from '../components/sample/CollapsibleDrawer';
+import FieldSummary from '../components/sample/FieldSummary';
+import FieldMetadataCard from '../components/sample/FieldMetadataCard';
+import FieldMap from '../components/sample/FieldMap';
+import SampleSummary from '../components/sample/SampleSummary'; // NEW
+import IntakeRequestCard from '../components/sample/IntakeRequestCard'; // NEW
+import WorkflowProgressBar from '../components/sample/WorkflowProgressBar'; // Phase 3
+import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
+import LabelPrintDialog from '../components/common/LabelPrintDialog';
+
+const SampleDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { token, user } = useAuth();
+    const { showDialog } = useDialog();
+    const { subscribeToEvent } = useNotifications();
+
+    // State
+    const [sample, setSample] = useState(null);
+    const [workItems, setWorkItems] = useState([]);
+    const [history, setHistory] = useState([]);
+    const [workflowSummary, setWorkflowSummary] = useState(null);  // Phase 3: Workflow Engine data
+
+    const [loading, setLoading] = useState(true);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const workspaceTableRef = useRef(null);
+
+    // UI State
+    const [showFieldMetadata, setShowFieldMetadata] = useState(false);
+    const [viewMode, setViewMode] = useState(() => localStorage.getItem('sampleViewMode') || 'WORKSPACE');
+    const [showContextPanel, setShowContextPanel] = useState(false);
+    const [printTarget, setPrintTarget] = useState(null);
+    const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);
+
+    // Persist Mode
+    useEffect(() => {
+        localStorage.setItem('sampleViewMode', viewMode);
+    }, [viewMode]);
+
+    // Fetch Data
+    const fetchData = useCallback(async () => {
+        try {
+            const res = await axios.get(`/api/samples/${id}/detail`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Normalize response
+            const sampleData = res.data.sample || res.data;
+            sampleData.hasKoboConnection = res.data.hasKoboConnection || false;
+            setSample(sampleData);
+            setWorkItems(res.data.workItems || []);
+            setHistory(res.data.auditLog || []);
+            setWorkflowSummary(res.data.workflowSummary || null);  // Phase 3: Workflow Engine
+
+        } catch (err) {
+            console.error(err);
+            if (err.response?.status === 404) showDialog({ type: 'error', title: 'Error', message: 'Sample not found' });
+        } finally {
+            setLoading(false);
+        }
+    }, [id, token]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    // ─── Real-time: subscribe to WORKITEM_UPDATE events ───
+    useEffect(() => {
+        if (!subscribeToEvent || !id) return;
+        const unsubscribe = subscribeToEvent('WORKITEM_UPDATE', (data) => {
+            // Refresh if this sample was updated
+            if (data.sampleIds?.includes(id)) {
+                console.log('[SampleDetail] Real-time update received, refreshing...');
+                fetchData();
+            }
+        });
+        return unsubscribe;
+    }, [subscribeToEvent, id, fetchData]);
+
+    // Confirm Modal State (Yes/No)
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+    // Info Modal State (Alerts/Errors)
+    const [infoModal, setInfoModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+
+    // Generic Action Wrapper
+    const requestConfirmation = (title, message, action) => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false })); // Close Confirm first
+                await action();
+            }
+        });
+    };
+
+    // Helper for Persistent Alerts
+    const showInfo = (title, message, type = 'info') => {
+        // Map error type
+        const modalType = title.toLowerCase().includes('error') || title.toLowerCase().includes('fail') ? 'error' :
+            title.toLowerCase().includes('success') ? 'success' : 'info';
+
+        setInfoModal({
+            isOpen: true,
+            title,
+            message,
+            type: modalType
+        });
+    };
+
+    const handleUpdateStatus = async (itemId, status, result, options = {}) => {
+        try {
+            await axios.put(`/api/work/${itemId}/status`, {
+                status,
+                result,
+                equipmentId: options.equipmentId
+            });
+            fetchData();
+        } catch (err) {
+            console.error("Update failed", err);
+            showInfo("Update Failed", "Error: " + (err.response?.data?.error || err.message));
+        }
+    };
+
+    const handleCreateSubmission = async (type, workItemIds) => {
+        if (!workItemIds || workItemIds.length === 0) return showInfo("Selection Empty", "No items selected");
+
+        requestConfirmation(`Create ${type} Submission`, `Confirm submission of ${workItemIds.length} items?`, async () => {
+            try {
+                await axios.post('/api/submissions', {
+                    sampleId: id,
+                    type,
+                    workItemIds
+                });
+                showInfo("Success", "Submission Created!");
+                fetchData();
+            } catch (err) {
+                console.error("Submission failed", err);
+                showInfo("Error", "Submission failed: " + (err.response?.data?.error || err.message));
+            }
+        });
+    };
+
+    const handleReviewSubmission = async (submissionId, status, note) => {
+        try {
+            await axios.post(`/api/submissions/${submissionId}/review`, { status, note });
+            showInfo("Success", "Review Submitted");
+            fetchData();
+        } catch (err) {
+            console.error("Review failed", err);
+            showInfo("Error", "Review failed: " + (err.response?.data?.error || err.message));
+        }
+    };
+
+    const handleReviewItem = async (itemId, status) => {
+        try {
+            await axios.post(`/api/work/${itemId}/review`, { status, note: 'Inline Manager Review' });
+            fetchData();
+        } catch (err) {
+            console.error("Item review failed", err);
+            showInfo("Error", "Action failed: " + (err.response?.data?.error || err.message));
+        }
+    };
+
+    const handleReviewBulk = async (itemIds, status) => {
+        try {
+            await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Manager Review' });
+            showInfo("Success", `Successfully reviewed ${itemIds.length} items.`);
+            fetchData();
+        } catch (err) {
+            console.error("Bulk review failed", err);
+            showInfo("Error", "Bulk action failed: " + (err.response?.data?.error || err.message));
+        }
+    };
+
+    const handleApproveIntake = async () => {
+        requestConfirmation("Approve Intake", "Confirm Intake Approval? This will finalize the record and generate laboratory work items.", async () => {
+            try {
+                const newStatus = 'ACCEPTED';
+                await axios.put(`/api/samples/${sample.id}/status`, { status: newStatus, reason: 'Manager Approval' });
+                showInfo("Success", "Sample Approved for Laboratory Processing!");
+                fetchData();
+            } catch (e) {
+                showInfo("Error", "Approval Failed: " + (e.response?.data?.error || e.message));
+            }
+        });
+    };
+
+    const handleUndoIntake = async () => {
+        requestConfirmation("Undo Intake", "⚠️ UNDO INTAKE? \n\nThis will:\n1. Revert status to RECEIVED\n2. Delete all generated Work Items\n3. Preserve the Lab ID for re-processing", async () => {
+            try {
+                await axios.post(`/api/samples/${sample.id}/undo-intake`);
+                showInfo("Success", "Intake Undone. Sample reverted to RECEIVED.");
+                fetchData();
+            } catch (e) {
+                showInfo("Error", "Undo Failed: " + (e.response?.data?.error || e.message));
+            }
+        });
+    };
+
+    const handleUpdateMetadata = async (metadata) => {
+        try {
+            await axios.put(`/api/samples/${sample.id}/metadata`, { metadata });
+            showInfo("Success", "Metadata Updated Successfully!");
+            fetchData();
+        } catch (e) {
+            showInfo("Error", "Update Failed: " + (e.response?.data?.error || e.message));
+        }
+    };
+
+
+    const handleFinalApproval = async () => {
+        // Debugging Click
+        requestConfirmation("Final Approval", "Approve Sample and Mark as Completed/Archived?", async () => {
+            try {
+                // Smart Logic: If Archiving/Disposal is ALREADY accepted, jump to final state.
+                const archivingItem = workItems.find(w => (w.analysis === 'ARCHIVING' || w.analysis === 'ARCH') && w.status === 'ACCEPTED');
+                const disposalItem = workItems.find(w => (w.analysis === 'DISPOSAL' || w.analysis === 'DISP') && w.status === 'ACCEPTED');
+
+                let targetStatus = 'APPROVED';
+                if (archivingItem) targetStatus = 'ARCHIVED';
+                if (disposalItem) targetStatus = 'DISPOSED';
+
+                // WORKAROUND: Legacy Server Logic requires passing through APPROVED before ARCHIVED
+                // Check if current status is NOT Approved, but target IS Final
+                if (['ARCHIVED', 'DISPOSED'].includes(targetStatus) && sample.status !== 'APPROVED') {
+                    // Step 1: Intermediate Approval
+                    try {
+                        await axios.put(`/api/samples/${id}/status`, { status: 'APPROVED', reason: 'Intermediate Step for Archiving' });
+                    } catch (ignore) {
+                        // Ignore if it fails? No, if it fails maybe because it's already approved or something.
+                        // But mostly strict validation.
+                        console.warn("Intermediate approval failed or skipped", ignore);
+                    }
+                }
+
+                // Step 2: Final Status
+                await axios.put(`/api/samples/${id}/status`, { status: targetStatus });
+
+                showInfo("Success", `Sample marked as ${targetStatus}!`);
+                fetchData();
+            } catch (err) {
+                console.error("Approval failed", err);
+                showInfo("Error", "Approval failed: " + (err.response?.data?.error || err.message));
+            }
+        });
+    };
+
+    const handleUndoApproval = async () => {
+        requestConfirmation("Undo Approval", "Undo Final Approval? Sample will return to ACCEPTED state.", async () => {
+            try {
+                await axios.post(`/api/samples/${id}/undo-approve`);
+                showInfo("Success", "Approval Undone. Reverted to ACCEPTED.");
+                fetchData();
+            } catch (err) {
+                showInfo("Error", "Undo failed: " + (err.response?.data?.error || err.message));
+            }
+        });
+    };
+
+    const handleArchive = async () => {
+        try {
+            await axios.post(`/api/samples/${id}/archive`, {});
+            showDialog({
+                type: 'success',
+                title: 'Archive Request Created',
+                message: "Archive task created. Please assign a technician in the table below."
+            });
+            await fetchData();
+            workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            if (err.response?.status === 400) {
+                // Already exists - just scroll
+                workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                showDialog({
+                    type: 'error',
+                    title: 'Archive Failed',
+                    message: err.response?.data?.error || err.message
+                });
+            }
+        }
+    };
+
+    const handleDispose = async () => {
+        try {
+            await axios.post(`/api/samples/${id}/dispose`, {});
+            showDialog({
+                type: 'success',
+                title: 'Disposal Request Created',
+                message: "Disposal task created. Please assign a technician in the table below."
+            });
+            await fetchData();
+            workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            if (err.response?.status === 400) {
+                // Already exists - just scroll
+                workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                showDialog({
+                    type: 'error',
+                    title: 'Disposal Failed',
+                    message: err.response?.data?.error || err.message
+                });
+            }
+        }
+    };
+
+
+    if (loading) return <div className="p-8 text-center text-gray-500">Loading details...</div>;
+    if (!sample) return <div className="p-8 text-center text-red-500">Sample not found</div>;
+
+    // Derived State
+    const dryingStatus = workItems.find(w => w.analysis === 'DRYING')?.status || 'PENDING';
+    const prepStatus = workItems.find(w => w.analysis === 'PREPARATION')?.status || 'PENDING';
+    const archivingStatus = workItems.find(w => w.analysis === 'ARCHIVING' || w.analysis === 'ARCH')?.status || null;
+
+    // Fix: ACCPETED also means done (verified)
+    // Fix: ACCPETED or SUBMITTED also means done enough to open next gate
+    const isDryingDone = ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(dryingStatus);
+    const isPrepDone = ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(prepStatus);
+    const gatesLockedByDrying = !isDryingDone;
+    // Preparation is locked if Drying not done
+    // Other analyses are locked if Preparation not done
+
+    // Check for unassigned items (excluding post-analytical)
+    const activeWorkItems = workItems.filter(w => w.category !== 'Post-Analytical');
+    const hasUnassigned = activeWorkItems.some(w => !w.assignedTo);
+
+    // allAccepted should only count ANALYTICAL items, not Post-Analytical itself
+    const analyticalItems = workItems.filter(w => !['Operational Gates', 'Post-Analytical'].includes(w.category));
+    const allAccepted = analyticalItems.length > 0 && analyticalItems.every(w => ['ACCEPTED', 'WAIVED'].includes(w.status));
+    const isApproved = ['APPROVED', 'ARCHIVING_PENDING', 'DISPOSAL_PENDING', 'ARCHIVED', 'DISPOSED'].includes(sample.status);
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 md:p-6 text-left relative flex overflow-x-hidden">
+            {/* Main Content Area - FULL WIDTH */}
+            <div className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] w-full max-w-[100vw] ${drawerOpen ? 'mr-96 opacity-90 scale-[0.99] translate-x-[-10px]' : 'mr-12'} pr-8`}>
+
+                {/* 1. Header & Summary */}
+                <div className="relative z-10">
+                    <SampleSummary
+                        sample={sample}
+                        user={user}
+                        dryingStatus={dryingStatus}
+                        prepStatus={prepStatus}
+                        archivingStatus={archivingStatus}
+                        showContextPanel={showContextPanel}
+                        setShowContextPanel={setShowContextPanel}
+                        drawerOpen={drawerOpen}
+                        setDrawerOpen={setDrawerOpen}
+                        onApproveIntake={handleApproveIntake}
+                        onUndoIntake={handleUndoIntake} // NEW
+                        onReviewBulk={handleReviewBulk}
+                        onFinalApproval={handleFinalApproval}
+                        onUndoApproval={handleUndoApproval}
+                        onArchive={handleArchive}
+                        onDispose={handleDispose}
+                        onPrintLabel={() => setPrintTarget(sample)}
+                        onEditAnalysis={() => setIsAnalysisModalOpen(true)}
+                        allAccepted={allAccepted}
+                        isApproved={isApproved}
+                    />
+                </div>
+
+                <LabelPrintDialog
+                    isOpen={!!printTarget}
+                    onClose={() => setPrintTarget(null)}
+                    sample={printTarget}
+                />
+
+                <AnalysisUpdateModal
+                    sample={sample}
+                    isOpen={isAnalysisModalOpen}
+                    onClose={() => setIsAnalysisModalOpen(false)}
+                    onUpdateSuccess={() => {
+                        fetchData();
+                        showInfo("Success", "Analysis requirements updated. New work items generated.");
+                    }}
+                />
+
+                {/* NEW: Workflow Progress Bar (Phase 3) */}
+                {workflowSummary && sample.status !== 'RECEIVED' && sample.status !== 'EXPECTED' && (
+                    <WorkflowProgressBar workflowSummary={workflowSummary} />
+                )}
+
+                {/* 2. INTAKE REQUEST CARD (Only for RECEIVED samples) */}
+                <IntakeRequestCard sample={sample} />
+
+                {/* 3. FIELD DATA STRIP */}
+                <FieldSummary
+                    sample={sample}
+                    showMetadata={showFieldMetadata}
+                    onToggleMetadata={() => setShowFieldMetadata(!showFieldMetadata)}
+                />
+
+                {/* 4. EXPANDABLE METADATA CARD */}
+                {showFieldMetadata && (
+                    <div className="mb-6 space-y-4 animate-in slide-in-from-top-2">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+                            <FieldMetadataCard
+                                sample={sample}
+                                canEdit={['INTAKE_OFFICER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)}
+                                onUpdateMetadata={handleUpdateMetadata}
+                            />
+                        </div>
+                        <div className="h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <FieldMap sample={sample} />
+                        </div>
+                    </div>
+                )}
+
+                {/* 5. CONTEXT PANEL (LEGACY/TOGGLE) */}
+                {showContextPanel && (
+                    <div className="mb-4 animate-in slide-in-from-top-2">
+                        <ContextPanel sample={sample} isActive={true} />
+                    </div>
+                )}
+
+                {/* 6. ANALYTICAL WORKSPACE (Only if Approved/Accepted) */}
+                {sample.status !== 'RECEIVED' && (
+                    <div className="flex flex-col gap-6">
+                        {/* Warning Banner - Only show if totally blocked from initial analysis */}
+                        {!isDryingDone && sample.status !== 'RECEIVED' && (
+                            <div className="bg-orange-50 border border-orange-200 text-orange-800 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 mb-4">
+                                <span className="p-1 bg-orange-100 rounded-full">⚠️</span>
+                                <span>
+                                    {['EXPECTED', 'COLLECTED'].includes(sample.status)
+                                        ? "ANALYSIS LOCKED: Sample should be RECEIVED first."
+                                        : "ANALYSIS LOCKED: Drying must be COMPLETED first."
+                                    }
+                                </span>
+                            </div>
+                        )}
+
+
+                        {/* The Table */}
+                        <div ref={workspaceTableRef} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[400px]">
+                            <WorkItemsTable
+                                workItems={workItems}
+                                isGateOpen={isDryingDone}
+                                onUpdateStatus={handleUpdateStatus}
+                                onAssignmentSuccess={fetchData}
+                                onReview={handleReviewItem}
+                                onReviewBulk={handleReviewBulk}
+
+                            />
+                        </div>
+
+                        {/* Submission Panel */}
+                        <SubmissionPanel
+                            submissions={history.filter(h => h.entity === 'SUBMISSION')}
+                            workItems={workItems}
+                            onCreateSubmission={handleCreateSubmission}
+                            onReviewSubmission={handleReviewSubmission}
+                            onReviewItem={handleReviewItem}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* Collapsible History Drawer - OVERLAY */}
+            <CollapsibleDrawer
+                history={history}
+                isOpen={drawerOpen}
+                onToggle={() => setDrawerOpen(!drawerOpen)}
+            />
+
+            {/* CUSTOM CONFIRM RESULT MODAL (YES/NO) */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                            {confirmModal.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-wrap">
+                            {confirmModal.message}
+                        </p>
+                        <div className="flex items-center justify-end gap-3">
+                            <button
+                                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                                className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg transition-all transform hover:scale-105"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* INFO / ERROR MODAL (OK ONLY) */}
+            {infoModal.isOpen && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-3 mb-2">
+                            {infoModal.type === 'error' ? (
+                                <div className="text-red-500"><div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center font-bold">!</div></div>
+                            ) : infoModal.type === 'success' ? (
+                                <div className="text-green-500"><div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center font-bold">✓</div></div>
+                            ) : null}
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                {infoModal.title}
+                            </h3>
+                        </div>
+
+                        <p className="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-wrap">
+                            {infoModal.message}
+                        </p>
+
+                        <div className="flex items-center justify-end">
+                            <button
+                                onClick={() => setInfoModal({ ...infoModal, isOpen: false })}
+                                className={`px-5 py-2 rounded-lg font-bold shadow-lg transition-all transform hover:scale-105 ${infoModal.type === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' :
+                                    infoModal.type === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' :
+                                        'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                    }`}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default SampleDetail;

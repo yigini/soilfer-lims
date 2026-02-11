@@ -1,0 +1,677 @@
+const express = require('express');
+require('dotenv').config();
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const adminRoutes = require('./routes/adminRoutes');
+const prisma = require('./prisma');
+const { v4: uuidv4 } = require('uuid');
+
+const app = express();
+// Enable if behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+app.set('trust proxy', 1);
+
+const PORT = process.env.PORT || 3000;
+
+// Security Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "default-src": ["'self'", "https://*.cesium.com", "https://cesium.com"],
+            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cesium.com", "https://*.cesium.com", "https://cdnjs.cloudflare.com", "https://*.virtualearth.net"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://cesium.com", "https://*.cesium.com", "https://fonts.googleapis.com"],
+            "font-src": ["'self'", "https://fonts.gstatic.com"],
+            "img-src": ["'self'", "data:", "blob:", "https://api.qrserver.com", "https://cesium.com", "https://*.cesium.com", "https://*.openstreetmap.org", "https://*.cartocdn.com", "https://*.basemaps.cartocdn.com", "https://*.virtualearth.net", "https://*.arcgisonline.com", "https://server.arcgisonline.com", "https://mt1.google.com", "https://*.google.com", "https://cdnjs.cloudflare.com", "https://images.unsplash.com"],
+            "connect-src": ["'self'", "https://cesium.com", "https://*.cesium.com", "https://api.cesium.com", "https://assets.cesium.com", "https://*.virtualearth.net", "https://*.openstreetmap.org", "https://*.cartocdn.com", "https://*.basemaps.cartocdn.com", "https://*.arcgisonline.com", "https://server.arcgisonline.com", "https://mt1.google.com", "https://*.google.com"],
+            "media-src": ["'self'", "https://ssl.gstatic.com"],
+            "worker-src": ["'self'", "blob:", "https://*.cesium.com", "https://cesium.com"],
+            "child-src": ["'self'", "blob:", "https://*.cesium.com", "https://cesium.com"]
+        }
+    }
+}));
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? ['http://localhost:5173', 'https://lims.yigini.net', 'http://lims.yigini.net']
+        : '*',
+    credentials: true
+}));
+
+// Rate Limiter for Auth Routes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit to 100 requests per windowMs
+    message: { error: 'Too many login attempts, please try again later.' }
+});
+app.use('/api/auth', authLimiter);
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Seed Users: Handled by reset_admin.js or external scripts
+// Seed Messages: Handled by migrations or external scripts
+
+
+// --- Routes ---
+// Server restart trigger 2
+const jwt = require('jsonwebtoken');
+const { verifyToken } = require('./middleware/authMiddleware');
+if (!process.env.JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET is not defined in environment variables.');
+    process.exit(1);
+}
+const SECRET_KEY = process.env.JWT_SECRET;
+// Forced Restart Trigger 3
+// Forced Restart Trigger: Fix Spectral Match Check 2
+
+// Health Check (used by Docker healthcheck)
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+});
+
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/', (req, res) => {
+        res.send('Enterprise Server running and healthy.');
+    });
+}
+
+// NUCLEAR OPTION: Audit Route at root level
+// NUCLEAR OPTION: Audit Route at root level
+app.get('/api/audit-final', verifyToken, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const search = (req.query.search || '').toLowerCase();
+        const category = req.query.category || 'ALL';
+
+        const user = req.user;
+        const userRole = (user.role || '').toUpperCase().trim();
+        const userLabId = user.labId;
+
+        console.log(`[AUDIT_SECURITY] Request by ${user.username} | Role: ${userRole} | Lab: ${userLabId}`);
+
+        const where = {};
+
+        // 1. Mandatory Isolation (The Forge)
+        if (userRole !== 'SUPER_ADMIN') {
+            if (userLabId) {
+                // If lab staff: They see logs for their lab OR logs they performed.
+                where.OR = [
+                    { labId: userLabId },
+                    { performedBy: user.username }
+                ];
+                console.log(`[AUDIT_SECURITY] Scoping to Lab: ${userLabId}`);
+            } else {
+                // If regional staff without a lab: They only see their own manual actions for now.
+                where.performedBy = user.username;
+                console.log(`[AUDIT_SECURITY] Scoping to User only: ${user.username}`);
+            }
+        } else {
+            console.log(`[AUDIT_SECURITY] Full Access (SUPER_ADMIN)`);
+        }
+
+        // 2. Filters
+        const operationalActions = ['SAMPLE_CREATED', 'STATUS_CHANGE', 'WORKITEM_GENERATED', 'RESULTS_ENTERED', 'APPROVAL_GIVEN', 'Sample Created', 'Sample Updated', 'Sample Deleted', 'AUTO_CREATE', 'SPECTRA_UPLOAD'];
+
+        if (category === 'OPERATIONAL') {
+            where.action = { in: operationalActions };
+        } else if (category === 'SYSTEM') {
+            where.action = { notIn: operationalActions };
+        }
+
+        if (search) {
+            const searchTerm = { contains: search };
+            const searchConditions = [
+                { action: searchTerm },
+                { performedBy: searchTerm },
+                { details: searchTerm },
+                { entityId: searchTerm }
+            ];
+
+            if (where.OR) {
+                // Combine RBAC OR with Search OR using AND
+                where.AND = [
+                    { OR: where.OR },
+                    { OR: searchConditions }
+                ];
+                delete where.OR;
+            } else {
+                where.OR = searchConditions;
+            }
+        }
+
+        const [total, logs] = await prisma.$transaction([
+            prisma.auditLog.count({ where }),
+            prisma.auditLog.findMany({
+                where,
+                orderBy: { timestamp: 'desc' },
+                skip: (page - 1) * limit,
+                take: limit
+            })
+        ]);
+
+        const mappedLogs = logs.map(log => {
+            const logAction = log.action || '';
+            const isOperational = operationalActions.includes(logAction);
+            return {
+                ...log,
+                user: log.performedBy || 'System',
+                time: log.timestamp,
+                details: log.details || (log.entity ? `${log.entity} ${log.entityId || ''}` : '-'),
+                category: isOperational ? 'OPERATIONAL' : 'SYSTEM'
+            };
+        });
+
+        res.json({
+            data: mappedLogs,
+            meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        });
+    } catch (e) {
+        console.error("[AUDIT_ERROR] Critical failure in audit retrieval:", e);
+        res.status(500).json({ error: 'Internal Security Gate Error' });
+    }
+});
+
+// --- Routes ---
+const { checkPermission } = require('./middleware/authMiddleware');
+app.use('/api/admin', verifyToken, adminRoutes);
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/projects', require('./routes/projectRoutes'));
+const analysisController = require('./controllers/analysisController');
+app.get('/api/config/categories', verifyToken, analysisController.getCategories);
+app.get('/api/config/analyses', verifyToken, analysisController.getAnalyses);
+app.get('/api/config/methodologies', verifyToken, analysisController.getMethodologies);
+app.get('/api/config/groups', verifyToken, analysisController.getGroups);
+app.use('/api/config', verifyToken, require('./routes/analysisRoutes'));
+
+// Admin Config Routes
+app.post('/api/config/categories', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createCategory);
+app.post('/api/config/analyses', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createAnalysis);
+app.post('/api/config/methodologies', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createMethodology);
+app.post('/api/config/groups', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createGroup);
+app.use('/api/samples', verifyToken, require('./routes/sampleRoutes'));
+app.use('/api/results', verifyToken, require('./routes/resultsRoutes'));
+app.use('/api/data-results', verifyToken, require('./routes/dataResultsRoutes'));
+app.use('/api/inventory', verifyToken, require('./routes/inventoryRoutes'));
+app.use('/api/equipment', verifyToken, require('./routes/equipmentRoutes'));
+const spectralRoutes = require('./routes/spectralRoutes');
+console.log('[DEBUG] Registering Spectral Routes...'); // Force Restart Trigger 4
+
+// ...
+app.use('/api/spectral', spectralRoutes);
+app.use('/api/reception', verifyToken, require('./routes/receptionRoutes'));
+app.use('/api/work', require('./routes/workRoutes'));
+app.use('/api/workbench', require('./routes/workbenchRoutes'));
+app.use('/api/labs', verifyToken, require('./routes/labRoutes'));
+app.use('/api/exports', verifyToken, require('./routes/exportRoutes'));
+app.use('/api/qc', require('./routes/qcRoutes'));
+app.use('/api/submissions', verifyToken, require('./routes/submissionRoutes'));
+app.use('/api/reviews', verifyToken, require('./routes/reviewRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
+// Kobo media proxy (no auth - img tags can't send JWT headers)
+const koboController = require('./controllers/koboController');
+app.get('/api/kobo/media', koboController.proxyMedia);
+
+// Kobo API routes (authenticated)
+app.use('/api/kobo', verifyToken, require('./routes/koboRoutes'));
+
+// FORCE ROUTE: Explicitly define change-password here to fix 404
+const authController = require('./controllers/authController');
+app.post('/api/auth/change-password', verifyToken, (req, res, next) => {
+    console.log('Hit /api/auth/change-password explicit route');
+    authController.changePassword(req, res, next);
+});
+
+// Auth Routes are handled by authRoutes.js
+app.use('/api/auth', require('./routes/authRoutes'));
+
+// ─── UNIFIED LIVE DASHBOARD ENDPOINT ───
+app.get('/api/dashboard/live', verifyToken, async (req, res) => {
+    const user = req.user;
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Build RBAC scoping for samples
+        const sampleWhere = {};
+        if (user.role !== 'SUPER_ADMIN') {
+            if (user.labId) sampleWhere.assignedLab = user.labId;
+            else if (user.countries?.length > 0) {
+                sampleWhere.OR = [
+                    { countryName: { in: user.countries } },
+                    { projectCode: { in: user.countries } }
+                ];
+            }
+        }
+
+        // ── LAB_MANAGER / SUPER_ADMIN ──
+        if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+            // KPIs
+            const [pendingIntakes, totalSamples, inProgress, completedToday] = await Promise.all([
+                prisma.sample.count({ where: { ...sampleWhere, status: { in: ['RECEIVED', 'COLLECTED'] } } }),
+                prisma.sample.count({ where: sampleWhere }),
+                prisma.sample.count({ where: { ...sampleWhere, status: { in: ['PROCESSING', 'PREPARATION', 'ANALYSIS', 'PARTIALLY_COMPLETE'] } } }),
+                prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED', updatedAt: { gte: today } } }),
+            ]);
+
+            // Work items
+            // Work items - STRICT Lab ID check
+            const workWhere = user.labId ? { labId: user.labId } : {};
+            const [unassignedTasks, allWork] = await Promise.all([
+                prisma.workItem.count({ where: { ...workWhere, status: 'PENDING', assignedTo: null } }),
+                prisma.workItem.findMany({ where: workWhere, orderBy: { createdAt: 'desc' }, take: 500 }),
+            ]);
+
+            // Submissions pending review
+            let awaitingReview = 0;
+            let reviewQueue = [];
+            try {
+                const submissions = await prisma.submission.findMany({
+                    where: { status: 'PENDING_REVIEW' },
+                    orderBy: { submittedAt: 'desc' },
+                    take: 20,
+                });
+                awaitingReview = submissions.length;
+                // Aggregate by sample
+                const reviewGroups = {};
+                submissions.forEach(sub => {
+                    if (!reviewGroups[sub.sampleId]) {
+                        reviewGroups[sub.sampleId] = {
+                            sampleId: sub.sampleId,
+                            labId: sub.labId || sub.sampleId,
+                            submittedBy: sub.submittedBy,
+                            submittedAt: sub.submittedAt,
+                            count: 1,
+                            types: [sub.type],
+                        };
+                    } else {
+                        reviewGroups[sub.sampleId].count++;
+                        if (!reviewGroups[sub.sampleId].types.includes(sub.type)) {
+                            reviewGroups[sub.sampleId].types.push(sub.type);
+                        }
+                    }
+                });
+                reviewQueue = Object.values(reviewGroups);
+            } catch (e) { /* submission model may not exist */ }
+
+            // Intake queue (latest 10 RECEIVED samples)
+            const intakeQueue = await prisma.sample.findMany({
+                where: { ...sampleWhere, status: { in: ['RECEIVED', 'COLLECTED'] } },
+                orderBy: { receptionDate: 'desc' },
+                take: 10,
+                select: { id: true, originalId: true, labId: true, projectCode: true, receptionDate: true, receivedBy: true, clientName: true, status: true },
+            });
+
+            // Oversight — progress per lab ID
+            const sampleGroups = {};
+            allWork.forEach(i => {
+                const key = i.labId || 'Unknown';
+                if (!sampleGroups[key]) sampleGroups[key] = { total: 0, completed: 0, sampleId: i.sampleId };
+                sampleGroups[key].total++;
+                if (i.status === 'COMPLETED') sampleGroups[key].completed++;
+            });
+            const oversight = Object.entries(sampleGroups)
+                .map(([labId, s]) => ({
+                    labId, sampleId: s.sampleId, total: s.total, completed: s.completed,
+                    progress: s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0
+                }))
+                .filter(s => s.total > 0)
+                .sort((a, b) => b.progress - a.progress)
+                .slice(0, 15);
+
+            // Tech workload
+            const techs = await prisma.user.findMany({
+                where: { role: 'LAB_TECHNICIAN', isActive: true, ...(user.labId ? { labId: user.labId } : {}) },
+                select: { id: true, username: true, name: true },
+            });
+            const techWorkload = techs.map(t => {
+                const assigned = allWork.filter(w => w.assignedTo === t.username);
+                return {
+                    username: t.username,
+                    name: t.name || t.username,
+                    assigned: assigned.length,
+                    completed: assigned.filter(w => w.status === 'COMPLETED').length,
+                    pending: assigned.filter(w => ['PENDING', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)).length,
+                };
+            });
+
+            // Recent activity (last 10)
+            const recentLogs = await prisma.auditLog.findMany({
+                orderBy: { timestamp: 'desc' },
+                take: 10,
+                where: user.role === 'SUPER_ADMIN' ? {} : { entity: 'SAMPLE' },
+            });
+            const recentActivity = recentLogs.map(log => ({
+                id: log.id,
+                action: log.action,
+                details: log.details || `${log.entity} ${log.entityId}`,
+                time: log.timestamp,
+                user: log.performedBy,
+            }));
+
+            // Warnings
+            const warnings = [];
+            if (pendingIntakes > 5) warnings.push({ type: 'HIGH_INTAKE', message: `${pendingIntakes} samples waiting for intake acceptance`, severity: 'MEDIUM' });
+            if (unassignedTasks > 10) warnings.push({ type: 'UNASSIGNED', message: `${unassignedTasks} work items need assignment`, severity: 'HIGH' });
+            if (awaitingReview > 0) warnings.push({ type: 'REVIEW', message: `${awaitingReview} submissions awaiting review`, severity: 'MEDIUM' });
+
+            return res.json({
+                role: user.role,
+                kpis: { pendingIntakes, unassignedTasks, inProgress, awaitingReview, completedToday, totalSamples },
+                intakeQueue,
+                reviewQueue,
+                oversight,
+                techWorkload,
+                recentActivity,
+                warnings,
+                timestamp: new Date(),
+            });
+        }
+
+        // ── LAB_TECHNICIAN ──
+        if (user.role === 'LAB_TECHNICIAN') {
+            const myWork = await prisma.workItem.findMany({
+                where: { assignedTo: user.username },
+                orderBy: { createdAt: 'desc' },
+                take: 200,
+            });
+
+            const activeItems = myWork.filter(w => ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(w.status));
+            const completedToday = myWork.filter(w => w.status === 'COMPLETED' && w.updatedAt >= today).length;
+            const reanalysis = myWork.filter(w => w.status === 'REANALYSIS_REQUIRED');
+
+            // Group by sample
+            const sampleGroups = {};
+            activeItems.forEach(item => {
+                const key = item.sampleId;
+                if (!sampleGroups[key]) {
+                    sampleGroups[key] = {
+                        sampleId: key,
+                        labId: item.labId || key,
+                        analyses: [item.analysis],
+                        statuses: [item.status],
+                        priority: item.priority,
+                        items: [item],
+                        createdAt: item.createdAt,
+                    };
+                } else {
+                    if (!sampleGroups[key].analyses.includes(item.analysis)) sampleGroups[key].analyses.push(item.analysis);
+                    sampleGroups[key].statuses.push(item.status);
+                    sampleGroups[key].items.push(item);
+                    if (item.priority === 'URGENT') sampleGroups[key].priority = 'URGENT';
+                }
+            });
+
+            const myQueue = Object.values(sampleGroups).sort((a, b) => {
+                if (a.priority === 'URGENT' && b.priority !== 'URGENT') return -1;
+                if (b.priority === 'URGENT' && a.priority !== 'URGENT') return 1;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+
+            const warnings = [];
+            if (reanalysis.length > 0) warnings.push({ type: 'REANALYSIS', message: `${reanalysis.length} item(s) need reanalysis`, severity: 'HIGH' });
+
+            return res.json({
+                role: user.role,
+                kpis: { assignedToMe: activeItems.length, inProgress: activeItems.filter(w => w.status === 'IN_PROGRESS').length, completedToday, reanalysisRequired: reanalysis.length },
+                myQueue,
+                reanalysis: reanalysis.map(r => ({ id: r.id, sampleId: r.sampleId, labId: r.labId, analysis: r.analysis, reason: r.reanalysisReason })),
+                warnings,
+                timestamp: new Date(),
+            });
+        }
+
+        // ── SAMPLE_RECEPTION ──
+        if (user.role === 'SAMPLE_RECEPTION') {
+            const [receivedToday, totalProcessed] = await Promise.all([
+                prisma.sample.count({ where: { ...sampleWhere, receptionDate: { gte: today } } }),
+                prisma.sample.count({ where: sampleWhere }),
+            ]);
+            const pendingDrying = await prisma.sample.count({ where: { ...sampleWhere, dryingStatus: 'PENDING' } });
+            const pendingPreparation = await prisma.sample.count({ where: { ...sampleWhere, preparationStatus: 'PENDING' } });
+
+            const recentIntakes = await prisma.sample.findMany({
+                where: { ...sampleWhere, receptionDate: { gte: today } },
+                orderBy: { receptionDate: 'desc' },
+                take: 15,
+                select: { id: true, originalId: true, labId: true, projectCode: true, receptionDate: true, receivedBy: true, status: true, dryingStatus: true, preparationStatus: true },
+            });
+
+            return res.json({
+                role: user.role,
+                kpis: { receivedToday, pendingDrying, pendingPreparation, totalProcessed },
+                recentIntakes,
+                warnings: [],
+                timestamp: new Date(),
+            });
+        }
+
+        // ── PROJECT_MANAGER / COUNTRY_ADMIN / VIEWER / others ──
+        const [totalSamples, inProgress, receivedToday] = await Promise.all([
+            prisma.sample.count({ where: sampleWhere }),
+            prisma.sample.count({ where: { ...sampleWhere, status: { in: ['RECEIVED', 'PREPARATION', 'ANALYSIS', 'PARTIALLY_COMPLETE', 'PROCESSING'] } } }),
+            prisma.sample.count({ where: { ...sampleWhere, receptionDate: { gte: today } } }),
+        ]);
+
+        // Daily counts for last 7 days
+        const dailyCounts = [];
+        for (let i = 6; i >= 0; i--) {
+            const dayStart = new Date(today);
+            dayStart.setDate(dayStart.getDate() - i);
+            const dayEnd = new Date(dayStart);
+            dayEnd.setDate(dayEnd.getDate() + 1);
+            const count = await prisma.sample.count({
+                where: { ...sampleWhere, receptionDate: { gte: dayStart, lt: dayEnd } },
+            });
+            dailyCounts.push({
+                date: dayStart.toISOString().split('T')[0],
+                day: dayStart.toLocaleDateString('en-US', { weekday: 'short' }),
+                count,
+            });
+        }
+
+        // Recent activity
+        const recentLogs = await prisma.auditLog.findMany({
+            orderBy: { timestamp: 'desc' },
+            take: 8,
+            where: user.role === 'SUPER_ADMIN' ? {} : { entity: 'SAMPLE' },
+        });
+        const recentActivity = recentLogs.map(log => ({
+            id: log.id,
+            action: log.action,
+            details: log.details || `${log.entity} ${log.entityId}`,
+            time: log.timestamp,
+        }));
+
+        return res.json({
+            role: user.role,
+            kpis: { totalSamples, inProgress, receivedToday },
+            dailyCounts,
+            recentActivity,
+            warnings: [],
+            timestamp: new Date(),
+        });
+
+    } catch (e) {
+        console.error('Dashboard Live Error:', e);
+        res.status(500).json({ error: 'Failed to fetch live dashboard data' });
+    }
+});
+
+app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
+    const user = req.user;
+    const { country, projectId } = req.query; // Optional filters
+
+    try {
+        // 1. Build Query
+        const where = {};
+
+        // RBAC Scoping
+        if (user.role !== 'SUPER_ADMIN') {
+            const userCountries = user.countries || [];
+            const userProjects = user.projects || [];
+            if (userCountries.length > 0) {
+                // If filtering by country, it's safer to query projects or raw field? 
+                // Schema has projectCode, countryName. 
+                // Let's assume projectCode map to country for now or countryName.
+                where.OR = [
+                    { projectCode: { in: userCountries } },
+                    { countryName: { in: userCountries } }
+                ];
+            }
+            if (userProjects.length > 0) {
+                // Combine with existing OR or add? 
+                // Complex RBAC logic from sampleController... simplified here:
+                if (where.OR) {
+                    where.OR.push({ projectId: { in: userProjects } });
+                } else {
+                    where.OR = [{ projectId: { in: userProjects } }];
+                }
+            }
+        }
+
+        // Explicit Filters
+        if (country) {
+            // where.countryName = country; // Schema might not have countryName populated for all.
+            // Using contains for safety or direct match if confident.
+            // OR query:
+            where.AND = [
+                ...(where.AND || []),
+                {
+                    OR: [
+                        { countryName: country },
+                        { projectCode: country }
+                    ]
+                }
+            ];
+        }
+        if (projectId) {
+            where.projectId = projectId;
+        }
+
+        // 2. Fetch Data
+        const totalSamples = await prisma.sample.count({ where });
+
+        // In Progress: RECEIVED, PREPARATION, ANALYSIS, PARTIALLY_COMPLETE, COMPLETED (Wait, COMPLETED means analysis completed?)
+        // Using same list: ['RECEIVED', 'PREPARATION', 'ANALYSIS', 'PARTIALLY_COMPLETE', 'COMPLETED']
+        const inProgress = await prisma.sample.count({
+            where: {
+                ...where,
+                status: {
+                    in: ['RECEIVED', 'PREPARATION', 'ANALYSIS', 'PARTIALLY_COMPLETE', 'COMPLETED', 'PROCESSING']
+                }
+            }
+        });
+
+        // "Today"
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const receivedToday = await prisma.sample.count({
+            where: {
+                ...where,
+                receptionDate: {
+                    gte: today
+                }
+            }
+        });
+
+        // Recent Activity
+        // Logic: Filter by entityId if not super admin? 
+        // For simplicity/performance: Show global recent for Admin, or scoped.
+        // Doing a simple fetch for now.
+        const recentLogs = await prisma.auditLog.findMany({
+            orderBy: { timestamp: 'desc' },
+            take: 5,
+            where: user.role === 'SUPER_ADMIN' ? {} : {
+                // Approximate scoping: entity 'SAMPLE'
+                entity: 'SAMPLE'
+                // We can't easily join to verify sample access in one query here without complexity.
+                // Accepting minor info leak of "Sample X change" for now, or just restricting to 'SAMPLE' entity.
+            }
+        });
+
+        const recentActivity = recentLogs.map(log => ({
+            id: log.id,
+            action: log.action,
+            details: log.details || `${log.entity} ${log.entityId}`,
+            time: log.timestamp
+        }));
+
+        res.json({ totalSamples, inProgress, receivedToday, recentActivity });
+    } catch (e) {
+        console.error("Dashboard Stats Error:", e);
+        res.status(500).json({ error: "Failed to fetch stats" });
+    }
+});
+
+// FALLBACK: Direct Route for Audit Logs (Bypassing Router Issue)
+app.get('/api/admin/audit-direct', verifyToken, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
+        const where = {};
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            if (req.user.labId) {
+                where.OR = [
+                    { labId: req.user.labId },
+                    { performedBy: req.user.username }
+                ];
+            } else {
+                where.performedBy = req.user.username;
+            }
+        }
+
+        const [total, logs] = await prisma.$transaction([
+            prisma.auditLog.count({ where }),
+            prisma.auditLog.findMany({
+                where,
+                orderBy: { timestamp: 'desc' },
+                skip,
+                take: limit
+            })
+        ]);
+
+        const mappedLogs = logs.map(log => ({
+            ...log,
+            user: log.performedBy || 'System',
+            time: log.timestamp,
+            details: log.details || (log.entity ? `${log.entity} ${log.entityId || ''}` : '-')
+        }));
+
+        res.json({
+            data: mappedLogs,
+            meta: {
+                page,
+                limit,
+                total: total,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error("Audit Direct Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ─── Production: Serve React client ───
+if (process.env.NODE_ENV === 'production') {
+    const clientDist = path.join(__dirname, '..', 'client', 'dist');
+    app.use(express.static(clientDist));
+
+    // SPA fallback: all non-API routes serve index.html
+    app.use((req, res, next) => {
+        if (!req.path.startsWith('/api') && req.method === 'GET') {
+            res.sendFile(path.join(clientDist, 'index.html'));
+        } else {
+            next();
+        }
+    });
+}
+
+module.exports = app;

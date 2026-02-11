@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// --- CORE MODELS ---
+
+model User {
+  id                 String     @id
+  username           String     @unique
+  password           String
+  email              String     @unique
+  role               String     // SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN, SAMPLE_RECEPTION, etc.
+  name               String?
+  labId             String?
+  countries          Json?      // Array of country codes: ["GTM", "HND"]
+  projects           Json?      // Array of project codes: ["SoilFER-USA"]
+  isActive           Boolean    @default(true)
+  mustChangePassword Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  assignedWorkItems  WorkItem[] @relation("AssignedTo")
+  createdWorkItems   WorkItem[] @relation("AssignedBy")
+  submissions        Submission[]
+}
+
+model Project {
+  id          String   @id
+  code        String   @unique
+  name        String
+  description String?
+  client      String?
+  startDate   DateTime?
+  status      String   // ACTIVE, COMPLETED, ARCHIVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  samples     Sample[]
+}
+
+model Sample {
+  id                String     @id
+  originalId        String     @unique
+  projectCode       String?
+  projectId         String?
+  project           Project?   @relation(fields: [projectId], references: [id])
+  countryName       String?
+  country           String?
+  assignedLab       String?
+  labId             String?    // Generated Lab ID: LAB-2026-KE-001
+  status            String     // EXPECTED, RECEIVED, ACCEPTED, PROCESSING, etc.
+  
+  // Workflow Gates
+  dryingStatus      String?    // PENDING, DONE, FAILED
+  preparationStatus String?    // PENDING, DONE
+  receptionDate     DateTime?
+  receivedBy        String?
+
+  // Metadata
+  metadata          Json?      // Raw metadata from external sources
+  fieldMetadata     Json?      // Structured field provenance data
+  requiredAnalyses  Json?      // Array of analysis codes
+
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  workItems         WorkItem[]
+}
+
+model WorkItem {
+  id             String    @id
+  sampleId       String
+  sample         Sample    @relation(fields: [sampleId], references: [id])
+  labId          String?
+  analysis       String    // DRYING, PREPARATION, PH_H2O, etc.
+  category       String?   // Operational Gates, Spectroscopy, etc.
+  status         String    // NOT_ASSIGNED, ASSIGNED, IN_PROGRESS, COMPLETED, ACCEPTED
+  
+  assignedTo     String?
+  assignee       User?     @relation("AssignedTo", fields: [assignedTo], references: [username])
+  
+  assignedBy     String?
+  manager        User?     @relation("AssignedBy", fields: [assignedBy], references: [username])
+  
+  assignedAt     DateTime?
+  priority       String    @default("NORMAL")
+  dueDate        DateTime?
+  
+  result         String?
+  completedAt    DateTime?
+  version        Int       @default(0)
+
+  // Submission Link
+  submissionId   String?
+  submission     Submission? @relation(fields: [submissionId], references: [id])
+  submittedAt    DateTime?
+
+  history        Json?     // Array of status change events
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// --- MANAGEMENT MODELS ---
+
+model Submission {
+  id          String     @id
+  labId       String?
+  status      String     // PENDING, ACCEPTED, REJECTED
+  submittedBy String
+  submitter   User       @relation(fields: [submittedBy], references: [username])
+  submittedAt DateTime   @default(now())
+  reviewNote  String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  // Relations
+  workItems   WorkItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model AuditLog {
+  id              String   @id
+  entity          String   // SAMPLE, WORKITEM, USER
+  entityId        String
+  action          String   // STATUS_CHANGE, CREATE, DELETE
+  details         String?
+  performedBy     String
+  performedByName String?
+  timestamp       DateTime @default(now())
+  
+  // Contextual Data (Flattened for easy querying)
+  sampleId        String?
+  labId           String?
+  analysisCode    String?
+  before          Json?
+  after           Json?
+}
+
+// --- ASSET & CONFIG MODELS ---
+
+model Lab {
+  id          String   @id
+  code        String   @unique
+  name        String
+  country     String
+  location    String?
+  createdAt   DateTime @default(now())
+}
+
+model InventoryItem {
+  id          String   @id
+  name        String
+  category    String
+  quantity    Float
+  unit        String
+  minThreshold Float?
+  labId       String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Equipment {
+  id          String   @id
+  name        String
+  model       String?
+  serialNumber String?
+  labId       String?
+  status      String   // ACTIVE, MAINTENANCE, DOWN
+  lastCalibratedAt DateTime?
+}
+
+model SpectralData {
+  id             String   @id
+  sampleId       String
+  labId          String?
+  modality       String   // NIR, MIR
+  filename       String
+  scanIp         String?
+  uploadedBy     String?
+  timestamp      DateTime @default(now())
+  metadata       Json?
+}
+
+model Notification {
+  id          String   @id
+  userId      String
+  title       String
+  message     String
+  type        String   // INFO, WARNING, SUCCESS
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model ParameteConfig {
+  id          String   @id
+  code        String   @unique
+  name        String
+  unit        String?
+  validation  Json?    // Min/Max rules
+}
