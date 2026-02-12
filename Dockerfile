@@ -31,9 +31,18 @@ LABEL org.opencontainers.image.description="Laboratory Information Management Sy
 
 WORKDIR /app
 
-# Install production server dependencies only
+# Install build tools needed for better-sqlite3 native addon
+RUN apk add --no-cache python3 make g++
+
+# Install production server dependencies
 COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --omit=dev --ignore-scripts
+
+# Build the better-sqlite3 native addon
+RUN cd server && npm rebuild better-sqlite3
+
+# Remove build tools to keep image small
+RUN apk del python3 make g++
 
 # Copy server source
 COPY server/ ./server/
