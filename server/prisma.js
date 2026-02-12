@@ -1,25 +1,15 @@
 const { PrismaClient } = require('./prisma_client');
 const path = require('path');
 
-const isArm64Windows = process.arch === 'arm64' && process.platform === 'win32';
+// Prisma 7 uses TypeScript query compiler by default.
+// Engine type "client" requires an adapter (no native engine).
+// Use better-sqlite3 driver adapter on all platforms.
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+
 const dbPath = path.resolve(__dirname, 'prisma', 'dev.db');
+console.log(`[PRISMA] Using better-sqlite3 adapter — DB: ${dbPath}`);
 
-let prisma;
-
-if (isArm64Windows) {
-    // ARM64 Windows: Prisma native engine (x64) is incompatible.
-    // Use better-sqlite3 driver adapter (Prisma 7 factory API).
-    console.log('[PRISMA] ARM64 Windows detected — using better-sqlite3 driver adapter');
-    const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-
-    const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
-    prisma = new PrismaClient({ adapter });
-} else {
-    // All other platforms (Linux Docker, macOS, etc.): use native Prisma engine
-    // Pass datasourceUrl since Prisma 7 removed url from schema.prisma
-    prisma = new PrismaClient({
-        datasourceUrl: `file:${dbPath}`
-    });
-}
+const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;

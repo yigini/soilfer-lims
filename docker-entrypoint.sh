@@ -20,10 +20,6 @@ if [ ! -f prisma/schema.prisma ]; then
     cp /app/server/.schema-backup/schema.prisma prisma/schema.prisma
 fi
 
-# Push schema to DB (creates tables if needed, safe to re-run)
-echo "📦 Pushing database schema..."
-npx prisma db push --skip-generate 2>&1 || echo "⚠ Schema push had warnings (may be OK)"
-
 # Seed default data (skips if users already exist)
 echo "🌱 Running seed..."
 node seed.js
