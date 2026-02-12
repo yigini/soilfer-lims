@@ -260,11 +260,13 @@ async function syncLabSubmissions(config, performedBy) {
     // Parse field mapping
     const fieldMapping = config.fieldMapping ? JSON.parse(config.fieldMapping) : null;
 
-    // Get country info and project for this lab
-    const labInfo = LAB_CONFIG[config.labId] || { iso: 'GEN', name: 'Unknown', project: 'SOILFER-US' };
-    const projectCode = labInfo.project;
+    // Get country info from LAB_CONFIG (for legacy SoilFER labs) or derive from config
+    const labInfo = LAB_CONFIG[config.labId] || { iso: 'GEN', name: config.labName || 'Unknown' };
 
-    // Get project ID for the project code
+    // Use config.projectCode if available (project-scoped configs), else fall back to LAB_CONFIG
+    const projectCode = config.projectCode || labInfo.project || 'SOILFER-US';
+
+    // Get project by code
     const project = await prisma.project.findUnique({ where: { code: projectCode } });
 
     let newCount = 0;
@@ -369,9 +371,9 @@ async function syncLabSubmissions(config, performedBy) {
         }
     }
 
-    // Update last sync info
+    // Update last sync info (use id for unique lookup, not labId which is not unique)
     await prisma.koboConfig.update({
-        where: { labId: config.labId },
+        where: { id: config.id },
         data: {
             lastSyncAt: new Date(),
             lastSubmissionId: lastSubmissionId
@@ -643,6 +645,9 @@ exports.proxyMedia = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch media' });
     }
 };
+
+// Expose internal functions for cross-controller use (auto-sync on project creation)
+exports._syncLabSubmissions = syncLabSubmissions;
 
 module.exports = exports;
 

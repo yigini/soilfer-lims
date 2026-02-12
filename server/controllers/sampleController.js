@@ -197,12 +197,14 @@ exports.getSamples = async (req, res) => {
 
         // Auto-hide orphan EXPECTED samples (planned but never sampled in field)
         // Only applies when user hasn't explicitly filtered by status
+        // IMPORTANT: Don't hide manifest-uploaded samples (they have projectCode set)
         if (!qStatus) {
             where.NOT = {
                 AND: [
                     { status: 'EXPECTED' },
                     { fieldMetadata: null },
-                    { metadata: null }
+                    { metadata: null },
+                    { projectCode: null }
                 ]
             };
         }

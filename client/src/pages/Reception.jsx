@@ -729,7 +729,7 @@ const Reception = () => {
                                 </div>
                                 <div className="flex gap-3 mt-1">
                                     <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{p.code}</div>
-                                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? 'Template' : 'Open Intake'}</div>
+                                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? 'Template' : p.projectType === 'KOBO_LINKED' ? 'Kobo Linked' : 'Open Intake'}</div>
                                     {p.defaultAnalysisBundle && (
                                         <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">• Auto-Bundle: {p.defaultAnalysisBundle}</div>
                                     )}

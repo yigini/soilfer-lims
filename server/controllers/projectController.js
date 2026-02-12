@@ -208,7 +208,7 @@ exports.createProject = async (req, res) => {
                     // Still create KoboConfig but mark as inactive
                 }
 
-                await prisma.koboConfig.create({
+                const newConfig = await prisma.koboConfig.create({
                     data: {
                         labId,
                         labName: newProject.name,
@@ -220,6 +220,25 @@ exports.createProject = async (req, res) => {
                     }
                 });
                 console.log(`[KOBO] Created KoboConfig for project ${uppercaseCode} (lab: ${labId})`);
+
+                // AUTO-SYNC: Trigger initial sync in the background (non-blocking)
+                // The user gets the project creation response immediately while samples load
+                if (testResult.success !== false) {
+                    const koboController = require('./koboController');
+                    // Fire-and-forget: don't await, don't block project creation
+                    Promise.resolve().then(async () => {
+                        try {
+                            const freshConfig = await prisma.koboConfig.findUnique({ where: { id: newConfig.id } });
+                            if (!freshConfig) return;
+
+                            // Use the internal sync function
+                            const result = await koboController._syncLabSubmissions(freshConfig, req.user?.username || 'AUTO_SYNC');
+                            console.log(`[KOBO] Auto-sync for ${uppercaseCode}: ${result.newSamples} samples imported, ${result.skipped} skipped`);
+                        } catch (syncErr) {
+                            console.error(`[KOBO] Auto-sync failed for ${uppercaseCode}:`, syncErr.message);
+                        }
+                    });
+                }
             } catch (koboErr) {
                 console.error(`[KOBO] Failed to create KoboConfig for ${uppercaseCode}:`, koboErr.message);
                 // Don't fail project creation if KoboConfig fails
@@ -361,8 +380,9 @@ exports.updateProject = async (req, res) => {
             data
         });
 
-        // KOBO CONFIG UPDATE: Admin-only Kobo credential management
-        if ((req.user.role === 'SUPER_ADMIN' || req.user.role === 'MASTER_USER' || req.user.role === 'ADMIN') && project.projectType === 'KOBO_LINKED') {
+        // KOBO CONFIG UPDATE: Admins and Lab Managers can manage Kobo credentials
+        const effectiveProjectType = updates.projectType || project.projectType;
+        if (['SUPER_ADMIN', 'MASTER_USER', 'ADMIN', 'LAB_MANAGER'].includes(req.user.role) && effectiveProjectType === 'KOBO_LINKED') {
             const { koboServerUrl, koboFormId, koboApiToken } = updates;
             if (koboServerUrl || koboFormId || koboApiToken) {
                 try {
@@ -521,6 +541,7 @@ exports.uploadManifest = async (req, res) => {
                     projectCode: project.code,
                     status: 'EXPECTED',
                     labId: project.labId || req.user.labId,
+                    assignedLab: project.labId || req.user.labId,
                     receptionDate: null,
                     createdAt: new Date(),
                     updatedAt: new Date()
