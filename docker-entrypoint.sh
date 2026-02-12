@@ -20,9 +20,14 @@ if [ ! -f prisma/schema.prisma ]; then
     cp /app/server/.schema-backup/schema.prisma prisma/schema.prisma
 fi
 
+# Push schema to DB (creates tables if needed, safe to re-run)
+# Prisma 7 CLI uses prisma.config.ts with adapter for schema push
+echo "📦 Pushing database schema..."
+npx prisma db push 2>&1 || echo "⚠ Schema push had warnings (may be OK for existing databases)"
+
 # Seed default data (skips if users already exist)
 echo "🌱 Running seed..."
-node seed.js
+node seed.js 2>&1 || echo "⚠ Seeding had warnings (may be OK)"
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

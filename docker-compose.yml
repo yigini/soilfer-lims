@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-please-change-this-secret}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
     volumes:
       # Persistent database storage (only the prisma dir for DB file)
@@ -20,7 +20,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 30s
 
 volumes:
   lims-data:

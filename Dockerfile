@@ -15,7 +15,7 @@ RUN cd server && npm ci --ignore-scripts
 COPY client/ ./client/
 COPY server/ ./server/
 
-# Generate Prisma client
+# Generate Prisma client (Prisma 7 uses prisma.config.ts)
 RUN cd server && npx prisma generate
 
 # Build the Vite app
@@ -38,7 +38,7 @@ RUN apk add --no-cache python3 make g++
 COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --omit=dev --ignore-scripts
 
-# Build the better-sqlite3 native addon
+# Build the better-sqlite3 native addon (requires python3/make/g++)
 RUN cd server && npm rebuild better-sqlite3
 
 # Remove build tools to keep image small
