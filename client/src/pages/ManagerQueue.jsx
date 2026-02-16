@@ -7,6 +7,7 @@ import {
     Microscope, Building2, AlertTriangle, MoreHorizontal, RefreshCw
 } from 'lucide-react';
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
+import { useLanguage } from '../context/LanguageContext';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -16,14 +17,14 @@ const QUEUE_Tabs = {
 };
 
 // ─── Live Indicator ───
-const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
+const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
-            {isStale ? 'Stale' : 'Live'}
+            {isStale ? t('queue.stale', 'Stale') : t('queue.live', 'Live')}
         </div>
         {lastUpdated && (
             <span className="text-[10px] text-gray-400">{formatLastUpdated(lastUpdated)}</span>
@@ -33,6 +34,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
 
 const ManagerQueue = () => {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState(QUEUE_Tabs.INTAKE);
 
     // Data States
@@ -136,7 +138,7 @@ const ManagerQueue = () => {
 
         } catch (e) {
             console.error("Queue fetch failed", e);
-            setError("Failed to load queue. Please try again.");
+            setError(t('queue.loadError', 'Failed to load queue. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -182,8 +184,8 @@ const ManagerQueue = () => {
                 {label}
                 {count > 0 && (
                     <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeTab === id
-                            ? 'bg-indigo-600 text-white dark:bg-indigo-500'
-                            : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                        : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                         }`}>
                         {count}
                     </span>
@@ -196,11 +198,11 @@ const ManagerQueue = () => {
         <div className="p-8 max-w-7xl mx-auto space-y-8">
             <header className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Manager Queue</h1>
-                    <p className="text-gray-500">Operational Dashboard</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('queue.title', 'Manager Queue')}</h1>
+                    <p className="text-gray-500">{t('queue.subtitle', 'Operational Dashboard')}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
+                    <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
                     <button onClick={() => { refreshLive(); fetchQueueData(meta.page); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now">
                         <RefreshCw size={16} className="text-gray-400" />
                     </button>
@@ -210,10 +212,10 @@ const ManagerQueue = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px] flex flex-col">
                 {/* TABS */}
                 <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-                    <TabButton id={QUEUE_Tabs.INTAKE} icon={AlertOctagon} label="New (Intake)" />
-                    <TabButton id={QUEUE_Tabs.ASSIGN} icon={UserPlus} label="Assign Work" />
-                    <TabButton id={QUEUE_Tabs.REVIEW} icon={FileText} label="Review Submissions" />
-                    <TabButton id={QUEUE_Tabs.APPROVE} icon={ShieldCheck} label="Final Approvals" />
+                    <TabButton id={QUEUE_Tabs.INTAKE} icon={AlertOctagon} label={t('queue.tabIntake', 'New (Intake)')} />
+                    <TabButton id={QUEUE_Tabs.ASSIGN} icon={UserPlus} label={t('queue.tabAssign', 'Assign Work')} />
+                    <TabButton id={QUEUE_Tabs.REVIEW} icon={FileText} label={t('queue.tabReview', 'Review Submissions')} />
+                    <TabButton id={QUEUE_Tabs.APPROVE} icon={ShieldCheck} label={t('queue.tabApprove', 'Final Approvals')} />
                 </div>
 
                 {/* CONTENT */}
@@ -233,13 +235,13 @@ const ManagerQueue = () => {
                     {!loading && data.length === 0 && (
                         <div className="h-64 flex flex-col items-center justify-center text-gray-400 italic">
                             <CheckCircle size={48} className="mb-4 text-gray-200 dark:text-gray-600" />
-                            <p>Queue is empty. Good job!</p>
+                            <p>{t('queue.empty', 'Queue is empty. Good job!')}</p>
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.map(item => (
-                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} />
+                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} t={t} />
                         ))}
                     </div>
                 </div>
@@ -274,35 +276,35 @@ const ManagerQueue = () => {
 };
 
 // Internal Component for Card Rendering
-const QueueCard = ({ item, type, navigate }) => {
+const QueueCard = ({ item, type, navigate, t }) => {
     const config = {
         intake: {
             icon: FlaskConical,
             color: 'text-blue-600',
             bg: 'bg-blue-100 dark:bg-blue-900/40',
-            label: 'New Sample',
-            action: 'Review Intake'
+            label: t('queue.cardNewSample', 'New Sample'),
+            action: t('queue.cardReviewIntake', 'Review Intake')
         },
         assign: {
             icon: Microscope,
             color: 'text-purple-600',
             bg: 'bg-purple-100 dark:bg-purple-900/40',
-            label: 'Analysis Pending',
-            action: 'Assign Tech'
+            label: t('queue.cardAnalysisPending', 'Analysis Pending'),
+            action: t('queue.cardAssignTech', 'Assign Tech')
         },
         review: {
             icon: FileText,
             color: 'text-orange-600',
             bg: 'bg-orange-100 dark:bg-orange-900/40',
-            label: 'Results Pending',
-            action: 'Review'
+            label: t('queue.cardResultsPending', 'Results Pending'),
+            action: t('queue.cardReview', 'Review')
         },
         approve: {
             icon: ShieldCheck,
             color: 'text-green-600',
             bg: 'bg-green-100 dark:bg-green-900/40',
-            label: 'Final Approval',
-            action: 'Approve'
+            label: t('queue.cardFinalApproval', 'Final Approval'),
+            action: t('queue.cardApprove', 'Approve')
         }
     }[type];
 
@@ -310,10 +312,10 @@ const QueueCard = ({ item, type, navigate }) => {
 
     const title = item.labId || (type === 'assign' ? `Sample ${item.sampleId}` : (String(item.originalId) || item.type));
     const subtitle = type === 'assign'
-        ? (item.analyses ? item.analyses.join(', ') : 'No analyses')
+        ? (item.analyses ? item.analyses.join(', ') : t('queue.noAnalyses', 'No analyses'))
         : (type === 'review' && item.isAggregated)
-            ? `${item.types?.join('/') || ''} Review`
-            : (item.clientName || item.analysis || 'Unknown Client');
+            ? `${item.types?.join('/') || ''} ${t('queue.cardReview', 'Review')}`
+            : (item.clientName || item.analysis || t('queue.unknownClient', 'Unknown Client'));
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
@@ -323,7 +325,7 @@ const QueueCard = ({ item, type, navigate }) => {
             onClick={() => navigate(`/samples/${item.sampleId || item.id}`)}
             className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer flex flex-col relative overflow-hidden"
         >
-            {isUrgent && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl-lg z-10">Urgent</div>}
+            {isUrgent && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl-lg z-10">{t('queue.urgent', 'Urgent')}</div>}
 
             <div className="p-5 flex-1">
                 <div className="flex justify-between items-start mb-4">
@@ -349,7 +351,7 @@ const QueueCard = ({ item, type, navigate }) => {
                     </div>
                     {item.isAggregated && (
                         <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-1 font-bold">
-                            {(item.itemIds?.length || item.taskCount || 0)} Tasks Pending
+                            {(item.itemIds?.length || item.taskCount || 0)} {t('queue.tasksPending', 'Tasks Pending')}
                         </div>
                     )}
                 </div>

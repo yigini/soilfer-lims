@@ -109,7 +109,8 @@ const Reception = () => {
                 // Fetch Branding
                 try {
                     const bRes = await axios.get('/api/admin/settings');
-                    if (bRes.data?.branding) setBranding(bRes.data.branding);
+                    const settings = bRes.data?.data || bRes.data;
+                    if (settings?.branding) setBranding(settings.branding);
                 } catch (be) { console.warn("Failed to fetch branding", be); }
             } catch (e) {
                 console.error(e);

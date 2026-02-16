@@ -115,7 +115,7 @@ exports.sendInternalMessage = async (req, res) => {
 };
 
 // Internal Helper to Create Notification
-exports.createNotification = async (userId, type, title, message, link) => {
+exports.createNotification = async (userId, type, title, message, link, options = {}) => {
     try {
         const notif = await prisma.notification.create({
             data: {
@@ -125,6 +125,11 @@ exports.createNotification = async (userId, type, title, message, link) => {
                 title,
                 message,
                 link,
+                titleCode: options.titleCode || null,
+                titleParams: options.titleParams ? JSON.stringify(options.titleParams) : null,
+                messageCode: options.messageCode || null,
+                messageParams: options.messageParams ? JSON.stringify(options.messageParams) : null,
+                senderId: options.senderId || null,
                 isRead: false,
                 createdAt: new Date()
             }

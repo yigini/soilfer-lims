@@ -4,7 +4,8 @@ import {
     ArrowUp, ArrowDown, Folder, MapPin, FileText, User, Trash2,
     CalendarClock, Inbox, ClipboardCheck, Beaker, FileUp, FileOutput, Library, AlertCircle, Archive, Trash, History, Hash,
     CheckCircle2, ShieldCheck, Printer, Droplets, FlaskConical, AlertTriangle, Clock, ExternalLink,
-    X, Activity, Loader2, Send, RotateCcw, Microscope, ChevronDown, ChevronUp, Truck
+    X, Activity, Loader2, Send, RotateCcw, Microscope, ChevronDown, ChevronUp, Truck,
+    GitBranch
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -311,7 +312,7 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
 };
 
 
-const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSelectAll, canDelete, onDelete, deletingIds = [], onPrintLabel }) => {
+const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSelectAll, canDelete, onDelete, deletingIds = [], onPrintLabel, loading = false }) => {
     const navigate = useNavigate();
     const { user, token } = useAuth();
     const [auditSampleId, setAuditSampleId] = useState(null);
@@ -337,6 +338,20 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                         </tr>
                     </thead>
                     <tbody>
+                        {loading && data.length === 0 && (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <tr key={`skel-${i}`} className="border-b border-gray-100 dark:border-gray-700 animate-pulse">
+                                    <td className="p-4 w-4"><div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded" /></td>
+                                    <td className="px-4 py-4"><div className="flex items-center gap-2.5"><div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg" /><div className="flex flex-col gap-1.5"><div className={`h-3.5 bg-gray-200 dark:bg-gray-700 rounded`} style={{ width: `${80 + i * 15}px` }} /><div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-16" /></div></div></td>
+                                    <td className="px-4 py-4"><div className="flex flex-col gap-1.5"><div className={`h-3 bg-gray-200 dark:bg-gray-700 rounded`} style={{ width: `${70 + i * 10}px` }} /><div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-12" /></div></td>
+                                    <td className="px-4 py-4"><div className="w-9 h-9 bg-gray-200 dark:bg-gray-700 rounded-xl mx-auto" /></td>
+                                    <td className="px-4 py-4"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-lg" /></td>
+                                    <td className="px-4 py-4"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" /><div className="w-8 h-3 bg-gray-200 dark:bg-gray-700 rounded" /></div></td>
+                                    <td className="px-4 py-4"><div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-14" /></td>
+                                    <td className="px-4 py-4"><div className="flex justify-end gap-1"><div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded" /><div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded" /></div></td>
+                                </tr>
+                            ))
+                        )}
                         {data.map((sample, rowIdx) => {
                             const isWalkIn = !sample.projectCode || String(sample.originalId).startsWith('EXT-') || String(sample.originalId).startsWith('W');
                             const isProtected = sample.metadata && (sample.metadata._uuid || sample.metadata['Country']);
@@ -359,12 +374,16 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                                                    {(sample.labId && !sample.labId.includes('-LAB')) ? sample.labId : sample.siteId || sample.originalId || 'PENDING'}
+                                                    {sample.status === 'EXPECTED'
+                                                        ? (sample.originalId || 'PENDING')
+                                                        : (sample.labId || sample.siteId || sample.originalId || 'PENDING')}
                                                 </span>
                                                 <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                    {(sample.labId && !sample.labId.includes('-LAB'))
-                                                        ? sample.originalId
-                                                        : sample.siteId ? <><MapPin size={10} className="text-gray-400" />{sample.originalId}</> : ''}
+                                                    {sample.status === 'EXPECTED'
+                                                        ? <span className="text-amber-500 font-medium">Lab ID: Pending</span>
+                                                        : sample.labId
+                                                            ? sample.originalId
+                                                            : sample.siteId ? <><MapPin size={10} className="text-gray-400" />{sample.originalId}</> : ''}
                                                 </span>
                                             </div>
                                         </div>
@@ -485,13 +504,16 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                 <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-gray-400 hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete"><Trash2 size={15} /></button>
                                             )}
                                             <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-gray-400 hover:text-indigo-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Print Label"><Printer size={15} /></button>
+                                            {!['EXPECTED', 'RECEIVED', 'COLLECTED', 'DRAFT'].includes(sample.status) && (
+                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/samples/${sample.id}/map`); }} className="text-gray-400 hover:text-purple-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Workflow Map"><GitBranch size={15} /></button>
+                                            )}
                                             <button onClick={(e) => { e.stopPropagation(); setAuditSampleId(sample.id); }} className="text-gray-400 hover:text-emerald-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Audit Log"><ExternalLink size={15} /></button>
                                         </div>
                                     </td>
                                 </tr>
                             );
                         })}
-                        {data.length === 0 && (
+                        {!loading && data.length === 0 && (
                             <tr><td colSpan="8" className="p-8 text-center text-gray-500 dark:text-gray-400 italic">No samples found matching your filters.</td></tr>
                         )}
                     </tbody>

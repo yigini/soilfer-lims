@@ -14,13 +14,13 @@ export const ROOMS = {
 
 // ─── Visual Config ───
 export const ROOM_CONFIG = {
-    [ROOMS.RECEPTION]: { emoji: '📦', accent: '#6366f1', description: 'Sample Login' },
-    [ROOMS.PREP_ROOM]: { emoji: '🔬', accent: '#f59e0b', description: 'Drying & Sieving' },
-    [ROOMS.PHYSICAL_LAB]: { emoji: '📐', accent: '#10b981', description: 'Physical Properties' },
-    [ROOMS.CHEMICAL_LAB]: { emoji: '🧪', accent: '#3b82f6', description: 'Wet Chemistry' },
-    [ROOMS.SPECTRAL_LAB]: { emoji: '🔭', accent: '#8b5cf6', description: 'Spectroscopy' },
-    [ROOMS.QA_OFFICE]: { emoji: '✅', accent: '#14b8a6', description: 'Quality Control' },
-    [ROOMS.ARCHIVE]: { emoji: '🗄️', accent: '#64748b', description: 'Storage' },
+    [ROOMS.RECEPTION]: { icon: 'PackageCheck', accent: '#6366f1', description: 'Sample Login' },
+    [ROOMS.PREP_ROOM]: { icon: 'Filter', accent: '#f59e0b', description: 'Drying & Sieving' },
+    [ROOMS.PHYSICAL_LAB]: { icon: 'Ruler', accent: '#10b981', description: 'Physical Properties' },
+    [ROOMS.CHEMICAL_LAB]: { icon: 'FlaskConical', accent: '#3b82f6', description: 'Wet Chemistry' },
+    [ROOMS.SPECTRAL_LAB]: { icon: 'ScanLine', accent: '#8b5cf6', description: 'Spectroscopy' },
+    [ROOMS.QA_OFFICE]: { icon: 'ShieldCheck', accent: '#14b8a6', description: 'Quality Control' },
+    [ROOMS.ARCHIVE]: { icon: 'Archive', accent: '#64748b', description: 'Storage' },
 };
 
 // ─── Analysis Mapping ───
@@ -551,10 +551,16 @@ export function deriveLocationSummary(sample, workItems, auditLog) {
         }
     }
 
-    // Risk assessment
+    // Risk assessment — pre-arrival samples have no lab SLA yet
+    const PRE_ARRIVAL = ['EXPECTED', 'COLLECTED', 'DRAFT'];
     let risk = 'OK';
-    if (bottlenecks.some(b => b.severity === 'CRITICAL') || sla.severity === 'CRITICAL') risk = 'CRITICAL';
-    else if (bottlenecks.length > 0 || sla.severity === 'WARNING') risk = 'WARNING';
+    if (PRE_ARRIVAL.includes(sample?.status)) {
+        risk = 'OK'; // No risk before sample arrives at the lab
+    } else if (bottlenecks.some(b => b.severity === 'CRITICAL') || sla.severity === 'CRITICAL') {
+        risk = 'CRITICAL';
+    } else if (bottlenecks.length > 0 || sla.severity === 'WARNING') {
+        risk = 'WARNING';
+    }
 
     // Blocker sentence
     let nextAction = loc.nextAction;

@@ -74,7 +74,8 @@ const CesiumGlobe = () => {
         const fetchToken = async () => {
             try {
                 const res = await axios.get('/api/admin/settings');
-                const token = res.data?.branding?.cesiumToken;
+                const settings = res.data?.data || res.data;
+                const token = settings?.branding?.cesiumToken;
                 if (token) {
                     setCesiumToken(token);
                 } else {

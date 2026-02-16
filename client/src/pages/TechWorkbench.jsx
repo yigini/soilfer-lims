@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -49,7 +50,7 @@ const Toast = ({ message, type = 'info', onClose }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
     const configs = {
-        ASSIGNED: { label: 'Pending', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
+        ASSIGNED: { label: 'Awaiting Input', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
         IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: Activity },
         REANALYSIS_REQUIRED: { label: 'Reanalysis', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', icon: AlertTriangle },
         COMPLETED: { label: 'Completed', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300', icon: CheckCircle },
@@ -237,6 +238,9 @@ const TechWorkbench = () => {
     // Fix 1: Toast state
     const [toast, setToast] = useState(null);
 
+    // Phase 5: Completion handoff banner — links to sample detail for submission
+    const [completedBanner, setCompletedBanner] = useState(null);
+
     // Fix 6: Polling state
     const [lastFetch, setLastFetch] = useState(null);
     const [isLive, setIsLive] = useState(true);
@@ -246,6 +250,20 @@ const TechWorkbench = () => {
     const pollTimer = useRef(null);
     const serverSaveTimer = useRef(null);
     const serverSavePending = useRef(false);
+
+    // Phase 7: Single-layout per viewport — prevents dual DOM + ref collision
+    const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        const handler = (e) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+
+    // Phase 2: Per-workItem version tracking — prevents stale version conflicts
+    const versionMapRef = useRef({});
+    // Phase 3: Track which workItemIds changed since last autosave
+    const dirtySetRef = useRef(new Set());
 
     const axiosConfig = useMemo(() => ({
         headers: { Authorization: `Bearer ${token}` }
@@ -263,6 +281,14 @@ const TechWorkbench = () => {
             if (data.groups?.length > 0 && !activeTab) {
                 setActiveTab(data.groups[0].analysis);
             }
+            // Phase 2: Initialize/refresh versionMap from server data
+            const newVersionMap = { ...versionMapRef.current };
+            (data.groups || []).forEach(g => {
+                g.items.forEach(item => {
+                    newVersionMap[item.workItemId] = item.version;
+                });
+            });
+            versionMapRef.current = newVersionMap;
         } catch (err) {
             console.error('Failed to fetch workbench queue:', err);
             setIsLive(false);
@@ -497,6 +523,8 @@ const TechWorkbench = () => {
             ...prev,
             [workItemId]: { ...prev[workItemId], [field]: value }
         }));
+        // Phase 3: Mark this workItem as dirty for delta autosave
+        dirtySetRef.current.add(workItemId);
     };
 
     // ─── Toggle Selection ───
@@ -534,7 +562,7 @@ const TechWorkbench = () => {
                             workItemId: comp.workItemId,
                             value: val,
                             equipmentId: d?.equipmentId || comp.equipmentId || undefined,
-                            version: comp.version,
+                            version: versionMapRef.current[comp.workItemId] ?? comp.version,
                             overrideReason: d?.overrideReason || undefined
                         });
                     }
@@ -551,7 +579,7 @@ const TechWorkbench = () => {
                 workItemId: i.workItemId,
                 value: draftValues[i.workItemId]?.value || i.currentResult,
                 equipmentId: draftValues[i.workItemId]?.equipmentId || i.equipmentId || undefined,
-                version: i.version,
+                version: versionMapRef.current[i.workItemId] ?? i.version,
                 overrideReason: draftValues[i.workItemId]?.overrideReason || undefined
             }));
     };
@@ -560,63 +588,104 @@ const TechWorkbench = () => {
     const draftValuesRef = useRef(draftValues);
     useEffect(() => { draftValuesRef.current = draftValues; }, [draftValues]);
 
-    // ─── Auto-save server helper (debounced) ───
+    // ─── Auto-save server helper (debounced, delta-only) ───
     const autoSaveToServer = useCallback(async () => {
         if (!activeGroup || !token) return;
         const currentDrafts = draftValuesRef.current;
         const isTexture = activeGroup.isTexture;
+        const dirtyIds = dirtySetRef.current;
 
-        // Build entries inline (avoids stale closure on buildEntries)
+        // Phase 3: Only send entries for dirty (changed) workItemIds
         const entries = [];
         if (isTexture) {
             activeGroup.items.forEach(item => {
                 TEXTURE_ANALYSES.forEach(code => {
                     const comp = item.components?.[code];
                     if (!comp) return;
+                    if (!dirtyIds.has(comp.workItemId)) return; // Skip unchanged
                     const d = currentDrafts[comp.workItemId];
                     if (d?.value) {
                         entries.push({
                             workItemId: comp.workItemId,
                             value: d.value,
                             equipmentId: d.equipmentId || comp.equipmentId || undefined,
-                            version: comp.version
+                            version: versionMapRef.current[comp.workItemId] ?? comp.version
                         });
                     }
                 });
             });
         } else {
             activeGroup.items.forEach(item => {
+                if (!dirtyIds.has(item.workItemId)) return; // Skip unchanged
                 const d = currentDrafts[item.workItemId];
                 if (d?.value) {
                     entries.push({
                         workItemId: item.workItemId,
                         value: d.value,
                         equipmentId: d.equipmentId || item.equipmentId || undefined,
-                        version: item.version
+                        version: versionMapRef.current[item.workItemId] ?? item.version
                     });
                 }
             });
         }
 
-        if (entries.length === 0) return;
+        if (entries.length === 0) {
+            dirtySetRef.current = new Set(); // Clear even if nothing to send
+            return;
+        }
+
+        // Snapshot dirty IDs before clearing (so new edits during save are tracked)
+        const savedDirtyIds = new Set(dirtyIds);
+        dirtySetRef.current = new Set();
 
         setSaveIndicator('saving');
         serverSavePending.current = true;
         try {
-            await axios.post('/api/workbench/batch-save',
+            const { data } = await axios.post('/api/workbench/batch-save',
                 { entries, draft: true },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setSaveIndicator('saved');
-            setLastSaved(new Date());
-            setTimeout(() => setSaveIndicator(prev => prev === 'saved' ? '' : prev), 3000);
+
+            // Phase 2: Process response — update versionMap + handle per-row errors
+            let hasConflict = false;
+            (data.results || []).forEach(r => {
+                if (r.newVersion !== undefined) {
+                    versionMapRef.current[r.workItemId] = r.newVersion;
+                }
+            });
+            (data.errors || []).forEach(e => {
+                if (e.code === 'VERSION_CONFLICT') {
+                    hasConflict = true;
+                    // Re-mark as dirty so it retries after refresh
+                    dirtySetRef.current.add(e.workItemId);
+                }
+                // Surface per-row errors in itemFeedback
+                setItemFeedback(prev => ({
+                    ...prev,
+                    [e.workItemId]: { status: 'error', error: e.error, code: e.code }
+                }));
+            });
+
+            if (hasConflict) {
+                // Refresh queue to get fresh versions for conflicted rows
+                fetchQueue(true);
+                setSaveIndicator('error');
+            } else if (data.errors?.length > 0) {
+                setSaveIndicator('error');
+            } else {
+                setSaveIndicator('saved');
+                setLastSaved(new Date());
+                setTimeout(() => setSaveIndicator(prev => prev === 'saved' ? '' : prev), 3000);
+            }
         } catch (err) {
             console.error('Auto-save failed:', err);
+            // Re-add dirty IDs so they retry on next cycle
+            savedDirtyIds.forEach(id => dirtySetRef.current.add(id));
             setSaveIndicator('error');
         } finally {
             serverSavePending.current = false;
         }
-    }, [activeGroup, token]);
+    }, [activeGroup, token, fetchQueue]);
 
     // ─── AutoSave drafts to localStorage + server (debounced) ───
     useEffect(() => {
@@ -761,6 +830,22 @@ const TechWorkbench = () => {
                     return next;
                 });
 
+                // Phase 5: Show completion handoff banner with links to submit
+                const completedSampleIds = [...new Set(
+                    (data.results || []).filter(r => r.status === 'completed').map(r => {
+                        const item = itemsToComplete.find(i => i.workItemId === r.workItemId);
+                        return item ? { id: item.sampleId, labId: item.labId || item.sampleId } : null;
+                    }).filter(Boolean).map(s => JSON.stringify(s))
+                )].map(s => JSON.parse(s));
+
+                if (completedSampleIds.length > 0) {
+                    setCompletedBanner({
+                        samples: completedSampleIds,
+                        count: successCount,
+                        analysis: activeGroup.analysisName || activeTab
+                    });
+                }
+
                 // Refresh queue to get updated statuses
                 setTimeout(() => fetchQueue(true), 500);
             }
@@ -898,6 +983,38 @@ const TechWorkbench = () => {
             {/* Toast */}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
+            {/* Phase 5: Completion Handoff Banner */}
+            {completedBanner && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 flex items-start gap-3">
+                    <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                            ✓ {completedBanner.count} {completedBanner.analysis} result{completedBanner.count > 1 ? 's' : ''} completed
+                        </p>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                            Go to Sample Detail to review and submit:
+                        </p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {completedBanner.samples.slice(0, 10).map(s => (
+                                <Link
+                                    key={s.id}
+                                    to={`/samples/${s.id}`}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-800/40 text-emerald-700 dark:text-emerald-300 text-xs font-medium hover:bg-emerald-200 dark:hover:bg-emerald-700/40 transition-colors"
+                                >
+                                    {s.labId} <ArrowRight size={12} />
+                                </Link>
+                            ))}
+                            {completedBanner.samples.length > 10 && (
+                                <span className="text-xs text-emerald-500">+{completedBanner.samples.length - 10} more</span>
+                            )}
+                        </div>
+                    </div>
+                    <button onClick={() => setCompletedBanner(null)} className="text-emerald-400 hover:text-emerald-600 transition-colors">
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -1004,13 +1121,13 @@ const TechWorkbench = () => {
                             <div className="flex items-center gap-2">
                                 {/* Auto-save indicator */}
                                 {saveIndicator === 'saving' && (
-                                    <span className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1 animate-pulse">
-                                        <RefreshCw size={12} className="animate-spin" /> Saving…
+                                    <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 animate-pulse bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 rounded-full">
+                                        <RefreshCw size={12} className="animate-spin" /> Saving draft…
                                     </span>
                                 )}
                                 {saveIndicator === 'saved' && (
-                                    <span className="text-xs text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
-                                        <Check size={12} /> Saved
+                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full font-medium">
+                                        <Check size={12} /> Draft Saved ✓
                                     </span>
                                 )}
                                 {saveIndicator === 'error' && (
@@ -1050,7 +1167,7 @@ const TechWorkbench = () => {
                         </div>
 
                         {/* ── Desktop: Spreadsheet Grid ── */}
-                        <div className="hidden md:block overflow-x-auto">
+                        {!isMobile && <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-gray-200 dark:border-gray-700 text-left">
@@ -1296,10 +1413,10 @@ const TechWorkbench = () => {
                                     })}
                                 </tbody>
                             </table>
-                        </div>
+                        </div>}
 
                         {/* ── Mobile: Card Layout ── */}
-                        <div className="md:hidden space-y-3">
+                        {isMobile && <div className="space-y-3">
                             {filteredItems.map((item, idx) => {
                                 const draft = draftValues[item.workItemId];
                                 const displayValue = draft?.value ?? item.currentResult ?? '';
@@ -1395,7 +1512,7 @@ const TechWorkbench = () => {
                                     </div>
                                 );
                             })}
-                        </div>
+                        </div>}
 
                         {filteredItems.length === 0 && (
                             <div className="text-center py-12 text-gray-400">
@@ -1426,13 +1543,13 @@ const TechWorkbench = () => {
                             </div>
 
                             {saveIndicator === 'saving' && (
-                                <span className="text-blue-500 text-xs flex items-center gap-1 animate-pulse">
-                                    <RefreshCw size={14} className="animate-spin" /> Auto-saving…
+                                <span className="text-blue-600 text-xs flex items-center gap-1 animate-pulse bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 rounded-full">
+                                    <RefreshCw size={14} className="animate-spin" /> Saving draft…
                                 </span>
                             )}
                             {saveIndicator === 'saved' && (
-                                <span className="text-emerald-500 text-xs flex items-center gap-1">
-                                    <Check size={14} /> Auto-saved ✓
+                                <span className="text-emerald-600 text-xs flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full font-medium">
+                                    <Check size={14} /> Draft Saved ✓
                                 </span>
                             )}
                             {saveIndicator === 'error' && (
@@ -1450,7 +1567,7 @@ const TechWorkbench = () => {
                                     className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-sm"
                                 >
                                     <Check size={16} />
-                                    Complete Selected ({selectedItems.size})
+                                    Submit Selected ({selectedItems.size})
                                 </button>
                             )}
 
@@ -1464,7 +1581,7 @@ const TechWorkbench = () => {
                                 ) : (
                                     <Zap size={16} />
                                 )}
-                                Complete All ({completionStats.filled})
+                                Submit Results ({completionStats.filled})
                             </button>
                         </div>
                     </div>

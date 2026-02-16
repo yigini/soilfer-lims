@@ -5,7 +5,7 @@ const { broadcastToUser } = require('../wsServer');
 const getDisplayName = (user) => user ? (user.name || user.username) : 'Unknown';
 
 // Helpers
-const createNotification = async (recipientId, type, title, message, link, senderId) => {
+const createNotification = async (recipientId, type, title, message, link, senderId, options = {}) => {
     try {
         const notif = await prisma.notification.create({
             data: {
@@ -16,6 +16,10 @@ const createNotification = async (recipientId, type, title, message, link, sende
                 message,
                 link,
                 senderId: senderId ? String(senderId) : null,
+                titleCode: options.titleCode || null,
+                titleParams: options.titleParams ? JSON.stringify(options.titleParams) : null,
+                messageCode: options.messageCode || null,
+                messageParams: options.messageParams ? JSON.stringify(options.messageParams) : null,
                 isRead: false
             }
         });

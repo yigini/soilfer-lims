@@ -18,6 +18,7 @@ model User {
   role               String     // SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN, SAMPLE_RECEPTION, etc.
   name               String?
   labId             String?
+  language          String?    // 'en', 'es', etc. Preference override
   countries          String?    // JSON string: Array of country codes: ["GTM", "HND"]
   projects           String?    // JSON string: Array of project codes: ["SoilFER-USA"]
   isActive           Boolean    @default(true)
@@ -548,6 +549,7 @@ model Language {
   code         String  @id
   name         String
   isDefault    Boolean @default(false)
+  isActive     Boolean @default(true)
   translations String? // JSON string
 }
 
@@ -557,6 +559,10 @@ model Notification {
   userId      String
   title       String
   message     String
+  titleCode   String?
+  titleParams String?
+  messageCode String?
+  messageParams String?
   type        String   // INFO, WARNING, SUCCESS
   isRead      Boolean  @default(false)
   link        String?

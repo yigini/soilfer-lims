@@ -3,6 +3,14 @@
  * Auto-detect user timezone and format timestamps accordingly
  */
 
+const getLocale = () => {
+    try {
+        return localStorage.getItem('locale') || navigator.language || 'en';
+    } catch {
+        return 'en';
+    }
+};
+
 /**
  * Get the user's browser timezone
  * @returns {string} IANA timezone identifier (e.g., "Europe/Paris")
@@ -17,7 +25,7 @@ export const getUserTimezone = () => {
  */
 export const getTimezoneAbbr = () => {
     const date = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat(getLocale(), {
         timeZoneName: 'short'
     });
     const parts = formatter.formatToParts(date);
@@ -56,14 +64,14 @@ export const formatTimestamp = (utcDate, format = 'datetime') => {
 
     switch (format) {
         case 'full':
-            return new Intl.DateTimeFormat('en-US', {
+            return new Intl.DateTimeFormat(getLocale(), {
                 ...options,
                 dateStyle: 'full',
                 timeStyle: 'long'
             }).format(date);
 
         case 'date':
-            return new Intl.DateTimeFormat('en-US', {
+            return new Intl.DateTimeFormat(getLocale(), {
                 ...options,
                 year: 'numeric',
                 month: '2-digit',
@@ -71,7 +79,7 @@ export const formatTimestamp = (utcDate, format = 'datetime') => {
             }).format(date);
 
         case 'time':
-            return new Intl.DateTimeFormat('en-US', {
+            return new Intl.DateTimeFormat(getLocale(), {
                 ...options,
                 hour: '2-digit',
                 minute: '2-digit',
@@ -79,7 +87,7 @@ export const formatTimestamp = (utcDate, format = 'datetime') => {
             }).format(date);
 
         case 'datetime':
-            return new Intl.DateTimeFormat('en-US', {
+            return new Intl.DateTimeFormat(getLocale(), {
                 ...options,
                 year: 'numeric',
                 month: '2-digit',
@@ -92,7 +100,7 @@ export const formatTimestamp = (utcDate, format = 'datetime') => {
             return formatRelativeTime(date);
 
         default:
-            return date.toLocaleString('en-US', options);
+            return date.toLocaleString(getLocale(), options);
     }
 };
 
@@ -108,7 +116,7 @@ export const formatTimestampWithTZ = (utcDate) => {
 
     if (isNaN(date.getTime())) return 'Invalid Date';
 
-    const formatted = new Intl.DateTimeFormat('en-US', {
+    const formatted = new Intl.DateTimeFormat(getLocale(), {
         timeZone: getUserTimezone(),
         year: 'numeric',
         month: '2-digit',
@@ -134,7 +142,7 @@ const formatRelativeTime = (date) => {
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
 
-    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    const rtf = new Intl.RelativeTimeFormat(getLocale(), { numeric: 'auto' });
 
     if (Math.abs(diffDay) >= 1) {
         return rtf.format(diffDay, 'day');

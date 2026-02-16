@@ -3,6 +3,7 @@ const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const { createNotification } = require('./notificationController');
 const { getAnalysisName, getAnalysisCategory } = require('../services/analysisService');
+const { broadcastToAll } = require('../wsServer');
 
 // Helper to get effective analysis list for a sample
 const getEffectiveAnalyses = (sample) => {
@@ -334,7 +335,7 @@ exports.assignWork = async (req, res) => {
                 'INFO',
                 `New Assignment: ${analysis}`,
                 `${user.username} assigned you "${analysis}" for sample ${item.labId || item.sampleId}.`,
-                `/work?sample=${item.sampleId}`
+                `/samples/${item.sampleId}`
             );
 
             // Send internal message to assignee
@@ -377,6 +378,21 @@ exports.assignWork = async (req, res) => {
                 error: errors[0]?.error || 'Failed to assign work items due to business rules.',
                 errors
             });
+        }
+
+        // Real-time push: broadcast WORKITEM_UPDATE to all connected users
+        if (assignedCount > 0) {
+            const affectedSampleIds = [...new Set(dbItems.map(i => i.sampleId).filter(Boolean))];
+            try {
+                broadcastToAll('WORKITEM_UPDATE', {
+                    sampleIds: affectedSampleIds,
+                    updatedBy: user.username,
+                    action: 'ASSIGNED',
+                    count: assignedCount
+                });
+            } catch (wsErr) {
+                console.error('[WS] Failed to broadcast WORKITEM_UPDATE (assign):', wsErr);
+            }
         }
 
         res.json({ success: true, assigned: assignedCount, errors: errors.length > 0 ? errors : undefined });
@@ -477,7 +493,7 @@ exports.reassignWork = async (req, res) => {
             'INFO',
             `📋 Reassigned: ${analysis}`,
             `${user.username} reassigned "${analysis}" for sample ${item.labId || item.sampleId} to you.`,
-            `/work?sample=${item.sampleId}`
+            `/samples/${item.sampleId}`
         );
 
         await prisma.message.create({
@@ -495,6 +511,18 @@ exports.reassignWork = async (req, res) => {
                 updatedAt: now
             }
         });
+
+        // Real-time push: broadcast WORKITEM_UPDATE
+        try {
+            broadcastToAll('WORKITEM_UPDATE', {
+                sampleIds: [item.sampleId],
+                updatedBy: user.username,
+                action: 'REASSIGNED',
+                count: 1
+            });
+        } catch (wsErr) {
+            console.error('[WS] Failed to broadcast WORKITEM_UPDATE (reassign):', wsErr);
+        }
 
         res.json({ success: true, workItem: updated, previousAssignee, newAssignee: technicianUserId });
     } catch (error) {
@@ -709,6 +737,18 @@ exports.updateWorkItemStatus = async (req, res) => {
             await prisma.$transaction(operations);
         }
 
+        // Real-time push: broadcast WORKITEM_UPDATE to all connected users
+        try {
+            broadcastToAll('WORKITEM_UPDATE', {
+                sampleIds: [String(item.sampleId)],
+                updatedBy: user.username,
+                action: status === 'COMPLETED' ? 'COMPLETED' : 'STATUS_CHANGE',
+                count: 1
+            });
+        } catch (wsErr) {
+            console.error('[WS] Failed to broadcast WORKITEM_UPDATE (status):', wsErr);
+        }
+
         res.json({
             success: true,
             updates: {
@@ -914,13 +954,26 @@ exports.reviewWorkItem = async (req, res) => {
                     notifType,
                     notifTitle,
                     `${item.analysis} for sample ${labId}`,
-                    `/work?sample=${item.sampleId}`
+                    `/samples/${item.sampleId}`
                 );
             }
         }
 
         if (operations.length > 0) {
             await prisma.$transaction(operations);
+        }
+
+        // Real-time push: broadcast WORKITEM_UPDATE to all connected users
+        try {
+            broadcastToAll('WORKITEM_UPDATE', {
+                sampleIds: [String(item.sampleId)],
+                updatedBy: user.username,
+                action: 'REVIEWED',
+                reviewStatus: status,
+                count: 1
+            });
+        } catch (wsErr) {
+            console.error('[WS] Failed to broadcast WORKITEM_UPDATE (review):', wsErr);
         }
 
         res.json({
@@ -1074,7 +1127,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                         notifType,
                         notifTitle,
                         `${item.analysis} for sample ${item.labId || item.sampleId}`,
-                        `/work?sample=${item.sampleId}`
+                        `/samples/${item.sampleId}`
                     );
                 }
             }
@@ -1083,6 +1136,22 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         if (operations.length > 0) {
             // Using transaction to ensure atomic updates
             await prisma.$transaction(operations);
+        }
+
+        // Real-time push: broadcast WORKITEM_UPDATE to all connected users
+        if (items.length > 0) {
+            const affectedSampleIds = [...new Set(items.map(i => i.sampleId).filter(Boolean))];
+            try {
+                broadcastToAll('WORKITEM_UPDATE', {
+                    sampleIds: affectedSampleIds,
+                    updatedBy: user.username,
+                    action: 'BULK_REVIEWED',
+                    reviewStatus: status,
+                    count: items.length
+                });
+            } catch (wsErr) {
+                console.error('[WS] Failed to broadcast WORKITEM_UPDATE (bulk review):', wsErr);
+            }
         }
 
         res.json({ success: true, count: items.length });

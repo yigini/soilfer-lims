@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../prisma');
 const bcrypt = require('bcryptjs');
 
+const { error, success } = require('../i18n/response');
+
 const { JWT_SECRET: SECRET_KEY } = require('../config/auth');
 
 // Helper to sanitize user object from DB (parse JSON strings, exclude password)
@@ -24,13 +26,13 @@ exports.login = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return error(res, 401, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
         }
 
         // Verify Password
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return error(res, 401, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
         }
 
         // Generate Token
@@ -42,13 +44,10 @@ exports.login = async (req, res) => {
 
         // Return user info
         const safeUser = sanitizeUser(user);
-        res.json({
-            token,
-            user: safeUser
-        });
-    } catch (error) {
-        console.error('[AUTH] Login Error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return success(res, 'AUTH.LOGIN_SUCCESS', 'Login successful', null, 200, { token, user: safeUser });
+    } catch (err) {
+        console.error('[AUTH] Login Error:', err);
+        return error(res, 500, 'AUTH.INTERNAL', 'Internal server error');
     }
 };
 

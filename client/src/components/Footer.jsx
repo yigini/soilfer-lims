@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Shield, Award } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+    const { t } = useLanguage();
 
     return (
         <footer className="mt-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 backdrop-blur-sm">
@@ -13,7 +15,7 @@ const Footer = () => {
                     <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                         <span className="font-semibold text-gray-500 dark:text-gray-400">LIMS</span>
                         <span className="text-gray-300 dark:text-gray-600">•</span>
-                        <span>Laboratory Information Management System</span>
+                        <span>{t('footer.systemName', 'Laboratory Information Management System')}</span>
                     </div>
 
                     {/* Center: links */}
@@ -23,7 +25,7 @@ const Footer = () => {
                             className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
                         >
                             <Award size={12} />
-                            Credits & Acknowledgments
+                            {t('footer.credits', 'Credits & Acknowledgments')}
                         </Link>
                     </div>
 
@@ -32,7 +34,7 @@ const Footer = () => {
                         <span>© {currentYear}</span>
                         <span className="text-gray-300 dark:text-gray-600">•</span>
                         <span className="flex items-center gap-1">
-                            Built with <Heart size={10} className="text-red-400" fill="currentColor" /> care
+                            {t('footer.builtWith', 'Built with')} <Heart size={10} className="text-red-400" fill="currentColor" /> {t('footer.care', 'care')}
                         </span>
                     </div>
                 </div>

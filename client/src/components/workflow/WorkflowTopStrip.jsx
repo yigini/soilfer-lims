@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, RefreshCw, Maximize2, Minimize2, MapPin } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Maximize2, Minimize2, MapPin, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 
 /**
  * V2 T06: Sticky top strip — Location | Owner | Status | Risk | Next Action
@@ -75,7 +75,7 @@ export default function WorkflowTopStrip({
             <div className="wf-strip-section">
                 <span className="wf-strip-label">Risk</span>
                 <span className={`wf-risk-badge ${riskClass}`}>
-                    {risk === 'CRITICAL' ? '🔴' : risk === 'WARNING' ? '⚠️' : '✅'} {risk || 'OK'}
+                    {risk === 'CRITICAL' ? <XCircle size={12} /> : risk === 'WARNING' ? <AlertTriangle size={12} /> : <CheckCircle2 size={12} />} {risk || 'OK'}
                 </span>
             </div>
 

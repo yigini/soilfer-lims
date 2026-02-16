@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import SamplesHeader from '../components/samples/SamplesHeader';
 import SamplesFilterBar from '../components/samples/SamplesFilterBar';
@@ -13,6 +14,7 @@ import ExportModal from '../components/common/ExportModal';
 const Samples = () => {
     const { token, user } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
 
     // Data State
     const [data, setData] = useState([]);
@@ -111,22 +113,22 @@ const Samples = () => {
             const skipped = res.data.skipped || 0;
             if (newCount > 0) {
                 showDialog({
-                    title: 'Sync Complete',
-                    message: `Successfully synced ${newCount} new sample(s) from Kobo.`,
+                    title: t('common.success', 'Sync Complete'),
+                    message: t('forms.syncSuccess', `Successfully synced ${newCount} new sample(s) from Kobo.`),
                     type: 'success'
                 });
                 fetchData(); // Refresh the table
             } else {
                 showDialog({
-                    title: 'Sync Complete',
-                    message: 'No new samples found in Kobo. All samples are already in the system.',
+                    title: t('common.success', 'Sync Complete'),
+                    message: t('forms.syncNoNew', 'No new samples found in Kobo. All samples are already in the system.'),
                     type: 'info'
                 });
             }
         } catch (err) {
             console.error('Sync failed:', err);
             showDialog({
-                title: 'Sync Failed',
+                title: t('common.error', 'Sync Failed'),
                 message: err.response?.data?.error || err.message,
                 type: 'error'
             });
@@ -278,7 +280,7 @@ const Samples = () => {
                             <div className="bg-emerald-500 text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full shadow-lg shadow-emerald-500/20">
                                 {selected.length}
                             </div>
-                            <span className="text-white font-medium text-sm">Samples Selected</span>
+                            <span className="text-white font-medium text-sm">{t('samples.samplesSelected', 'Samples Selected')}</span>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -288,14 +290,14 @@ const Samples = () => {
                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
                                 <Trash2 size={18} className="transition-transform group-hover:scale-110" />
-                                <span>Batch Delete</span>
+                                <span>{t('samples.batchDelete', 'Batch Delete')}</span>
                             </button>
 
                             <button
                                 onClick={() => setSelected([])}
                                 className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2"
                             >
-                                Cancel
+                                {t('common.cancel', 'Cancel')}
                             </button>
                         </div>
                     </div>
@@ -335,6 +337,7 @@ const Samples = () => {
                 onDelete={initiateDelete}
                 deletingIds={deletingIds}
                 onPrintLabel={(sample) => setPrintTarget(sample)}
+                loading={loading}
             />
 
             <LabelPrintDialog
@@ -381,23 +384,23 @@ const Samples = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3 text-red-600 mb-4">
                             <AlertTriangle size={24} />
-                            <h3 className="text-lg font-bold">Delete Sample?</h3>
+                            <h3 className="text-lg font-bold">{t('samples.deleteSample', 'Delete Sample?')}</h3>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 mb-6">
-                            Are you sure you want to delete this sample? This action will permanently remove all associated work items and audit logs.
+                            {t('samples.deleteConfirm', 'Are you sure you want to delete this sample? This action will permanently remove all associated work items and audit logs.')}
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setDeleteTarget(null)}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded transition"
                             >
-                                Cancel
+                                {t('common.cancel', 'Cancel')}
                             </button>
                             <button
                                 onClick={confirmDelete}
                                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-medium"
                             >
-                                Delete
+                                {t('common.delete', 'Delete')}
                             </button>
                         </div>
                     </div>
@@ -409,7 +412,7 @@ const Samples = () => {
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50">
                     {deletingIds.map(id => (
                         <div key={id} className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-4 animate-in slide-in-from-bottom duration-300">
-                            <span>Sample deleted.</span>
+                            <span>{t('samples.sampleDeleted', 'Sample deleted.')}</span>
                             <button
                                 onClick={() => undoDelete(id)}
                                 className="text-indigo-400 font-bold hover:text-indigo-300 hover:underline"

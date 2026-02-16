@@ -32,14 +32,15 @@ export const ThemeProvider = ({ children }) => {
         const loadSettings = async () => {
             try {
                 const res = await axios.get('/api/admin/settings');
-                if (res.data.branding) {
-                    setTheme({ ...theme, ...res.data.branding });
-                    if (res.data.branding.colors) {
-                        updateCssVars(res.data.branding.colors);
+                const settings = res.data?.data || res.data;
+                if (settings.branding) {
+                    setTheme({ ...theme, ...settings.branding });
+                    if (settings.branding.colors) {
+                        updateCssVars(settings.branding.colors);
                     }
                 }
             } catch (e) {
-                if (e.response?.status !== 401) {
+                if (e.response?.status !== 401 && e.response?.status !== 403) {
                     console.warn('Failed to load theme settings', e.message);
                 }
             } finally {

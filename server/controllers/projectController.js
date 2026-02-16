@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const { success, error } = require('../i18n/response');
 
 exports.getProjects = async (req, res) => {
     const user = req.user;
@@ -90,9 +91,9 @@ exports.getProjects = async (req, res) => {
         }));
 
         res.json(enrichedProjects);
-    } catch (error) {
-        console.error('[getProjects] Error:', error);
-        res.status(500).json({ error: 'Failed to fetch projects' });
+    } catch (err) {
+        console.error('[getProjects] Error:', err);
+        return error(res, 500, 'PROJECT_FETCH_ERROR', null, 'Failed to fetch projects');
     }
 };
 
@@ -100,17 +101,17 @@ exports.getProject = async (req, res) => {
     const { id } = req.params;
     try {
         const project = await prisma.project.findUnique({ where: { id: String(id) } });
-        if (!project) return res.status(404).json({ error: 'Project not found' });
+        if (!project) return error(res, 404, 'PROJECT_NOT_FOUND', { id }, 'Project not found');
 
         // Lab Isolation Check (Phase 1 - Scope Guard)
         const scopeGuard = require('../utils/scopeGuard');
         if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Access denied: Project belongs to another lab' });
+            return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: Project belongs to another lab');
         }
 
         res.json(project);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch project' });
+    } catch (err) {
+        return error(res, 500, 'PROJECT_FETCH_ERROR', null, 'Failed to fetch project');
     }
 };
 
@@ -123,13 +124,13 @@ exports.createProject = async (req, res) => {
 
     // VALIDATION
     if (!code || !name || !projectType) {
-        return res.status(400).json({ error: 'Code, Name, and Project Type are required' });
+        return error(res, 400, 'MISSING_FIELDS', { fields: 'code, name, projectType' }, 'Code, Name, and Project Type are required');
     }
 
     // KOBO_LINKED validation: require Kobo credentials
     if (projectType === 'KOBO_LINKED') {
         if (!req.body.koboFormId || !req.body.koboApiToken) {
-            return res.status(400).json({ error: 'Kobo Form ID and API Token are required for Kobo-linked projects' });
+            return error(res, 400, 'KOBO_CREDENTIALS_REQUIRED', null, 'Kobo Form ID and API Token are required for Kobo-linked projects');
         }
     }
 
@@ -282,12 +283,12 @@ exports.createProject = async (req, res) => {
         }
 
         res.json(newProject);
-    } catch (error) {
-        console.error('[createProject] Error:', error);
-        if (error.code === 'P2002') {
-            return res.status(400).json({ error: 'Project code already exists' });
+    } catch (err) {
+        console.error('[createProject] Error:', err);
+        if (err.code === 'P2002') {
+            return error(res, 400, 'PROJECT_CODE_EXISTS', { code: uppercaseCode }, 'Project code already exists');
         }
-        res.status(500).json({ error: 'Failed to create project' });
+        return error(res, 500, 'PROJECT_CREATE_ERROR', null, 'Failed to create project');
     }
 };
 
@@ -476,9 +477,10 @@ exports.updateProject = async (req, res) => {
         });
 
         res.json(updated);
-    } catch (error) {
-        console.error('[updateProject] Error:', error);
-        res.status(500).json({ error: error.message });
+        res.json(updated);
+    } catch (err) {
+        console.error('[updateProject] Error:', err);
+        return error(res, 500, 'PROJECT_UPDATE_ERROR', null, err.message);
     }
 };
 
@@ -499,7 +501,7 @@ exports.uploadManifest = async (req, res) => {
         try {
             scopeGuard.ensureScope(req.user, project, { labField: 'labId' });
         } catch (e) {
-            return res.status(403).json({ error: 'Access Denied: You are not assigned to this project.' });
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', null, 'Access Denied: You are not assigned to this project.');
         }
 
         // Check for duplicates within this batch and against existing db
@@ -570,14 +572,10 @@ exports.uploadManifest = async (req, res) => {
             });
         }
 
-        res.json({
-            message: `Successfully processed ${uniqueSampleIds.length} IDs.`,
-            count: newIds.length,
-            duplicatesSkipped: skippedCount
-        });
-    } catch (error) {
-        console.error('[uploadManifest] Error:', error);
-        res.status(500).json({ error: 'Failed to process manifest' });
+        return success(res, 'MANIFEST_PROCESSED', { count: newIds.length, skipped: skippedCount }, `Successfully processed ${uniqueSampleIds.length} IDs.`);
+    } catch (err) {
+        console.error('[uploadManifest] Error:', err);
+        return error(res, 500, 'MANIFEST_PROCESS_ERROR', null, 'Failed to process manifest');
     }
 };
 
@@ -610,10 +608,10 @@ exports.archiveProject = async (req, res) => {
             }
         });
 
-        res.json({ message: 'Project archived', project: updated });
-    } catch (error) {
-        console.error('[archiveProject] Error:', error);
-        res.status(500).json({ error: error.message });
+        return success(res, 'PROJECT_ARCHIVED', { code: project.code }, 'Project archived', { project: updated });
+    } catch (err) {
+        console.error('[archiveProject] Error:', err);
+        return error(res, 500, 'PROJECT_ARCHIVE_ERROR', null, err.message);
     }
 };
 
@@ -675,9 +673,9 @@ exports.deleteProject = async (req, res) => {
             }
         });
 
-        res.json({ message: 'Project moved to trash', reassignedCount: updateResult.count });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        return success(res, 'PROJECT_DELETED', { count: updateResult.count }, 'Project moved to trash');
+    } catch (err) {
+        return error(res, 500, 'PROJECT_DELETE_ERROR', null, err.message);
     }
 };
 
@@ -719,10 +717,10 @@ exports.restoreProject = async (req, res) => {
             }
         });
 
-        res.json({ message: 'Project restored', restoredCount: updateResult.count });
-    } catch (error) {
-        console.error('[restoreProject] Error:', error);
-        res.status(500).json({ error: error.message });
+        return success(res, 'PROJECT_RESTORED', { count: updateResult.count }, 'Project restored');
+    } catch (err) {
+        console.error('[restoreProject] Error:', err);
+        return error(res, 500, 'PROJECT_RESTORE_ERROR', null, err.message);
     }
 };
 

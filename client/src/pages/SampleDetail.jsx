@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { getStatusLabel } from '../utils/i18nHelper';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import ContextPanel from '../components/sample/ContextPanel';
@@ -23,6 +25,7 @@ const SampleDetail = () => {
     const { token, user } = useAuth();
     const { showDialog } = useDialog();
     const { subscribeToEvent } = useNotifications();
+    const { t } = useLanguage();
 
     // State
     const [sample, setSample] = useState(null);
@@ -62,7 +65,7 @@ const SampleDetail = () => {
 
         } catch (err) {
             console.error(err);
-            if (err.response?.status === 404) showDialog({ type: 'error', title: 'Error', message: 'Sample not found' });
+            if (err.response?.status === 404) showDialog({ type: 'error', title: t('common.error', 'Error'), message: t('sampleDetail.noSampleFound', 'Sample not found') });
         } finally {
             setLoading(false);
         }
@@ -72,13 +75,29 @@ const SampleDetail = () => {
         fetchData();
     }, [fetchData]);
 
-    // ─── Real-time: subscribe to WORKITEM_UPDATE events ───
+    // ─── Real-time: subscribe to WORKITEM_CHANGED events (draft + completion) ───
     useEffect(() => {
         if (!subscribeToEvent || !id) return;
-        const unsubscribe = subscribeToEvent('WORKITEM_UPDATE', (data) => {
-            // Refresh if this sample was updated
-            if (data.sampleIds?.includes(id)) {
-                console.log('[SampleDetail] Real-time update received, refreshing...');
+        const unsubscribe = subscribeToEvent('WORKITEM_CHANGED', (data) => {
+            if (!data.sampleIds?.includes(id)) return;
+
+            if (data.action === 'DRAFT_SAVE' && data.updates) {
+                // Inline patch: show draft values without full refetch
+                setWorkItems(prev => prev.map(wi => {
+                    const update = data.updates.find(u => u.workItemId === wi.id);
+                    if (!update) return wi;
+                    return {
+                        ...wi,
+                        result: update.result ?? wi.result,
+                        status: update.status ?? wi.status,
+                        _isDraft: true,
+                        _draftBy: data.updatedBy,
+                        _draftAt: data.updatedAt
+                    };
+                }));
+            } else {
+                // Completion or other: full refetch
+                console.log('[SampleDetail] Real-time completion update, refreshing...');
                 fetchData();
             }
         });
@@ -127,25 +146,25 @@ const SampleDetail = () => {
             fetchData();
         } catch (err) {
             console.error("Update failed", err);
-            showInfo("Update Failed", "Error: " + (err.response?.data?.error || err.message));
+            showInfo(t('common.error', 'Update Failed'), err.response?.data?.error || err.message);
         }
     };
 
     const handleCreateSubmission = async (type, workItemIds) => {
-        if (!workItemIds || workItemIds.length === 0) return showInfo("Selection Empty", "No items selected");
+        if (!workItemIds || workItemIds.length === 0) return showInfo(t('common.error', 'Selection Empty'), t('forms.noItemsSelected', 'No items selected'));
 
-        requestConfirmation(`Create ${type} Submission`, `Confirm submission of ${workItemIds.length} items?`, async () => {
+        requestConfirmation(t('common.confirm', 'Confirm'), t('forms.confirmSubmission', `Confirm submission of ${workItemIds.length} items?`), async () => {
             try {
                 await axios.post('/api/submissions', {
                     sampleId: id,
                     type,
                     workItemIds
                 });
-                showInfo("Success", "Submission Created!");
+                showInfo(t('common.success', 'Success'), t('forms.submissionCreated', 'Submission Created!'));
                 fetchData();
             } catch (err) {
                 console.error("Submission failed", err);
-                showInfo("Error", "Submission failed: " + (err.response?.data?.error || err.message));
+                showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
             }
         });
     };
@@ -153,11 +172,11 @@ const SampleDetail = () => {
     const handleReviewSubmission = async (submissionId, status, note) => {
         try {
             await axios.post(`/api/submissions/${submissionId}/review`, { status, note });
-            showInfo("Success", "Review Submitted");
+            showInfo(t('common.success', 'Success'), t('forms.reviewSubmitted', 'Review Submitted'));
             fetchData();
         } catch (err) {
             console.error("Review failed", err);
-            showInfo("Error", "Review failed: " + (err.response?.data?.error || err.message));
+            showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
         }
     };
 
@@ -167,42 +186,42 @@ const SampleDetail = () => {
             fetchData();
         } catch (err) {
             console.error("Item review failed", err);
-            showInfo("Error", "Action failed: " + (err.response?.data?.error || err.message));
+            showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
         }
     };
 
     const handleReviewBulk = async (itemIds, status) => {
         try {
             await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Manager Review' });
-            showInfo("Success", `Successfully reviewed ${itemIds.length} items.`);
+            showInfo(t('common.success', 'Success'), t('forms.bulkReviewSuccess', `Successfully reviewed ${itemIds.length} items.`));
             fetchData();
         } catch (err) {
             console.error("Bulk review failed", err);
-            showInfo("Error", "Bulk action failed: " + (err.response?.data?.error || err.message));
+            showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
         }
     };
 
     const handleApproveIntake = async () => {
-        requestConfirmation("Approve Intake", "Confirm Intake Approval? This will finalize the record and generate laboratory work items.", async () => {
+        requestConfirmation(t('sampleDetail.approveIntake', 'Approve Intake'), t('forms.confirmIntakeApproval', 'Confirm Intake Approval? This will finalize the record and generate laboratory work items.'), async () => {
             try {
                 const newStatus = 'ACCEPTED';
                 await axios.put(`/api/samples/${sample.id}/status`, { status: newStatus, reason: 'Manager Approval' });
-                showInfo("Success", "Sample Approved for Laboratory Processing!");
+                showInfo(t('common.success', 'Success'), t('forms.intakeApproved', 'Sample Approved for Laboratory Processing!'));
                 fetchData();
             } catch (e) {
-                showInfo("Error", "Approval Failed: " + (e.response?.data?.error || e.message));
+                showInfo(t('common.error', 'Error'), e.response?.data?.error || e.message);
             }
         });
     };
 
     const handleUndoIntake = async () => {
-        requestConfirmation("Undo Intake", "⚠️ UNDO INTAKE? \n\nThis will:\n1. Revert status to RECEIVED\n2. Delete all generated Work Items\n3. Preserve the Lab ID for re-processing", async () => {
+        requestConfirmation(t('sampleDetail.undoIntake', 'Undo Intake'), t('forms.confirmUndoIntake', '⚠️ UNDO INTAKE? \n\nThis will:\n1. Revert status to RECEIVED\n2. Delete all generated Work Items\n3. Preserve the Lab ID for re-processing'), async () => {
             try {
                 await axios.post(`/api/samples/${sample.id}/undo-intake`);
-                showInfo("Success", "Intake Undone. Sample reverted to RECEIVED.");
+                showInfo(t('common.success', 'Success'), t('forms.intakeUndone', 'Intake Undone. Sample reverted to RECEIVED.'));
                 fetchData();
             } catch (e) {
-                showInfo("Error", "Undo Failed: " + (e.response?.data?.error || e.message));
+                showInfo(t('common.error', 'Error'), e.response?.data?.error || e.message);
             }
         });
     };
@@ -210,17 +229,17 @@ const SampleDetail = () => {
     const handleUpdateMetadata = async (metadata) => {
         try {
             await axios.put(`/api/samples/${sample.id}/metadata`, { metadata });
-            showInfo("Success", "Metadata Updated Successfully!");
+            showInfo(t('common.success', 'Success'), t('forms.metadataUpdated', 'Metadata Updated Successfully!'));
             fetchData();
         } catch (e) {
-            showInfo("Error", "Update Failed: " + (e.response?.data?.error || e.message));
+            showInfo(t('common.error', 'Error'), e.response?.data?.error || e.message);
         }
     };
 
 
     const handleFinalApproval = async () => {
         // Debugging Click
-        requestConfirmation("Final Approval", "Approve Sample and Mark as Completed/Archived?", async () => {
+        requestConfirmation(t('sampleDetail.finalApproval', 'Final Approval'), t('forms.confirmFinalApproval', 'Approve Sample and Mark as Completed/Archived?'), async () => {
             try {
                 // Smart Logic: If Archiving/Disposal is ALREADY accepted, jump to final state.
                 const archivingItem = workItems.find(w => (w.analysis === 'ARCHIVING' || w.analysis === 'ARCH') && w.status === 'ACCEPTED');
@@ -246,23 +265,23 @@ const SampleDetail = () => {
                 // Step 2: Final Status
                 await axios.put(`/api/samples/${id}/status`, { status: targetStatus });
 
-                showInfo("Success", `Sample marked as ${targetStatus}!`);
+                showInfo(t('common.success', 'Success'), `${t('samples.title', 'Sample')} → ${getStatusLabel(targetStatus, t)}`);
                 fetchData();
             } catch (err) {
                 console.error("Approval failed", err);
-                showInfo("Error", "Approval failed: " + (err.response?.data?.error || err.message));
+                showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
             }
         });
     };
 
     const handleUndoApproval = async () => {
-        requestConfirmation("Undo Approval", "Undo Final Approval? Sample will return to ACCEPTED state.", async () => {
+        requestConfirmation(t('sampleDetail.undoApproval', 'Undo Approval'), t('forms.confirmUndoApproval', 'Undo Final Approval? Sample will return to ACCEPTED state.'), async () => {
             try {
                 await axios.post(`/api/samples/${id}/undo-approve`);
-                showInfo("Success", "Approval Undone. Reverted to ACCEPTED.");
+                showInfo(t('common.success', 'Success'), t('forms.approvalUndone', 'Approval Undone. Reverted to ACCEPTED.'));
                 fetchData();
             } catch (err) {
-                showInfo("Error", "Undo failed: " + (err.response?.data?.error || err.message));
+                showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
             }
         });
     };
@@ -272,8 +291,8 @@ const SampleDetail = () => {
             await axios.post(`/api/samples/${id}/archive`, {});
             showDialog({
                 type: 'success',
-                title: 'Archive Request Created',
-                message: "Archive task created. Please assign a technician in the table below."
+                title: t('forms.archiveCreated', 'Archive Request Created'),
+                message: t('forms.archiveMessage', 'Archive task created. Please assign a technician in the table below.')
             });
             await fetchData();
             workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -284,7 +303,7 @@ const SampleDetail = () => {
             } else {
                 showDialog({
                     type: 'error',
-                    title: 'Archive Failed',
+                    title: t('common.error', 'Archive Failed'),
                     message: err.response?.data?.error || err.message
                 });
             }
@@ -296,8 +315,8 @@ const SampleDetail = () => {
             await axios.post(`/api/samples/${id}/dispose`, {});
             showDialog({
                 type: 'success',
-                title: 'Disposal Request Created',
-                message: "Disposal task created. Please assign a technician in the table below."
+                title: t('forms.disposalCreated', 'Disposal Request Created'),
+                message: t('forms.disposalMessage', 'Disposal task created. Please assign a technician in the table below.')
             });
             await fetchData();
             workspaceTableRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -308,7 +327,7 @@ const SampleDetail = () => {
             } else {
                 showDialog({
                     type: 'error',
-                    title: 'Disposal Failed',
+                    title: t('common.error', 'Disposal Failed'),
                     message: err.response?.data?.error || err.message
                 });
             }
@@ -316,8 +335,8 @@ const SampleDetail = () => {
     };
 
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading details...</div>;
-    if (!sample) return <div className="p-8 text-center text-red-500">Sample not found</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500">{t('sampleDetail.loading', 'Loading sample details...')}</div>;
+    if (!sample) return <div className="p-8 text-center text-red-500">{t('sampleDetail.noSampleFound', 'Sample not found')}</div>;
 
     // Derived State
     const dryingStatus = workItems.find(w => w.analysis === 'DRYING')?.status || 'PENDING';
@@ -384,7 +403,7 @@ const SampleDetail = () => {
                     onClose={() => setIsAnalysisModalOpen(false)}
                     onUpdateSuccess={() => {
                         fetchData();
-                        showInfo("Success", "Analysis requirements updated. New work items generated.");
+                        showInfo(t('common.success', 'Success'), t('forms.analysisUpdated', 'Analysis requirements updated. New work items generated.'));
                     }}
                 />
 
@@ -435,8 +454,8 @@ const SampleDetail = () => {
                                 <span className="p-1 bg-orange-100 rounded-full">⚠️</span>
                                 <span>
                                     {['EXPECTED', 'COLLECTED'].includes(sample.status)
-                                        ? "ANALYSIS LOCKED: Sample should be RECEIVED first."
-                                        : "ANALYSIS LOCKED: Drying must be COMPLETED first."
+                                        ? t('workflow.analysisLockedReceive', 'ANALYSIS LOCKED: Sample should be RECEIVED first.')
+                                        : t('workflow.analysisLockedDrying', 'ANALYSIS LOCKED: Drying must be COMPLETED first.')
                                     }
                                 </span>
                             </div>
@@ -490,13 +509,13 @@ const SampleDetail = () => {
                                 onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
                                 className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
-                                Cancel
+                                {t('common.cancel', 'Cancel')}
                             </button>
                             <button
                                 onClick={confirmModal.onConfirm}
                                 className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg transition-all transform hover:scale-105"
                             >
-                                Confirm
+                                {t('common.confirm', 'Confirm')}
                             </button>
                         </div>
                     </div>
@@ -530,7 +549,7 @@ const SampleDetail = () => {
                                         'bg-indigo-600 hover:bg-indigo-700 text-white'
                                     }`}
                             >
-                                OK
+                                {t('common.ok', 'OK')}
                             </button>
                         </div>
                     </div>

@@ -55,11 +55,14 @@ const verifyToken = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
+        console.log(`[AUTH] Verifying token for ID: ${decoded.id} (Type: ${typeof decoded.id})`);
+
         const user = await prisma.user.findUnique({
             where: { id: String(decoded.id) }
         });
 
         if (!user) {
+            console.error(`[AUTH] User NOT FOUND for ID: ${decoded.id}`);
             return res.status(401).json({ error: 'User invalid' });
         }
 
@@ -70,6 +73,11 @@ const verifyToken = async (req, res, next) => {
             countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
             projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || [])
         };
+
+        // Sync locale with user preference
+        if (req.user.language) {
+            req.locale = req.user.language;
+        }
 
         next();
     } catch (e) {

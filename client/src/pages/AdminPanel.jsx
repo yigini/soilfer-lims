@@ -15,14 +15,29 @@ const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('branding');
     const [languages, setLanguages] = useState([]);
 
+    const [labSettings, setLabSettings] = useState(null);
+
     useEffect(() => {
         fetchLanguages();
+        fetchSettings();
     }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await axios.get('/api/admin/settings');
+            // New contract: data is under res.data.data; fallback for old format
+            setLabSettings(res.data.data || res.data);
+        } catch (e) {
+            console.error('Failed to fetch settings:', e);
+        }
+    };
 
     const fetchLanguages = async () => {
         try {
             const res = await axios.get('/api/admin/languages');
-            setLanguages(res.data);
+            // New contract: data is under res.data.data; fallback for old format
+            const langs = res.data.data || res.data;
+            setLanguages(Array.isArray(langs) ? langs : []);
         } catch (e) {
             console.error('Failed to fetch languages:', e.message);
         }
@@ -33,7 +48,6 @@ const AdminPanel = () => {
     const [newLang, setNewLang] = useState({ name: '', code: '' });
     const [editorOpen, setEditorOpen] = useState(false);
     const [activeLang, setActiveLang] = useState(null);
-    const [editTranslations, setEditTranslations] = useState({});
 
     const handleAddLanguage = async () => {
         try {
@@ -50,7 +64,7 @@ const AdminPanel = () => {
         }
     };
 
-    const handleDeleteLanguage = async (id) => {
+    const handleDeleteLanguage = async (code) => {
         showDialog({
             title: 'Delete Language?',
             message: 'Are you sure you want to delete this language? This action cannot be undone.',
@@ -59,7 +73,7 @@ const AdminPanel = () => {
             cancelText: 'Cancel',
             onConfirm: async () => {
                 try {
-                    await axios.delete(`/api/admin/languages/${id}`);
+                    await axios.delete(`/api/admin/languages/${code}`);
                     fetchLanguages();
                 } catch (e) {
                     showDialog({ title: 'Error', message: 'Failed to delete language', type: 'error' });
@@ -68,19 +82,20 @@ const AdminPanel = () => {
         });
     };
 
-    const handleSetDefault = async (id) => {
+    const handleSetDefault = async (code) => {
         try {
-            await axios.put(`/api/admin/languages/${id}/default`);
+            await axios.put(`/api/admin/languages/${code}/default`);
             fetchLanguages();
+            fetchSettings();
         } catch (e) {
-            showDialog({ title: 'Error', message: 'Failed to set default language', type: 'error' });
+            const msg = e.response?.data?.details || e.response?.data?.error || 'Failed to set default language';
+            showDialog({ title: 'Error', message: msg, type: 'error' });
         }
     };
 
     const handleSaveTranslations = async (translationsFromEditor) => {
-        const translationsToSave = translationsFromEditor || editTranslations;
         try {
-            await axios.put(`/api/admin/languages/${activeLang.code}`, { translations: translationsToSave });
+            await axios.put(`/api/admin/languages/${activeLang.code}`, { translations: translationsFromEditor });
             setEditorOpen(false);
             fetchLanguages();
             showDialog({ title: 'Success', message: 'Translations saved successfully!', type: 'success' });
@@ -159,11 +174,11 @@ const AdminPanel = () => {
                                         <td className="p-3 font-mono text-sm">{l.code}</td>
                                         <td className="p-3 font-medium">{l.name}</td>
                                         <td className="p-3">
-                                            {l.isDefault ? (
+                                            {(labSettings?.branding?.defaultLanguage ? labSettings.branding.defaultLanguage === l.code : l.isDefault) ? (
                                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200">Default</span>
                                             ) : (
                                                 <button
-                                                    onClick={() => handleSetDefault(l.id)}
+                                                    onClick={() => handleSetDefault(l.code)}
                                                     className="text-gray-400 hover:text-blue-600 text-xs border border-gray-300 px-2 py-1 rounded hover:border-blue-500"
                                                 >
                                                     Set Default
@@ -172,14 +187,14 @@ const AdminPanel = () => {
                                         </td>
                                         <td className="p-3 text-right space-x-3">
                                             <button
-                                                onClick={() => { setActiveLang(l); setEditTranslations(l.translations || {}); setEditorOpen(true); }}
+                                                onClick={() => { setActiveLang(l); setEditorOpen(true); }}
                                                 className="text-blue-600 hover:underline text-sm font-medium"
                                             >
                                                 Edit Translations
                                             </button>
                                             {!l.isDefault && (
                                                 <button
-                                                    onClick={() => handleDeleteLanguage(l.id)}
+                                                    onClick={() => handleDeleteLanguage(l.code)}
                                                     className="text-red-500 hover:text-red-700 text-sm"
                                                 >
                                                     Delete
@@ -222,7 +237,6 @@ const AdminPanel = () => {
                         {editorOpen && activeLang && (
                             <TranslationEditor
                                 language={activeLang}
-                                translations={editTranslations}
                                 onSave={handleSaveTranslations}
                                 onClose={() => setEditorOpen(false)}
                             />

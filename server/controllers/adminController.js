@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const translationService = require('../services/TranslationService');
 
 // Initialize default settings if needed (best done in a script, but we'll keep logic here for now)
 const ensureSettings = async () => {
@@ -62,10 +63,10 @@ exports.getSettings = async (req, res) => {
             }
         }
 
-        res.json(settings);
+        res.success('SETTINGS_FETCHED', 'Settings fetched successfully', null, 200, settings);
     } catch (error) {
         console.error("Get Settings Error:", error);
-        res.status(500).json({ error: 'Failed to fetch settings' });
+        res.error(500, 'SETTINGS_FETCH_FAILED', 'Failed to fetch settings');
     }
 };
 
@@ -95,7 +96,16 @@ exports.updateBranding = async (req, res) => {
                     branding: JSON.stringify(newBranding)
                 }
             });
-            res.json({ message: 'Lab branding updated' });
+
+            // If default language is set, propagate to all users in the lab
+            if (defaultLanguage) {
+                await prisma.user.updateMany({
+                    where: { labId: req.user.labId },
+                    data: { language: defaultLanguage }
+                });
+            }
+
+            res.success('BRANDING_UPDATED', 'Lab branding and default language updated');
 
         } else if (req.user.role === 'SUPER_ADMIN') {
             // Update Global Branding
@@ -109,13 +119,20 @@ exports.updateBranding = async (req, res) => {
                     branding: JSON.stringify(newBranding)
                 }
             });
-            res.json({ message: 'Global branding updated' });
+
+            // Keep default language in sync with languages table
+            if (defaultLanguage) {
+                const code = String(defaultLanguage);
+                await prisma.language.updateMany({ data: { isDefault: false } });
+                await prisma.language.updateMany({ where: { code }, data: { isDefault: true } });
+            }
+            res.success('BRANDING_UPDATED', 'Global branding updated');
         } else {
-            res.status(403).json({ error: 'Not authorized to update branding' });
+            res.error(403, 'AUTH_FORBIDDEN', 'Not authorized to update branding');
         }
     } catch (error) {
         console.error("Update Branding Error:", error);
-        res.status(500).json({ error: 'Failed to update settings' });
+        res.error(500, 'BRANDING_UPDATE_FAILED', 'Failed to update settings');
     }
 };
 
@@ -156,7 +173,7 @@ exports.getAuditLogs = async (req, res) => {
             details: log.details || (log.entity ? `${log.entity} ${log.entityId || ''}` : '-')
         }));
 
-        res.json({
+        res.success('LOGS_FETCHED', 'Audit logs fetched', null, 200, {
             data: mappedLogs,
             meta: {
                 page,
@@ -167,7 +184,7 @@ exports.getAuditLogs = async (req, res) => {
         });
     } catch (error) {
         console.error("Audit Logs Error:", error);
-        res.status(500).json({ error: 'Failed to fetch logs' });
+        res.error(500, 'LOGS_FETCH_FAILED', 'Failed to fetch logs');
     }
 };
 
@@ -178,19 +195,19 @@ exports.getLanguages = async (req, res) => {
             ...l,
             translations: typeof l.translations === 'string' ? JSON.parse(l.translations) : l.translations
         }));
-        res.json(parsed);
+        res.success('LANGUAGES_FETCHED', 'Languages fetched', null, 200, parsed);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch languages' });
+        res.error(500, 'LANGUAGES_FETCH_FAILED', 'Failed to fetch languages');
     }
 };
 
 exports.createLanguage = async (req, res) => {
     const { code, name } = req.body;
-    if (!code || !name) return res.status(400).json({ error: 'Code and Name required' });
+    if (!code || !name) return res.error(400, 'VALIDATION_ERROR', 'Code and Name required');
 
     try {
         const existing = await prisma.language.findUnique({ where: { code } });
-        if (existing) return res.status(400).json({ error: 'Language code already exists' });
+        if (existing) return res.error(400, 'DUPLICATE_ENTRY', 'Language code already exists');
 
         const newLang = await prisma.language.create({
             data: {
@@ -200,42 +217,93 @@ exports.createLanguage = async (req, res) => {
                 translations: JSON.stringify({})
             }
         });
-        res.json(newLang);
+        res.success('LANGUAGE_CREATED', 'Language created', null, 200, newLang);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create language' });
+        res.error(500, 'LANGUAGE_CREATE_FAILED', 'Failed to create language');
     }
 };
 
 exports.deleteLanguage = async (req, res) => {
-    const { id } = req.params; // 'id' matches route :id, which is code
+    const { code } = req.params;
 
     try {
-        const lang = await prisma.language.findUnique({ where: { code: id } });
-        if (!lang) return res.status(404).json({ error: 'Language not found' });
-        if (lang.isDefault) return res.status(400).json({ error: 'Cannot delete default language' });
+        const lang = await prisma.language.findUnique({ where: { code } });
+        if (!lang) return res.error(404, 'NOT_FOUND', 'Language not found');
+        if (lang.isDefault) return res.error(400, 'ACTION_FORBIDDEN', 'Cannot delete default language');
 
-        await prisma.language.delete({ where: { code: id } });
-        res.json({ message: 'Deleted' });
+        await prisma.language.delete({ where: { code } });
+        res.success('LANGUAGE_DELETED', 'Deleted');
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete language' });
+        res.error(500, 'LANGUAGE_DELETE_FAILED', 'Failed to delete language');
     }
 };
 
 exports.setDefaultLanguage = async (req, res) => {
-    const { id } = req.params;
+    const { code } = req.params;
+    const user = req.user;
 
     try {
-        const lang = await prisma.language.findUnique({ where: { code: id } });
+        const lang = await prisma.language.findUnique({ where: { code } });
         if (!lang) return res.status(404).json({ error: 'Language not found' });
 
-        await prisma.$transaction([
-            prisma.language.updateMany({ data: { isDefault: false } }),
-            prisma.language.update({ where: { code: id }, data: { isDefault: true } })
-        ]);
+        // Lab Manager Context: Update Lab Branding
+        if (user && user.labId) {
+            const lab = await prisma.lab.findUnique({ where: { id: user.labId } });
+            if (!lab) return res.error(404, 'LAB_NOT_FOUND', 'Lab not found');
 
-        res.json({ message: 'Default updated' });
+            let branding = {};
+            try {
+                branding = lab.branding ? JSON.parse(lab.branding) : {};
+            } catch (e) {
+                console.warn(`[setDefaultLanguage] Invalid branding JSON for lab ${user.labId}, resetting.`);
+                branding = {};
+            }
+
+            branding.defaultLanguage = code;
+
+            await prisma.lab.update({
+                where: { id: user.labId },
+                data: { branding: JSON.stringify(branding) }
+            });
+
+            // Bulk update all users in this lab to enforce the new default language preference
+            await prisma.user.updateMany({
+                where: { labId: user.labId },
+                data: { language: code }
+            });
+
+            return res.success('LAB_DEFAULT_UPDATED', 'Lab default language updated', { scope: 'LAB' });
+        }
+
+        // Global Context: Super Admin only
+        if (user && user.role === 'SUPER_ADMIN') {
+            await prisma.$transaction([
+                prisma.language.updateMany({ data: { isDefault: false } }),
+                prisma.language.update({ where: { code }, data: { isDefault: true } })
+            ]);
+
+            // Sync branding defaultLanguage
+            try {
+                const settings = await prisma.systemSetting.findUnique({ where: { id: 'global' } });
+                const branding = settings?.branding ? JSON.parse(settings.branding) : {};
+                branding.defaultLanguage = code;
+                await prisma.systemSetting.upsert({
+                    where: { id: 'global' },
+                    create: { id: 'global', branding: JSON.stringify(branding) },
+                    update: { branding: JSON.stringify(branding) }
+                });
+            } catch (e) {
+                console.warn('[setDefaultLanguage] branding sync failed', e.message);
+            }
+
+            return res.success('GLOBAL_DEFAULT_UPDATED', 'Global default language updated', { scope: 'GLOBAL' });
+        }
+
+        return res.error(403, 'AUTH_FORBIDDEN', 'Not authorized to change default language');
+
     } catch (error) {
-        res.status(500).json({ error: 'Failed to set default' });
+        console.error("Set Default Language Error:", error);
+        res.error(500, 'SET_DEFAULT_FAILED', 'Failed to set default language', { details: error.message });
     }
 };
 
@@ -245,15 +313,29 @@ exports.updateLanguage = async (req, res) => {
 
     try {
         const lang = await prisma.language.findUnique({ where: { code } });
-        if (!lang) return res.status(404).json({ error: 'Language not found' });
+        if (!lang) return res.error(404, 'NOT_FOUND', 'Language not found');
 
         await prisma.language.update({
             where: { code },
             data: { translations: JSON.stringify(translations) }
         });
 
-        res.json({ message: 'Translations updated' });
+        // Invalidate cache if needed
+        translationService.invalidateCache();
+
+        res.success('TRANSLATIONS_UPDATED', 'Translations updated');
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update translations' });
+        res.error(500, 'TRANSLATION_UPDATE_FAILED', 'Failed to update translations');
+    }
+};
+
+exports.getLanguageCatalog = async (req, res) => {
+    const { code } = req.params;
+    try {
+        const catalog = await translationService.getCatalog(code);
+        res.success('CATALOG_FETCHED', 'Catalog fetched', null, 200, catalog);
+    } catch (error) {
+        console.error('Get Catalog Error:', error);
+        res.error(500, 'CATALOG_FETCH_FAILED', 'Failed to fetch translation catalog');
     }
 };

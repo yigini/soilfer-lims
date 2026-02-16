@@ -14,15 +14,18 @@ const LabelPrintDialog = ({ isOpen, onClose, sample }) => {
     const fetchBranding = async () => {
         try {
             const res = await axios.get('/api/admin/settings');
-            if (res.data?.branding) setBranding(res.data.branding);
+            const settings = res.data?.data || res.data;
+            if (settings?.branding) setBranding(settings.branding);
         } catch (e) { console.warn("Failed to fetch branding", e); }
     };
 
     if (!isOpen || !sample) return null;
 
-    // Determine IDs
-    const labId = sample.labId || 'PENDING';
+    // Determine IDs — EXPECTED samples don't have a real lab ID yet
+    const isExpected = sample.status === 'EXPECTED';
+    const labId = isExpected ? 'Pending' : (sample.labId || 'PENDING');
     const originalId = sample.originalId || 'N/A';
+    const qrData = isExpected ? originalId : labId;
     const collectionDate = sample.samplingDetails?.date || sample.metadata?.date || 'N/A';
 
     return (
@@ -68,7 +71,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample }) => {
                             {/* QR CODE - Points to Lab ID */}
                             <div className="w-24 h-24 bg-white border border-gray-100 p-1 rounded">
                                 <img
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${labId}`}
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`}
                                     alt="QR"
                                     className="w-full h-full object-contain"
                                 />
@@ -144,7 +147,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample }) => {
                     <div className="flex flex-1 gap-4 items-center">
                         <div className="w-24 h-24 bg-white border border-gray-200 p-1 rounded">
                             <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${labId}`}
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`}
                                 alt="QR"
                                 className="w-full h-full object-contain"
                             />

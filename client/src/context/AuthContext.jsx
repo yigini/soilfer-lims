@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLanguage } from './LanguageContext';
 
 const AuthContext = createContext();
 
@@ -36,6 +37,7 @@ const PERMISSIONS = {
 };
 
 export const AuthProvider = ({ children }) => {
+    const { changeLanguage } = useLanguage();
     const [user, setUser] = useState(() => {
         try {
             const token = localStorage.getItem('token');
@@ -48,10 +50,17 @@ export const AuthProvider = ({ children }) => {
         }
     });
 
+    useEffect(() => {
+        if (user && user.language) {
+            changeLanguage(user.language);
+        }
+    }, [user]);
+
     const login = async (username, password) => {
         try {
             const res = await axios.post('/api/auth/login', { username, password });
-            const { token, user: userData } = res.data;
+            const payload = res.data?.data || res.data;
+            const { token, user: userData } = payload;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(userData));
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -68,7 +77,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
-        window.location.href = '/login';
+        // React Router's RequireAuth automatically redirects to /login when user is null
+        // No window.location.href needed — that caused a full page reload/flash
     };
 
     const hasAccess = (scopeType, scopeValue) => {

@@ -1,7 +1,7 @@
-
 import React, { useEffect, useRef } from 'react';
 import { X, Check, Bell, ExternalLink, Info, AlertTriangle, CheckCircle, AlertOctagon, Mail, MessageCircle, Send, ArrowLeft, CheckCheck, Smile } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -13,6 +13,7 @@ const NotificationDrawer = () => {
         activeThread, activeThreadPartner, fetchThread, setActiveThreadPartner,
         isOnline
     } = useNotifications();
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
     // VIEW: NOTIFICATIONS | CHATS | THREAD
@@ -58,6 +59,24 @@ const NotificationDrawer = () => {
     }, [isDrawerOpen]);
 
     // ── Helpers ────────────────────────────────────────────────────
+    const parseParams = (str) => {
+        try {
+            return str ? JSON.parse(str) : {};
+        } catch {
+            return {};
+        }
+    };
+
+    const resolveTitle = (notif) => {
+        if (notif.titleCode) return t(notif.titleCode, parseParams(notif.titleParams));
+        return notif.title;
+    };
+
+    const resolveMessage = (notif) => {
+        if (notif.messageCode) return t(notif.messageCode, parseParams(notif.messageParams));
+        return notif.message;
+    };
+
     const getTypeStyles = (type) => {
         switch (type) {
             case 'SUCCESS': return { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' };
@@ -112,7 +131,7 @@ const NotificationDrawer = () => {
         const d = new Date(date);
         const now = new Date();
         const diff = now - d;
-        if (diff < 60000) return 'now';
+        if (diff < 60000) return t('ui.now', 'now');
         if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
         if (diff < 86400000) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         if (diff < 604800000) return d.toLocaleDateString([], { weekday: 'short' });
@@ -145,7 +164,7 @@ const NotificationDrawer = () => {
             const msg = activeThread[0];
             return msg.isMe ? msg.recipientName : msg.senderName;
         }
-        return 'Chat';
+        return t('ui.chat', 'Chat');
     };
 
     // ── Tab Header ─────────────────────────────────────────────────
@@ -167,10 +186,10 @@ const NotificationDrawer = () => {
                             <p className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">{getPartnerName()}</p>
                             {isOnline(activeThreadPartner) ? (
                                 <p className="text-xs text-green-500 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> online
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> {t('ui.online', 'online')}
                                 </p>
                             ) : (
-                                <p className="text-xs text-gray-400">offline</p>
+                                <p className="text-xs text-gray-400">{t('ui.offline', 'offline')}</p>
                             )}
                         </div>
                     </div>
@@ -186,7 +205,7 @@ const NotificationDrawer = () => {
                                 : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
                         )}
                     >
-                        <Bell size={16} /> Notifications
+                        <Bell size={16} /> {t('ui.notifications', 'Notifications')}
                     </button>
                     <button
                         onClick={() => setView('CHATS')}
@@ -197,7 +216,7 @@ const NotificationDrawer = () => {
                                 : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
                         )}
                     >
-                        <MessageCircle size={16} /> Chats
+                        <MessageCircle size={16} /> {t('ui.chats', 'Chats')}
                     </button>
                 </>
             )}
@@ -210,20 +229,23 @@ const NotificationDrawer = () => {
             {/* Actions */}
             {notifications.length > 0 && (
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex gap-2">
-                    <button onClick={markAllRead} className="text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors">Mark all read</button>
-                    <button onClick={clearAllNotifications} className="text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors">Clear All</button>
+                    <button onClick={markAllRead} className="text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors">{t('ui.markAllRead', 'Mark all read')}</button>
+                    <button onClick={clearAllNotifications} className="text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors">{t('ui.clearAll', 'Clear All')}</button>
                 </div>
             )}
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-8">
                         <Bell size={48} className="mb-4 opacity-20" />
-                        <p>No notifications yet</p>
+                        <p>{t('ui.noNotifications', 'No notifications yet')}</p>
                     </div>
                 ) : (
                     notifications.map(notif => {
                         const style = getTypeStyles(notif.type);
                         const Icon = style.icon;
+                        const title = resolveTitle(notif);
+                        const message = resolveMessage(notif);
+
                         return (
                             <div
                                 key={notif.id}
@@ -240,13 +262,13 @@ const NotificationDrawer = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start mb-0.5">
-                                        <h4 className={clsx("text-sm font-medium truncate pr-2", (notif.read || notif.isRead) ? "text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100 font-semibold")}>{notif.title}</h4>
+                                        <h4 className={clsx("text-sm font-medium truncate pr-2", (notif.read || notif.isRead) ? "text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100 font-semibold")}>{title}</h4>
                                         {!(notif.read || notif.isRead) && <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />}
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-1">{notif.message}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-1">{message}</p>
                                     <div className="flex items-center justify-between text-xs text-gray-400">
                                         <span>{formatTime(notif.createdAt)}</span>
-                                        {notif.link && <span className="flex items-center gap-1 text-blue-500 font-medium group-hover:underline">View <ExternalLink size={10} /></span>}
+                                        {notif.link && <span className="flex items-center gap-1 text-blue-500 font-medium group-hover:underline">{t('ui.view', 'View')} <ExternalLink size={10} /></span>}
                                     </div>
                                 </div>
                             </div>
@@ -266,14 +288,14 @@ const NotificationDrawer = () => {
                     onClick={() => setView('COMPOSE')}
                     className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm flex items-center justify-center gap-2"
                 >
-                    <MessageCircle size={16} /> New Chat
+                    <MessageCircle size={16} /> {t('ui.newChat', 'New Chat')}
                 </button>
             </div>
 
             {sendSuccess && (
                 <div className="mx-3 mt-2 p-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-2 animate-in slide-in-from-top duration-300">
                     <CheckCircle size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Message sent!</p>
+                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">{t('ui.messageSent', 'Message sent!')}</p>
                 </div>
             )}
 
@@ -281,8 +303,8 @@ const NotificationDrawer = () => {
                 {conversations.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-8">
                         <MessageCircle size={48} className="mb-4 opacity-20" />
-                        <p className="text-sm">No conversations yet</p>
-                        <p className="text-xs mt-1">Start a new chat above</p>
+                        <p className="text-sm">{t('ui.noConversations', 'No conversations yet')}</p>
+                        <p className="text-xs mt-1">{t('ui.startNewChat', 'Start a new chat above')}</p>
                     </div>
                 ) : (
                     conversations.map(conv => (
@@ -338,18 +360,18 @@ const NotificationDrawer = () => {
                 <button onClick={() => setView('CHATS')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
                     <ArrowLeft size={20} className="text-gray-600 dark:text-gray-300" />
                 </button>
-                <h3 className="font-semibold text-gray-900 dark:text-white">New Message</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('ui.newMessage', 'New Message')}</h3>
             </div>
             <form onSubmit={handleQuickCompose} className="space-y-4 flex-1 flex flex-col">
                 <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">To</label>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('ui.to', 'To')}</label>
                     <select
                         className="w-full rounded-xl border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-2.5 px-3 focus:ring-2 focus:ring-blue-500"
                         value={composeData.toUserId}
                         onChange={e => setComposeData({ ...composeData, toUserId: e.target.value })}
                         required
                     >
-                        <option value="">Select Recipient...</option>
+                        <option value="">{t('ui.selectRecipient', 'Select Recipient...')}</option>
                         {directory.map(u => (
                             <option key={u.id} value={u.id}>
                                 {u.name || u.username} ({u.role})
@@ -358,19 +380,19 @@ const NotificationDrawer = () => {
                     </select>
                 </div>
                 <div className="flex-1 flex flex-col">
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Message</label>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('ui.message', 'Message')}</label>
                     <textarea
                         className="flex-1 w-full rounded-xl border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm p-3 resize-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
                         value={composeData.message}
                         onChange={e => setComposeData({ ...composeData, message: e.target.value })}
                         required
-                        placeholder="Type your message..."
+                        placeholder={t('ui.typeMessage', 'Type your message...')}
                     />
                 </div>
                 <div className="flex gap-2">
-                    <button type="button" onClick={() => setView('CHATS')} className="flex-1 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="button" onClick={() => setView('CHATS')} className="flex-1 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">{t('ui.cancel', 'Cancel')}</button>
                     <button type="submit" disabled={sending} className="flex-1 px-4 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 font-medium shadow-sm flex items-center justify-center gap-2 transition-all">
-                        {sending ? 'Sending...' : <><Send size={14} /> Send</>}
+                        {sending ? t('ui.sending', 'Sending...') : <><Send size={14} /> {t('ui.send', 'Send')}</>}
                     </button>
                 </div>
             </form>
@@ -394,8 +416,8 @@ const NotificationDrawer = () => {
                     {activeThread.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center text-gray-400">
                             <MessageCircle size={40} className="mb-3 opacity-30" />
-                            <p className="text-sm">No messages yet</p>
-                            <p className="text-xs mt-1">Say hello! 👋</p>
+                            <p className="text-sm">{t('ui.noMessages', 'No messages yet')}</p>
+                            <p className="text-xs mt-1">{t('ui.sayHello', 'Say hello! 👋')}</p>
                         </div>
                     ) : (
                         grouped.map((item, idx) => {
@@ -486,7 +508,7 @@ const NotificationDrawer = () => {
                                         handleChatSend(e);
                                     }
                                 }}
-                                placeholder="Type a message..."
+                                placeholder={t('ui.typeMessage', 'Type a message...')}
                                 rows={1}
                                 style={{ minHeight: '40px' }}
                             />
@@ -528,7 +550,7 @@ const NotificationDrawer = () => {
                 <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800">
                     <div className="flex items-center gap-2">
                         <h2 className="font-bold text-lg text-white">
-                            {view === 'THREAD' ? 'Chat' : 'Messages & Alerts'}
+                            {view === 'THREAD' ? t('ui.chat', 'Chat') : t('ui.messagesAndAlerts', 'Messages & Alerts')}
                         </h2>
                     </div>
                     <button
@@ -558,7 +580,7 @@ const NotificationDrawer = () => {
                             }}
                             className="w-full py-2 flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
                         >
-                            <Mail size={14} /> Open Full Messaging Center
+                            <Mail size={14} /> {t('ui.openMessagingCenter', 'Open Full Messaging Center')}
                         </button>
                     </div>
                 )}

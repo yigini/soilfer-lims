@@ -129,15 +129,29 @@ exports.getAnalyticalResults = async (req, res) => {
                     const requiredModality = analysisCode === 'SPEC_MIR' ? 'MIR' : 'NIR';
                     const spectralExists = isSpectral && hasSpectral(requiredModality);
 
-                    if (spectralExists || (item && item.result && ['ACCEPTED', 'COMPLETED', 'APPROVED', 'SUBMITTED', 'SUBMITTED_PARTIAL'].includes(item.status))) {
-                        resultObj[analysisCode] = item?.result || (spectralExists ? 'Spectrum Uploaded' : 'Done');
+                    // Spectral: show checkmark ONLY if WI is completed/accepted/approved
+                    const spectralDoneStatuses = ['ACCEPTED', 'COMPLETED', 'APPROVED', 'SUBMITTED', 'SUBMITTED_PARTIAL'];
+                    if (item && item.result && spectralDoneStatuses.includes(item.status)) {
+                        // For approved results, return plain value; for submitted/completed, wrap with status
+                        if (['APPROVED', 'ACCEPTED'].includes(item.status)) {
+                            resultObj[analysisCode] = item.result;
+                        } else {
+                            resultObj[analysisCode] = { status: 'SUBMITTED', value: item.result, assignedTo: item.assignedTo || 'Unknown' };
+                        }
+                    } else if (spectralExists && item && spectralDoneStatuses.includes(item.status)) {
+                        resultObj[analysisCode] = 'Spectrum Uploaded';
                     } else if (item && ['CANCELLED', 'N/A'].includes(item.status)) {
                         resultObj[analysisCode] = 'N/A';
+                    } else if (item && item.result && item.status === 'IN_PROGRESS') {
+                        // Phase 4: Surface draft values instead of suppressing them
+                        resultObj[analysisCode] = { status: 'DRAFT', value: item.result, assignedTo: item.assignedTo || 'Unknown', lastUpdated: item.updatedAt };
+                    } else if (spectralExists && item) {
+                        // Spectrum uploaded but work item not yet completed — show as in-progress
+                        resultObj[analysisCode] = { status: 'PENDING', assignedTo: item.assignedTo || 'Unassigned', lastUpdated: item.updatedAt, note: 'Spectrum uploaded, awaiting review' };
                     } else if (item) {
                         resultObj[analysisCode] = { status: 'PENDING', assignedTo: item.assignedTo || 'Unassigned', lastUpdated: item.updatedAt };
                     } else {
-                        // No item, check spectral again?
-                        if (spectralExists) resultObj[analysisCode] = 'Spectrum Uploaded';
+                        if (spectralExists) resultObj[analysisCode] = { status: 'PENDING', assignedTo: 'Pending Intake', note: 'Spectrum uploaded, no work item' };
                         else resultObj[analysisCode] = { status: 'PENDING', assignedTo: 'Pending Intake' };
                     }
                 }
@@ -148,7 +162,11 @@ exports.getAnalyticalResults = async (req, res) => {
                 if (!EXCLUDED_ANALYSES.includes(item.analysis) && !required.includes(item.analysis)) {
                     analysisKeys.add(item.analysis);
                     if (item.result && ['ACCEPTED', 'COMPLETED', 'APPROVED', 'SUBMITTED'].includes(item.status)) {
-                        resultObj[item.analysis] = item.result;
+                        if (['APPROVED', 'ACCEPTED'].includes(item.status)) {
+                            resultObj[item.analysis] = item.result;
+                        } else {
+                            resultObj[item.analysis] = { status: 'SUBMITTED', value: item.result, assignedTo: item.assignedTo || 'Unknown' };
+                        }
                     } // else ignore pending extra items to not clutter
                 }
             });

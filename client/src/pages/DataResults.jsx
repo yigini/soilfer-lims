@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Download, Filter, Search, FlaskConical, Table, CheckCircle, FileText, XCircle, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import * as XLSX from 'xlsx';
 import SpectraViewer from '../components/SpectraViewer';
 import InfoTooltip from '../components/common/InfoTooltip';
 
 const DataResults = () => {
     const { user } = useAuth();
+    const { subscribeToEvent } = useNotifications();
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -98,6 +100,21 @@ const DataResults = () => {
         fetchData();
     }, [projectFilter, countryFilter, analysisType]);
 
+    // Phase 4: Subscribe to WORKITEM_CHANGED for real-time draft/completion updates
+    const refetchTimerRef = useRef(null);
+    useEffect(() => {
+        if (!subscribeToEvent) return;
+        const unsubscribe = subscribeToEvent('WORKITEM_CHANGED', () => {
+            // Debounce refetch to avoid hammering during rapid draft saves
+            if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+            refetchTimerRef.current = setTimeout(() => fetchData(), 2000);
+        });
+        return () => {
+            unsubscribe();
+            if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+        };
+    }, [subscribeToEvent]);
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -126,9 +143,13 @@ const DataResults = () => {
             const newRow = {};
             columns.forEach(col => {
                 let val = row[col.key];
-                // Flatten objects for export (e.g. PENDING status)
+                // Flatten objects for export (e.g. PENDING, DRAFT, SUBMITTED status)
                 if (val && typeof val === 'object' && val.status === 'PENDING') {
                     val = `PENDING (${val.assignedTo || 'Unassigned'})`;
+                } else if (val && typeof val === 'object' && val.status === 'DRAFT') {
+                    val = `DRAFT: ${val.value} (${val.assignedTo})`;
+                } else if (val && typeof val === 'object' && val.status === 'SUBMITTED') {
+                    val = `${val.value} (Pending Review)`;
                 }
                 newRow[col.label] = val;
             });
@@ -183,13 +204,37 @@ const DataResults = () => {
     };
 
     const renderCellContent = (value, col, row) => {
+        // Handle DRAFT Object — show value with draft indicator
+        if (value && typeof value === 'object' && value.status === 'DRAFT') {
+            return (
+                <div className="flex items-center justify-end gap-1.5">
+                    <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{value.value}</span>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300" title={`Draft by ${value.assignedTo}`}>
+                        draft
+                    </span>
+                </div>
+            );
+        }
+
+        // Handle SUBMITTED Object — result awaiting approval
+        if (value && typeof value === 'object' && value.status === 'SUBMITTED') {
+            return (
+                <div className="flex items-center justify-end gap-1.5">
+                    <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{value.value}</span>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" title={`Submitted by ${value.assignedTo} — pending review`}>
+                        pending review
+                    </span>
+                </div>
+            );
+        }
+
         // Handle PENDING Object
         if (value && typeof value === 'object' && value.status === 'PENDING') {
             return (
                 <div className="flex justify-end">
                     <FlaskConical size={16} className="text-amber-500 animate-pulse" />
                     <InfoTooltip
-                        text={`Analysis Pending. Assigned to: ${value.assignedTo}${value.lastUpdated ? ' (Updated: ' + new Date(value.lastUpdated).toLocaleDateString() + ')' : ''}`}
+                        text={`${value.note || 'Analysis Pending'}. Assigned to: ${value.assignedTo}${value.lastUpdated ? ' (Updated: ' + new Date(value.lastUpdated).toLocaleDateString() + ')' : ''}`}
                         position="bottom"
                     />
                 </div>

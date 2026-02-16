@@ -10,6 +10,7 @@ const BrandingManager = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
+    const [languages, setLanguages] = useState([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -27,17 +28,29 @@ const BrandingManager = () => {
 
     useEffect(() => {
         fetchSettings();
+        fetchLanguages();
     }, []);
+
+    const fetchLanguages = async () => {
+        try {
+            const res = await axios.get('/api/admin/languages');
+            const langs = res.data?.data || res.data;
+            setLanguages(Array.isArray(langs) ? langs : []);
+        } catch (e) {
+            console.error('Failed to fetch languages:', e);
+        }
+    };
 
     const fetchSettings = async () => {
         try {
             const res = await axios.get('/api/admin/settings');
-            if (res.data.branding) {
+            const settings = res.data?.data || res.data;
+            if (settings.branding) {
                 setFormData(prev => ({
                     ...prev,
-                    ...res.data.branding,
+                    ...settings.branding,
                     // Ensure colors object exists
-                    colors: res.data.branding.colors || prev.colors
+                    colors: settings.branding.colors || prev.colors
                 }));
             }
             setIsLoading(false);
@@ -96,7 +109,7 @@ const BrandingManager = () => {
         } catch (e) {
             showDialog({
                 title: 'Error',
-                message: 'Failed to save branding settings',
+                message: e.response?.data?.details || e.response?.data?.error || e.message || 'Failed to save branding settings',
                 type: 'error'
             });
         } finally {
@@ -320,10 +333,13 @@ const BrandingManager = () => {
                                         value={formData.defaultLanguage}
                                         onChange={(e) => handleChange('defaultLanguage', e.target.value)}
                                     >
-                                        <option value="en">English (US)</option>
-                                        <option value="es">Español</option>
-                                        <option value="fr">Français</option>
-                                        <option value="pt">Português</option>
+                                        {languages && languages.length > 0 ? (
+                                            languages.map(lang => (
+                                                <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                            ))
+                                        ) : (
+                                            <option value="" disabled>No languages available</option>
+                                        )}
                                     </select>
                                 </div>
                                 <div className="space-y-2">

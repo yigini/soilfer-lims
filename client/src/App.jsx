@@ -43,6 +43,8 @@ import AuditLogs from './pages/AuditLogs';
 import Profile from './pages/Profile';
 import DataResults from './pages/DataResults';
 
+const SampleWorkflowMap = React.lazy(() => import('./pages/SampleWorkflowMap'));
+
 import { useTheme } from './context/ThemeContext';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
@@ -82,20 +84,20 @@ const Layout = ({ children }) => {
 
     // 1. TECHNICIAN
     if (user?.role === 'LAB_TECHNICIAN') {
-        navItems.push({ icon: ClipboardList, label: 'My Work', path: '/my-work' });
-        navItems.push({ icon: Beaker, label: 'Workbench', path: '/workbench' });
+        navItems.push({ icon: ClipboardList, label: t('nav.myWork', 'My Work'), path: '/my-work' });
+        navItems.push({ icon: Beaker, label: t('nav.workbench', 'Workbench'), path: '/workbench' });
     }
 
     // 2. MANAGER
     if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ icon: ShieldAlert, label: 'Manager Queue', path: '/manager-queue' });
+        navItems.push({ icon: ShieldAlert, label: t('nav.managerQueue', 'Manager Queue'), path: '/manager-queue' });
     }
 
     // 3. INTAKE
     if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: Package, label: t('nav.reception'), path: '/reception' });
         if (user?.role === 'SAMPLE_RECEPTION') {
-            navItems.push({ icon: UserPlus, label: 'Walk-in Intake', path: '/reception?mode=WALK_IN' });
+            navItems.push({ icon: UserPlus, label: t('nav.receptionWalkIn', 'Walk-in Intake'), path: '/reception?mode=WALK_IN' });
         }
     }
 
@@ -103,10 +105,10 @@ const Layout = ({ children }) => {
     if (user?.role !== 'SAMPLE_RECEPTION') {
         navItems.push({ icon: Activity, label: t('nav.spectral'), path: '/spectral-library' });
     }
-    navItems.push({ icon: FileText, label: 'Reports', path: '/reports' });
+    navItems.push({ icon: FileText, label: t('nav.reports', 'Reports'), path: '/reports' });
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ icon: User, label: 'Laboratory Staff', path: '/users' });
+        navItems.push({ icon: User, label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
         navItems.push({ icon: Monitor, label: t('nav.equipment'), path: '/equipment' });
     }
 
@@ -117,13 +119,13 @@ const Layout = ({ children }) => {
 
     if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
         navItems.push({ icon: FileSpreadsheet, label: t('nav.projects'), path: '/projects' });
-        navItems.push({ icon: Table, label: 'Data Results', path: '/data-results' });
+        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
 
     }
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
         if (user?.role === 'SUPER_ADMIN') {
-            navItems.push({ icon: Beaker, label: 'Labs', path: '/admin/labs' });
+            navItems.push({ icon: Beaker, label: t('nav.labs'), path: '/admin/labs' });
         }
         navItems.push({ icon: Settings, label: t('nav.admin'), path: '/admin' });
     }
@@ -250,6 +252,7 @@ function App() {
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
             <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
+            <Route path="/samples/:id/map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
 
             {/* Restricted Routes */}
             <Route path="/my-work" element={<RequireAuth permission="ENTER_RESULTS"><MyWork /></RequireAuth>} />

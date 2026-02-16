@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const { success, error } = require('../i18n/response');
 const idGenerator = require('../services/idGenerator');
 const workflow = require('../workflowContract');
 
@@ -130,9 +131,9 @@ exports.searchExpectedSamples = async (req, res) => {
         });
 
         res.json(results);
-    } catch (error) {
-        console.error('[DEBUG] searchExpectedSamples CRASH:', error);
-        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    } catch (err) {
+        console.error('[DEBUG] searchExpectedSamples CRASH:', err);
+        return error(res, 500, 'SAMPLE_SEARCH_ERROR', null, err.message || 'Internal Server Error');
     }
 };
 
@@ -195,16 +196,15 @@ exports.getSamples = async (req, res) => {
             ];
         }
 
-        // Auto-hide orphan EXPECTED samples (planned but never sampled in field)
+        // Auto-hide uncollected EXPECTED samples (never sampled in field)
         // Only applies when user hasn't explicitly filtered by status
-        // IMPORTANT: Don't hide manifest-uploaded samples (they have projectCode set)
+        // Hides any EXPECTED sample with no fieldMetadata and no metadata
         if (!qStatus) {
             where.NOT = {
                 AND: [
                     { status: 'EXPECTED' },
                     { fieldMetadata: null },
-                    { metadata: null },
-                    { projectCode: null }
+                    { metadata: null }
                 ]
             };
         }
@@ -322,9 +322,9 @@ exports.getSamples = async (req, res) => {
             meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
             facets: { lifecycle }
         });
-    } catch (error) {
-        console.error("[getSamples] ERROR:", error);
-        res.status(500).json({ error: "Internal Server Error", message: error.message });
+    } catch (err) {
+        console.error("[getSamples] ERROR:", err);
+        return error(res, 500, 'SAMPLE_FETCH_ERROR', null, "Internal Server Error", { message: err.message });
     }
 };
 
@@ -346,14 +346,14 @@ exports.updateStatus = async (req, res) => {
 
     try {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id }, 'Sample not found');
 
         // SECURITY: Enforce Lab Scope
         const scopeGuard = require('../utils/scopeGuard');
         try {
             scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
         } catch (e) {
-            return res.status(403).json({ error: 'Access Denied: You cannot modify samples from another lab.' });
+            return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access Denied: You cannot modify samples from another lab.');
         }
 
         // STRICT: Reject legacy/unknown statuses
@@ -449,9 +449,9 @@ exports.updateStatus = async (req, res) => {
         });
 
         res.json(updated);
-    } catch (error) {
-        console.error('[updateStatus] Error:', error);
-        res.status(500).json({ error: 'Failed to update status' });
+    } catch (err) {
+        console.error('[updateStatus] Error:', err);
+        return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
     }
 };
 
@@ -462,13 +462,11 @@ exports.updatePhaseStatus = async (req, res) => {
 
     try {
         if (!['LAB_TECHNICIAN', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-            return res.status(403).json({
-                error: 'Only Lab Technicians and Managers can update drying/preparation gates'
-            });
+            return error(res, 403, 'INSUFFICIENT_PERMISSIONS', null, 'Only Lab Technicians and Managers can update drying/preparation gates');
         }
 
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id }, 'Sample not found');
 
         // SECURITY: Enforce Lab Scope
         const scopeGuard = require('../utils/scopeGuard');
@@ -579,9 +577,9 @@ exports.updatePhaseStatus = async (req, res) => {
         });
 
         res.json(updated);
-    } catch (error) {
-        console.error('[updatePhaseStatus] Error:', error);
-        res.status(500).json({ error: 'Failed to update phase status' });
+    } catch (err) {
+        console.error('[updatePhaseStatus] Error:', err);
+        return error(res, 500, 'PHASE_UPDATE_ERROR', null, 'Failed to update phase status');
     }
 };
 
@@ -936,15 +934,19 @@ exports.getSampleDetail = async (req, res) => {
             };
         });
 
-        // Enrich work items with analysis units
+        // Enrich work items with analysis metadata (display names + units)
         const wiAnalysisCodes = [...new Set(parsedWorkItems.map(wi => wi.analysis).filter(Boolean))];
-        const analysisUnits = await prisma.analysis.findMany({
+        const analysisMetadata = await prisma.analysis.findMany({
             where: { code: { in: wiAnalysisCodes } },
-            select: { code: true, units: true }
+            select: { code: true, name: true, units: true }
         });
-        const unitMap = {};
-        analysisUnits.forEach(a => { unitMap[a.code] = a.units; });
-        parsedWorkItems.forEach(wi => { wi.unit = unitMap[wi.analysis] || null; });
+        const analysisMap = {};
+        analysisMetadata.forEach(a => { analysisMap[a.code] = a; });
+        parsedWorkItems.forEach(wi => {
+            const meta = analysisMap[wi.analysis];
+            wi.unit = meta?.units || null;
+            wi.analysisName = meta?.name || null;
+        });
 
         // Calculate workflow summary using the Workflow Engine
         const workflowEngine = require('../utils/workflowEngine');

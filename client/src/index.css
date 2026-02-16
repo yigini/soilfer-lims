@@ -144,24 +144,46 @@
     }
 
     @media print {
-        .no-print {
-            display: none !important;
+
+        /* Hide everything by default */
+        body * {
+            visibility: hidden !important;
+        }
+
+        /* Show the print-only label and its contents */
+        .print-only,
+        .print-only * {
+            visibility: visible !important;
         }
 
         .print-only {
-            display: block !important;
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 101mm;
+            height: 54mm;
             background: white;
             z-index: 9999;
+            margin: 0;
+            padding: 0;
+            display: block !important;
+        }
+
+        /* Hide the dialog overlay entirely */
+        .no-print {
+            display: none !important;
         }
 
         body,
         html {
             background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        @page {
+            size: 101mm 54mm;
+            margin: 0;
         }
     }
 }

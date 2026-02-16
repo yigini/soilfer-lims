@@ -11,8 +11,9 @@ router.get('/settings', adminController.getSettings);
 router.put('/settings/branding', checkPermission('MANAGE_BRANDING'), adminController.updateBranding);
 router.get('/languages', adminController.getLanguages);
 router.post('/languages', checkPermission('MANAGE_BRANDING'), adminController.createLanguage);
-router.delete('/languages/:id', checkPermission('MANAGE_BRANDING'), adminController.deleteLanguage);
-router.put('/languages/:id/default', checkPermission('MANAGE_BRANDING'), adminController.setDefaultLanguage);
+router.delete('/languages/:code', checkPermission('MANAGE_BRANDING'), adminController.deleteLanguage);
+router.put('/languages/:code/default', checkPermission('MANAGE_BRANDING'), adminController.setDefaultLanguage);
 router.put('/languages/:code', checkPermission('MANAGE_BRANDING'), adminController.updateLanguage);
+router.get('/languages/:code/catalog', checkPermission('MANAGE_BRANDING'), adminController.getLanguageCatalog);
 
 module.exports = router;

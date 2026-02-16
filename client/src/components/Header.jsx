@@ -1,7 +1,9 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { ThemeToggle } from './ThemeToggle';
+
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useLanguage } from '../context/LanguageContext';
 import { UserMenu } from './UserMenu';
 
 import { Bell, Menu } from 'lucide-react';
@@ -35,7 +37,7 @@ export const Header = ({ onMenuClick }) => {
                     <button
                         onClick={toggleDrawer}
                         className="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                        title="Notifications"
+                        title={useLanguage().t('header.notifications', 'Notifications')}
                     >
                         <Bell size={20} />
                         {unreadCount > 0 && (

@@ -28,7 +28,7 @@ export const NotificationProvider = ({ children }) => {
     const reconnectTimer = useRef(null);
     const wsConnected = useRef(false);
 
-    // Generic event subscribers (for WORKITEM_UPDATE, etc.)
+    // Generic event subscribers (for WORKITEM_CHANGED, WORKITEM_UPDATE, etc.)
     const eventSubscribersRef = useRef(new Map());
 
     // ── Refs for stable WS handler access ─────────────────────────
@@ -247,10 +247,13 @@ export const NotificationProvider = ({ children }) => {
                 break;
             }
 
+            case 'WORKITEM_CHANGED':
             case 'WORKITEM_UPDATE': {
-                // Notify all subscribers listening for work item changes
-                const subs = eventSubscribersRef.current.get('WORKITEM_UPDATE');
-                if (subs) subs.forEach(cb => cb(data));
+                // Fan out to subscribers of both event names for backward compat
+                const changedSubs = eventSubscribersRef.current.get('WORKITEM_CHANGED');
+                if (changedSubs) changedSubs.forEach(cb => cb(data));
+                const legacySubs = eventSubscribersRef.current.get('WORKITEM_UPDATE');
+                if (legacySubs) legacySubs.forEach(cb => cb(data));
                 break;
             }
 
@@ -352,7 +355,7 @@ export const NotificationProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [user, fetchNotifications]);
 
-    // ── Event Subscription API (for WORKITEM_UPDATE etc.) ─────────────────
+    // ── Event Subscription API (for WORKITEM_CHANGED, WORKITEM_UPDATE, etc.) ─────────────────
     const subscribeToEvent = useCallback((eventType, callback) => {
         const subs = eventSubscribersRef.current;
         if (!subs.has(eventType)) subs.set(eventType, new Set());

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, CheckCircle, MoreHorizontal, User, Building, Phone, Activity, Clock, Inbox, Printer, Droplet } from 'lucide-react';
+import { ArrowLeft, CheckCircle, MoreHorizontal, User, Building, Phone, Activity, Clock, Inbox, Printer, Droplet, GitBranch } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SampleSummary = ({
@@ -84,6 +84,13 @@ const SampleSummary = ({
                         title="Print Label"
                     >
                         <Printer size={20} />
+                    </button>
+                    <button
+                        onClick={() => navigate(`/samples/${sample.id}/map`)}
+                        className="p-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-xl shadow-sm transition-all"
+                        title="Workflow Map"
+                    >
+                        <GitBranch size={20} />
                     </button>
                     <button
                         onClick={() => setDrawerOpen(!drawerOpen)}

@@ -5,8 +5,11 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 const prisma = require('./prisma');
 const { v4: uuidv4 } = require('uuid');
+const localeMiddleware = require('./middleware/localeMiddleware');
+const { success, error } = require('./i18n/response');
 
 const app = express();
 // Enable if behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
@@ -50,6 +53,19 @@ app.use('/api/auth', authLimiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Global Localization & Response Standardization Middleware
+app.use(localeMiddleware);
+app.use((req, res, next) => {
+    // Attach helpers to res object for easy access in controllers
+    // partial application to pass 'res' automatically
+    res.success = (code, msg, params, status, data) => success(res, code, msg, params, status, data);
+    res.error = (status, code, msg, params, data) => error(res, status, code, msg, params, data);
+    next();
+});
+
+// Public (no-auth) routes
+app.use('/api/public', publicRoutes);
+
 // Seed Users: Handled by reset_admin.js or external scripts
 // Seed Messages: Handled by migrations or external scripts
 
@@ -64,7 +80,7 @@ if (!process.env.JWT_SECRET) {
 }
 const SECRET_KEY = process.env.JWT_SECRET;
 // Forced Restart Trigger 3
-// Forced Restart Trigger: Fix Spectral Match Check 2
+// Forced Restart Trigger: Fix Spectral Match Check 3
 
 // Health Check (used by Docker healthcheck)
 app.get('/api/health', (req, res) => {

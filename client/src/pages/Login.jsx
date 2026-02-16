@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -12,6 +13,12 @@ const Login = () => {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [bgVideo, setBgVideo] = useState('');
+
+    useEffect(() => {
+        const videos = ['/assets/img/bg1.mp4', '/assets/img/bg2.mp4'];
+        setBgVideo(videos[Math.floor(Math.random() * videos.length)]);
+    }, []);
 
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -36,7 +43,20 @@ const Login = () => {
         <div className="min-h-screen w-full flex bg-stone-50 dark:bg-gray-900 overflow-hidden font-sans">
             {/* Left Side - Visual / Branding */}
             <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-emerald-800 via-green-900 to-amber-950 relative items-center justify-center p-12 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=3420&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
+                {bgVideo && (
+                    <video
+                        key={bgVideo}
+                        src={bgVideo}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
+                    />
+                )}
+                {!bgVideo && (
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=3420&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
 
                 <div className="relative z-10 text-white max-w-lg text-left">
@@ -48,25 +68,47 @@ const Login = () => {
                         Dedicated to global sustainable agriculture.
                     </p>
 
-                    <div className="grid grid-cols-2 gap-4 text-sm font-medium">
-                        <div className="flex items-center gap-3 py-3 px-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-xl">
-                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                            <span className="text-emerald-50">System Operational</span>
-                        </div>
-                        <div className="flex items-center gap-3 py-3 px-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-xl">
-                            <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                            <span className="text-amber-50">v2.5.0 Enterprise</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl"></div>
+
+                {/* Donor Acknowledgement */}
+                <div className="absolute bottom-8 left-12 right-12 z-20">
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 shadow-2xl p-5">
+                        <p className="text-[10px] font-semibold text-emerald-100/70 uppercase tracking-[0.2em] mb-3">
+                            With the financial support of
+                        </p>
+                        <div className="flex items-center gap-4">
+                            <div className="bg-white rounded-full p-2 shadow-md flex-shrink-0">
+                                <img
+                                    src="/assets/img/mofa_japan.svg"
+                                    alt="Ministry of Foreign Affairs of Japan"
+                                    className="h-8 w-8 object-contain"
+                                />
+                            </div>
+                            <span className="text-white/80 text-xs font-medium leading-tight">Ministry of Foreign Affairs<br />of Japan</span>
+                            <div className="w-px h-10 bg-white/20 mx-1"></div>
+                            <div className="bg-white rounded-full p-2 shadow-md flex-shrink-0">
+                                <img
+                                    src="/assets/img/us_dept_state.svg"
+                                    alt="United States Department of State"
+                                    className="h-8 w-8 object-contain"
+                                />
+                            </div>
+                            <span className="text-white/80 text-xs font-medium leading-tight">United States<br />Department of State</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Right Side - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+                <div className="absolute top-6 right-6 z-20">
+                    <LanguageSwitcher />
+                </div>
+
                 <div className="max-w-[440px] w-full">
                     {/* Mobile Branding View */}
                     <div className="lg:hidden flex flex-col items-center mb-10">
@@ -182,6 +224,8 @@ const Login = () => {
                                 Need technical support? GLOSOLAN@fao.org
                             </a>
                         </div>
+
+
                     </div>
                 </div>
             </div>

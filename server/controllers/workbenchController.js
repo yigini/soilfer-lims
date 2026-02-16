@@ -619,26 +619,42 @@ exports.batchSave = async (req, res) => {
             }
         }
 
-        // ─── Real-time push: broadcast WORKITEM_UPDATE to all connected users ───
-        if (!draft && results.length > 0) {
-            // Collect sampleIds from the processed work items
-            const completedSampleIds = [...new Set(
+        // ─── Real-time push: broadcast WORKITEM_CHANGED for drafts AND completions ───
+        if (results.length > 0) {
+            const affectedSampleIds = [...new Set(
                 operationBundles.map(b => {
                     const item = itemMap[b.workItemId];
                     return item?.sampleId;
                 }).filter(Boolean)
             )];
 
-            if (completedSampleIds.length > 0) {
+            if (affectedSampleIds.length > 0) {
                 try {
-                    broadcastToAll('WORKITEM_UPDATE', {
-                        sampleIds: completedSampleIds,
+                    // Build per-item update details for real-time patching
+                    const updates = operationBundles.map(b => {
+                        const item = itemMap[b.workItemId];
+                        const entry = entryMap[b.workItemId];
+                        return {
+                            workItemId: b.workItemId,
+                            sampleId: item?.sampleId,
+                            analysis: item?.analysis,
+                            status: draft ? (item?.status === 'ASSIGNED' ? 'IN_PROGRESS' : item?.status) : 'COMPLETED',
+                            result: entry?.value ?? null,
+                            isDraft: draft,
+                            version: (entry?.version ?? item?.version ?? 0) + 1
+                        };
+                    });
+
+                    broadcastToAll('WORKITEM_CHANGED', {
+                        sampleIds: affectedSampleIds,
+                        updates,
                         updatedBy: user.username,
-                        action: 'BATCH_COMPLETE',
+                        updatedAt: now.toISOString(),
+                        action: draft ? 'DRAFT_SAVE' : 'BATCH_COMPLETE',
                         count: results.length
                     });
                 } catch (wsErr) {
-                    console.error('[WS] Failed to broadcast WORKITEM_UPDATE:', wsErr);
+                    console.error('[WS] Failed to broadcast WORKITEM_CHANGED:', wsErr);
                 }
             }
         }

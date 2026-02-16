@@ -39,3 +39,6 @@ npm-debug.log*
 
 # ─── Agent/AI directories ───
 .gemini/
+
+server/prisma/dev.db-shm
+server/prisma/dev.db-wal
