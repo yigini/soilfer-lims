@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { AlertTriangle, Download, Printer } from 'lucide-react';
 import ReportContent from '../components/report/ReportContent';
 
 /**
- * PublicReport — Unauthenticated route for /report/:token
- * Renders a branded report from a public share link using the shared ReportContent component.
+ * PublicReport — Customer-facing public report page.
+ * Clean, professional, light-only. No dark mode.
  */
 const PublicReport = () => {
     const { token } = useParams();
@@ -35,10 +34,10 @@ const PublicReport = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-indigo-500 border-t-transparent mx-auto mb-4" />
-                    <p className="text-gray-500">Loading report...</p>
+            <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', color: '#888' }}>
+                    <div style={{ width: 32, height: 32, border: '3px solid #1e3a5f', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
+                    <p style={{ fontSize: '14px' }}>Loading report…</p>
                 </div>
             </div>
         );
@@ -46,50 +45,53 @@ const PublicReport = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-200 p-8 text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertTriangle size={28} className="text-red-500" />
-                    </div>
-                    <h1 className="text-xl font-black text-gray-900 mb-2">Report Unavailable</h1>
-                    <p className="text-gray-500 text-sm">{error}</p>
-                    <p className="text-xs text-gray-300 mt-6">If you believe this is an error, please contact the laboratory that issued this report.</p>
+            <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <div style={{ maxWidth: 420, width: '100%', background: '#fff', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', border: '1px solid #e5e7eb', padding: 40, textAlign: 'center' }}>
+                    <div style={{ width: 56, height: 56, background: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>⚠</div>
+                    <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>Report Unavailable</h1>
+                    <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 24 }}>{error}</p>
+                    <p style={{ fontSize: 11, color: '#d1d5db' }}>If you believe this is an error, please contact the laboratory that issued this report.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8 px-4 print:bg-white print:py-0 print:px-0">
-            <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden print:shadow-none print:border-none print:rounded-none">
-                {/* Print bar */}
-                <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center print:hidden no-print">
-                    <span className="text-xs text-gray-400">Shared Report • Version {report?.version}</span>
-                    <div className="flex items-center gap-2">
-                        {report?.id && (
-                            <a
-                                href={`/api/reports/public/${token}/pdf`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-bold hover:bg-gray-700 transition-colors flex items-center gap-2"
-                            >
-                                <Download size={14} /> Download PDF
-                            </a>
-                        )}
+        <div style={{ minHeight: '100vh', background: '#f0f0f0', padding: '24px 16px' }} className="print-reset">
+            <div style={{ maxWidth: 900, margin: '0 auto', background: '#fff', borderRadius: 8, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', overflow: 'hidden' }}
+                className="print-container">
+
+                {/* Action bar — hidden in print */}
+                <div className="no-print" style={{ padding: '12px 20px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: '#9ca3af' }}>
+                        Shared Report · Version {report?.version}
+                    </span>
+                    <div style={{ display: 'flex', gap: 8 }}>
                         <button
                             onClick={() => window.print()}
-                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                            style={{ padding: '8px 16px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                         >
-                            <Printer size={14} /> Print
+                            🖨 Print / Save as PDF
                         </button>
                     </div>
                 </div>
 
-                {/* Report Body — uses shared ReportContent */}
-                <div className="p-8 lg:p-12">
+                {/* Report Document */}
+                <div style={{ padding: '32px 40px' }} className="print-body">
                     <ReportContent data={report?.content} />
                 </div>
             </div>
+
+            {/* Print reset styles */}
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @media print {
+                    .print-reset { background: white !important; padding: 0 !important; }
+                    .print-container { box-shadow: none !important; border: none !important; border-radius: 0 !important; max-width: none !important; }
+                    .print-body { padding: 0 !important; }
+                    .no-print { display: none !important; }
+                }
+            `}</style>
         </div>
     );
 };
