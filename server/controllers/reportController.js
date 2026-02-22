@@ -175,18 +175,18 @@ async function searchReports(req, res) {
             const isPhone = /^\d+$/.test(term.replace(/[+\-\s()]/g, ''));
 
             where.OR = [
-                { firstName: { contains: term, mode: 'insensitive' } },
-                { surname: { contains: term, mode: 'insensitive' } },
-                { projectCode: { contains: term, mode: 'insensitive' } },
-                { projectName: { contains: term, mode: 'insensitive' } },
-                { sampleLabId: { contains: term, mode: 'insensitive' } },
-                { sampleId: { contains: term, mode: 'insensitive' } }
+                { firstName: { contains: term } },
+                { surname: { contains: term } },
+                { projectCode: { contains: term } },
+                { projectName: { contains: term } },
+                { sampleLabId: { contains: term } },
+                { sampleId: { contains: term } }
             ];
 
             if (isPhone) {
                 where.OR.push({ phoneNorm: { contains: term.replace(/\D/g, '') } });
             } else {
-                where.OR.push({ phone: { contains: term, mode: 'insensitive' } });
+                where.OR.push({ phone: { contains: term } });
             }
         }
 
