@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNotifications } from '../context/NotificationContext';
 import {
     Beaker, CheckCircle, Clock, AlertTriangle, Save, PlayCircle,
     ChevronRight, Filter, RefreshCw, Trash2, X, Check, ArrowRight,
@@ -215,6 +216,7 @@ const isRowBlocked = (item) => {
 const TechWorkbench = () => {
     const { user, token } = useAuth();
     const { t } = useLanguage();
+    const { subscribeToEvent } = useNotifications();
 
     // Data state
     const [groups, setGroups] = useState([]);
@@ -264,6 +266,12 @@ const TechWorkbench = () => {
     const versionMapRef = useRef({});
     // Phase 3: Track which workItemIds changed since last autosave
     const dirtySetRef = useRef(new Set());
+    // Fix 1: Ref to latest processedGroups for tab-independent autosave
+    const groupsRef = useRef([]);
+    // Fix 2: Hydration guard — suppress autosave while restoring drafts
+    const isHydratingDraftsRef = useRef(false);
+    // Fix 4: Throttle ref for WS-triggered refresh
+    const wsRefreshThrottleRef = useRef(0);
 
     const axiosConfig = useMemo(() => ({
         headers: { Authorization: `Bearer ${token}` }
@@ -427,10 +435,11 @@ const TechWorkbench = () => {
         return () => clearInterval(staleCheck);
     }, [lastFetch]);
 
-    // ─── Fix 5: Load server drafts on mount ───
+    // ─── Fix 5: Load server drafts on mount (with hydration guard) ───
     useEffect(() => {
         if (!token) return;
         const loadServerDrafts = async () => {
+            isHydratingDraftsRef.current = true; // Fix 2: suppress autosave
             try {
                 const { data } = await axios.get('/api/workbench/drafts', axiosConfig);
                 if (data.drafts && Object.keys(data.drafts).length > 0) {
@@ -450,14 +459,18 @@ const TechWorkbench = () => {
                 }
             } catch (err) {
                 console.error('Failed to load server drafts:', err);
+            } finally {
+                // Fix 2: re-enable autosave after a tick (so React state has settled)
+                setTimeout(() => { isHydratingDraftsRef.current = false; }, 100);
             }
         };
         loadServerDrafts();
     }, [token]);
 
-    // ─── Load drafts from localStorage on tab change ───
+    // ─── Load drafts from localStorage on tab change (with hydration guard) ───
     useEffect(() => {
         if (!activeTab || !user) return;
+        isHydratingDraftsRef.current = true; // Fix 2: suppress autosave during merge
         const key = DRAFT_KEY(user.username, activeTab);
         const stored = localStorage.getItem(key);
         if (stored) {
@@ -466,6 +479,7 @@ const TechWorkbench = () => {
                 setDraftValues(prev => ({ ...prev, ...parsed }));
             } catch (e) { /* ignore corrupted */ }
         }
+        setTimeout(() => { isHydratingDraftsRef.current = false; }, 100);
     }, [activeTab, user]);
 
     // ─── Fix 6: Clear selection on tab change (keep itemFeedback for tab colors) ───
@@ -588,54 +602,62 @@ const TechWorkbench = () => {
     const draftValuesRef = useRef(draftValues);
     useEffect(() => { draftValuesRef.current = draftValues; }, [draftValues]);
 
-    // ─── Auto-save server helper (debounced, delta-only) ───
-    const autoSaveToServer = useCallback(async () => {
-        if (!activeGroup || !token) return;
-        const currentDrafts = draftValuesRef.current;
-        const isTexture = activeGroup.isTexture;
-        const dirtyIds = dirtySetRef.current;
+    // Fix 1: Keep groupsRef in sync with processedGroups for tab-independent autosave
+    useEffect(() => { groupsRef.current = processedGroups; }, [processedGroups]);
 
-        // Phase 3: Only send entries for dirty (changed) workItemIds
+    // ─── Fix 1+C: Build global work-item lookup from ALL groups (tab-independent) ───
+    const buildDirtyEntries = useCallback(() => {
+        const dirtyIds = dirtySetRef.current;
+        if (dirtyIds.size === 0) return [];
+        const currentDrafts = draftValuesRef.current;
+        const allGroups = groupsRef.current;
         const entries = [];
-        if (isTexture) {
-            activeGroup.items.forEach(item => {
-                TEXTURE_ANALYSES.forEach(code => {
-                    const comp = item.components?.[code];
-                    if (!comp) return;
-                    if (!dirtyIds.has(comp.workItemId)) return; // Skip unchanged
-                    const d = currentDrafts[comp.workItemId];
-                    if (d?.value) {
-                        entries.push({
-                            workItemId: comp.workItemId,
-                            value: d.value,
-                            equipmentId: d.equipmentId || comp.equipmentId || undefined,
-                            version: versionMapRef.current[comp.workItemId] ?? comp.version
-                        });
-                    }
-                });
-            });
-        } else {
-            activeGroup.items.forEach(item => {
-                if (!dirtyIds.has(item.workItemId)) return; // Skip unchanged
-                const d = currentDrafts[item.workItemId];
-                if (d?.value) {
-                    entries.push({
-                        workItemId: item.workItemId,
-                        value: d.value,
-                        equipmentId: d.equipmentId || item.equipmentId || undefined,
-                        version: versionMapRef.current[item.workItemId] ?? item.version
+
+        // Build a flat lookup: workItemId → { version, equipmentId }
+        const itemLookup = {};
+        allGroups.forEach(g => {
+            if (g.isTexture) {
+                g.items.forEach(item => {
+                    Object.entries(item.components || {}).forEach(([code, comp]) => {
+                        itemLookup[comp.workItemId] = { version: comp.version, equipmentId: comp.equipmentId };
                     });
-                }
+                });
+            } else {
+                g.items.forEach(item => {
+                    itemLookup[item.workItemId] = { version: item.version, equipmentId: item.equipmentId };
+                });
+            }
+        });
+
+        dirtyIds.forEach(workItemId => {
+            const d = currentDrafts[workItemId];
+            const meta = itemLookup[workItemId];
+            if (!d?.value || !meta) return;
+            entries.push({
+                workItemId,
+                value: d.value,
+                equipmentId: d.equipmentId || meta.equipmentId || undefined,
+                version: versionMapRef.current[workItemId] ?? meta.version
             });
-        }
+        });
+
+        return entries;
+    }, []);
+
+    // ─── Auto-save server helper (debounced, delta-only, tab-independent) ───
+    const autoSaveToServer = useCallback(async () => {
+        if (!token) return;
+        if (isHydratingDraftsRef.current) return; // Fix 2: suppress during hydration
+
+        const entries = buildDirtyEntries();
 
         if (entries.length === 0) {
-            dirtySetRef.current = new Set(); // Clear even if nothing to send
+            dirtySetRef.current = new Set();
             return;
         }
 
         // Snapshot dirty IDs before clearing (so new edits during save are tracked)
-        const savedDirtyIds = new Set(dirtyIds);
+        const savedDirtyIds = new Set(dirtySetRef.current);
         dirtySetRef.current = new Set();
 
         setSaveIndicator('saving');
@@ -646,28 +668,44 @@ const TechWorkbench = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Phase 2: Process response — update versionMap + handle per-row errors
+            // Process response — update versionMap + handle per-row errors
             let hasConflict = false;
             (data.results || []).forEach(r => {
                 if (r.newVersion !== undefined) {
                     versionMapRef.current[r.workItemId] = r.newVersion;
                 }
+                // Fix 5: Per-cell "saved" feedback
+                setItemFeedback(prev => ({
+                    ...prev,
+                    [r.workItemId]: { status: 'saved', at: Date.now() }
+                }));
             });
             (data.errors || []).forEach(e => {
                 if (e.code === 'VERSION_CONFLICT') {
                     hasConflict = true;
-                    // Re-mark as dirty so it retries after refresh
                     dirtySetRef.current.add(e.workItemId);
                 }
-                // Surface per-row errors in itemFeedback
                 setItemFeedback(prev => ({
                     ...prev,
                     [e.workItemId]: { status: 'error', error: e.error, code: e.code }
                 }));
             });
 
+            // Fix 5: Auto-clear "saved" indicators after 2.5s
+            if (data.results?.length > 0) {
+                const savedIds = data.results.map(r => r.workItemId);
+                setTimeout(() => {
+                    setItemFeedback(prev => {
+                        const next = { ...prev };
+                        savedIds.forEach(id => {
+                            if (next[id]?.status === 'saved') delete next[id];
+                        });
+                        return next;
+                    });
+                }, 2500);
+            }
+
             if (hasConflict) {
-                // Refresh queue to get fresh versions for conflicted rows
                 fetchQueue(true);
                 setSaveIndicator('error');
             } else if (data.errors?.length > 0) {
@@ -679,17 +717,17 @@ const TechWorkbench = () => {
             }
         } catch (err) {
             console.error('Auto-save failed:', err);
-            // Re-add dirty IDs so they retry on next cycle
             savedDirtyIds.forEach(id => dirtySetRef.current.add(id));
             setSaveIndicator('error');
         } finally {
             serverSavePending.current = false;
         }
-    }, [activeGroup, token, fetchQueue]);
+    }, [token, fetchQueue, buildDirtyEntries]);
 
     // ─── AutoSave drafts to localStorage + server (debounced) ───
     useEffect(() => {
         if (!activeTab || !user) return;
+        if (isHydratingDraftsRef.current) return; // Fix 2: skip during hydration
         if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
         if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
 
@@ -711,9 +749,11 @@ const TechWorkbench = () => {
             }
         }, 300); // localStorage: fast
 
-        // Server save: slightly longer debounce
+        // Server save: slightly longer debounce (fix 1: tab-independent via buildDirtyEntries)
         serverSaveTimer.current = setTimeout(() => {
-            autoSaveToServer();
+            if (dirtySetRef.current.size > 0) {
+                autoSaveToServer();
+            }
         }, AUTOSAVE_INTERVAL);
 
         return () => {
@@ -721,6 +761,64 @@ const TechWorkbench = () => {
             if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
         };
     }, [draftValues, activeTab, user, groups, autoSaveToServer]);
+
+    // ─── Fix 3: Unload / page-hide flush (keepalive fetch) ───
+    useEffect(() => {
+        const flushDirty = () => {
+            if (dirtySetRef.current.size === 0) return;
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) return;
+
+            const entries = buildDirtyEntries();
+            if (entries.length === 0) return;
+
+            // Cap at 100 entries for keepalive payload limit (~64KB)
+            const capped = entries.slice(0, 100);
+            try {
+                fetch('/api/workbench/batch-save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify({ entries: capped, draft: true }),
+                    keepalive: true
+                });
+                dirtySetRef.current = new Set();
+            } catch (e) {
+                console.error('[FLUSH] Failed to flush dirty drafts:', e);
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') flushDirty();
+        };
+        const handleBeforeUnload = () => flushDirty();
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [buildDirtyEntries]);
+
+    // ─── Fix 4: WebSocket WORKITEM_CHANGED subscription with throttle ───
+    useEffect(() => {
+        if (!subscribeToEvent) return;
+        const handleWsEvent = (data) => {
+            // Ignore self-originated draft saves to reduce churn
+            if (data.updatedBy === user?.username && data.action === 'DRAFT_SAVE') return;
+            // Throttle: min 2s between refreshes
+            const now = Date.now();
+            if (now - wsRefreshThrottleRef.current < 2000) return;
+            wsRefreshThrottleRef.current = now;
+            fetchQueue(true);
+        };
+        const unsubscribe = subscribeToEvent('WORKITEM_CHANGED', handleWsEvent);
+        return () => unsubscribe();
+    }, [subscribeToEvent, user, fetchQueue]);
 
     // ─── Process batch response — Fix 1: rich feedback ───
     const processBatchResponse = (data, isDraft) => {
@@ -1376,10 +1474,15 @@ const TechWorkbench = () => {
                                                         </td>
                                                     )}
                                                     <td className="py-2.5 pr-4">
-                                                        <ValidationIndicator value={displayValue} validation={activeGroup.validation} />
+                                                        <div className="flex items-center gap-1">
+                                                            <ValidationIndicator value={displayValue} validation={activeGroup.validation} />
+                                                            {feedback?.status === 'saved' && (
+                                                                <span className="text-[10px] text-emerald-500 font-medium animate-pulse">✓ Saved</span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="py-2.5">
-                                                        <StatusBadge status={feedback?.status || item.status} />
+                                                        <StatusBadge status={feedback?.status === 'saved' ? item.status : (feedback?.status || item.status)} />
                                                     </td>
                                                 </tr>
                                                 {/* Error message row */}

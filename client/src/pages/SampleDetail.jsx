@@ -204,8 +204,8 @@ const SampleDetail = () => {
     const handleApproveIntake = async () => {
         requestConfirmation(t('sampleDetail.approveIntake', 'Approve Intake'), t('forms.confirmIntakeApproval', 'Confirm Intake Approval? This will finalize the record and generate laboratory work items.'), async () => {
             try {
-                const newStatus = 'ACCEPTED';
-                await axios.put(`/api/samples/${sample.id}/status`, { status: newStatus, reason: 'Manager Approval' });
+                // Finding #10: Use dedicated /accept endpoint for proper metadata + work item generation
+                await axios.post(`/api/samples/${sample.id}/accept`);
                 showInfo(t('common.success', 'Success'), t('forms.intakeApproved', 'Sample Approved for Laboratory Processing!'));
                 fetchData();
             } catch (e) {
@@ -363,7 +363,7 @@ const SampleDetail = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 md:p-6 text-left relative flex overflow-x-hidden">
             {/* Main Content Area - FULL WIDTH */}
-            <div className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] w-full max-w-[100vw] ${drawerOpen ? 'mr-96 opacity-90 scale-[0.99] translate-x-[-10px]' : 'mr-12'} pr-8`}>
+            <div className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] w-full max-w-[100vw] ${drawerOpen ? 'md:mr-96 md:opacity-90 md:scale-[0.99] md:translate-x-[-10px]' : 'md:mr-12'} md:pr-8`}>
 
                 {/* 1. Header & Summary */}
                 <div className="relative z-10">

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
-import { Search, Upload, Activity, RefreshCw, Eye, FileText, Download, CheckCircle, AlertTriangle, XCircle, Trash, Database, Sparkles, BarChart3, Calendar, User, Cpu, Clock, ThumbsUp, ThumbsDown, Shield, ClipboardCheck, Undo2, Trash2, RotateCcw, AlertOctagon } from 'lucide-react';
+import { Search, Upload, Activity, RefreshCw, Eye, FileText, Download, CheckCircle, AlertTriangle, XCircle, Trash, Database, Sparkles, BarChart3, Calendar, User, Cpu, Clock, ThumbsUp, ThumbsDown, Shield, ClipboardCheck, Undo2, Trash2, RotateCcw, AlertOctagon, ChevronDown, ChevronRight } from 'lucide-react';
 import SpectraBatchUpload from '../components/SpectraBatchUpload';
 import SpectraViewer from '../components/SpectraViewer';
 import InfoTooltip from '../components/common/InfoTooltip';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import { useNotifications } from '../context/NotificationContext';
 
 const SpectralLibrary = () => {
     const { user } = useAuth();
@@ -14,9 +15,46 @@ const SpectralLibrary = () => {
     const [spectraList, setSpectraList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedScan, setSelectedScan] = useState(null);
+    const [overlayScans, setOverlayScans] = useState(null); // Array of scan objects for overlay mode
     const [filters, setFilters] = useState({ search: '', modality: '', qcStatus: '', status: '' });
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [batchLoading, setBatchLoading] = useState(false);
+    const [expandedGroups, setExpandedGroups] = useState(new Set());
+
+    // Group scans by sampleId for collapsible display
+    const groupedData = useMemo(() => {
+        const groups = {};
+        spectraList.forEach(scan => {
+            const key = scan.sampleId || scan.id; // ungrouped scans use their own id
+            if (!groups[key]) {
+                groups[key] = {
+                    sampleId: scan.sampleId,
+                    labId: scan.labId,
+                    scans: []
+                };
+            }
+            groups[key].scans.push(scan);
+        });
+        return Object.values(groups).map(g => {
+            const nirCount = g.scans.filter(s => s.modality === 'NIR').length;
+            const mirCount = g.scans.filter(s => s.modality === 'MIR').length;
+            const latestDate = g.scans.reduce((latest, s) => {
+                const d = s.metadata?.scanDate || s.timestamp;
+                return d > latest ? d : latest;
+            }, '');
+            const statuses = [...new Set(g.scans.map(s => s.status))];
+            return { ...g, nirCount, mirCount, latestDate, statuses, scanCount: g.scans.length };
+        });
+    }, [spectraList]);
+
+    const toggleGroup = (key) => {
+        setExpandedGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
+            return next;
+        });
+    };
 
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
     const isTrashView = filters.status === 'DELETED';
@@ -181,6 +219,25 @@ const SpectralLibrary = () => {
         fetchLibrary();
     }, [filters]);
 
+    // Real-time: auto-refresh on SPECTRAL_UPDATE or WORKITEM_CHANGED events
+    const { subscribeToEvent } = useNotifications();
+    useEffect(() => {
+        if (!subscribeToEvent) return;
+        let debounceTimer = null;
+        const debouncedRefresh = () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => fetchLibrary(), 500);
+        };
+        const unsubs = [
+            subscribeToEvent('SPECTRAL_UPDATE', debouncedRefresh),
+            subscribeToEvent('WORKITEM_CHANGED', debouncedRefresh),
+        ];
+        return () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            unsubs.forEach(u => u && u());
+        };
+    }, [subscribeToEvent, fetchLibrary]);
+
     // Selection helpers
     const toggleSelect = (id) => {
         setSelectedIds(prev => {
@@ -208,6 +265,7 @@ const SpectralLibrary = () => {
     const [viewerLoading, setViewerLoading] = useState(false);
     const openViewer = async (scanId) => {
         setViewerLoading(true);
+        setOverlayScans(null); // Clear overlay when opening single scan
         try {
             const res = await axios.get(`/api/spectral/${scanId}`);
             const chartData = res.data.wavelengths.map((w, i) => ({
@@ -217,6 +275,35 @@ const SpectralLibrary = () => {
             setSelectedScan({ ...res.data, chartData });
         } catch (e) {
             showDialog({ type: 'error', title: 'Error', message: 'Failed to load spectral data' });
+        } finally {
+            setViewerLoading(false);
+        }
+    };
+
+    // Compare all scans in a group (overlay mode)
+    const handleCompareGroup = async (group) => {
+        setViewerLoading(true);
+        setSelectedScan(null);
+        try {
+            const scanPromises = group.scans.map(s => axios.get(`/api/spectral/${s.id}`));
+            const responses = await Promise.all(scanPromises);
+            const loaded = responses.map(res => {
+                const d = res.data;
+                const chartData = (d.wavelengths || []).map((w, i) => ({
+                    wavelength: w,
+                    absorbance: d.values ? d.values[i] : 0
+                }));
+                return {
+                    ...d,
+                    chartData,
+                    metadata: typeof d.metadata === 'string' ? JSON.parse(d.metadata) : d.metadata
+                };
+            });
+            setOverlayScans(loaded);
+            // Set a dummy selectedScan to trigger the modal
+            setSelectedScan({ _overlay: true, labId: group.labId, modality: loaded[0]?.modality });
+        } catch (e) {
+            showDialog({ type: 'error', title: 'Error', message: 'Failed to load scans for comparison' });
         } finally {
             setViewerLoading(false);
         }
@@ -587,164 +674,230 @@ const SpectralLibrary = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    spectraList.map(scan => {
-                                        const isReviewable = ['PENDING', 'VALIDATED'].includes(scan.status);
-                                        const hasLinkedSample = !!scan.sampleId;
+                                    groupedData.map(group => {
+                                        const groupKey = group.sampleId || group.scans[0]?.id;
+                                        const isExpanded = expandedGroups.has(groupKey);
+                                        const isSingleScan = group.scanCount === 1;
+                                        const hasLinkedSample = !!group.sampleId;
 
-                                        return (
-                                            <tr key={scan.id} className={`hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors group ${scan.status === 'VALIDATED' ? 'bg-amber-50/30 dark:bg-amber-900/10' : ''} ${scan.status === 'REJECTED' ? 'bg-red-50/20 dark:bg-red-900/5' : ''}`}>
-                                                {/* Checkbox */}
-                                                {isManager && !isTrashView && (
-                                                    <td className="pl-4 pr-2 py-4">
-                                                        {isReviewable ? (
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedIds.has(scan.id)}
-                                                                onChange={() => toggleSelect(scan.id)}
-                                                                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                            />
+                                        // For single-scan groups, render flat (no expand/collapse)
+                                        const renderScanRow = (scan, indent = false) => {
+                                            const isReviewable = ['PENDING', 'VALIDATED'].includes(scan.status);
+                                            return (
+                                                <tr key={scan.id} className={`hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors group ${scan.status === 'VALIDATED' ? 'bg-amber-50/30 dark:bg-amber-900/10' : ''} ${scan.status === 'REJECTED' ? 'bg-red-50/20 dark:bg-red-900/5' : ''}`}>
+                                                    {isManager && !isTrashView && (
+                                                        <td className="pl-4 pr-2 py-4">
+                                                            {isReviewable ? (
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedIds.has(scan.id)}
+                                                                    onChange={() => toggleSelect(scan.id)}
+                                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-4 h-4" />
+                                                            )}
+                                                        </td>
+                                                    )}
+                                                    <td className={`px-6 py-4 ${indent ? 'pl-14' : ''}`}>
+                                                        {indent ? (
+                                                            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                                                v{scan.metadata?.scanVersion || '1'} — {scan.filename}
+                                                            </span>
+                                                        ) : hasLinkedSample ? (
+                                                            <a
+                                                                href={`/samples/${scan.sampleId}`}
+                                                                className="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                                                                title={`View sample ${scan.sampleId}`}
+                                                            >
+                                                                {getDisplayLabId(scan)}
+                                                            </a>
                                                         ) : (
-                                                            <div className="w-4 h-4" />
+                                                            <Tip label="Not linked to a sample record">
+                                                                <span className="font-mono font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                                                    {getDisplayLabId(scan)}
+                                                                    <AlertTriangle size={13} className="text-amber-500" />
+                                                                </span>
+                                                            </Tip>
                                                         )}
                                                     </td>
-                                                )}
-                                                {/* Lab ID - conditional link */}
-                                                <td className="px-6 py-4">
-                                                    {hasLinkedSample ? (
-                                                        <a
-                                                            href={`/samples/${scan.sampleId}`}
-                                                            className="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
-                                                            title={`View sample ${scan.sampleId}`}
-                                                        >
-                                                            {getDisplayLabId(scan)}
-                                                        </a>
-                                                    ) : (
-                                                        <Tip label="Not linked to a sample record">
-                                                            <span className="font-mono font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                                                {getDisplayLabId(scan)}
-                                                                <AlertTriangle size={13} className="text-amber-500" />
-                                                            </span>
-                                                        </Tip>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${scan.modality === 'NIR'
-                                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
-                                                        : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm'
-                                                        }`}>
-                                                        <Sparkles size={12} />
-                                                        {scan.modality}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        {scan.qcStatus === 'PASS' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                                                <CheckCircle size={12} />PASS
-                                                            </span>
-                                                        )}
-                                                        {scan.qcStatus === 'WARN' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                                                <AlertTriangle size={12} />WARN
-                                                            </span>
-                                                        )}
-                                                        {scan.qcStatus === 'FAIL' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                                                                <XCircle size={12} />FAIL
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    {getStatusBadge(scan.status)}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                                    {formatDate(scan.metadata?.scanDate || scan.timestamp)}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                        {/* TRASH VIEW ACTIONS */}
-                                                        {isTrashView ? (
-                                                            <>
-                                                                <Tip label="Restore spectrum">
-                                                                    <button
-                                                                        onClick={() => handleRestore(scan.id, getDisplayLabId(scan))}
-                                                                        className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 transition-colors"
-                                                                    >
-                                                                        <RotateCcw size={18} />
-                                                                    </button>
-                                                                </Tip>
-                                                                <Tip label="Permanently delete">
-                                                                    <button
-                                                                        onClick={() => handlePermanentDelete(scan.id, getDisplayLabId(scan))}
-                                                                        className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors"
-                                                                    >
-                                                                        <AlertOctagon size={18} />
-                                                                    </button>
-                                                                </Tip>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                {/* View */}
-                                                                <Tip label="View spectrum chart">
-                                                                    <button
-                                                                        onClick={() => openViewer(scan.id)}
-                                                                        className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 transition-colors"
-                                                                    >
-                                                                        <Eye size={18} />
-                                                                    </button>
-                                                                </Tip>
-
-                                                                {/* Manager Review Actions */}
-                                                                {isManager && isReviewable && (
-                                                                    <>
-                                                                        <Tip label="Approve spectrum">
-                                                                            <button
-                                                                                onClick={() => handleReview(scan.id, 'APPROVE', getDisplayLabId(scan))}
-                                                                                className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 transition-colors"
-                                                                            >
-                                                                                <ThumbsUp size={18} />
-                                                                            </button>
-                                                                        </Tip>
-                                                                        <Tip label="Reject spectrum">
-                                                                            <button
-                                                                                onClick={() => handleReview(scan.id, 'REJECT', getDisplayLabId(scan))}
-                                                                                className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors"
-                                                                            >
-                                                                                <ThumbsDown size={18} />
-                                                                            </button>
-                                                                        </Tip>
-                                                                    </>
-                                                                )}
-
-                                                                {/* Undo Reject */}
-                                                                {isManager && scan.status === 'REJECTED' && (
-                                                                    <Tip label="Undo rejection">
-                                                                        <button
-                                                                            onClick={() => handleReview(scan.id, 'UNDO', getDisplayLabId(scan))}
-                                                                            className="p-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 transition-colors"
-                                                                        >
-                                                                            <Undo2 size={18} />
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${scan.modality === 'NIR'
+                                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
+                                                            : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm'
+                                                            }`}>
+                                                            <Sparkles size={12} />
+                                                            {scan.modality}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            {scan.qcStatus === 'PASS' && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                                    <CheckCircle size={12} />PASS
+                                                                </span>
+                                                            )}
+                                                            {scan.qcStatus === 'WARN' && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                                                    <AlertTriangle size={12} />WARN
+                                                                </span>
+                                                            )}
+                                                            {scan.qcStatus === 'FAIL' && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                                                    <XCircle size={12} />FAIL
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {getStatusBadge(scan.status)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                        {formatDate(scan.metadata?.scanDate || scan.timestamp)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                            {isTrashView ? (
+                                                                <>
+                                                                    <Tip label="Restore spectrum">
+                                                                        <button onClick={() => handleRestore(scan.id, getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 transition-colors">
+                                                                            <RotateCcw size={18} />
                                                                         </button>
                                                                     </Tip>
-                                                                )}
-
-                                                                {/* Trash */}
-                                                                {isManager && (
-                                                                    <Tip label="Move to trash">
-                                                                        <button
-                                                                            onClick={() => handleDelete(scan.id, getDisplayLabId(scan))}
-                                                                            className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors"
-                                                                        >
-                                                                            <Trash size={18} />
+                                                                    <Tip label="Permanently delete">
+                                                                        <button onClick={() => handlePermanentDelete(scan.id, getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors">
+                                                                            <AlertOctagon size={18} />
                                                                         </button>
                                                                     </Tip>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Tip label="View spectrum chart">
+                                                                        <button onClick={() => openViewer(scan.id)} className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 transition-colors">
+                                                                            <Eye size={18} />
+                                                                        </button>
+                                                                    </Tip>
+                                                                    {isManager && isReviewable && (
+                                                                        <>
+                                                                            <Tip label="Approve spectrum">
+                                                                                <button onClick={() => handleReview(scan.id, 'APPROVE', getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 transition-colors">
+                                                                                    <ThumbsUp size={18} />
+                                                                                </button>
+                                                                            </Tip>
+                                                                            <Tip label="Reject spectrum">
+                                                                                <button onClick={() => handleReview(scan.id, 'REJECT', getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors">
+                                                                                    <ThumbsDown size={18} />
+                                                                                </button>
+                                                                            </Tip>
+                                                                        </>
+                                                                    )}
+                                                                    {isManager && scan.status === 'REJECTED' && (
+                                                                        <Tip label="Undo rejection">
+                                                                            <button onClick={() => handleReview(scan.id, 'UNDO', getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 transition-colors">
+                                                                                <Undo2 size={18} />
+                                                                            </button>
+                                                                        </Tip>
+                                                                    )}
+                                                                    {isManager && (
+                                                                        <Tip label="Move to trash">
+                                                                            <button onClick={() => handleDelete(scan.id, getDisplayLabId(scan))} className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition-colors">
+                                                                                <Trash size={18} />
+                                                                            </button>
+                                                                        </Tip>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        };
+
+                                        // Single-scan group: render flat row (no header)
+                                        if (isSingleScan) {
+                                            return renderScanRow(group.scans[0]);
+                                        }
+
+                                        // Multi-scan group: collapsible header + child rows
+                                        return (
+                                            <React.Fragment key={groupKey}>
+                                                {/* Group Header Row */}
+                                                <tr
+                                                    className="bg-indigo-50/50 dark:bg-indigo-900/10 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors border-t border-indigo-100 dark:border-indigo-800/30"
+                                                    onClick={() => toggleGroup(groupKey)}
+                                                >
+                                                    {isManager && !isTrashView && <td className="pl-4 pr-2 py-3"><div className="w-4 h-4" /></td>}
+                                                    <td className="px-6 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            {isExpanded
+                                                                ? <ChevronDown size={16} className="text-indigo-500" />
+                                                                : <ChevronRight size={16} className="text-indigo-400" />
+                                                            }
+                                                            {hasLinkedSample ? (
+                                                                <a
+                                                                    href={`/samples/${group.sampleId}`}
+                                                                    className="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400"
+                                                                    onClick={e => e.stopPropagation()}
+                                                                >
+                                                                    {group.labId}
+                                                                </a>
+                                                            ) : (
+                                                                <span className="font-mono font-bold text-gray-600 dark:text-gray-300">{group.labId}</span>
+                                                            )}
+                                                            <span className="text-xs text-gray-400 font-medium">
+                                                                ({group.scanCount} scans)
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-3">
+                                                        <div className="flex items-center gap-1.5">
+                                                            {group.nirCount > 0 && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                                                    {group.nirCount} NIR
+                                                                </span>
+                                                            )}
+                                                            {group.mirCount > 0 && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                                    {group.mirCount} MIR
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-3">
+                                                        <span className="text-xs text-gray-400">—</span>
+                                                    </td>
+                                                    <td className="px-6 py-3">
+                                                        <div className="flex items-center gap-1">
+                                                            {group.statuses.map(st => (
+                                                                <span key={st}>{getStatusBadge(st)}</span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                        {formatDate(group.latestDate)}
+                                                    </td>
+                                                    <td className="px-6 py-3 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            {group.scanCount > 1 && (
+                                                                <Tip label="Overlay all scans">
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); handleCompareGroup(group); }}
+                                                                        className="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 transition-colors flex items-center gap-1.5"
+                                                                    >
+                                                                        <BarChart3 size={13} />
+                                                                        Compare
+                                                                    </button>
+                                                                </Tip>
+                                                            )}
+                                                            <span className="text-xs text-indigo-400 font-medium">
+                                                                {isExpanded ? 'Collapse' : 'Expand'}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {/* Child Scan Rows */}
+                                                {isExpanded && group.scans.map(scan => renderScanRow(scan, true))}
+                                            </React.Fragment>
                                         );
                                     })
                                 )}
@@ -799,7 +952,7 @@ const SpectralLibrary = () => {
                                         <Download size={20} />
                                     </button>
                                 </Tip>
-                                <button onClick={() => setSelectedScan(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                <button onClick={() => { setSelectedScan(null); setOverlayScans(null); }} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
                                     <XCircle size={24} />
                                 </button>
                             </div>
@@ -807,102 +960,104 @@ const SpectralLibrary = () => {
 
                         <div className="flex-1 flex overflow-hidden">
                             {/* Chart Area */}
-                            <div className="flex-1 p-6 overflow-hidden flex flex-col bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-                                <SpectraViewer data={selectedScan} />
+                            <div className={`flex-1 p-6 overflow-hidden flex flex-col bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ${overlayScans ? '' : ''}`}>
+                                <SpectraViewer data={selectedScan} overlayData={overlayScans} />
                             </div>
 
-                            {/* Sidebar Info */}
-                            <div className="w-80 border-l border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 overflow-y-auto">
-                                <h3 className="font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                    <FileText size={16} /> Metadata
-                                </h3>
-                                <div className="space-y-4 text-sm">
-                                    <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                        <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Cpu size={12} /> Instrument</label>
-                                        <div className="font-bold text-gray-900 dark:text-white mt-1">{getInstrumentDisplay(selectedScan)}</div>
-                                    </div>
-                                    <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                        <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Calendar size={12} /> Scan Date</label>
-                                        <div className="font-bold text-gray-900 dark:text-white mt-1">{formatDate(selectedScan.metadata?.scanDate || selectedScan.timestamp)}</div>
-                                    </div>
-                                    <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                        <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><User size={12} /> Operator</label>
-                                        <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.metadata?.operator || selectedScan.uploadedBy || 'System'}</div>
-                                    </div>
-
-                                    <hr className="border-gray-200 dark:border-gray-700" />
-
-                                    <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                        <CheckCircle size={16} /> QC Report
+                            {/* Sidebar Info - hidden in overlay mode */}
+                            {!overlayScans && (
+                                <div className="w-80 border-l border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 overflow-y-auto">
+                                    <h3 className="font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                        <FileText size={16} /> Metadata
                                     </h3>
-                                    <div className={`p-4 rounded-xl border ${selectedScan.qcStatus === 'PASS' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
-                                        selectedScan.qcStatus === 'WARN' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
-                                            'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
-                                        }`}>
-                                        <div className={`font-black text-lg mb-2 flex items-center gap-2 ${selectedScan.qcStatus === 'PASS' ? 'text-green-700 dark:text-green-400' :
-                                            selectedScan.qcStatus === 'WARN' ? 'text-amber-700 dark:text-amber-400' :
-                                                'text-red-700 dark:text-red-400'
-                                            }`}>
-                                            {selectedScan.qcStatus === 'PASS' && <CheckCircle size={20} />}
-                                            {selectedScan.qcStatus === 'WARN' && <AlertTriangle size={20} />}
-                                            {selectedScan.qcStatus === 'FAIL' && <XCircle size={20} />}
-                                            {selectedScan.qcStatus}
+                                    <div className="space-y-4 text-sm">
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                            <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Cpu size={12} /> Instrument</label>
+                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{getInstrumentDisplay(selectedScan)}</div>
                                         </div>
-                                        {selectedScan.qcFlags && selectedScan.qcFlags.length > 0 ? (
-                                            <ul className="list-disc pl-4 text-xs space-y-1">
-                                                {selectedScan.qcFlags.map(f => <li key={f} className="text-gray-700 dark:text-gray-300">{f}</li>)}
-                                            </ul>
-                                        ) : (
-                                            <div className="text-xs text-green-600 dark:text-green-400">✓ All quality checks passed</div>
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                            <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Calendar size={12} /> Scan Date</label>
+                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{formatDate(selectedScan.metadata?.scanDate || selectedScan.timestamp)}</div>
+                                        </div>
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                            <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><User size={12} /> Operator</label>
+                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.metadata?.operator || selectedScan.uploadedBy || 'System'}</div>
+                                        </div>
+
+                                        <hr className="border-gray-200 dark:border-gray-700" />
+
+                                        <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                            <CheckCircle size={16} /> QC Report
+                                        </h3>
+                                        <div className={`p-4 rounded-xl border ${selectedScan.qcStatus === 'PASS' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
+                                            selectedScan.qcStatus === 'WARN' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
+                                                'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                                            }`}>
+                                            <div className={`font-black text-lg mb-2 flex items-center gap-2 ${selectedScan.qcStatus === 'PASS' ? 'text-green-700 dark:text-green-400' :
+                                                selectedScan.qcStatus === 'WARN' ? 'text-amber-700 dark:text-amber-400' :
+                                                    'text-red-700 dark:text-red-400'
+                                                }`}>
+                                                {selectedScan.qcStatus === 'PASS' && <CheckCircle size={20} />}
+                                                {selectedScan.qcStatus === 'WARN' && <AlertTriangle size={20} />}
+                                                {selectedScan.qcStatus === 'FAIL' && <XCircle size={20} />}
+                                                {selectedScan.qcStatus}
+                                            </div>
+                                            {selectedScan.qcFlags && selectedScan.qcFlags.length > 0 ? (
+                                                <ul className="list-disc pl-4 text-xs space-y-1">
+                                                    {selectedScan.qcFlags.map(f => <li key={f} className="text-gray-700 dark:text-gray-300">{f}</li>)}
+                                                </ul>
+                                            ) : (
+                                                <div className="text-xs text-green-600 dark:text-green-400">✓ All quality checks passed</div>
+                                            )}
+                                        </div>
+
+                                        {/* Approval section */}
+                                        {selectedScan.reviewedBy && (
+                                            <>
+                                                <hr className="border-gray-200 dark:border-gray-700" />
+                                                <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                                    <Shield size={16} /> Manager Review
+                                                </h3>
+                                                <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                                    <div className="text-xs text-gray-400 uppercase">Reviewed By</div>
+                                                    <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.reviewedBy}</div>
+                                                    <div className="text-xs text-gray-500 mt-1">{formatDate(selectedScan.reviewedAt)}</div>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Manager review buttons in modal */}
+                                        {isManager && ['PENDING', 'VALIDATED'].includes(selectedScan.status) && (
+                                            <div className="flex gap-2 pt-4">
+                                                <button
+                                                    onClick={() => { handleReview(selectedScan.id, 'APPROVE', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
+                                                    className="flex-1 py-2 bg-green-600 text-white rounded-lg font-bold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <ThumbsUp size={16} /> Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => { handleReview(selectedScan.id, 'REJECT', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
+                                                    className="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <ThumbsDown size={16} /> Reject
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Undo reject button in modal */}
+                                        {isManager && selectedScan.status === 'REJECTED' && (
+                                            <div className="pt-4">
+                                                <button
+                                                    onClick={() => { handleReview(selectedScan.id, 'UNDO', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
+                                                    className="w-full py-2 bg-amber-500 text-white rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <Undo2 size={16} /> Undo Rejection
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
-
-                                    {/* Approval section */}
-                                    {selectedScan.reviewedBy && (
-                                        <>
-                                            <hr className="border-gray-200 dark:border-gray-700" />
-                                            <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                                <Shield size={16} /> Manager Review
-                                            </h3>
-                                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                                <div className="text-xs text-gray-400 uppercase">Reviewed By</div>
-                                                <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.reviewedBy}</div>
-                                                <div className="text-xs text-gray-500 mt-1">{formatDate(selectedScan.reviewedAt)}</div>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {/* Manager review buttons in modal */}
-                                    {isManager && ['PENDING', 'VALIDATED'].includes(selectedScan.status) && (
-                                        <div className="flex gap-2 pt-4">
-                                            <button
-                                                onClick={() => { handleReview(selectedScan.id, 'APPROVE', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
-                                                className="flex-1 py-2 bg-green-600 text-white rounded-lg font-bold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <ThumbsUp size={16} /> Approve
-                                            </button>
-                                            <button
-                                                onClick={() => { handleReview(selectedScan.id, 'REJECT', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
-                                                className="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <ThumbsDown size={16} /> Reject
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Undo reject button in modal */}
-                                    {isManager && selectedScan.status === 'REJECTED' && (
-                                        <div className="pt-4">
-                                            <button
-                                                onClick={() => { handleReview(selectedScan.id, 'UNDO', getDisplayLabId(selectedScan)); setSelectedScan(null); }}
-                                                className="w-full py-2 bg-amber-500 text-white rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <Undo2 size={16} /> Undo Rejection
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

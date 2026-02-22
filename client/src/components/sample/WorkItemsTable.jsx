@@ -245,7 +245,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                             onClick={() => setShowMyAssignedOnly(!showMyAssignedOnly)}
                             className={`text-xs font-bold px-3 py-1 rounded-full border transition-colors ${showMyAssignedOnly
                                 ? 'bg-indigo-100 text-indigo-700 border-indigo-200 shadow-sm'
-                                : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'
+                                : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                 }`}
                         >
                             {showMyAssignedOnly ? 'Showing: My Assignments' : 'Showing: All'}
@@ -305,7 +305,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             )}
 
             <div className="overflow-auto max-h-[70vh]"> {/* Scrollable Container */}
-                <table className="w-full text-left border-collapse relative">
+                <table className="w-full text-left border-collapse relative min-w-[800px]">
                     <thead className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                         <tr>
                             {isManager && (
@@ -669,19 +669,19 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             {
                 selectedScan && (
                     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col">
-                            <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col">
+                            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 rounded-t-xl">
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-800">
-                                        {selectedScan.labId} <span className="text-gray-400">|</span> {selectedScan.modality}
+                                        {selectedScan.labId} <span className="text-gray-400 dark:text-gray-500">|</span> {selectedScan.modality}
                                     </h2>
                                     <p className="text-xs text-gray-500">{selectedScan.id}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={handleDownload} className="p-2 hover:bg-gray-200 rounded-full text-blue-600" title="Download CSV">
+                                    <button onClick={handleDownload} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-blue-600 dark:text-blue-400" title="Download CSV">
                                         <Download size={20} />
                                     </button>
-                                    <button onClick={() => setSelectedScan(null)} className="p-2 hover:bg-gray-200 rounded-full">
+                                    <button onClick={() => setSelectedScan(null)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full">
                                         <XCircle size={24} className="text-gray-500" />
                                     </button>
                                 </div>
@@ -694,8 +694,8 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                 </div>
 
                                 {/* Sidebar Info */}
-                                <div className="w-80 border-l bg-gray-50 p-6 overflow-y-auto">
-                                    <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                                <div className="w-80 border-l dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-6 overflow-y-auto">
+                                    <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
                                         <FileText size={16} /> Metadata
                                     </h3>
                                     <div className="space-y-4 text-sm">
@@ -716,12 +716,12 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                             <div className="break-all text-xs text-gray-600">{selectedScan.metadata.filename}</div>
                                         </div>
 
-                                        <hr className="border-gray-200" />
+                                        <hr className="border-gray-200 dark:border-gray-600" />
 
-                                        <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                        <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
                                             <CheckCircle size={16} /> QC Report
                                         </h3>
-                                        <div className={`p-3 rounded-lg border ${selectedScan.qcStatus === 'PASS' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                                        <div className={`p-3 rounded-lg border ${selectedScan.qcStatus === 'PASS' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300'}`}>
                                             <div className="font-bold mb-1">Status: {selectedScan.qcStatus}</div>
                                             {selectedScan.qcFlags && selectedScan.qcFlags.length > 0 ? (
                                                 <ul className="list-disc pl-4 text-xs">
@@ -741,8 +741,8 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             {/* Spectra Batch Upload Modal (Reused for Single Item Upload) */}
             {showUploadModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
-                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
+                        <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-700/50">
                             <h3 className="font-bold text-lg">Upload Spectrum for {uploadItem?.labId}</h3>
                             <button onClick={() => setShowUploadModal(false)} className="text-gray-400 hover:text-gray-600">
                                 <XCircle size={24} />

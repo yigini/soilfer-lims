@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
 const { validateSpectra } = require('../services/spectralValidation');
 const crypto = require('crypto');
+const { broadcastToAll } = require('../wsServer');
 
 // Helper: Calculate Checksum
 const calculateChecksum = (dataString) => {
@@ -351,35 +352,17 @@ exports.uploadBatch = async (req, res) => {
                 });
             }
 
-            // 1.5 Check for existing spectral data (for overwrite - only if sample matched)
-            let overwritten = false;
+            // 1.5 Count existing scans for versioning (multi-scan: no overwrite)
+            let scanVersion = 1;
             if (sample) {
-                const existingSpectra = await prisma.spectralData.findMany({
+                const existingCount = await prisma.spectralData.count({
                     where: {
                         sampleId: sample.id,
-                        modality: scanItem.modality || 'NIR'
+                        modality: scanItem.modality || 'NIR',
+                        status: { not: 'DELETED' }
                     }
                 });
-                if (existingSpectra.length > 0) {
-                    for (const oldSpec of existingSpectra) {
-                        await prisma.spectralData.delete({ where: { id: oldSpec.id } });
-                        await prisma.auditLog.create({
-                            data: {
-                                id: `audit-spec-overwrite-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                                entity: 'SPECTRA',
-                                entityId: oldSpec.id,
-                                action: 'SPECTRA_REPLACED',
-                                performedBy: user ? user.username : 'system',
-                                timestamp: new Date(),
-                                sampleId: sample.id,
-                                details: `Previous ${oldSpec.modality} spectrum replaced. Original: ${oldSpec.timestamp}`
-                            }
-                        });
-                    }
-                    overwritten = true;
-                    if (!results.overwrites) results.overwrites = [];
-                    results.overwrites.push({ labId: sample.labId, modality: scanItem.modality || 'NIR', count: existingSpectra.length });
-                }
+                scanVersion = existingCount + 1;
             }
 
             // 1.6 Auto-Sort Data
@@ -417,7 +400,7 @@ exports.uploadBatch = async (req, res) => {
                         operator: user ? user.username : 'system',
                         scanDate: scanItem.scanDate || new Date().toISOString(),
                         importBatchId: batchId,
-                        replacedPrevious: overwritten,
+                        scanVersion: scanVersion,
                         csvLabId: scanItem.labId,
                         linkedSampleId: sample ? sample.id : null,
                         autoApproved: canAutoApprove ? true : undefined
@@ -510,6 +493,13 @@ exports.uploadBatch = async (req, res) => {
                             history: JSON.stringify(history)
                         }
                     });
+                    // Broadcast work item change
+                    broadcastToAll('WORKITEM_CHANGED', {
+                        sampleId: sample.id,
+                        workItemId: relatedItem.id,
+                        status: 'COMPLETED',
+                        source: 'spectral_upload'
+                    });
                 }
             }
         }
@@ -517,6 +507,11 @@ exports.uploadBatch = async (req, res) => {
         const skippedMsg = results.skipped > 0
             ? ` ${results.skipped} skipped (no matching sample).`
             : '';
+
+        // Broadcast spectral update for all affected samples
+        if (results.success > 0) {
+            broadcastToAll('SPECTRAL_UPDATE', { action: 'UPLOAD', count: results.success });
+        }
 
         res.json({
             message: `Batch processing complete: ${results.success} uploaded, ${results.failed} failed.${skippedMsg}`,
@@ -575,6 +570,7 @@ exports.batchReview = async (req, res) => {
                         const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
                         history.push({ status: 'COMPLETED', note: `Spectrum batch-approved by ${user.username}`, changedBy: user.username, timestamp: new Date().toISOString() });
                         await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'COMPLETED', result: `Spectrum Approved (${scan.qcStatus})`, completedAt: new Date(), history: JSON.stringify(history) } });
+                        broadcastToAll('WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'COMPLETED', source: 'spectral_batch_review' });
                     }
                 }
 
@@ -595,6 +591,7 @@ exports.batchReview = async (req, res) => {
             }
         });
 
+        broadcastToAll('SPECTRAL_UPDATE', { action: `BATCH_${action}`, count: results.succeeded });
         res.json({ success: true, message: `Batch ${action.toLowerCase()} complete: ${results.succeeded}/${ids.length} succeeded.`, results });
     } catch (e) {
         console.error("Batch Review Error:", e);
@@ -650,6 +647,7 @@ exports.batchDelete = async (req, res) => {
                         const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
                         history.push({ status: 'IN_PROGRESS', note: `Spectrum batch-trashed by ${user.username}. Task reverted.`, changedBy: user.username, timestamp: new Date().toISOString() });
                         await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'IN_PROGRESS', result: null, completedAt: null, history: JSON.stringify(history) } });
+                        broadcastToAll('WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'IN_PROGRESS', source: 'spectral_batch_trash' });
                     }
                 }
 
@@ -669,6 +667,7 @@ exports.batchDelete = async (req, res) => {
             }
         });
 
+        broadcastToAll('SPECTRAL_UPDATE', { action: 'BATCH_TRASH', count: results.succeeded });
         res.json({ success: true, message: `${results.succeeded}/${ids.length} spectra moved to trash.`, results });
     } catch (e) {
         console.error("Batch Delete Error:", e);
@@ -726,6 +725,7 @@ exports.deleteScan = async (req, res) => {
                 const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
                 history.push({ status: 'IN_PROGRESS', note: `Spectrum moved to trash by ${user.username}. Task reverted.`, changedBy: user.username, timestamp: new Date().toISOString() });
                 await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'IN_PROGRESS', result: null, completedAt: null, history: JSON.stringify(history) } });
+                broadcastToAll('WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'IN_PROGRESS', source: 'spectral_trash' });
             }
         }
 
@@ -738,6 +738,7 @@ exports.deleteScan = async (req, res) => {
             }
         });
 
+        broadcastToAll('SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: 'TRASH' });
         res.json({ success: true, message: 'Spectrum moved to trash.' });
     } catch (e) {
         console.error("Delete Scan Error:", e);
@@ -779,6 +780,7 @@ exports.restoreScan = async (req, res) => {
             }
         });
 
+        broadcastToAll('SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: 'RESTORE' });
         res.json({ success: true, message: `Spectrum restored to ${restoreTo}.` });
     } catch (e) {
         console.error("Restore Scan Error:", e);
@@ -914,6 +916,7 @@ exports.reviewSpectrum = async (req, res) => {
                         history: JSON.stringify(history)
                     }
                 });
+                broadcastToAll('WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'COMPLETED', source: 'spectral_review_approve' });
             }
         }
 
@@ -931,6 +934,7 @@ exports.reviewSpectrum = async (req, res) => {
             }
         });
 
+        broadcastToAll('SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: newStatus });
         res.json({ success: true, message: `Spectrum ${newStatus.toLowerCase()}.`, status: newStatus });
 
     } catch (e) {

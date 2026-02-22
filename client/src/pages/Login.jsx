@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
 
 const Login = () => {
-    const [username, setUsername] = useState('manager');
-    const [password, setPassword] = useState('password');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +21,14 @@ const Login = () => {
 
     const navigate = useNavigate();
     const { login } = useAuth();
-    const { t } = useLanguage();
+    const { t, locale, changeLanguage, availableLanguages } = useLanguage();
+
+    const languages = availableLanguages || [
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Español' },
+        { code: 'fr', name: 'Français' },
+        { code: 'pt', name: 'Português' }
+    ];
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -105,8 +111,28 @@ const Login = () => {
 
             {/* Right Side - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+                {/* Language Segmented Pill */}
                 <div className="absolute top-6 right-6 z-20">
-                    <LanguageSwitcher />
+                    <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-sm border border-gray-200/60 dark:border-gray-700">
+                        {languages.map(l => {
+                            const isActive = locale === l.code;
+                            return (
+                                <button
+                                    key={l.code}
+                                    onClick={() => changeLanguage(l.code)}
+                                    title={l.name}
+                                    className={clsx(
+                                        'px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-200',
+                                        isActive
+                                            ? 'bg-white dark:bg-gray-600 text-emerald-700 dark:text-emerald-300 shadow-sm'
+                                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    )}
+                                >
+                                    {l.code}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className="max-w-[440px] w-full">
@@ -214,18 +240,15 @@ const Login = () => {
                     </form>
 
                     <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-                        <p className="text-gray-500 text-sm">
-                            Powered by <span className="font-bold text-emerald-800 dark:text-emerald-400">SoilFER LIMS Platform</span>
-                            <br />
-                            <span className="text-xs text-gray-400 font-medium">Secure Enterprise Connection • v2.5.0</span>
+                        <p className="text-gray-400 dark:text-gray-500 text-[11px] font-medium tracking-wide">
+                            <span className="text-gray-500 dark:text-gray-400 font-bold">SoilFER LIMS</span>
+                            {' · '}v{__APP_VERSION__}{' · '}build {__BUILD_DATE__}
                         </p>
-                        <div className="mt-4">
-                            <a href="mailto:GLOSOLAN@fao.org" className="text-xs font-bold text-amber-600 hover:underline transition-colors">
-                                Need technical support? GLOSOLAN@fao.org
+                        <div className="mt-3">
+                            <a href="mailto:GLOSOLAN@fao.org" className="text-[11px] font-bold text-amber-600 hover:underline transition-colors">
+                                Support: GLOSOLAN@fao.org
                             </a>
                         </div>
-
-
                     </div>
                 </div>
             </div>

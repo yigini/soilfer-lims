@@ -657,3 +657,66 @@ model OperationalGate {
   @@unique([code, labId])
 }
 
+// --- REPORTING MODULE ---
+
+model Report {
+  id            String    @id @default(uuid())
+  sampleId      String
+  labId         String?
+  version       Int       @default(1)
+  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED
+
+  // Denormalized search keys (populated at generation time)
+  firstName     String?
+  surname       String?
+  phone         String?
+  phoneNorm     String?   // digits-only for fuzzy search
+  projectCode   String?
+  projectName   String?
+  sampleLabId   String?   // Sample's labId for quick lookup
+
+  // Report content snapshot (denormalized)
+  content       String?   // JSON: full assembled report payload
+  generatedBy   String
+  generatedAt   DateTime  @default(now())
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shareLinks    ReportShareLink[]
+
+  @@index([sampleId])
+  @@index([labId])
+  @@index([status])
+  @@index([projectCode])
+  @@index([sampleLabId])
+}
+
+model ReportShareLink {
+  id          String    @id @default(uuid())
+  reportId    String
+  report      Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique   // SHA-256 of the public token (token itself is NOT stored)
+  expiresAt   DateTime?
+  isRevoked   Boolean   @default(false)
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+  revokedBy   String?
+
+  accessLogs  ReportAccessLog[]
+
+  @@index([reportId])
+}
+
+model ReportAccessLog {
+  id          String    @id @default(uuid())
+  linkId      String
+  link        ReportShareLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  accessedAt  DateTime  @default(now())
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([linkId])
+}
+

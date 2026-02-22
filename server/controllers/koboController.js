@@ -610,8 +610,16 @@ exports.proxyMedia = async (req, res) => {
         const { url } = req.query;
         if (!url) return res.status(400).json({ error: 'Missing url parameter' });
 
-        // Extract the server base URL from the attachment URL to find the right API token
+        // SSRF protection: only allow HTTPS URLs to external hosts
         const parsedUrl = new URL(url);
+        if (parsedUrl.protocol !== 'https:') {
+            return res.status(400).json({ error: 'Only HTTPS URLs are allowed' });
+        }
+        const hostname = parsedUrl.hostname;
+        if (['localhost', '127.0.0.1', '[::1]', '0.0.0.0'].includes(hostname) ||
+            hostname.startsWith('10.') || hostname.startsWith('172.') || hostname.startsWith('192.168.')) {
+            return res.status(403).json({ error: 'Internal addresses are not allowed' });
+        }
 
         // Find a KoboConfig with a matching server URL
         const configs = await prisma.koboConfig.findMany({

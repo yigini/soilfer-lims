@@ -35,7 +35,8 @@ import SampleDetail from './pages/SampleDetail';
 import Users from './pages/Users';
 import Projects from './pages/Projects';
 import LabManagement from './pages/admin/LabManagement';
-import Reports from './pages/Reports';
+import ResultReports from './pages/ResultReports';
+import PublicReport from './pages/PublicReport';
 import MyWork from './pages/MyWork';
 import TechWorkbench from './pages/TechWorkbench';
 import ManagerQueue from './pages/ManagerQueue';
@@ -105,7 +106,7 @@ const Layout = ({ children }) => {
     if (user?.role !== 'SAMPLE_RECEPTION') {
         navItems.push({ icon: Activity, label: t('nav.spectral'), path: '/spectral-library' });
     }
-    navItems.push({ icon: FileText, label: t('nav.reports', 'Reports'), path: '/reports' });
+    navItems.push({ icon: FileText, label: t('nav.reports', 'Result Reports'), path: '/result-reports' });
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
         navItems.push({ icon: User, label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
@@ -277,7 +278,9 @@ function App() {
             <Route path="/spectral" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
             <Route path="/data-results" element={<RequireAuth><DataResults /></RequireAuth>} />
 
-            <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
+            <Route path="/result-reports" element={<RequireAuth><ResultReports /></RequireAuth>} />
+            <Route path="/reports" element={<Navigate to="/result-reports" replace />} />
+            <Route path="/report/:token" element={<PublicReport />} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             <Route path="/credits" element={<RequireAuth><Credits /></RequireAuth>} />
         </Routes>

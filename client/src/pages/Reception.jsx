@@ -54,6 +54,13 @@ const Reception = () => {
         crop: '',
         previousCrop: '',
         management: '',
+        captureMethod: 'MAP_PIN',
+        locationConfidence: null,
+        siteName: '',
+        areaVillage: '',
+        district: '',
+        landmark: '',
+        locationUncertaintyReason: '',
         purpose: '',
         isComposite: false,
         subsamples: '',
@@ -71,6 +78,7 @@ const Reception = () => {
     const [searchAnalysis, setSearchAnalysis] = useState('');
     const analysisSectionRef = useRef(null);
     const [analysisHighlight, setAnalysisHighlight] = useState(false);
+    const [validationErrors, setValidationErrors] = useState([]);
 
     const [hasRanLookup, setHasRanLookup] = useState(false);
 
@@ -137,6 +145,13 @@ const Reception = () => {
                 depthType: '0-20',
                 location: '',
                 coordinates: null,
+                captureMethod: 'MAP_PIN',
+                locationConfidence: null,
+                siteName: '',
+                areaVillage: '',
+                district: '',
+                landmark: '',
+                locationUncertaintyReason: '',
                 landUse: '',
                 crop: '',
                 previousCrop: '',
@@ -264,10 +279,12 @@ const Reception = () => {
                             : `Would you like to resume the draft for ${found.originalId}?`,
                         confirmText: 'Yes, Open',
                         onConfirm: () => {
-                            setMode(found.receptionData?.isWalkIn ? 'WALK_IN' : 'PROJECT');
-                            if (found.receptionData?.isWalkIn) {
-                                // For walk-ins, we keep projectCode as Walk-in
-                                setSessionProject(found.projectId || '');
+                            // Detect walk-in: explicit flag OR no project link
+                            const isWalkInDraft = found.receptionData?.isWalkIn || (!found.projectId && !found.projectCode);
+                            setMode(isWalkInDraft ? 'WALK_IN' : 'PROJECT');
+                            if (isWalkInDraft) {
+                                // For walk-ins, clear project context
+                                setSessionProject(null);
                             } else {
                                 setSessionProject(found.projectId || found.projectCode);
                             }
@@ -519,7 +536,7 @@ const Reception = () => {
             onConfirm: async () => {
                 try {
                     setLoading(true);
-                    await axios.post('/api/samples/batch-delete', { ids: [idToDelete] }, {
+                    await axios.post('/api/reception/discard', { id: idToDelete }, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     showDialog({ type: 'success', title: 'Discarded', message: 'Intake record has been deleted.' });
@@ -538,7 +555,60 @@ const Reception = () => {
         });
     };
 
+    const CHECKLIST_KEYS = ['container', 'label', 'quantity', 'condition', 'coc'];
+
+    const validateForm = () => {
+        const errors = [];
+        const isWalkInOrNew = mode === 'WALK_IN' || sampleData?.isNew;
+
+        // Walk-in / new sample fields
+        if (isWalkInOrNew) {
+            if (!submitter.name?.trim()) errors.push({ key: 'submitter.name', label: 'Submitter first name' });
+            if (!submitter.phone?.trim()) errors.push({ key: 'submitter.phone', label: 'Submitter phone number' });
+            // Location validation: GPS present → OK; else need two text anchors (areaVillage + landmark)
+            const hasGPS = sampling.coordinates?.lat && sampling.coordinates?.lng;
+            if (!hasGPS) {
+                if (!sampling.areaVillage?.trim()) errors.push({ key: 'areaVillage', label: 'Area/Village (required when no GPS)' });
+                if (!sampling.landmark?.trim()) errors.push({ key: 'landmark', label: 'Nearest landmark (required when no GPS)' });
+                if (!sampling.areaVillage?.trim() && !sampling.landmark?.trim() && !sampling.location?.trim()) {
+                    errors.push({ key: 'location', label: 'Sample location (GPS, or area + landmark)' });
+                }
+            }
+            // Low confidence requires reason
+            if (sampling.locationConfidence === 'LOW' && !sampling.locationUncertaintyReason?.trim()) {
+                errors.push({ key: 'uncertaintyReason', label: 'Reason for low location confidence' });
+            }
+            if (!sampling.depthType) errors.push({ key: 'depth', label: 'Sampling depth' });
+            if (!sampling.purpose) errors.push({ key: 'purpose', label: 'Purpose of testing' });
+        }
+
+        // Universal fields (both modes)
+        if (effectiveList.length === 0) errors.push({ key: 'analyses', label: 'At least one analysis must be selected' });
+
+        const unanswered = CHECKLIST_KEYS.filter(k => !checklistData.items?.[k]?.status);
+        if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
+
+        if (removals.length > 0 && !justification?.trim()) errors.push({ key: 'justification', label: 'Justification for removed analyses' });
+        if (checklistData.nonConformance && !checklistData.reason?.trim()) errors.push({ key: 'ncReason', label: 'Non-conformance reason' });
+
+        return errors;
+    };
+
     const handleSubmit = async (decision, isDraft = false) => {
+        // Skip validation for drafts
+        if (!isDraft) {
+            const errors = validateForm();
+            if (errors.length > 0) {
+                setValidationErrors(errors);
+                showDialog({
+                    type: 'error',
+                    title: 'Missing Required Fields',
+                    message: errors.map(e => `• ${e.label}`).join('\n')
+                });
+                return;
+            }
+        }
+        setValidationErrors([]);
         setLoading(true);
 
         const payload = {
@@ -557,8 +627,8 @@ const Reception = () => {
             analysisRemovals: removals,
             justification: removals.length > 0 ? justification : null,
 
-            isWalkIn: mode === 'WALK_IN' && !sessionProject,
-            projectId: sessionProject || null,
+            isWalkIn: mode === 'WALK_IN',
+            projectId: mode === 'WALK_IN' ? null : (sessionProject || null),
             submitterDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? submitter : null,
             samplingDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? sampling : null,
             isDraft
@@ -607,22 +677,22 @@ const Reception = () => {
     if (!mode) {
         return (
             <div className="p-6 max-w-6xl mx-auto h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
-                <div className="text-center mb-10">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Reception Console</h1>
+                <div className="text-center mb-6 md:mb-10">
+                    <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Reception Console</h1>
                     <p className="text-gray-500">Select intake mode or resume a draft</p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 mb-12">
-                    <button onClick={() => setMode('PROJECT')} className="p-10 bg-white rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-8 md:mb-12">
+                    <button onClick={() => setMode('PROJECT')} className="p-6 md:p-10 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <Layers size={120} />
                         </div>
                         <div className="relative z-10">
-                            <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 group-hover:scale-110 transition-transform">
+                            <div className="bg-blue-100 dark:bg-blue-900/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                 <Layers size={32} />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Project Sample</h2>
-                            <p className="text-gray-500">Scheduled samples (SoilFER, etc.)</p>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Project Sample</h2>
+                            <p className="text-gray-500 dark:text-gray-400">Scheduled samples (SoilFER, etc.)</p>
                         </div>
                     </button>
 
@@ -632,34 +702,34 @@ const Reception = () => {
                         const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                         setScanCode(`EXT-${randomId}`);
                         setSampleData({ originalId: `EXT-${randomId}`, isNew: true });
-                    }} className="p-10 bg-white rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                    }} className="p-6 md:p-10 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <User size={120} />
                         </div>
                         <div className="relative z-10">
-                            <div className="bg-purple-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-purple-600 group-hover:scale-110 transition-transform">
+                            <div className="bg-purple-100 dark:bg-purple-900/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                                 <User size={32} />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Walk-in Sample</h2>
-                            <p className="text-gray-500">Farmers & Individual clients</p>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Walk-in Sample</h2>
+                            <p className="text-gray-500 dark:text-gray-400">Farmers & Individual clients</p>
                         </div>
                     </button>
                 </div>
 
                 {/* DRAFTS LIST */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex-1 max-h-[400px] flex flex-col">
-                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center sticky top-0">
-                        <h3 className="font-bold text-gray-700 flex items-center gap-2">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex-1 max-h-[400px] flex flex-col">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center sticky top-0">
+                        <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                             <FileText size={18} /> Incomplete Intakes (Drafts)
                         </h3>
-                        <span className="text-xs font-bold bg-gray-200 px-2 py-1 rounded-full">{drafts.length}</span>
+                        <span className="text-xs font-bold bg-gray-200 dark:bg-gray-600 dark:text-gray-200 px-2 py-1 rounded-full">{drafts.length}</span>
                     </div>
                     <div className="overflow-y-auto flex-1 p-2 space-y-2">
                         {drafts.length === 0 ? (
-                            <div className="text-center py-10 text-gray-400">No drafts found.</div>
+                            <div className="text-center py-10 text-gray-400 dark:text-gray-500">No drafts found.</div>
                         ) : (
                             drafts.map(d => (
-                                <div key={d.id} className="flex items-center justify-between p-4 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-colors group cursor-pointer"
+                                <div key={d.id} className="flex items-center justify-between p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl border border-transparent hover:border-blue-100 dark:hover:border-blue-800 transition-colors group cursor-pointer"
                                     onClick={() => {
                                         setScanCode(d.originalId);
                                         // Trigger lookup manually or effect? 
@@ -670,17 +740,17 @@ const Reception = () => {
                                     }}
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="bg-orange-100 text-orange-600 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs">
+                                        <div className="bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs">
                                             DFT
                                         </div>
                                         <div>
-                                            <div className="font-bold text-gray-900 flex items-center gap-2">
+                                            <div className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                 {d.originalId}
-                                                <span className="text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded capitalize">
-                                                    {d.receptionData?.isWalkIn ? 'Walk-in' : 'Project'}
+                                                <span className="text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded capitalize">
+                                                    {(d.receptionData?.isWalkIn || (!d.projectId && !d.projectCode)) ? 'Walk-in' : 'Project'}
                                                 </span>
                                             </div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">
                                                 {new Date(d.updatedAt || d.createdAt).toLocaleString()} • {d.receptionData?.submitterDetails?.name || 'Unknown Submitter'}
                                             </div>
                                         </div>
@@ -691,11 +761,11 @@ const Reception = () => {
                                                 e.stopPropagation();
                                                 handleDiscard(d.id);
                                             }}
-                                            className="text-gray-400 hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white px-3 py-1.5 rounded border border-gray-200 hover:border-red-200 shadow-sm"
+                                            className="text-gray-400 hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-700 px-3 py-1.5 rounded border border-gray-200 dark:border-gray-600 hover:border-red-200 dark:hover:border-red-700 shadow-sm"
                                         >
                                             Discard
                                         </button>
-                                        <button className="text-blue-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white px-3 py-1.5 rounded border border-blue-200 shadow-sm">
+                                        <button className="text-blue-600 dark:text-blue-400 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-700 px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm">
                                             Resume
                                         </button>
                                     </div>
@@ -717,16 +787,16 @@ const Reception = () => {
 
     if (mode === 'PROJECT' && !sessionProject) {
         return (
-            <div className="p-10 max-w-2xl mx-auto animate-in slide-in-from-right">
+            <div className="p-4 md:p-10 max-w-2xl mx-auto animate-in slide-in-from-right">
                 <button onClick={() => setMode(null)} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-6 font-medium"><ArrowLeft size={20} /> Back</button>
-                <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Select Project Session</h2>
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Select Project Session</h2>
                     <div className="space-y-3">
                         {availableProjects.filter(p => p.status === 'ACTIVE').map(p => (
-                            <button key={p.id} onClick={() => handleSelectProject(p)} className="w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all flex flex-col group">
+                            <button key={p.id} onClick={() => handleSelectProject(p)} className="w-full text-left p-4 border dark:border-gray-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col group">
                                 <div className="flex justify-between items-start">
-                                    <span className="font-bold text-lg text-gray-900 group-hover:text-blue-700">{p.name || p.id}</span>
-                                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
+                                    <span className="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400">{p.name || p.id}</span>
+                                    <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
                                 </div>
                                 <div className="flex gap-3 mt-1">
                                     <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{p.code}</div>
@@ -783,7 +853,7 @@ const Reception = () => {
             </div>
 
             {/* LOOKUP with Autocomplete */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 relative">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 relative">
                 <div className="flex gap-4">
                     <div className="flex-1 relative">
                         <input
@@ -812,7 +882,7 @@ const Reception = () => {
 
                         {/* Autocomplete Dropdown */}
                         {showAutocomplete && mode === 'PROJECT' && (
-                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto mt-1">
+                            <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto mt-1">
                                 {isSearching ? (
                                     <div className="p-4 text-center text-gray-500">Searching...</div>
                                 ) : (
@@ -825,19 +895,19 @@ const Reception = () => {
                                         <div
                                             key={sample.id}
                                             onClick={() => handleSelectAutocomplete(sample)}
-                                            className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 flex items-center justify-between group"
+                                            className="p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b last:border-0 dark:border-gray-700 flex items-center justify-between group"
                                         >
                                             <div>
-                                                <div className="font-mono font-bold text-gray-900">{sample.originalId}</div>
+                                                <div className="font-mono font-bold text-gray-900 dark:text-gray-100">{sample.originalId}</div>
                                                 <div className="text-xs text-gray-500">
                                                     {sample.projectCode} • {sample.location || sample.country || 'Unknown Location'}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 {sample.coordinates && (
-                                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">📍 GPS</span>
+                                                    <span className="text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">📍 GPS</span>
                                                 )}
-                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase">
+                                                <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase">
                                                     {sample.status}
                                                 </span>
                                             </div>
@@ -849,7 +919,7 @@ const Reception = () => {
                     </div>
                     <button
                         onClick={() => setShowScanner(true)}
-                        className="bg-slate-100 text-slate-600 p-3 rounded-lg hover:bg-slate-200 transition-colors border border-slate-300 flex items-center gap-2"
+                        className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600 flex items-center gap-2"
                         title="Scan Code"
                     >
                         <Camera size={20} />
@@ -884,7 +954,7 @@ const Reception = () => {
                                     projectCode: proj?.code
                                 });
                             }}
-                            className="text-indigo-600 hover:text-indigo-800 text-sm font-bold flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg transition-colors"
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-bold flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-lg transition-colors"
                         >
                             <Plus size={14} /> New Manual ID
                         </button>
@@ -899,8 +969,8 @@ const Reception = () => {
                     <div className="space-y-6">
                         {/* Map View */}
                         {(sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates) && (
-                            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm animate-in fade-in slide-in-from-top-2">
-                                <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">📍 Location Preview</h3>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm animate-in fade-in slide-in-from-top-2">
+                                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">📍 Location Preview</h3>
                                 <SampleMap
                                     coordinates={sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates}
                                     title={sampleData?.originalId || 'Sample Site'}
@@ -915,10 +985,11 @@ const Reception = () => {
                                 sampling={sampling} setSampling={setSampling}
                                 groups={groups}
                                 onPurposeSelect={handlePurposeSelect}
+                                errors={validationErrors}
                             />
                         ) : (
-                            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                                <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2"><Layers size={20} /> Project Sample Metadata</h3>
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2"><Layers size={20} /> Project Sample Metadata</h3>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div><label className="text-gray-500">Original ID</label><div className="font-mono font-bold">{sampleData.originalId}</div></div>
@@ -928,7 +999,7 @@ const Reception = () => {
                                     </div>
 
                                     {sampleData.fieldMetadata && (
-                                        <div className="bg-gray-50 p-4 rounded-lg border text-xs space-y-2">
+                                        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border dark:border-gray-600 text-xs space-y-2">
                                             {Object.entries(sampleData.fieldMetadata).slice(0, 6).map(([k, v]) => {
                                                 const displayVal = v && typeof v === 'object' ? (v.value ?? JSON.stringify(v)) : v;
                                                 return (
@@ -947,12 +1018,14 @@ const Reception = () => {
                         {/* ANALYSIS SELECTION */}
                         <div
                             ref={analysisSectionRef}
-                            className={`bg-white p-6 rounded-xl border shadow-sm transition-all duration-500 ${analysisHighlight
+                            className={`bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm transition-all duration-500 ${analysisHighlight
                                 ? 'border-blue-400 ring-2 ring-blue-200 shadow-blue-100 shadow-lg'
-                                : 'border-gray-200'
+                                : validationErrors.some(e => e.key === 'analyses')
+                                    ? 'border-red-400 ring-1 ring-red-200'
+                                    : 'border-gray-200 dark:border-gray-700'
                                 }`}
                         >
-                            <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
                                 <Droplet size={20} /> Requested Analysis
                                 <InfoTooltip text="Choose a predefined package of tests (Bundle) or add individual tests as required by the client." />
                             </h3>
@@ -964,7 +1037,7 @@ const Reception = () => {
                             <select
                                 value={selectedGroup}
                                 onChange={e => { setSelectedGroup(e.target.value); setRemovals([]); setAdditions([]); }}
-                                className="w-full p-3 border rounded bg-blue-50 font-bold text-blue-800 mb-4"
+                                className="w-full p-3 border rounded bg-blue-50 dark:bg-blue-900/30 font-bold text-blue-800 dark:text-blue-300 mb-4"
                             >
                                 <option value="">-- No Bundle --</option>
                                 {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -975,9 +1048,9 @@ const Reception = () => {
                                 <div className="flex gap-2 relative">
                                     <input value={searchAnalysis} onChange={e => setSearchAnalysis(e.target.value)} placeholder="Search analysis code..." className="flex-1 p-2 border rounded" />
                                     {searchAnalysis && (
-                                        <div className="absolute top-full left-0 w-full bg-white border shadow-lg rounded z-10 max-h-40 overflow-y-auto">
+                                        <div className="absolute top-full left-0 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded z-10 max-h-40 overflow-y-auto">
                                             {analyses.filter(a => !effectiveList.includes(a.code) && a.name.toLowerCase().includes(searchAnalysis.toLowerCase())).map(a => (
-                                                <div key={a.code} onClick={() => { toggleAnalysis(a.code); setSearchAnalysis(''); }} className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                                <div key={a.code} onClick={() => { toggleAnalysis(a.code); setSearchAnalysis(''); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">
                                                     {a.name} ({a.code})
                                                 </div>
                                             ))}
@@ -986,13 +1059,13 @@ const Reception = () => {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 min-h-[40px] bg-gray-50 p-3 rounded border inner-shadow">
+                            <div className="flex flex-wrap gap-2 min-h-[40px] bg-gray-50 dark:bg-gray-700/50 p-3 rounded border dark:border-gray-600 inner-shadow">
                                 {effectiveList.length === 0 && <span className="text-gray-400 text-sm italic">No analyses selected</span>}
                                 {effectiveList.map(code => {
                                     const group = groups.find(g => g.id === selectedGroup);
                                     const isGroup = group?.analyses.includes(code);
                                     return (
-                                        <div key={code} className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${isGroup ? 'bg-white border shadow-sm' : 'bg-green-100 border border-green-300 text-green-800'}`}>
+                                        <div key={code} className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${isGroup ? 'bg-white dark:bg-gray-700 border dark:border-gray-600 shadow-sm' : 'bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'}`}>
                                             <span className="font-bold">{code}</span>
                                             <button onClick={() => toggleAnalysis(code)} className="text-gray-400 hover:text-red-500 ml-1"><XCircle size={14} /></button>
                                         </div>
@@ -1019,16 +1092,17 @@ const Reception = () => {
 
                     {/* RIGHT COLUMN: COMPLIANCE & SUBMIT */}
                     <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
                                 onNonConformance={(checked) => setChecklistData({ ...checklistData, nonConformance: checked })}
+                                showIncomplete={validationErrors.some(e => e.key === 'compliance')}
                             />
                         </div>
 
-                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                            <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2"><Camera size={20} /> Documentation & Notes</h3>
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2"><Camera size={20} /> Documentation & Notes</h3>
                             <input
                                 value={cocDeliveredBy} onChange={e => setCocDeliveredBy(e.target.value)}
                                 placeholder="Chain of Custody: Delivered By"
@@ -1042,12 +1116,20 @@ const Reception = () => {
                             />
                         </div>
 
-                        <div className="sticky bottom-4 z-10 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-gray-200">
+                        {validationErrors.length > 0 && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-2 animate-in fade-in slide-in-from-top-2">
+                                <p className="text-red-700 dark:text-red-300 text-xs font-bold flex items-center gap-1.5">
+                                    <AlertTriangle size={14} />
+                                    {validationErrors.length} required {validationErrors.length === 1 ? 'field' : 'fields'} missing
+                                </p>
+                            </div>
+                        )}
+                        <div className="sticky bottom-4 z-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-gray-200 dark:border-gray-700">
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => handleDiscard()}
                                     disabled={loading}
-                                    className="py-3 px-5 bg-red-50 border border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    className="py-3 px-5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
                                     <XCircle size={18} /> Discard
                                 </button>
@@ -1055,7 +1137,7 @@ const Reception = () => {
                                 <button
                                     onClick={() => handleSubmit('ACCEPTED', true)}
                                     disabled={loading}
-                                    className="py-3 px-5 bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    className="py-3 px-5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
                                     <FileText size={18} /> Save Draft
                                 </button>
@@ -1080,7 +1162,7 @@ const Reception = () => {
             {/* RESULT MODAL */}
             {result && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300 no-print">
-                    <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
                         {result.success ? (
                             <>
                                 <div className="mx-auto w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
@@ -1088,12 +1170,12 @@ const Reception = () => {
                                         <CheckCircle size={32} className="text-white" />
                                     </div>
                                 </div>
-                                <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight uppercase">Intake Confirmed!</h2>
-                                <p className="text-slate-500 mb-8 font-medium">Sample identity established and records synchronized.</p>
+                                <h2 className="text-3xl font-black text-slate-900 dark:text-gray-100 mb-2 tracking-tight uppercase">Intake Confirmed!</h2>
+                                <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">Sample identity established and records synchronized.</p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 rounded-3xl p-6 border border-slate-200 mb-8 text-left shadow-inner">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-gray-700/50 rounded-3xl p-6 border border-slate-200 dark:border-gray-600 mb-8 text-left shadow-inner">
                                     {/* Left: QR Code */}
-                                    <div className="flex flex-col items-center justify-center gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-200 dark:border-gray-600 shadow-sm">
                                         <div className="w-32 h-32 border border-slate-100 p-1 rounded-xl">
                                             <img
                                                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${result.labId}`}
@@ -1124,7 +1206,7 @@ const Reception = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         onClick={() => window.print()}
-                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-white text-indigo-600 font-bold rounded-2xl border-2 border-indigo-100 hover:border-indigo-600 hover:bg-slate-50 transition-all active:scale-95 shadow-sm group"
+                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl border-2 border-indigo-100 dark:border-indigo-800 hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-gray-600 transition-all active:scale-95 shadow-sm group"
                                     >
                                         <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
                                             <Printer size={24} />

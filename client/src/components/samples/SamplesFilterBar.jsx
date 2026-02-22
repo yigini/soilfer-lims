@@ -63,7 +63,7 @@ const SamplesFilterBar = ({
                             type="text"
                             value={localSearch}
                             onChange={(e) => setLocalSearch(e.target.value)}
-                            placeholder="Search Lab ID, Submitter, etc..."
+                            placeholder="Search by Lab ID or Original ID..."
                             className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm font-medium"
                         />
                         {localSearch && (

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
+import { useNotifications } from '../context/NotificationContext';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -27,7 +28,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
             {isStale ? t('queue.stale', 'Stale') : t('queue.live', 'Live')}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-gray-400">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">{formatLastUpdated(lastUpdated)}</span>
         )}
     </div>
 );
@@ -46,6 +47,7 @@ const ManagerQueue = () => {
     // Live counts from dashboard API for tab badges
     const { data: liveData, isLive, isStale, lastUpdated, refresh: refreshLive } = useRealtimeData('/api/dashboard/live', {
         interval: 15000,
+        wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
 
     // Fetch Trigger — now also polls
@@ -148,13 +150,26 @@ const ManagerQueue = () => {
         fetchQueueData(1);
     }, [activeTab, fetchQueueData]);
 
-    // Auto-refresh queue data every 15s
+    // WebSocket-driven queue refresh (replaces old 15s polling)
+    const { subscribeToEvent } = useNotifications();
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchQueueData(meta.page);
-        }, 15000);
-        return () => clearInterval(interval);
-    }, [fetchQueueData, meta.page]);
+        if (!subscribeToEvent) return;
+        let debounceTimer = null;
+        const debouncedRefresh = () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchQueueData(meta.page);
+            }, 500);
+        };
+        const unsubs = [
+            subscribeToEvent('WORKITEM_CHANGED', debouncedRefresh),
+            subscribeToEvent('WORKITEM_UPDATE', debouncedRefresh),
+        ];
+        return () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            unsubs.forEach(u => u && u());
+        };
+    }, [subscribeToEvent, fetchQueueData, meta.page]);
 
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= meta.totalPages) {
@@ -233,7 +248,7 @@ const ManagerQueue = () => {
                     )}
 
                     {!loading && data.length === 0 && (
-                        <div className="h-64 flex flex-col items-center justify-center text-gray-400 italic">
+                        <div className="h-64 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 italic">
                             <CheckCircle size={48} className="mb-4 text-gray-200 dark:text-gray-600" />
                             <p>{t('queue.empty', 'Queue is empty. Good job!')}</p>
                         </div>
@@ -333,7 +348,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
                         <Icon size={20} />
                     </div>
                     <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-full">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-full">
                             {config.label}
                         </span>
                     </div>
@@ -342,7 +357,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
                 <div className="mb-4">
                     <h3 className="font-bold text-gray-800 dark:text-gray-200 text-lg truncate leading-tight" title={title}>{title}</h3>
                     {item.labId && item.originalId && (
-                        <div className="text-[10px] text-gray-400 font-mono mt-0.5 uppercase tracking-tighter">
+                        <div className="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5 uppercase tracking-tighter">
                             ID: {item.originalId}
                         </div>
                     )}
@@ -350,7 +365,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
                         {subtitle}
                     </div>
                     {item.isAggregated && (
-                        <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-1 font-bold">
+                        <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-1 font-bold">
                             {(item.itemIds?.length || item.taskCount || 0)} {t('queue.tasksPending', 'Tasks Pending')}
                         </div>
                     )}
@@ -373,7 +388,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
             </div>
 
             <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 flex justify-between items-center group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-900/10 transition-colors">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 font-medium">
                     <Calendar size={12} />
                     {date}
                 </div>

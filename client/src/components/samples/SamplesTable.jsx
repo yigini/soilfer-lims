@@ -73,6 +73,11 @@ const computeAttention = (sample) => {
         if (sample.dryingStatus === 'PENDING') flags.push({ key: 'drying', icon: Droplets, color: 'text-blue-500', label: 'Drying Pending' });
         if (sample.preparationStatus === 'PENDING') flags.push({ key: 'prep', icon: FlaskConical, color: 'text-purple-500', label: 'Preparation Pending' });
     }
+    // Work-item-level attention signals (from server activity flags)
+    if (sample.hasInProgressWork) flags.push({ key: 'in_progress', icon: Clock, color: 'text-emerald-500', label: 'Analysis In Progress' });
+    if (sample.hasAssignedWork) flags.push({ key: 'assigned', icon: AlertTriangle, color: 'text-blue-500', label: 'Work Assigned' });
+    if (sample.hasReanalysisWork) flags.push({ key: 'reanalysis', icon: AlertTriangle, color: 'text-red-500', label: 'Reanalysis Required' });
+    if (sample.pendingReview) flags.push({ key: 'review', icon: AlertTriangle, color: 'text-purple-500', label: 'Pending Review' });
     if (st === 'ON_HOLD') flags.push({ key: 'hold', icon: History, color: 'text-red-500', label: 'On Hold' });
     return flags;
 };
@@ -323,8 +328,8 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-visible">
-                <table className="w-full text-sm text-left">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <table className="w-full text-sm text-left min-w-[700px]">
                     <thead className="text-[10px] font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-gray-200 dark:border-gray-700">
                         <tr>
                             <th className="p-4 w-4"><input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} checked={data.length > 0 && selected.length === data.length} /></th>

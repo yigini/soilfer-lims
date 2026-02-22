@@ -52,8 +52,7 @@ async function seed() {
         });
 
         console.log('  ✓ Created user: admin (SUPER_ADMIN)');
-        console.log('    Password: password');
-        console.log('    ⚠ You will be prompted to change this on first login.\n');
+        console.log('    ⚠ You will be prompted to set a new password on first login.\n');
         console.log('  Next steps:');
         console.log('    1. Log in as admin');
         console.log('    2. Create laboratories via Admin → Laboratories');
@@ -100,8 +99,7 @@ async function seed() {
         });
 
         console.log('  ✓ Created user: admin (LAB_MANAGER)');
-        console.log('    Password: password');
-        console.log('    ⚠ You will be prompted to change this on first login.\n');
+        console.log('    ⚠ You will be prompted to set a new password on first login.\n');
         console.log('  Next steps:');
         console.log('    1. Log in as admin');
         console.log('    2. Update laboratory details via Settings');

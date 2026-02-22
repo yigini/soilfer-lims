@@ -10,7 +10,7 @@ import { useRealtimeData, formatLastUpdated } from '../../hooks/useRealtimeData'
 const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
@@ -26,6 +26,7 @@ const ReceptionDashboard = ({ user }) => {
     const navigate = useNavigate();
     const { data, loading, isLive, isStale, lastUpdated, refresh } = useRealtimeData('/api/dashboard/live', {
         interval: 15000,
+        wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
 
     if (loading && !data) {

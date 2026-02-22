@@ -16,24 +16,6 @@ const SECTIONS = [
             { value: 'ARCHIVED', label: 'Archived' },
             { value: 'DISPOSED', label: 'Disposed' }
         ]
-    },
-    {
-        id: 'blockers', label: 'Blockers / Attention', type: 'checkbox',
-        options: [
-            { value: 'GATES_LOCKED', label: 'Gates Locked' },
-            { value: 'DRYING_FAILED', label: 'Drying Failed' },
-            { value: 'ON_HOLD', label: 'Non-Conformance' },
-            { value: 'MISSING_ITEMS', label: 'Missing Analysis' },
-            { value: 'UNASSIGNED_ITEMS', label: 'Unassigned Work' },
-            { value: 'PENDING_REVIEW', label: 'Pending Review' }
-        ]
-    },
-    {
-        id: 'types', label: 'Sample Type', type: 'checkbox',
-        options: [
-            { value: 'PROJECT', label: 'Project Sample' },
-            { value: 'WALKIN', label: 'Walk-in / External' }
-        ]
     }
 ];
 

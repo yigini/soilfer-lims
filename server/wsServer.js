@@ -1,9 +1,11 @@
 const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
+const { JWT_SECRET } = require('./config/auth');
 
 // Map: userId -> Set<WebSocket>
 const clients = new Map();
+const DEBUG = process.env.NODE_ENV !== 'production';
 
 let wss = null;
 
@@ -25,7 +27,7 @@ function init(server) {
 
         let userId;
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-production-key');
+            const decoded = jwt.verify(token, JWT_SECRET);
             userId = String(decoded.id || decoded.userId);
         } catch (e) {
             ws.close(4002, 'Invalid token');
@@ -45,7 +47,7 @@ function init(server) {
         }
         clients.get(userId).add(ws);
 
-        console.log(`[WS] User ${userId} connected (${clients.get(userId).size} sockets)`);
+        if (DEBUG) console.log(`[WS] User ${userId} connected (${clients.get(userId).size} sockets)`);
 
         // Heartbeat
         ws.isAlive = true;
@@ -57,14 +59,14 @@ function init(server) {
                 sockets.delete(ws);
                 if (sockets.size === 0) {
                     clients.delete(userId);
-                    console.log(`[WS] User ${userId} fully disconnected`);
+                    if (DEBUG) console.log(`[WS] User ${userId} fully disconnected`);
                     // Broadcast OFFLINE to everyone else
                     clients.forEach((_, otherUserId) => {
                         broadcastToUser(otherUserId, 'USER_STATUS', { userId, status: 'OFFLINE' });
                     });
                 }
             }
-            console.log(`[WS] User ${userId} socket closed`);
+            if (DEBUG) console.log(`[WS] User ${userId} socket closed`);
         });
 
         ws.on('error', (err) => {
@@ -128,19 +130,19 @@ function init(server) {
 function broadcastToUser(userId, eventType, payload) {
     const sockets = clients.get(String(userId));
     if (!sockets || sockets.size === 0) {
-        console.log(`[WS] No sockets for user ${userId}, cannot broadcast ${eventType}`);
+        if (DEBUG) console.log(`[WS] No sockets for user ${userId}, cannot broadcast ${eventType}`);
         return 0;
     }
 
     let count = 0;
-    console.log(`[WS] Broadcasting ${eventType} to user ${userId} (${sockets.size} sockets)`);
+    if (DEBUG) console.log(`[WS] Broadcasting ${eventType} to user ${userId} (${sockets.size} sockets)`);
     const data = JSON.stringify({ type: eventType, ...payload });
     sockets.forEach((ws) => {
         if (ws.readyState === 1) { // OPEN
             ws.send(data);
             count++;
         } else {
-            console.log(`[WS] Socket for ${userId} not OPEN (readyState: ${ws.readyState})`);
+            if (DEBUG) console.log(`[WS] Socket for ${userId} not OPEN (readyState: ${ws.readyState})`);
         }
     });
     return count;

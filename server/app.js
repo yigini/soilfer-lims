@@ -71,7 +71,6 @@ app.use('/api/public', publicRoutes);
 
 
 // --- Routes ---
-// Server restart trigger 2
 const jwt = require('jsonwebtoken');
 const { verifyToken } = require('./middleware/authMiddleware');
 if (!process.env.JWT_SECRET) {
@@ -79,8 +78,6 @@ if (!process.env.JWT_SECRET) {
     process.exit(1);
 }
 const SECRET_KEY = process.env.JWT_SECRET;
-// Forced Restart Trigger 3
-// Forced Restart Trigger: Fix Spectral Match Check 3
 
 // Health Check (used by Docker healthcheck)
 app.get('/api/health', (req, res) => {
@@ -213,37 +210,29 @@ app.use('/api/data-results', verifyToken, require('./routes/dataResultsRoutes'))
 app.use('/api/inventory', verifyToken, require('./routes/inventoryRoutes'));
 app.use('/api/equipment', verifyToken, require('./routes/equipmentRoutes'));
 const spectralRoutes = require('./routes/spectralRoutes');
-console.log('[DEBUG] Registering Spectral Routes...'); // Force Restart Trigger 4
 
-// ...
 app.use('/api/spectral', spectralRoutes);
 app.use('/api/reception', verifyToken, require('./routes/receptionRoutes'));
-app.use('/api/work', require('./routes/workRoutes'));
-app.use('/api/workbench', require('./routes/workbenchRoutes'));
+app.use('/api/work', verifyToken, require('./routes/workRoutes'));
+app.use('/api/workbench', verifyToken, require('./routes/workbenchRoutes'));
 app.use('/api/labs', verifyToken, require('./routes/labRoutes'));
 app.use('/api/exports', verifyToken, require('./routes/exportRoutes'));
-app.use('/api/qc', require('./routes/qcRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes')); // auth handled internally (has public routes)
+app.use('/api/qc', verifyToken, require('./routes/qcRoutes'));
 app.use('/api/submissions', verifyToken, require('./routes/submissionRoutes'));
 app.use('/api/reviews', verifyToken, require('./routes/reviewRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/messages', require('./routes/messageRoutes'));
-// Kobo media proxy (no auth - img tags can't send JWT headers)
+app.use('/api/notifications', verifyToken, require('./routes/notificationRoutes'));
+app.use('/api/auth', require('./routes/authRoutes')); // auth handled internally (has login)
+app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
+// Kobo media proxy — no JWT auth because <img> tags can't send headers.
+// Security: (1) only proxies to known Kobo hosts from active configs, (2) HTTPS only, (3) URL scheme validation.
 const koboController = require('./controllers/koboController');
 app.get('/api/kobo/media', koboController.proxyMedia);
 
 // Kobo API routes (authenticated)
 app.use('/api/kobo', verifyToken, require('./routes/koboRoutes'));
 
-// FORCE ROUTE: Explicitly define change-password here to fix 404
-const authController = require('./controllers/authController');
-app.post('/api/auth/change-password', verifyToken, (req, res, next) => {
-    console.log('Hit /api/auth/change-password explicit route');
-    authController.changePassword(req, res, next);
-});
-
-// Auth Routes are handled by authRoutes.js
-app.use('/api/auth', require('./routes/authRoutes'));
+// Auth change-password is handled by authRoutes.js (single canonical mount above)
 
 // ─── UNIFIED LIVE DASHBOARD ENDPOINT ───
 app.get('/api/dashboard/live', verifyToken, async (req, res) => {

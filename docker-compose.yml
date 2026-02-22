@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - JWT_SECRET=${JWT_SECRET:-please-change-this-secret}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
     volumes:
       # Persistent database storage (only the prisma dir for DB file)

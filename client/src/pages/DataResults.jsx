@@ -17,20 +17,26 @@ const DataResults = () => {
 
     // SPECTRA VIEWER STATE
     const [selectedScan, setSelectedScan] = useState(null);
+    const [availableScans, setAvailableScans] = useState([]); // All scans for multi-scan selector
     const [viewerLoading, setViewerLoading] = useState(false);
+
+    const loadScanDetail = async (scanSummary) => {
+        const detailRes = await axios.get(`/api/spectral/${scanSummary.id}`);
+        const chartData = detailRes.data.wavelengths.map((w, i) => ({
+            wavelength: w,
+            absorbance: detailRes.data.values ? detailRes.data.values[i] : 0
+        }));
+        setSelectedScan({ ...detailRes.data, chartData });
+    };
 
     const handleViewSpectra = async (sampleId, key) => {
         setViewerLoading(true);
         try {
-            // Map Analysis to Modality
-            // key is like 'SPEC_VIS_NIR' or 'SPEC_MIR'
             let modality = 'NIR';
             if (key === 'SPEC_MIR' || key === 'MIR Soil Spectra') {
                 modality = 'MIR';
             }
 
-            // 1. Find the scan for this sample
-            // We search by Sample ID (internal)
             const searchRes = await axios.get('/api/spectral', {
                 params: { search: sampleId, modality }
             });
@@ -41,23 +47,30 @@ const DataResults = () => {
                 return;
             }
 
-            // Take the most recent one
-            const scanSummary = scans[0];
+            setAvailableScans(scans);
 
-            // 2. Fetch full details (chart data)
-            const detailRes = await axios.get(`/api/spectral/${scanSummary.id}`);
+            // Prefer the most recent approved scan, fallback to most recent overall
+            const approvedScan = scans.find(s => s.status === 'APPROVED');
+            const bestScan = approvedScan || scans[0];
 
-            // Transform for Chart
-            const chartData = detailRes.data.wavelengths.map((w, i) => ({
-                wavelength: w,
-                absorbance: detailRes.data.values ? detailRes.data.values[i] : 0
-            }));
-
-            setSelectedScan({ ...detailRes.data, chartData });
+            await loadScanDetail(bestScan);
 
         } catch (e) {
             console.error(e);
             alert('Failed to load spectral data: ' + e.message);
+        } finally {
+            setViewerLoading(false);
+        }
+    };
+
+    const handleScanSwitch = async (scanId) => {
+        const scan = availableScans.find(s => s.id === scanId);
+        if (!scan) return;
+        setViewerLoading(true);
+        try {
+            await loadScanDetail(scan);
+        } catch (e) {
+            console.error(e);
         } finally {
             setViewerLoading(false);
         }
@@ -100,17 +113,20 @@ const DataResults = () => {
         fetchData();
     }, [projectFilter, countryFilter, analysisType]);
 
-    // Phase 4: Subscribe to WORKITEM_CHANGED for real-time draft/completion updates
+    // Real-time: subscribe to WORKITEM_CHANGED + SPECTRAL_UPDATE for instant refresh
     const refetchTimerRef = useRef(null);
     useEffect(() => {
         if (!subscribeToEvent) return;
-        const unsubscribe = subscribeToEvent('WORKITEM_CHANGED', () => {
-            // Debounce refetch to avoid hammering during rapid draft saves
+        const debouncedRefetch = () => {
             if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
-            refetchTimerRef.current = setTimeout(() => fetchData(), 2000);
-        });
+            refetchTimerRef.current = setTimeout(() => fetchData(), 1000);
+        };
+        const unsubs = [
+            subscribeToEvent('WORKITEM_CHANGED', debouncedRefetch),
+            subscribeToEvent('SPECTRAL_UPDATE', debouncedRefetch),
+        ];
         return () => {
-            unsubscribe();
+            unsubs.forEach(u => u && u());
             if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
         };
     }, [subscribeToEvent]);
@@ -409,17 +425,32 @@ const DataResults = () => {
                     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col">
                             <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800">
-                                        {selectedScan.labId} <span className="text-gray-400">|</span> {selectedScan.modality}
-                                    </h2>
-                                    <p className="text-xs text-gray-500">{selectedScan.id}</p>
+                                <div className="flex items-center gap-4">
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-800">
+                                            {selectedScan.labId} <span className="text-gray-400">|</span> {selectedScan.modality}
+                                        </h2>
+                                        <p className="text-xs text-gray-500">{selectedScan.id}</p>
+                                    </div>
+                                    {availableScans.length > 1 && (
+                                        <select
+                                            value={selectedScan.id}
+                                            onChange={(e) => handleScanSwitch(e.target.value)}
+                                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            {availableScans.map((s, idx) => (
+                                                <option key={s.id} value={s.id}>
+                                                    Scan {idx + 1} — {new Date(s.metadata?.scanDate || s.timestamp).toLocaleDateString()} {s.status === 'APPROVED' ? '✓' : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={handleDownload} className="p-2 hover:bg-gray-200 rounded-full text-blue-600" title="Download CSV">
                                         <Download size={20} />
                                     </button>
-                                    <button onClick={() => setSelectedScan(null)} className="p-2 hover:bg-gray-200 rounded-full">
+                                    <button onClick={() => { setSelectedScan(null); setAvailableScans([]); }} className="p-2 hover:bg-gray-200 rounded-full">
                                         <XCircle size={24} className="text-gray-500" />
                                     </button>
                                 </div>

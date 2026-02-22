@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { useNotifications } from '../context/NotificationContext';
 
 /**
  * useRealtimeData — Real-time polling hook with smart features.
@@ -27,7 +28,17 @@ export function useRealtimeData(url, options = {}) {
         params = {},
         staleThreshold = 60000,
         enabled = true,
+        wsEvents = [],  // Array of WS event names that trigger immediate refresh
     } = options;
+
+    // Try to get subscribeToEvent from NotificationContext (safe fallback)
+    let subscribeToEvent = null;
+    try {
+        const notif = useNotifications();
+        subscribeToEvent = notif?.subscribeToEvent;
+    } catch (e) {
+        // Context not available — WS features disabled, polling still works
+    }
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -146,6 +157,28 @@ export function useRealtimeData(url, options = {}) {
 
         return () => clearInterval(checkStale);
     }, [lastUpdated, staleThreshold]);
+
+    // ── WebSocket event subscription for instant refresh ──
+    useEffect(() => {
+        if (!subscribeToEvent || !wsEvents || wsEvents.length === 0 || !enabled) return;
+
+        let debounceTimer = null;
+        const debouncedRefresh = () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchData(false);
+            }, 500);
+        };
+
+        const unsubs = wsEvents.map(eventName =>
+            subscribeToEvent(eventName, debouncedRefresh)
+        );
+
+        return () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            unsubs.forEach(unsub => unsub && unsub());
+        };
+    }, [subscribeToEvent, wsEvents.join(','), enabled, fetchData]);
 
     return {
         data,

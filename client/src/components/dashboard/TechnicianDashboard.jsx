@@ -10,7 +10,7 @@ import { useRealtimeData, formatLastUpdated } from '../../hooks/useRealtimeData'
 const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
@@ -26,6 +26,7 @@ const TechnicianDashboard = ({ user }) => {
     const navigate = useNavigate();
     const { data, loading, isLive, isStale, lastUpdated, refresh } = useRealtimeData('/api/dashboard/live', {
         interval: 15000,
+        wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
 
     if (loading && !data) {
@@ -102,8 +103,8 @@ const TechnicianDashboard = ({ user }) => {
                     <span className="text-3xl font-black text-emerald-700 dark:text-emerald-300">{kpis.completedToday || 0}</span>
                 </div>
                 <div className={`p-5 rounded-xl border ${kpis.reanalysisRequired > 0
-                        ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
-                        : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+                    ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                    : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
                     }`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className={`text-xs font-bold uppercase tracking-wider ${kpis.reanalysisRequired > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'
@@ -179,8 +180,8 @@ const TechnicianDashboard = ({ user }) => {
                                     <div className="flex gap-1">
                                         {group.statuses?.map((st, j) => (
                                             <span key={j} className={`w-2 h-2 rounded-full ${st === 'COMPLETED' ? 'bg-emerald-400' :
-                                                    st === 'IN_PROGRESS' ? 'bg-orange-400 animate-pulse' :
-                                                        'bg-gray-300'
+                                                st === 'IN_PROGRESS' ? 'bg-orange-400 animate-pulse' :
+                                                    'bg-gray-300'
                                                 }`} />
                                         ))}
                                     </div>

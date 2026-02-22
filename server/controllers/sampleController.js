@@ -139,7 +139,7 @@ exports.searchExpectedSamples = async (req, res) => {
 
 exports.getSamples = async (req, res) => {
     const {
-        page = 1, limit = 50, sort = 'createdAt', order = 'desc', search: qSearch,
+        page = 1, limit = 50, sort = 'attention', order = 'desc', search: qSearch,
         status: qStatus, projects: qProjects, countries: qCountries,
         assignedLab: qAssignedLab, labs: qLabs, originalId: qOriginalId
     } = req.query;
@@ -188,12 +188,16 @@ exports.getSamples = async (req, res) => {
         }
 
         // Search by originalId OR labId
+        // SECURITY FIX: Wrap in AND to preserve scope guard OR conditions
         if (qSearch && qSearch.trim()) {
             const term = qSearch.trim();
-            where.OR = [
-                { originalId: { contains: term } },
-                { labId: { contains: term } }
-            ];
+            if (!where.AND) where.AND = [];
+            where.AND.push({
+                OR: [
+                    { originalId: { contains: term, mode: 'insensitive' } },
+                    { labId: { contains: term, mode: 'insensitive' } }
+                ]
+            });
         }
 
         // Auto-hide uncollected EXPECTED samples (never sampled in field)
@@ -209,10 +213,15 @@ exports.getSamples = async (req, res) => {
             };
         }
 
-        // --- 2. GET COUNT AND PAGINATED DATA IN PARALLEL ---
-        const orderBy = { [sort]: order };
+        // --- 2. SORT ALLOWLIST & ATTENTION-FIRST ORDERING ---
+        const ALLOWED_SORTS = ['labId', 'projectCode', 'status', 'updatedAt', 'createdAt', 'attention'];
+        const safeSort = ALLOWED_SORTS.includes(sort) ? sort : 'createdAt';
+        const safeOrder = order === 'asc' ? 'asc' : 'desc';
 
-        const [total, samples, statusCounts] = await Promise.all([
+        // For attention sort, we need work item statuses to compute rank
+        const needsAttentionSort = safeSort === 'attention';
+
+        const [total, samples, statusCounts, projectCounts, countryCounts, labCounts] = await Promise.all([
             prisma.sample.count({ where }),
             prisma.sample.findMany({
                 where,
@@ -240,18 +249,35 @@ exports.getSamples = async (req, res) => {
                         }
                     }
                 },
-                orderBy,
-                skip,
-                take: limitNum
+                orderBy: needsAttentionSort ? { updatedAt: 'desc' } : { [safeSort]: safeOrder },
+                // For attention sort, fetch all rows for in-memory re-sort, then slice
+                skip: needsAttentionSort ? 0 : skip,
+                take: needsAttentionSort ? 5000 : limitNum
             }),
             prisma.sample.groupBy({
                 by: ['status'],
                 where,
                 _count: true
+            }),
+            // P1: Facets for project/country/lab
+            prisma.sample.groupBy({
+                by: ['projectCode'],
+                where,
+                _count: true
+            }),
+            prisma.sample.groupBy({
+                by: ['country'],
+                where,
+                _count: true
+            }),
+            prisma.sample.groupBy({
+                by: ['assignedLab'],
+                where,
+                _count: true
             })
         ]);
 
-        // --- 3. BUILD LIGHTWEIGHT FACETS ---
+        // --- 3. BUILD FACETS ---
         const lifecycle = { EXPECTED: 0, RECEIVED: 0, ACCEPTED: 0, ONGOING: 0, COMPLETED: 0, HISTORY: 0 };
         statusCounts.forEach(sc => {
             if (sc.status === 'EXPECTED') lifecycle.EXPECTED = sc._count;
@@ -261,6 +287,14 @@ exports.getSamples = async (req, res) => {
             else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) lifecycle.COMPLETED += sc._count;
             else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) lifecycle.HISTORY += sc._count;
         });
+
+        // P1: Project/Country/Lab facets for advanced filters
+        const projects = {};
+        projectCounts.forEach(pc => { if (pc.projectCode) projects[pc.projectCode] = pc._count; });
+        const countries = {};
+        countryCounts.forEach(cc => { if (cc.country) countries[cc.country] = cc._count; });
+        const labs = {};
+        labCounts.forEach(lc => { if (lc.assignedLab) labs[lc.assignedLab] = lc._count; });
 
         // --- 4. MINIMAL ENRICHMENT ---
         const enriched = samples.map(s => {
@@ -296,12 +330,25 @@ exports.getSamples = async (req, res) => {
                 .filter(wi => wi.category !== null); // Exclude lifecycle ops
 
             const totalWI = progressItems.length;
-            const completedWI = progressItems.filter(wi => ['COMPLETED', 'ACCEPTED'].includes(wi.status)).length;
+            const completedWI = progressItems.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(wi.status)).length;
             const workItemProgress = {
                 total: totalWI,
                 completed: completedWI,
                 items: progressItems
             };
+
+            // P1: Computed activity flags for attention signals
+            const hasInProgressWork = workItems.some(wi => wi.status === 'IN_PROGRESS');
+            const hasAssignedWork = workItems.some(wi => wi.status === 'ASSIGNED');
+            const hasReanalysisWork = workItems.some(wi => wi.status === 'REANALYSIS_REQUIRED');
+            const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
+
+            // P1: Attention rank for sorting (lower = more urgent)
+            let attentionRank = 4;
+            if (hasInProgressWork) attentionRank = 0;
+            else if (hasAssignedWork || hasReanalysisWork) attentionRank = 1;
+            else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)) attentionRank = 2;
+            else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) attentionRank = 3;
 
             return {
                 ...s,
@@ -310,6 +357,11 @@ exports.getSamples = async (req, res) => {
                 metadata,
                 siteId,
                 workItemProgress,
+                hasInProgressWork,
+                hasAssignedWork,
+                hasReanalysisWork,
+                pendingReview,
+                attentionRank,
                 gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
                 nextAction: s.status === 'EXPECTED' ? 'Receive' :
                     s.status === 'RECEIVED' ? 'Accept' :
@@ -317,10 +369,25 @@ exports.getSamples = async (req, res) => {
             };
         });
 
+        // P1: Attention-first sort (in-memory, then paginate)
+        let finalData;
+        let finalTotal = total;
+        if (needsAttentionSort) {
+            enriched.sort((a, b) => {
+                if (a.attentionRank !== b.attentionRank) return a.attentionRank - b.attentionRank;
+                // Secondary: updatedAt desc
+                return new Date(b.updatedAt) - new Date(a.updatedAt);
+            });
+            finalTotal = enriched.length;
+            finalData = enriched.slice(skip, skip + limitNum);
+        } else {
+            finalData = enriched;
+        }
+
         res.json({
-            data: enriched,
-            meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
-            facets: { lifecycle }
+            data: finalData,
+            meta: { page: pageNum, limit: limitNum, total: finalTotal, pages: Math.ceil(finalTotal / limitNum) },
+            facets: { lifecycle, projects, countries, labs }
         });
     } catch (err) {
         console.error("[getSamples] ERROR:", err);
@@ -405,9 +472,13 @@ exports.updateStatus = async (req, res) => {
                 const stdGroup = analysisGroupsRaw[0];
                 if (stdGroup) {
                     const groupAnalyses = stdGroup.analyses ? JSON.parse(stdGroup.analyses) : [];
-                    const currentAnalyses = new Set(typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : (sample.requiredAnalyses || []));
-                    groupAnalyses.forEach(code => currentAnalyses.add(code));
-                    updates.requiredAnalyses = JSON.stringify(Array.from(currentAnalyses));
+                    // Finding #7: Start from existing analyses to avoid overwriting on partial payloads
+                    const existingAnalyses = sample.requiredAnalyses
+                        ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses)
+                        : [];
+                    let requiredAnalyses = new Set(existingAnalyses);
+                    groupAnalyses.forEach(code => requiredAnalyses.add(code));
+                    updates.requiredAnalyses = JSON.stringify(Array.from(requiredAnalyses));
                 }
             }
         }
@@ -738,7 +809,7 @@ exports.createWalkInSample = async (req, res) => {
                 receptionDate: now,
                 receivedBy: user.username,
                 requiredAnalyses: analyses ? JSON.stringify(analyses) : '[]',
-                labId: null, // Assigned on acceptance
+                labId: autoId, // Walk-ins use their short ID as Lab ID (Finding #5)
                 metadata: JSON.stringify({
                     sampleType: sampleType || 'WALKIN',
                     ptRound: ptRound || null,
@@ -797,6 +868,11 @@ exports.undoIntake = async (req, res) => {
     try {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // Lab scope guard — prevent cross-lab mutations (Finding #1)
+        if (user.role !== 'SUPER_ADMIN' && sample.assignedLab && sample.assignedLab !== user.labId) {
+            return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
+        }
 
         // Validate State
         if (sample.status !== 'ACCEPTED' && sample.status !== 'LAB_ID_ASSIGNED') {
@@ -1035,6 +1111,11 @@ exports.acceptSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
+        // Lab scope guard — prevent cross-lab mutations (Finding #1)
+        if (user.role !== 'SUPER_ADMIN' && sample.assignedLab && sample.assignedLab !== user.labId) {
+            return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
+        }
+
         if (sample.status !== 'RECEIVED' && sample.status !== 'COLLECTED') {
             return res.status(400).json({
                 error: `Sample must be in RECEIVED state to accept. Current: ${sample.status}`
@@ -1072,11 +1153,14 @@ exports.acceptSample = async (req, res) => {
             }
         });
 
+        let workItemWarning = null;
         try {
             const workItemController = require('./workItemController');
             await workItemController.generateWorkItemsForSample(updated);
         } catch (e) {
-            console.error('Failed to generate work items during acceptance:', e);
+            // Finding #4: Don't silently suppress — track the failure
+            console.error('[ACCEPT] Failed to generate work items during acceptance:', e);
+            workItemWarning = `Sample accepted but work item generation failed: ${e.message}. Please contact support.`;
         }
 
         await prisma.auditLog.create({
@@ -1092,7 +1176,7 @@ exports.acceptSample = async (req, res) => {
             }
         });
 
-        res.json(updated);
+        res.json({ ...updated, warning: workItemWarning || undefined });
     } catch (error) {
         console.error('[acceptSample] Error:', error);
         res.status(500).json({ error: 'Failed to accept sample' });

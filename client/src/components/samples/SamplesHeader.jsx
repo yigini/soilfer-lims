@@ -106,7 +106,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, loadingSync, onToggleQui
                         <React.Fragment key={status.key}>
                             <div
                                 className="relative group flex-1 cursor-pointer"
-                                onClick={() => onToggleQuickFilter && onToggleQuickFilter('lifecycle', status.statuses)}
+                                onClick={() => onToggleQuickFilter && onToggleQuickFilter('status', status.statuses)}
                             >
                                 <div className={`flex items-center justify-center gap-2 px-2 py-1.5 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-default ${index === 0 ? 'pl-2' : ''} ${isLast ? 'pr-2' : ''}`}>
                                     <div className={`flex items-center justify-center w-8 h-8 rounded-full ${status.bg} ${status.border} border`}>

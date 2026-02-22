@@ -12,7 +12,7 @@ import InfoTooltip from '../common/InfoTooltip';
 const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
@@ -55,8 +55,8 @@ const WarningBanner = ({ warnings }) => {
         <div className="space-y-2">
             {warnings.map((w, i) => (
                 <div key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${w.severity === 'HIGH'
-                        ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-                        : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300'
+                    ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+                    : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300'
                     }`}>
                     <AlertTriangle size={16} className="shrink-0" />
                     <span className="text-sm font-semibold">{w.message}</span>
@@ -70,6 +70,7 @@ const ManagerDashboard = ({ user }) => {
     const navigate = useNavigate();
     const { data, loading, isLive, isStale, lastUpdated, refresh } = useRealtimeData('/api/dashboard/live', {
         interval: 15000,
+        wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
 
     // Assignment state (kept local since it's interactive)
@@ -339,8 +340,8 @@ const ManagerDashboard = ({ user }) => {
                             {recentActivity.map((log, idx) => (
                                 <div key={log.id || idx} className="flex gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors items-start">
                                     <div className={`p-1.5 rounded-lg mt-0.5 shrink-0 ${log.action?.includes('CREATE') ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40' :
-                                            log.action?.includes('DELETE') ? 'bg-red-100 text-red-600 dark:bg-red-900/40' :
-                                                'bg-blue-100 text-blue-600 dark:bg-blue-900/40'
+                                        log.action?.includes('DELETE') ? 'bg-red-100 text-red-600 dark:bg-red-900/40' :
+                                            'bg-blue-100 text-blue-600 dark:bg-blue-900/40'
                                         }`}>
                                         <Activity size={12} />
                                     </div>

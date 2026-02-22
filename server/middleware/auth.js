@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma');
-
-const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-production-key';
+const { JWT_SECRET: SECRET_KEY } = require('../config/auth');
 
 module.exports = async (req, res, next) => {
     // Get token from header

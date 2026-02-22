@@ -124,18 +124,23 @@ export const LanguageProvider = ({ children }) => {
     };
 
     const t = useMemo(() => {
-        return (key, params = {}) => {
+        return (key, paramsOrFallback = {}) => {
+            // Support t('key', 'Fallback String') as well as t('key', { param: 'value' })
+            const fallback = typeof paramsOrFallback === 'string' ? paramsOrFallback : null;
+            const params = typeof paramsOrFallback === 'object' ? paramsOrFallback : {};
+
             const normalized = normalizeLocale(locale);
             const localePack = translations[normalized];
             const fallbackPack = translations.en;
-            if (!localePack) return key;
+            if (!localePack) return fallback || key;
 
             const value =
                 localePack.flat[key] ??
                 fallbackPack.flat[key] ??
+                fallback ??
                 key;
 
-            return applyParams(value, params) || key;
+            return applyParams(value, params) || fallback || key;
         };
     }, [locale, translations]);
 

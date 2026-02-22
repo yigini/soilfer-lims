@@ -25,7 +25,7 @@ const Samples = () => {
     // Filter State
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState({});
-    const [sort, setSort] = useState('createdAt');
+    const [sort, setSort] = useState('attention');
     const [order, setOrder] = useState('desc');
 
     // UI State
@@ -274,8 +274,8 @@ const Samples = () => {
         <div className="p-6 max-w-[1600px] mx-auto min-h-screen relative">
             {/* Floating Bulk Actions Bar */}
             {selected.length > 0 && user?.role === 'SUPER_ADMIN' && (
-                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-8 duration-300">
-                    <div className="bg-gray-900 border border-white/10 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-8 backdrop-blur-xl bg-opacity-95">
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-8 duration-300 w-[calc(100%-2rem)] max-w-lg md:w-auto md:max-w-none">
+                    <div className="bg-gray-900 border border-white/10 shadow-2xl rounded-2xl px-4 md:px-6 py-3 md:py-4 flex items-center gap-4 md:gap-8 backdrop-blur-xl bg-opacity-95">
                         <div className="flex items-center gap-3 border-r border-white/10 pr-8">
                             <div className="bg-emerald-500 text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full shadow-lg shadow-emerald-500/20">
                                 {selected.length}
