@@ -3,15 +3,18 @@
  * 
  * This is a PRINT-FIRST document. No dark mode.
  * Think: "What does the farmer receive from the lab?"
+ * Designed by a lab manager with 30 years of soil analysis experience.
  *
  * Sections:
  *  1. Lab letterhead (logo, name, address, contact)
- *  2. Report reference (report number, date, sample ID)
+ *  2. Report reference (report number, date, sample ID, project)
  *  3. Client info (who requested the analysis)
- *  4. Sample info (what was received, when, from where)
- *  5. Results table (Parameter | Result | Unit | Rating | Reference)
+ *  4. Sample description (what was received, when, from where)
+ *  5. Results table (Parameter | Result | Unit | Rating | Reference | Method)
  *  6. Summary of findings & recommendations
- *  7. Disclaimer & signature block
+ *  7. Methodology footnotes
+ *  8. Signature block (auto-signed by lab manager)
+ *  9. Disclaimer & footer
  */
 import React from 'react';
 import './ReportContent.css';
@@ -83,7 +86,7 @@ const LEVEL_INDICATOR = {
 const ReportContent = ({ data }) => {
     if (!data) return <div style={{ textAlign: 'center', color: '#999', padding: '80px 0' }}>No report content available</div>;
 
-    const { sample, client, project, lab, labBranding, resultGroups, fieldMetadata, receptionData, generated } = data;
+    const { sample, client, project, lab, labBranding, resultGroups, locationData, fieldMetadata, receptionData, signedBy, methodologies, generated, reportNumber } = data;
 
     // Build interpretations for all results
     const allInterpreted = (resultGroups || []).flatMap(g =>
@@ -91,8 +94,14 @@ const ReportContent = ({ data }) => {
     );
     const recommendations = allInterpreted.filter(i => i.interp && (i.interp.level === 'critical' || i.interp.level === 'low'));
 
+    // Check if any result has a method
+    const hasMethodColumn = allInterpreted.some(i => i.method || i.standard);
+
     const reportDate = generated?.at ? new Date(generated.at) : new Date();
     const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+    // Location data (prefer structured locationData, fallback to raw)
+    const loc = locationData || {};
 
     return (
         <div className="report-document">
@@ -117,6 +126,9 @@ const ReportContent = ({ data }) => {
                 </div>
                 <div className="report-header-right">
                     <div className="report-title-badge">SOIL ANALYSIS REPORT</div>
+                    {reportNumber && (
+                        <div className="report-number">{reportNumber}</div>
+                    )}
                 </div>
             </header>
 
@@ -126,16 +138,22 @@ const ReportContent = ({ data }) => {
             <table className="report-ref-table">
                 <tbody>
                     <tr>
+                        <td className="ref-label">Report No.</td>
+                        <td className="ref-value ref-mono">{reportNumber || '—'}</td>
                         <td className="ref-label">Report Date</td>
                         <td className="ref-value">{fmtDate(reportDate)}</td>
-                        <td className="ref-label">Laboratory ID</td>
-                        <td className="ref-value ref-mono">{sample?.labId || sample?.originalId || '—'}</td>
                     </tr>
                     <tr>
+                        <td className="ref-label">Laboratory ID</td>
+                        <td className="ref-value ref-mono">{sample?.labId || sample?.originalId || '—'}</td>
                         <td className="ref-label">Sample Received</td>
                         <td className="ref-value">{fmtDate(sample?.receptionDate)}</td>
+                    </tr>
+                    <tr>
                         <td className="ref-label">Project</td>
-                        <td className="ref-value">{project ? `${project.name}` : '—'}</td>
+                        <td className="ref-value">{project ? `${project.name} (${project.code})` : '—'}</td>
+                        <td className="ref-label">Country</td>
+                        <td className="ref-value">{loc.country || sample?.countryName || '—'}</td>
                     </tr>
                 </tbody>
             </table>
@@ -153,12 +171,16 @@ const ReportContent = ({ data }) => {
                             <td className="info-label">Phone</td>
                             <td className="info-value">{client?.phone || '—'}</td>
                         </tr>
-                        {project && (
+                        <tr>
+                            <td className="info-label">Email</td>
+                            <td className="info-value">{client?.email || '—'}</td>
+                            <td className="info-label">Organization</td>
+                            <td className="info-value">{client?.organization || project?.client || '—'}</td>
+                        </tr>
+                        {client?.address && (
                             <tr>
-                                <td className="info-label">Project</td>
-                                <td className="info-value">{project.name} ({project.code})</td>
-                                <td className="info-label">Organization</td>
-                                <td className="info-value">{project.client || '—'}</td>
+                                <td className="info-label">Address</td>
+                                <td className="info-value" colSpan={3}>{client.address}</td>
                             </tr>
                         )}
                     </tbody>
@@ -172,35 +194,34 @@ const ReportContent = ({ data }) => {
                 <h2 className="report-section-title">Sample Description</h2>
                 <table className="report-info-table">
                     <tbody>
-                        {fieldMetadata?.land_use && (
-                            <tr>
-                                <td className="info-label">Land Use</td>
-                                <td className="info-value">{fieldMetadata.land_use}</td>
-                                <td className="info-label">Soil Depth</td>
-                                <td className="info-value">{fieldMetadata.soil_depth || receptionData?.depth || '—'}</td>
-                            </tr>
-                        )}
-                        {(fieldMetadata?.latitude || receptionData?.gpsLat) && (
-                            <tr>
-                                <td className="info-label">GPS Coordinates</td>
-                                <td className="info-value" colSpan={3}>
-                                    {Number(fieldMetadata?.latitude || receptionData?.gpsLat).toFixed(5)}°, {Number(fieldMetadata?.longitude || receptionData?.gpsLng).toFixed(5)}°
-                                    {(fieldMetadata?.altitude || receptionData?.altitude) && ` (${fieldMetadata?.altitude || receptionData?.altitude} m a.s.l.)`}
-                                </td>
-                            </tr>
-                        )}
-                        {(fieldMetadata?.location_description || fieldMetadata?.locationDescription || receptionData?.locationDescription) && (
+                        <tr>
+                            <td className="info-label">Land Use</td>
+                            <td className="info-value">{loc.landUse || fieldMetadata?.land_use || '—'}</td>
+                            <td className="info-label">Crop Type</td>
+                            <td className="info-value">{loc.cropType || fieldMetadata?.crop_type || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td className="info-label">Soil Depth</td>
+                            <td className="info-value">{loc.soilDepth || '—'}</td>
+                            <td className="info-label">Soil Texture</td>
+                            <td className="info-value">{loc.soilTexture || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td className="info-label">GPS Coordinates</td>
+                            <td className="info-value">
+                                {loc.gpsLat && loc.gpsLng
+                                    ? `${Number(loc.gpsLat).toFixed(5)}°, ${Number(loc.gpsLng).toFixed(5)}°${loc.altitude ? ` (${loc.altitude} m a.s.l.)` : ''}`
+                                    : '—'}
+                            </td>
+                            <td className="info-label">District / Region</td>
+                            <td className="info-value">
+                                {[loc.district, loc.village, loc.region].filter(Boolean).join(', ') || '—'}
+                            </td>
+                        </tr>
+                        {loc.locationDescription && (
                             <tr>
                                 <td className="info-label">Location</td>
-                                <td className="info-value" colSpan={3}>
-                                    {fieldMetadata?.location_description || fieldMetadata?.locationDescription || receptionData?.locationDescription}
-                                </td>
-                            </tr>
-                        )}
-                        {sample?.countryName && (
-                            <tr>
-                                <td className="info-label">Country</td>
-                                <td className="info-value" colSpan={3}>{sample.countryName}</td>
+                                <td className="info-value" colSpan={3}>{loc.locationDescription}</td>
                             </tr>
                         )}
                     </tbody>
@@ -220,11 +241,12 @@ const ReportContent = ({ data }) => {
                             <table className="report-results-table">
                                 <thead>
                                     <tr>
-                                        <th style={{ width: '30%' }}>Parameter</th>
-                                        <th style={{ width: '15%', textAlign: 'right' }}>Result</th>
-                                        <th style={{ width: '12%' }}>Unit</th>
-                                        <th style={{ width: '18%' }}>Rating</th>
-                                        <th style={{ width: '25%' }}>Reference Range</th>
+                                        <th style={{ width: hasMethodColumn ? '24%' : '30%' }}>Parameter</th>
+                                        <th style={{ width: '12%', textAlign: 'right' }}>Result</th>
+                                        <th style={{ width: '10%' }}>Unit</th>
+                                        <th style={{ width: '14%' }}>Rating</th>
+                                        <th style={{ width: hasMethodColumn ? '18%' : '25%' }}>Reference Range</th>
+                                        {hasMethodColumn && <th style={{ width: '22%' }}>Method</th>}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -251,6 +273,9 @@ const ReportContent = ({ data }) => {
                                                     ) : '—'}
                                                 </td>
                                                 <td className="param-ref">{interp?.ref || '—'}</td>
+                                                {hasMethodColumn && (
+                                                    <td className="param-method">{item.standard || item.method || '—'}</td>
+                                                )}
                                             </tr>
                                         );
                                     })}
@@ -286,22 +311,65 @@ const ReportContent = ({ data }) => {
             )}
 
             {/* ═══════════════════════════════════════════════════
-                7. FOOTER: DISCLAIMER & SIGNATURE
+                7. METHODOLOGY FOOTNOTES
+            ═══════════════════════════════════════════════════ */}
+            {methodologies && methodologies.length > 0 && (
+                <section className="report-section report-methods-section">
+                    <h2 className="report-section-title">Analytical Methods</h2>
+                    <table className="report-methods-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Method</th>
+                                <th>Standard</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {methodologies.map((m, i) => (
+                                <tr key={i}>
+                                    <td>{m.paramName}</td>
+                                    <td>{m.method}</td>
+                                    <td>{m.standard || '—'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
+            )}
+
+            {/* ═══════════════════════════════════════════════════
+                8. FOOTER: SIGNATURE, APPROVAL, DISCLAIMER
             ═══════════════════════════════════════════════════ */}
             <footer className="report-footer-section">
-                <div className="report-methodology">
-                    <strong>Methodology:</strong> All analyses were performed according to standard laboratory protocols.
+                <div className="report-methodology-note">
+                    <strong>General Note:</strong> All analyses were performed according to standard laboratory protocols.
                     Results are reported on an oven-dry weight basis unless otherwise indicated.
                 </div>
 
-                <div className="report-signature-block">
-                    <div className="signature-line">
-                        <div className="signature-space"></div>
-                        <span>Laboratory Director</span>
+                {/* Approval Trail */}
+                {sample?.approvedBy && (
+                    <div className="report-approval-trail">
+                        <span className="approval-label">Results Approved:</span>
+                        <span className="approval-value">{sample.approvedBy}{sample.approvedAt ? ` — ${fmtDate(sample.approvedAt)}` : ''}</span>
                     </div>
-                    <div className="signature-line">
-                        <div className="signature-space"></div>
-                        <span>Date</span>
+                )}
+
+                {/* Signature Block */}
+                <div className="report-signature-block">
+                    <div className="signature-column">
+                        <div className="signature-signed-area">
+                            <div className="signature-name">{signedBy?.name || 'Laboratory Manager'}</div>
+                            <div className="signature-esign">✓ Electronically Signed</div>
+                        </div>
+                        <div className="signature-rule"></div>
+                        <div className="signature-title">{signedBy?.title || 'Laboratory Manager'}</div>
+                    </div>
+                    <div className="signature-column">
+                        <div className="signature-signed-area">
+                            <div className="signature-date-value">{fmtDate(signedBy?.date || reportDate)}</div>
+                        </div>
+                        <div className="signature-rule"></div>
+                        <div className="signature-title">Date</div>
                     </div>
                 </div>
 
@@ -317,7 +385,7 @@ const ReportContent = ({ data }) => {
                 </div>
 
                 <div className="report-generation-info">
-                    Report generated on {fmtDate(reportDate)} · {lab?.name || 'Laboratory'} · SoilFER LIMS
+                    Report generated on {fmtDate(reportDate)} · {lab?.name || 'Laboratory'} · SoilFER LIMS v{generated?.version || '1.0'}
                 </div>
             </footer>
         </div>

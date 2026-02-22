@@ -48,12 +48,18 @@ async function generateReport(req, res) {
         // Assemble the report
         const { content, searchKeys } = await assembleReport(sampleId, req.user);
 
+        // Append version to report number
+        const version = currentVersion + 1;
+        if (content.reportNumber) {
+            content.reportNumber = `${content.reportNumber}-v${version}`;
+        }
+
         // Create report record
         const report = await prisma.report.create({
             data: {
                 sampleId,
                 labId: sample.assignedLab || sample.labId || null,
-                version: currentVersion + 1,
+                version,
                 status: 'PUBLISHED',
                 content: JSON.stringify(content),
                 generatedBy: req.user?.username || 'system',

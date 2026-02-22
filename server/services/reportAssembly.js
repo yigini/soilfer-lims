@@ -32,18 +32,56 @@ async function assembleReport(sampleId, user) {
         });
     }
 
-    // 3. Parse metadata
+    // 3. Fetch lab manager for auto-signature
+    let labManager = null;
+    if (lab) {
+        labManager = await prisma.user.findFirst({
+            where: {
+                labId: lab.id,
+                role: 'LAB_MANAGER',
+                isActive: true
+            },
+            select: { name: true, username: true, email: true }
+        });
+        // Fallback: try matching by lab code
+        if (!labManager) {
+            labManager = await prisma.user.findFirst({
+                where: {
+                    labId: lab.code,
+                    role: 'LAB_MANAGER',
+                    isActive: true
+                },
+                select: { name: true, username: true, email: true }
+            });
+        }
+    }
+
+    // 4. Parse metadata
     const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
     const fieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
     const receptionData = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : (sample.receptionData || {});
 
-    // 4. Extract client/farmer info for search keys
+    // 5. Extract client/farmer info for search keys
     const clientInfo = extractClientInfo(metadata, fieldMeta, receptionData, sample);
 
-    // 5. Group results by category
+    // 6. Fetch all analyses and their default methodologies
     const analyses = await prisma.analysis.findMany();
     const analysisMap = new Map(analyses.map(a => [a.code, a]));
 
+    // Fetch default methodologies for all analysis codes in results
+    const resultParams = sample.results.map(r => r.param);
+    let methodologies = [];
+    try {
+        methodologies = await prisma.methodology.findMany({
+            where: {
+                analysisCode: { in: resultParams },
+                isDefault: true
+            }
+        });
+    } catch (e) { /* methodologies table may be empty */ }
+    const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
+
+    // 7. Group results by category
     const groupedResults = {};
     for (const result of sample.results) {
         const analysis = analysisMap.get(result.param);
@@ -56,18 +94,21 @@ async function assembleReport(sampleId, user) {
         }
 
         const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
+        const methodology = methodMap.get(result.param);
 
         groupedResults[category].items.push({
             param: result.param,
             name: analysis?.name || result.param,
             value: result.value,
             unit: analysis?.units || result.unit || '',
+            method: methodology?.name || null,
+            standard: methodology?.standard || null,
             flags,
             isValid: result.isValid
         });
     }
 
-    // 6. Fetch category names
+    // 8. Fetch category names
     const categoryIds = [...new Set(Object.keys(groupedResults))];
     const categories = await prisma.analysisCategory.findMany({
         where: { id: { in: categoryIds } }
@@ -77,7 +118,7 @@ async function assembleReport(sampleId, user) {
         group.categoryName = categoryMap.get(catId) || catId;
     }
 
-    // 7. Work item summary
+    // 9. Work item summary
     const workItemSummary = sample.workItems.map(wi => ({
         analysis: wi.analysis,
         status: wi.status,
@@ -86,14 +127,50 @@ async function assembleReport(sampleId, user) {
         assignedTo: wi.assignedTo
     }));
 
-    // 8. Lab branding
+    // 10. Lab branding
     let labBranding = {};
     if (lab?.branding) {
         labBranding = typeof lab.branding === 'string' ? JSON.parse(lab.branding) : lab.branding;
     }
 
-    // 9. Assemble the full report payload
+    // 11. Build unique methodologies list for footnotes
+    const usedMethods = [];
+    const seenMethods = new Set();
+    for (const m of methodologies) {
+        const key = m.analysisCode;
+        if (!seenMethods.has(key)) {
+            seenMethods.add(key);
+            const analysis = analysisMap.get(m.analysisCode);
+            usedMethods.push({
+                param: m.analysisCode,
+                paramName: analysis?.name || m.analysisCode,
+                method: m.name,
+                standard: m.standard || null
+            });
+        }
+    }
+
+    // 12. Extract location data (merge receptionData + fieldMetadata)
+    const locationData = extractLocationData(fieldMeta, receptionData, sample);
+
+    // 13. Build report number
+    const labCode = lab?.code || 'LAB';
+    const year = new Date().getFullYear();
+    // Version will be set by the controller, use placeholder
+    const reportNumber = `RPT-${labCode}-${year}`;
+
+    // 14. Build signedBy block
+    const signedByName = labManager?.name || labManager?.username || user?.name || user?.username || 'Laboratory Manager';
+    const signedBy = {
+        name: signedByName,
+        title: 'Laboratory Manager',
+        date: new Date().toISOString()
+    };
+
+    // 15. Assemble the full report payload
     const reportContent = {
+        // Report number (version appended by controller)
+        reportNumber,
         // Sample Info
         sample: {
             id: sample.id,
@@ -133,12 +210,18 @@ async function assembleReport(sampleId, user) {
         labBranding,
         // Results (grouped by category)
         resultGroups: Object.values(groupedResults),
+        // Methodologies footnotes
+        methodologies: usedMethods,
         // Work Items
         workItems: workItemSummary,
-        // Field metadata (location, sampling info)
+        // Location data (merged and structured)
+        locationData,
+        // Field metadata (raw, for backward compat)
         fieldMetadata: fieldMeta,
-        // Reception data
+        // Reception data (raw, for backward compat)
         receptionData,
+        // Signature
+        signedBy,
         // Generation metadata
         generated: {
             at: new Date().toISOString(),
@@ -147,7 +230,7 @@ async function assembleReport(sampleId, user) {
         }
     };
 
-    // 10. Extract denormalized search keys
+    // 16. Extract denormalized search keys
     const searchKeys = {
         firstName: clientInfo.firstName || null,
         surname: clientInfo.surname || null,
@@ -169,7 +252,10 @@ function extractClientInfo(metadata, fieldMeta, receptionData, sample) {
         firstName: null,
         surname: null,
         fullName: null,
-        phone: null
+        phone: null,
+        email: null,
+        address: null,
+        organization: null
     };
 
     // Try reception data first (walk-in intake often has client info)
@@ -202,9 +288,46 @@ function extractClientInfo(metadata, fieldMeta, receptionData, sample) {
     }
 
     // Phone
-    info.phone = receptionData.phone || fieldMeta?.phone || fieldMeta?.farmer_phone || metadata?.phone || null;
+    info.phone = receptionData.phone || receptionData.clientPhone ||
+        fieldMeta?.phone || fieldMeta?.farmer_phone || fieldMeta?.farmerPhone ||
+        metadata?.phone || null;
+
+    // Email
+    info.email = receptionData.email || receptionData.clientEmail ||
+        fieldMeta?.email || fieldMeta?.farmer_email || fieldMeta?.farmerEmail ||
+        metadata?.email || null;
+
+    // Address
+    info.address = receptionData.address || receptionData.clientAddress ||
+        fieldMeta?.address || fieldMeta?.farmer_address ||
+        metadata?.address || null;
+
+    // Organization
+    info.organization = receptionData.organization || receptionData.company ||
+        fieldMeta?.organization || fieldMeta?.company ||
+        metadata?.organization || null;
 
     return info;
 }
 
-module.exports = { assembleReport, extractClientInfo };
+/**
+ * Extract and structure location data from multiple sources.
+ */
+function extractLocationData(fieldMeta, receptionData, sample) {
+    return {
+        gpsLat: fieldMeta?.latitude || fieldMeta?.gps_lat || receptionData?.gpsLat || null,
+        gpsLng: fieldMeta?.longitude || fieldMeta?.gps_lng || receptionData?.gpsLng || null,
+        altitude: fieldMeta?.altitude || receptionData?.altitude || null,
+        landUse: fieldMeta?.land_use || fieldMeta?.landUse || receptionData?.landUse || null,
+        cropType: fieldMeta?.crop_type || fieldMeta?.cropType || receptionData?.cropType || null,
+        soilDepth: fieldMeta?.soil_depth || fieldMeta?.soilDepth || receptionData?.depth || receptionData?.soilDepth || null,
+        soilTexture: fieldMeta?.soil_texture || fieldMeta?.soilTexture || receptionData?.soilTexture || null,
+        district: fieldMeta?.district || receptionData?.district || null,
+        village: fieldMeta?.village || receptionData?.village || null,
+        region: fieldMeta?.region || fieldMeta?.province || receptionData?.region || receptionData?.province || null,
+        locationDescription: fieldMeta?.location_description || fieldMeta?.locationDescription || receptionData?.locationDescription || null,
+        country: sample?.countryName || sample?.country || fieldMeta?.country || null
+    };
+}
+
+module.exports = { assembleReport, extractClientInfo, extractLocationData };

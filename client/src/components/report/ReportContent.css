@@ -3,7 +3,7 @@
  * 
  * This is a DOCUMENT, not a web app.
  * Always light background, black text, professional typography.
- * Designed for A4 print output.
+ * Designed for A4 print output — approved by veteran lab manager standards.
  */
 
 /* ─── Base Document ──────────────────────────────── */
@@ -70,6 +70,15 @@
     background: #1e3a5f;
     padding: 6px 16px;
     display: inline-block;
+}
+
+.report-number {
+    font-family: 'Courier New', monospace;
+    font-size: 8.5pt;
+    color: #1e3a5f;
+    font-weight: 600;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
 }
 
 /* ─── 2. Reference Table ─────────────────────────── */
@@ -236,6 +245,12 @@
     font-size: 8pt;
 }
 
+.param-method {
+    color: #4b5563;
+    font-size: 7.5pt;
+    font-style: italic;
+}
+
 /* Row highlighting */
 .row-critical {
     background: #fef2f2 !important;
@@ -305,7 +320,43 @@
     line-height: 1.4;
 }
 
-/* ─── 7. Footer ──────────────────────────────────── */
+/* ─── 7. Methodology Footnotes ───────────────────── */
+
+.report-methods-section {
+    margin-top: 8px;
+}
+
+.report-methods-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8pt;
+}
+
+.report-methods-table th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 600;
+    padding: 4px 10px;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 7pt;
+    border-bottom: 1.5px solid #d1d5db;
+}
+
+.report-methods-table td {
+    padding: 3px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+    font-size: 8pt;
+}
+
+.report-methods-table tbody tr:last-child td {
+    border-bottom: 1.5px solid #d1d5db;
+}
+
+/* ─── 8. Footer ──────────────────────────────────── */
 
 .report-footer-section {
     margin-top: 20px;
@@ -313,35 +364,97 @@
     border-top: 1.5px solid #d1d5db;
 }
 
-.report-methodology {
+.report-methodology-note {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 8pt;
     color: #6b7280;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     line-height: 1.4;
 }
 
+/* Approval Trail */
+.report-approval-trail {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8.5pt;
+    color: #374151;
+    margin-bottom: 16px;
+    padding: 6px 10px;
+    background: #f0fdf4;
+    border-left: 3px solid #059669;
+}
+
+.approval-label {
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.approval-value {
+    color: #1a1a1a;
+}
+
+/* Signature Block */
 .report-signature-block {
     display: flex;
     gap: 60px;
-    margin: 24px 0;
+    margin: 20px 0;
 }
 
-.signature-line {
+.signature-column {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    min-width: 200px;
+}
+
+.signature-signed-area {
+    min-height: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 4px;
+}
+
+.signature-name {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 12pt;
+    font-weight: 700;
+    color: #1e3a5f;
+    letter-spacing: -0.2px;
+}
+
+.signature-esign {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 8.5pt;
+    font-size: 7pt;
+    color: #059669;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-top: 1px;
+}
+
+.signature-date-value {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10pt;
+    color: #1a1a1a;
+    font-weight: 500;
+    padding-bottom: 2px;
+}
+
+.signature-rule {
+    width: 100%;
+    height: 0;
+    border-bottom: 1px solid #374151;
+    margin-bottom: 4px;
+}
+
+.signature-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8pt;
     color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-.signature-space {
-    width: 200px;
-    height: 40px;
-    border-bottom: 1px solid #9ca3af;
-}
-
+/* Disclaimer and footer */
 .report-disclaimer {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 7pt;
@@ -409,9 +522,19 @@
         page-break-inside: avoid;
     }
 
-    /* Keep footer at bottom */
+    /* Keep footer together */
     .report-footer-section {
         page-break-inside: avoid;
+    }
+
+    /* Keep signature block together */
+    .report-signature-block {
+        page-break-inside: avoid;
+    }
+
+    /* Methods section can break if needed */
+    .report-methods-section {
+        page-break-inside: auto;
     }
 
     /* Ensure colors print */
@@ -422,7 +545,9 @@
     .report-title-badge,
     .report-results-table th,
     .report-category-title,
-    .ref-label {
+    .ref-label,
+    .report-approval-trail,
+    .report-methods-table th {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
