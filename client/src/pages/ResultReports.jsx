@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import ReportContent from '../components/report/ReportContent';
 import {
     FileText, Search, Share2, Download, ExternalLink, Copy, XCircle,
     ChevronLeft, ChevronRight, Clock, User, Shield, Link2, LinkIcon,
-    Eye, Trash2, Plus
+    Eye, Trash2, Plus, Printer
 } from 'lucide-react';
 
 const ResultReports = () => {
@@ -270,22 +271,27 @@ const ResultReports = () => {
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
                         {/* Header */}
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800 no-print">
                             <div>
                                 <h2 className="text-xl font-black text-gray-900 dark:text-white">
                                     Report — {selectedReport.sampleLabId || selectedReport.sampleId?.slice(0, 8)}
                                 </h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Version {selectedReport.version} • Generated {formatDate(selectedReport.generatedAt)} by {selectedReport.generatedBy}</p>
                             </div>
-                            <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
-                                <XCircle size={24} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 transition-colors" title="Print / Save as PDF">
+                                    <Printer size={20} />
+                                </button>
+                                <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Report Content */}
                         <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-gray-900">
                             {selectedReport.content ? (
-                                <ReportContent data={selectedReport.content} />
+                                <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content} showActions />
                             ) : (
                                 <div className="text-center text-gray-400 py-20">No report content available</div>
                             )}
@@ -375,102 +381,6 @@ const ResultReports = () => {
                     </div>
                 </div>
             )}
-        </div>
-    );
-};
-
-// ─── REPORT CONTENT RENDERER ─────────────────────────────
-
-const ReportContent = ({ data }) => {
-    const { sample, client, project, lab, labBranding, resultGroups, generated } = data || {};
-
-    return (
-        <div className="max-w-4xl mx-auto print:max-w-none space-y-8">
-            {/* Lab Header */}
-            <div className="text-center border-b-2 border-indigo-600 pb-6">
-                {labBranding?.logoUrl && (
-                    <img src={labBranding.logoUrl} alt="Lab logo" className="h-16 mx-auto mb-3" />
-                )}
-                <h1 className="text-2xl font-black text-gray-900 dark:text-white">{lab?.name || 'Laboratory Report'}</h1>
-                {lab?.address && <p className="text-sm text-gray-500 mt-1">{[lab.address, lab.city, lab.country].filter(Boolean).join(', ')}</p>}
-                {(lab?.phone || lab?.email) && (
-                    <p className="text-xs text-gray-400 mt-0.5">{[lab.phone, lab.email, lab.website].filter(Boolean).join(' • ')}</p>
-                )}
-                <h2 className="text-lg font-bold text-indigo-600 mt-4">SOIL ANALYSIS REPORT</h2>
-            </div>
-
-            {/* Client & Sample Info */}
-            <div className="grid grid-cols-2 gap-6">
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><User size={13} /> Client Information</h3>
-                    <div className="space-y-1.5 text-sm">
-                        <div><span className="text-gray-500">Name:</span> <span className="font-bold text-gray-900 dark:text-white">{client?.fullName || '—'}</span></div>
-                        {client?.phone && <div><span className="text-gray-500">Phone:</span> <span className="font-medium">{client.phone}</span></div>}
-                        {project && <div><span className="text-gray-500">Project:</span> <span className="font-medium">{project.name} ({project.code})</span></div>}
-                    </div>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><FileText size={13} /> Sample Details</h3>
-                    <div className="space-y-1.5 text-sm">
-                        <div><span className="text-gray-500">Lab ID:</span> <span className="font-mono font-bold text-indigo-600">{sample?.labId || '—'}</span></div>
-                        <div><span className="text-gray-500">Status:</span> <span className="font-bold">{sample?.status || '—'}</span></div>
-                        {sample?.receptionDate && <div><span className="text-gray-500">Received:</span> <span className="font-medium">{new Date(sample.receptionDate).toLocaleDateString()}</span></div>}
-                        {sample?.approvedBy && <div><span className="text-gray-500">Approved by:</span> <span className="font-medium">{sample.approvedBy}</span></div>}
-                    </div>
-                </div>
-            </div>
-
-            {/* Results by Category */}
-            {resultGroups && resultGroups.length > 0 ? (
-                resultGroups.map((group, idx) => (
-                    <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                        <div className="bg-indigo-50 dark:bg-indigo-900/20 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="font-bold text-indigo-800 dark:text-indigo-300">{group.categoryName}</h3>
-                        </div>
-                        <table className="w-full text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-gray-500 tracking-wider">
-                                <tr>
-                                    <th className="px-6 py-2.5 text-left">Parameter</th>
-                                    <th className="px-6 py-2.5 text-left">Result</th>
-                                    <th className="px-6 py-2.5 text-left">Unit</th>
-                                    <th className="px-6 py-2.5 text-left">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {group.items.map((item, i) => (
-                                    <tr key={i} className={`${item.flags?.length > 0 ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''}`}>
-                                        <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{item.name}</td>
-                                        <td className="px-6 py-3 font-mono font-bold text-gray-900 dark:text-white">
-                                            {item.value != null ? Number(item.value).toFixed(2) : '—'}
-                                        </td>
-                                        <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{item.unit || '—'}</td>
-                                        <td className="px-6 py-3">
-                                            {item.flags?.length > 0 ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                                    ⚠ {item.flags.join(', ')}
-                                                </span>
-                                            ) : (
-                                                <span className="text-xs text-green-600">✓ Normal</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ))
-            ) : (
-                <div className="text-center py-10 text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl">
-                    <p className="font-bold">No analysis results available</p>
-                    <p className="text-sm mt-1">Results will appear here once laboratory analyses are complete.</p>
-                </div>
-            )}
-
-            {/* Generation Footer */}
-            <div className="text-center text-xs text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-4 mt-8">
-                <p>Report generated on {generated?.at ? new Date(generated.at).toLocaleString() : '—'} by {generated?.byName || 'System'}</p>
-                <p className="mt-1 text-gray-300">CONFIDENTIAL — This report is intended for the named client and authorized personnel only.</p>
-            </div>
         </div>
     );
 };

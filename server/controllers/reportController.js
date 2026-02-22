@@ -161,6 +161,13 @@ async function searchReports(req, res) {
 
         const where = {};
 
+        // R-9: Lab-scoping — non-admin users only see reports for their lab
+        const userRole = req.user?.role;
+        const userLab = req.user?.labId;
+        if (userLab && !['SUPER_ADMIN', 'MASTER_USER'].includes(userRole)) {
+            where.labId = userLab;
+        }
+
         // Status filter
         if (status) {
             where.status = status;
@@ -432,8 +439,8 @@ async function getPublicReport(req, res) {
 
 /**
  * GET /api/reports/public/:token/pdf
- * Public PDF download via token.
- * Returns the report content as JSON (PDF rendering done client-side with pdfmake).
+ * Server-side PDF generation using Puppeteer.
+ * Renders the public report HTML and converts to A4 PDF.
  */
 async function getPublicReportPdf(req, res) {
     try {
@@ -467,15 +474,67 @@ async function getPublicReportPdf(req, res) {
         } catch (e) { /* best-effort */ }
 
         const report = link.report;
-        // Return content for client-side PDF rendering
-        res.json({
-            format: 'pdf',
-            content: report.content ? JSON.parse(report.content) : null,
-            version: report.version,
-            generatedAt: report.generatedAt
+        const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;
+
+        if (!content) {
+            return res.status(404).json({ error: 'Report content not available' });
+        }
+
+        // Try Puppeteer for server-side PDF
+        let puppeteer;
+        try {
+            puppeteer = require('puppeteer');
+        } catch (e) {
+            // Puppeteer not installed — fall back to JSON response for client-side rendering
+            console.warn('[Report] Puppeteer not available, returning JSON for client-side PDF rendering');
+            return res.json({
+                format: 'pdf-data',
+                content,
+                version: report.version,
+                generatedAt: report.generatedAt
+            });
+        }
+
+        // Build the public report URL
+        const host = req.get('host') || 'localhost:4000';
+        const protocol = req.protocol || 'http';
+        const publicUrl = `${protocol}://${host}/report/${token}`;
+
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
+
+        try {
+            const page = await browser.newPage();
+            await page.goto(publicUrl, { waitUntil: 'networkidle0', timeout: 30000 });
+
+            // Wait a bit for React to render
+            await page.waitForSelector('.report-container', { timeout: 10000 }).catch(() => { });
+
+            const labName = content.lab?.name || 'Laboratory';
+            const sampleId = content.sample?.labId || content.sample?.originalId || 'Report';
+
+            const pdfBuffer = await page.pdf({
+                format: 'A4',
+                margin: { top: '20mm', bottom: '25mm', left: '15mm', right: '15mm' },
+                printBackground: true,
+                displayHeaderFooter: true,
+                headerTemplate: `<div style="width:100%;font-size:8px;padding:5mm 15mm;color:#999;display:flex;justify-content:space-between;"><span>${labName}</span><span>Soil Analysis Report — ${sampleId}</span></div>`,
+                footerTemplate: `<div style="width:100%;font-size:7px;padding:5mm 15mm;color:#999;border-top:0.5px solid #ddd;display:flex;justify-content:space-between;"><span>Generated ${new Date(report.generatedAt).toLocaleDateString()}</span><span>v${report.version}</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>`
+            });
+
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="report-${sampleId}-v${report.version}.pdf"`,
+                'Content-Length': pdfBuffer.length
+            });
+            res.send(pdfBuffer);
+        } finally {
+            await browser.close();
+        }
     } catch (err) {
-        console.error('[Report] Public PDF error:', err);
+        console.error('[Report] PDF generation error:', err);
         res.status(500).json({ error: 'Failed to generate PDF' });
     }
 }

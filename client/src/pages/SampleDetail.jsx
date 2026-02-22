@@ -18,6 +18,8 @@ import IntakeRequestCard from '../components/sample/IntakeRequestCard'; // NEW
 import WorkflowProgressBar from '../components/sample/WorkflowProgressBar'; // Phase 3
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
+import ReportContent from '../components/report/ReportContent';
+import { FileText, XCircle, Printer } from 'lucide-react';
 
 const SampleDetail = () => {
     const { id } = useParams();
@@ -43,6 +45,8 @@ const SampleDetail = () => {
     const [showContextPanel, setShowContextPanel] = useState(false);
     const [printTarget, setPrintTarget] = useState(null);
     const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);
+    const [existingReport, setExistingReport] = useState(null);
+    const [reportModal, setReportModal] = useState(null);
 
     // Persist Mode
     useEffect(() => {
@@ -71,9 +75,20 @@ const SampleDetail = () => {
         }
     }, [id, token]);
 
+    // Check for existing report
+    const checkReport = useCallback(async () => {
+        try {
+            const res = await axios.get(`/api/reports/sample/${id}`);
+            setExistingReport(res.data || null);
+        } catch {
+            setExistingReport(null);
+        }
+    }, [id]);
+
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+        checkReport();
+    }, [fetchData, checkReport]);
 
     // ─── Real-time: subscribe to WORKITEM_CHANGED events (draft + completion) ───
     useEffect(() => {
@@ -236,6 +251,32 @@ const SampleDetail = () => {
         }
     };
 
+    const handleGenerateReport = async () => {
+        requestConfirmation('Generate Report', 'Generate a soil analysis report for this sample? This will snapshot the current results.', async () => {
+            try {
+                const res = await axios.post(`/api/reports/generate/${id}`);
+                setExistingReport(res.data);
+                showInfo(t('common.success', 'Success'), 'Report generated successfully!');
+                // Auto-open the report
+                const full = await axios.get(`/api/reports/${res.data.id}`);
+                setReportModal(full.data);
+            } catch (e) {
+                showInfo(t('common.error', 'Error'), e.response?.data?.error || 'Failed to generate report');
+            }
+        });
+    };
+
+    const handleViewReport = async () => {
+        try {
+            const reportId = existingReport?.id;
+            if (!reportId) return;
+            const res = await axios.get(`/api/reports/${reportId}`);
+            setReportModal(res.data);
+        } catch (e) {
+            showInfo(t('common.error', 'Error'), 'Failed to load report');
+        }
+    };
+
 
     const handleFinalApproval = async () => {
         // Debugging Click
@@ -386,6 +427,9 @@ const SampleDetail = () => {
                         onDispose={handleDispose}
                         onPrintLabel={() => setPrintTarget(sample)}
                         onEditAnalysis={() => setIsAnalysisModalOpen(true)}
+                        onGenerateReport={handleGenerateReport}
+                        onViewReport={handleViewReport}
+                        hasReport={!!existingReport}
                         allAccepted={allAccepted}
                         isApproved={isApproved}
                     />
@@ -551,6 +595,34 @@ const SampleDetail = () => {
                             >
                                 {t('common.ok', 'OK')}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── REPORT VIEWER MODAL ─── */}
+            {reportModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[120] flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800 no-print">
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                                    <FileText size={20} className="text-indigo-600" />
+                                    Report — {reportModal.sampleLabId || reportModal.sampleId?.slice(0, 8)}
+                                </h2>
+                                <p className="text-xs text-gray-500 mt-0.5">Version {reportModal.version} • Generated {reportModal.generatedAt ? new Date(reportModal.generatedAt).toLocaleDateString('en-GB') : '—'}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 transition-colors" title="Print">
+                                    <Printer size={20} />
+                                </button>
+                                <button onClick={() => setReportModal(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-gray-900">
+                            <ReportContent data={typeof reportModal.content === 'string' ? JSON.parse(reportModal.content) : reportModal.content} showActions />
                         </div>
                     </div>
                 </div>

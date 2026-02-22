@@ -1,0 +1,130 @@
+/* ─── Report Print Stylesheet ─────────────────────────── */
+
+/* Screen styles for the report container */
+.report-container {
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: #1a1a2e;
+    line-height: 1.6;
+}
+
+.report-container table {
+    border-collapse: collapse;
+    width: 100%;
+    page-break-inside: auto;
+}
+
+.report-container thead {
+    display: table-header-group; /* repeats on each page */
+}
+
+.report-container tr {
+    page-break-inside: avoid;
+}
+
+/* ─── Print-specific rules ────────────────────────────── */
+@media print {
+    /* Hide non-print elements */
+    .no-print,
+    .report-actions,
+    button,
+    nav,
+    aside,
+    header,
+    footer:not(.report-footer) {
+        display: none !important;
+    }
+
+    /* Reset page */
+    body {
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        color: black !important;
+        font-size: 10pt;
+    }
+
+    .report-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Page setup */
+    @page {
+        size: A4;
+        margin: 20mm 15mm 25mm 15mm;
+    }
+
+    /* Lab header — show on first page */
+    .report-lab-header {
+        border-bottom: 2px solid #4338ca;
+        padding-bottom: 12pt;
+        margin-bottom: 16pt;
+    }
+
+    .report-lab-header img {
+        max-height: 50pt;
+    }
+
+    /* Section breaks */
+    .report-section {
+        page-break-inside: avoid;
+        margin-bottom: 12pt;
+    }
+
+    .report-section-break {
+        page-break-before: always;
+    }
+
+    /* Tables */
+    .report-container table {
+        font-size: 9pt;
+    }
+
+    .report-container th {
+        background: #f0f0f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Flag highlighting */
+    .report-flag-warn {
+        background: #fef3cd !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .report-flag-critical {
+        background: #f8d7da !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Footer */
+    .report-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 7pt;
+        text-align: center;
+        color: #999;
+        border-top: 0.5pt solid #ddd;
+        padding-top: 4pt;
+    }
+
+    /* Links */
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    /* Dark mode reset */
+    .dark * {
+        color: black !important;
+        background: white !important;
+        border-color: #ddd !important;
+    }
+}

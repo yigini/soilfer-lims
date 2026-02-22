@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, CheckCircle, MoreHorizontal, User, Building, Phone, Activity, Clock, Inbox, Printer, Droplet, GitBranch } from 'lucide-react';
+import { ArrowLeft, CheckCircle, MoreHorizontal, User, Building, Phone, Activity, Clock, Inbox, Printer, Droplet, GitBranch, FileText, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SampleSummary = ({
@@ -21,7 +21,10 @@ const SampleSummary = ({
     allAccepted,
     isApproved,
     onPrintLabel,
-    onEditAnalysis
+    onEditAnalysis,
+    onGenerateReport,
+    onViewReport,
+    hasReport
 }) => {
     const navigate = useNavigate();
 
@@ -92,6 +95,24 @@ const SampleSummary = ({
                     >
                         <GitBranch size={20} />
                     </button>
+                    {/* REPORT ACTIONS */}
+                    {hasReport ? (
+                        <button
+                            onClick={onViewReport}
+                            className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl shadow-sm transition-all"
+                            title="View Report"
+                        >
+                            <FileText size={20} />
+                        </button>
+                    ) : ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status) && onGenerateReport ? (
+                        <button
+                            onClick={onGenerateReport}
+                            className="p-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl shadow-sm transition-all"
+                            title="Generate Report"
+                        >
+                            <FileText size={20} />
+                        </button>
+                    ) : null}
                     <button
                         onClick={() => setDrawerOpen(!drawerOpen)}
                         className={`p-2.5 rounded-xl transition-all border shadow-sm ${drawerOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
