@@ -223,36 +223,11 @@ exports.getSamples = async (req, res) => {
 
         const [total, samples, statusCounts, projectCounts, countryCounts, labCounts] = await Promise.all([
             prisma.sample.count({ where }),
+            // --- Phase 1: Lightweight ranking query (ALL matching rows, minimal fields) ---
             prisma.sample.findMany({
                 where,
-                select: {
-                    id: true,
-                    originalId: true,
-                    labId: true,
-                    assignedLab: true,
-                    projectCode: true,
-                    country: true,
-                    countryName: true,
-                    status: true,
-                    dryingStatus: true,
-                    preparationStatus: true,
-                    receptionDate: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    fieldMetadata: true,
-                    metadata: true,
-                    workItems: {
-                        select: {
-                            analysis: true,
-                            status: true,
-                            category: true
-                        }
-                    }
-                },
-                orderBy: needsAttentionSort ? { updatedAt: 'desc' } : { [safeSort]: safeOrder },
-                // For attention sort, fetch enough rows for in-memory re-sort, then slice
-                skip: needsAttentionSort ? 0 : skip,
-                take: needsAttentionSort ? 10000 : limitNum
+                select: { id: true, status: true, updatedAt: true, workItems: { select: { status: true } } },
+                orderBy: { updatedAt: 'desc' }
             }),
             prisma.sample.groupBy({
                 by: ['status'],
@@ -296,73 +271,122 @@ exports.getSamples = async (req, res) => {
         const labs = {};
         labCounts.forEach(lc => { if (lc.assignedLab) labs[lc.assignedLab] = lc._count; });
 
-        // --- 4. MINIMAL ENRICHMENT ---
-        const enriched = samples.map(s => {
-            // Extract site_id from fieldMetadata for display
+        // --- 4. RESOLVE PAGE DATA ---
+        // For attention sort: rank ALL lightweight rows, sort, slice page IDs, then fetch full data.
+        // For normal sort: Phase 1 already has all rows but we need a separate full fetch with proper pagination.
+        let pageSamples; // Full records for this page
+        let attentionRanks = {}; // id → rank map (only for attention sort)
+
+        if (needsAttentionSort) {
+            // Phase 1b: Compute attention rank on lightweight data (no cap — operates on ALL matching rows)
+            const ranked = samples.map(s => {
+                const wis = s.workItems || [];
+                const hasInProgress = wis.some(wi => wi.status === 'IN_PROGRESS');
+                const hasAssigned = wis.some(wi => wi.status === 'ASSIGNED');
+                const hasReanalysis = wis.some(wi => wi.status === 'REANALYSIS_REQUIRED');
+                const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
+                let rank = 5;
+                if (hasInProgress) rank = 0;
+                else if (hasAssigned || hasReanalysis) rank = 1;
+                else if (pendingReview) rank = 2;
+                else if (s.status === 'PROCESSING') rank = 3;
+                else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) rank = 4;
+                return { id: s.id, rank, updatedAt: s.updatedAt };
+            });
+
+            // Sort all rows by attention rank, then updatedAt desc
+            ranked.sort((a, b) => {
+                if (a.rank !== b.rank) return a.rank - b.rank;
+                return new Date(b.updatedAt) - new Date(a.updatedAt);
+            });
+
+            // Slice for current page
+            const pageSlice = ranked.slice(skip, skip + limitNum);
+            const pageIds = pageSlice.map(r => r.id);
+
+            // Save ranks for re-ordering after Phase 2
+            pageSlice.forEach((r, idx) => { attentionRanks[r.id] = idx; });
+
+            // Phase 2: Fetch full data for just this page's IDs
+            pageSamples = pageIds.length > 0 ? await prisma.sample.findMany({
+                where: { id: { in: pageIds } },
+                select: {
+                    id: true, originalId: true, labId: true, assignedLab: true,
+                    projectCode: true, country: true, countryName: true,
+                    status: true, dryingStatus: true, preparationStatus: true,
+                    receptionDate: true, createdAt: true, updatedAt: true,
+                    fieldMetadata: true, metadata: true,
+                    workItems: { select: { analysis: true, status: true, category: true } }
+                }
+            }) : [];
+
+            // Re-order to match the ranked sort order
+            pageSamples.sort((a, b) => attentionRanks[a.id] - attentionRanks[b.id]);
+        } else {
+            // Non-attention sort: standard paginated query with full data
+            pageSamples = await prisma.sample.findMany({
+                where,
+                select: {
+                    id: true, originalId: true, labId: true, assignedLab: true,
+                    projectCode: true, country: true, countryName: true,
+                    status: true, dryingStatus: true, preparationStatus: true,
+                    receptionDate: true, createdAt: true, updatedAt: true,
+                    fieldMetadata: true, metadata: true,
+                    workItems: { select: { analysis: true, status: true, category: true } }
+                },
+                orderBy: { [safeSort]: safeOrder },
+                skip,
+                take: limitNum
+            });
+        }
+
+        // --- 5. ENRICH page data ---
+        const enriched = pageSamples.map(s => {
             let siteId = null;
             try {
                 const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
                 if (fm?.site_id) siteId = fm.site_id.value || fm.site_id;
             } catch (e) { }
-            // Extract metadata for provenance display
             let metadata = null;
             try {
                 metadata = typeof s.metadata === 'string' ? JSON.parse(s.metadata) : s.metadata;
             } catch (e) { }
 
-            // Build work item progress summary
             const workItems = s.workItems || [];
-
-            // Smart categorization based on analysis name
             const categorizeWI = (analysis) => {
                 if (!analysis) return null;
                 const a = analysis.toUpperCase();
                 if (['DRYING', 'PREPARATION'].includes(a)) return 'Operational Gates';
-                if (['ARCHIVING', 'DISPOSING', 'ARCHIVE', 'DISPOSE'].includes(a)) return null; // Exclude lifecycle ops
+                if (['ARCHIVING', 'DISPOSING', 'ARCHIVE', 'DISPOSE'].includes(a)) return null;
                 if (a.startsWith('SPEC_') || a.startsWith('SPECTRAL') || ['MIR', 'NIR', 'VIS_NIR', 'XRF'].includes(a)) return 'Spectroscopy';
                 if (['SAND', 'SILT', 'CLAY', 'TEXTURE'].includes(a)) return 'Texture';
-                // Everything else is wet chemistry
                 return 'Wet Chemistry';
             };
-
             const progressItems = workItems
                 .map(wi => ({ analysis: wi.analysis, category: categorizeWI(wi.analysis), status: wi.status }))
-                .filter(wi => wi.category !== null); // Exclude lifecycle ops
-
+                .filter(wi => wi.category !== null);
             const totalWI = progressItems.length;
             const completedWI = progressItems.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(wi.status)).length;
-            const workItemProgress = {
-                total: totalWI,
-                completed: completedWI,
-                items: progressItems
-            };
 
-            // P1: Computed activity flags for attention signals
             const hasInProgressWork = workItems.some(wi => wi.status === 'IN_PROGRESS');
             const hasAssignedWork = workItems.some(wi => wi.status === 'ASSIGNED');
             const hasReanalysisWork = workItems.some(wi => wi.status === 'REANALYSIS_REQUIRED');
             const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
-
-            // P1: Attention rank for sorting (lower = more urgent)
             let attentionRank = 5;
             if (hasInProgressWork) attentionRank = 0;
             else if (hasAssignedWork || hasReanalysisWork) attentionRank = 1;
             else if (pendingReview) attentionRank = 2;
-            else if (['PROCESSING'].includes(s.status)) attentionRank = 3;
+            else if (s.status === 'PROCESSING') attentionRank = 3;
             else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) attentionRank = 4;
 
             return {
                 ...s,
-                workItems: undefined, // Don't send raw relation
-                fieldMetadata: undefined, // Don't send raw JSON to frontend
+                workItems: undefined,
+                fieldMetadata: undefined,
                 metadata,
                 siteId,
-                workItemProgress,
-                hasInProgressWork,
-                hasAssignedWork,
-                hasReanalysisWork,
-                pendingReview,
-                attentionRank,
+                workItemProgress: { total: totalWI, completed: completedWI, items: progressItems },
+                hasInProgressWork, hasAssignedWork, hasReanalysisWork, pendingReview, attentionRank,
                 gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
                 nextAction: s.status === 'EXPECTED' ? 'Receive' :
                     s.status === 'RECEIVED' ? 'Accept' :
@@ -370,25 +394,9 @@ exports.getSamples = async (req, res) => {
             };
         });
 
-        // P1: Attention-first sort (in-memory, then paginate)
-        let finalData;
-        let finalTotal = total;
-        if (needsAttentionSort) {
-            enriched.sort((a, b) => {
-                if (a.attentionRank !== b.attentionRank) return a.attentionRank - b.attentionRank;
-                // Secondary: updatedAt desc
-                return new Date(b.updatedAt) - new Date(a.updatedAt);
-            });
-            // Use the real DB count for pagination (not the array length)
-            finalTotal = total;
-            finalData = enriched.slice(skip, skip + limitNum);
-        } else {
-            finalData = enriched;
-        }
-
         res.json({
-            data: finalData,
-            meta: { page: pageNum, limit: limitNum, total: finalTotal, pages: Math.ceil(finalTotal / limitNum) },
+            data: enriched,
+            meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
             facets: { lifecycle, projects, countries, labs }
         });
     } catch (err) {

@@ -1,6 +1,13 @@
-fix(hotfix): fix temporal dead zone in attention sort cap
+fix(P0): eliminate attention sort cap with 2-phase query
 
-ReferenceError: Cannot access 'total' before initialization
-The const total is declared in the Promise.all destructuring,
-so it cannot be referenced inside the same Promise.all expression.
-Changed to flat 10000 cap.
+Phase 1: lightweight query fetches ALL matching samples with only
+id, status, updatedAt, and work item statuses (minimal memory).
+Computes attention rank in memory, sorts, slices for the page,
+extracts just the IDs.
+
+Phase 2: fetches full data (with all includes) for only
+the page's IDs, then re-orders to match the ranked sort.
+
+This eliminates the 10K cap that caused wrong/empty pages when
+total samples exceeded the cap while pagination reported the
+real DB count.
