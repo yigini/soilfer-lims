@@ -371,7 +371,8 @@ const ROOM_MAP = {
     SPEC_MIR: 'Spectral Lab', SPEC_VIS_NIR: 'Spectral Lab',
     SPEC_VISNIR: 'Spectral Lab', SPEC_XRF: 'Spectral Lab',
 
-    ARCHIVING: 'Archive', ARCH: 'Archive', DISPOSAL: 'Archive', DISP: 'Archive',
+    ARCHIVING: 'Archive & Disposal', ARCH: 'Archive & Disposal',
+    DISPOSAL: 'Archive & Disposal', DISP: 'Archive & Disposal',
 };
 
 function resolveRoom(analysisCode) {
@@ -401,7 +402,7 @@ function buildMapState(sample, workItems, auditLog = []) {
     // Determine current room(s) — what the plan calls "Where is this sample right now?"
     let currentRooms;
     if (isTerminal) {
-        currentRooms = ['Archive'];
+        currentRooms = ['Archive & Disposal'];
     } else if (activeRooms.length > 0) {
         currentRooms = activeRooms;
     } else if (['EXPECTED', 'RECEIVED'].includes(sample.status)) {
@@ -409,7 +410,7 @@ function buildMapState(sample, workItems, auditLog = []) {
     } else if (sample.status === 'ACCEPTED') {
         currentRooms = ['Preparation Room'];
     } else if (eligibility.isFullyApproved || lifecycle === 'APPROVED') {
-        currentRooms = ['Archive'];
+        currentRooms = ['Archive & Disposal'];
     } else if (eligibility.isFullySubmitted || lifecycle === 'SUBMITTED_FULL') {
         currentRooms = ['QA Review'];
     } else {

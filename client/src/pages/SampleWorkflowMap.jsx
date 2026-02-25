@@ -60,17 +60,31 @@ export default function SampleWorkflowMap() {
     }, [mapState, sample, workItems, auditLog]);
 
     const stageSummaries = useMemo(() => {
+        // Always fall back to client-side derivation which includes ALL rooms
+        const fullStages = deriveStageSummaries(sample, workItems);
+
         if (mapState?.activeStages?.length > 0) {
-            return mapState.activeStages.map(s => ({
-                room: s.room,
-                items: s.items,
-                done: s.progress.done,
-                total: s.progress.total,
-                status: s.status,
-                blockers: s.blockers || [],
-            }));
+            // Build lookup from backend stages
+            const backendMap = {};
+            mapState.activeStages.forEach(s => { backendMap[s.room] = s; });
+
+            // Merge: use backend data where available, keep client-side for missing rooms
+            return fullStages.map(stage => {
+                const bs = backendMap[stage.room];
+                if (bs) {
+                    return {
+                        ...stage,
+                        items: bs.items,
+                        done: bs.progress.done,
+                        total: bs.progress.total,
+                        status: bs.status,
+                        blockers: bs.blockers || [],
+                    };
+                }
+                return stage;
+            });
         }
-        return deriveStageSummaries(sample, workItems);
+        return fullStages;
     }, [mapState, sample, workItems]);
 
     const path = useMemo(

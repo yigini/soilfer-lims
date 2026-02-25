@@ -1,7 +1,7 @@
-fix(workflow-map): suppress risk and fix next-action for terminal states
+fix(workflow-map): restore all 7 room nodes and align room names
 
-- buildMapState: terminal samples (ARCHIVED/DISPOSED) always get risk=OK
-- resolveSampleLocation: archived samples show "Sample stored in archive"
-  instead of "Ready for Disposal". Archive and disposal are mutually
-  exclusive closures, not sequential steps.
-- deriveLocationSummary: suppress risk for terminal states
+- Backend ROOM_MAP: 'Archive' → 'Archive & Disposal' to match client
+- Backend currentRooms: same alignment for terminal/approved states
+- Client stageSummaries: merge mapState.activeStages with full
+  STAGE_ORDER so empty rooms (Reception, Chemical Analysis etc.)
+  still render nodes instead of being skipped
