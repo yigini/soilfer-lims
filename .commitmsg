@@ -1,6 +1,6 @@
-fix(hotfix): cap attention sort at 10000 instead of unbounded
+fix(hotfix): fix temporal dead zone in attention sort cap
 
-The take:undefined change caused the samples API to hang on production
-by loading all rows with nested relations into memory unbounded.
-Changed to cap at 10000 which is generous enough for practical datasets
-while preventing OOM/timeout issues.
+ReferenceError: Cannot access 'total' before initialization
+The const total is declared in the Promise.all destructuring,
+so it cannot be referenced inside the same Promise.all expression.
+Changed to flat 10000 cap.

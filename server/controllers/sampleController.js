@@ -252,7 +252,7 @@ exports.getSamples = async (req, res) => {
                 orderBy: needsAttentionSort ? { updatedAt: 'desc' } : { [safeSort]: safeOrder },
                 // For attention sort, fetch enough rows for in-memory re-sort, then slice
                 skip: needsAttentionSort ? 0 : skip,
-                take: needsAttentionSort ? Math.min(total || 10000, 10000) : limitNum
+                take: needsAttentionSort ? 10000 : limitNum
             }),
             prisma.sample.groupBy({
                 by: ['status'],
