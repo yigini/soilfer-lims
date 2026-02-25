@@ -1,4 +1,8 @@
-fix(ui): prevent logo disappearing during theme load
+fix(ui): replace all alert() calls with showDialog, add P4-P6 utilities
 
-- Add logoUrl to ThemeContext initial state so it is never undefined
-- Add onError fallback on sidebar img tag to recover from broken URLs
+- Replace 27 alert() calls across 10 files with showDialog()
+- Fix sidebar active-state for nested routes (startsWith)
+- Fix sidebar collapse persistence via localStorage
+- Add centralized dateUtils.js (formatDate/formatTime)
+- Add useFocusTrap.js hook for modal overlays
+- Add btn-primary CSS design token

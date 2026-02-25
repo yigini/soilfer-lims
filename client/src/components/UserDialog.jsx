@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
+import { useDialog } from '../context/DialogContext';
 
 const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserLabId }) => {
     const isEdit = !!userToEdit;
+    const { showDialog } = useDialog();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -56,7 +58,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
 
         // Password Complexity Check for New Users
         if (!isEdit && formData.password.length < 8) {
-            alert('Password must be at least 8 characters long');
+            showDialog({ title: 'Validation Error', message: 'Password must be at least 8 characters long', type: 'error' });
             return;
         }
 
@@ -68,7 +70,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
             }
             onSave();
         } catch (err) {
-            alert('Operation failed: ' + (err.response?.data?.error || err.message));
+            showDialog({ title: 'Operation Failed', message: err.response?.data?.error || err.message, type: 'error' });
         }
     };
 

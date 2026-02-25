@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
 import { generateCSV, generateXLS, generatePDF } from '../utils/reportUtils';
 import { FileText, Table, FileSpreadsheet, History, Download, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const Reports = () => {
     const { user } = useAuth();
+    const { showDialog } = useDialog();
     const [activeTab, setActiveTab] = useState('generate');
     const [loading, setLoading] = useState(false);
     const [history, setHistory] = useState([]);
@@ -52,11 +54,11 @@ const Reports = () => {
 
     const handleExport = async (format) => {
         if (!consentChecked) {
-            alert("You must confirm that this export is authorized.");
+            showDialog({ title: 'Authorization Required', message: 'You must confirm that this export is authorized.', type: 'error' });
             return;
         }
         if (!signOffName) {
-            alert("Please enter your name for the signature.");
+            showDialog({ title: 'Missing Signature', message: 'Please enter your name for the signature.', type: 'error' });
             return;
         }
 
@@ -77,7 +79,7 @@ const Reports = () => {
             const { data, columns, meta } = res.data;
 
             if (data.length === 0) {
-                alert("No records found for the selected criteria.");
+                showDialog({ title: 'No Results', message: 'No records found for the selected criteria.', type: 'info' });
                 setLoading(false);
                 return;
             }
@@ -92,7 +94,7 @@ const Reports = () => {
             if (activeTab === 'history') fetchHistory();
 
         } catch (e) {
-            alert('Export Failed: ' + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Export Failed', message: e.response?.data?.error || e.message, type: 'error' });
         } finally {
             setLoading(false);
         }

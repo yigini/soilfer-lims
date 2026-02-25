@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
 import {
     Package, AlertTriangle, Search, Plus, Download, Bell, Filter,
     ChevronRight, X, Beaker, FlaskConical, Box, TestTube2,
@@ -511,6 +512,7 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
 // ═════════════════════════════════════════════════════════════════
 const Inventory = () => {
     const { user, hasPermission } = useAuth();
+    const { showDialog } = useDialog();
     const canManage = hasPermission('MANAGE_INVENTORY');
     const canConsume = hasPermission('CONSUME_INVENTORY');
 
@@ -574,7 +576,7 @@ const Inventory = () => {
             const a = document.createElement('a');
             a.href = url; a.download = `inventory_${type}_${new Date().toISOString().split('T')[0]}.csv`;
             a.click(); URL.revokeObjectURL(url);
-        } catch (e) { alert('Export failed'); }
+        } catch (e) { showDialog({ title: 'Export Failed', message: 'Failed to export inventory data.', type: 'error' }); }
     };
 
     return (

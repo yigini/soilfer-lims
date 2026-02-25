@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Download, Filter, Search, FlaskConical, Table, CheckCircle, FileText, XCircle, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import * as XLSX from 'xlsx';
 import SpectraViewer from '../components/SpectraViewer';
@@ -10,6 +11,7 @@ import InfoTooltip from '../components/common/InfoTooltip';
 
 const DataResults = () => {
     const { user } = useAuth();
+    const { showDialog } = useDialog();
     const { subscribeToEvent } = useNotifications();
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
@@ -43,7 +45,7 @@ const DataResults = () => {
 
             const scans = searchRes.data.data;
             if (!scans || scans.length === 0) {
-                alert('No spectral data found for this analysis.');
+                showDialog({ title: 'No Data', message: 'No spectral data found for this analysis.', type: 'info' });
                 return;
             }
 
@@ -57,7 +59,7 @@ const DataResults = () => {
 
         } catch (e) {
             console.error(e);
-            alert('Failed to load spectral data: ' + e.message);
+            showDialog({ title: 'Load Failed', message: 'Failed to load spectral data: ' + e.message, type: 'error' });
         } finally {
             setViewerLoading(false);
         }

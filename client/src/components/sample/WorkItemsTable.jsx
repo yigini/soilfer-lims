@@ -157,7 +157,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             console.log('[ViewSpectra] Found scans:', scans?.length || 0);
 
             if (!scans || scans.length === 0) {
-                alert(`No spectral data found for Lab ID: ${searchTerm} (${modality}). Please upload spectral data first.`);
+                showDialog({ title: 'No Data', message: `No spectral data found for Lab ID: ${searchTerm} (${modality}). Please upload spectral data first.`, type: 'info' });
                 return;
             }
 
@@ -177,7 +177,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
 
         } catch (e) {
             console.error(e);
-            alert('Failed to load spectral data: ' + e.message);
+            showDialog({ title: 'Load Failed', message: 'Failed to load spectral data: ' + e.message, type: 'error' });
         } finally {
             setViewerLoading(false);
         }

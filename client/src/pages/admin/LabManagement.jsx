@@ -8,6 +8,7 @@ import {
     FileText, AlertTriangle, FolderOpen, Clipboard, Eye, Search, ExternalLink,
     TestTube2, ArrowUpRight
 } from 'lucide-react';
+import { useDialog } from '../../context/DialogContext';
 
 // ─── Role Display Config ───
 const ROLE_CONFIG = {
@@ -223,11 +224,11 @@ const ProjectsTab = ({ projects }) => {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${proj.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                : proj.status === 'PAUSED' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                                    : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                            : proj.status === 'PAUSED' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                             }`}>{proj.status}</span>
                         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${proj.isOwned ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-                                : 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
+                            : 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
                             }`}>{proj.isOwned ? 'Owned' : 'Shared'}</span>
                         <ArrowUpRight size={14} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
                     </div>
@@ -346,8 +347,8 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
                                         {proj.name || proj.code}
                                     </span>
                                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${proj.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                            : proj.status === 'PAUSED' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                        : proj.status === 'PAUSED' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                            : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                                         }`}>{proj.status}</span>
                                 </div>
                             ))
@@ -608,6 +609,7 @@ const LabFormModal = ({ isOpen, editingLab, formData, setFormData, onSubmit, onC
 // ─── MAIN COMPONENT ───
 // ═══════════════════════════════════════════════
 const LabManagement = () => {
+    const { showDialog } = useDialog();
     const [labs, setLabs] = useState([]);
     const [projects, setProjects] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -657,7 +659,7 @@ const LabManagement = () => {
             setEditingLab(null);
             fetchLabs();
         } catch (e) {
-            alert('Operation failed: ' + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Operation Failed', message: e.response?.data?.error || e.message, type: 'error' });
         }
     };
 
@@ -691,7 +693,7 @@ const LabManagement = () => {
         try {
             await axios.patch(`/api/labs/${lab.id}/toggle-active`);
             fetchLabs();
-        } catch (e) { alert('Toggle failed: ' + (e.response?.data?.error || e.message)); }
+        } catch (e) { showDialog({ title: 'Toggle Failed', message: e.response?.data?.error || e.message, type: 'error' }); }
     };
 
     // Filter

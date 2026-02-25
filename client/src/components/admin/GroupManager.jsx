@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Check, X, AlertTriangle } from 'lucide-react';
+import { useDialog } from '../../context/DialogContext';
 
 const GroupManager = () => {
+    const { showDialog } = useDialog();
     const [groups, setGroups] = useState([]);
     const [analyses, setAnalyses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ const GroupManager = () => {
             fetchData();
             setEditingGroup(null);
         } catch (e) {
-            alert(e.response?.data?.error || 'Failed to save');
+            showDialog({ title: 'Save Failed', message: e.response?.data?.error || 'Failed to save', type: 'error' });
         }
     };
 
@@ -47,7 +49,7 @@ const GroupManager = () => {
             await axios.delete(`/api/config/groups/${id}`);
             fetchData();
         } catch (e) {
-            alert('Failed to delete');
+            showDialog({ title: 'Delete Failed', message: 'Failed to delete group.', type: 'error' });
         }
     };
 

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, Filter, Search, CheckCircle, AlertCircle, FlaskConical, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
 
 const DataSheet = () => {
     const { user } = useAuth();
+    const { showDialog } = useDialog();
     const [workItems, setWorkItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterAnalysis, setFilterAnalysis] = useState('');
@@ -63,7 +65,7 @@ const DataSheet = () => {
             setWorkItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'COMPLETED', result: val } : i));
             // Maybe clear input or keep it? Keeping it shows what was entered.
         } catch (e) {
-            alert('Failed to save: ' + e.message);
+            showDialog({ title: 'Save Failed', message: e.message, type: 'error' });
         }
     };
 
@@ -83,11 +85,11 @@ const DataSheet = () => {
 
         try {
             await Promise.all(promises);
-            alert('Batch save completed!');
+            showDialog({ title: 'Success', message: 'Batch save completed!', type: 'success' });
             // Refresh logic handled optimistically above
             setInputs({}); // Clear inputs on full batch save?
         } catch (e) {
-            alert('Some items failed to save.');
+            showDialog({ title: 'Partial Failure', message: 'Some items failed to save.', type: 'error' });
             fetchWork(); // Re-fetch to ensure consistency
         }
     };

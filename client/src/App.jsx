@@ -60,13 +60,11 @@ const Layout = ({ children }) => {
     const { t } = useLanguage();
     const { theme } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = React.useState(location.pathname === '/workbench');
-
-    // Auto-collapse only on workbench, expand on all other pages
-    React.useEffect(() => {
-        const isWorkbench = location.pathname === '/workbench';
-        setSidebarCollapsed(isWorkbench);
-    }, [location.pathname]);
+    const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
+        const saved = localStorage.getItem('sidebar-collapsed');
+        if (saved !== null) return saved === 'true';
+        return location.pathname === '/workbench';
+    });
 
     const toggleCollapse = () => {
         setSidebarCollapsed(prev => {
@@ -159,7 +157,7 @@ const Layout = ({ children }) => {
                 </div>
                 <nav className={`flex-1 ${sidebarCollapsed ? 'p-2' : 'p-4'} space-y-1 overflow-y-auto sidebar-scroll`}>
                     {navItems.map((item) => {
-                        const isActive = location.pathname === item.path;
+                        const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path);
                         return (
                             <Link
                                 key={item.path}

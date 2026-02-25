@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Check, Search } from 'lucide-react';
+import { useDialog } from '../../context/DialogContext';
 
 const MethodologyManager = () => {
+    const { showDialog } = useDialog();
     const [methods, setMethods] = useState([]);
     const [analyses, setAnalyses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ const MethodologyManager = () => {
             fetchData();
             setEditingItem(null);
         } catch (e) {
-            alert(e.response?.data?.error || 'Failed to save');
+            showDialog({ title: 'Save Failed', message: e.response?.data?.error || 'Failed to save', type: 'error' });
         }
     };
 
@@ -48,7 +50,7 @@ const MethodologyManager = () => {
             await axios.delete(`/api/config/methodologies/${id}`);
             fetchData();
         } catch (e) {
-            alert(e.response?.data?.error || 'Failed to delete');
+            showDialog({ title: 'Delete Failed', message: e.response?.data?.error || 'Failed to delete', type: 'error' });
         }
     };
 

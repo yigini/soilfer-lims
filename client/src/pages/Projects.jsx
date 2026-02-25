@@ -14,6 +14,7 @@ const calculatePercentage = (actual, target) => {
     return Math.round((a / t) * 100);
 };
 import { useAuth } from '../context/AuthContext';
+import { useDialog } from '../context/DialogContext';
 import * as XLSX from 'xlsx';
 import InfoTooltip from '../components/common/InfoTooltip';
 
@@ -402,6 +403,7 @@ const SuccessModal = ({ isOpen, message, onClose }) => {
 
 const Projects = () => {
     const { user } = useAuth();
+    const { showDialog } = useDialog();
     const [projects, setProjects] = useState([]);
     const [labs, setLabs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -478,7 +480,7 @@ const Projects = () => {
             setModalSamples(res.data);
         } catch (e) {
             console.error("Failed to fetch manifest samples", e);
-            alert("Failed to load sample list");
+            showDialog({ title: 'Error', message: 'Failed to load sample list', type: 'error' });
         } finally {
             setLoadingSamples(false);
         }
@@ -561,7 +563,7 @@ const Projects = () => {
             setShowModal(false);
             fetchProjects();
         } catch (e) {
-            alert('Error: ' + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Error', message: e.response?.data?.error || e.message, type: 'error' });
         }
     };
 
@@ -611,7 +613,7 @@ const Projects = () => {
             fetchProjects();
         } catch (e) {
             console.error("Failed to delete project", e);
-            alert("Delete failed: " + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Delete Failed', message: e.response?.data?.error || e.message, type: 'error' });
             undoDelete(id);
         } finally {
             setUndoTimers(prev => {
@@ -664,7 +666,7 @@ const Projects = () => {
             if (viewingProject?.id === p.id) setViewingProject(null);
         } catch (e) {
             console.error("Archive failed", e);
-            alert("Archive failed: " + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Archive Failed', message: e.response?.data?.error || e.message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -680,7 +682,7 @@ const Projects = () => {
             if (viewingProject?.id === p.id) setViewingProject(null);
         } catch (e) {
             console.error("Restore failed", e);
-            alert("Restore failed: " + (e.response?.data?.error || e.message));
+            showDialog({ title: 'Restore Failed', message: e.response?.data?.error || e.message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -1441,7 +1443,7 @@ const Projects = () => {
                                                         }));
                                                     } catch (err) {
                                                         console.error('File parse error:', err);
-                                                        alert('Failed to parse file. Please ensure it is a valid CSV or Excel file.');
+                                                        showDialog({ title: 'Parse Error', message: 'Failed to parse file. Please ensure it is a valid CSV or Excel file.', type: 'error' });
                                                     }
                                                 };
                                                 reader.readAsBinaryString(file);
