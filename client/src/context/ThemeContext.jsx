@@ -11,7 +11,8 @@ export const ThemeProvider = ({ children }) => {
             secondary: '#111827',
             accent: '#D97706'
         },
-        title: 'SoilFER LIMS'
+        title: 'SoilFER LIMS',
+        logoUrl: '/assets/img/logo.png'
     });
 
     // Dark mode state
