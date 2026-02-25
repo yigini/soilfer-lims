@@ -10,9 +10,9 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-    deriveLocationSummary,
     deriveStageSummaries,
     derivePath,
+    deriveLocationSummary,
 } from '../utils/workflowMapper';
 import { useSampleWorkflow } from '../hooks/useSampleWorkflow';
 import WorkflowTopStrip from '../components/workflow/WorkflowTopStrip';
@@ -39,17 +39,40 @@ export default function SampleWorkflowMap() {
     const { t } = useLanguage();
 
     // Data
-    const { sample, workItems, auditLog, loading, error, fetchData } = useSampleWorkflow(id);
+    const { sample, workItems, auditLog, mapState, loading, error, fetchData } = useSampleWorkflow(id);
 
-    // Derived selectors (memoized)
-    const locationSummary = useMemo(
-        () => deriveLocationSummary(sample, workItems, auditLog),
-        [sample, workItems, auditLog]
-    );
-    const stageSummaries = useMemo(
-        () => deriveStageSummaries(sample, workItems),
-        [sample, workItems]
-    );
+    // Use backend mapState as primary truth, client-side derivation as fallback
+    const locationSummary = useMemo(() => {
+        if (mapState) {
+            return {
+                currentRoom: mapState.currentRooms?.[0] || '—',
+                activeRooms: mapState.currentRooms || [],
+                owner: mapState.owner,
+                status: mapState.lifecycle,
+                risk: mapState.risk,
+                nextAction: mapState.nextActions?.[0]?.action || '—',
+                sla: mapState.sla,
+                phase: mapState.phase,
+                progress: mapState.progress,
+            };
+        }
+        return deriveLocationSummary(sample, workItems, auditLog);
+    }, [mapState, sample, workItems, auditLog]);
+
+    const stageSummaries = useMemo(() => {
+        if (mapState?.activeStages?.length > 0) {
+            return mapState.activeStages.map(s => ({
+                room: s.room,
+                items: s.items,
+                done: s.progress.done,
+                total: s.progress.total,
+                status: s.status,
+                blockers: s.blockers || [],
+            }));
+        }
+        return deriveStageSummaries(sample, workItems);
+    }, [mapState, sample, workItems]);
+
     const path = useMemo(
         () => derivePath(locationSummary, stageSummaries),
         [locationSummary, stageSummaries]
@@ -132,6 +155,7 @@ export default function SampleWorkflowMap() {
             {/* Sticky Top Strip */}
             <WorkflowTopStrip
                 locationSummary={locationSummary}
+                mapState={mapState}
                 sample={sample}
                 isFullscreen={isFullscreen}
                 onBack={() => navigate(`/samples/${id}`)}
@@ -188,6 +212,7 @@ export default function SampleWorkflowMap() {
                 <WorkflowDetailDrawer
                     selectedRoom={selectedRoom}
                     stageSummary={stageSummaries.find(s => s.room === selectedRoom)}
+                    blockerGraph={mapState?.blockerGraph || []}
                     workItems={workItems}
                     auditLog={auditLog}
                     onClose={() => setSelectedRoom(null)}

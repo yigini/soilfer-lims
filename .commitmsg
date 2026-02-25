@@ -1,8 +1,8 @@
-fix(ui): replace all alert() calls with showDialog, add P4-P6 utilities
+feat(workflow-map): Phase 1 — backend map-state contract endpoint
 
-- Replace 27 alert() calls across 10 files with showDialog()
-- Fix sidebar active-state for nested routes (startsWith)
-- Fix sidebar collapse persistence via localStorage
-- Add centralized dateUtils.js (formatDate/formatTime)
-- Add useFocusTrap.js hook for modal overlays
-- Add btn-primary CSS design token
+- Add buildMapState(), ROOM_MAP, resolveRoom() to workflowEngine.js
+- Add getMapState handler to sampleController.js
+- Add GET /api/samples/:id/map-state route
+- Modify useSampleWorkflow hook to fetch map-state in parallel
+- Rewrite SampleWorkflowMap.jsx to use backend mapState as primary truth
+- Add blocker graph rendering to WorkflowDetailDrawer.jsx

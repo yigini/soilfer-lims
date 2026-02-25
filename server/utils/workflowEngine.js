@@ -339,6 +339,188 @@ function getWorkflowSummary(sample, workItems) {
 }
 
 // =============================================================================
+// MAP-STATE: Room Resolution & Unified Map Payload
+// =============================================================================
+
+/**
+ * Maps analysis codes to logical "rooms" for the workflow map.
+ * This is the server-side equivalent of the client's ANALYSIS_ROOM mapping,
+ * eliminating drift between frontend and backend.
+ */
+const ROOM_MAP = {
+    DRYING: 'Preparation Room',
+    PREPARATION: 'Preparation Room',
+
+    // Physical / Wet Chemistry → varies by sub-type
+    PH: 'Chemical Analysis', PH_H2O: 'Chemical Analysis', PH_KCL: 'Chemical Analysis',
+    EC: 'Chemical Analysis', SOC: 'Chemical Analysis', OC: 'Chemical Analysis',
+    TN: 'Chemical Analysis', TC: 'Chemical Analysis',
+    CEC: 'Chemical Analysis', BS: 'Chemical Analysis', MEHLICH: 'Chemical Analysis',
+    P: 'Chemical Analysis', K: 'Chemical Analysis',
+    K_EXCH: 'Chemical Analysis', CA_EXCH: 'Chemical Analysis', MG_EXCH: 'Chemical Analysis',
+    NA_EXCH: 'Chemical Analysis', AL_EXCH: 'Chemical Analysis', H_EXCH: 'Chemical Analysis',
+    FE: 'Chemical Analysis', MN: 'Chemical Analysis', ZN: 'Chemical Analysis',
+    CU: 'Chemical Analysis', B: 'Chemical Analysis',
+    CACO3: 'Chemical Analysis', S_RESP: 'Chemical Analysis', MISC: 'Chemical Analysis',
+
+    TEXTURE: 'Physical Testing', SAND: 'Physical Testing', SILT: 'Physical Testing',
+    CLAY: 'Physical Testing', GRAVEL: 'Physical Testing',
+    BULK_DENSITY: 'Physical Testing', BD: 'Physical Testing',
+
+    MIR: 'Spectral Lab', VISNIR: 'Spectral Lab', XRF: 'Spectral Lab',
+    SPEC_MIR: 'Spectral Lab', SPEC_VIS_NIR: 'Spectral Lab',
+    SPEC_VISNIR: 'Spectral Lab', SPEC_XRF: 'Spectral Lab',
+
+    ARCHIVING: 'Archive', ARCH: 'Archive', DISPOSAL: 'Archive', DISP: 'Archive',
+};
+
+function resolveRoom(analysisCode) {
+    return ROOM_MAP[analysisCode] || ROOM_MAP[analysisCode?.toUpperCase()] || 'Chemical Analysis';
+}
+
+/**
+ * Build the unified map-state contract payload.
+ * This is the SINGLE SOURCE OF TRUTH for the workflow map UI.
+ * 
+ * @param {Object} sample - The sample object.
+ * @param {Array} workItems - All work items for the sample.
+ * @param {Array} [auditLog] - Optional audit log for SLA computation.
+ * @returns {Object} - Complete map-state contract.
+ */
+function buildMapState(sample, workItems, auditLog = []) {
+    const { status: lifecycle, eligibility } = calculateSampleStatus(sample, workItems);
+    const summary = getWorkflowSummary(sample, workItems);
+    const isTerminal = FINAL_SAMPLE_STATES.includes(lifecycle);
+
+    // ── Active rooms (supports parallel activity) ──
+    const activeItems = workItems.filter(wi =>
+        ['IN_PROGRESS', 'ASSIGNED', 'NOT_ASSIGNED'].includes(wi.status)
+    );
+    const activeRooms = [...new Set(activeItems.map(wi => resolveRoom(wi.analysis)))];
+
+    // Determine current room(s) — what the plan calls "Where is this sample right now?"
+    let currentRooms;
+    if (isTerminal) {
+        currentRooms = ['Archive'];
+    } else if (activeRooms.length > 0) {
+        currentRooms = activeRooms;
+    } else if (['EXPECTED', 'RECEIVED'].includes(sample.status)) {
+        currentRooms = ['Reception'];
+    } else if (sample.status === 'ACCEPTED') {
+        currentRooms = ['Preparation Room'];
+    } else if (eligibility.isFullyApproved || lifecycle === 'APPROVED') {
+        currentRooms = ['Archive'];
+    } else if (eligibility.isFullySubmitted || lifecycle === 'SUBMITTED_FULL') {
+        currentRooms = ['QA Review'];
+    } else {
+        currentRooms = ['QA Review'];
+    }
+
+    // ── Per-stage summaries (grouped by room) ──
+    const stageMap = {};
+    for (const wi of workItems) {
+        const room = resolveRoom(wi.analysis);
+        if (!stageMap[room]) {
+            stageMap[room] = { room, items: [], done: 0, total: 0, blockers: [] };
+        }
+        stageMap[room].items.push({
+            id: wi.id,
+            analysis: wi.analysis,
+            displayName: getAnalysisConfig(wi.analysis).displayName,
+            status: wi.status,
+            assignedTo: wi.assignedTo || null,
+            assignedLab: wi.assignedLab || null,
+            updatedAt: wi.updatedAt || null,
+        });
+        stageMap[room].total++;
+        if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)) {
+            stageMap[room].done++;
+        }
+    }
+
+    // Compute stage status
+    const activeStages = Object.values(stageMap).map(stage => {
+        const allDone = stage.done === stage.total;
+        const hasActive = stage.items.some(i => ['IN_PROGRESS', 'ASSIGNED'].includes(i.status));
+        const hasBlocked = stage.blockers.length > 0;
+        return {
+            ...stage,
+            status: allDone ? 'completed' : hasActive ? 'active' : hasBlocked ? 'blocked' : 'future',
+            progress: { done: stage.done, total: stage.total }
+        };
+    });
+
+    // ── Blocker graph ──
+    const blockerGraph = [];
+    for (const wi of workItems) {
+        if (['ACCEPTED', 'WAIVED', 'COMPLETED', 'SUBMITTED'].includes(wi.status)) continue;
+        const prereq = checkPrerequisites(wi, workItems);
+        if (!prereq.canStart) {
+            blockerGraph.push({
+                workItemId: wi.id,
+                analysis: wi.analysis,
+                displayName: getAnalysisConfig(wi.analysis).displayName,
+                room: resolveRoom(wi.analysis),
+                blockedBy: prereq.blockedBy,
+                reason: prereq.reason,
+            });
+            // Also add to stage blockers
+            const room = resolveRoom(wi.analysis);
+            const stage = stageMap[room];
+            if (stage) stage.blockers.push({ analysis: wi.analysis, reason: prereq.reason });
+        }
+    }
+
+    // ── SLA / Risk ──
+    let sla = { totalHours: 0, severity: 'OK' };
+    const createdEvent = auditLog.find(e => e.action === 'SAMPLE_CREATED' || e.action === 'STATUS_CHANGE');
+    const createdAt = createdEvent?.timestamp || sample.createdAt;
+    if (createdAt) {
+        const hours = Math.floor((Date.now() - new Date(createdAt).getTime()) / 3600000);
+        sla = {
+            totalHours: hours,
+            severity: hours > 72 ? 'CRITICAL' : hours > 24 ? 'WARNING' : 'OK',
+            createdAt,
+        };
+    }
+    const risk = sla.severity;
+
+    // ── Owner resolution ──
+    const inProgressItems = workItems.filter(wi => wi.status === 'IN_PROGRESS');
+    const owner = inProgressItems.length > 0
+        ? inProgressItems[0].assignedTo || 'Unassigned'
+        : (activeItems.length > 0 ? activeItems[0].assignedTo || 'Unassigned' : 'System');
+
+    // ── Next actions ──
+    const nextActions = summary.nextActions.map(action => ({
+        action,
+        assignee: null,
+        role: null,
+    }));
+
+    // ── Closure type ──
+    let closureType = null;
+    if (lifecycle === 'ARCHIVED') closureType = 'ARCHIVED';
+    if (lifecycle === 'DISPOSED') closureType = 'DISPOSED';
+
+    return {
+        lifecycle,
+        currentRooms,
+        activeStages,
+        blockerGraph,
+        owner,
+        risk,
+        sla,
+        phase: summary.phase,
+        progress: summary.progress,
+        nextActions,
+        isTerminal,
+        closureType,
+        eligibility,
+    };
+}
+
+// =============================================================================
 // UNDO LOGIC
 // =============================================================================
 
@@ -358,7 +540,6 @@ function calculateUndoImpact(workItem, allWorkItems) {
         for (const wi of allWorkItems) {
             const wiConfig = getAnalysisConfig(wi.analysis);
             if (wiConfig.prerequisites.includes(workItem.analysis)) {
-                // This item depends on the one being undone
                 if (['IN_PROGRESS', 'COMPLETED', 'SUBMITTED'].includes(wi.status)) {
                     affectedItems.push({
                         id: wi.id,
@@ -391,6 +572,11 @@ module.exports = {
     // Status Calculations
     calculateSampleStatus,
     getWorkflowSummary,
+
+    // Map State
+    buildMapState,
+    ROOM_MAP,
+    resolveRoom,
 
     // Undo Logic
     calculateUndoImpact

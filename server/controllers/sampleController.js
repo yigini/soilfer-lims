@@ -1095,6 +1095,58 @@ exports.getSampleDetail = async (req, res) => {
     }
 };
 
+/**
+ * GET /api/samples/:id/map-state
+ * 
+ * Returns the unified map-state contract for the workflow map.
+ * This is the SINGLE SOURCE OF TRUTH — the client renders from this payload only.
+ */
+exports.getMapState = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: { workItems: true }
+        });
+
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // Lab Isolation Check
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample belongs to another lab.' });
+        }
+
+        // Get Audit Log (for SLA computation)
+        const auditLog = await prisma.auditLog.findMany({
+            where: {
+                OR: [
+                    { entityId: String(id) },
+                    { sampleId: String(id) }
+                ]
+            },
+            orderBy: { timestamp: 'desc' }
+        });
+
+        // Self-heal work item statuses
+        const workItems = sample.workItems.map(wi => {
+            let status = wi.status;
+            if (status === 'ASSIGNED' && !wi.assignedTo) status = 'NOT_ASSIGNED';
+            return { ...wi, status };
+        });
+
+        // Build map-state from engine
+        const workflowEngine = require('../utils/workflowEngine');
+        const mapState = workflowEngine.buildMapState(sample, workItems, auditLog);
+
+        res.json(mapState);
+    } catch (error) {
+        console.error('[getMapState] Error:', error);
+        res.status(500).json({ error: 'Failed to build map state' });
+    }
+};
+
 // =============================================================================
 // STEP 6: FINAL APPROVAL + CLOSURE
 // =============================================================================

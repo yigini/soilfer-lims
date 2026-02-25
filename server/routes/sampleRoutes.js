@@ -21,6 +21,7 @@ router.put('/:id/metadata', checkPermission('CHANGE_STATUS'), sampleController.u
 router.put('/:id/project', checkPermission('CHANGE_STATUS'), sampleController.updateSampleProject);
 router.put('/:id/analyses', checkPermission('CHANGE_STATUS'), sampleController.updateSampleAnalyses);
 router.get('/:id/detail', checkPermission('VIEW_SAMPLES'), sampleController.getSampleDetail);
+router.get('/:id/map-state', checkPermission('VIEW_SAMPLES'), sampleController.getMapState);
 
 // Final Approval + Closure
 router.post('/:id/approve', checkPermission('APPROVE_RESULTS'), sampleController.approveSample);

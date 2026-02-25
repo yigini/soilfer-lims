@@ -8,6 +8,7 @@ import { getStatusColor, getDisplayName, getRoom, ROOM_CONFIG } from '../../util
 export default function WorkflowDetailDrawer({
     selectedRoom,
     stageSummary,
+    blockerGraph = [],
     workItems,
     auditLog,
     onClose,
@@ -112,6 +113,34 @@ export default function WorkflowDetailDrawer({
                             </div>
                         </div>
                     )}
+
+                    {/* Blockers */}
+                    {(() => {
+                        const roomBlockers = blockerGraph.filter(b => b.room === selectedRoom);
+                        if (roomBlockers.length === 0) return null;
+                        return (
+                            <div className="wf-drawer-section">
+                                <div className="wf-drawer-section-title">
+                                    <AlertTriangle size={12} style={{ display: 'inline', marginRight: 4, color: '#f59e0b' }} /> Blockers ({roomBlockers.length})
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {roomBlockers.map((b, i) => (
+                                        <div key={i} style={{
+                                            padding: '8px 12px', background: '#fef3c7', borderRadius: 10,
+                                            border: '1px solid #fde68a',
+                                        }}>
+                                            <div style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>
+                                                {b.displayName || b.analysis}
+                                            </div>
+                                            <div style={{ fontSize: 11, color: '#78350f', marginTop: 2 }}>
+                                                {b.reason}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     {/* Staff */}
                     {stageSummary?.staff?.length > 0 && (
