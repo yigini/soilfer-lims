@@ -1,11 +1,6 @@
-fix(audit): P0-P3 UI/UX audit remediation
+fix(hotfix): cap attention sort at 10000 instead of unbounded
 
-- Remove 5000-row attention sort cap (Critical)
-- Add pendingReview to attention ranking (High)
-- Align progress completion semantics backend/frontend
-- Add keyboard nav to SamplesTable rows and ManagerQueue cards
-- Add aria-label to all icon-only buttons
-- Fix ManagerQueue/MyWork pagination after client-side filtering
-- Replace alert with showDialog in Samples.jsx
-- Fix pagination zero-state text
-- Remove dead Saved Views button
+The take:undefined change caused the samples API to hang on production
+by loading all rows with nested relations into memory unbounded.
+Changed to cap at 10000 which is generous enough for practical datasets
+while preventing OOM/timeout issues.
