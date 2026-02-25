@@ -136,7 +136,15 @@ const ManagerQueue = () => {
             }
 
             setData(finalData);
-            setMeta(result.meta || { page, limit: 20, total: finalData.length, totalPages: 1 });
+            // Recalculate meta from filtered/grouped data for accurate pagination
+            const correctedTotal = finalData.length;
+            const correctedTotalPages = Math.max(1, Math.ceil(correctedTotal / 20));
+            setMeta({
+                ...(result.meta || { page, limit: 20 }),
+                page,
+                total: correctedTotal,
+                totalPages: correctedTotalPages
+            });
 
         } catch (e) {
             console.error("Queue fetch failed", e);
@@ -218,7 +226,7 @@ const ManagerQueue = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
-                    <button onClick={() => { refreshLive(); fetchQueueData(meta.page); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now">
+                    <button onClick={() => { refreshLive(); fetchQueueData(meta.page); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now" aria-label="Refresh queue">
                         <RefreshCw size={16} className="text-gray-400" />
                     </button>
                 </div>
@@ -336,9 +344,10 @@ const QueueCard = ({ item, type, navigate, t }) => {
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
 
     return (
-        <div
+        <button
             onClick={() => navigate(`/samples/${item.sampleId || item.id}`)}
-            className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer flex flex-col relative overflow-hidden"
+            className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            aria-label={`${config.label}: ${title}`}
         >
             {isUrgent && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl-lg z-10">{t('queue.urgent', 'Urgent')}</div>}
 
@@ -396,7 +405,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
                     {config.action} <ArrowRight size={12} />
                 </div>
             </div>
-        </div>
+        </button>
     );
 };
 

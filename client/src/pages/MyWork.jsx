@@ -46,7 +46,6 @@ const MyWork = () => {
             ]);
 
             const items = workRes.data.data || workRes.data || [];
-            setMeta(workRes.data.meta || { total: items.length, totalPages: 1 });
             setReanalysis(Array.isArray(reanalysisRes.data) ? reanalysisRes.data : []);
 
             // Group by sample
@@ -79,7 +78,13 @@ const MyWork = () => {
                 }
             });
 
-            setWork(Object.values(groups));
+            const grouped = Object.values(groups);
+            setWork(grouped);
+            // Recalculate meta from grouped cards (not raw items)
+            setMeta({
+                total: grouped.length,
+                totalPages: Math.max(1, Math.ceil(grouped.length / 50))
+            });
             setLastUpdated(new Date());
             setIsStale(false);
             setIsLive(true);

@@ -325,6 +325,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
     const handleSort = (field) => { const newOrder = sort === field && order === 'asc' ? 'desc' : 'asc'; onSort(field, newOrder); };
     const SortIcon = ({ field }) => { if (sort !== field) return null; return order === 'asc' ? <ArrowUp size={12} className="inline ml-1" /> : <ArrowDown size={12} className="inline ml-1" />; };
     const handleRowClick = (e, id) => { if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return; navigate(`/samples/${id}`); };
+    const handleRowKeyDown = (e, id) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/samples/${id}`); } };
 
     return (
         <>
@@ -365,8 +366,8 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                             const progress = computeProgress(sample);
 
                             return (
-                                <tr key={sample.id} onClick={(e) => handleRowClick(e, sample.id)}
-                                    className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-500 ${selected.includes(sample.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/10 scale-95' : ''}`}>
+                                <tr key={sample.id} onClick={(e) => handleRowClick(e, sample.id)} onKeyDown={(e) => handleRowKeyDown(e, sample.id)} tabIndex={0} role="link" aria-label={`Sample ${sample.labId || sample.originalId || sample.id}`}
+                                    className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${selected.includes(sample.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/10 scale-95' : ''}`}>
 
                                     {/* Checkbox */}
                                     <td className="p-4 w-4"><input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500" checked={selected.includes(sample.id)} onChange={(e) => onSelect(sample.id, e.target.checked)} disabled={isDeleting} /></td>
@@ -452,7 +453,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                             const done = progress.completed >= progress.total;
                                             const segments = Object.entries(progress.categories).map(([cat, items]) => {
                                                 const cc = CATEGORY_COLORS[cat] || CATEGORY_COLORS['Other'];
-                                                const comp = items.filter(i => ['COMPLETED', 'ACCEPTED'].includes(i.status)).length;
+                                                const comp = items.filter(i => ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(i.status)).length;
                                                 return { cat, items, cc, w: (items.length / progress.total) * 100, fill: items.length > 0 ? (comp / items.length) * 100 : 0, comp };
                                             });
                                             return (
@@ -506,13 +507,13 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                     <td className="px-4 py-4 text-right">
                                         <div className="flex items-center justify-end gap-1">
                                             {user.role === 'SUPER_ADMIN' && !isProtected && !isDeleting && (
-                                                <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-gray-400 hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete"><Trash2 size={15} /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-gray-400 hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete" aria-label="Delete sample"><Trash2 size={15} /></button>
                                             )}
-                                            <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-gray-400 hover:text-indigo-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Print Label"><Printer size={15} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-gray-400 hover:text-indigo-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Print Label" aria-label="Print label"><Printer size={15} /></button>
                                             {!['EXPECTED', 'RECEIVED', 'COLLECTED', 'DRAFT'].includes(sample.status) && (
-                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/samples/${sample.id}/map`); }} className="text-gray-400 hover:text-purple-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Workflow Map"><GitBranch size={15} /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/samples/${sample.id}/map`); }} className="text-gray-400 hover:text-purple-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Workflow Map" aria-label="Workflow map"><GitBranch size={15} /></button>
                                             )}
-                                            <button onClick={(e) => { e.stopPropagation(); setAuditSampleId(sample.id); }} className="text-gray-400 hover:text-emerald-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Audit Log"><ExternalLink size={15} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); setAuditSampleId(sample.id); }} className="text-gray-400 hover:text-emerald-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Audit Log" aria-label="Audit log"><ExternalLink size={15} /></button>
                                         </div>
                                     </td>
                                 </tr>

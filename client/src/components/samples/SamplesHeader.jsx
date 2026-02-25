@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Download, Grid, CalendarClock, Inbox, ClipboardCheck, Beaker, ShieldCheck, History } from 'lucide-react';
+import { RefreshCw, Download, CalendarClock, Inbox, ClipboardCheck, Beaker, ShieldCheck, History } from 'lucide-react';
 import InfoTooltip from '../common/InfoTooltip';
 
 const STATUS_CONFIG = [
@@ -72,14 +72,6 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, loadingSync, onToggleQui
                                 <RefreshCw size={16} className={loadingSync ? "animate-spin" : ""} />
                             </button>
                             <InfoTooltip text="Sync with Kobo to check for newly collected field samples." position="bottom" />
-                        </div>
-
-                        {/* Saved Views Action */}
-                        <div className="flex items-center">
-                            <button className="p-2 rounded-lg text-gray-500 hover:text-blue-500 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200">
-                                <Grid size={16} />
-                            </button>
-                            <InfoTooltip text="Switch between custom filtered presets." position="bottom" />
                         </div>
 
                         {/* Export Action */}

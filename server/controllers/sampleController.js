@@ -252,7 +252,7 @@ exports.getSamples = async (req, res) => {
                 orderBy: needsAttentionSort ? { updatedAt: 'desc' } : { [safeSort]: safeOrder },
                 // For attention sort, fetch all rows for in-memory re-sort, then slice
                 skip: needsAttentionSort ? 0 : skip,
-                take: needsAttentionSort ? 5000 : limitNum
+                take: needsAttentionSort ? undefined : limitNum
             }),
             prisma.sample.groupBy({
                 by: ['status'],
@@ -344,11 +344,12 @@ exports.getSamples = async (req, res) => {
             const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
 
             // P1: Attention rank for sorting (lower = more urgent)
-            let attentionRank = 4;
+            let attentionRank = 5;
             if (hasInProgressWork) attentionRank = 0;
             else if (hasAssignedWork || hasReanalysisWork) attentionRank = 1;
-            else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)) attentionRank = 2;
-            else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) attentionRank = 3;
+            else if (pendingReview) attentionRank = 2;
+            else if (['PROCESSING'].includes(s.status)) attentionRank = 3;
+            else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) attentionRank = 4;
 
             return {
                 ...s,
@@ -378,7 +379,8 @@ exports.getSamples = async (req, res) => {
                 // Secondary: updatedAt desc
                 return new Date(b.updatedAt) - new Date(a.updatedAt);
             });
-            finalTotal = enriched.length;
+            // Use the real DB count for pagination (not the array length)
+            finalTotal = total;
             finalData = enriched.slice(skip, skip + limitNum);
         } else {
             finalData = enriched;

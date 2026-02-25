@@ -231,7 +231,7 @@ const Samples = () => {
         } catch (err) {
             console.error("Failed to delete sample", err);
             const msg = err.response?.data?.error || "Failed to delete sample.";
-            alert(msg);
+            showDialog({ title: t('common.error', 'Error'), message: msg, type: 'error' });
             // Revert UI if failed
             undoDelete(id);
         } finally {
@@ -259,12 +259,12 @@ const Samples = () => {
             const res = await axios.post('/api/samples/batch-delete', { ids: selected }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert(res.data.message || 'Samples deleted successfully');
+            showDialog({ title: t('common.success', 'Success'), message: res.data.message || 'Samples deleted successfully', type: 'success' });
             setSelected([]);
             fetchData();
         } catch (err) {
             console.error("Batch delete failed", err);
-            alert(err.response?.data?.error || 'Failed to perform batch deletion.');
+            showDialog({ title: t('common.error', 'Error'), message: err.response?.data?.error || 'Failed to perform batch deletion.', type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -349,7 +349,9 @@ const Samples = () => {
             {/* Pagination ... */}
             <div className="flex justify-between items-center mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Showing {(meta.page - 1) * meta.limit + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries
+                    {meta.total > 0
+                        ? `Showing ${(meta.page - 1) * meta.limit + 1} to ${Math.min(meta.page * meta.limit, meta.total)} of ${meta.total} entries`
+                        : 'No entries found'}
                 </span>
                 <div className="flex gap-2">
                     <button

@@ -14,6 +14,7 @@ import { useNotifications } from '../context/NotificationContext';
 export const Header = ({ onMenuClick }) => {
     const { theme } = useTheme();
     const { unreadCount, toggleDrawer } = useNotifications();
+    const { t } = useLanguage();
 
     return (
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 right-0 left-0 z-30 transition-colors duration-300">
@@ -23,6 +24,7 @@ export const Header = ({ onMenuClick }) => {
                     <button
                         onClick={onMenuClick}
                         className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        aria-label="Toggle navigation menu"
                     >
                         <Menu size={20} />
                     </button>
@@ -37,7 +39,8 @@ export const Header = ({ onMenuClick }) => {
                     <button
                         onClick={toggleDrawer}
                         className="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                        title={useLanguage().t('header.notifications', 'Notifications')}
+                        title={t('header.notifications', 'Notifications')}
+                        aria-label={t('header.notifications', 'Notifications')}
                     >
                         <Bell size={20} />
                         {unreadCount > 0 && (

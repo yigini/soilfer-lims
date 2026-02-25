@@ -1,0 +1,11 @@
+fix(audit): P0-P3 UI/UX audit remediation
+
+- Remove 5000-row attention sort cap (Critical)
+- Add pendingReview to attention ranking (High)
+- Align progress completion semantics backend/frontend
+- Add keyboard nav to SamplesTable rows and ManagerQueue cards
+- Add aria-label to all icon-only buttons
+- Fix ManagerQueue/MyWork pagination after client-side filtering
+- Replace alert with showDialog in Samples.jsx
+- Fix pagination zero-state text
+- Remove dead Saved Views button
