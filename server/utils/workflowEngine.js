@@ -472,18 +472,22 @@ function buildMapState(sample, workItems, auditLog = []) {
     }
 
     // ── SLA / Risk ──
+    // Terminal samples have no risk — they're done
     let sla = { totalHours: 0, severity: 'OK' };
-    const createdEvent = auditLog.find(e => e.action === 'SAMPLE_CREATED' || e.action === 'STATUS_CHANGE');
-    const createdAt = createdEvent?.timestamp || sample.createdAt;
-    if (createdAt) {
-        const hours = Math.floor((Date.now() - new Date(createdAt).getTime()) / 3600000);
-        sla = {
-            totalHours: hours,
-            severity: hours > 72 ? 'CRITICAL' : hours > 24 ? 'WARNING' : 'OK',
-            createdAt,
-        };
+    let risk = 'OK';
+    if (!isTerminal) {
+        const createdEvent = auditLog.find(e => e.action === 'SAMPLE_CREATED' || e.action === 'STATUS_CHANGE');
+        const createdAt = createdEvent?.timestamp || sample.createdAt;
+        if (createdAt) {
+            const hours = Math.floor((Date.now() - new Date(createdAt).getTime()) / 3600000);
+            sla = {
+                totalHours: hours,
+                severity: hours > 72 ? 'CRITICAL' : hours > 24 ? 'WARNING' : 'OK',
+                createdAt,
+            };
+        }
+        risk = sla.severity;
     }
-    const risk = sla.severity;
 
     // ── Owner resolution ──
     const inProgressItems = workItems.filter(wi => wi.status === 'IN_PROGRESS');

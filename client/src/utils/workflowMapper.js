@@ -213,13 +213,17 @@ export function resolveSampleLocation(sample, workItems, auditLog) {
             };
         }
 
-        // 5. Fully QA'd → Archive
+        // 5. Fully QA'd → Archive (terminal: either archived or disposed)
         if (allDone && !notQA) {
+            const isArchived = sample?.status === 'ARCHIVED';
+            const isDisposed = sample?.status === 'DISPOSED';
             return {
                 currentRoom: ROOMS.ARCHIVE,
-                reason: 'All QA Passed',
-                nextAction: 'Ready for Disposal',
-                status: 'ARCHIVED'
+                reason: isArchived ? 'Sample archived' : isDisposed ? 'Sample disposed' : 'All QA Passed',
+                nextAction: isArchived ? 'Sample stored in archive'
+                    : isDisposed ? 'Sample disposed of'
+                        : 'Ready for archiving or disposal',
+                status: sample?.status || 'APPROVED',
             };
         }
     }
@@ -551,11 +555,12 @@ export function deriveLocationSummary(sample, workItems, auditLog) {
         }
     }
 
-    // Risk assessment — pre-arrival samples have no lab SLA yet
+    // Risk assessment — pre-arrival and terminal samples have no risk
     const PRE_ARRIVAL = ['EXPECTED', 'COLLECTED', 'DRAFT'];
+    const TERMINAL = ['ARCHIVED', 'DISPOSED'];
     let risk = 'OK';
-    if (PRE_ARRIVAL.includes(sample?.status)) {
-        risk = 'OK'; // No risk before sample arrives at the lab
+    if (PRE_ARRIVAL.includes(sample?.status) || TERMINAL.includes(sample?.status)) {
+        risk = 'OK'; // No risk before sample arrives or after it's done
     } else if (bottlenecks.some(b => b.severity === 'CRITICAL') || sla.severity === 'CRITICAL') {
         risk = 'CRITICAL';
     } else if (bottlenecks.length > 0 || sla.severity === 'WARNING') {
