@@ -171,6 +171,7 @@ export default function SampleWorkflowMap() {
                 locationSummary={locationSummary}
                 mapState={mapState}
                 sample={sample}
+                workItems={workItems}
                 isFullscreen={isFullscreen}
                 onBack={() => navigate(`/samples/${id}`)}
                 onRefresh={fetchData}
@@ -188,35 +189,24 @@ export default function SampleWorkflowMap() {
                     nodeTypes={nodeTypes}
                     defaultEdgeOptions={defaultEdgeOptions}
                     fitView
-                    fitViewOptions={{ padding: 0.15 }}
-                    minZoom={0.3}
+                    fitViewOptions={{ padding: 0.18 }}
+                    minZoom={0.25}
                     maxZoom={2}
                     nodesDraggable={false}
                     nodesConnectable={false}
                     proOptions={{ hideAttribution: true }}
                 >
-                    <Background variant="dots" gap={24} size={1} color="rgba(148,163,184,0.2)" />
+                    <Background variant="dots" gap={24} size={1} className="wf-canvas-dots" />
                     <MiniMap
                         nodeStrokeWidth={3}
                         pannable
                         zoomable
-                        style={{
-                            background: 'rgba(255,255,255,0.9)',
-                            backdropFilter: 'blur(8px)',
-                            borderRadius: 12,
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                        }}
-                        maskColor="rgba(99, 102, 241, 0.08)"
+                        className="wf-minimap"
+                        maskColor="rgba(99, 102, 241, 0.12)"
                     />
                     <Controls
                         showInteractive={false}
-                        style={{
-                            borderRadius: 12,
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                            overflow: 'hidden',
-                        }}
+                        className="wf-canvas-controls"
                     />
                 </ReactFlow>
             </div>
@@ -229,6 +219,7 @@ export default function SampleWorkflowMap() {
                     blockerGraph={mapState?.blockerGraph || []}
                     workItems={workItems}
                     auditLog={auditLog}
+                    sample={sample}
                     onClose={() => setSelectedRoom(null)}
                 />
             )}
@@ -236,22 +227,21 @@ export default function SampleWorkflowMap() {
     );
 }
 
-
 /**
  * Build ReactFlow nodes/edges from stage summaries.
- * Layout: 3 rows to avoid edge overlap.
+ * Layout: 3 clean balanced rows
  *   Row 1:  Reception → Preparation Room
- *   Row 2:  Physical Testing | Chemical Analysis | Spectral Lab  (parallel)
- *   Row 3:  QA Review → Archive & Disposal
+ *   Row 2:  Physical Testing | Chemical Analysis | Spectral Lab  (Parallel Analytical Core)
+ *   Row 3:  QA Review → Archive & Storage
  */
 function buildStageGraph(stageSummaries, path) {
     const { completedRooms, currentRoom } = path || {};
     const nodes = [];
     const edges = [];
 
-    const CARD_W = 250;
-    const H_GAP = 80;
-    const V_GAP = 60;
+    const CARD_W = 260;
+    const H_GAP = 90;
+    const V_GAP = 70;
 
     const stageMap = {};
     stageSummaries.forEach(s => { stageMap[s.room] = s; });
@@ -272,27 +262,21 @@ function buildStageGraph(stageSummaries, path) {
         });
     };
 
-    // ─── Row 1: Reception → Prep (horizontal) ───
+    // ─── Row 1: Intake & Physical Gate ───
     const row1Y = 0;
-    addNode('reception', 'Reception', 0, row1Y);
-    addNode('prep', 'Preparation Room', CARD_W + H_GAP, row1Y);
+    const row1OffsetX = (3 * CARD_W + 2 * H_GAP - (2 * CARD_W + H_GAP)) / 2;
+    addNode('reception', 'Reception', row1OffsetX, row1Y);
+    addNode('prep', 'Preparation Room', row1OffsetX + CARD_W + H_GAP, row1Y);
 
-    // ─── Row 2: 3 parallel labs (centered under row 1) ───
-    const row1Width = 2 * CARD_W + H_GAP;
-    const labCount = 3;
-    const labTotalW = labCount * CARD_W + (labCount - 1) * H_GAP;
-    const labOffsetX = (row1Width - labTotalW) / 2;
-    const row2Y = row1Y + V_GAP + 200; // generous vertical gap
+    // ─── Row 2: Parallel Analytical Core (3 Labs) ───
+    const row2Y = row1Y + V_GAP + 260;
+    addNode('physical', 'Physical Testing', 0 * (CARD_W + H_GAP), row2Y);
+    addNode('chemical', 'Chemical Analysis', 1 * (CARD_W + H_GAP), row2Y);
+    addNode('spectral', 'Spectral Lab', 2 * (CARD_W + H_GAP), row2Y);
 
-    addNode('physical', 'Physical Testing', labOffsetX + 0 * (CARD_W + H_GAP), row2Y);
-    addNode('chemical', 'Chemical Analysis', labOffsetX + 1 * (CARD_W + H_GAP), row2Y);
-    addNode('spectral', 'Spectral Lab', labOffsetX + 2 * (CARD_W + H_GAP), row2Y);
-
-    // ─── Row 3: QA → Archive (centered under labs) ───
-    const row3Width = 2 * CARD_W + H_GAP;
-    const row3OffsetX = (labTotalW - row3Width) / 2 + labOffsetX;
-    const row3Y = row2Y + V_GAP + 200;
-
+    // ─── Row 3: QA Review & Archive Sample Bank ───
+    const row3Y = row2Y + V_GAP + 260;
+    const row3OffsetX = row1OffsetX;
     addNode('qa', 'QA Review', row3OffsetX, row3Y);
     addNode('archive', 'Archive & Disposal', row3OffsetX + CARD_W + H_GAP, row3Y);
 
@@ -302,12 +286,11 @@ function buildStageGraph(stageSummaries, path) {
         const tgtRoom = nodes.find(n => n.id === tgt)?.data?.room;
         const srcPhase = getPhase(srcRoom);
         const tgtPhase = getPhase(tgtRoom);
-        const isActive = srcPhase !== 'future' || tgtPhase !== 'future';
 
-        // Animate edges to rooms with active (pending) work, not just the single 'current' room
         const tgtStage = stageMap[tgtRoom];
         const tgtHasActiveWork = tgtStage && tgtStage.total > 0 && tgtStage.done < tgtStage.total;
-        const isOnPath = tgtPhase === 'current' || (srcPhase === 'completed' && tgtHasActiveWork);
+        const isCurrentlyActive = tgtPhase === 'current' || (srcPhase === 'completed' && tgtHasActiveWork);
+        const isCompletedStep = srcPhase === 'completed' && tgtPhase === 'completed';
 
         edges.push({
             id: `e-${src}-${tgt}`,
@@ -316,30 +299,34 @@ function buildStageGraph(stageSummaries, path) {
             sourceHandle: srcHandle,
             targetHandle: tgtHandle,
             type: 'smoothstep',
-            animated: isOnPath,
+            animated: isCurrentlyActive,
             style: {
-                stroke: isOnPath ? '#f59e0b' : isActive ? '#86efac' : '#e2e8f0',
-                strokeWidth: isOnPath ? 3 : isActive ? 2 : 1.5,
-                opacity: isActive ? 1 : 0.4,
-                strokeDasharray: isActive ? undefined : '6 4',
+                stroke: isCurrentlyActive
+                    ? '#6366f1' // Active glowing indigo
+                    : isCompletedStep
+                    ? '#10b981' // Verified emerald
+                    : 'var(--wf-edge-inactive, #cbd5e1)',
+                strokeWidth: isCurrentlyActive ? 3 : isCompletedStep ? 2.5 : 1.5,
+                opacity: isCurrentlyActive || isCompletedStep ? 1 : 0.45,
+                strokeDasharray: isCompletedStep || isCurrentlyActive ? undefined : '5 4',
             },
         });
     };
 
-    // Row 1 horizontal connections
+    // Row 1 connections
     addEdge('reception', 'prep', 'right', 'left');
 
-    // Prep → 3 labs (vertical: bottom → top)
+    // Row 1 -> Row 2 (Prep to 3 testing stations)
     addEdge('prep', 'physical', 'bottom', 'top');
     addEdge('prep', 'chemical', 'bottom', 'top');
     addEdge('prep', 'spectral', 'bottom', 'top');
 
-    // 3 labs → QA (vertical: bottom → top)
+    // Row 2 -> Row 3 (3 testing stations to QA)
     addEdge('physical', 'qa', 'bottom', 'top');
     addEdge('chemical', 'qa', 'bottom', 'top');
     addEdge('spectral', 'qa', 'bottom', 'top');
 
-    // QA → Archive (horizontal)
+    // Row 3 connections (QA to Archive)
     addEdge('qa', 'archive', 'right', 'left');
 
     return { nodes, edges };

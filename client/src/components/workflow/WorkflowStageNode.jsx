@@ -3,7 +3,7 @@ import { Handle, Position } from '@xyflow/react';
 import {
     PackageCheck, Filter, Ruler, FlaskConical, ScanLine,
     ShieldCheck, Archive, CheckCircle2, Circle, Loader2,
-    AlertCircle, Clock, Users,
+    AlertCircle, Clock, Users, ChevronRight, Sparkles
 } from 'lucide-react';
 import { getStatusColor } from '../../utils/workflowMapper';
 
@@ -12,51 +12,31 @@ const ICON_MAP = {
     PackageCheck, Filter, Ruler, FlaskConical, ScanLine,
     ShieldCheck, Archive,
 };
+
 function RoomIcon({ name, size = 18, style }) {
     const Icon = ICON_MAP[name] || PackageCheck;
     return <Icon size={size} style={style} />;
 }
 
-// ─── Status Badge Config ───
-const PHASE_STYLES = {
-    current: {
-        border: '2px solid var(--accent)',
-        boxShadow: '0 0 0 4px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.08)',
-        opacity: 1,
-        bg: '#ffffff',
-    },
-    completed: {
-        border: '1.5px solid #bbf7d0',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-        opacity: 1,
-        bg: '#f8fdf9',
-    },
-    future: {
-        border: '1.5px dashed #cbd5e1',
-        boxShadow: 'none',
-        opacity: 0.55,
-        bg: '#f8fafc',
-    },
-};
-
 const STATUS_DOTS = {
-    NOT_ASSIGNED: { color: '#cbd5e1', Icon: Circle },
-    ASSIGNED: { color: '#60a5fa', Icon: Circle },
+    NOT_ASSIGNED: { color: '#94a3b8', Icon: Circle },
+    ASSIGNED: { color: '#3b82f6', Icon: Circle },
     IN_PROGRESS: { color: '#f59e0b', Icon: Loader2 },
-    COMPLETED: { color: '#818cf8', Icon: CheckCircle2 },
-    SUBMITTED: { color: '#818cf8', Icon: CheckCircle2 },
-    ACCEPTED: { color: '#34d399', Icon: CheckCircle2 },
-    REANALYSIS_REQUIRED: { color: '#f87171', Icon: AlertCircle },
+    COMPLETED: { color: '#10b981', Icon: CheckCircle2 },
+    SUBMITTED: { color: '#6366f1', Icon: CheckCircle2 },
+    ACCEPTED: { color: '#10b981', Icon: CheckCircle2 },
+    REANALYSIS_REQUIRED: { color: '#ef4444', Icon: AlertCircle },
     WAIVED: { color: '#94a3b8', Icon: Circle },
-    PENDING: { color: '#e2e8f0', Icon: Circle },
+    PENDING: { color: '#cbd5e1', Icon: Circle },
 };
 
 // ─── Handle Styles ───
 const hStyle = (color) => ({
-    width: 8, height: 8,
-    border: '2px solid white',
+    width: 10,
+    height: 10,
+    border: '2px solid rgba(255,255,255,0.9)',
     backgroundColor: color,
-    boxShadow: `0 0 4px ${color}30`,
+    boxShadow: `0 0 8px ${color}80`,
     borderRadius: '50%',
 });
 
@@ -66,245 +46,243 @@ function WorkflowStageNode({ data }) {
         status, staff, analyses, sampleInfo,
     } = data;
 
-    const accent = config?.accent || '#94a3b8';
-    const phaseStyle = PHASE_STYLES[phase] || PHASE_STYLES.future;
-    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    const isEmpty = status === 'EMPTY' && total === 0 && !sampleInfo;
+    const accent = config?.accent || '#6366f1';
+    const isCurrent = phase === 'current';
+    const isCompleted = phase === 'completed';
+    const isFuture = phase === 'future';
 
-    const cssVars = {
-        '--accent': accent,
-        '--accent-glow': `${accent}20`,
-    };
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const queuedCount = Math.max(0, (total || 0) - (done || 0) - (inProgress || 0));
+    const isEmpty = status === 'EMPTY' && total === 0 && !sampleInfo;
 
     return (
         <div
-            className={`wf-node wf-node-${phase} ${phase === 'current' ? 'wf-node-pulse' : ''}`}
+            className={`wf-node group ${isCurrent ? 'wf-node-current' : isCompleted ? 'wf-node-completed' : 'wf-node-future'}`}
             style={{
-                ...cssVars,
-                width: 240,
-                border: phaseStyle.border,
-                borderRadius: 20,
-                backgroundColor: phaseStyle.bg,
-                opacity: phaseStyle.opacity,
-                boxShadow: phaseStyle.boxShadow,
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                position: 'relative',
+                '--accent': accent,
+                '--accent-glow': `${accent}25`,
             }}
         >
-            {/* Accent bar */}
-            <div style={{
-                height: 3,
-                borderRadius: '20px 20px 0 0',
-                background: phase === 'future' ? '#e2e8f0' : `linear-gradient(90deg, ${accent}, ${accent}80)`,
-                transition: 'background 0.4s',
-            }} />
+            {/* Top Accent Gradient Bar */}
+            <div
+                className="wf-node-accent-bar"
+                style={{
+                    background: isFuture
+                        ? 'var(--wf-future-border)'
+                        : `linear-gradient(90deg, ${accent}, ${accent}90)`,
+                }}
+            />
 
-            {/* Beacon for current room */}
-            {phase === 'current' && (
-                <div className="wf-beacon" style={{ position: 'absolute', top: -6, right: -6, zIndex: 5 }}>
-                    <div className="wf-beacon-dot" style={{ borderColor: 'white', background: accent }} />
+            {/* Active Station Pulsing Radar Beacon */}
+            {isCurrent && (
+                <div className="absolute -top-1.5 -right-1.5 z-20 flex h-4 w-4">
+                    <span
+                        className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                        style={{ backgroundColor: accent }}
+                    />
+                    <span
+                        className="relative inline-flex rounded-full h-4 w-4 border-2 border-white dark:border-slate-900 shadow-md"
+                        style={{ backgroundColor: accent }}
+                    />
                 </div>
             )}
 
-            {/* Header */}
-            <div style={{ padding: '12px 16px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div className="wf-node-icon" style={{
-                    width: 36, height: 36, borderRadius: 12,
-                    background: phase !== 'future'
-                        ? `linear-gradient(135deg, ${accent}18, ${accent}08)`
-                        : '#f1f5f9',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 0.3s',
-                }}>
-                    <RoomIcon name={config?.icon} size={18} style={{
-                        color: phase !== 'future' ? accent : '#94a3b8',
-                        transition: 'color 0.3s',
-                    }} />
+            {/* Card Header: Icon + Title + Count Badge */}
+            <div className="p-3.5 pb-2 flex items-center gap-2.5">
+                <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-sm"
+                    style={{
+                        background: !isFuture
+                            ? `linear-gradient(135deg, ${accent}25, ${accent}10)`
+                            : 'var(--wf-icon-bg-future)',
+                        border: `1px solid ${accent}30`
+                    }}
+                >
+                    <RoomIcon
+                        name={config?.icon}
+                        size={18}
+                        style={{ color: !isFuture ? accent : '#94a3b8' }}
+                    />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                        fontSize: 11, fontWeight: 800,
-                        color: phase !== 'future' ? accent : '#94a3b8',
-                        textTransform: 'uppercase', letterSpacing: 0.8,
-                        transition: 'color 0.3s',
-                    }}>
+
+                <div className="flex-1 min-w-0">
+                    <div
+                        className="text-xs font-black tracking-wide uppercase truncate transition-colors"
+                        style={{ color: !isFuture ? accent : 'var(--wf-text-muted)' }}
+                    >
                         {room}
                     </div>
-                    <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 1 }}>
-                        {config?.description}
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                        {config?.description || 'Analytical Station'}
                     </div>
                 </div>
+
                 {total > 0 && (
-                    <div className="wf-count-badge" style={{
-                        fontSize: 10, fontWeight: 800, color: accent,
-                        backgroundColor: `${accent}10`, borderRadius: 8,
-                        padding: '2px 8px', transition: 'all 0.3s',
-                    }}>
+                    <div
+                        className="px-2 py-0.5 rounded-lg text-[10px] font-black tracking-tight shrink-0 shadow-xs border"
+                        style={{
+                            color: accent,
+                            backgroundColor: `${accent}15`,
+                            borderColor: `${accent}30`
+                        }}
+                    >
                         {done}/{total}
                     </div>
                 )}
             </div>
 
-            {/* Reception: Sample Info */}
+            {/* Reception Station: Sample Information Card */}
             {sampleInfo && (
-                <div className="wf-node-content" style={{ padding: '0 16px 12px' }}>
-                    <div style={{
-                        padding: '10px 12px', borderRadius: 12,
-                        backgroundColor: `${accent}06`, border: `1px solid ${accent}10`,
-                    }}>
-                        <div style={{ fontWeight: 800, fontSize: 16, color: '#1e293b', letterSpacing: 0.3 }}>
+                <div className="px-3.5 pb-2">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
+                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100 tracking-tight">
                             {sampleInfo.labId}
                         </div>
-                        <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
-                            {sampleInfo.projectCode}
+                        <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                            <span>{sampleInfo.projectCode || 'LIMS Project'}</span>
+                            {sampleInfo.matrix && (
+                                <>
+                                    <span>•</span>
+                                    <span>{sampleInfo.matrix}</span>
+                                </>
+                            )}
                         </div>
-                        <div style={{
-                            display: 'inline-block', marginTop: 6,
-                            fontSize: 9, fontWeight: 700, padding: '2px 8px',
-                            borderRadius: 6, textTransform: 'uppercase', letterSpacing: 0.5,
-                            backgroundColor: sampleInfo.status === 'EXPECTED' ? '#fef3c7' : '#dbeafe',
-                            color: sampleInfo.status === 'EXPECTED' ? '#d97706' : '#2563eb',
-                            transition: 'all 0.3s',
-                        }}>
+                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                             {sampleInfo.status || 'RECEIVED'}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Progress bar */}
+            {/* Progress Meter Bar */}
             {total > 0 && (
-                <div style={{ padding: '0 16px 4px' }}>
-                    <div style={{
-                        height: 4, backgroundColor: `${accent}10`,
-                        borderRadius: 99, overflow: 'hidden',
-                    }}>
-                        <div className="wf-progress-animated" style={{
-                            height: '100%', width: `${pct}%`,
-                            borderRadius: 99,
-                            background: `linear-gradient(90deg, ${accent}90, ${accent})`,
-                            transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }} />
+                <div className="px-3.5 pb-2">
+                    <div className="flex items-center justify-between text-[9px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                        <span>Completion</span>
+                        <span style={{ color: accent }}>{pct}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                        <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                                width: `${pct}%`,
+                                background: `linear-gradient(90deg, ${accent}80, ${accent})`,
+                            }}
+                        />
                     </div>
                 </div>
             )}
 
-            {/* Analysis list */}
-            {analyses && analyses.length > 0 && (() => {
-                // Sort: completed/submitted first, then in-progress, then assigned, then pending
-                const STATUS_PRIORITY = {
-                    COMPLETED: 0, SUBMITTED: 0, ACCEPTED: 0,
-                    IN_PROGRESS: 1,
-                    ASSIGNED: 2,
-                    PENDING: 3, WAIVED: 3,
-                    REANALYSIS_REQUIRED: 1,
-                };
-                const sorted = [...analyses].sort((a, b) =>
-                    (STATUS_PRIORITY[a.status] ?? 4) - (STATUS_PRIORITY[b.status] ?? 4)
-                );
-                return (
-                    <div className="wf-node-analyses nodrag nopan nowheel" style={{
-                        padding: '4px 12px 10px',
-                        maxHeight: 120, overflowY: 'auto',
-                        scrollbarWidth: 'thin',
-                    }}>
-                        {sorted.slice(0, 8).map((a, i) => {
-                            const sc = getStatusColor(a.status);
-                            const dot = STATUS_DOTS[a.status] || STATUS_DOTS.PENDING;
-                            const StatusIcon = dot.Icon;
+            {/* Metric Status Chips (Clean Replacement for Trap Scrollbar) */}
+            {total > 0 && (
+                <div className="px-3.5 pb-2 flex items-center gap-1.5 flex-wrap">
+                    {done > 0 && (
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                            <CheckCircle2 size={10} /> {done} Done
+                        </span>
+                    )}
+                    {inProgress > 0 && (
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                            <Loader2 size={10} className="animate-spin" /> {inProgress} Active
+                        </span>
+                    )}
+                    {queuedCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            {queuedCount} Queued
+                        </span>
+                    )}
+                    {blocked > 0 && (
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center gap-1">
+                            <AlertCircle size={10} /> {blocked} Blocked
+                        </span>
+                    )}
+                </div>
+            )}
 
-                            return (
-                                <div
-                                    key={i}
-                                    className="wf-analysis-row"
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: 6,
-                                        padding: '3px 6px', borderRadius: 6,
-                                        transition: 'background 0.2s',
-                                        animationDelay: `${i * 60}ms`,
-                                    }}
-                                >
+            {/* Top 3 Key Analyses Pills */}
+            {analyses && analyses.length > 0 && (
+                <div className="px-3.5 pb-2 space-y-1">
+                    {analyses.slice(0, 3).map((a, i) => {
+                        const sc = getStatusColor(a.status);
+                        const dot = STATUS_DOTS[a.status] || STATUS_DOTS.PENDING;
+                        const StatusIcon = dot.Icon;
+
+                        return (
+                            <div
+                                key={i}
+                                className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 text-[10px]"
+                            >
+                                <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
                                     <StatusIcon
-                                        size={11}
-                                        style={{ color: dot.color, flexShrink: 0 }}
-                                        className={a.status === 'IN_PROGRESS' ? 'wf-spin' : ''}
+                                        size={10}
+                                        style={{ color: dot.color }}
+                                        className={a.status === 'IN_PROGRESS' ? 'animate-spin' : ''}
                                     />
-                                    <span style={{
-                                        flex: 1, fontSize: 10, color: '#374151',
-                                        fontWeight: 500, overflow: 'hidden',
-                                        textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                    }}>
+                                    <span className="font-semibold text-slate-700 dark:text-slate-200 truncate">
                                         {a.name}
                                     </span>
-                                    <span className="wf-status-chip" style={{
-                                        fontSize: 8, fontWeight: 700, padding: '1px 6px',
-                                        borderRadius: 5, flexShrink: 0,
-                                        color: sc.text, backgroundColor: sc.bg,
-                                        transition: 'all 0.3s',
-                                    }}>
-                                        {sc.label}
-                                    </span>
                                 </div>
-                            );
-                        })}
-                        {analyses.length > 8 && (
-                            <div style={{ fontSize: 9, color: '#94a3b8', paddingTop: 2, textAlign: 'center' }}>
-                                +{analyses.length - 8} more
-                            </div>
-                        )}
-                    </div>
-                );
-            })()}
-
-
-            {/* Blocked indicator */}
-            {blocked > 0 && (
-                <div className="wf-blocked-badge" style={{
-                    margin: '0 16px 8px',
-                    fontSize: 9, fontWeight: 700, color: '#dc2626',
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    padding: '3px 8px', borderRadius: 6,
-                    backgroundColor: '#fef2f2',
-                }}>
-                    <AlertCircle size={10} /> {blocked} blocked
-                </div>
-            )}
-
-            {/* Staff row */}
-            {staff && staff.length > 0 && (
-                <div style={{ padding: '0 16px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Users size={10} style={{ color: '#94a3b8' }} />
-                    {staff.map((name, i) => {
-                        const initials = name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
-                        return (
-                            <div key={i} title={name} style={{
-                                width: 22, height: 22, borderRadius: '50%',
-                                background: `linear-gradient(135deg, ${accent}30, ${accent}60)`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 8, fontWeight: 700, color: accent,
-                                border: '2px solid white',
-                                marginLeft: i > 0 ? -6 : 0,
-                                zIndex: staff.length - i,
-                                transition: 'transform 0.2s',
-                            }}>
-                                {initials}
+                                <span
+                                    className="px-1.5 py-0.2 rounded text-[8px] font-bold uppercase shrink-0"
+                                    style={{ color: sc.text, backgroundColor: sc.bg }}
+                                >
+                                    {sc.label}
+                                </span>
                             </div>
                         );
                     })}
+
+                    {analyses.length > 3 && (
+                        <div className="pt-0.5 text-center">
+                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline inline-flex items-center gap-0.5">
+                                +{analyses.length - 3} more parameters <ChevronRight size={10} />
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Empty state */}
+            {/* Staff Row */}
+            {staff && staff.length > 0 && (
+                <div className="px-3.5 pb-2.5 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2">
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                        <Users size={11} /> Handlers
+                    </div>
+                    <div className="flex items-center -space-x-1.5 overflow-hidden">
+                        {staff.map((name, i) => {
+                            const initials = name?.split(/[ _-]/).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
+                            return (
+                                <div
+                                    key={i}
+                                    title={name}
+                                    className="w-5 h-5 rounded-full ring-2 ring-white dark:ring-slate-900 flex items-center justify-center text-[8px] font-extrabold shadow-xs"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${accent}, ${accent}90)`,
+                                        color: '#ffffff'
+                                    }}
+                                >
+                                    {initials}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Empty State */}
             {isEmpty && (
-                <div style={{
-                    fontSize: 10, color: '#cbd5e1', fontStyle: 'italic',
-                    textAlign: 'center', padding: '0 16px 12px',
-                }}>
-                    No activity
+                <div className="px-3.5 pb-3 text-center text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">
+                    Station on Standby
                 </div>
             )}
 
-            {/* Handles — ids must match sourceHandle/targetHandle in edges */}
+            {/* Hover Action Hint */}
+            <div className="px-3.5 py-1.5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800/80 rounded-b-[19px] flex items-center justify-between text-[9px] font-bold text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <span>Station Inspector</span>
+                <ChevronRight size={11} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
+
+            {/* Connection Handles */}
             <Handle type="target" position={Position.Left} id="left" style={hStyle(accent)} />
             <Handle type="source" position={Position.Right} id="right" style={hStyle(accent)} />
             <Handle type="target" position={Position.Top} id="top" style={hStyle(accent)} />
