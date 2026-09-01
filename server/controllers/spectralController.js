@@ -10,10 +10,8 @@ const calculateChecksum = (dataString) => {
 
 exports.getLibrary = async (req, res) => {
     try {
-        const { modality, qcStatus, search } = req.query;
-        const user = req.user;
-
         const { status, modality, qcStatus, search } = req.query;
+        const user = req.user;
 
         // Build the query conditions
         let where = {};

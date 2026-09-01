@@ -209,7 +209,6 @@ app.get('/api/audit-final', verifyToken, checkPermission('VIEW_AUDIT'), async (r
 });
 
 // --- Routes ---
-const { checkPermission } = require('./middleware/authMiddleware');
 app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
