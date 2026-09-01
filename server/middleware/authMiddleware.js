@@ -6,45 +6,7 @@ if (!SECRET_KEY) {
     throw new Error('JWT_SECRET is not defined in config/auth (checking .env)');
 }
 
-/**
- * AUTHORITATIVE PERMISSION MATRIX
- * Based on: LIMS – Roles, Inventory, Sample Lifecycle, and Production Completeness
- */
-const PERMISSIONS = {
-    // RESOURCE: [Roles allowed]
-
-    // Samples
-    'VIEW_SAMPLES': ['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'SURVEYOR', 'VIEWER'],
-    'CREATE_SAMPLE': ['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'SURVEYOR'],
-    'RECEIVE_SAMPLE': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'],
-    'ASSIGN_LAB_ID': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'],
-    'CHANGE_STATUS': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN'], // Tech limited, checked in logic
-
-    // Results
-    'ENTER_RESULTS': ['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN'],
-    'APPROVE_RESULTS': ['SUPER_ADMIN', 'LAB_MANAGER'],
-    'BATCH_APPROVAL': ['SUPER_ADMIN', 'LAB_MANAGER'],
-
-    // Inventory
-    'VIEW_INVENTORY': ['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'VIEWER'],
-    'CONSUME_INVENTORY': ['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN'],
-    'MANAGE_INVENTORY': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'],
-
-    // Projects
-    'MANAGE_PROJECTS': ['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER'],
-    'ARCHIVE_PROJECTS': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'],
-
-    // Users
-    'MANAGE_USERS': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'],
-
-    // System
-    'MANAGE_BRANDING': ['SUPER_ADMIN', 'LAB_MANAGER'],
-    'MANAGE_ANALYSES': ['SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'],
-
-    // Reports
-    'GENERATE_REPORT': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'],
-    'SHARE_REPORT': ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER']
-};
+const { PERMISSIONS, getPermissionsForRole } = require('../config/roles');
 
 /**
  * Middleware to verify JWT and attach user to request
@@ -80,8 +42,21 @@ const verifyToken = async (req, res, next) => {
         req.user = {
             ...safeUser,
             countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
-            projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || [])
+            projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
+            permissions: getPermissionsForRole(user.role)
         };
+
+        // Enforce mustChangePassword gate on all non-whitelisted endpoints
+        if (user.mustChangePassword) {
+            const allowedPaths = ['/api/auth/me', '/api/auth/change-password', '/api/auth/logout'];
+            const currentPath = (req.baseUrl || '') + (req.path || '');
+            if (!allowedPaths.some(p => currentPath.includes(p))) {
+                return res.status(403).json({
+                    error: 'PASSWORD_CHANGE_REQUIRED',
+                    message: 'You must change your password before proceeding to other features.'
+                });
+            }
+        }
 
         // Sync locale with user preference
         if (req.user.language) {

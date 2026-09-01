@@ -72,7 +72,7 @@ app.use('/api/public', publicRoutes);
 
 // --- Routes ---
 const jwt = require('jsonwebtoken');
-const { verifyToken } = require('./middleware/authMiddleware');
+const { verifyToken, checkPermission } = require('./middleware/authMiddleware');
 if (!process.env.JWT_SECRET) {
     console.error('FATAL: JWT_SECRET is not defined in environment variables.');
     process.exit(1);
@@ -89,8 +89,11 @@ try {
     const { performBackup } = require('./scripts/backup_db');
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
     setInterval(() => {
-        performBackup().catch(err => console.error('[BACKUP_SCHEDULE_ERR]', err));
+        performBackup()
+            .then(p => p && console.log(`[BACKUP_SCHEDULE] Completed: ${p}`))
+            .catch(e => console.error('[BACKUP_SCHEDULE] Error:', e.message));
     }, ONE_DAY_MS);
+    console.log('[BACKUP_SCHEDULE] Backup interval active (24h)');
 } catch (e) {
     console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
 }
@@ -101,9 +104,8 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-// NUCLEAR OPTION: Audit Route at root level
-// NUCLEAR OPTION: Audit Route at root level
-app.get('/api/audit-final', verifyToken, async (req, res) => {
+// Canonical Audit Logs Route
+app.get('/api/audit-final', verifyToken, checkPermission('VIEW_AUDIT'), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
@@ -614,57 +616,6 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
     } catch (e) {
         console.error("Dashboard Stats Error:", e);
         res.status(500).json({ error: "Failed to fetch stats" });
-    }
-});
-
-// FALLBACK: Direct Route for Audit Logs (Bypassing Router Issue)
-app.get('/api/admin/audit-direct', verifyToken, async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50;
-        const skip = (page - 1) * limit;
-
-        const where = {};
-        if (req.user && req.user.role !== 'SUPER_ADMIN') {
-            if (req.user.labId) {
-                where.OR = [
-                    { labId: req.user.labId },
-                    { performedBy: req.user.username }
-                ];
-            } else {
-                where.performedBy = req.user.username;
-            }
-        }
-
-        const [total, logs] = await prisma.$transaction([
-            prisma.auditLog.count({ where }),
-            prisma.auditLog.findMany({
-                where,
-                orderBy: { timestamp: 'desc' },
-                skip,
-                take: limit
-            })
-        ]);
-
-        const mappedLogs = logs.map(log => ({
-            ...log,
-            user: log.performedBy || 'System',
-            time: log.timestamp,
-            details: log.details || (log.entity ? `${log.entity} ${log.entityId || ''}` : '-')
-        }));
-
-        res.json({
-            data: mappedLogs,
-            meta: {
-                page,
-                limit,
-                total: total,
-                totalPages: Math.ceil(total / limit)
-            }
-        });
-    } catch (error) {
-        console.error("Audit Direct Error:", error);
-        res.status(500).json({ error: error.message });
     }
 });
 

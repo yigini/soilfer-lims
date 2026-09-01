@@ -50,6 +50,29 @@ export const AuthProvider = ({ children }) => {
         }
     });
 
+    // Revalidate session on mount with server (Source of Truth)
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            axios.get('/api/auth/me')
+                .then(res => {
+                    const freshUser = res.data?.data || res.data;
+                    if (freshUser && freshUser.id) {
+                        setUser(freshUser);
+                        localStorage.setItem('user', JSON.stringify(freshUser));
+                        if (freshUser.language) {
+                            changeLanguage(freshUser.language);
+                        }
+                    }
+                })
+                .catch(err => {
+                    if (err.response?.status === 401 || err.response?.status === 403) {
+                        logout();
+                    }
+                });
+        }
+    }, []);
+
     useEffect(() => {
         if (user && user.language) {
             changeLanguage(user.language);
@@ -77,8 +100,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
-        // React Router's RequireAuth automatically redirects to /login when user is null
-        // No window.location.href needed — that caused a full page reload/flash
     };
 
     const hasAccess = (scopeType, scopeValue) => {
@@ -100,6 +121,14 @@ export const AuthProvider = ({ children }) => {
 
     const hasPermission = (permissionKey) => {
         if (!user) return false;
+        if (user.role === 'SUPER_ADMIN') return true;
+
+        // Preferred: Direct check against server-evaluated permissions array
+        if (Array.isArray(user.permissions)) {
+            return user.permissions.includes(permissionKey);
+        }
+
+        // Fallback for offline cache / initial render
         const allowedRoles = PERMISSIONS[permissionKey];
         if (!allowedRoles) return false;
         return allowedRoles.includes(user.role);

@@ -18,6 +18,25 @@ axios.interceptors.request.use(config => {
     return config;
 });
 
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response && error.response.status === 401) {
+            // Ignore 401 from login or verify-token endpoints to avoid reload loops
+            const isAuthEndpoint = error.config?.url?.includes('/api/auth/login');
+            if (!isAuthEndpoint && localStorage.getItem('token')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                delete axios.defaults.headers.common['Authorization'];
+                if (window.location.pathname !== '/login') {
+                    window.location.href = '/login?expired=true';
+                }
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);

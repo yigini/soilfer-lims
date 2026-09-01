@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const { error, success } = require('../i18n/response');
 
 const { JWT_SECRET: SECRET_KEY } = require('../config/auth');
+const { getPermissionsForRole } = require('../config/roles');
 
 // Helper to sanitize user object from DB (parse JSON strings, exclude password)
 const sanitizeUser = (user) => {
@@ -13,7 +15,8 @@ const sanitizeUser = (user) => {
     return {
         ...safeUser,
         countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
-        projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || [])
+        projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
+        permissions: getPermissionsForRole(user.role)
     };
 };
 
@@ -47,7 +50,7 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        // Return user info
+        // Return user info with effective permissions
         const safeUser = sanitizeUser(user);
         return success(res, 'AUTH.LOGIN_SUCCESS', 'Login successful', null, 200, { token, user: safeUser });
     } catch (err) {
@@ -57,7 +60,7 @@ exports.login = async (req, res) => {
 };
 
 exports.me = (req, res) => {
-    // req.user is already sanitized by verifyToken middleware (after it's refactored)
+    // req.user is sanitized and contains permissions from verifyToken middleware
     res.json(req.user);
 };
 
@@ -70,12 +73,14 @@ exports.changePassword = async (req, res) => {
             where: { id: String(userId) }
         });
 
-        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         // Verify current
         const isValid = await bcrypt.compare(currentPassword, user.password);
         if (!isValid) {
-            return res.status(400).json({ error: 'Invalid current password' });
+            return res.status(400).json({ error: 'Current password incorrect' });
         }
 
         if (newPassword.length < 8) {
@@ -110,7 +115,7 @@ exports.impersonate = async (req, res) => {
     const { userId } = req.body;
     const adminUser = req.user;
 
-    if (!adminUser || !['SUPER_ADMIN', 'MASTER_USER'].includes(adminUser.role)) {
+    if (!adminUser || adminUser.role !== 'SUPER_ADMIN') {
         return error(res, 403, 'AUTH.FORBIDDEN', 'Only Super Admins can impersonate users');
     }
 
@@ -123,11 +128,34 @@ exports.impersonate = async (req, res) => {
             return error(res, 404, 'AUTH.USER_NOT_FOUND', 'Target user not found');
         }
 
+        if (targetUser.role === 'SUPER_ADMIN') {
+            return error(res, 403, 'AUTH.FORBIDDEN', 'Cannot impersonate another Super Admin');
+        }
+
+        // Mint short-lived token (30m) with actor claim
         const token = jwt.sign(
-            { id: targetUser.id, username: targetUser.username, role: targetUser.role },
+            {
+                id: targetUser.id,
+                username: targetUser.username,
+                role: targetUser.role,
+                act: { id: adminUser.id, username: adminUser.username }
+            },
             SECRET_KEY,
-            { expiresIn: '24h' }
+            { expiresIn: '30m' }
         );
+
+        // Record in audit log
+        await prisma.auditLog.create({
+            data: {
+                id: crypto.randomUUID(),
+                entity: 'USER',
+                entityId: targetUser.id,
+                action: 'IMPERSONATE_START',
+                details: `Super Admin ${adminUser.username} initiated 30-min impersonation of ${targetUser.username} (${targetUser.role})`,
+                performedBy: adminUser.username,
+                timestamp: new Date()
+            }
+        });
 
         const safeUser = sanitizeUser(targetUser);
         return res.json({

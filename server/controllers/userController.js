@@ -2,19 +2,7 @@ const prisma = require('../prisma');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-// Canonical Role List
-const ALL_ROLES = [
-    'SUPER_ADMIN',
-    'MASTER_USER',
-    'PROJECT_MANAGER',
-    'LAB_MANAGER',
-    'SAMPLE_RECEPTION',
-    'LAB_TECHNICIAN',
-    'SURVEYOR',
-    'VIEWER'
-];
-
-const ALLOWED_SUB_ROLES = ['LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'SURVEYOR'];
+const { ALL_ROLES, ALLOWED_SUB_ROLES } = require('../config/roles');
 
 const canManage = (actor, target) => {
     if (!actor || !target) return false;
