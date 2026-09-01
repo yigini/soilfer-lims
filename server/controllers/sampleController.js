@@ -315,6 +315,7 @@ exports.getSamples = async (req, res) => {
                     id: true, originalId: true, labId: true, assignedLab: true,
                     projectCode: true, country: true, countryName: true,
                     status: true, dryingStatus: true, preparationStatus: true,
+                    depthTop: true, depthBottom: true, horizon: true,
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true,
                     workItems: { select: { analysis: true, status: true, category: true } }
@@ -331,6 +332,7 @@ exports.getSamples = async (req, res) => {
                     id: true, originalId: true, labId: true, assignedLab: true,
                     projectCode: true, country: true, countryName: true,
                     status: true, dryingStatus: true, preparationStatus: true,
+                    depthTop: true, depthBottom: true, horizon: true,
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true,
                     workItems: { select: { analysis: true, status: true, category: true } }

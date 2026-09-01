@@ -464,17 +464,14 @@ exports.syncSample = async (req, res) => {
             return res.json({ success: false, message: 'No submissions found in Kobo form' });
         }
 
-        // 4. Flexible ID matching
-        // Normalize: strip depth suffixes (-T, -S, _D1, _D2), replace separators
-        const normalize = (id) => {
+        // 4. Depth-Aware ID matching (Fix SCI-02: Do NOT strip depth suffixes!)
+        const normalizeId = (id) => {
             if (!id) return '';
-            return id.trim().toUpperCase()
-                .replace(/[-_](?:D1|D2|T|S)$/i, '')  // strip depth suffixes
-                .replace(/[_-]/g, '');                  // normalize separators
+            return id.trim().toUpperCase().replace(/[_\s-]/g, ''); // normalize separators without stripping depth
         };
 
         const targetOriginal = sample.originalId?.trim().toUpperCase();
-        const targetNormalized = normalize(sample.originalId);
+        const targetNormalized = normalizeId(sample.originalId);
 
         const fieldMapping = config.fieldMapping ? JSON.parse(config.fieldMapping) : null;
         let matchedSubmission = null;
@@ -494,18 +491,22 @@ exports.syncSample = async (req, res) => {
                     break;
                 }
 
-                // Tier 2: site_id match (DB may store site_id as originalId)
-                if (koboSiteId === targetOriginal || koboSiteId === targetOriginal?.replace(/-/g, '_')) {
+                // Tier 2: Normalized separator match (depth intact)
+                if (normalizeId(koboId) === targetNormalized) {
                     matchedSubmission = submission;
                     matchedSampleData = sampleData;
                     break;
                 }
 
-                // Tier 3: Normalized match (strip suffixes, normalize separators)
-                if (normalize(koboId) === targetNormalized || normalize(koboSiteId) === targetNormalized) {
-                    matchedSubmission = submission;
-                    matchedSampleData = sampleData;
-                    break;
+                // Tier 3: Site ID match with explicit depth verification
+                if (koboSiteId && (normalizeId(koboSiteId) === targetNormalized || koboSiteId === targetOriginal)) {
+                    // Check if sample depth matches kobo depth (e.g. D1/T vs D2/S)
+                    const sampleDepth = (sample.horizon || sample.depthTop === 0 ? 'D1' : 'D2');
+                    if (!sampleData.depth || sampleData.depth === sampleDepth || sampleData.depth === sample.horizon) {
+                        matchedSubmission = submission;
+                        matchedSampleData = sampleData;
+                        break;
+                    }
                 }
             }
             if (matchedSubmission) break;

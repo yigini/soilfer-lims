@@ -97,6 +97,11 @@ model Sample {
   receptionDate     DateTime?
   receivedBy        String?
 
+  // Depth & Horizon (First-Class SOSA Feature of Interest)
+  depthTop          Float?     // e.g. 0 (cm)
+  depthBottom       Float?     // e.g. 20 (cm)
+  horizon           String?    // e.g. "Ap", "Bw", "T", "S"
+
   // Metadata
   clientName        String?
   metadata          String?    // JSON string: Raw metadata from external sources
@@ -628,25 +633,28 @@ model AnalysisCategory {
 }
 
 model Analysis {
-  code             String            @id
-  name             String
-  description      String?
-  categoryId       String?
-  category         AnalysisCategory? @relation(fields: [categoryId], references: [id])
-  units            String?
-  status           String?           // active, inactive
-  validation       String?           // JSON string: validation rules
-  decimalPlaces    Int?              @default(2)
-  lod              Float?
-  loq              Float?
-  uncertainty      Float?
-  labId            String?
-  glosisAttribute  String?           // GloSIS Property (attribute in codelist e.g. nitrogenTotal, carbonOrganic, ph)
-  glosisUri        String?           // GloSIS Property URI
-  methodLabel      String?           // Selected Method Label (from glosis_procedure.csv e.g. TotalN_kjeldahl)
-  methodDefinition String?           // Procedure description
-  methodCitation   String?           // Procedure scientific reference / standard
-  methodologies    Methodology[]
+  code               String            @id
+  name               String
+  description        String?
+  categoryId         String?
+  category           AnalysisCategory? @relation(fields: [categoryId], references: [id])
+  units              String?
+  qudtUnit           String?           // QUDT unit identifier (e.g. "GM-PER-KiloGM", "PERCENT", "DeciSIEMENS-PER-M")
+  status             String?           // active, inactive
+  validation         String?           // JSON string: validation rules
+  decimalPlaces      Int?              @default(2)
+  lod                Float?
+  loq                Float?
+  uncertainty        Float?
+  labId              String?
+  glosisProperty     String?           // GloSIS Property code (e.g. "glosis_cl:ClayPropertyCode", "glosis_cl:TotalNitrogenPropertyCode")
+  glosisPropertyUri  String?           // GloSIS Property URI
+  glosisAttribute    String?           // Legacy codelist group (e.g. "nitrogenTotal", "carbonOrganic")
+  glosisUri          String?           // Legacy URI
+  methodLabel        String?           // Selected Method Label (from glosis_procedure.csv e.g. TotalN_kjeldahl)
+  methodDefinition   String?           // Procedure description
+  methodCitation     String?           // Procedure scientific reference / standard
+  methodologies      Methodology[]
 }
 
 model AnalysisGroup {
@@ -662,6 +670,7 @@ model Methodology {
   analysis         Analysis @relation(fields: [analysisCode], references: [code])
   name             String   // e.g. "pH in Water (1:2.5)"
   standard         String?  // e.g. "ISO 10390:2021"
+  qudtUnit         String?  // QUDT unit override
   decimalPlaces    Int?
   lod              Float?
   loq              Float?
@@ -673,7 +682,7 @@ model Methodology {
   glosisDefinition String?  // Procedure Definition text
   glosisReference  String?  // Standard reference / DOI URL
   glosisCitation   String?  // Bibliographic citation text
-  glosisUri        String?  // Linked Data URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
+  glosisUri        String?  // Linked Data Procedure URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }

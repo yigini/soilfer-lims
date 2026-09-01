@@ -68,32 +68,46 @@ function buildSisWhere(sisAuth, query = {}) {
 }
 
 let cachedAnalysisMap = null;
+let cachedMethodMap = null;
 let lastFetchTime = 0;
 
 async function getAnalysisMap() {
     const now = Date.now();
     if (cachedAnalysisMap && (now - lastFetchTime < 60000)) {
-        return cachedAnalysisMap;
+        return { analysisMap: cachedAnalysisMap, methodMap: cachedMethodMap };
     }
     try {
-        const analyses = await prisma.analysis.findMany();
-        const map = {};
-        analyses.forEach(a => {
-            map[a.code] = a;
-            if (a.glosisAttribute && !map[a.glosisAttribute]) {
-                map[a.glosisAttribute] = a;
-            }
+        const [analyses, methodologies] = await Promise.all([
+            prisma.analysis.findMany(),
+            prisma.methodology.findMany()
+        ]);
+
+        const aMap = {};
+        const mMap = {};
+
+        methodologies.forEach(m => {
+            mMap[m.id] = m;
+            if (m.isDefault) mMap[`default_${m.analysisCode}`] = m;
         });
-        cachedAnalysisMap = map;
+
+        analyses.forEach(a => {
+            aMap[a.code] = {
+                ...a,
+                defaultMethod: mMap[`default_${a.code}`] || null
+            };
+        });
+
+        cachedAnalysisMap = aMap;
+        cachedMethodMap = mMap;
         lastFetchTime = now;
-        return map;
+        return { analysisMap: aMap, methodMap: mMap };
     } catch (e) {
-        return cachedAnalysisMap || {};
+        return { analysisMap: cachedAnalysisMap || {}, methodMap: cachedMethodMap || {} };
     }
 }
 
-// Helper to format a sample into harmonized SIS JSON structure
-function formatSampleForSis(sample, analysisMap = {}) {
+// Helper to format a sample into harmonized SIS JSON structure (SOSA/SSN & GloSIS compliant)
+function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
     let field = {};
     try { field = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {}); } catch(e) {}
     
@@ -108,23 +122,44 @@ function formatSampleForSis(sample, analysisMap = {}) {
     const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || null;
     const accuracy = field.accuracy || field.gps_accuracy || (field.coordinates ? field.coordinates.accuracy : null) || null;
 
-    // Build Results Map with GloSIS Linked Data enrichment
+    // Depth resolution (Sample columns > field metadata > reception)
+    const topCm = sample.depthTop ?? (field.depthTop !== undefined ? Number(field.depthTop) : 0);
+    const bottomCm = sample.depthBottom ?? (field.depthBottom !== undefined ? Number(field.depthBottom) : 20);
+    const horizonDesig = sample.horizon || field.horizon || field.depth || reception.depth || `${topCm}-${bottomCm} cm`;
+
+    // Build Results Map with genuine GloSIS Property & Used Procedure separation
     const analyticalResults = {};
     if (sample.results && Array.isArray(sample.results)) {
-        sample.results.forEach(r => {
+        // Filter only current active results if present
+        const currentResults = sample.results.filter(r => r.isCurrent !== false);
+        currentResults.forEach(r => {
             const aMeta = analysisMap[r.param] || {};
+            const methodObj = (r.methodologyId && methodMap[r.methodologyId]) ? methodMap[r.methodologyId] : aMeta.defaultMethod;
+
+            const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
+            const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
+            const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
+
             analyticalResults[r.param] = {
-                value: isNaN(Number(r.value)) ? r.value : Number(r.value),
+                value: r.numericValue !== null && r.numericValue !== undefined ? r.numericValue : (isNaN(Number(r.value)) ? r.value : Number(r.value)),
+                rawEntry: r.value,
                 unit: r.unit || aMeta.units || null,
+                qudtUnit: qudtUnit,
+                basis: r.basis || 'AIR_DRY',
+                censoring: r.censoring || 'NONE',
+                replicateNo: r.replicateNo || 1,
                 isValid: r.isValid !== false,
-                method: r.method || aMeta.methodLabel || null,
-                glosis: (aMeta.glosisAttribute || aMeta.glosisUri) ? {
-                    attribute: aMeta.glosisAttribute || null,
-                    methodLabel: aMeta.methodLabel || null,
-                    definition: aMeta.methodDefinition || null,
-                    citation: aMeta.methodCitation || null,
-                    uri: aMeta.glosisUri || null
+                method: methodObj?.name || r.method || aMeta.methodLabel || null,
+                glosis: (propertyUri || procedureUri || aMeta.glosisAttribute) ? {
+                    propertyCode: aMeta.glosisProperty || null,
+                    propertyUri: propertyUri,
+                    usedProcedure: methodObj?.glosisProcedure || aMeta.glosisAttribute || null,
+                    usedProcedureUri: procedureUri,
+                    methodLabel: methodObj?.name || aMeta.methodLabel || null,
+                    standard: methodObj?.standard || null,
+                    citation: methodObj?.glosisCitation || aMeta.methodCitation || null
                 } : null,
+                analysedAt: r.analysedAt || r.updatedAt,
                 updatedAt: r.updatedAt
             };
         });
@@ -141,9 +176,10 @@ function formatSampleForSis(sample, analysisMap = {}) {
             collectionDate: field.collectionDate || field.sampling_date || reception.collectionDate || sample.receptionDate || null,
             collectorName: field.collector || field.surveyor_name || reception.deliveredBy || null,
             depthHorizon: {
-                depthRange: field.depth || field.depthType || reception.depth || '0-20 cm',
-                topCm: field.depthTop || 0,
-                bottomCm: field.depthBottom || 20,
+                depthRange: `${topCm}–${bottomCm} cm`,
+                topCm: topCm,
+                bottomCm: bottomCm,
+                horizon: horizonDesig,
                 unit: 'cm'
             },
             coordinates: lat !== null && lng !== null ? {
@@ -183,7 +219,7 @@ exports.getSamples = async (req, res) => {
 
         const where = buildSisWhere(req.sisAuth, req.query);
 
-        const [total, samples, analysisMap] = await Promise.all([
+        const [total, samples, maps] = await Promise.all([
             prisma.sample.count({ where }),
             prisma.sample.findMany({
                 where,
@@ -195,7 +231,7 @@ exports.getSamples = async (req, res) => {
             getAnalysisMap()
         ]);
 
-        const formatted = samples.map(s => formatSampleForSis(s, analysisMap));
+        const formatted = samples.map(s => formatSampleForSis(s, maps));
 
         res.json({
             status: 'success',
@@ -218,7 +254,7 @@ exports.getSamples = async (req, res) => {
 exports.getSampleById = async (req, res) => {
     try {
         const { id } = req.params;
-        const [sample, analysisMap] = await Promise.all([
+        const [sample, maps] = await Promise.all([
             prisma.sample.findFirst({
                 where: {
                     OR: [{ id }, { originalId: id }, { labId: id }]
@@ -250,7 +286,7 @@ exports.getSampleById = async (req, res) => {
             }
         });
 
-        const formatted = formatSampleForSis(sample, analysisMap);
+        const formatted = formatSampleForSis(sample, maps);
         formatted.spectralRecords = spectra;
 
         res.json({
@@ -269,7 +305,7 @@ exports.getGeoJson = async (req, res) => {
         const limit = Math.min(5000, parseInt(req.query.limit) || 2000);
         const where = buildSisWhere(req.sisAuth, req.query);
 
-        const [samples, analysisMap] = await Promise.all([
+        const [samples, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
                 include: { results: true },
@@ -282,7 +318,7 @@ exports.getGeoJson = async (req, res) => {
         const features = [];
 
         samples.forEach(s => {
-            const formatted = formatSampleForSis(s, analysisMap);
+            const formatted = formatSampleForSis(s, maps);
             const coords = formatted.provenance.coordinates;
 
             if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
