@@ -6,7 +6,29 @@ const axios = require('axios');
 
 class KoboService {
     /**
-     * Fetch submissions from a Kobo form
+     * Helper for resilient HTTP GET requests with exponential backoff retry.
+     */
+    async _requestWithRetry(url, options, maxRetries = 3) {
+        let attempt = 0;
+        while (attempt < maxRetries) {
+            try {
+                return await axios.get(url, { ...options, timeout: options.timeout || 30000 });
+            } catch (err) {
+                attempt++;
+                const status = err.response?.status;
+                const isTransient = !status || status >= 500 || status === 429;
+                if (attempt >= maxRetries || !isTransient) {
+                    throw err;
+                }
+                const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+                console.warn(`[KOBO] Transient error on attempt ${attempt}/${maxRetries}. Retrying in ${backoffMs}ms: ${err.message}`);
+                await new Promise(resolve => setTimeout(resolve, backoffMs));
+            }
+        }
+    }
+
+    /**
+     * Fetch submissions from a Kobo form with pagination and timeout
      * @param {string} serverUrl - Kobo server URL (e.g., https://kf.kobotoolbox.org)
      * @param {string} formId - Kobo asset UID
      * @param {string} apiToken - API token for authentication
@@ -16,18 +38,38 @@ class KoboService {
     async fetchSubmissions(serverUrl, formId, apiToken, since = null) {
         try {
             const url = `${serverUrl}/api/v2/assets/${formId}/data.json`;
+            const PAGE_SIZE = 1000;
+            let start = 0;
+            let allSubmissions = [];
+            let hasMore = true;
 
-            const response = await axios.get(url, {
-                headers: {
-                    'Authorization': `Token ${apiToken}`
-                },
-                params: since ? { query: JSON.stringify({ _id: { $gt: parseInt(since) } }) } : {}
-            });
+            while (hasMore) {
+                const params = {
+                    limit: PAGE_SIZE,
+                    start: start
+                };
+                if (since) {
+                    params.query = JSON.stringify({ _id: { $gt: parseInt(since) } });
+                }
 
-            const submissions = response.data.results || [];
-            console.log(`[KOBO] Fetched ${submissions.length} submissions from form ${formId}`);
+                const response = await this._requestWithRetry(url, {
+                    headers: { 'Authorization': `Token ${apiToken}` },
+                    params,
+                    timeout: 30000
+                });
 
-            return submissions;
+                const results = response.data.results || [];
+                allSubmissions = allSubmissions.concat(results);
+
+                if (results.length < PAGE_SIZE || !response.data.next) {
+                    hasMore = false;
+                } else {
+                    start += PAGE_SIZE;
+                }
+            }
+
+            console.log(`[KOBO] Total ${allSubmissions.length} submissions fetched from form ${formId}`);
+            return allSubmissions;
         } catch (error) {
             console.error('[KOBO] Error fetching submissions:', error.response?.data || error.message);
             throw new Error(`Failed to fetch Kobo submissions: ${error.response?.data?.detail || error.message}`);
@@ -45,10 +87,11 @@ class KoboService {
         try {
             const url = `${serverUrl}/api/v2/assets/${formId}/`;
 
-            const response = await axios.get(url, {
+            const response = await this._requestWithRetry(url, {
                 headers: {
                     'Authorization': `Token ${apiToken}`
-                }
+                },
+                timeout: 15000
             });
 
             return {

@@ -2,7 +2,7 @@ const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const validationController = require('./validationController');
-const { broadcastToAll } = require('../wsServer');
+const { broadcastToLab } = require('../wsServer');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -645,7 +645,7 @@ exports.batchSave = async (req, res) => {
                         };
                     });
 
-                    broadcastToAll('WORKITEM_CHANGED', {
+                    broadcastToLab(user.labId, 'WORKITEM_CHANGED', {
                         sampleIds: affectedSampleIds,
                         updates,
                         updatedBy: user.username,

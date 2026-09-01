@@ -491,11 +491,10 @@ async function getPublicReportPdf(req, res) {
         try {
             puppeteer = require('puppeteer');
         } catch (e) {
-            // Puppeteer not installed — fall back to JSON response for client-side rendering
-            console.warn('[Report] Puppeteer not available, returning JSON for client-side PDF rendering');
-            return res.json({
-                format: 'pdf-data',
-                content,
+            console.warn('[Report] Puppeteer not available for server-side PDF generation');
+            return res.status(503).json({
+                error: 'PDF_SERVICE_UNAVAILABLE',
+                message: 'Server-side PDF rendering is not configured on this host. Please use the in-browser print/export option.',
                 version: report.version,
                 generatedAt: report.generatedAt
             });

@@ -16,9 +16,15 @@ function init(server) {
     wss = new WebSocketServer({ server, path: '/ws' });
 
     wss.on('connection', (ws, req) => {
-        // Authenticate via token query param
-        const params = new URLSearchParams(url.parse(req.url).query);
-        const token = params.get('token');
+        // Authenticate via Sec-WebSocket-Protocol or query param
+        let token = null;
+        if (req.headers['sec-websocket-protocol']) {
+            token = req.headers['sec-websocket-protocol'].split(',')[0].trim();
+        }
+        if (!token) {
+            const params = new URLSearchParams(url.parse(req.url).query);
+            token = params.get('token');
+        }
 
         if (!token) {
             ws.close(4001, 'Missing token');
@@ -41,7 +47,7 @@ function init(server) {
                 const prisma = require('./prisma');
                 const user = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { id: true, isActive: true, labId: true }
+                    select: { id: true, username: true, role: true, isActive: true, labId: true }
                 });
 
                 if (!user || user.isActive === false) {
@@ -49,28 +55,63 @@ function init(server) {
                     return;
                 }
 
+                ws.userId = userId;
+                ws.username = user.username;
+                ws.role = user.role;
                 ws.labId = user.labId || null;
 
                 // Register
                 const isFirstSocket = !clients.has(userId);
                 if (isFirstSocket) {
                     clients.set(userId, new Set());
-                    // Broadcast ONLINE to everyone else
-                    clients.forEach((_, otherUserId) => {
-                        if (otherUserId !== userId) {
-                            broadcastToUser(otherUserId, 'USER_STATUS', { userId, status: 'ONLINE' });
-                        }
-                    });
+                    // Broadcast ONLINE to lab peers or super admins
+                    broadcastToLab(ws.labId, 'USER_STATUS', { userId, status: 'ONLINE' });
                 }
                 clients.get(userId).add(ws);
+
+                if (DEBUG) console.log(`[WS] User ${user.username} (${userId}) connected for lab ${user.labId || 'GLOBAL'}`);
+
+                // Send welcome & scoped online list
+                const onlineUsers = [];
+                clients.forEach((sockets, otherUid) => {
+                    sockets.forEach(sock => {
+                        if (sock.readyState === 1) {
+                            if (user.role === 'SUPER_ADMIN' || !user.labId || sock.labId === user.labId || sock.role === 'SUPER_ADMIN') {
+                                if (!onlineUsers.includes(otherUid)) onlineUsers.push(otherUid);
+                            }
+                        }
+                    });
+                });
+
+                ws.send(JSON.stringify({
+                    type: 'CONNECTED',
+                    userId,
+                    onlineUsers
+                }));
+
+                // Retroactively mark messages as delivered
+                const undelivered = await prisma.message.findMany({
+                    where: { recipientId: userId, isDelivered: false, status: 'SENT' },
+                    select: { id: true, senderId: true }
+                });
+
+                if (undelivered.length > 0) {
+                    await prisma.message.updateMany({
+                        where: { id: { in: undelivered.map(m => m.id) } },
+                        data: { isDelivered: true }
+                    });
+
+                    const senderIds = [...new Set(undelivered.map(m => m.senderId))];
+                    senderIds.forEach(sid => {
+                        broadcastToUser(sid, 'MESSAGES_DELIVERED', { recipientId: userId, messageIds: undelivered.filter(m => m.senderId === sid).map(m => m.id) });
+                    });
+                }
             } catch (err) {
                 console.error('[WS] Auth check error:', err);
                 ws.close(4000, 'Server error');
                 return;
             }
         })();
-
-        if (DEBUG) console.log(`[WS] User ${userId} connected (${clients.get(userId).size} sockets)`);
 
         // Heartbeat
         ws.isAlive = true;
@@ -83,53 +124,15 @@ function init(server) {
                 if (sockets.size === 0) {
                     clients.delete(userId);
                     if (DEBUG) console.log(`[WS] User ${userId} fully disconnected`);
-                    // Broadcast OFFLINE to everyone else
-                    clients.forEach((_, otherUserId) => {
-                        broadcastToUser(otherUserId, 'USER_STATUS', { userId, status: 'OFFLINE' });
-                    });
+                    // Broadcast OFFLINE to lab peers
+                    broadcastToLab(ws.labId, 'USER_STATUS', { userId, status: 'OFFLINE' });
                 }
             }
-            if (DEBUG) console.log(`[WS] User ${userId} socket closed`);
         });
 
         ws.on('error', (err) => {
             console.error(`[WS] Error for ${userId}:`, err.message);
         });
-
-        // Send welcome & online list
-        ws.send(JSON.stringify({
-            type: 'CONNECTED',
-            userId,
-            onlineUsers: Array.from(clients.keys())
-        }));
-
-        // Retroactively mark messages as delivered
-        (async () => {
-            try {
-                const prisma = require('./prisma');
-                const undelivered = await prisma.message.findMany({
-                    where: { recipientId: userId, isDelivered: false, status: 'SENT' },
-                    select: { id: true, senderId: true }
-                });
-
-                if (undelivered.length > 0) {
-                    await prisma.message.updateMany({
-                        where: { id: { in: undelivered.map(m => m.id) } },
-                        data: { isDelivered: true }
-                    });
-
-                    // Notify senders? (Optionally)
-                    // For now, let's keep it simple. The next refresh will show it.
-                    // Or we broadcast 'MESSAGES_DELIVERED' to each sender.
-                    const senderIds = [...new Set(undelivered.map(m => m.senderId))];
-                    senderIds.forEach(sid => {
-                        broadcastToUser(sid, 'MESSAGES_DELIVERED', { recipientId: userId, messageIds: undelivered.filter(m => m.senderId === sid).map(m => m.id) });
-                    });
-                }
-            } catch (e) {
-                console.error('[WS] Delivery sync error:', e);
-            }
-        })();
     });
 
     // Heartbeat interval — drop stale connections every 30s
@@ -153,19 +156,15 @@ function init(server) {
 function broadcastToUser(userId, eventType, payload) {
     const sockets = clients.get(String(userId));
     if (!sockets || sockets.size === 0) {
-        if (DEBUG) console.log(`[WS] No sockets for user ${userId}, cannot broadcast ${eventType}`);
         return 0;
     }
 
     let count = 0;
-    if (DEBUG) console.log(`[WS] Broadcasting ${eventType} to user ${userId} (${sockets.size} sockets)`);
     const data = JSON.stringify({ type: eventType, ...payload });
     sockets.forEach((ws) => {
         if (ws.readyState === 1) { // OPEN
             ws.send(data);
             count++;
-        } else {
-            if (DEBUG) console.log(`[WS] Socket for ${userId} not OPEN (readyState: ${ws.readyState})`);
         }
     });
     return count;
@@ -179,12 +178,35 @@ function broadcastToUsers(userIds, eventType, payload) {
 }
 
 /**
+ * Broadcast an event to all users in a specific laboratory (and Super Admins).
+ */
+function broadcastToLab(labId, eventType, payload) {
+    if (!labId) {
+        return broadcastToAll(eventType, payload);
+    }
+    const data = JSON.stringify({ type: eventType, ...payload });
+    let count = 0;
+    clients.forEach((sockets) => {
+        sockets.forEach(ws => {
+            if (ws.readyState === 1) { // OPEN
+                if (ws.role === 'SUPER_ADMIN' || ws.labId === labId) {
+                    ws.send(data);
+                    count++;
+                }
+            }
+        });
+    });
+    if (DEBUG) console.log(`[WS] Broadcast ${eventType} to ${count} socket(s) in lab ${labId}`);
+    return count;
+}
+
+/**
  * Broadcast to ALL currently connected users.
  */
 function broadcastToAll(eventType, payload) {
     const data = JSON.stringify({ type: eventType, ...payload });
     let count = 0;
-    clients.forEach((sockets, userId) => {
+    clients.forEach((sockets) => {
         sockets.forEach(ws => {
             if (ws.readyState === 1) {
                 ws.send(data);
@@ -192,8 +214,7 @@ function broadcastToAll(eventType, payload) {
             }
         });
     });
-    console.log(`[WS] Broadcast ${eventType} to ${count} socket(s) across ${clients.size} user(s)`);
     return count;
 }
 
-module.exports = { init, broadcastToUser, broadcastToUsers, broadcastToAll };
+module.exports = { init, broadcastToUser, broadcastToUsers, broadcastToLab, broadcastToAll };

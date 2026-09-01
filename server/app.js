@@ -98,6 +98,14 @@ try {
     console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
 }
 
+// Automated KoboToolbox Background Sync Scheduler
+try {
+    const { startScheduler } = require('./services/koboScheduler');
+    startScheduler(60000); // Check every 60s
+} catch (e) {
+    console.warn('[KOBO_SCHEDULER] Could not start Kobo scheduler:', e.message);
+}
+
 if (process.env.NODE_ENV !== 'production') {
     app.get('/', (req, res) => {
         res.send('Enterprise Server running and healthy.');

@@ -3,7 +3,7 @@ const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const { createNotification } = require('./notificationController');
 const { getAnalysisName, getAnalysisCategory } = require('../services/analysisService');
-const { broadcastToAll } = require('../wsServer');
+const { broadcastToLab, broadcastToUser } = require('../wsServer');
 
 // Helper to get effective analysis list for a sample
 const getEffectiveAnalyses = (sample) => {
@@ -385,7 +385,7 @@ exports.assignWork = async (req, res) => {
         if (assignedCount > 0) {
             const affectedSampleIds = [...new Set(dbItems.map(i => i.sampleId).filter(Boolean))];
             try {
-                broadcastToAll('WORKITEM_UPDATE', {
+                broadcastToLab(user.labId,'WORKITEM_UPDATE', {
                     sampleIds: affectedSampleIds,
                     updatedBy: user.username,
                     action: 'ASSIGNED',
@@ -515,7 +515,7 @@ exports.reassignWork = async (req, res) => {
 
         // Real-time push: broadcast WORKITEM_UPDATE
         try {
-            broadcastToAll('WORKITEM_UPDATE', {
+            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
                 sampleIds: [item.sampleId],
                 updatedBy: user.username,
                 action: 'REASSIGNED',
@@ -740,7 +740,7 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
-            broadcastToAll('WORKITEM_UPDATE', {
+            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
                 sampleIds: [String(item.sampleId)],
                 updatedBy: user.username,
                 action: status === 'COMPLETED' ? 'COMPLETED' : 'STATUS_CHANGE',
@@ -966,7 +966,7 @@ exports.reviewWorkItem = async (req, res) => {
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
-            broadcastToAll('WORKITEM_UPDATE', {
+            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
                 sampleIds: [String(item.sampleId)],
                 updatedBy: user.username,
                 action: 'REVIEWED',
@@ -1143,7 +1143,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         if (items.length > 0) {
             const affectedSampleIds = [...new Set(items.map(i => i.sampleId).filter(Boolean))];
             try {
-                broadcastToAll('WORKITEM_UPDATE', {
+                broadcastToLab(user.labId,'WORKITEM_UPDATE', {
                     sampleIds: affectedSampleIds,
                     updatedBy: user.username,
                     action: 'BULK_REVIEWED',
