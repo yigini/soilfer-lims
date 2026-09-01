@@ -15,6 +15,8 @@ server/prisma/dev.db
 server/prisma/dev.db-journal
 server/prisma/dev - Copy*
 server/prisma_client/
+server/prisma/dev.db-shm
+server/prisma/dev.db-wal
 
 # ─── Data & Uploads ───
 server/data/
@@ -42,3 +44,7 @@ npm-debug.log*
 
 server/prisma/dev.db-shm
 server/prisma/dev.db-wal
+
+# ─── Deploy archives & Backups ───
+*.tar.gz
+server/backups/

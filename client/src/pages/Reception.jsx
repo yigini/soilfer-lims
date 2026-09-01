@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
 import { AlertTriangle, CheckCircle, XCircle, Droplet, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle } from 'lucide-react';
 import WalkInForm from '../components/reception/WalkInForm';
@@ -13,6 +14,7 @@ import InfoTooltip from '../components/common/InfoTooltip';
 const Reception = () => {
     const { user, token } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const location = useLocation();
 
     // --- MODE SELECTION ---
@@ -827,9 +829,9 @@ const Reception = () => {
                     <button onClick={() => {
                         showDialog({
                             type: 'confirm',
-                            title: 'End Session?',
-                            message: 'Are you sure you want to end this reception session? Any unsaved changes will be lost.',
-                            confirmText: 'End Session',
+                            title: t('reception.endSessionTitle', 'End Session?'),
+                            message: t('reception.endSessionMsg', 'Are you sure you want to end this reception session? Any unsaved changes will be lost.'),
+                            confirmText: t('reception.endSessionConfirm', 'End Session'),
                             onConfirm: () => {
                                 setMode(null);
                                 setSessionProject(null);
@@ -840,14 +842,14 @@ const Reception = () => {
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Session Active</div>
+                        <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">{t('reception.sessionActive', 'Session Active')}</div>
                         <div className="text-lg font-bold flex items-center gap-2">
-                            {mode === 'PROJECT' || sessionProject ? <><Layers size={18} /> Project: {sessionProject}</> : <><User size={18} /> Walk-in Reception</>}
+                            {mode === 'PROJECT' || sessionProject ? <><Layers size={18} /> {t('common.project', 'Project')}: {sessionProject}</> : <><User size={18} /> {t('reception.walkInReception', 'Walk-in Reception')}</>}
                         </div>
                     </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-xs text-slate-400">Operator ({user.labId || 'Global'})</div>
+                    <div className="text-xs text-slate-400">{t('reception.operator', 'Operator')} ({user.labId || 'Global'})</div>
                     <div className="font-medium">{user.name || user.username}</div>
                 </div>
             </div>
@@ -861,9 +863,9 @@ const Reception = () => {
                             onChange={(e) => setScanCode(e.target.value)}
                             placeholder={mode === 'PROJECT' ?
                                 (availableProjects.find(p => p.id === sessionProject)?.projectType === 'TEMPLATE_PREDEFINED_IDS'
-                                    ? "Search manifest by Sample ID..."
-                                    : "Scan or Enter Sample ID to add...")
-                                : "Enter Sample ID"}
+                                    ? t('reception.searchManifest', 'Search manifest by Sample ID...')
+                                    : t('reception.scanOrEnter', 'Scan or Enter Sample ID to add...'))
+                                : t('reception.enterSampleId', 'Enter Sample ID')}
                             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-lg"
                             onKeyDown={e => {
                                 if (e.key === 'Enter') {
@@ -884,12 +886,12 @@ const Reception = () => {
                         {showAutocomplete && mode === 'PROJECT' && (
                             <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto mt-1">
                                 {isSearching ? (
-                                    <div className="p-4 text-center text-gray-500">Searching...</div>
+                                    <div className="p-4 text-center text-gray-500">{t('common.searching', 'Searching...')}</div>
                                 ) : (
                                     null
                                 )}
                                 {!isSearching && autocompleteResults.length === 0 ? (
-                                    <div className="p-4 text-center text-gray-400">No EXPECTED samples found</div>
+                                    <div className="p-4 text-center text-gray-400">{t('reception.noExpectedSamples', 'No EXPECTED samples found')}</div>
                                 ) : (
                                     autocompleteResults.map(sample => (
                                         <div
@@ -920,17 +922,17 @@ const Reception = () => {
                     <button
                         onClick={() => setShowScanner(true)}
                         className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600 flex items-center gap-2"
-                        title="Scan Code"
+                        title={t('reception.scan', 'Scan')}
                     >
                         <Camera size={20} />
-                        <span className="hidden sm:inline font-bold">Scan</span>
+                        <span className="hidden sm:inline font-bold">{t('reception.scan', 'Scan')}</span>
                     </button>
                     <button
                         onClick={() => { setShowAutocomplete(false); handleLookup(); }}
                         disabled={!scanCode}
                         className="bg-blue-600 text-white px-8 rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50"
                     >
-                        Look Up
+                        {t('reception.lookUp', 'Look Up')}
                     </button>
                 </div>
 
@@ -1131,7 +1133,7 @@ const Reception = () => {
                                     disabled={loading}
                                     className="py-3 px-5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
-                                    <XCircle size={18} /> Discard
+                                    <XCircle size={18} /> {t('reception.discard', 'Discard')}
                                 </button>
 
                                 <button
@@ -1139,7 +1141,7 @@ const Reception = () => {
                                     disabled={loading}
                                     className="py-3 px-5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
-                                    <FileText size={18} /> Save Draft
+                                    <FileText size={18} /> {t('reception.saveDraft', 'Save Draft')}
                                 </button>
 
                                 <button
@@ -1149,9 +1151,9 @@ const Reception = () => {
                                 >
                                     <div className="flex items-center gap-2">
                                         <CheckCircle size={18} />
-                                        <span>{loading ? 'Processing...' : 'Complete Intake'}</span>
+                                        <span>{loading ? t('common.processing', 'Processing...') : t('reception.completeIntake', 'Complete Intake')}</span>
                                     </div>
-                                    <span className="text-[10px] opacity-80 uppercase tracking-widest mt-0.5 font-bold">Synchronize & Print Label</span>
+                                    <span className="text-[10px] opacity-80 uppercase tracking-widest mt-0.5 font-bold">{t('reception.syncAndPrint', 'Synchronize & Print Label')}</span>
                                 </button>
                             </div>
                         </div>
@@ -1170,8 +1172,8 @@ const Reception = () => {
                                         <CheckCircle size={32} className="text-white" />
                                     </div>
                                 </div>
-                                <h2 className="text-3xl font-black text-slate-900 dark:text-gray-100 mb-2 tracking-tight uppercase">Intake Confirmed!</h2>
-                                <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">Sample identity established and records synchronized.</p>
+                                <h2 className="text-3xl font-black text-slate-900 dark:text-gray-100 mb-2 tracking-tight uppercase">{t('reception.intakeConfirmed', 'Intake Confirmed!')}</h2>
+                                <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">{t('reception.intakeConfirmedSubtitle', 'Sample identity established and records synchronized.')}</p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-gray-700/50 rounded-3xl p-6 border border-slate-200 dark:border-gray-600 mb-8 text-left shadow-inner">
                                     {/* Left: QR Code */}
@@ -1189,16 +1191,16 @@ const Reception = () => {
                                     {/* Right: ID Data */}
                                     <div className="flex flex-col justify-center space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Permanent Lab ID</span>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('reception.permanentLabId', 'Permanent Lab ID')}</span>
                                             <div className="font-mono font-black text-3xl text-indigo-600 leading-none">{result.labId}</div>
                                         </div>
                                         <div className="space-y-1 pt-3 border-t border-slate-200">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Scanning Code (Original)</span>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('reception.originalSampleId', 'Scanning Code (Original)')}</span>
                                             <div className="font-mono font-bold text-slate-500 text-sm truncate" title={result.originalId}>{result.originalId}</div>
                                         </div>
                                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase w-fit">
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                            Ready for Lab
+                                            {t('reception.readyForLab', 'Ready for Lab')}
                                         </div>
                                     </div>
                                 </div>
@@ -1211,7 +1213,7 @@ const Reception = () => {
                                         <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
                                             <Printer size={24} />
                                         </div>
-                                        <span className="text-sm">Print Tag</span>
+                                        <span className="text-sm">{t('reception.printTag', 'Print Tag')}</span>
                                     </button>
                                     <button
                                         onClick={resetForm}
@@ -1220,7 +1222,7 @@ const Reception = () => {
                                         <div className="p-2 bg-slate-800 rounded-lg group-hover:bg-slate-700 transition-colors">
                                             <Plus size={24} />
                                         </div>
-                                        <span className="text-sm">Next Sample</span>
+                                        <span className="text-sm">{t('reception.nextSample', 'Next Sample')}</span>
                                     </button>
                                 </div>
                             </>
@@ -1229,10 +1231,10 @@ const Reception = () => {
                                 <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
                                     <XCircle size={40} className="text-red-600" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-red-600 mb-2">Intake Failed</h2>
+                                <h2 className="text-2xl font-bold text-red-600 mb-2">{t('reception.intakeFailed', 'Intake Failed')}</h2>
                                 <p className="text-gray-600 mb-6">{result.message}</p>
                                 <button onClick={() => setResult(null)} className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors">
-                                    Try Again
+                                    {t('reception.tryAgain', 'Try Again')}
                                 </button>
                             </>
                         )}

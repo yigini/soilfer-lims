@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 import { X, Plus, Monitor, Tag, Hash, MapPin, ShieldAlert, Info, RefreshCw } from 'lucide-react';
 
 const ASSET_TYPES = ['SPECTROMETER', 'BALANCE', 'PH_METER', 'EC_METER', 'OVEN', 'SHAKER', 'AUTO_ANALYZER', 'OTHER'];
 
 const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
+    const { t } = useLanguage();
     const [form, setForm] = useState({
         name: '',
         assetType: 'SPECTROMETER',
@@ -74,7 +76,9 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         {asset ? <Monitor className="text-blue-600" size={20} /> : <Plus className="text-blue-600" size={20} />}
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{asset ? 'Edit Instrument Details' : 'Register New Instrument'}</h3>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            {asset ? t('equipment.editAsset', 'Edit Instrument Details') : t('equipment.registerAsset', 'Register New Instrument')}
+                        </h3>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
@@ -84,7 +88,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2">
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Display Name *</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.assetName', 'Display Name')} *</label>
                             <input
                                 required
                                 value={form.name}
@@ -94,17 +98,17 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Asset Type *</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.type', 'Asset Type')} *</label>
                             <select
                                 value={form.assetType}
                                 onChange={e => setForm({ ...form, assetType: e.target.value })}
                                 className="w-full px-3 py-2.5 rounded-xl border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {ASSET_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
+                                {ASSET_TYPES.map(tType => <option key={tType} value={tType}>{t(`dynamic.equipmentType.${tType}.label`, tType.replace(/_/g, ' '))}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Internal Asset Tag *</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.assetTag', 'Internal Asset Tag')} *</label>
                             <input
                                 required
                                 value={form.internalAssetTag}
@@ -117,7 +121,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Manufacturer</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.manufacturer', 'Manufacturer')}</label>
                             <input
                                 value={form.manufacturer}
                                 onChange={e => setForm({ ...form, manufacturer: e.target.value })}
@@ -126,7 +130,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Model</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.model', 'Model')}</label>
                             <input
                                 value={form.model}
                                 onChange={e => setForm({ ...form, model: e.target.value })}
@@ -138,7 +142,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Serial Number</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.serialNumber', 'Serial Number')}</label>
                             <input
                                 value={form.serialNumber}
                                 onChange={e => setForm({ ...form, serialNumber: e.target.value })}
@@ -147,7 +151,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Criticality</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.status', 'Criticality')}</label>
                             <select
                                 value={form.criticality}
                                 onChange={e => setForm({ ...form, criticality: e.target.value })}
@@ -161,7 +165,7 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Location / Bench</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.location', 'Location / Bench')}</label>
                         <input
                             value={form.locationId}
                             onChange={e => setForm({ ...form, locationId: e.target.value })}
@@ -178,14 +182,14 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
                     )}
 
                     <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
-                        <button type="button" onClick={onClose} className="px-4 py-2 font-bold text-gray-500">Cancel</button>
+                        <button type="button" onClick={onClose} className="px-4 py-2 font-bold text-gray-500">{t('common.cancel', 'Cancel')}</button>
                         <button
                             type="submit"
                             disabled={saving || !form.name || !form.internalAssetTag}
                             className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95"
                         >
                             {saving ? <RefreshCw size={16} className="animate-spin" /> : (asset ? <Monitor size={16} /> : <Plus size={16} />)}
-                            {asset ? 'Save Changes' : 'Register Asset'}
+                            {asset ? t('common.save', 'Save Changes') : t('equipment.registerAsset', 'Register Asset')}
                         </button>
                     </div>
                 </form>

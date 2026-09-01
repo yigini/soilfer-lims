@@ -7,10 +7,12 @@ import InfoTooltip from '../components/common/InfoTooltip';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const SpectralLibrary = () => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('EXPLORER');
     const [spectraList, setSpectraList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -376,10 +378,10 @@ const SpectralLibrary = () => {
                             <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/25">
                                 <Activity className="text-white" size={24} />
                             </div>
-                            Spectral Library
+                            {t('spectral.title', 'Spectral Library')}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1 ml-14">
-                            Manage and explore Vis-NIR and MIR spectral assets
+                            {t('spectral.subtitle', 'Manage and explore Vis-NIR and MIR spectral assets')}
                         </p>
                     </div>
 
@@ -393,7 +395,7 @@ const SpectralLibrary = () => {
                                 }`}
                         >
                             <Database size={16} />
-                            Library Explorer
+                            {t('spectral.explorer', 'Library Explorer')}
                         </button>
                         <button
                             onClick={() => setActiveTab('UPLOAD')}
@@ -403,7 +405,7 @@ const SpectralLibrary = () => {
                                 }`}
                         >
                             <Upload size={16} />
-                            Batch Upload
+                            {t('spectral.batchUpload', 'Batch Upload')}
                         </button>
                         {isManager && (
                             <button
@@ -414,7 +416,7 @@ const SpectralLibrary = () => {
                                     }`}
                             >
                                 <Trash2 size={16} />
-                                Trash
+                                {t('common.trash', 'Trash')}
                             </button>
                         )}
                     </div>
@@ -430,7 +432,7 @@ const SpectralLibrary = () => {
                                 </div>
                                 <div>
                                     <div className="text-2xl font-black text-gray-900 dark:text-white">{stats.total}</div>
-                                    <div className="text-xs text-gray-500 uppercase tracking-wide">Total Spectra</div>
+                                    <div className="text-xs text-gray-500 uppercase tracking-wide">{t('spectral.totalSpectra', 'Total Spectra')}</div>
                                 </div>
                             </div>
                         </div>
@@ -441,7 +443,7 @@ const SpectralLibrary = () => {
                                 </div>
                                 <div>
                                     <div className="text-2xl font-black text-blue-600">{stats.nir}</div>
-                                    <div className="text-xs text-gray-500 uppercase tracking-wide">NIR Scans</div>
+                                    <div className="text-xs text-gray-500 uppercase tracking-wide">{t('spectral.nirScans', 'NIR Scans')}</div>
                                 </div>
                             </div>
                         </div>

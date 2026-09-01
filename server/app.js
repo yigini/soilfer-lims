@@ -7,7 +7,7 @@ const path = require('path');
 const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const prisma = require('./prisma');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 const localeMiddleware = require('./middleware/localeMiddleware');
 const { success, error } = require('./i18n/response');
 
@@ -83,6 +83,17 @@ const SECRET_KEY = process.env.JWT_SECRET;
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime() });
 });
+
+// Automated Daily Database Backup Schedule (runs every 24h)
+try {
+    const { performBackup } = require('./scripts/backup_db');
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    setInterval(() => {
+        performBackup().catch(err => console.error('[BACKUP_SCHEDULE_ERR]', err));
+    }, ONE_DAY_MS);
+} catch (e) {
+    console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
+}
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/', (req, res) => {
@@ -197,6 +208,7 @@ app.get('/api/config/categories', verifyToken, analysisController.getCategories)
 app.get('/api/config/analyses', verifyToken, analysisController.getAnalyses);
 app.get('/api/config/methodologies', verifyToken, analysisController.getMethodologies);
 app.get('/api/config/groups', verifyToken, analysisController.getGroups);
+app.get('/api/config/glosis/catalog', verifyToken, analysisController.getGlosisCatalog);
 app.use('/api/config', verifyToken, require('./routes/analysisRoutes'));
 
 // Admin Config Routes
@@ -224,6 +236,7 @@ app.use('/api/reviews', verifyToken, require('./routes/reviewRoutes'));
 app.use('/api/notifications', verifyToken, require('./routes/notificationRoutes'));
 app.use('/api/auth', require('./routes/authRoutes')); // auth handled internally (has login)
 app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
+app.use('/api/v1/sis', require('./routes/sisRoutes')); // Soil Information System Integration API
 // Kobo media proxy — no JWT auth because <img> tags can't send headers.
 // Security: (1) only proxies to known Kobo hosts from active configs, (2) HTTPS only, (3) URL scheme validation.
 const koboController = require('./controllers/koboController');

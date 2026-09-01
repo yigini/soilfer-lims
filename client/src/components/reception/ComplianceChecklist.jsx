@@ -2,41 +2,44 @@
 import React from 'react';
 import { AlertCircle, Check, X, HelpCircle, ShieldCheck, Minus } from 'lucide-react';
 import InfoTooltip from '../common/InfoTooltip';
-
-const CHECKLIST_ITEMS = [
-    {
-        key: 'container',
-        label: 'Container Intact / Sealed',
-        tooltip: 'Verify the sample bag or container is not torn, open, or leaking. Compromised containers may lead to contamination.',
-        failHint: 'e.g. Bag torn, lid loose, visible leakage...'
-    },
-    {
-        key: 'label',
-        label: 'Label Legible & Matches ID',
-        tooltip: 'Confirm the label on the container matches the scanned/entered Sample ID. Illegible labels risk misidentification.',
-        failHint: 'e.g. Smudged ink, wrong ID on label...'
-    },
-    {
-        key: 'quantity',
-        label: 'Sample Quantity Sufficient',
-        tooltip: 'Ensure there is enough material (~500g minimum) to perform all requested analyses.',
-        failHint: 'e.g. Less than 200g, half-empty bag...'
-    },
-    {
-        key: 'condition',
-        label: 'Sample Condition (Dry, No Contam.)',
-        tooltip: 'Check that the sample is air-dry and free of visible contaminants (rocks, roots, mold, excessive moisture).',
-        failHint: 'e.g. Wet/muddy, contains large roots, mold...'
-    },
-    {
-        key: 'coc',
-        label: 'Chain of Custody Present',
-        tooltip: 'A Chain of Custody document should accompany the sample, recording who collected and delivered it.',
-        failHint: 'e.g. No CoC form, missing signatures...'
-    }
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const ComplianceChecklist = ({ value, onChange, onNonConformance, showIncomplete = false }) => {
+    const { t } = useLanguage();
+
+    const CHECKLIST_ITEMS = [
+        {
+            key: 'container',
+            label: t('reception.containerIntact', 'Container Intact / Sealed'),
+            tooltip: t('reception.containerTooltip', 'Verify the sample bag or container is not torn, open, or leaking. Compromised containers may lead to contamination.'),
+            failHint: 'e.g. Bag torn, lid loose, visible leakage...'
+        },
+        {
+            key: 'label',
+            label: t('reception.labelLegible', 'Label Legible & Matches ID'),
+            tooltip: t('reception.labelTooltip', 'Confirm the label on the container matches the scanned/entered Sample ID. Illegible labels risk misidentification.'),
+            failHint: 'e.g. Smudged ink, wrong ID on label...'
+        },
+        {
+            key: 'quantity',
+            label: t('reception.quantitySufficient', 'Sample Quantity Sufficient'),
+            tooltip: t('reception.quantityTooltip', 'Ensure there is enough material (~500g minimum) to perform all requested analyses.'),
+            failHint: 'e.g. Less than 200g, half-empty bag...'
+        },
+        {
+            key: 'condition',
+            label: t('reception.conditionDry', 'Sample Condition (Dry, No Contam.)'),
+            tooltip: t('reception.conditionTooltip', 'Check that the sample is air-dry and free of visible contaminants (rocks, roots, mold, excessive moisture).'),
+            failHint: 'e.g. Wet/muddy, contains large roots, mold...'
+        },
+        {
+            key: 'coc',
+            label: t('reception.cocPresent', 'Chain of Custody Present'),
+            tooltip: t('reception.cocTooltip', 'A Chain of Custody document should accompany the sample, recording who collected and delivered it.'),
+            failHint: 'e.g. No CoC form, missing signatures...'
+        }
+    ];
+
     // value = { items: { container: { status: 'PASS'|'FAIL'|'NA'|undefined, note: '' } }, nonConformance: false, reason: '' }
 
     const setStatus = (key, status) => {
@@ -79,21 +82,21 @@ const ComplianceChecklist = ({ value, onChange, onNonConformance, showIncomplete
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                    <ShieldCheck size={20} className="text-blue-600" /> Reception Compliance
-                    <InfoTooltip text="Verify each item by clicking ✓ Pass or ✗ Fail. All items must be checked before completing the intake." />
+                    <ShieldCheck size={20} className="text-blue-600" /> {t('reception.receptionCompliance', 'Reception Compliance')}
+                    <InfoTooltip text={t('reception.complianceTooltip', 'Verify each item by clicking ✓ Pass or ✗ Fail. All items must be checked before completing the intake.')} />
                 </h3>
                 <div className="flex items-center gap-1.5 text-xs font-bold">
                     {pendingCount > 0 ? (
                         <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full">
-                            {pendingCount} pending
+                            {t('reception.pendingCount', { count: pendingCount }, `${pendingCount} pending`)}
                         </span>
                     ) : failCount > 0 ? (
                         <span className="bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full">
-                            {failCount} failed
+                            {t('reception.failedCount', { count: failCount }, `${failCount} failed`)}
                         </span>
                     ) : (
                         <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full">
-                            All clear ✓
+                            {t('reception.allClear', 'All clear ✓')}
                         </span>
                     )}
                 </div>

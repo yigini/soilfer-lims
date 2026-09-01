@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Plus, Search, Edit2, Trash2, Shield, User, MapPin, Eye, Lock } from 'lucide-react';
 import UserDialog from '../components/UserDialog';
 import { useDialog } from '../context/DialogContext';
 
 const Users = () => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { showDialog } = useDialog();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -82,22 +84,32 @@ const Users = () => {
 
     const handleImpersonate = async (userId) => {
         showDialog({
-            title: 'Impersonate User?',
-            message: 'Are you sure you want to log in as this user? You will need to logout to return to your admin account.',
+            title: t('users.impersonateTitle', 'Impersonate User?'),
+            message: t('users.impersonateMsg', 'Are you sure you want to log in as this user? You will need to log out to return to your admin account.'),
             type: 'confirm',
-            confirmText: 'Log In',
-            cancelText: 'Cancel',
+            confirmText: t('users.impersonateConfirm', 'Log In as User'),
+            cancelText: t('common.cancel', 'Cancel'),
             onConfirm: async () => {
                 try {
                     const res = await axios.post('/api/auth/impersonate', { userId });
-                    const { token, user: userData } = res.data;
+                    const payload = res.data?.data || res.data;
+                    const token = payload?.token;
+                    const userData = payload?.user;
+
+                    if (!token || !userData) {
+                        throw new Error('Invalid token or user data received');
+                    }
 
                     // Direct Login logic
                     localStorage.setItem('token', token);
                     localStorage.setItem('user', JSON.stringify(userData));
                     window.location.href = '/'; // Hard reload to pick up new context
                 } catch (e) {
-                    showDialog({ title: 'Error', message: 'Impersonation failed: ' + e.message, type: 'error' });
+                    showDialog({
+                        title: t('common.error', 'Error'),
+                        message: e.response?.data?.message || e.response?.data?.error || e.message || 'Impersonation failed',
+                        type: 'error'
+                    });
                 }
             }
         });
@@ -113,14 +125,14 @@ const Users = () => {
         <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Laboratory Staff</h1>
-                    <p className="text-gray-700 dark:text-gray-400">Manage laboratory personnel and access</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('users.title', 'Laboratory Staff')}</h1>
+                    <p className="text-gray-700 dark:text-gray-400">{t('users.subtitle', 'Manage laboratory personnel and access')}</p>
                 </div>
                 <button
                     onClick={() => { setEditingUser(null); setShowDialogState(true); }}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-sm"
                 >
-                    <Plus size={18} /> Add Staff
+                    <Plus size={18} /> {t('users.addUser', 'Add User')}
                 </button>
             </div>
 
@@ -130,7 +142,7 @@ const Users = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                     <input
                         type="text"
-                        placeholder="Search users..."
+                        placeholder={t('users.searchPlaceholder', 'Search users by name, username, or email...')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="input-base w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -143,17 +155,17 @@ const Users = () => {
                 <table className="w-full text-left">
                     <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-600">
                         <tr>
-                            <th className="p-4">User</th>
-                            <th className="p-4">Role</th>
-                            <th className="p-4">Scope (Lab/Country)</th>
-                            <th className="p-4 text-center">Actions</th>
+                            <th className="p-4">{t('users.name', 'User')}</th>
+                            <th className="p-4">{t('users.role', 'Role')}</th>
+                            <th className="p-4">{t('users.lab', 'Scope (Lab/Country)')}</th>
+                            <th className="p-4 text-center">{t('common.actions', 'Actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y dark:divide-gray-700">
                         {loading ? (
-                            <tr><td colSpan="4" className="p-8 text-center text-gray-500 dark:text-gray-400">Loading...</td></tr>
+                            <tr><td colSpan="4" className="p-8 text-center text-gray-500 dark:text-gray-400">{t('common.loading', 'Loading...')}</td></tr>
                         ) : users.length === 0 ? (
-                            <tr><td colSpan="4" className="p-8 text-center text-gray-400">No users found.</td></tr>
+                            <tr><td colSpan="4" className="p-8 text-center text-gray-400">{t('common.noRecords', 'No users found.')}</td></tr>
                         ) : (
                             users.map(u => (
                                 <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
@@ -173,7 +185,7 @@ const Users = () => {
                                             u.role === 'LAB_MANAGER' ? 'bg-orange-100 text-orange-700 border-orange-200' :
                                                 'bg-blue-100 text-blue-700 border-blue-200'
                                             }`}>
-                                            {u.role.replace('_', ' ')}
+                                            {t(`roles.${u.role}`, u.role.replace('_', ' '))}
                                         </span>
                                     </td>
                                     <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
@@ -190,7 +202,7 @@ const Users = () => {
                                             <button
                                                 onClick={() => { setEditingUser(u); setShowDialogState(true); }}
                                                 className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-700 rounded"
-                                                title="Edit"
+                                                title={t('common.edit', 'Edit')}
                                             >
                                                 <Edit2 size={16} />
                                             </button>
@@ -198,7 +210,7 @@ const Users = () => {
                                                 <button
                                                     onClick={() => handleImpersonate(u.id)}
                                                     className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded"
-                                                    title="Log in as User"
+                                                    title={t('users.impersonate', 'Log in as User')}
                                                 >
                                                     <Eye size={16} />
                                                 </button>
@@ -206,14 +218,14 @@ const Users = () => {
                                             <button
                                                 onClick={() => handleDelete(u.id)}
                                                 className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded"
-                                                title="Delete"
+                                                title={t('common.delete', 'Delete')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleResetPassword(u.id, u.name)}
                                                 className="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700 rounded"
-                                                title="Reset Password"
+                                                title={t('users.resetPassword', 'Reset Password')}
                                             >
                                                 <Lock size={16} />
                                             </button>
@@ -233,15 +245,15 @@ const Users = () => {
                     onClick={() => setPage(p => p - 1)}
                     className="px-4 py-2 border dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                 >
-                    Previous
+                    {t('common.previous', 'Previous')}
                 </button>
-                <span>Page {page} of {totalPages}</span>
+                <span>{t('common.pageOf', { page, totalPages }, `Page ${page} of ${totalPages}`)}</span>
                 <button
                     disabled={page === totalPages}
                     onClick={() => setPage(p => p + 1)}
                     className="px-4 py-2 border dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                 >
-                    Next
+                    {t('common.next', 'Next')}
                 </button>
             </div>
 

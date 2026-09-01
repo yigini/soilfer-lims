@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 import { X, ClipboardCheck, Wrench, ShieldAlert, CheckCircle, XCircle, AlertTriangle, Calendar, Info, RefreshCw } from 'lucide-react';
 
 const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
+    const { t } = useLanguage();
     const [form, setForm] = useState({
         eventType: eventType || 'MAINTENANCE',
         summary: '',
@@ -50,7 +52,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         {isCalibration ? <ClipboardCheck className="text-blue-600" size={20} /> : <Wrench className="text-indigo-600" size={20} />}
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Log {form.eventType.replace(/_/g, ' ')}</h3>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('equipment.logEvent', 'Log Event')}: {form.eventType.replace(/_/g, ' ')}</h3>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
@@ -59,12 +61,12 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                     {error && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm flex items-center gap-2"><ShieldAlert size={14} /> {error}</div>}
 
                     <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700 text-xs">
-                        <div className="text-gray-400 mb-1">Target Instrument</div>
+                        <div className="text-gray-400 mb-1">{t('equipment.assetName', 'Target Instrument')}</div>
                         <div className="font-bold text-gray-900 dark:text-gray-100">{asset.name} <span className="font-mono ml-2 text-blue-600">{asset.internalAssetTag}</span></div>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Summary / ID *</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.logHistory', 'Summary / ID')} *</label>
                         <input
                             required
                             value={form.summary}
@@ -76,7 +78,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Outcome</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.status', 'Outcome')}</label>
                             <div className="flex gap-2">
                                 <button
                                     type="button"
@@ -95,7 +97,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Next Due Date</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.nextCalibration', 'Next Due Date')}</label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                                 <input
@@ -109,7 +111,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Detailed Notes</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('workItems.remarks', 'Detailed Notes')}</label>
                         <textarea
                             rows={3}
                             value={form.details}
@@ -127,14 +129,14 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                     )}
 
                     <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 font-bold text-gray-500 hover:text-gray-700">Cancel</button>
+                        <button type="button" onClick={onClose} className="px-4 py-2 font-bold text-gray-500 hover:text-gray-700">{t('common.cancel', 'Cancel')}</button>
                         <button
                             type="submit"
                             disabled={saving || !form.summary}
                             className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95"
                         >
                             {saving ? <RefreshCw size={16} className="animate-spin" /> : <ClipboardCheck size={16} />}
-                            Save Record
+                            {t('common.save', 'Save Record')}
                         </button>
                     </div>
                 </form>

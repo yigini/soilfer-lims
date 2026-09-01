@@ -12,6 +12,21 @@ export default defineConfig({
         __APP_VERSION__: JSON.stringify(pkg.version),
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+                    'vendor-charts': ['recharts'],
+                    'vendor-maps': ['leaflet', 'react-leaflet'],
+                    'vendor-pdf': ['jspdf', 'jspdf-autotable', 'html-to-image'],
+                    'vendor-excel': ['xlsx'],
+                    'vendor-flow': ['@xyflow/react', 'dagre']
+                }
+            }
+        },
+        chunkSizeWarningLimit: 1000
+    },
     server: {
         proxy: {
             '/api': {

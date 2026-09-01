@@ -11,19 +11,29 @@ import { Search, Filter, X, Save, Loader2, ChevronDown, ChevronRight, AlertCircl
  */
 
 const SECTION_CONFIG = [
-    { prefix: 'nav.', label: 'Navigation', icon: '🧭' },
-    { prefix: 'common.', label: 'Common', icon: '🔤' },
-    { prefix: 'admin.', label: 'Admin Panel', icon: '⚙️' },
-    { prefix: 'samples.', label: 'Samples', icon: '🧪' },
-    { prefix: 'ui.', label: 'UI Elements', icon: '🖥️' },
-    { prefix: 'header.', label: 'Header', icon: '📌' },
-    { prefix: 'footer.', label: 'Footer', icon: '📎' },
-    { prefix: 'dynamic.analysis.', label: 'Analyses (Dynamic)', icon: '🔬' },
+    { prefix: 'nav.', label: 'Navigation & Sidebar', icon: '🧭' },
+    { prefix: 'reception.', label: 'Sample Reception & Intake', icon: '📥' },
+    { prefix: 'samples.', label: 'Samples & Registry', icon: '🧪' },
+    { prefix: 'projects.', label: 'Projects & Campaigns', icon: '📁' },
+    { prefix: 'users.', label: 'Staff & User Management', icon: '👥' },
+    { prefix: 'equipment.', label: 'Equipment & Calibration', icon: '🔬' },
+    { prefix: 'inventory.', label: 'Inventory & Reagents', icon: '📦' },
+    { prefix: 'spectral.', label: 'Spectroscopy & Proximal Sensing', icon: '🌈' },
+    { prefix: 'datasheet.', label: 'Data Sheets & Analytical Entry', icon: '📋' },
+    { prefix: 'reports.', label: 'Result Reports & Certificates', icon: '📊' },
+    { prefix: 'labs.', label: 'Laboratory Network & Facilities', icon: '🏢' },
+    { prefix: 'about.', label: 'About SoilFER & Resource Partners', icon: 'ℹ️' },
+    { prefix: 'admin.', label: 'Admin Panel & Settings', icon: '⚙️' },
+    { prefix: 'common.', label: 'Common Buttons & Actions', icon: '🔤' },
+    { prefix: 'ui.', label: 'UI Badges & Indicators', icon: '🖥️' },
+    { prefix: 'header.', label: 'Header & User Menu', icon: '📌' },
+    { prefix: 'footer.', label: 'Footer & Meta', icon: '📎' },
+    { prefix: 'dynamic.analysis.', label: 'Analyses (Dynamic Methods)', icon: '🔬' },
     { prefix: 'dynamic.gate.', label: 'Workflow Gates (Dynamic)', icon: '🚪' },
     { prefix: 'dynamic.category.', label: 'Categories (Dynamic)', icon: '📂' },
     { prefix: 'dynamic.status.', label: 'Statuses (Dynamic)', icon: '📊' },
-    { prefix: 'dynamic.equipmentType.', label: 'Equipment (Dynamic)', icon: '🔧' },
-    { prefix: 'dynamic.', label: 'Other Dynamic', icon: '⚡' },  // catch-all for dynamic
+    { prefix: 'dynamic.equipmentType.', label: 'Equipment Types (Dynamic)', icon: '🔧' },
+    { prefix: 'dynamic.', label: 'Other Dynamic Database Keys', icon: '⚡' },
 ];
 
 const classifyKey = (key) => {

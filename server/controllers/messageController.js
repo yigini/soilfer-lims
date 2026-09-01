@@ -1,5 +1,5 @@
 const prisma = require('../prisma');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 const { broadcastToUser } = require('../wsServer');
 
 const getDisplayName = (user) => user ? (user.name || user.username) : 'Unknown';

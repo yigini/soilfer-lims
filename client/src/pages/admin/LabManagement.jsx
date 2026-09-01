@@ -9,6 +9,7 @@ import {
     TestTube2, ArrowUpRight
 } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 // ─── Role Display Config ───
 const ROLE_CONFIG = {
@@ -610,6 +611,7 @@ const LabFormModal = ({ isOpen, editingLab, formData, setFormData, onSubmit, onC
 // ═══════════════════════════════════════════════
 const LabManagement = () => {
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const [labs, setLabs] = useState([]);
     const [projects, setProjects] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -719,13 +721,13 @@ const LabManagement = () => {
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
                             <Beaker size={22} className="text-blue-600 dark:text-blue-400" />
                         </div>
-                        Laboratory Network
+                        {t('labs.title', 'Laboratory Management')}
                     </h1>
-                    <p className="text-sm text-gray-400 mt-1">Central command for all laboratory facilities and staff</p>
+                    <p className="text-sm text-gray-400 mt-1">{t('labs.subtitle', 'Configure National Reference Soil Laboratories and partner facilities')}</p>
                 </div>
                 <button onClick={openNew}
                     className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-black uppercase tracking-widest text-[10px] transition shadow-lg shadow-blue-500/20 active:scale-95">
-                    <Plus size={16} /> Onboard Lab
+                    <Plus size={16} /> {t('labs.addLab', 'Onboard Lab')}
                 </button>
             </div>
 

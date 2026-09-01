@@ -100,3 +100,39 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.impersonate = async (req, res) => {
+    const { userId } = req.body;
+    const adminUser = req.user;
+
+    if (!adminUser || !['SUPER_ADMIN', 'MASTER_USER'].includes(adminUser.role)) {
+        return error(res, 403, 'AUTH.FORBIDDEN', 'Only Super Admins can impersonate users');
+    }
+
+    try {
+        const targetUser = await prisma.user.findUnique({
+            where: { id: String(userId) }
+        });
+
+        if (!targetUser) {
+            return error(res, 404, 'AUTH.USER_NOT_FOUND', 'Target user not found');
+        }
+
+        const token = jwt.sign(
+            { id: targetUser.id, username: targetUser.username, role: targetUser.role },
+            SECRET_KEY,
+            { expiresIn: '24h' }
+        );
+
+        const safeUser = sanitizeUser(targetUser);
+        return res.json({
+            success: true,
+            token,
+            user: safeUser,
+            data: { token, user: safeUser }
+        });
+    } catch (err) {
+        console.error('[AUTH] Impersonate Error:', err);
+        return error(res, 500, 'AUTH.INTERNAL', 'Failed to impersonate user');
+    }
+};

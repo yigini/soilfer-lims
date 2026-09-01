@@ -28,8 +28,9 @@ export const Header = ({ onMenuClick }) => {
                     >
                         <Menu size={20} />
                     </button>
-                    <div className="md:hidden font-bold text-gray-900 dark:text-gray-100">
-                        SoilFER
+                    <div className="md:hidden flex items-center gap-1.5">
+                        <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-7 w-auto object-contain" />
+                        <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">LIMS</span>
                     </div>
                     <div className="hidden md:block"></div>
                 </div>

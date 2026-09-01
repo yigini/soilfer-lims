@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import {
     Package, AlertTriangle, Search, Plus, Download, Bell, Filter,
@@ -513,6 +514,7 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
 const Inventory = () => {
     const { user, hasPermission } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const canManage = hasPermission('MANAGE_INVENTORY');
     const canConsume = hasPermission('CONSUME_INVENTORY');
 
@@ -576,24 +578,27 @@ const Inventory = () => {
             const a = document.createElement('a');
             a.href = url; a.download = `inventory_${type}_${new Date().toISOString().split('T')[0]}.csv`;
             a.click(); URL.revokeObjectURL(url);
-        } catch (e) { showDialog({ title: 'Export Failed', message: 'Failed to export inventory data.', type: 'error' }); }
+        } catch (e) { showDialog({ title: t('common.error', 'Error'), message: 'Failed to export inventory data.', type: 'error' }); }
     };
 
     return (
         <div className="flex flex-col h-full gap-4 pb-4">
-            {/* ... header and filters remain same ... */}
+            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Package className="text-blue-600 dark:text-blue-400" size={24} /> Inventory Cockpit
-                </h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <Package className="text-blue-600 dark:text-blue-400" size={24} /> {t('inventory.title', 'Inventory & Reagents')}
+                    </h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('inventory.subtitle', 'Track laboratory consumables, certified reference materials, and expiration alerts')}</p>
+                </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     {canManage && (
                         <>
                             <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <Plus size={14} /> New Item
+                                <Plus size={14} /> {t('inventory.addItem', 'New Item')}
                             </button>
                             <button onClick={() => { setInitialReceiveItemId(null); setShowReceive(true); }} className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">
-                                <PlusCircle size={14} /> Receive Stock
+                                <PlusCircle size={14} /> {t('inventory.adjustStock', 'Receive Stock')}
                             </button>
                         </>
                     )}
@@ -603,9 +608,9 @@ const Inventory = () => {
                         </button>
                         {showExportMenu && (
                             <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 py-1 z-30">
-                                {['stock', 'expiry', 'transactions'].map(t => (
-                                    <button key={t} onClick={() => { handleExport(t); setShowExportMenu(false); }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 capitalize">{t} Report</button>
+                                {['stock', 'expiry', 'transactions'].map(type => (
+                                    <button key={type} onClick={() => { handleExport(type); setShowExportMenu(false); }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 capitalize">{type} Report</button>
                                 ))}
                             </div>
                         )}
@@ -617,7 +622,7 @@ const Inventory = () => {
             {alertFilter && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 text-sm">
                     <Filter size={14} className="text-orange-500" />
-                    <span className="text-orange-700 dark:text-orange-300 font-medium">Showing: Low Stock Items</span>
+                    <span className="text-orange-700 dark:text-orange-300 font-medium">{t('inventory.lowStock', 'Showing: Low Stock Items')}</span>
                     <button onClick={() => setAlertFilter(null)} className="ml-auto p-0.5 rounded hover:bg-orange-100 dark:hover:bg-orange-800/40 text-orange-500"><X size={14} /></button>
                 </div>
             )}
@@ -625,7 +630,7 @@ const Inventory = () => {
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 max-w-md">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search items by name or code..."
+                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('inventory.searchPlaceholder', 'Search items by name or code...')}
                         className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="flex card-base rounded-lg border p-0.5 overflow-x-auto">
@@ -634,7 +639,7 @@ const Inventory = () => {
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${typeFilter === type
                                 ? 'bg-slate-700 dark:bg-slate-600 text-white shadow-sm'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
-                            {type}
+                            {type === 'ALL' ? t('common.all', 'ALL') : type}
                         </button>
                     ))}
                 </div>
@@ -642,22 +647,22 @@ const Inventory = () => {
 
             <div className="card-base rounded-xl shadow-sm border flex-1 overflow-auto">
                 {loading ? (
-                    <div className="flex items-center justify-center h-48 text-gray-400"><RefreshCw size={24} className="animate-spin mr-2" /> Loading inventory...</div>
+                    <div className="flex items-center justify-center h-48 text-gray-400"><RefreshCw size={24} className="animate-spin mr-2" /> {t('common.loading', 'Loading inventory...')}</div>
                 ) : items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-48 text-gray-400">
                         <Package size={40} className="mb-2 opacity-40" />
-                        <p className="text-sm">No inventory items found</p>
+                        <p className="text-sm">{t('common.noRecords', 'No inventory items found')}</p>
                     </div>
                 ) : (
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-700/60 border-b dark:border-gray-600 sticky top-0">
                             <tr>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Item</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Type</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">Total Stock</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">Nearest Expiry</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">Flags</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">Actions</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('inventory.itemName', 'Item')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('inventory.category', 'Type')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">{t('inventory.currentStock', 'Total Stock')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">{t('inventory.expiryDate', 'Nearest Expiry')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">Status</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">{t('common.actions', 'Actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y dark:divide-gray-700">

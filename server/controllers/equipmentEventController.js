@@ -1,5 +1,5 @@
 const prisma = require('../prisma');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 
 /**
  * Log an equipment event (Calibration, Verification, Maintenance, etc.)

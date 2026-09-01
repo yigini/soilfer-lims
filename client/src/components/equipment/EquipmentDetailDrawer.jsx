@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     X, Settings, History, ClipboardCheck, Info, AlertTriangle,
     CheckCircle, XCircle, Wrench, Calendar, MapPin, Tag,
@@ -16,6 +17,7 @@ const READINESS_COLORS = {
 };
 
 const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) => {
+    const { t } = useLanguage();
     const [asset, setAsset] = useState(null);
     const [activeTab, setActiveTab] = useState('OVERVIEW');
     const [loading, setLoading] = useState(true);

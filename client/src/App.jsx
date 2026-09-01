@@ -18,40 +18,55 @@ import {
     Table,
     UserPlus,
     PanelLeftClose,
-    PanelLeftOpen
+    PanelLeftOpen,
+    Info,
+    Loader2
 } from 'lucide-react';
+
+// Core immediate pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Samples from './pages/Samples';
-import DataSheet from './pages/DataSheet';
-import CountryData from './pages/CountryData';
-import QADashboard from './pages/QADashboard';
-import Inventory from './pages/Inventory';
-import Equipment from './pages/Equipment';
-import Reception from './pages/Reception';
-import AdminPanel from './pages/AdminPanel';
-import SpectralLibrary from './pages/SpectralLibrary';
 import SampleDetail from './pages/SampleDetail';
-import Users from './pages/Users';
-import Projects from './pages/Projects';
-import LabManagement from './pages/admin/LabManagement';
-import ResultReports from './pages/ResultReports';
-import PublicReport from './pages/PublicReport';
-import MyWork from './pages/MyWork';
-import TechWorkbench from './pages/TechWorkbench';
-import ManagerQueue from './pages/ManagerQueue';
-import AuditLogs from './pages/AuditLogs';
-import Profile from './pages/Profile';
-import DataResults from './pages/DataResults';
 
+// Lazy-loaded secondary pages
+const Projects = React.lazy(() => import('./pages/Projects'));
+const Inventory = React.lazy(() => import('./pages/Inventory'));
+const Equipment = React.lazy(() => import('./pages/Equipment'));
+const Reception = React.lazy(() => import('./pages/Reception'));
+const SpectralLibrary = React.lazy(() => import('./pages/SpectralLibrary'));
+const ResultReports = React.lazy(() => import('./pages/ResultReports'));
+const PublicReport = React.lazy(() => import('./pages/PublicReport'));
+const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
+const LabManagement = React.lazy(() => import('./pages/admin/LabManagement'));
+const AuditLogs = React.lazy(() => import('./pages/AuditLogs'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Users = React.lazy(() => import('./pages/Users'));
+const DataSheet = React.lazy(() => import('./pages/DataSheet'));
+const DataResults = React.lazy(() => import('./pages/DataResults'));
+const CountryData = React.lazy(() => import('./pages/CountryData'));
+const QADashboard = React.lazy(() => import('./pages/QADashboard'));
+const MyWork = React.lazy(() => import('./pages/MyWork'));
+const TechWorkbench = React.lazy(() => import('./pages/TechWorkbench'));
+const ManagerQueue = React.lazy(() => import('./pages/ManagerQueue'));
+const About = React.lazy(() => import('./pages/About'));
+const TechStack = React.lazy(() => import('./pages/TechStack'));
 const SampleWorkflowMap = React.lazy(() => import('./pages/SampleWorkflowMap'));
+
+const LazyFallback = () => (
+    <div className="flex items-center justify-center min-h-[50vh] p-8">
+        <div className="flex flex-col items-center gap-3 text-emerald-600 dark:text-emerald-400">
+            <Loader2 className="w-8 h-8 animate-spin" />
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading View...</span>
+        </div>
+    </div>
+);
 
 import { useTheme } from './context/ThemeContext';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import Footer from './components/Footer';
-import Credits from './pages/Credits';
 
 // --- Layout Component ---
 const Layout = ({ children }) => {
@@ -128,6 +143,9 @@ const Layout = ({ children }) => {
         }
         navItems.push({ icon: Settings, label: t('nav.admin'), path: '/admin' });
     }
+
+    // General Information
+    navItems.push({ icon: Info, label: t('nav.about', 'About SoilFER'), path: '/about' });
 
     const sidebarWidth = sidebarCollapsed ? 'w-16' : 'w-64';
     const marginClass = sidebarCollapsed ? 'md:ml-16' : 'md:ml-64';
@@ -237,7 +255,9 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
     return (
         <NotificationProvider>
             <Layout>
-                {children}
+                <React.Suspense fallback={<LazyFallback />}>
+                    {children}
+                </React.Suspense>
                 <NotificationDrawer />
             </Layout>
         </NotificationProvider>
@@ -278,9 +298,11 @@ function App() {
 
             <Route path="/result-reports" element={<RequireAuth><ResultReports /></RequireAuth>} />
             <Route path="/reports" element={<Navigate to="/result-reports" replace />} />
-            <Route path="/report/:token" element={<PublicReport />} />
+            <Route path="/report/:token" element={<React.Suspense fallback={<LazyFallback />}><PublicReport /></React.Suspense>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            <Route path="/credits" element={<RequireAuth><Credits /></RequireAuth>} />
+            <Route path="/about" element={<RequireAuth><About /></RequireAuth>} />
+            <Route path="/techstack" element={<RequireAuth><TechStack /></RequireAuth>} />
+            <Route path="/credits" element={<RequireAuth><TechStack /></RequireAuth>} />
         </Routes>
     );
 }

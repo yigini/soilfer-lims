@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Globe, Palette, Users, FlaskConical, ShieldCheck } from 'lucide-react';
+import { Globe, Palette, Users, FlaskConical, ShieldCheck, Key } from 'lucide-react';
 import AnalysisConfig from '../components/AnalysisConfig';
 import AuditLogs from './AuditLogs';
 import UsersComponent from './Users';
 import BrandingManager from '../components/admin/BrandingManager';
+import ApiKeyManager from '../components/admin/ApiKeyManager';
 import { TranslationEditor } from '../components/TranslationEditor';
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
@@ -134,6 +135,12 @@ const AdminPanel = () => {
                     <ShieldCheck size={18} /> Audit & Security
                 </button>
                 <button
+                    onClick={() => setActiveTab('api-keys')}
+                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'api-keys' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
+                >
+                    <Key size={18} /> SIS API Gateway
+                </button>
+                <button
                     onClick={() => setActiveTab('users')}
                     className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ml-auto ${activeTab === 'users' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
                 >
@@ -141,7 +148,7 @@ const AdminPanel = () => {
                 </button>
             </div>
 
-            <div className={`card-base rounded-xl shadow-sm border p-8 flex-1 overflow-y-auto ${activeTab === 'branding' ? 'bg-gray-50 dark:bg-black/20 border-transparent shadow-none p-0' : ''}`}>
+            <div className={`card-base rounded-xl shadow-sm border p-6 flex-1 overflow-y-auto ${activeTab === 'branding' ? 'bg-gray-50 dark:bg-black/20 border-transparent shadow-none p-0' : ''} ${activeTab === 'lab-config' || activeTab === 'api-keys' ? 'p-3 sm:p-5' : ''}`}>
 
                 {activeTab === 'branding' && <BrandingManager />}
 
@@ -251,6 +258,7 @@ const AdminPanel = () => {
                         <AuditLogs />
                     </div>
                 )}
+                {activeTab === 'api-keys' && <ApiKeyManager />}
                 {activeTab === 'users' && (
                     <div className="-m-8 p-8">
                         <UsersComponent />

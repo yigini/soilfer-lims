@@ -137,6 +137,7 @@ exports.getWorkItems = async (req, res) => {
 
         // Start with lab-scoped query
         let where = scopeGuard.buildScopedWhere(user, {}, {
+            entityType: 'WorkItem',
             labField: 'labId',
             altLabField: 'assignedLab'
         });

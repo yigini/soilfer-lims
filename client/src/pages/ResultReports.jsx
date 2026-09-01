@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import { useLanguage } from '../context/LanguageContext';
 import ReportContent from '../components/report/ReportContent';
 import {
     FileText, Search, Share2, Download, ExternalLink, Copy, XCircle,
@@ -12,6 +13,7 @@ import {
 const ResultReports = () => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');

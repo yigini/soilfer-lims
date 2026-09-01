@@ -1,15 +1,17 @@
-﻿import React from 'react';
+import React from 'react';
 import { User, MapPin, Clipboard, Sprout, HelpCircle, FlaskConical, Search, Shield, Bug } from 'lucide-react';
 import LocationPicker from './LocationPicker';
 import InfoTooltip from '../common/InfoTooltip';
-
-const STATIC_PURPOSES = [
-    { val: 'Research', label: 'Research', icon: Search, color: 'bg-violet-100 text-violet-700 border-violet-200' },
-    { val: 'Compliance', label: 'Regulatory', icon: Shield, color: 'bg-amber-100 text-amber-700 border-amber-200' },
-    { val: 'Diagnosis', label: 'Problem Diagnosis', icon: Bug, color: 'bg-rose-100 text-rose-700 border-rose-200' },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [] }) => {
+    const { t } = useLanguage();
+
+    const STATIC_PURPOSES = [
+        { val: 'Research', label: t('reception.purposeResearch', 'Research'), icon: Search, color: 'bg-violet-100 text-violet-700 border-violet-200' },
+        { val: 'Compliance', label: t('reception.purposeRegulatory', 'Regulatory'), icon: Shield, color: 'bg-amber-100 text-amber-700 border-amber-200' },
+        { val: 'Diagnosis', label: t('reception.purposeDiagnosis', 'Problem Diagnosis'), icon: Bug, color: 'bg-rose-100 text-rose-700 border-rose-200' },
+    ];
 
     const hasErr = (key) => errors.some(e => e.key === key);
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
@@ -25,47 +27,47 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             {/* SUBMITTER */}
             <div className="bg-purple-50 dark:bg-purple-900/10 p-6 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
                 <h3 className="font-bold text-purple-900 dark:text-purple-300 mb-4 flex items-center gap-2">
-                    <User size={20} /> 1. Submitter Details
-                    <InfoTooltip text="Information about the laboratory customer or farmer submitting the samples." />
+                    <User size={20} /> {t('reception.submitterDetails', '1. Submitter Details')}
+                    <InfoTooltip text={t('reception.submitterTooltip', 'Information about the laboratory customer or farmer submitting the samples.')} />
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <input
-                        placeholder="First Name *"
+                        placeholder={t('reception.firstName', 'First Name *')}
                         className={`p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.name')}`}
                         value={submitter.name}
                         onChange={e => handleChange('submitter', 'name', e.target.value)}
                     />
                     <input
-                        placeholder="Last Name *"
+                        placeholder={t('reception.lastName', 'Last Name *')}
                         className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                         value={submitter.surname}
                         onChange={e => handleChange('submitter', 'surname', e.target.value)}
                     />
                     <div className="relative">
                         <input
-                            placeholder="Phone (Required) *"
+                            placeholder={t('reception.phoneReq', 'Phone (Required) *')}
                             className={`w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.phone')}`}
                             value={submitter.phone}
                             onChange={e => handleChange('submitter', 'phone', e.target.value)}
                         />
-                        <div className="absolute right-2 top-2"><InfoTooltip text="Essential for sending results via SMS or WhatsApp." /></div>
+                        <div className="absolute right-2 top-2"><InfoTooltip text={t('reception.phoneTooltip', 'Essential for sending results via SMS or WhatsApp.')} /></div>
                     </div>
                     <input
-                        placeholder="Email"
+                        placeholder={t('reception.email', 'Email')}
                         className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                         value={submitter.email}
                         onChange={e => handleChange('submitter', 'email', e.target.value)}
                     />
                     <input
-                        placeholder="Organization / Farm Name"
+                        placeholder={t('reception.organization', 'Organization / Farm Name')}
                         className="p-2 border rounded lg:col-span-2 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                         value={submitter.organization}
                         onChange={e => handleChange('submitter', 'organization', e.target.value)}
                     />
                     <div className="lg:col-span-2">
                         <label className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
-                            Contact Preference
-                            <InfoTooltip text="How the client prefers to receive their final analysis report." />
+                            {t('reception.contactPreference', 'Contact Preference')}
+                            <InfoTooltip text={t('reception.contactPrefTooltip', 'How the client prefers to receive their final analysis report.')} />
                         </label>
                         <div className="flex flex-wrap gap-4 mt-1">
                             {['Phone', 'Email', 'WhatsApp', 'In-Person'].map(m => (
@@ -78,7 +80,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                         onChange={e => handleChange('submitter', 'contactMethod', e.target.value)}
                                         className="text-purple-600 focus:ring-purple-500"
                                     />
-                                    <span className="text-sm">{m}</span>
+                                    <span className="text-sm">{t(`reception.pref${m.replace(/[^a-zA-Z]/g, '')}`, m)}</span>
                                 </label>
                             ))}
                         </div>
@@ -89,25 +91,25 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             {/* SAMPLING CONTEXT */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
-                    <Sprout size={20} /> 2. Sample Context
-                    <InfoTooltip text="Agronomic and environmental data helps experts interpret soil results more accurately." />
+                    <Sprout size={20} /> {t('reception.sampleContext', '2. Sample Context')}
+                    <InfoTooltip text={t('reception.sampleContextTooltip', 'Agronomic and environmental data helps experts interpret soil results more accurately.')} />
                 </h3>
 
                 {/* Row 1: Crops, Land Use, Date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
-                            Crops
-                            <InfoTooltip text="Providing crop history allows for tailored fertilizer recommendations." />
+                            {t('reception.crops', 'Crops')}
+                            <InfoTooltip text={t('reception.cropsTooltip', 'Providing crop history allows for tailored fertilizer recommendations.')} />
                         </label>
                         <input
-                            placeholder="Current Crop"
+                            placeholder={t('reception.currentCrop', 'Current Crop')}
                             className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                             value={sampling.crop}
                             onChange={e => handleChange('sampling', 'crop', e.target.value)}
                         />
                         <input
-                            placeholder="Previous Crop (Rotation)"
+                            placeholder={t('reception.previousCrop', 'Previous Crop (Rotation)')}
                             className="w-full p-2 border rounded text-sm bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200"
                             value={sampling.previousCrop || ''}
                             onChange={e => handleChange('sampling', 'previousCrop', e.target.value)}
@@ -115,21 +117,24 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">Land Use & Management <InfoTooltip text="Current land use affects nutrient availability and fertilizer recommendations." /></label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                            {t('reception.landUse', 'Land Use & Management')} 
+                            <InfoTooltip text={t('reception.landUseTooltip', 'Current land use affects nutrient availability and fertilizer recommendations.')} />
+                        </label>
                         <select
                             className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                             value={sampling.landUse}
                             onChange={e => handleChange('sampling', 'landUse', e.target.value)}
                         >
-                            <option value="">-- Select Land Use --</option>
-                            <option value="Cropland">Cropland</option>
-                            <option value="Pasture">Pasture</option>
-                            <option value="Forest">Forest</option>
-                            <option value="Garden">Home Garden</option>
-                            <option value="Greenhouse">Greenhouse</option>
+                            <option value="">{t('reception.selectLandUse', '-- Select Land Use --')}</option>
+                            <option value="Cropland">{t('reception.cropland', 'Cropland')}</option>
+                            <option value="Pasture">{t('reception.pasture', 'Pasture')}</option>
+                            <option value="Forest">{t('reception.forest', 'Forest')}</option>
+                            <option value="Garden">{t('reception.garden', 'Home Garden')}</option>
+                            <option value="Greenhouse">{t('reception.greenhouse', 'Greenhouse')}</option>
                         </select>
                         <input
-                            placeholder="Fertilizer / Manure Used?"
+                            placeholder={t('reception.fertilizerUsed', 'Fertilizer / Manure Used?')}
                             className="w-full p-2 border rounded text-sm bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200"
                             value={sampling.management || ''}
                             onChange={e => handleChange('sampling', 'management', e.target.value)}
@@ -138,8 +143,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
 
                     <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1">
-                            Collection Date
-                            <InfoTooltip text="Date of physical collection in the field." />
+                            {t('reception.collectionDate', 'Collection Date')}
+                            <InfoTooltip text={t('reception.collectionDateTooltip', 'Date of physical collection in the field.')} />
                         </label>
                         <input
                             type="date"

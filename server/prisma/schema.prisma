@@ -615,16 +615,21 @@ model AnalysisCategory {
 }
 
 model Analysis {
-  code          String            @id
-  name          String
-  description   String?
-  categoryId    String?
-  category      AnalysisCategory? @relation(fields: [categoryId], references: [id])
-  units         String?
-  status        String?           // active, inactive
-  validation    String?           // JSON string: validation rules
-  labId         String?
-  methodologies Methodology[]
+  code             String            @id
+  name             String
+  description      String?
+  categoryId       String?
+  category         AnalysisCategory? @relation(fields: [categoryId], references: [id])
+  units            String?
+  status           String?           // active, inactive
+  validation       String?           // JSON string: validation rules
+  labId            String?
+  glosisAttribute  String?           // GloSIS Property (attribute in codelist e.g. nitrogenTotal, carbonOrganic, ph)
+  glosisUri        String?           // GloSIS Property URI
+  methodLabel      String?           // Selected Method Label (from glosis_procedure.csv e.g. TotalN_kjeldahl)
+  methodDefinition String?           // Procedure description
+  methodCitation   String?           // Procedure scientific reference / standard
+  methodologies    Methodology[]
 }
 
 model AnalysisGroup {
@@ -635,15 +640,21 @@ model AnalysisGroup {
 }
 
 model Methodology {
-  id           String   @id @default(uuid())
-  analysisCode String
-  analysis     Analysis @relation(fields: [analysisCode], references: [code])
-  name         String   // e.g. "pH in Water (1:2.5)"
-  standard     String?  // e.g. "ISO 10390:2021"
-  isDefault    Boolean  @default(false)
-  labId        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(uuid())
+  analysisCode     String
+  analysis         Analysis @relation(fields: [analysisCode], references: [code])
+  name             String   // e.g. "pH in Water (1:2.5)"
+  standard         String?  // e.g. "ISO 10390:2021"
+  isDefault        Boolean  @default(false)
+  labId            String?
+  glosisProcedure  String?  // GloSIS Procedure ID (e.g. "pH_h2o-1-2.5", "P_extr-olsen")
+  glosisNotation   String?  // GloSIS Notation
+  glosisDefinition String?  // Procedure Definition text
+  glosisReference  String?  // Standard reference / DOI URL
+  glosisCitation   String?  // Bibliographic citation text
+  glosisUri        String?  // Linked Data URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model OperationalGate {
@@ -719,4 +730,25 @@ model ReportAccessLog {
 
   @@index([linkId])
 }
+
+// --- SOIL INFORMATION SYSTEM (SIS) INTEGRATION API KEYS ---
+
+model ApiKey {
+  id          String    @id
+  name        String
+  keyHash     String    @unique // Hashed or masked token
+  keyPrefix   String    // e.g. "slims_live_9f83..." for display
+  role        String    @default("NSIS_CONSUMER") // NSIS_CONSUMER, EXTERNAL_GIS, GLOBAL_HARVESTER
+  countries   String?   // JSON array: ["GTM", "HND"] or null for all
+  projects    String?   // JSON array: ["SoilFER-USA"] or null for all
+  isActive    Boolean   @default(true)
+  createdBy   String?
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([keyHash])
+}
+
 

@@ -15,6 +15,7 @@ const calculatePercentage = (actual, target) => {
 };
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import { useLanguage } from '../context/LanguageContext';
 import * as XLSX from 'xlsx';
 import InfoTooltip from '../components/common/InfoTooltip';
 
@@ -404,6 +405,7 @@ const SuccessModal = ({ isOpen, message, onClose }) => {
 const Projects = () => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const [projects, setProjects] = useState([]);
     const [labs, setLabs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -832,8 +834,8 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto p-6 relative min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Project Hub</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Operational management of soil research projects</p>
+                    <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{t('projects.title', 'Projects')}</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">{t('projects.subtitle', 'Operational management of soil research projects')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {(user.role === 'SUPER_ADMIN' || user.role === 'MASTER_USER' || user.role === 'LAB_MANAGER') && (
@@ -841,7 +843,7 @@ const Projects = () => {
                             onClick={() => openModal()}
                             className="bg-blue-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all font-bold active:scale-95"
                         >
-                            <Plus size={20} /> Create Project
+                            <Plus size={20} /> {t('projects.createProject', 'Create Project')}
                         </button>
                     )}
                 </div>
@@ -855,50 +857,51 @@ const Projects = () => {
                     </div>
                     <div>
                         <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.total}</div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Total Projects</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('common.total', 'Total')} {t('projects.title', 'Projects')}</div>
                     </div>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
                     <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 size={24} />
+                        <PackageCheck size={24} />
                     </div>
                     <div>
                         <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.active}</div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Active Projects</div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-xl flex items-center justify-center text-orange-600 dark:text-orange-400">
-                        <Trash2 size={24} />
-                    </div>
-                    <div>
-                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.deleted}</div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">In Trash</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.active', 'Active')}</div>
                     </div>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
                     <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center text-red-600 dark:text-red-400">
-                        <Clock size={24} />
+                        <AlertTriangle size={24} />
                     </div>
                     <div>
-                        <div className="text-2xl font-black text-red-600 uppercase tracking-tighter">{stats.overdue}</div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Critical Overdue</div>
+                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.overdue}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.overdue', 'Overdue')}</div>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700/40 rounded-xl flex items-center justify-center text-gray-400">
+                        <Archive size={24} />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.deleted}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.archived', 'Archived')}</div>
                     </div>
                 </div>
             </div>
 
-            {/* FILTER BAR */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-wrap items-center gap-4 sticky top-6 z-40">
-                <div className="flex-1 min-w-[200px] relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            {/* CONTROLS BAR */}
+            <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center mb-6 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
+                        type="text"
+                        placeholder={t('projects.searchPlaceholder', 'Search projects by name, code, or country...')}
                         value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search by code or name..."
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 outline-none"
                     />
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">

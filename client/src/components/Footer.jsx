@@ -21,11 +21,19 @@ const Footer = () => {
                     {/* Center: links */}
                     <div className="flex items-center gap-4 text-xs">
                         <Link
-                            to="/credits"
-                            className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                            to="/about"
+                            className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
+                        >
+                            <Shield size={12} />
+                            {t('footer.about', 'About SoilFER')}
+                        </Link>
+                        <span className="text-gray-300 dark:text-gray-600">•</span>
+                        <Link
+                            to="/techstack"
+                            className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
                         >
                             <Award size={12} />
-                            {t('footer.credits', 'Credits & Acknowledgments')}
+                            {t('footer.techstack', 'Tech Stack & Releases')}
                         </Link>
                     </div>
 

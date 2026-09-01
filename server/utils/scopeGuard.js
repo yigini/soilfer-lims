@@ -76,86 +76,115 @@ function getLabScope(user) {
  * const where = scopeGuard.buildScopedWhere(req.user, {}, { labField: 'labId', altLabField: 'assignedLab' });
  */
 function buildScopedWhere(user, existingWhere = {}, options = {}) {
-    const labScope = getLabScope(user);
-
-    // If null, user has global access - return existing where unchanged.
-    if (labScope === null) {
+    if (hasGlobalAccess(user)) {
         return existingWhere;
     }
 
-    const { labField = 'labId', altLabField = null } = options;
+    const labScope = user.labId || null;
+    const entityType = options.entityType || 'Sample';
+    const { labField = 'labId', altLabField = 'assignedLab' } = options;
 
-    // Build the lab filter
-    let labFilter;
-    if (altLabField) {
-        // OR condition: matches either labId or assignedLab
-        labFilter = {
-            OR: [
-                { [labField]: labScope },
-                { [altLabField]: labScope }
-            ]
-        };
+    let orClauses = [];
+
+    if (entityType === 'WorkItem') {
+        // WorkItem fields: labId, assignedLab, assignedTo, sample: { country }
+        if (user.role === 'LAB_TECHNICIAN') {
+            if (user.username) {
+                orClauses.push({ assignedTo: user.username });
+            }
+            if (labScope) {
+                orClauses.push({ [labField]: labScope });
+                if (altLabField) orClauses.push({ [altLabField]: labScope });
+            }
+        } else {
+            // Managers and others
+            if (labScope) {
+                orClauses.push({ [labField]: labScope });
+                if (altLabField) orClauses.push({ [altLabField]: labScope });
+            }
+            if (user.countries) {
+                try {
+                    const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
+                    if (Array.isArray(countries) && countries.length > 0) {
+                        orClauses.push({ sample: { country: { in: countries } } });
+                    }
+                } catch (e) {}
+            }
+        }
+    } else if (entityType === 'Sample') {
+        // Sample fields: labId, assignedLab, country, workItems: { some: { assignedTo } }
+        if (labScope) {
+            orClauses.push({ [labField]: labScope });
+            if (altLabField) orClauses.push({ [altLabField]: labScope });
+        }
+        if (user.username) {
+            orClauses.push({ workItems: { some: { assignedTo: user.username } } });
+        }
+        if (user.countries) {
+            try {
+                const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
+                if (Array.isArray(countries) && countries.length > 0) {
+                    orClauses.push({ country: { in: countries } });
+                }
+            } catch (e) {}
+        }
     } else {
-        labFilter = { [labField]: labScope };
+        // Generic (Equipment, Project, Spectral, etc.)
+        if (labScope) {
+            orClauses.push({ [labField]: labScope });
+            if (altLabField) orClauses.push({ [altLabField]: labScope });
+        }
     }
 
-    // Merge with existing where
-    // If existingWhere already has an AND, append to it.
-    // Otherwise, create a new AND array.
+    const labFilter = orClauses.length > 0 ? { OR: orClauses } : {};
+
     if (existingWhere.AND) {
         return {
             ...existingWhere,
             AND: [...existingWhere.AND, labFilter]
         };
-    } else {
+    } else if (Object.keys(existingWhere).length > 0) {
         return {
             ...existingWhere,
-            ...labFilter
+            AND: [labFilter]
         };
+    } else {
+        return labFilter;
     }
 }
 
 /**
  * Validates that a fetched entity belongs to the user's lab scope.
  * Use this for POST-FETCH validation (e.g., after findUnique by ID).
- * 
- * @param {Object} user - The authenticated user object from req.user.
- * @param {Object} entity - The fetched entity (must have labId or assignedLab).
- * @param {Object} options - Options for validation.
- * @param {string} options.labField - The field name to check (default: 'labId').
- * @param {string} options.altLabField - An alternative lab field (e.g., 'assignedLab').
- * @returns {boolean} - True if user has access to this entity.
- * 
- * @example
- * const sample = await prisma.sample.findUnique({ where: { id } });
- * if (!scopeGuard.canAccessEntity(req.user, sample, { altLabField: 'assignedLab' })) {
- *     return res.status(403).json({ error: 'Access denied to this sample.' });
- * }
  */
 function canAccessEntity(user, entity, options = {}) {
     if (!entity) return false;
 
-    const labScope = getLabScope(user);
-
-    // Global access - can see everything
-    if (labScope === null) {
+    // 0. SUPER_ADMIN - global access
+    if (hasGlobalAccess(user)) {
         return true;
     }
 
-    const { labField = 'labId', altLabField = null } = options;
+    const labScope = user.labId || null;
+    const { labField = 'labId', altLabField = 'assignedLab' } = options;
 
-    // 1. Check primary field (Owner Lab)
-    if (entity[labField] === labScope) {
+    // 1. Direct assignedTo check on entity or workItems
+    if (entity.assignedTo && (entity.assignedTo === user.username || entity.assignedTo === user.id)) {
         return true;
     }
 
-    // 2. Check alternative field (e.g. assignedLab)
-    if (altLabField && entity[altLabField] === labScope) {
+    if (Array.isArray(entity.workItems) && entity.workItems.some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id)) {
         return true;
     }
 
-    // 3. Check Multi-Lab assignment field (assignedLabIds)
-    // This field usually stores a JSON array string like '["LAB1", "LAB2"]'
+    // 2. Primary and alternative lab match
+    if (labScope) {
+        if (entity[labField] === labScope) return true;
+        if (altLabField && entity[altLabField] === labScope) return true;
+        if (entity.labLocation === labScope) return true;
+    }
+
+    // 3. Multi-Lab assignment field (assignedLabIds)
     if (entity.assignedLabIds) {
         try {
             const assigned = typeof entity.assignedLabIds === 'string'
@@ -166,11 +195,21 @@ function canAccessEntity(user, entity, options = {}) {
                 return true;
             }
         } catch (e) {
-            // If it contains the lab ID as a substring (safety fallback for partial matches)
             if (typeof entity.assignedLabIds === 'string' && entity.assignedLabIds.includes(`"${labScope}"`)) {
                 return true;
             }
         }
+    }
+
+    // 4. Country matching (if user has country scope e.g. ["GTM"] and entity is from GTM)
+    if (user.countries) {
+        try {
+            const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
+            if (Array.isArray(countries)) {
+                if (entity.country && countries.includes(entity.country)) return true;
+                if (entity.countryName && countries.includes(entity.countryName)) return true;
+            }
+        } catch (e) {}
     }
 
     return false;

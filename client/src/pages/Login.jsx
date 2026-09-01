@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ArrowRight, ExternalLink } from 'lucide-react';
 import clsx from 'clsx';
 
 const Login = () => {
@@ -12,12 +12,20 @@ const Login = () => {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [bgVideo, setBgVideo] = useState('');
+    const bgImages = [
+        '/assets/img/bg1.jpg',
+        '/assets/img/bg2.jpg',
+        '/assets/img/bg3.jpg',
+        '/assets/img/bg4.jpg'
+    ];
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
-        const videos = ['/assets/img/bg1.mp4', '/assets/img/bg2.mp4'];
-        setBgVideo(videos[Math.floor(Math.random() * videos.length)]);
-    }, []);
+        const timer = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % bgImages.length);
+        }, 8000);
+        return () => clearInterval(timer);
+    }, [bgImages.length]);
 
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -48,32 +56,44 @@ const Login = () => {
     return (
         <div className="min-h-screen w-full flex bg-stone-50 dark:bg-gray-900 overflow-hidden font-sans">
             {/* Left Side - Visual / Branding */}
-            <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-emerald-800 via-green-900 to-amber-950 relative items-center justify-center p-12 overflow-hidden">
-                {bgVideo && (
-                    <video
-                        key={bgVideo}
-                        src={bgVideo}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
-                    />
-                )}
-                {!bgVideo && (
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=3420&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-emerald-900 via-emerald-950 to-green-950 relative items-center justify-center p-12 overflow-hidden">
+                {/* Smooth Multi-Layer Crossfading Backgrounds */}
+                {bgImages.map((src, index) => {
+                    const isActive = currentImageIndex === index;
+                    return (
+                        <div
+                            key={src}
+                            className={clsx(
+                                "absolute inset-0 bg-cover bg-center transition-all ease-in-out mix-blend-overlay",
+                                isActive ? "opacity-45" : "opacity-0 pointer-events-none"
+                            )}
+                            style={{
+                                backgroundImage: `url(${src})`,
+                                transitionProperty: "opacity, transform",
+                                transitionDuration: "2500ms, 16000ms",
+                                transform: isActive ? "scale(1.08)" : "scale(1.0)",
+                                willChange: "transform, opacity"
+                            }}
+                        />
+                    );
+                })}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
 
                 <div className="relative z-10 text-white max-w-lg text-left">
-                    <h1 className="text-6xl font-extrabold mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-amber-200">
-                        SoilFER LIMS
-                    </h1>
+                    <div className="flex items-center gap-5 mb-6">
+                        <img
+                            src="/assets/img/soilfer-logo.png"
+                            alt="SoilFER"
+                            className="h-20 w-auto object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]"
+                        />
+                        <h1 className="text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-amber-200">
+                            LIMS
+                        </h1>
+                    </div>
                     <p className="text-xl text-emerald-50/90 leading-relaxed font-light mb-8">
                         Advanced Laboratory Information Management System for Soil Analysis and Fertility Tracking.
                         Dedicated to global sustainable agriculture.
                     </p>
-
                 </div>
 
                 {/* Decorative Elements */}
@@ -81,29 +101,63 @@ const Login = () => {
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl"></div>
 
                 {/* Donor Acknowledgement */}
-                <div className="absolute bottom-8 left-12 right-12 z-20">
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 shadow-2xl p-5">
-                        <p className="text-[10px] font-semibold text-emerald-100/70 uppercase tracking-[0.2em] mb-3">
+                <div className="absolute bottom-8 left-8 right-8 z-20">
+                    <div className="bg-black/35 backdrop-blur-xl rounded-2xl border border-white/15 shadow-2xl p-4 transition-all">
+                        <p className="text-[10px] font-bold text-emerald-200/70 uppercase tracking-[0.2em] mb-2.5 ml-1">
                             With the financial support of
                         </p>
-                        <div className="flex items-center gap-4">
-                            <div className="bg-white rounded-full p-2 shadow-md flex-shrink-0">
-                                <img
-                                    src="/assets/img/mofa_japan.svg"
-                                    alt="Ministry of Foreign Affairs of Japan"
-                                    className="h-8 w-8 object-contain"
-                                />
-                            </div>
-                            <span className="text-white/80 text-xs font-medium leading-tight">Ministry of Foreign Affairs<br />of Japan</span>
-                            <div className="w-px h-10 bg-white/20 mx-1"></div>
-                            <div className="bg-white rounded-full p-2 shadow-md flex-shrink-0">
-                                <img
-                                    src="/assets/img/us_dept_state.svg"
-                                    alt="United States Department of State"
-                                    className="h-8 w-8 object-contain"
-                                />
-                            </div>
-                            <span className="text-white/80 text-xs font-medium leading-tight">United States<br />Department of State</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {/* 1. US Department of State Link (FIRST) */}
+                            <a
+                                href="https://www.state.gov/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 backdrop-blur-md transition-all duration-200 group"
+                                title="United States Department of State"
+                            >
+                                <div className="w-14 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden bg-white/95 border border-white/40 p-1">
+                                    <img
+                                        src="/assets/img/us_dept_state_official.svg"
+                                        alt="United States Department of State"
+                                        className="h-full w-full object-contain"
+                                    />
+                                </div>
+                                <div className="flex flex-col text-left min-w-0">
+                                    <span className="text-white text-xs sm:text-sm font-bold leading-snug group-hover:text-amber-200 transition-colors truncate">
+                                        United States
+                                    </span>
+                                    <span className="text-emerald-100/75 text-[11px] leading-tight truncate">
+                                        Department of State
+                                    </span>
+                                </div>
+                                <ExternalLink size={14} className="text-white/40 group-hover:text-white ml-auto flex-shrink-0 transition-colors" />
+                            </a>
+
+                            {/* 2. Japan MOFA / ODA Link (SECOND) */}
+                            <a
+                                href="https://www.mofa.go.jp/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 backdrop-blur-md transition-all duration-200 group"
+                                title="Ministry of Foreign Affairs of Japan — From the People of Japan"
+                            >
+                                <div className="w-14 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden bg-white border border-black/15 p-0.5">
+                                    <img
+                                        src="/assets/img/japan_oda_official.jpg"
+                                        alt="From the People of Japan"
+                                        className="h-full w-full object-contain"
+                                    />
+                                </div>
+                                <div className="flex flex-col text-left min-w-0">
+                                    <span className="text-white text-xs sm:text-sm font-bold leading-snug group-hover:text-amber-200 transition-colors truncate">
+                                        From the People of Japan
+                                    </span>
+                                    <span className="text-emerald-100/75 text-[11px] leading-tight truncate">
+                                        Ministry of Foreign Affairs
+                                    </span>
+                                </div>
+                                <ExternalLink size={14} className="text-white/40 group-hover:text-white ml-auto flex-shrink-0 transition-colors" />
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -138,7 +192,8 @@ const Login = () => {
                 <div className="max-w-[440px] w-full">
                     {/* Mobile Branding View */}
                     <div className="lg:hidden flex flex-col items-center mb-10">
-                        <h1 className="text-3xl font-bold text-emerald-800 dark:text-emerald-400">SoilFER LIMS</h1>
+                        <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-12 w-auto object-contain" />
+                        <h1 className="text-2xl font-bold text-emerald-800 dark:text-emerald-400 -mt-1">LIMS</h1>
                         <div className="w-12 h-1 bg-amber-500 rounded-full mt-2"></div>
                     </div>
 
@@ -240,8 +295,9 @@ const Login = () => {
                     </form>
 
                     <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-                        <p className="text-gray-400 dark:text-gray-500 text-[11px] font-medium tracking-wide">
-                            <span className="text-gray-500 dark:text-gray-400 font-bold">SoilFER LIMS</span>
+                        <p className="text-gray-400 dark:text-gray-500 text-[11px] font-medium tracking-wide inline-flex items-center gap-1.5 justify-center">
+                            <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-4 w-auto object-contain inline-block" />
+                            <span className="text-gray-500 dark:text-gray-400 font-bold">LIMS</span>
                             {' · '}v{__APP_VERSION__}{' · '}build {__BUILD_DATE__}
                         </p>
                         <div className="mt-3">

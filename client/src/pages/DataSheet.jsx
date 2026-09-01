@@ -3,10 +3,12 @@ import axios from 'axios';
 import { Save, Filter, Search, CheckCircle, AlertCircle, FlaskConical, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const DataSheet = () => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
+    const { t } = useLanguage();
     const [workItems, setWorkItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterAnalysis, setFilterAnalysis] = useState('');

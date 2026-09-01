@@ -1,48 +1,68 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import AnalysisManager from './admin/AnalysisManager';
 import GroupManager from './admin/GroupManager';
-import MethodologyManager from './admin/MethodologyManager';
 import CategoryManager from './admin/CategoryManager';
-import { LayoutList, Layers, Settings2, Tag } from 'lucide-react';
+import GlosisExplorer from './admin/GlosisExplorer';
+import { LayoutList, Layers, Tag, Globe, BookOpen } from 'lucide-react';
 
 const AnalysisConfig = () => {
-    const [view, setView] = useState('analyses'); // categories, analyses, methods, groups
+    const { t } = useLanguage();
+    const [view, setView] = useState('analyses'); // analyses, groups, categories, glosis
 
     return (
-        <div className="flex h-full gap-6">
+        <div className="flex flex-col lg:flex-row h-full gap-4 w-full min-w-0">
             {/* Sub-Sidebar */}
-            <div className="w-56 bg-gray-50 border-r p-4 space-y-2 h-full">
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">Configuration</div>
+            <div className="w-full lg:w-52 bg-gray-50 dark:bg-gray-800/80 border lg:border-r border-gray-200 dark:border-gray-700 p-2.5 space-y-1.5 flex-shrink-0 rounded-xl">
+                <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2.5">
+                    {t('nav.settings', 'Laboratory Setup')}
+                </div>
 
-                <button onClick={() => setView('analyses')} className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-colors ${view === 'analyses' ? 'bg-white shadow-sm text-blue-700 font-bold border' : 'text-gray-600 hover:bg-gray-200/50'}`}>
-                    <LayoutList size={18} />
-                    <span>Analyses</span>
+                {/* 1. Analyses & Methods */}
+                <button
+                    onClick={() => setView('analyses')}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'analyses' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
+                >
+                    <LayoutList size={16} />
+                    <span>{t('analytics.testMethods', 'Analyses & Methods')}</span>
                 </button>
 
-                <button onClick={() => setView('groups')} className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-colors ${view === 'groups' ? 'bg-white shadow-sm text-blue-700 font-bold border' : 'text-gray-600 hover:bg-gray-200/50'}`}>
-                    <Layers size={18} />
-                    <span>Analysis Groups</span>
+                {/* 2. Analysis Packages / Suites */}
+                <button
+                    onClick={() => setView('groups')}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'groups' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
+                >
+                    <Layers size={16} />
+                    <span>Analysis Packages</span>
                 </button>
 
-                <button onClick={() => setView('methods')} className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-colors ${view === 'methods' ? 'bg-white shadow-sm text-blue-700 font-bold border' : 'text-gray-600 hover:bg-gray-200/50'}`}>
-                    <Settings2 size={18} />
-                    <span>Methodologies</span>
+                {/* 3. Categories */}
+                <button
+                    onClick={() => setView('categories')}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'categories' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
+                >
+                    <Tag size={16} />
+                    <span>Property Categories</span>
                 </button>
 
-                <div className="pt-4 border-t mt-4">
-                    <button onClick={() => setView('categories')} className={`w-full text-left px-3 py-2 rounded flex items-center gap-3 ${view === 'categories' ? 'text-blue-700 font-bold' : 'text-gray-500 hover:text-gray-700'}`}>
-                        <Tag size={16} />
-                        <span className="text-sm">Categories</span>
+                {/* 4. GloSIS Procedures Library */}
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
+                    <button
+                        onClick={() => setView('glosis')}
+                        className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'glosis' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-700' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
+                    >
+                        <Globe size={16} className="text-emerald-600 dark:text-emerald-400" />
+                        <span>GloSIS Procedures</span>
                     </button>
                 </div>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto pr-6 pb-6 pt-2">
+            <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden pb-4 pt-1">
                 {view === 'analyses' && <AnalysisManager />}
                 {view === 'groups' && <GroupManager />}
-                {view === 'methods' && <MethodologyManager />}
                 {view === 'categories' && <CategoryManager />}
+                {view === 'glosis' && <GlosisExplorer />}
             </div>
         </div>
     );

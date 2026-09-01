@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, AlertTriangle, XCircle, ArrowRight, Refr
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * @param {object} props
@@ -13,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
  */
 const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, currentSampleId }) => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
     const [step, setStep] = useState(1); // 1: Select, 2: Preview, 3: Result
     const [file, setFile] = useState(null);

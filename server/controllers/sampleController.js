@@ -57,7 +57,7 @@ exports.searchExpectedSamples = async (req, res) => {
 
         // 2. Lab Scope
         console.log(`[DEBUG] Building scope for user: ${user?.username}`);
-        const scopedWhere = scopeGuard.buildScopedWhere(user, {}, { labField: 'assignedLab', altLabField: 'labId' });
+        const scopedWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' });
         if (scopedWhere.OR) {
             andConditions.push({ OR: scopedWhere.OR });
         } else if (Object.keys(scopedWhere).length > 0) {
@@ -155,6 +155,7 @@ exports.getSamples = async (req, res) => {
 
         // Base lab-scoped query
         let where = scopeGuard.buildScopedWhere(user, {}, {
+            entityType: 'Sample',
             labField: 'labId',
             altLabField: 'assignedLab'
         });
@@ -944,12 +945,26 @@ exports.getSampleDetail = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const sample = await prisma.sample.findUnique({
+        let sample = await prisma.sample.findUnique({
             where: { id: String(id) },
             include: {
                 workItems: true
             }
         });
+
+        if (!sample) {
+            sample = await prisma.sample.findFirst({
+                where: {
+                    OR: [
+                        { labId: String(id) },
+                        { originalId: String(id) }
+                    ]
+                },
+                include: {
+                    workItems: true
+                }
+            });
+        }
 
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
