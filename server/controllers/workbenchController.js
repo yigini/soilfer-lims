@@ -2,6 +2,7 @@ const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const validationController = require('./validationController');
+const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -647,6 +648,51 @@ exports.batchSave = async (req, res) => {
                     return item?.sampleId;
                 }).filter(Boolean)
             )];
+
+            // Auto-derive USDA Texture Class if all 3 fractions (SAND, SILT, CLAY) are present
+            if (!draft && affectedSampleIds.length > 0) {
+                for (const sampleId of affectedSampleIds) {
+                    try {
+                        const curResults = await prisma.result.findMany({
+                            where: { sampleId, isCurrent: true, param: { in: ['SAND', 'SILT', 'CLAY'] } }
+                        });
+                        const sandR = curResults.find(r => r.param === 'SAND');
+                        const siltR = curResults.find(r => r.param === 'SILT');
+                        const clayR = curResults.find(r => r.param === 'CLAY');
+                        if (sandR && siltR && clayR) {
+                            const tex = calculateUsdaTexture(sandR.numericValue ?? sandR.value, siltR.numericValue ?? siltR.value, clayR.numericValue ?? clayR.value);
+                            if (tex.isValid) {
+                                const texResultId = `res-tex-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+                                await prisma.result.updateMany({
+                                    where: { sampleId, param: 'TEXTURE', isCurrent: true },
+                                    data: { isCurrent: false, supersededBy: texResultId }
+                                });
+                                await prisma.result.create({
+                                    data: {
+                                        id: texResultId,
+                                        sampleId,
+                                        param: 'TEXTURE',
+                                        value: tex.className,
+                                        numericValue: null,
+                                        unit: '',
+                                        isValid: true,
+                                        censoring: 'NONE',
+                                        basis: 'AIR_DRY',
+                                        replicateNo: 1,
+                                        isCurrent: true,
+                                        enteredBy: 'SYSTEM_CALC',
+                                        analysedAt: now,
+                                        createdAt: now,
+                                        updatedAt: now
+                                    }
+                                });
+                            }
+                        }
+                    } catch (texErr) {
+                        console.error('[TEXTURE_CALC_ERR]', texErr.message);
+                    }
+                }
+            }
 
             if (affectedSampleIds.length > 0) {
                 try {

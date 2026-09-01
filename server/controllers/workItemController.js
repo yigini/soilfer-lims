@@ -70,9 +70,29 @@ exports.generateWorkItemsForSample = async (sample) => {
         });
     }
 
-    // 2. Create ANALYTICAL Work Items
+    // 2. Create ANALYTICAL Work Items (with compound parameter expansion)
+    const COMPOUND_ANALYSIS_EXPANSION = {
+        'pSA': ['SAND', 'CLAY', 'SILT'],
+        'PSA': ['SAND', 'CLAY', 'SILT'],
+        'TEXTURE': ['SAND', 'CLAY', 'SILT'],
+        'Particle Size Analysis': ['SAND', 'CLAY', 'SILT'],
+        'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
+    };
+
     if (requiredAnalyses && Array.isArray(requiredAnalyses)) {
-        for (const analysisCode of requiredAnalyses) {
+        // Flatten any compound analyses into discrete physical/chemical determinations
+        const expandedAnalyses = [];
+        for (const code of requiredAnalyses) {
+            if (COMPOUND_ANALYSIS_EXPANSION[code]) {
+                expandedAnalyses.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
+            } else {
+                expandedAnalyses.push(code);
+            }
+        }
+
+        const uniqueAnalyses = [...new Set(expandedAnalyses)];
+
+        for (const analysisCode of uniqueAnalyses) {
             const existing = await prisma.workItem.findFirst({
                 where: { sampleId: String(id), analysis: analysisCode }
             });
