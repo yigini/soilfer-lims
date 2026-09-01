@@ -118,13 +118,13 @@ function formatSampleForSis(sample, analysisMap = {}) {
                 unit: r.unit || aMeta.units || null,
                 isValid: r.isValid !== false,
                 method: r.method || aMeta.methodLabel || null,
-                glosis: {
-                    attribute: aMeta.glosisAttribute || r.param,
+                glosis: (aMeta.glosisAttribute || aMeta.glosisUri) ? {
+                    attribute: aMeta.glosisAttribute || null,
                     methodLabel: aMeta.methodLabel || null,
                     definition: aMeta.methodDefinition || null,
                     citation: aMeta.methodCitation || null,
-                    uri: aMeta.glosisUri || `http://glosis.org/ont/glosis#${aMeta.glosisAttribute || r.param}`
-                },
+                    uri: aMeta.glosisUri || null
+                } : null,
                 updatedAt: r.updatedAt
             };
         });

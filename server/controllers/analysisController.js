@@ -156,8 +156,8 @@ exports.createAnalysis = async (req, res) => {
                 methodLabel: methodLabel || null,
                 methodDefinition: methodDefinition || null,
                 methodCitation: methodCitation || null,
-                glosisAttribute: glosisAttribute || code,
-                glosisUri: glosisUri || `http://glosis.org/ont/glosis#${glosisAttribute || code}`,
+                glosisAttribute: glosisAttribute || null,
+                glosisUri: glosisUri || null,
                 labId: user.role !== 'SUPER_ADMIN' ? user.labId : null
             }
         });

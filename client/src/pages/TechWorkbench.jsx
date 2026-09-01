@@ -18,7 +18,7 @@ const AUTOSAVE_INTERVAL = 1500; // ms — debounce before server save
 const POLL_INTERVAL = 20000; // 20s
 const DRAFT_KEY = (username, analysis) => `workbench-drafts-${username}-${analysis}`;
 const TEXTURE_ANALYSES = ['SAND', 'CLAY', 'SILT'];
-const TEXTURE_TOLERANCE = 0.5; // ±0.5% tolerance for sum-to-100 check
+const TEXTURE_TOLERANCE = 2.0; // ±2.0% realistic method tolerance for hydrometer/pipette closure
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOAST COMPONENT
@@ -885,12 +885,26 @@ const TechWorkbench = () => {
     // ─── Complete Items (Batch) ───
     const handleBatchComplete = async (onlySelected = false) => {
         if (!activeGroup) return;
-        setSaving(true);
 
         const itemsToComplete = onlySelected
             ? filteredItems.filter(i => selectedItems.has(i.workItemId))
             : filteredItems;
 
+        // Texture closure pre-check: All 3 components must sum to 100% ± tolerance
+        if (activeGroup.isTexture) {
+            for (const item of itemsToComplete) {
+                const texSum = getTextureSum(item);
+                if (texSum.count === 3 && !texSum.valid) {
+                    setToast({
+                        message: `Closure failed: Sample ${item.labId || item.sampleId} Sand + Silt + Clay (${texSum.sum.toFixed(1)}%) must equal 100% ± ${TEXTURE_TOLERANCE}%`,
+                        type: 'error'
+                    });
+                    return;
+                }
+            }
+        }
+
+        setSaving(true);
         const entries = buildEntries(itemsToComplete, false);
 
         if (entries.length === 0) {

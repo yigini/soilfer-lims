@@ -61,13 +61,50 @@ const THRESHOLDS = {
     ],
 };
 
-function getInterpretation(param, value) {
-    const num = parseFloat(value);
+function getInterpretation(param, value, unit) {
+    if (value === null || value === undefined || value === '') return null;
+    const cleanStr = String(value).trim().replace(',', '.');
+    const num = parseFloat(cleanStr);
     if (isNaN(num)) return null;
-    const ranges = THRESHOLDS[param];
+
+    let normalizedValue = num;
+    const cleanUnit = (unit || '').toLowerCase().trim();
+    const upperParam = (param || '').toUpperCase();
+
+    // Unit Normalization against base thresholds:
+    // Organic Carbon thresholds are in % (g/100g). If unit is g/kg -> divide by 10.
+    if (upperParam === 'OC' || upperParam === 'SOC' || upperParam === 'ORGANIC_CARBON') {
+        if (cleanUnit === 'g/kg' || cleanUnit === 'g kg-1' || cleanUnit === 'g/1000g') {
+            normalizedValue = num / 10;
+        } else if (cleanUnit === 'mg/kg' || cleanUnit === 'ppm') {
+            normalizedValue = num / 10000;
+        } else if (cleanUnit === '%' || cleanUnit === 'g/100g' || cleanUnit === 'g/hg' || cleanUnit === '') {
+            normalizedValue = num;
+        } else {
+            return null; // Refuse to interpret unrecognized unit
+        }
+    } else if (upperParam === 'TOTAL_N' || upperParam === 'TN' || upperParam === 'N_TOT') {
+        if (cleanUnit === 'g/kg' || cleanUnit === 'g kg-1') {
+            normalizedValue = num / 10;
+        } else if (cleanUnit === 'mg/kg' || cleanUnit === 'ppm') {
+            normalizedValue = num / 10000;
+        } else if (cleanUnit === '%' || cleanUnit === 'g/100g' || cleanUnit === '') {
+            normalizedValue = num;
+        } else {
+            return null;
+        }
+    } else if (upperParam === 'EXCH_K' || upperParam === 'K_EXCH') {
+        if (cleanUnit === 'mg/kg' || cleanUnit === 'ppm') {
+            normalizedValue = num / 391.0;
+        } else if (cleanUnit === 'cmol/kg' || cleanUnit === 'cmol(+)/kg' || cleanUnit === 'meq/100g' || cleanUnit === 'cmol_c/kg' || cleanUnit === '') {
+            normalizedValue = num;
+        }
+    }
+
+    const ranges = THRESHOLDS[upperParam] || (upperParam === 'SOC' ? THRESHOLDS.OC : upperParam === 'TN' ? THRESHOLDS.TOTAL_N : null);
     if (!ranges) return null;
     for (const r of ranges) {
-        if (num <= r.max) return r;
+        if (normalizedValue <= r.max) return r;
     }
     return null;
 }
@@ -88,9 +125,13 @@ const ReportContent = ({ data }) => {
 
     const { sample, client, project, lab, labBranding, resultGroups, locationData, fieldMetadata, receptionData, signedBy, methodologies, generated, reportNumber } = data;
 
-    // Build interpretations for all results
+    // Build interpretations for all results (unit-aware)
     const allInterpreted = (resultGroups || []).flatMap(g =>
-        g.items.map(item => ({ ...item, categoryName: g.categoryName, interp: getInterpretation(item.param, item.value) }))
+        g.items.map(item => ({
+            ...item,
+            categoryName: g.categoryName,
+            interp: getInterpretation(item.param, item.value, item.unit)
+        }))
     );
     const recommendations = allInterpreted.filter(i => i.interp && (i.interp.level === 'critical' || i.interp.level === 'low'));
 
@@ -251,7 +292,7 @@ const ReportContent = ({ data }) => {
                                 </thead>
                                 <tbody>
                                     {group.items.map((item, i) => {
-                                        const interp = getInterpretation(item.param, item.value);
+                                        const interp = getInterpretation(item.param, item.value, item.unit);
                                         const indicator = interp ? LEVEL_INDICATOR[interp.level] : null;
                                         const isCritical = interp?.level === 'critical';
                                         const isLow = interp?.level === 'low' || interp?.level === 'high';
@@ -343,7 +384,7 @@ const ReportContent = ({ data }) => {
             <footer className="report-footer-section">
                 <div className="report-methodology-note">
                     <strong>General Note:</strong> All analyses were performed according to standard laboratory protocols.
-                    Results are reported on an oven-dry weight basis unless otherwise indicated.
+                    Results are reported on an air-dry fine-earth (&lt;2 mm) basis unless otherwise indicated.
                 </div>
 
                 {/* Approval Trail */}
