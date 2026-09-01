@@ -1,109 +1,109 @@
-# 🔧 SoilFER-LIMS — Administration Guide
+# 🔧 SoilFER-LIMS — Comprehensive Administration Guide
 
-Post-installation guide for configuring and managing your LIMS deployment.
-
----
-
-## First Login
-
-1. Open your LIMS URL (default: `http://localhost:3000`)
-2. Log in with `admin` / `password`
-3. You'll be prompted to change your password immediately
-4. Set a strong password (minimum 8 characters)
+A complete guide for System Administrators and Laboratory Managers configuring, operating, and maintaining SoilFER-LIMS.
 
 ---
 
-## Roles & Permissions
+## 1. First Login & Initial Setup
 
-| Role | Capabilities |
-|------|-------------|
-| **SUPER_ADMIN** | Full system access, create labs, manage all users (Global mode only) |
-| **LAB_MANAGER** | Manage lab users, assign work, review/approve results, configure analyses |
-| **LAB_TECHNICIAN** | Perform assigned analyses, enter results, submit for review |
-| **SAMPLE_RECEPTION** | Receive samples, assign lab IDs, manage intake queue |
-| **PROJECT_MANAGER** | View project data, export reports, read-only access |
+1. Open your LIMS URL (e.g., `https://lims.your-domain.org` or `http://localhost`).
+2. Log in with initial credentials:
+   * **Username:** `admin`
+   * **Password:** `password`
+3. You will be prompted to set a new, strong password (minimum 8 characters with alphanumeric requirements).
 
 ---
 
-## Local Mode — Getting Started
+## 2. Roles & Permissions Matrix (RBAC)
 
-1. **Update Lab Details**: Settings → Laboratory → Edit name, address, code
-2. **Create Users**: Settings → Users → Create technicians and reception staff
-3. **Configure Analyses**: Settings → Analyses → Enable the soil tests your lab performs
-4. **Set Up Projects**: Projects → Create a project for your first batch of samples
-5. **Start Receiving Samples**: Reception → Begin sample intake
+SoilFER-LIMS uses strict, type-safe Role-Based Access Control and multi-tenancy lab isolation:
 
----
-
-## Global Mode — Getting Started
-
-1. **Create Laboratories**: Admin → Laboratories → Create each physical lab
-2. **Create Lab Managers**: Admin → Users → Create a LAB_MANAGER for each lab
-3. **Lab Managers Set Up Their Lab**: Each manager logs in and configures:
-   - Technician accounts
-   - Available analyses
-   - Projects
-4. **Lab Isolation**: Data is automatically scoped — lab staff only see their lab's data
+| Role | Scope | Key Responsibilities |
+| :--- | :--- | :--- |
+| **`SUPER_ADMIN`** | Global (All Labs) | Manage all physical laboratories, create lab managers, generate SIS API keys, manage global GloSIS catalogs, system backups. |
+| **`LAB_MANAGER`** | Single Laboratory (e.g. `GTM-LAB1`) | Assign work items to technicians, review and approve test results, configure laboratory test packages, manage lab equipment and reagents. |
+| **`LAB_TECHNICIAN`** | Personal Work Queue | Access personal bench queue ("My Work"), enter test measurements on the Workbench, save autosaving drafts, log instrument usage. |
+| **`SAMPLE_RECEPTION`** | Lab Reception Desk | Perform physical sample intake, check compliance/condition, assign generated Lab IDs (e.g. `S001`), print barcode/QR labels. |
+| **`PROJECT_MANAGER`** | Project-specific Scope | View sample progress, inspect 3D field coordinates, export project data reports. |
 
 ---
 
-## KoboToolbox Integration
+## 3. FAO GloSIS & Analytical Methods Configuration
 
-To sync field collection data:
+SoilFER-LIMS natively implements the **FAO Global Soil Information System (GloSIS)** code and procedure ontology:
 
-1. Go to **Settings → KoboToolbox**
-2. Enter your KoboToolbox API URL and token
-3. Select the form to sync with a project
-4. Set the sync interval (or sync manually)
-5. Field samples will appear in Reception automatically
+Navigate to **Admin Panel → Lab Configuration** (`/admin?tab=lab-config`):
+
+### A. Analyses & Methods Tab
+* **Soil Property (Code):** The canonical soil property code (e.g. `pH`, `carbonOrganic`, `nitrogenTotal`, `pSA`, `exchangeableBases`).
+* **Analytical Method (Label):** The exact laboratory procedure from `glosis_procedure.csv` (e.g. `pHH2O_ratio1-2.5`, `OrgC_wc-cro3-walkleyblack`, `pipette-dispersion`).
+* **Validation Bounds:** Set realistic minimum and maximum physical thresholds to trigger real-time bench warnings.
+
+### B. Analysis Packages (Suites)
+Group individual tests into standard packages for 1-click reception:
+* **Basic Soil Fertility Package:** `pH`, `carbonOrganic`, `nitrogenTotal`, `extractableElements`, `exchangeableBases`, `electricalConductivity`.
+* **Physical & Texture Properties:** `pSA` (`SAND`, `SILT`, `CLAY`), `bulkDensityWholeSoil`, `soilWaterContent`.
+* **Exchangeable Cations & CEC:** `CA_EXCH`, `MG_EXCH`, `K_EXCH`, `NA_EXCH`, `cationExchangeCapacitySoil`.
+
+### C. GloSIS Procedure Explorer
+* Live search and explore all **275 official FAO analytical procedures** with definitions, citations (ISO, USDA-NRCS, GLOSOLAN), and URI links.
 
 ---
 
-## Spectral Data
+## 4. Machine-to-Machine SIS API & External Data Exchange
 
-### Uploading Spectra
+To securely exchange soil analytical data with National Soil Information Systems (SIS) or FAO central repositories:
 
-1. Go to **Spectral Library → Upload**
-2. Select files (CSV or OPUS format for NIR/MIR)
-3. Match lab IDs to existing samples (or upload unlinked)
-4. Validation runs automatically (wavelength checks, QC flags)
+1. Navigate to **Admin Panel → API Keys** (`/admin?tab=api-keys`).
+2. Click **Generate New API Key**.
+3. Specify a Name (e.g., `National-SIS-Sync-Service`), select the Lab Scope, and set expiration.
+4. Use the API Key in the `X-API-Key` HTTP header:
 
-### Review Workflow
-
-```
-Upload → PENDING → Validation → VALIDATED → Manager Review → APPROVED / REJECTED
+```bash
+# Fetch sample results formatted in GloSIS Linked-Data structure:
+curl -H "X-API-Key: sis_live_abc123..." https://lims.your-domain.org/api/sis/samples/GTM0236-5-3C-T
 ```
 
-Spectra can be reviewed from:
-- **Spectral Library page** (batch review)
-- **Sample Details page** (per-sample review, also updates spectral status)
+---
+
+## 5. Field Intake & KoboToolbox Integration
+
+To connect field sampling teams with laboratory reception:
+
+1. Go to **Admin Panel → KoboToolbox Config**.
+2. Enter your KoboToolbox Server URL (e.g., `https://kf.soilfer-data.fao.org`) and API Access Token.
+3. Select the active survey form.
+4. Field records, GPS coordinates, depth layers (D1/D2), and land-feature photos will automatically populate in **Reception**.
 
 ---
 
-## Data Export
+## 6. Multi-Lingual Customization & Translation Editor
 
-Available from the **Data Results** page:
+SoilFER-LIMS supports English, Spanish, Latin American Spanish, French, and Portuguese:
 
-- **Excel (.xlsx)** — Full dataset with formatting
-- **CSV** — Raw data for analysis
-- **PDF** — Formatted reports
-
----
-
-## System Settings
-
-Go to **Settings → System** to configure:
-
-- **Branding**: App title, primary color, logo
-- **Default analyses**: Which tests are enabled for new samples
-- **Notifications**: Email/in-app notification preferences
+1. Navigate to **Admin Panel → Translations** (`/admin?tab=translations`).
+2. Select your target language.
+3. Edit any UI phrase or localized lab terminology in real time.
+4. Click **Save Translations** — changes take effect immediately across all connected users.
 
 ---
 
-## Security Best Practices
+## 7. Automated Backups & Maintenance
 
-1. **Change default passwords** immediately after setup
-2. **Use HTTPS** in production (see [INSTALL.md](INSTALL.md#4-reverse-proxy--ssl))
-3. **Set a strong JWT_SECRET** (64+ character random string)
-4. **Regular backups** (see [INSTALL.md](INSTALL.md#6-backup--restore))
-5. **Keep updated** — pull latest releases regularly
+### Schedule an Automated Daily Cron Backup
+```bash
+# Add to host crontab (crontab -e):
+0 2 * * * docker exec -w /app/server soilfer-lims node scripts/backup_db.js
+```
+
+Backups are timestamped and saved in `/opt/soilfer-lims/server/backups/`.
+
+---
+
+## 8. Security Checklist for Production
+
+1. ✅ **HTTPS / SSL:** Always terminate TLS using Let's Encrypt / Certbot with HTTP $\rightarrow$ HTTPS redirection.
+2. ✅ **JWT Secret:** Ensure `JWT_SECRET` in `.env` is a high-entropy string ($64+$ characters).
+3. ✅ **Default Passwords:** Ensure `admin`, `mgr_*`, and `tech_*` accounts have custom passwords.
+4. ✅ **Firewall:** Expose only port `80` and `443` externally. Protect SSH with key-based authentication.
+
