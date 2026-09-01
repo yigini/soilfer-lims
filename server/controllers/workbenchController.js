@@ -480,7 +480,7 @@ exports.batchSave = async (req, res) => {
                 data: updateData
             }));
 
-            // Create/update Result record
+            // Create/update Result record (Append-Only with Replicate & History)
             if (value !== undefined && value !== null && value !== '') {
                 const method = methodMap[item.analysis];
                 const flagsData = validation.flags || [];
@@ -488,28 +488,48 @@ exports.batchSave = async (req, res) => {
                     flagsData.push('MANAGER_OVERRIDE');
                 }
 
-                ops.push(prisma.result.upsert({
+                const strVal = String(value).trim();
+                const isCensored = validation.isCensored || /^[<>]/.test(strVal);
+                const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
+                const numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+
+                const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+                // Supersede prior active result for this sample & parameter
+                ops.push(prisma.result.updateMany({
                     where: {
-                        sampleId_param: {
-                            sampleId: item.sampleId,
-                            param: item.analysis
-                        }
-                    },
-                    update: {
-                        value: String(value),
-                        unit: method?.unit || null,
-                        updatedAt: now,
-                        flags: JSON.stringify(flagsData),
-                        isValid: validation.valid
-                    },
-                    create: {
-                        id: `res-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                         sampleId: item.sampleId,
                         param: item.analysis,
-                        value: String(value),
+                        isCurrent: true
+                    },
+                    data: {
+                        isCurrent: false,
+                        supersededBy: newResultId
+                    }
+                }));
+
+                // Append new defensible Result row
+                ops.push(prisma.result.create({
+                    data: {
+                        id: newResultId,
+                        sampleId: item.sampleId,
+                        param: item.analysis,
+                        value: strVal,
+                        numericValue: numericVal,
                         unit: method?.unit || null,
                         flags: JSON.stringify(flagsData),
-                        isValid: validation.valid
+                        isValid: validation.valid,
+                        censoring: censoringType,
+                        basis: 'AIR_DRY',
+                        methodologyId: method?.id || null,
+                        replicateNo: 1,
+                        isCurrent: true,
+                        enteredBy: user.username,
+                        analysedAt: now,
+                        equipmentId: entry.equipmentId || item.equipmentId || null,
+                        batchId: item.batchId || null,
+                        createdAt: now,
+                        updatedAt: now
                     }
                 }));
             }

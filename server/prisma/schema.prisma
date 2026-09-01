@@ -594,17 +594,30 @@ model KoboConfig {
 // --- ANALYSIS & RESULTS MODELS ---
 
 model Result {
-  id        String   @id
-  sampleId  String
-  sample    Sample   @relation(fields: [sampleId], references: [id])
-  param     String
-  value     String
-  unit      String?
-  flags     String?  // JSON string: validation flags
-  isValid   Boolean?
-  updatedAt DateTime @updatedAt
+  id            String    @id
+  sampleId      String
+  sample        Sample    @relation(fields: [sampleId], references: [id])
+  param         String
+  value         String
+  numericValue  Float?
+  unit          String?
+  flags         String?   // JSON string: validation flags
+  isValid       Boolean?
+  censoring     String?   @default("NONE") // NONE, BELOW_LOQ, ABOVE_RANGE
+  basis         String?   @default("AIR_DRY") // AIR_DRY, OVEN_DRY, FIELD_MOIST
+  methodologyId String?
+  replicateNo   Int       @default(1)
+  isCurrent     Boolean   @default(true)
+  supersededBy  String?
+  enteredBy     String?
+  analysedAt    DateTime?
+  equipmentId   String?
+  batchId       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  @@unique([sampleId, param])
+  @@index([sampleId, param, isCurrent])
+  @@index([batchId])
 }
 
 model AnalysisCategory {
@@ -623,6 +636,10 @@ model Analysis {
   units            String?
   status           String?           // active, inactive
   validation       String?           // JSON string: validation rules
+  decimalPlaces    Int?              @default(2)
+  lod              Float?
+  loq              Float?
+  uncertainty      Float?
   labId            String?
   glosisAttribute  String?           // GloSIS Property (attribute in codelist e.g. nitrogenTotal, carbonOrganic, ph)
   glosisUri        String?           // GloSIS Property URI
@@ -645,6 +662,10 @@ model Methodology {
   analysis         Analysis @relation(fields: [analysisCode], references: [code])
   name             String   // e.g. "pH in Water (1:2.5)"
   standard         String?  // e.g. "ISO 10390:2021"
+  decimalPlaces    Int?
+  lod              Float?
+  loq              Float?
+  uncertainty      Float?
   isDefault        Boolean  @default(false)
   labId            String?
   glosisProcedure  String?  // GloSIS Procedure ID (e.g. "pH_h2o-1-2.5", "P_extr-olsen")

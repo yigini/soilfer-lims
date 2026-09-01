@@ -118,6 +118,27 @@ const LEVEL_INDICATOR = {
     high: { symbol: '▲▲', color: '#d97706', label: 'High' },
 };
 
+function formatResultValue(val, decimals, param) {
+    if (val === null || val === undefined || val === '') return '—';
+    const strVal = String(val).trim();
+    if (/^[<>]/.test(strVal)) return strVal; // Preserves censored strings e.g. "<0.005"
+
+    const normalized = strVal.replace(',', '.');
+    const num = parseFloat(normalized);
+    if (isNaN(num)) return strVal;
+
+    let prec = decimals;
+    if (prec === undefined || prec === null) {
+        const p = (param || '').toUpperCase();
+        if (p.includes('PH')) prec = 1;
+        else if (['SAND', 'SILT', 'CLAY'].includes(p)) prec = 1;
+        else if (['ZN', 'CU', 'MN', 'FE', 'B', 'MO'].some(t => p.includes(t))) prec = 3;
+        else prec = 2;
+    }
+
+    return num.toFixed(prec);
+}
+
 // ─── Main Component ──────────────────────────────────────
 
 const ReportContent = ({ data }) => {
@@ -301,9 +322,7 @@ const ReportContent = ({ data }) => {
                                             <tr key={i} className={isCritical ? 'row-critical' : isLow ? 'row-attention' : ''}>
                                                 <td className="param-name">{item.name}</td>
                                                 <td className="param-value">
-                                                    {item.value != null
-                                                        ? (isNaN(Number(item.value)) ? item.value : Number(item.value).toFixed(2))
-                                                        : '—'}
+                                                    {formatResultValue(item.value, item.decimalPlaces, item.param)}
                                                 </td>
                                                 <td className="param-unit">{item.unit || ''}</td>
                                                 <td className="param-rating">
