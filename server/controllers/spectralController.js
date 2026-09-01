@@ -13,20 +13,11 @@ exports.getLibrary = async (req, res) => {
         const { modality, qcStatus, search } = req.query;
         const user = req.user;
 
-        // Use Scope Guard for Lab Isolation (Phase 1 Refactor)
-        const scopeGuard = require('../utils/scopeGuard');
-        let baseScope = scopeGuard.buildScopedWhere(user, {}, { labField: 'labId' });
+        const { status, modality, qcStatus, search } = req.query;
 
-        const { status } = req.query;
-
-        // Build the final where clause with proper AND combination
+        // Build the query conditions
         let where = {};
         let andConditions = [];
-
-        // Add scope guard filter if present
-        if (baseScope.labId) {
-            andConditions.push({ labId: baseScope.labId });
-        }
 
         // Status filter: exclude DELETED by default, include when explicitly requested
         if (status) {
@@ -37,7 +28,7 @@ exports.getLibrary = async (req, res) => {
 
         // Add modality filter
         if (modality) {
-            andConditions.push({ modality: modality });
+            andConditions.push({ modality: modality.toUpperCase() });
         }
 
         // Add QC status filter
@@ -47,18 +38,21 @@ exports.getLibrary = async (req, res) => {
 
         // Add search filter
         if (search) {
-            const searchConditions = [
-                { sampleId: search },       // Exact match on sampleId
-                { labId: search },          // Exact match on labId
-                { filename: { contains: search } }  // Partial match on filename
-            ];
-            andConditions.push({ OR: searchConditions });
+            andConditions.push({
+                OR: [
+                    { sampleId: search },
+                    { labId: search },
+                    { filename: { contains: search } }
+                ]
+            });
         }
 
-        // Combine all conditions with AND
         if (andConditions.length > 0) {
             where.AND = andConditions;
         }
+
+        // Apply Scope Guard for Lab Isolation
+        where = scopeGuard.buildScopedWhere(user, where, { entityType: 'Spectral', labField: 'labId' });
 
         console.log('[getLibrary] Query:', JSON.stringify(where, null, 2));
 

@@ -117,7 +117,7 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
             orClauses.push({ [labField]: labScope });
             if (altLabField) orClauses.push({ [altLabField]: labScope });
         }
-        if (user.username) {
+        if (user.role === 'LAB_TECHNICIAN' && user.username) {
             orClauses.push({ workItems: { some: { assignedTo: user.username } } });
         }
         if (user.countries) {
@@ -128,15 +128,21 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
                 }
             } catch (e) {}
         }
+    } else if (entityType === 'Spectral') {
+        // Spectral fields: labId
+        if (labScope) {
+            orClauses.push({ labId: labScope });
+        }
     } else {
-        // Generic (Equipment, Project, Spectral, etc.)
+        // Generic (Equipment, Project, Inventory, etc.)
         if (labScope) {
             orClauses.push({ [labField]: labScope });
-            if (altLabField) orClauses.push({ [altLabField]: labScope });
+            if (altLabField && altLabField !== labField) orClauses.push({ [altLabField]: labScope });
         }
     }
 
-    const labFilter = orClauses.length > 0 ? { OR: orClauses } : {};
+    // Fail-Closed: If user is not SUPER_ADMIN and no scope could be determined, DENY by default
+    const labFilter = orClauses.length > 0 ? { OR: orClauses } : { id: { in: [] } };
 
     if (existingWhere.AND) {
         return {

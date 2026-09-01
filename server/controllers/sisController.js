@@ -14,23 +14,46 @@ function buildSisWhere(sisAuth, query = {}) {
         where.status = { not: 'CANCELLED' };
     }
 
-    // 2. Country scoping
+    // 2. Country scoping - Intersect key permissions with query parameters
+    const keyCountries = sisAuth?.countries || [];
+    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
+
     if (query.country) {
-        where.country = query.country;
-    } else if (sisAuth && sisAuth.countries && sisAuth.countries.length > 0 && !sisAuth.countries.includes('*')) {
-        where.country = { in: sisAuth.countries };
+        if (hasGlobalCountry || keyCountries.includes(query.country)) {
+            where.country = query.country;
+        } else {
+            where.country = { in: [] }; // Deny: requested country outside authorized key scope
+        }
+    } else if (!hasGlobalCountry) {
+        where.country = { in: keyCountries };
     }
 
-    // 3. Project scoping
+    // 3. Project scoping - Intersect key permissions with query parameters
+    const keyProjects = sisAuth?.projects || [];
+    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
+
     if (query.project) {
-        where.projectCode = query.project;
-    } else if (sisAuth && sisAuth.projects && sisAuth.projects.length > 0 && !sisAuth.projects.includes('*')) {
-        where.projectCode = { in: sisAuth.projects };
+        if (hasGlobalProject || keyProjects.includes(query.project)) {
+            where.projectCode = query.project;
+        } else {
+            where.projectCode = { in: [] }; // Deny: requested project outside authorized key scope
+        }
+    } else if (!hasGlobalProject) {
+        where.projectCode = { in: keyProjects };
     }
 
     // 4. Lab scoping
+    const keyLabs = sisAuth?.labs || [];
+    const hasGlobalLab = keyLabs.length === 0 || keyLabs.includes('*');
+
     if (query.labId) {
-        where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+        if (hasGlobalLab || keyLabs.includes(query.labId)) {
+            where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+        } else {
+            where.OR = [{ labId: '__impossible__' }, { assignedLab: '__impossible__' }];
+        }
+    } else if (!hasGlobalLab) {
+        where.OR = [{ labId: { in: keyLabs } }, { assignedLab: { in: keyLabs } }];
     }
 
     // 5. Incremental sync timestamp filter
@@ -371,6 +394,29 @@ exports.getSpectra = async (req, res) => {
         const where = { status: 'APPROVED' };
         if (modality) where.modality = modality.toUpperCase();
 
+        // Scope spectra by key permissions
+        const keyLabs = req.sisAuth?.labs || [];
+        const hasGlobalLab = keyLabs.length === 0 || keyLabs.includes('*');
+        if (!hasGlobalLab) {
+            where.labId = { in: keyLabs };
+        }
+
+        const keyCountries = req.sisAuth?.countries || [];
+        const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
+        if (!hasGlobalCountry) {
+            const scopedSamples = await prisma.sample.findMany({
+                where: { country: { in: keyCountries } },
+                select: { id: true, labId: true, originalId: true }
+            });
+            const allowedIds = [];
+            scopedSamples.forEach(s => {
+                if (s.id) allowedIds.push(s.id);
+                if (s.labId) allowedIds.push(s.labId);
+                if (s.originalId) allowedIds.push(s.originalId);
+            });
+            where.sampleId = { in: allowedIds };
+        }
+
         const [total, records] = await Promise.all([
             prisma.spectralData.count({ where }),
             prisma.spectralData.findMany({
@@ -459,10 +505,11 @@ exports.syncDelta = async (req, res) => {
 // ─── 7. GET /api/v1/sis/stats (Global / Regional Metrics) ───
 exports.getStats = async (req, res) => {
     try {
+        const sampleWhere = buildSisWhere(req.sisAuth, {});
         const [totalSamples, completedSamples, totalResults, totalSpectra, labsCount] = await Promise.all([
-            prisma.sample.count(),
-            prisma.sample.count({ where: { status: 'COMPLETED' } }),
-            prisma.result.count(),
+            prisma.sample.count({ where: sampleWhere }),
+            prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED' } }),
+            prisma.result.count({ where: { sample: sampleWhere } }),
             prisma.spectralData.count(),
             prisma.lab.count()
         ]);

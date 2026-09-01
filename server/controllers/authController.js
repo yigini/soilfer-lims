@@ -35,6 +35,11 @@ exports.login = async (req, res) => {
             return error(res, 401, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
         }
 
+        // Check if account is active
+        if (user.isActive === false) {
+            return error(res, 401, 'AUTH.ACCOUNT_DEACTIVATED', 'This account has been deactivated. Please contact your administrator.');
+        }
+
         // Generate Token
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },

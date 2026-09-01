@@ -254,17 +254,10 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Build RBAC scoping for samples
-        const sampleWhere = {};
-        if (user.role !== 'SUPER_ADMIN') {
-            if (user.labId) sampleWhere.assignedLab = user.labId;
-            else if (user.countries?.length > 0) {
-                sampleWhere.OR = [
-                    { countryName: { in: user.countries } },
-                    { projectCode: { in: user.countries } }
-                ];
-            }
-        }
+        // Build RBAC scoping using central scopeGuard
+        const scopeGuard = require('./utils/scopeGuard');
+        const sampleWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample' });
+        const workWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'WorkItem' });
 
         // ── LAB_MANAGER / SUPER_ADMIN ──
         if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -276,9 +269,7 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
                 prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED', updatedAt: { gte: today } } }),
             ]);
 
-            // Work items
-            // Work items - STRICT Lab ID check
-            const workWhere = user.labId ? { labId: user.labId } : {};
+            // Work items - Scoped via Scope Guard
             const [unassignedTasks, allWork] = await Promise.all([
                 prisma.workItem.count({ where: { ...workWhere, status: 'PENDING', assignedTo: null } }),
                 prisma.workItem.findMany({ where: workWhere, orderBy: { createdAt: 'desc' }, take: 500 }),

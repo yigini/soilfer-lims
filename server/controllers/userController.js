@@ -2,31 +2,39 @@ const prisma = require('../prisma');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-// Roles that can manage users
-const MANAGER_ROLES = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'COUNTRY_ADMIN'];
+// Canonical Role List
+const ALL_ROLES = [
+    'SUPER_ADMIN',
+    'MASTER_USER',
+    'PROJECT_MANAGER',
+    'LAB_MANAGER',
+    'SAMPLE_RECEPTION',
+    'LAB_TECHNICIAN',
+    'SURVEYOR',
+    'VIEWER'
+];
+
+const ALLOWED_SUB_ROLES = ['LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'SURVEYOR'];
 
 const canManage = (actor, target) => {
+    if (!actor || !target) return false;
     if (actor.role === 'SUPER_ADMIN') return true;
 
     // Helper to parse countries
     const getCountries = (u) => typeof u.countries === 'string' ? JSON.parse(u.countries) : (u.countries || []);
 
-    // Country Admin: Can manage users in their country
-    if (actor.role === 'MASTER_USER' || actor.role === 'COUNTRY_ADMIN') {
-        const targetCountries = getCountries(target);
-        if (targetCountries.length === 0) return false; // Orphan user
-        const intersects = targetCountries.some(c => actor.countries.includes(c));
-        if (target.role === 'SUPER_ADMIN') return false;
-        return intersects;
-    }
-
-    // Lab Manager: Can manage users in their LAB
+    // Lab Manager: Can manage sub-roles in their OWN lab
     if (actor.role === 'LAB_MANAGER') {
-        if (!actor.labId) return false; // Manager must have a lab
-        if (target.labId !== actor.labId) return false; // Target must be in same lab
-        if (['SUPER_ADMIN', 'MASTER_USER', 'COUNTRY_ADMIN'].includes(target.role)) return false;
+        if (!actor.labId) return false;
+        if (target.labId !== actor.labId) return false;
+        if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(target.role) && target.id !== actor.id) {
+            return false;
+        }
         return true;
     }
+
+    // Self-profile edit is permitted (checked for allowed fields in updateUser)
+    if (actor.id === target.id) return true;
 
     return false;
 };
@@ -40,35 +48,43 @@ exports.getUsers = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     try {
-        const where = {};
+        const andConditions = [];
 
         // 1. Scoping (Security) - HARD ISOLATION
         if (actor.role !== 'SUPER_ADMIN') {
             if (actor.role === 'LAB_MANAGER') {
                 if (actor.labId) {
-                    where.labId = actor.labId; // Forced filter
+                    andConditions.push({ labId: actor.labId });
                 } else {
                     return res.status(403).json({ error: 'Manager lacks Lab ID' });
                 }
             } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
-                // Approximate country scoping in controllers if needed, 
-                // but for now we'll restrict to their projects/countries
+                if (actor.countries && actor.countries.length > 0) {
+                    const countryList = typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries;
+                    andConditions.push({ country: { in: countryList } });
+                }
             } else {
-                where.id = actor.id;
+                andConditions.push({ id: actor.id });
             }
         }
 
-        // 2. Filters
-        if (role) where.role = role;
-        if (labId) where.labId = labId;
-        if (search) {
-            where.OR = [
-                ...(where.OR || []),
-                { username: { contains: search } },
-                { name: { contains: search } },
-                { email: { contains: search } }
-            ];
+        // 2. Filters (Applied with AND, never overriding security constraints)
+        if (role) andConditions.push({ role });
+        if (labId && actor.role === 'SUPER_ADMIN') {
+            andConditions.push({ labId });
         }
+        if (search && search.trim()) {
+            const term = search.trim();
+            andConditions.push({
+                OR: [
+                    { username: { contains: term } },
+                    { name: { contains: term } },
+                    { email: { contains: term } }
+                ]
+            });
+        }
+
+        const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
         const [users, total] = await Promise.all([
             prisma.user.findMany({
@@ -108,16 +124,21 @@ exports.createUser = async (req, res) => {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    if (!ALL_ROLES.includes(role)) {
+        return res.status(400).json({ error: `Invalid role '${role}'. Must be one of: ${ALL_ROLES.join(', ')}` });
+    }
+
     try {
         const existing = await prisma.user.findUnique({ where: { username } });
         if (existing) return res.status(400).json({ error: 'Username already exists' });
 
         if (actor.role === 'LAB_MANAGER') {
             if (!actor.labId) return res.status(403).json({ error: 'Manager has no Lab assigned' });
-            if (labId && labId !== actor.labId) return res.status(403).json({ error: 'Cannot create user for another lab' });
-
-            const ALLOWED_SUB_ROLES = ['LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'SURVEYOR'];
-            if (!ALLOWED_SUB_ROLES.includes(role)) return res.status(403).json({ error: 'Invalid role' });
+            if (!ALLOWED_SUB_ROLES.includes(role)) {
+                return res.status(403).json({ error: `Lab Managers may only create: ${ALLOWED_SUB_ROLES.join(', ')}` });
+            }
+        } else if (actor.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'Only administrators can create users' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -127,8 +148,8 @@ exports.createUser = async (req, res) => {
                 username,
                 password: hashedPassword,
                 role,
-                name,
-                email,
+                name: name || username,
+                email: email || `${username}@soilfer.org`,
                 labId: actor.role === 'LAB_MANAGER' ? actor.labId : labId,
                 countries: JSON.stringify(actor.role === 'LAB_MANAGER' ? actor.countries : (countries || [])),
                 projects: JSON.stringify(actor.role === 'LAB_MANAGER' ? actor.projects : (projects || [])),
@@ -143,7 +164,7 @@ exports.createUser = async (req, res) => {
                 entity: 'USER',
                 entityId: newUser.id,
                 action: 'CREATE',
-                details: `Created user ${username} (${role})`,
+                details: `Created user ${username} (${role}) in lab ${newUser.labId}`,
                 performedBy: actor.username,
                 timestamp: new Date()
             }
@@ -169,19 +190,62 @@ exports.updateUser = async (req, res) => {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
 
-        if (updates.role && updates.role !== target.role && actor.role === 'LAB_MANAGER') {
-            const ALLOWED_SUB_ROLES = ['LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'SURVEYOR'];
-            if (!ALLOWED_SUB_ROLES.includes(updates.role)) return res.status(403).json({ error: 'Invalid role' });
+        const isSelf = actor.id === target.id;
+        const isSuperAdmin = actor.role === 'SUPER_ADMIN';
+
+        // Prevent self-privilege escalation
+        if (isSelf && !isSuperAdmin) {
+            if (updates.role && updates.role !== target.role) {
+                return res.status(403).json({ error: 'Cannot modify your own role' });
+            }
+            if (updates.labId && updates.labId !== target.labId) {
+                return res.status(403).json({ error: 'Cannot modify your own lab assignment' });
+            }
+            if (updates.countries || updates.projects) {
+                return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+            }
         }
+
+        // Validate role changes
+        if (updates.role && updates.role !== target.role) {
+            if (!ALL_ROLES.includes(updates.role)) {
+                return res.status(400).json({ error: `Invalid role '${updates.role}'` });
+            }
+            if (actor.role === 'LAB_MANAGER') {
+                if (!ALLOWED_SUB_ROLES.includes(updates.role)) {
+                    return res.status(403).json({ error: `Lab Managers may only assign: ${ALLOWED_SUB_ROLES.join(', ')}` });
+                }
+            } else if (!isSuperAdmin) {
+                return res.status(403).json({ error: 'Only Super Admins can assign management roles' });
+            }
+        }
+
+        // Build data using strict allowlist
+        const data = {};
+        if (updates.name !== undefined) data.name = updates.name;
+        if (updates.email !== undefined) data.email = updates.email;
+        if (updates.language !== undefined) data.language = updates.language;
 
         if (updates.password) {
-            updates.password = await bcrypt.hash(updates.password, 10);
-            updates.mustChangePassword = true;
+            data.password = await bcrypt.hash(updates.password, 10);
+            data.mustChangePassword = true;
         }
 
-        const data = { ...updates };
-        if (data.countries) data.countries = JSON.stringify(data.countries);
-        if (data.projects) data.projects = JSON.stringify(data.projects);
+        // Privileged fields
+        if (isSuperAdmin) {
+            if (updates.role !== undefined) data.role = updates.role;
+            if (updates.labId !== undefined) data.labId = updates.labId;
+            if (updates.isActive !== undefined) data.isActive = Boolean(updates.isActive);
+            if (updates.countries !== undefined) data.countries = JSON.stringify(updates.countries);
+            if (updates.projects !== undefined) data.projects = JSON.stringify(updates.projects);
+        } else if (actor.role === 'LAB_MANAGER') {
+            if (updates.role !== undefined && ALLOWED_SUB_ROLES.includes(updates.role)) {
+                data.role = updates.role;
+            }
+            if (updates.isActive !== undefined && !isSelf) {
+                data.isActive = Boolean(updates.isActive);
+            }
+        }
 
         const updated = await prisma.user.update({
             where: { id: String(id) },
@@ -194,7 +258,7 @@ exports.updateUser = async (req, res) => {
                 entity: 'USER',
                 entityId: id,
                 action: 'UPDATE',
-                details: `Updated fields: ${Object.keys(updates).join(', ')}`,
+                details: `Updated fields: ${Object.keys(data).join(', ')} on user ${target.username}`,
                 performedBy: actor.username,
                 timestamp: new Date()
             }

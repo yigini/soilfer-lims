@@ -26,26 +26,49 @@ function init(server) {
         }
 
         let userId;
+        let decoded;
         try {
-            const decoded = jwt.verify(token, JWT_SECRET);
+            decoded = jwt.verify(token, JWT_SECRET);
             userId = String(decoded.id || decoded.userId);
         } catch (e) {
             ws.close(4002, 'Invalid token');
             return;
         }
 
-        // Register
-        const isFirstSocket = !clients.has(userId);
-        if (isFirstSocket) {
-            clients.set(userId, new Set());
-            // Broadcast ONLINE to everyone else
-            clients.forEach((_, otherUserId) => {
-                if (otherUserId !== userId) {
-                    broadcastToUser(otherUserId, 'USER_STATUS', { userId, status: 'ONLINE' });
+        // Verify active status in DB
+        (async () => {
+            try {
+                const prisma = require('./prisma');
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { id: true, isActive: true, labId: true }
+                });
+
+                if (!user || user.isActive === false) {
+                    ws.close(4003, 'Account deactivated or invalid');
+                    return;
                 }
-            });
-        }
-        clients.get(userId).add(ws);
+
+                ws.labId = user.labId || null;
+
+                // Register
+                const isFirstSocket = !clients.has(userId);
+                if (isFirstSocket) {
+                    clients.set(userId, new Set());
+                    // Broadcast ONLINE to everyone else
+                    clients.forEach((_, otherUserId) => {
+                        if (otherUserId !== userId) {
+                            broadcastToUser(otherUserId, 'USER_STATUS', { userId, status: 'ONLINE' });
+                        }
+                    });
+                }
+                clients.get(userId).add(ws);
+            } catch (err) {
+                console.error('[WS] Auth check error:', err);
+                ws.close(4000, 'Server error');
+                return;
+            }
+        })();
 
         if (DEBUG) console.log(`[WS] User ${userId} connected (${clients.get(userId).size} sockets)`);
 

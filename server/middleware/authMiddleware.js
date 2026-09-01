@@ -70,6 +70,11 @@ const verifyToken = async (req, res, next) => {
             return res.status(401).json({ error: 'User invalid' });
         }
 
+        if (user.isActive === false) {
+            console.warn(`[AUTH] Access denied for deactivated user ID: ${user.id} (${user.username})`);
+            return res.status(401).json({ error: 'Account has been deactivated' });
+        }
+
         // Sanitize and Parse JSON fields for SQLite
         const { password: _, ...safeUser } = user;
         req.user = {
