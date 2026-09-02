@@ -13,7 +13,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
             id: `SMP-MX-${Date.now()}`,
             labId: 'LAB-MX-001',
             assignedLab: 'LAB-MX',
-            status: 'ANALYSIS'
+            status: 'PROCESSING'
         });
         sampleId = s.id;
     });
@@ -60,7 +60,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
             id: `SMP-MX-BAD-${Date.now()}`,
             labId: 'LAB-MX-002',
             assignedLab: 'LAB-MX',
-            status: 'ANALYSIS'
+            status: 'PROCESSING'
         });
 
         const res = await request(app)
@@ -86,7 +86,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
             .set('Authorization', `Bearer ${techToken}`);
 
         expect(res.status).toBe(200);
-        expect(res.body.status).toBe('COMPLETED');
+        expect(res.body.status).toBe('SUBMITTED_FULL');
         expect(res.body.matrixDiagnostics).toBeDefined();
         expect(res.body.matrixDiagnostics.texture.className).toBe('Sandy Loam');
     });

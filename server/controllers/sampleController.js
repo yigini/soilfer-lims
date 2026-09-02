@@ -634,14 +634,17 @@ exports.updatePhaseStatus = async (req, res) => {
 
         const newDrying = updates.dryingStatus || sample.dryingStatus;
         const newPrep = updates.preparationStatus || sample.preparationStatus;
+        let updated;
         if (newDrying === 'DONE' && newPrep === 'DONE' && sample.status === 'ACCEPTED') {
-            updates.status = 'PROCESSING';
+            const { transitionSample } = require('../services/sampleStateService');
+            delete updates.status;
+            updated = await transitionSample(id, 'PROCESSING', user, 'Drying and preparation completed (gates passed)', updates);
+        } else {
+            updated = await prisma.sample.update({
+                where: { id: String(id) },
+                data: updates
+            });
         }
-
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: updates
-        });
 
         const auditEvent = phase === 'DRYING' ? 'DRYING_STATUS_CHANGED' : 'PREP_STATUS_CHANGED';
         const beforeValue = phase === 'DRYING' ? beforeDrying : beforePrep;
@@ -920,19 +923,19 @@ exports.undoIntake = async (req, res) => {
             acceptedBy: null,
             acceptedAt: null
         });
-            prisma.auditLog.create({
-                data: {
-                    id: `audit-undo-${Date.now()}`,
-                    entity: 'SAMPLE',
-                    entityId: id,
-                    action: 'UNDO_INTAKE',
-                    details: `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`,
-                    performedBy: user.username,
-                    timestamp: new Date(),
-                    sampleId: String(id)
-                }
-            })
-        ]);
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-undo-${Date.now()}`,
+                entity: 'SAMPLE',
+                entityId: id,
+                action: 'UNDO_INTAKE',
+                details: `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`,
+                performedBy: user.username,
+                timestamp: new Date(),
+                sampleId: String(id)
+            }
+        });
 
         const updatedSample = await prisma.sample.findUnique({ where: { id: String(id) } });
         res.json({ message: 'Intake undone successfully', sample: updatedSample });
@@ -1347,18 +1350,18 @@ exports.deleteSample = async (req, res) => {
                 lastSubmissionType: null,
                 lastSubmissionAt: null
             });
-                prisma.auditLog.create({
-                    data: {
-                        id: `audit-revert-${Date.now()}`,
-                        entity: 'SAMPLE',
-                        entityId: id,
-                        action: 'REVERT_TO_EXPECTED',
-                        performedBy: user.username,
-                        details: `Reverted pre-registered sample ${sample.originalId} back to EXPECTED (cleared intake data). Sample record preserved.`,
-                        timestamp: new Date()
-                    }
-                })
-            ]);
+
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-revert-${Date.now()}`,
+                    entity: 'SAMPLE',
+                    entityId: id,
+                    action: 'REVERT_TO_EXPECTED',
+                    performedBy: user.username,
+                    details: `Reverted pre-registered sample ${sample.originalId} back to EXPECTED (cleared intake data). Sample record preserved.`,
+                    timestamp: new Date()
+                }
+            });
 
             return res.json({ message: 'Sample intake discarded. Sample reverted to EXPECTED status.', reverted: true });
         }

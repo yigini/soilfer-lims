@@ -76,7 +76,7 @@ exports.processIntake = async (req, res) => {
                 data: {
                     id: sampleId,
                     originalId: finalOriginalId,
-                    status: 'COLLECTED',
+                    status: 'EXPECTED',
                     projectCode: finalProjectId || null,
                     projectId: finalProjectId || null,
                     assignedLab: user.labId,
@@ -308,10 +308,14 @@ exports.processIntake = async (req, res) => {
         });
 
         const updateData = {
-            status: workflow.SAMPLE_STATES.RECEIVED,
+            status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
             labId: assignedLabId,
             receptionDate: now,       // Finding #3: canonical column
             receivedBy: receivedBy,   // Finding #3: canonical column
+            acceptedBy: assignedLabId ? receivedBy : null,
+            acceptedAt: assignedLabId ? now : null,
+            dryingStatus: assignedLabId ? 'PENDING' : null,
+            preparationStatus: assignedLabId ? 'PENDING' : null,
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
             analysisGroupIds: JSON.stringify(analysisGroupIds || []),
             fieldMetadata: JSON.stringify(currentFieldMeta),
@@ -343,7 +347,7 @@ exports.processIntake = async (req, res) => {
 
         console.log(`[INTAKE] Updating sample ${sample.id} with status RECEIVED`);
         const { transitionSample } = require('../services/sampleStateService');
-        const nextStatus = updateData.status || 'RECEIVED';
+        const nextStatus = updateData.status || (updateData.labId ? 'ACCEPTED' : 'RECEIVED');
         delete updateData.status;
         const updated = await transitionSample(sample.id, nextStatus, user, 'Intake completed at reception', updateData);
 
@@ -466,8 +470,7 @@ exports.discardDraft = async (req, res) => {
                         timestamp: new Date(),
                         sampleId: String(sample.id)
                     }
-                })
-            ]);
+                });
             console.log(`[DISCARD] Reverted project sample ${sample.id} to EXPECTED`);
             return res.json({ success: true, message: `Sample ${sample.originalId} reverted to EXPECTED.` });
         } else {
