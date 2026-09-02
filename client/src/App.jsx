@@ -307,6 +307,7 @@ function App() {
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             <Route path="/about" element={<RequireAuth><About /></RequireAuth>} />
             <Route path="/techstack" element={<RequireAuth><TechStack /></RequireAuth>} />
+            <Route path="/tech-stack" element={<RequireAuth><TechStack /></RequireAuth>} />
             <Route path="/credits" element={<RequireAuth><TechStack /></RequireAuth>} />
         </Routes>
     );
