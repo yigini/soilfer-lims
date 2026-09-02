@@ -1040,10 +1040,42 @@ exports.getSampleDetail = async (req, res) => {
             ? (['ACCEPTED', 'COMPLETED'].includes(prepItem.status) ? 'DONE' : 'PENDING')
             : (sample.preparationStatus !== undefined ? sample.preparationStatus : null);
 
+        // SD-17: Compute analytical episodes for reopened samples
+        const undoLogs = parsedAuditLog.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
+        const approvalLogs = parsedAuditLog.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+
+        const episodes = [];
+        if (undoLogs.length > 0) {
+            episodes.push({
+                episodeNumber: 1,
+                label: 'Pass 1 (Initial Analysis)',
+                approvedAt: approvalLogs[0]?.timestamp || null,
+                approvedBy: approvalLogs[0]?.performedBy || null
+            });
+            undoLogs.forEach((undo, idx) => {
+                episodes.push({
+                    episodeNumber: idx + 2,
+                    label: `Pass ${idx + 2} (Reopened)`,
+                    reopenedAt: undo.timestamp,
+                    reopenReason: undo.details,
+                    approvedAt: approvalLogs[idx + 1]?.timestamp || (sample.status === 'APPROVED' ? sample.approvedAt : null),
+                    approvedBy: approvalLogs[idx + 1]?.performedBy || (sample.status === 'APPROVED' ? sample.approvedBy : null)
+                });
+            });
+        } else if (sample.approvedAt) {
+            episodes.push({
+                episodeNumber: 1,
+                label: 'Pass 1 (Initial Analysis)',
+                approvedAt: sample.approvedAt,
+                approvedBy: sample.approvedBy
+            });
+        }
+
         const enrichedSample = {
             ...sample,
             dryingStatus: derivedDryingStatus,
             preparationStatus: derivedPrepStatus,
+            episodes,
             metadata: parseJson(sample.metadata),
             fieldMetadata: parseJson(sample.fieldMetadata),
             requiredAnalyses: parseJson(sample.requiredAnalyses),

@@ -186,17 +186,56 @@ async function assembleReport(sampleId, user) {
         date: new Date().toISOString()
     };
 
-    // 15. Assemble the full report payload
+    // SD-17: Compute analytical episodes for reopened samples
+    const auditLogs = await prisma.auditLog.findMany({
+        where: { OR: [{ sampleId: sample.id }, { entityId: sample.id }] },
+        orderBy: { timestamp: 'asc' }
+    });
+    const undoLogs = auditLogs.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
+    const approvalLogs = auditLogs.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+
+    const episodes = [];
+    if (undoLogs.length > 0) {
+        episodes.push({
+            episodeNumber: 1,
+            label: 'Initial Analytical Pass',
+            approvedAt: approvalLogs[0]?.timestamp || null,
+            approvedBy: approvalLogs[0]?.performedBy || null
+        });
+        undoLogs.forEach((undo, idx) => {
+            episodes.push({
+                episodeNumber: idx + 2,
+                label: `Reopened Pass ${idx + 1}`,
+                reopenedAt: undo.timestamp,
+                reopenReason: undo.details,
+                approvedAt: approvalLogs[idx + 1]?.timestamp || (sample.status === 'APPROVED' ? sample.approvedAt : null),
+                approvedBy: approvalLogs[idx + 1]?.performedBy || (sample.status === 'APPROVED' ? sample.approvedBy : null)
+            });
+        });
+    } else if (sample.approvedAt) {
+        episodes.push({
+            episodeNumber: 1,
+            label: 'Initial Analytical Pass',
+            approvedAt: sample.approvedAt,
+            approvedBy: sample.approvedBy
+        });
+    }
+
+    // 15. Assemble the final structured report payload
     const reportContent = {
-        // Report number (version appended by controller)
-        reportNumber,
-        // Sample Info
+        meta: {
+            reportId: null, // assigned when saved
+            formatVersion: '2.0',
+            template: 'STANDARD_AGRONOMIC'
+        },
+        // Sample Details
         sample: {
             id: sample.id,
-            originalId: sample.originalId,
             labId: sample.labId,
+            originalId: sample.originalId,
+            matrix: sample.matrix,
+            batchId: sample.batchId,
             status: sample.status,
-            projectCode: sample.projectCode,
             countryName: sample.countryName,
             country: sample.country,
             receptionDate: sample.receptionDate,
@@ -204,7 +243,8 @@ async function assembleReport(sampleId, user) {
             acceptedBy: sample.acceptedBy,
             acceptedAt: sample.acceptedAt,
             approvedBy: sample.approvedBy,
-            approvedAt: sample.approvedAt
+            approvedAt: sample.approvedAt,
+            episodes
         },
         // Client/Farmer Info
         client: clientInfo,

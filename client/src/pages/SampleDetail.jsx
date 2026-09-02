@@ -545,6 +545,7 @@ const SampleDetail = () => {
                                 <SampleTimeline
                                     currentStatus={sample.status}
                                     history={timelineHistory}
+                                    episodes={sample.episodes || []}
                                     className="border-0 p-0"
                                 />
                             </div>

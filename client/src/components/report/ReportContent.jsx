@@ -354,13 +354,25 @@ const ReportContent = ({ data }) => {
                     Results are reported on an air-dry fine-earth (&lt;2 mm) basis unless otherwise indicated.
                 </div>
 
-                {/* Approval Trail */}
-                {sample?.approvedBy && (
+                {/* Approval Trail (SD-17: Separated Episodes on Certificate) */}
+                {sample?.episodes && sample.episodes.length > 1 ? (
+                    <div className="report-approval-trail space-y-1.5 my-2 p-2.5 bg-gray-50 rounded border border-gray-200">
+                        <div className="font-bold text-xs text-gray-800 uppercase tracking-wider">Analytical Approval Passes:</div>
+                        {sample.episodes.map(ep => (
+                            <div key={ep.episodeNumber} className="text-xs text-gray-700 flex justify-between">
+                                <span className="font-semibold">{ep.label}:</span>
+                                <span>
+                                    {ep.approvedAt ? `Approved by ${ep.approvedBy || 'Manager'} on ${fmtDate(ep.approvedAt)}` : 'In Progress / Current Pass'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                ) : sample?.approvedBy ? (
                     <div className="report-approval-trail">
                         <span className="approval-label">Results Approved:</span>
                         <span className="approval-value">{sample.approvedBy}{sample.approvedAt ? ` — ${fmtDate(sample.approvedAt)}` : ''}</span>
                     </div>
-                )}
+                ) : null}
 
                 {/* Signature Block */}
                 <div className="report-signature-block">
