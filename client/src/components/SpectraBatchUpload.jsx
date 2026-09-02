@@ -18,22 +18,24 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
     const [step, setStep] = useState(1); // 1: Select, 2: Preview, 3: Result
     const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [previewData, setPreviewData] = useState(null); // { new: [], errors: [] }
     const [uploadResult, setUploadResult] = useState(null);
     const [modality, setModality] = useState('NIR');
     const [detectedModality, setDetectedModality] = useState(null); // Auto-detected from wavelengths
-    const [detectedFormat, setDetectedFormat] = useState(null); // 'wide' or 'long'
+    const [detectedFormat, setDetectedFormat] = useState(null); // 'wide', 'long', or 'instrument_files'
     const [autoApprove, setAutoApprove] = useState(false);
     const [previewScan, setPreviewScan] = useState(null); // For showing spectrum chart
     const [labIdMatchInfo, setLabIdMatchInfo] = useState(null); // { matched: [], unmatched: [] }
     const [matchCheckResult, setMatchCheckResult] = useState(null); // Backend sample match check
 
     const handleFileChange = (e) => {
-        const selected = e.target.files[0];
-        if (selected) {
-            setFile(selected);
+        const selected = Array.from(e.target.files || []);
+        if (selected.length > 0) {
+            setFiles(selected);
+            setFile(selected[0]);
             setError(null);
         }
     };
@@ -191,86 +193,142 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
     };
 
     const handlePreview = async () => {
-        if (!file) return;
+        if (!file && files.length === 0) return;
         setLoading(true);
         setError(null);
         setParsingProgress({ current: 0, total: 0 });
 
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
+        const isSingleCsv = (files.length <= 1) && (files[0] || file).name.toLowerCase().endsWith('.csv');
+
+        if (isSingleCsv) {
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const text = evt.target.result;
+                    // Use async parser with progress callback
+                    const { scans, errors, format, detectedModality: dm } = await parseCSVAsync(text, (current, total) => {
+                        setParsingProgress({ current, total });
+                    });
+
+                    setDetectedFormat(format);
+                    if (dm) {
+                        setDetectedModality(dm);
+                        setModality(dm);
+                    }
+
+                    if (scans.length === 0 && errors.length === 0) {
+                        setError('No data found in file.');
+                    } else {
+                        setPreviewData({ scans, errors, isRawInstrumentFiles: false });
+
+                        if (currentSampleLabId && scans.length > 0) {
+                            const matched = scans.filter(s =>
+                                s.labId.toLowerCase() === currentSampleLabId.toLowerCase()
+                            );
+                            const unmatched = scans.filter(s =>
+                                s.labId.toLowerCase() !== currentSampleLabId.toLowerCase()
+                            );
+                            setLabIdMatchInfo({ matched, unmatched });
+                        } else {
+                            setLabIdMatchInfo(null);
+                        }
+
+                        // Pre-upload match check: verify all lab IDs against existing samples
+                        if (scans.length > 0) {
+                            const uniqueLabIds = [...new Set(scans.map(s => s.labId).filter(Boolean))];
+                            try {
+                                // Reset progress for API call
+                                setParsingProgress({ current: scans.length, total: scans.length, message: 'Verifying sample matches...' });
+                                const matchRes = await axios.post('/api/spectral/check-matches', { labIds: uniqueLabIds });
+                                setMatchCheckResult(matchRes.data);
+                            } catch (err) {
+                                console.error('Match check failed:', err);
+                                setMatchCheckResult(null);
+                            }
+                        }
+
+                        setStep(2);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setError('Failed to parse CSV client-side.');
+                } finally {
+                    setLoading(false);
+                    setParsingProgress(null);
+                }
+            };
+            reader.readAsText(files[0] || file);
+        } else {
+            // Direct Instrument Files / Multi-File Ingest (SL-06 & SL-13)
             try {
-                const text = evt.target.result;
-                // Use async parser with progress callback
-                const { scans, errors, format, detectedModality: dm } = await parseCSVAsync(text, (current, total) => {
-                    setParsingProgress({ current, total });
+                const targetFiles = files.length > 0 ? files : [file];
+                const scans = targetFiles.map(f => {
+                    const ext = f.name.slice(f.name.lastIndexOf('.')).toLowerCase();
+                    const labId = f.name.replace(/\.[^/.]+$/, '');
+                    return {
+                        filename: f.name,
+                        size: f.size,
+                        labId,
+                        format: ext.replace('.', '').toUpperCase(),
+                        modality,
+                        scanDate: new Date().toISOString()
+                    };
                 });
 
-                setDetectedFormat(format);
-                if (dm) {
-                    setDetectedModality(dm);
-                    setModality(dm);
+                setDetectedFormat('instrument_files');
+                setPreviewData({ scans, errors: [], isRawInstrumentFiles: true });
+
+                const uniqueLabIds = [...new Set(scans.map(s => s.labId).filter(Boolean))];
+                if (uniqueLabIds.length > 0) {
+                    try {
+                        const matchRes = await axios.post('/api/spectral/check-matches', { labIds: uniqueLabIds });
+                        setMatchCheckResult(matchRes.data);
+                    } catch (err) {
+                        console.error('Match check failed:', err);
+                        setMatchCheckResult(null);
+                    }
                 }
 
-                if (scans.length === 0 && errors.length === 0) {
-                    setError('No data found in file.');
-                } else {
-                    setPreviewData({ scans, errors });
-
-                    if (currentSampleLabId && scans.length > 0) {
-                        const matched = scans.filter(s =>
-                            s.labId.toLowerCase() === currentSampleLabId.toLowerCase()
-                        );
-                        const unmatched = scans.filter(s =>
-                            s.labId.toLowerCase() !== currentSampleLabId.toLowerCase()
-                        );
-                        setLabIdMatchInfo({ matched, unmatched });
-                    } else {
-                        setLabIdMatchInfo(null);
-                    }
-
-                    // Pre-upload match check: verify all lab IDs against existing samples
-                    if (scans.length > 0) {
-                        const uniqueLabIds = [...new Set(scans.map(s => s.labId).filter(Boolean))];
-                        try {
-                            // Reset progress for API call
-                            setParsingProgress({ current: scans.length, total: scans.length, message: 'Verifying sample matches...' });
-                            const matchRes = await axios.post('/api/spectral/check-matches', { labIds: uniqueLabIds });
-                            setMatchCheckResult(matchRes.data);
-                        } catch (err) {
-                            console.error('Match check failed:', err);
-                            setMatchCheckResult(null);
-                        }
-                    }
-
-                    setStep(2);
-                }
+                setStep(2);
             } catch (err) {
                 console.error(err);
-                setError('Failed to parse CSV client-side.');
+                setError('Failed to inspect selected files.');
             } finally {
                 setLoading(false);
                 setParsingProgress(null);
             }
-        };
-        reader.readAsText(file);
+        }
     };
 
     const handleConfirm = async () => {
         if (!previewData) return;
         setLoading(true);
+        setError(null);
         try {
-            const res = await axios.post('/api/spectral/batch', {
-                batchId: `BATCH-${Date.now()}`,
-                scans: previewData.scans,
-                contextSampleId: currentSampleId || null,
-                autoApprove: autoApprove && isManager ? true : false
+            const formData = new FormData();
+            formData.append('batchId', `BATCH-${Date.now()}`);
+            if (currentSampleId) formData.append('contextSampleId', currentSampleId);
+            formData.append('autoApprove', autoApprove && isManager ? 'true' : 'false');
+            if (modality) formData.append('modality', modality);
+
+            // Append raw binary files for byte-identical storage (SL-06 & SL-13)
+            const targetFiles = files.length > 0 ? files : (file ? [file] : []);
+            targetFiles.forEach(f => formData.append('files', f));
+
+            // If wide-table CSV was parsed into individual scans, also send scans JSON
+            if (previewData.scans && !previewData.isRawInstrumentFiles) {
+                formData.append('scans', JSON.stringify(previewData.scans));
+            }
+
+            const res = await axios.post('/api/spectral/batch', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             setUploadResult(res.data.results);
             setStep(3);
             if (onUploadSuccess) onUploadSuccess();
         } catch (err) {
-            setError(err.response?.data?.error || 'Upload failed.');
+            setError(err.response?.data?.error || err.response?.data?.message || 'Upload failed.');
         } finally {
             setLoading(false);
         }
@@ -284,24 +342,33 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <Upload className="text-blue-600" /> Batch Upload Spectra
                 </h2>
-
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-800">
-                    <p>Upload a CSV file with spectral data. Supports:</p>
-                    <ul className="mt-1 ml-4 list-disc">
-                        <li><strong>Wide format</strong> — wavelengths as column headers, one row per sample</li>
-                        <li><strong>Long format</strong> — columns: LabID, Wavelength, Value</li>
+                    <p className="font-semibold mb-1">Upload instrument spectral files or CSV table (SL-06 & SL-13):</p>
+                    <ul className="mt-1 ml-4 list-disc space-y-0.5">
+                        <li><strong>Raw Instrument Files</strong> — JCAMP-DX (.dx, .jcamp), Bruker OPUS (.opus), Galactic SPC (.spc), ASD (.asd)</li>
+                        <li><strong>Wide-format CSV</strong> — wavelengths as column headers, one row per sample</li>
+                        <li><strong>Long-format CSV</strong> — columns: LabID, Wavelength, Value</li>
                     </ul>
-                    <p className="mt-1">Modality (NIR/MIR) is <strong>auto-detected</strong> from wavelength range.</p>
+                    <p className="mt-2 text-xs text-blue-700">Raw instrument files are persisted byte-identically on disk and parsed server-side.</p>
                 </div>
 
                 <div className="border-2 border-dashed border-gray-300 rounded-xl h-48 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-blue-400 transition-colors relative">
                     <input
                         type="file"
-                        accept=".csv"
+                        multiple
+                        accept=".csv,.dx,.jdx,.jcamp,.txt,.opus,.spc,.asd"
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    {file ? (
+                    {files.length > 1 ? (
+                        <div className="text-center">
+                            <FileText className="mx-auto text-blue-500 mb-2" size={40} />
+                            <p className="font-medium text-gray-700">{files.length} files selected</p>
+                            <p className="text-xs text-gray-400">
+                                Total: {(files.reduce((acc, f) => acc + f.size, 0) / 1024).toFixed(1)} KB
+                            </p>
+                        </div>
+                    ) : file ? (
                         <div className="text-center">
                             <FileText className="mx-auto text-blue-500 mb-2" size={40} />
                             <p className="font-medium text-gray-700">{file.name}</p>
@@ -310,7 +377,8 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                     ) : (
                         <div className="text-center">
                             <Upload className="mx-auto text-gray-400 mb-2" size={40} />
-                            <p className="font-medium text-gray-600">Drag & Drop CSV</p>
+                            <p className="font-medium text-gray-600">Drag & Drop Instrument Files or CSV</p>
+                            <p className="text-xs text-gray-400 mt-1">Select one or multiple files (.dx, .jcamp, .opus, .spc, .asd, .csv)</p>
                         </div>
                     )}
                 </div>
@@ -336,7 +404,7 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                     <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
                     <button
                         onClick={handlePreview}
-                        disabled={!file || loading}
+                        disabled={(!file && files.length === 0) || loading}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                     >
                         {loading ? <RefreshCw className="animate-spin" size={18} /> : null}
@@ -367,7 +435,7 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                     )}
                     {detectedFormat && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                            {detectedFormat === 'wide' ? 'Wide Format' : 'Long Format'}
+                            {detectedFormat === 'wide' ? 'Wide Format' : (detectedFormat === 'instrument_files' ? 'Raw Instrument Files' : 'Long Format')}
                         </span>
                     )}
                     {autoApprove && (
@@ -414,7 +482,7 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                                     </div>
                                     <div className="mt-2 bg-amber-100 rounded p-2 text-sm max-h-24 overflow-y-auto">
                                         {matchCheckResult.unmatched.slice(0, 10).map((id, i) => (
-                                            <span key={i} className="inline-block mr-2 mb-1 px-2 py-0.5 bg-red-100 text-red-800 rounded font-mono text-xs">{id}</span>
+                                             <span key={i} className="inline-block mr-2 mb-1 px-2 py-0.5 bg-red-100 text-red-800 rounded font-mono text-xs">{id}</span>
                                         ))}
                                         {matchCheckResult.unmatched.length > 10 && (
                                             <span className="text-amber-600 italic text-xs">...and {matchCheckResult.unmatched.length - 10} more</span>
@@ -430,16 +498,7 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                                 <div>
                                     <div className="font-bold text-red-800">✗ No Matching Samples Found</div>
                                     <div className="text-sm text-red-700 mt-1">
-                                        None of the {matchCheckResult.unmatchedCount} Lab ID(s) in this file match any existing sample records.
-                                        <strong> Upload is blocked.</strong> Please ensure the samples are registered in the system first.
-                                    </div>
-                                    <div className="mt-2 bg-red-100 rounded p-2 text-sm max-h-24 overflow-y-auto">
-                                        {matchCheckResult.unmatched.slice(0, 10).map((id, i) => (
-                                            <span key={i} className="inline-block mr-2 mb-1 px-2 py-0.5 bg-red-200 text-red-800 rounded font-mono text-xs">{id}</span>
-                                        ))}
-                                        {matchCheckResult.unmatched.length > 10 && (
-                                            <span className="text-red-600 italic text-xs">...and {matchCheckResult.unmatched.length - 10} more</span>
-                                        )}
+                                        None of the {matchCheckResult.unmatchedCount} Lab ID(s) in this file match existing samples in the database.
                                     </div>
                                 </div>
                             </div>
@@ -502,8 +561,8 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                             <tr className="border-b">
                                 {currentSampleLabId && <th className="p-2 w-8">Match</th>}
                                 <th className="p-2">Lab ID</th>
-                                <th className="p-2">Points</th>
-                                <th className="p-2">Range</th>
+                                <th className="p-2">Points / Format</th>
+                                <th className="p-2">Range / Size</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -529,9 +588,9 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                                         <td className={`p-2 font-mono ${isMatch ? 'text-green-700 font-bold' : ''} ${isMismatch ? 'text-amber-700' : ''}`}>
                                             {s.labId}
                                         </td>
-                                        <td className="p-2">{s.wavelengths.length}</td>
+                                        <td className="p-2">{s.wavelengths ? `${s.wavelengths.length} pts` : (s.format || 'Raw File')}</td>
                                         <td className="p-2 text-gray-500">
-                                            {Math.min(...s.wavelengths)}-{Math.max(...s.wavelengths)}
+                                            {s.wavelengths && s.wavelengths.length > 0 ? `${Math.min(...s.wavelengths)}-${Math.max(...s.wavelengths)}` : (s.size ? `${(s.size / 1024).toFixed(1)} KB` : '-')}
                                         </td>
                                         <td className="p-2 text-right">
                                             <Eye size={16} className={`inline ${previewScan?.labId === s.labId ? 'text-blue-600' : 'text-gray-400'}`} />
@@ -547,7 +606,7 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                 </div>
 
                 {/* Spectrum Preview Chart */}
-                {previewScan && (
+                {previewScan && previewScan.wavelengths && previewScan.wavelengths.length > 0 && (
                     <div className="mb-6 bg-white border rounded-lg p-4">
                         <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
                             <Eye size={16} className="text-blue-600" />

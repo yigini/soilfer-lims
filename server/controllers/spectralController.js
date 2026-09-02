@@ -318,12 +318,58 @@ exports.checkMatches = async (req, res) => {
  */
 exports.uploadBatch = async (req, res) => {
     try {
-        const { batchId, scans, contextSampleId, autoApprove } = req.body;
+        let { batchId, scans, contextSampleId, autoApprove } = req.body || {};
         const user = req.user; // From auth middleware
         const canAutoApprove = autoApprove && user && ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role);
 
-        if (!scans || !Array.isArray(scans)) {
-            return res.status(400).json({ error: 'Invalid payload: scans array required' });
+        // Parse stringified scans if sent via FormData
+        if (typeof scans === 'string') {
+            try {
+                scans = JSON.parse(scans);
+            } catch (e) {}
+        }
+
+        // SL-06 & SL-13: True Multipart Binary Raw File Support
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            if (Array.isArray(scans) && scans.length > 0) {
+                // Wide-format or long-format table parsed into scans array, attach raw file blob
+                const firstFile = req.files[0];
+                scans.forEach(s => {
+                    if (!s.rawBuffer && !s.rawContent) {
+                        s.rawBuffer = firstFile.buffer;
+                        s.rawContent = firstFile.buffer;
+                    }
+                });
+            } else {
+                // Direct instrument files upload
+                scans = req.files.map(file => {
+                    const ext = path.extname(file.originalname).toLowerCase();
+                    let sourceFormat = 'CSV';
+                    if (ext === '.dx' || ext === '.jdx' || ext === '.jcamp') sourceFormat = 'JCAMP';
+                    else if (ext === '.opus') sourceFormat = 'OPUS';
+                    else if (ext === '.spc') sourceFormat = 'SPC';
+                    else if (ext === '.asd') sourceFormat = 'ASD';
+
+                    const nameWithoutExt = path.basename(file.originalname, ext);
+                    const fileLabId = (req.body && (req.body.labId || req.body.sampleId)) || nameWithoutExt;
+
+                    return {
+                        filename: file.originalname,
+                        rawBuffer: file.buffer, // Preserve exact binary bytes
+                        rawContent: file.buffer,
+                        sourceFormat,
+                        labId: fileLabId,
+                        modality: req.body?.modality,
+                        quantity: req.body?.quantity,
+                        equipmentId: req.body?.equipmentId,
+                        replicateNo: req.body?.replicateNo ? parseInt(req.body.replicateNo) : 1
+                    };
+                });
+            }
+        }
+
+        if (!scans || !Array.isArray(scans) || scans.length === 0) {
+            return res.status(400).json({ error: 'Invalid payload: scans array or multipart files required' });
         }
 
         // If we have a context sample ID (from sample details page), pre-fetch it
@@ -472,8 +518,18 @@ exports.uploadBatch = async (req, res) => {
 
             // SL-11: Checksum Deduplication
             const effectiveLabId = sample ? (sample.assignedLab || sample.labId || (user ? user.labId : null)) : (user ? user.labId : null);
-            const arrayString = JSON.stringify(wavelengths) + JSON.stringify(values);
-            const sha256Hash = scanItem.sha256 || calculateChecksum(scanItem.rawContent || arrayString);
+            let sha256Hash = scanItem.sha256;
+            if (!sha256Hash) {
+                if (scanItem.rawBuffer) {
+                    sha256Hash = crypto.createHash('sha256').update(scanItem.rawBuffer).digest('hex');
+                } else if (scanItem.rawContent) {
+                    const buf = Buffer.isBuffer(scanItem.rawContent) ? scanItem.rawContent : Buffer.from(scanItem.rawContent, 'utf8');
+                    sha256Hash = crypto.createHash('sha256').update(buf).digest('hex');
+                } else {
+                    const arrayString = JSON.stringify(wavelengths) + JSON.stringify(values);
+                    sha256Hash = calculateChecksum(arrayString);
+                }
+            }
 
             const duplicate = await prisma.spectralData.findFirst({
                 where: {
@@ -492,21 +548,27 @@ exports.uploadBatch = async (req, res) => {
                 continue;
             }
 
-            // SL-06: Raw File Storage
+            // SL-06: Raw File Storage (Byte-identical binary preservation)
             const newScanId = `spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
             let sourceFilePath = null;
             try {
-                let rawContent = scanItem.rawContent;
-                if (!rawContent) {
-                    const lines = ['wavelength,value'];
-                    for (let i = 0; i < wavelengths.length; i++) {
-                        lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+                let rawBuffer = scanItem.rawBuffer;
+                if (!rawBuffer) {
+                    if (scanItem.rawContent) {
+                        rawBuffer = Buffer.isBuffer(scanItem.rawContent)
+                            ? scanItem.rawContent
+                            : Buffer.from(scanItem.rawContent, 'utf8');
+                    } else {
+                        const lines = ['wavelength,value'];
+                        for (let i = 0; i < wavelengths.length; i++) {
+                            lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+                        }
+                        rawBuffer = Buffer.from(lines.join('\n'), 'utf8');
                     }
-                    rawContent = lines.join('\n');
                 }
                 const safeName = (scanItem.filename || 'scan.csv').replace(/[^a-zA-Z0-9._-]/g, '_');
                 const fullFilePath = path.join(UPLOADS_SPECTRA_DIR, `${newScanId}_${safeName}`);
-                fs.writeFileSync(fullFilePath, rawContent, 'utf8');
+                fs.writeFileSync(fullFilePath, rawBuffer);
                 sourceFilePath = path.relative(path.join(__dirname, '..'), fullFilePath).replace(/\\/g, '/');
             } catch (fsErr) {
                 console.warn('[SPECTRAL] Warning: Failed to persist raw file blob:', fsErr.message);
@@ -1349,4 +1411,7 @@ exports.getControlDrifts = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+// SL-06 & SL-13: Dedicated multipart upload handler alias
+exports.uploadRawFiles = exports.uploadBatch;
 

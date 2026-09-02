@@ -73,14 +73,14 @@ function parseJcampDx(content) {
     const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
     const modality = isWavenumber ? 'MIR' : 'NIR';
 
-    // Determine physical quantity
-    const yUnits = (headers['YUNITS'] || '').toUpperCase();
-    let quantity = 'ABSORBANCE';
-    if (yUnits.includes('TRANSMITTANCE')) quantity = 'TRANSMITTANCE';
-    else if (yUnits.includes('REFLECTANCE')) quantity = 'REFLECTANCE';
+    // Determine physical    // Quantity
+    const yUnits = headers['YUNITS'] ? headers['YUNITS'].toUpperCase() : '';
+    let quantity = 'UNVERIFIED';
+    if (yUnits.includes('ABSORB') || yUnits.includes('AU')) quantity = 'ABSORBANCE';
+    else if (yUnits.includes('REFLECT') || yUnits.includes('%R')) quantity = 'REFLECTANCE';
     else if (yUnits.includes('LOG') || yUnits.includes('1/R')) quantity = 'LOG_1_R';
+    else if (yUnits.includes('TRANSMIT') || yUnits.includes('%T')) quantity = 'TRANSMITTANCE';
     else if (yUnits.includes('KUBELKA')) quantity = 'KUBELKA_MUNK';
-    else if (modality === 'NIR') quantity = 'REFLECTANCE';
 
     // Resolution & Instrument
     const resolution = headers['RESOLUTION'] ? parseFloat(headers['RESOLUTION']) : null;
@@ -150,11 +150,12 @@ function parseCsv(content) {
     const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
     const modality = isWavenumber ? 'MIR' : 'NIR';
 
-    let quantity = 'ABSORBANCE';
-    if (headerY.includes('REFLECTANCE')) quantity = 'REFLECTANCE';
-    else if (headerY.includes('TRANSMITTANCE')) quantity = 'TRANSMITTANCE';
-    else if (headerY.includes('LOG')) quantity = 'LOG_1_R';
-    else if (modality === 'NIR') quantity = 'REFLECTANCE';
+    let quantity = 'UNVERIFIED';
+    if (headerY.includes('REFLECTANCE') || headerY.includes('%R') || headerY.includes('//R')) quantity = 'REFLECTANCE';
+    else if (headerY.includes('ABSORBANCE') || headerY.includes('AU')) quantity = 'ABSORBANCE';
+    else if (headerY.includes('TRANSMITTANCE') || headerY.includes('%T')) quantity = 'TRANSMITTANCE';
+    else if (headerY.includes('LOG') || headerY.includes('1/R')) quantity = 'LOG_1_R';
+    else if (headerY.includes('KUBELKA')) quantity = 'KUBELKA_MUNK';
 
     return {
         format: 'CSV',
@@ -168,22 +169,28 @@ function parseCsv(content) {
 }
 
 /**
- * Universal Spectral File Parser
+ * Universal Spectral File Parser (Supports Buffer or string)
  */
-exports.parseSpectralFile = (rawContent, filename = '') => {
-    if (!rawContent || typeof rawContent !== 'string') {
-        throw new Error('Invalid raw content: string expected');
+exports.parseSpectralFile = (rawInput, filename = '') => {
+    let content;
+    let buffer;
+    if (Buffer.isBuffer(rawInput)) {
+        buffer = rawInput;
+        content = rawInput.toString('utf8');
+    } else if (typeof rawInput === 'string') {
+        content = rawInput;
+        buffer = Buffer.from(rawInput, 'utf8');
+    } else {
+        throw new Error('Invalid raw content: Buffer or string expected');
     }
 
-    const trimmed = rawContent.trim();
+    const trimmed = content.trim();
     const isJcamp = trimmed.startsWith('##TITLE') || trimmed.includes('##JCAMP-DX') ||
         filename.endsWith('.dx') || filename.endsWith('.jdx') || filename.endsWith('.jcamp');
 
-    if (isJcamp) {
-        return parseJcampDx(rawContent);
-    } else {
-        return parseCsv(rawContent);
-    }
+    const result = isJcamp ? parseJcampDx(content) : parseCsv(content);
+    result.sha256 = crypto.createHash('sha256').update(buffer).digest('hex');
+    return result;
 };
 
 exports.calculateChecksum = calculateChecksum;

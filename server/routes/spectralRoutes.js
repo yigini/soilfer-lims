@@ -21,8 +21,17 @@ router.get('/:id/raw', verifyToken, spectralController.downloadRawScan);
 // Pre-upload: check which lab IDs match existing samples
 router.post('/check-matches', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.checkMatches);
 
-// Batch Upload (technicians+)
-router.post('/batch', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.uploadBatch);
+const multer = require('multer');
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 }
+});
+
+// Batch Upload (Supports JSON scans array or multipart raw file uploads)
+router.post('/batch', verifyToken, checkPermission('ENTER_RESULTS'), upload.array('files', 100), spectralController.uploadBatch);
+
+// Dedicated Raw Instrument Files Upload (SL-06 & SL-13 true binary multipart)
+router.post('/upload-raw', verifyToken, checkPermission('ENTER_RESULTS'), upload.array('files', 100), spectralController.uploadBatch);
 
 // Batch Review — approve/reject multiple spectra (managers only)
 router.post('/batch-review', verifyToken, checkPermission('APPROVE_RESULTS'), spectralController.batchReview);
