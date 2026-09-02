@@ -1,11 +1,13 @@
 # 🧪 SoilFER-LIMS
 
 **Global & Local Laboratory Information Management System for Soil Analysis**  
-*Aligned with the FAO Global Soil Partnership (GSP), GLOSOLAN, and GloSIS Soil Ontology Standards.*
+*Aligned with the FAO Global Soil Partnership (GSP), GLOSOLAN, ISO/IEC 17025, and GloSIS Soil Ontology Standards.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](Dockerfile)
 [![GloSIS Compatible](https://img.shields.io/badge/GloSIS-v1.0%20Compatible-green.svg)](https://github.com/glosis-ld/glosis)
+[![ISO 17025 Ready](https://img.shields.io/badge/ISO%2F规-17025%20Ready-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-14%20Suites%20%7C%2058%20Passing-brightgreen.svg)]()
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
 
@@ -13,16 +15,17 @@
 
 ## 🌟 Overview
 
-**SoilFER-LIMS** is an enterprise-grade, open-source Laboratory Information Management System purpose-built for national soil laboratories, international research networks, and agricultural development initiatives.
+**SoilFER-LIMS** is an enterprise-grade, open-source Laboratory Information Management System purpose-built for national soil laboratories, international research networks, and agricultural development initiatives under the FAO SoilFER Programme.
 
 It connects the entire soil analytical pipeline:
-1. **Field Sample Intake** (KoboToolbox GPS & field photo sync)
-2. **Operational Gates** (Drying, Grinding, and Preparation tracking)
-3. **Analytical Testing & Bench Workbenches** (Wet chemistry, AAS, ICP, Photometry)
+1. **Field Sample Intake & Chain of Custody** (KoboToolbox GPS, field photo inspection, auto-generated barcodes)
+2. **Operational Pre-Analytical Gates** (Drying, Grinding, and Preparation tracking)
+3. **Analytical Testing & Bench Workbenches** (Wet chemistry, AAS, ICP-OES, Photometry, Titration)
 4. **Spectral Analysis** (MIR / VIS-NIR spectral library & validation)
-5. **Quality Assurance & Scientific Auditing** (QA/QC balances, automatic texture checks)
-6. **Multi-tier Managerial Review & Formal Reporting** (Bilingual PDF certificates)
-7. **National & Global Data Exchange** (FAO GloSIS Linked Data & Machine-to-Machine SIS APIs)
+5. **Typed Quality Assurance & Batch Control** (Blanks, Duplicate RPD %, CRM Recovery %, Batch Disposition)
+6. **FAO Agronomic Interpretation Engine & Matrix Diagnostics** (5-tier ratings, USDA texture classes, C:N stoichiometry, Base Saturation, Ca:Mg, SAR/ESP)
+7. **Publication-Grade Reporting & Certificates** (Zero-dependency pure JS PDFKit generator with digital signatures & public verification tokens)
+8. **National & Global Data Exchange** (FAO GloSIS Linked Data & Machine-to-Machine SIS APIs)
 
 ---
 
@@ -41,43 +44,49 @@ Configure via `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=global` in your `.env`
 
 ---
 
-## ✨ Key Features
+## ✨ Key Capabilities
 
 ### 🔬 1. FAO GloSIS & GLOSOLAN Ontology Standard
 * **275 Standardized Analytical Procedures**: Built-in procedure catalog loaded directly from FAO `glosis-ld/glosis` specifications.
+* **Controlled Unit Vocabulary & Conversion**: Centralized dictionary normalizes `%`, `ppm`, `meq/100g`, `g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, and `µS/cm` with automatic scientific conversion factors.
 * **Canonical Soil Attributes**: Standardized codes for `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `extractableElements`, `exchangeableBases`, `pSA`, `cationExchangeCapacitySoil`, and more.
-* **Atomic Bench Analytes**: Natural bench-level logging (e.g. Ca, Mg, K, Na, Zn, Fe, Sand, Silt, Clay) mapped to parent GloSIS attributes.
 * **Machine-to-Machine SIS API**: Export sample analyses in standardized JSON/Linked-Data format with API Key authentication.
 
-### 🛡️ 2. Multi-Lab Multi-Tenancy & RBAC Security
+### 🛡️ 2. ISO/IEC 17025 Quality Control & Batch Disposition
+* **Typed QC Sample Types**:
+  * **Method Blanks**: Automatic evaluation against background threshold ($\le 0.05$).
+  * **Analytical Duplicates**: Relative Percent Difference ($\text{RPD} \le 10.0\%$).
+  * **Certified Reference Materials (CRMs)**: Standard recovery window ($90.0\% \le \text{Recovery} \le 110.0\%$).
+* **Automated Batch Evaluation**: Automatic transition to `QC_PASS` or `QC_FAIL`.
+* **Managerial Disposition Overrides**: Formal overrides (`PROCEED_WITH_WARNING`, `REANALYZE_BATCH`, `REJECT_BATCH`) requiring manager role and audit trail rationale.
+
+### 🌿 3. Agronomic Interpretation & Multi-Parameter Soil Metrology
+* **FAO 5-Tier Agronomic Engine**: Classifies parameters into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH` with practical soil fertility management recommendations.
+* **USDA 12-Class Textural Derivation**: Automatically calculates texture class (e.g. `Sandy Loam`, `Clay`, `Silty Clay`) with closure error validation ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm 2.0\%$).
+* **Stoichiometric & Balance Diagnostics**: Evaluates C:N organic matter equilibrium, Base Saturation %, $\text{Ca:Mg}$ and $\text{Mg:K}$ nutritional balances, and SAR/ESP sodicity hazards.
+
+### 📄 4. Publication-Grade Certificate & PDF Generation
+* **Zero-Dependency Pure JS PDF Engine**: Built on PDFKit (no headless Chrome / Puppeteer dependencies).
+* **Official FAO SoilFER Layout**:
+  * FAO and laboratory co-branding headers.
+  * 2-column sample provenance and chain of custody grid.
+  * Categorized analytical results table with standardized units, method references, and FAO interpretation badges.
+  * USDA texture and soil diagnostic summaries.
+  * ISO 17025 QA/QC statements and Lab Manager digital signature.
+* **Secure Access**: Available via authenticated endpoints (`/api/reports/:id/pdf`) and secure public verification tokens (`/api/reports/public/:token/pdf`).
+
+### 🛡️ 5. Multi-Lab Multi-Tenancy & Hardened RBAC
 * **Granular Role-Based Access Control**:
-  * `SUPER_ADMIN`: Global cross-laboratory visibility, laboratory creation, API key management.
-  * `LAB_MANAGER`: Analytical assignment, batch approvals, equipment oversight, laboratory configuration.
+  * `SUPER_ADMIN`: Global cross-laboratory visibility, laboratory creation, API key management, institutional branding lock.
+  * `LAB_MANAGER`: Analytical assignment, batch approvals, QC disposition overrides, equipment oversight.
   * `LAB_TECHNICIAN`: Personal bench queue ("My Work"), draft autosaving, method-specific validations.
   * `SAMPLE_RECEPTION`: Chain-of-custody intake, label printing, non-conformance logging.
-* **Type-Safe Lab Isolation**: Automatic query scoping ensuring staff only access authorized lab data.
+* **Scope Guard Isolation**: Automatic query scoping ensuring staff only access authorized lab data.
 
-### ⚡ 3. Technician Workbench & Scientific Validation
+### ⚡ 6. Technician Workbench & Spectral Analysis
 * **High-Throughput Batch Entry**: Enter results sample-by-sample or test-by-test with keyboard navigation.
-* **Automated Scientific Validation Rules**:
-  * Texture Balance QA Check: $\text{Sand \%} + \text{Silt \%} + \text{Clay \%} = 100\% \pm 0.5\%$.
-  * Realistic Soil Physical-Chemical ranges with real-time out-of-spec warnings.
-* **Equipment & Instrument Linkage**: Assign instruments (AAS, pH meter, Balance) with automatic calibration check reminders.
-* **Draft Autosave**: Real-time optimistic draft saving preventing data loss during bench work.
-
-### 🛰️ 4. 3D Geospatial Field Intelligence
-* **CesiumJS 3D Globe**: Visualizes soil sampling points with high-resolution satellite imagery and terrain.
-* **Field Provenance**: Displays depth layers (D1/D2), collection dates, land-cover classes, and GPS coordinates.
-* **Photo Inspection**: Cardinal direction photos (North, East, South, West) and surveyor signature verification.
-
-### 📊 5. Spectroscopy & Quality Control
 * **Spectral Library**: Upload, visualize, and baseline-correct VIS-NIR and Mid-Infrared (MIR) spectra.
-* **QC Sample Management**: Blanks, certified reference materials (CRM), and duplicate batch tracking.
-
-### 🌐 6. Internationalization & Custom Branding
-* **Multi-lingual Interface**: English (`en`), Spanish (`es`), Latin American Spanish (`es-419`), French (`fr`), and Portuguese (`pt`).
-* **In-App Translation Editor**: Lab administrators can customize terminology directly from the UI.
-* **Institutional Branding**: Support for Ministry / Laboratory logos and official partner emblems (Japanese ODA, US Department of State, FAO).
+* **Equipment & Instrument Linkage**: Assign instruments (AAS, pH meter, Balance) with automatic calibration check reminders.
 
 ---
 
@@ -91,13 +100,44 @@ Configure via `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=global` in your `.env`
                                        │ HTTP / WebSocket (WS)
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                            EXPRESS API SERVER                               │
-│  Node.js · JWT Auth · Scope Guard RBAC · GloSIS Engine · Real-time Push     │
+│  Node.js · JWT Auth · Scope Guard RBAC · GloSIS Engine · PDFKit Generator   │
 └──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │ Prisma ORM
+                                       │ Prisma ORM / Better-SQLite3
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                           DATABASE & STORAGE                                │
-│  SQLite (Zero-Config / Better-SQLite3) · Prisma Schema · Audit Trail Engine │
+│  SQLite (Zero-Config) · Prisma Schema · Audit Trail Engine · QC Batches     │
 └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🧪 Automated Test Suite (14 Suites, 58 Tests)
+
+SoilFER-LIMS includes comprehensive contract, scenario, and security test coverage:
+
+```bash
+cd server
+npm test
+```
+
+```
+PASS tests/contracts/matrix_validation.test.js (3/3 passed)
+PASS tests/contracts/qc_controls.test.js (6/6 passed)
+PASS tests/contracts/controlled_units_interpretation.test.js (4/4 passed)
+PASS tests/contracts/report_pdf.test.js (5/5 passed)
+PASS tests/security/rbac_enforcement.test.js (5/5 passed)
+PASS tests/contracts/assignment.test.js (6/6 passed)
+PASS tests/contracts/closure.test.js (6/6 passed)
+PASS tests/contracts/gates_clean.test.js (1/1 passed)
+PASS tests/contracts/status_contract.test.js (3/3 passed)
+PASS tests/contracts/submission.test.js (5/5 passed)
+PASS tests/scenarios/golden_path.test.js (4/4 passed)
+PASS tests/scenarios/pt_ilc.test.js (2/2 passed)
+PASS tests/scenarios/qc_batch.test.js (4/4 passed)
+PASS tests/scenarios/scientific_validation.test.js (4/4 passed)
+
+Test Suites: 14 passed, 14 total
+Tests:       58 passed, 58 total
 ```
 
 ---
@@ -141,7 +181,9 @@ Open your browser to **`http://localhost`** (or your server domain/IP).
 
 ---
 
-## 📚 Documentation & Guides
+## 📚 Online Documentation (GitHub Pages)
+
+📖 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
 
 * 📖 **[Administration Guide](docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.

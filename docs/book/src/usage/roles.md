@@ -25,6 +25,8 @@ The Super Admin is the highest-level administrator. This role only exists in Glo
 **Can do:**
 - Create, edit, and delete laboratories
 - Create and manage users across all laboratories
+- Manage institutional partner branding and logos (`MANAGE_BRANDING`)
+- Issue and revoke Machine-to-Machine SIS API Keys
 - View system-wide statistics and dashboards
 - Change system-level settings
 - Access all data across all laboratories
@@ -40,16 +42,18 @@ The Lab Manager is responsible for day-to-day operations of a single laboratory.
 **Can do:**
 - Create and manage users within their laboratory
 - Assign samples and work items to technicians
-- Review and approve or reject analysis results
-- Configure which analyses the lab offers
+- Review submissions and approve/reject/waive analytical results
+- Authorize QC Batch disposition overrides (`PROCEED_WITH_WARNING`, `REANALYZE_BATCH`)
+- Configure which analyses and procedures the lab offers
 - Create and manage projects
-- Export data and generate reports
-- View equipment and inventory records
+- Generate and digitally sign PDF Certificates of Analysis
+- View equipment calibration and inventory records
 - Manage KoboToolbox integration settings
 
 **Cannot do:**
 - Access data from other laboratories (in Global mode)
 - Create new laboratories (in Global mode)
+- Modify global institutional branding without Super Admin role
 
 **Typical user:** Head of laboratory, senior chemist, lab director
 
@@ -60,14 +64,17 @@ The Lab Manager is responsible for day-to-day operations of a single laboratory.
 Lab Technicians are the users who physically perform soil analyses and enter results into the system.
 
 **Can do:**
-- View samples assigned to them
-- Enter analysis results
-- Submit results for review
-- View their work history
-- Upload spectral data
+- View samples and work items assigned to them
+- Create and run analytical QC batches (Blanks, Duplicates, CRMs)
+- Trigger automated batch pass/fail evaluations
+- Enter analysis results with optimistic draft saving
+- Submit results for manager review
+- View their personal bench queue and work history
+- Upload spectral data (MIR / VIS-NIR)
 
 **Cannot do:**
-- Approve results (only submit them for the manager to review)
+- Approve results or issue Certificates of Analysis
+- Override failed QC batches
 - Create or manage users
 - Change laboratory settings
 - Delete samples

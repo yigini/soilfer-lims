@@ -99,50 +99,54 @@ Not everyone in a lab should have access to everything. RBAC ensures people only
 
 ---
 
-## 📊 Data Export & Reporting
+## 📜 Publication-Grade Certificates & PDF Reports
 
-Get your data out of the system in the format you need.
+Generate formal, bilingual **Certificates of Analysis (COA)** compliant with **ISO/IEC 17025** and FAO SoilFER branding guidelines.
 
-**Export formats:**
-- **Excel (.xlsx)** — formatted spreadsheets with headers and styling
-- **CSV** — raw data for statistical analysis (R, Python, etc.)
-- **PDF** — formatted reports suitable for clients or stakeholders
+**What you can do:**
+- **Zero-Dependency Native PDF Rendering**: Built on PDFKit for fast, container-friendly rendering without headless browsers.
+- **Complete Provenance & Quality Gates**: 2-column metadata grid showing sampling coordinates, depths (D1/D2), reception date, and preparation gate checks (Drying $<40^\circ\text{C}$, 2mm sieving).
+- **Categorized Results with FAO Ratings**: Displays analytical parameters with standardized units, method references, and FAO 5-tier agronomic classification badges.
+- **Derived Diagnostics & Signatures**: Derives USDA texture triangle class, C:N stoichiometry, and includes Lab Manager digital signature.
+- **Secure Public Verification Tokens**: Share certificates via secure token links (`/api/reports/public/:token/pdf`) without requiring login.
 
 ---
 
-## 🔧 Equipment Module
+## 🌿 FAO Agronomic Interpretation Engine & Soil Metrology
 
-Track all laboratory instruments in one place.
+Transform raw analytical numbers into actionable agronomic insights.
 
 **What you can do:**
-- Register instruments with model, serial number, manufacturer, and location
-- Set calibration schedules and receive alerts when calibration is due
-- Record maintenance activities with dates, costs, and notes
-- Mark equipment as eligible or ineligible for use (ineligible instruments get flagged in analysis records)
+- **Controlled Unit Standardization**: Automatic conversion of `%`, `ppm`, `meq/100g`, `g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, and `µS/cm`.
+- **FAO 5-Tier Ratings**: Classifies parameters into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, and `VERY_HIGH` with tailored agronomic advisory text.
+- **USDA 12-Class Texture Derivation**: Computes textural triangle classes with 100% closure error validation ($\pm 2.0\%$).
+- **Stoichiometry & Cation Balance**: Evaluates C:N organic matter equilibrium, Base Saturation %, Ca:Mg ($<2.0$) and Mg:K ($<1.0$) balance alerts, and SAR/ESP sodicity hazards.
 
 ---
 
-## 📦 Inventory Module
+## 🛡️ ISO/IEC 17025 Typed Quality Control & Batch Disposition
 
-Manage reagents, chemicals, and consumables used in the lab.
+Enforce rigorous analytical quality assurance across every testing run.
 
 **What you can do:**
-- Create an item catalog with categories, units, and suppliers
-- Track stock levels and record additions (purchases) and usage
-- Set minimum stock thresholds and receive alerts when stock is low
-- Track lot numbers for traceability
+- **Typed QC Control Types**:
+  - **Method Blanks**: Automatic evaluation against baseline contamination limits ($\le 0.05$).
+  - **Analytical Duplicates**: Relative Percent Difference precision checks ($\text{RPD} \le 10.0\%$).
+  - **Certified Reference Materials (CRMs)**: Standard recovery window evaluation ($90.0\% \le \text{Recovery} \le 110.0\%$).
+- **Automated Batch Evaluation**: Transitions batch to `QC_PASS` or `QC_FAIL` automatically.
+- **Managerial Quality Gate Overrides**: Blocks unapproved acceptance of failed batch items; supports `PROCEED_WITH_WARNING` with audit trail justification.
 
 ---
 
-## ✅ QC Batches
+## 🔧 Equipment & Inventory Modules
 
-Organize analytical work into quality-controlled batches.
+Track all laboratory instruments, calibrations, and consumables in one place.
 
 **What you can do:**
-- Group samples into analytical batches for a specific test
-- Include quality control samples (reference materials, blanks, duplicates)
-- Review batch results together before individual approval
-- Flag outliers and non-conforming results
+- Register instruments with model, serial number, manufacturer, and location.
+- Set calibration schedules and receive alerts when calibration is due.
+- Record maintenance activities with dates, costs, and notes.
+- Manage reagents, minimum stock thresholds, lot numbers, and supplier catalogs.
 
 ---
 

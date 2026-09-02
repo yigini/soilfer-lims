@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-09-02 (Soil Lab Readiness & ISO/IEC 17025 Compliance)
+### Added
+- **Pure JS PDF Report Engine (`pdfGenerator.js`)**: Publication-grade certificate generation using PDFKit with zero browser/Puppeteer dependencies, official FAO SoilFER styling, digital signatures, and public verification tokens (`/api/reports/public/:token/pdf`).
+- **Controlled Unit Vocabulary & Conversion Engine (`interpretationService.js`)**: Centralized unit vocabulary with automatic conversions (`%` $\leftrightarrow$ `g/kg`, `ppm` $\leftrightarrow$ `mg/kg`, `meq/100g` $\leftrightarrow$ `cmol(+)/kg`, `dS/m` $\leftrightarrow$ `µS/cm`).
+- **FAO 5-Tier Agronomic Interpretation**: Automatic evaluation into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH` ratings with contextual advisory text.
+- **Holistic Soil Diagnostics**: Real-time USDA 12-class textural classification with closure validation ($\pm 2.0\%$), C:N stoichiometry, Base Saturation %, Ca:Mg ratio, and SAR/ESP sodicity hazards.
+- **ISO/IEC 17025 Typed QC Controls (`qcService.js`)**: Method Blanks, Analytical Duplicates with RPD %, Certified Reference Materials (CRMs) with Recovery %, automated batch pass/fail transitions, and managerial disposition overrides (`PROCEED_WITH_WARNING`).
+- **Cross-Parameter Matrix Diagnostics**: Real-time matrix validation during results entry (`saveResults`) and sample submission approval (`submitForApproval`).
+- **Test Infrastructure & Coverage**: 14 automated Jest test suites and 58 contract/scenario tests running 100% green.
+
 ## [2.1.0] - 2026-01-28
 ### Added
 - **Handover Package**: Full documentation suite in `/docs`.

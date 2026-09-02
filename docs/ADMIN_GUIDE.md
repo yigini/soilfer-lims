@@ -77,7 +77,31 @@ To connect field sampling teams with laboratory reception:
 
 ---
 
-## 6. Multi-Lingual Customization & Translation Editor
+## 6. ISO/IEC 17025 Quality Control & Batch Disposition
+
+SoilFER-LIMS enforces strict analytical quality assurance across every testing run:
+
+1. **QC Sample Types**:
+   * **Method Blanks**: Verified against maximum background thresholds ($\le 0.05$).
+   * **Analytical Duplicates**: Verified using Relative Percent Difference ($\text{RPD} \le 10.0\%$).
+   * **Certified Reference Materials (CRMs)**: Verified using standard recovery windows ($90.0\% \le \text{Recovery} \le 110.0\%$).
+2. **Automated Batch Evaluation**: Batches transition to `QC_PASS` or `QC_FAIL` automatically based on entered QC measurements.
+3. **Managerial Disposition Overrides**: When analytical duplicates or CRMs fail due to sample matrix heterogeneity, only a `LAB_MANAGER` or `SUPER_ADMIN` can authorize a `PROCEED_WITH_WARNING` disposition with mandatory audit trail justification.
+
+---
+
+## 7. Agronomic Interpretation & Reporting
+
+1. **Controlled Units**: Incoming results are standardized into controlled scientific units (`g/kg`, `mg/kg`, `cmol(+)/kg`, `µS/cm`, `pH units`, `%`).
+2. **FAO 5-Tier Agronomic Engine**: Classifies parameters into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH` ratings with practical recommendations.
+3. **Publication-Grade PDF Certificates**:
+   * Pure JS PDF rendering with zero browser dependencies.
+   * Official FAO SoilFER layout with 2-column provenance metadata, pre-analytical gates badge, and Lab Manager digital signature.
+   * Secure public sharing tokens (`/api/reports/public/:token/pdf`).
+
+---
+
+## 8. Multi-Lingual Customization & Translation Editor
 
 SoilFER-LIMS supports English, Spanish, Latin American Spanish, French, and Portuguese:
 
@@ -88,7 +112,7 @@ SoilFER-LIMS supports English, Spanish, Latin American Spanish, French, and Port
 
 ---
 
-## 7. Automated Backups & Maintenance
+## 9. Automated Backups & Maintenance
 
 ### Schedule an Automated Daily Cron Backup
 ```bash
@@ -100,10 +124,11 @@ Backups are timestamped and saved in `/opt/soilfer-lims/server/backups/`.
 
 ---
 
-## 8. Security Checklist for Production
+## 10. Security Checklist for Production
 
 1. ✅ **HTTPS / SSL:** Always terminate TLS using Let's Encrypt / Certbot with HTTP $\rightarrow$ HTTPS redirection.
 2. ✅ **JWT Secret:** Ensure `JWT_SECRET` in `.env` is a high-entropy string ($64+$ characters).
 3. ✅ **Default Passwords:** Ensure `admin`, `mgr_*`, and `tech_*` accounts have custom passwords.
 4. ✅ **Firewall:** Expose only port `80` and `443` externally. Protect SSH with key-based authentication.
+5. ✅ **Branding Protection:** Partner and institutional branding can only be modified by global `SUPER_ADMIN`.
 
