@@ -846,6 +846,16 @@ exports.updateWorkItemStatus = async (req, res) => {
             });
         }
 
+        // SD-09: Validate work-item status writes against WORK_ITEM_TRANSITIONS (409 Conflict)
+        if (status && status !== item.status) {
+            if (!workflow.isValidWorkItemTransition(item.status, status)) {
+                return res.status(409).json({
+                    error: `Illegal status transition: ${item.status} → ${status}`,
+                    code: 'ILLEGAL_TRANSITION'
+                });
+            }
+        }
+
         const sealedStates = ['SUBMITTED', 'ACCEPTED', 'WAIVED'];
         if (sealedStates.includes(item.status)) {
             return res.status(403).json({ error: `Item is SEALED (${item.status}). You cannot edit it.` });
