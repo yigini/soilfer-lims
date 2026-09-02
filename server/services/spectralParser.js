@@ -169,6 +169,266 @@ function parseCsv(content) {
 }
 
 /**
+ * Extract parameters from OPUS parameter block
+ */
+function extractOpusParameters(buffer, blockOffset, byteLength, params) {
+    let offset = blockOffset;
+    const end = Math.min(blockOffset + byteLength, buffer.length);
+
+    while (offset + 8 < end) {
+        const tag = buffer.toString('ascii', offset, offset + 3).trim();
+        const type = buffer.readUInt16LE(offset + 4);
+        const sizeWords = buffer.readUInt16LE(offset + 6);
+        const valOffset = offset + 8;
+
+        if (/^[A-Z0-9]{2,4}$/.test(tag)) {
+            if (type === 0 && valOffset + 4 <= end) { // Integer
+                params[tag] = buffer.readInt32LE(valOffset);
+            } else if (type === 1) { // Real / Float
+                if (valOffset + 8 <= end) {
+                    params[tag] = buffer.readDoubleLE(valOffset);
+                } else if (valOffset + 4 <= end) {
+                    params[tag] = buffer.readFloatLE(valOffset);
+                }
+            } else if (type === 2 && valOffset + 2 <= end) { // String
+                const strLen = buffer.readUInt16LE(valOffset);
+                const strStart = valOffset + 2;
+                if (strStart + strLen <= end) {
+                    params[tag] = buffer.toString('ascii', strStart, strStart + strLen).replace(/\0/g, '').trim();
+                }
+            }
+        }
+        offset += Math.max(8 + (sizeWords * 2), 8);
+    }
+}
+
+/**
+ * Parse Bruker OPUS Binary Format (SD-13)
+ * Native FTIR/NIR binary output from Bruker Alpha, Alpha II, Tensor, MPA, Vertex.
+ */
+function parseOpus(buffer) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 256) {
+        throw new Error('Invalid OPUS file: file too small');
+    }
+
+    const dirOffset = buffer.readUInt32LE(8);
+    let numEntries = buffer.readUInt32LE(16);
+
+    if (dirOffset + numEntries * 12 > buffer.length) {
+        numEntries = Math.floor((buffer.length - dirOffset) / 12);
+    }
+
+    const dirEntries = [];
+    for (let i = 0; i < numEntries; i++) {
+        const entryOffset = dirOffset + i * 12;
+        if (entryOffset + 12 > buffer.length) break;
+        const type = buffer.readUInt32LE(entryOffset);
+        const sizeWords = buffer.readUInt32LE(entryOffset + 4);
+        const blockOffset = buffer.readUInt32LE(entryOffset + 8);
+        if (sizeWords > 0 && blockOffset > 0 && blockOffset + sizeWords * 4 <= buffer.length) {
+            dirEntries.push({ type, sizeWords, blockOffset, byteLength: sizeWords * 4 });
+        }
+    }
+
+    const params = {};
+    for (const entry of dirEntries) {
+        extractOpusParameters(buffer, entry.blockOffset, entry.byteLength, params);
+    }
+
+    // Identify data block (prefer Absorbance = 15, then Reflectance = 31, Transmittance = 23, Single Beam = 7)
+    let dataBlock = dirEntries.find(e => (e.type & 0x03FF) === 15) ||
+                     dirEntries.find(e => (e.type & 0x03FF) === 31) ||
+                     dirEntries.find(e => (e.type & 0x03FF) === 23) ||
+                     dirEntries.find(e => (e.type & 0x03FF) === 7) ||
+                     dirEntries.find(e => e.sizeWords >= 100);
+
+    if (!dataBlock) {
+        throw new Error('No valid spectral data block found in OPUS file');
+    }
+
+    const npt = params.NPT || dataBlock.sizeWords;
+    let fxv = params.FXV;
+    let lxv = params.LXV;
+
+    if (fxv === undefined || lxv === undefined) {
+        fxv = 4000.0;
+        lxv = 400.0;
+    }
+
+    const step = npt > 1 ? (lxv - fxv) / (npt - 1) : 0;
+    const wavelengths = [];
+    const values = [];
+
+    for (let i = 0; i < npt; i++) {
+        const x = fxv + i * step;
+        const bytePos = dataBlock.blockOffset + i * 4;
+        if (bytePos + 4 <= buffer.length) {
+            wavelengths.push(Math.round(x * 1000) / 1000);
+            values.push(buffer.readFloatLE(bytePos));
+        }
+    }
+
+    const instrument = params.INS || params.INSTRUMENT || 'Bruker Alpha FTIR';
+    const resolution = params.RES !== undefined ? parseFloat(params.RES) : 4.0;
+    const coAddedScans = params.NSS !== undefined ? parseInt(params.NSS, 10) : 32;
+    const backgroundRef = params.NSR ? `Background (${params.NSR} scans)` : (params.BKM || null);
+
+    const isWavenumber = (fxv >= 200 && fxv <= 15000) || (params.DXU && params.DXU.toUpperCase().includes('WN'));
+    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
+    const modality = (fxv >= 400 && fxv <= 4000) || isWavenumber ? 'MIR' : 'NIR';
+    const axisDirection = fxv > lxv ? 'DESCENDING' : 'ASCENDING';
+
+    let quantity = 'UNVERIFIED';
+    const dyu = (params.DYU || '').toUpperCase();
+    if (dyu.includes('AB') || (dataBlock.type & 0x03FF) === 15) quantity = 'ABSORBANCE';
+    else if (dyu.includes('TR') || (dataBlock.type & 0x03FF) === 23) quantity = 'TRANSMITTANCE';
+    else if (dyu.includes('RF') || dyu.includes('R') || (dataBlock.type & 0x03FF) === 31) quantity = 'REFLECTANCE';
+
+    return {
+        format: 'OPUS',
+        instrument,
+        resolution,
+        coAddedScans,
+        backgroundRef,
+        wavelengths,
+        values,
+        modality,
+        axisUnit,
+        axisDirection,
+        quantity,
+        sha256: crypto.createHash('sha256').update(buffer).digest('hex')
+    };
+}
+
+/**
+ * Parse ASD Binary Format (SD-13)
+ * Analytical Spectral Devices (ASD FieldSpec 3 / 4, HandHeld)
+ */
+function parseAsd(buffer) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 484) {
+        throw new Error('Invalid ASD file: buffer too small');
+    }
+
+    const channels = buffer.readUInt16LE(178) || 2151;
+    const wavelenInit = buffer.readFloatLE(180) || 350.0;
+    const wavelenStep = buffer.readFloatLE(184) || 1.0;
+    const dataType = buffer.readUInt8(188);
+
+    const wavelengths = [];
+    const values = [];
+    const dataOffset = 484;
+
+    for (let i = 0; i < channels; i++) {
+        const bytePos = dataOffset + i * 4;
+        if (bytePos + 4 <= buffer.length) {
+            wavelengths.push(Math.round((wavelenInit + i * wavelenStep) * 1000) / 1000);
+            values.push(buffer.readFloatLE(bytePos));
+        }
+    }
+
+    let quantity = 'UNVERIFIED';
+    if (dataType === 1) quantity = 'REFLECTANCE';
+    else if (dataType === 2) quantity = 'RADIANCE';
+
+    return {
+        format: 'ASD',
+        instrument: 'ASD FieldSpec',
+        resolution: wavelenStep,
+        coAddedScans: 10,
+        wavelengths,
+        values,
+        modality: 'NIR',
+        axisUnit: 'WAVELENGTH_NM',
+        axisDirection: 'ASCENDING',
+        quantity,
+        sha256: crypto.createHash('sha256').update(buffer).digest('hex')
+    };
+}
+
+/**
+ * Parse Galactic / Thermo GRAMS .spc Binary Format (SD-13)
+ */
+function parseSpc(buffer) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 512) {
+        throw new Error('Invalid SPC file: buffer too small');
+    }
+
+    const fnpts = buffer.readUInt32LE(4);
+    const ffirst = buffer.readDoubleLE(8);
+    const flast = buffer.readDoubleLE(16);
+    const fxtype = buffer.readUInt8(28);
+    const fytype = buffer.readUInt8(29);
+
+    if (fnpts === 0 || fnpts > 100000) {
+        throw new Error('Invalid SPC point count: ' + fnpts);
+    }
+
+    const isWavenumber = fxtype === 1 || (ffirst >= 400 && ffirst <= 4000);
+    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
+    const modality = isWavenumber ? 'MIR' : 'NIR';
+    const axisDirection = ffirst > flast ? 'DESCENDING' : 'ASCENDING';
+
+    let quantity = 'UNVERIFIED';
+    if (fytype === 1) quantity = 'TRANSMITTANCE';
+    else if (fytype === 2) quantity = 'REFLECTANCE';
+    else if (fytype === 3) quantity = 'ABSORBANCE';
+
+    const step = fnpts > 1 ? (flast - ffirst) / (fnpts - 1) : 0;
+    const wavelengths = [];
+    const values = [];
+    const dataOffset = 512 + 32;
+
+    for (let i = 0; i < fnpts; i++) {
+        const bytePos = dataOffset + i * 4;
+        if (bytePos + 4 <= buffer.length) {
+            wavelengths.push(Math.round((ffirst + i * step) * 1000) / 1000);
+            values.push(buffer.readFloatLE(bytePos));
+        }
+    }
+
+    return {
+        format: 'SPC',
+        instrument: 'Thermo GRAMS / SPC',
+        wavelengths,
+        values,
+        modality,
+        axisUnit,
+        axisDirection,
+        quantity,
+        sha256: crypto.createHash('sha256').update(buffer).digest('hex')
+    };
+}
+
+function isOpusFormat(buffer, filename) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 256) return false;
+    const ext = filename.toLowerCase();
+    if (ext.endsWith('.opus') || /\.[0-9]+$/.test(ext)) return true;
+    if (buffer[0] === 0x0A && buffer[1] === 0x0A) return true;
+    const dirPtr = buffer.readUInt32LE(8);
+    return dirPtr >= 12 && dirPtr < buffer.length && buffer.readUInt32LE(16) > 0 && buffer.readUInt32LE(16) < 500;
+}
+
+function isAsdFormat(buffer, filename) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 484) return false;
+    const ext = filename.toLowerCase();
+    if (ext.endsWith('.asd')) return true;
+    const sig = buffer.toString('ascii', 0, 3);
+    return sig === 'ASD' || sig === 'FS3';
+}
+
+function isSpcFormat(buffer, filename) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 512) return false;
+    const ext = filename.toLowerCase();
+    if (ext.endsWith('.spc')) return true;
+    const fversn = buffer.readUInt8(1);
+    if (fversn === 0x4B || fversn === 0x4D) {
+        const pts = buffer.readUInt32LE(4);
+        return pts > 0 && pts < 100000;
+    }
+    return false;
+}
+
+/**
  * Universal Spectral File Parser (Supports Buffer or string)
  */
 exports.parseSpectralFile = (rawInput, filename = '') => {
@@ -184,6 +444,17 @@ exports.parseSpectralFile = (rawInput, filename = '') => {
         throw new Error('Invalid raw content: Buffer or string expected');
     }
 
+    // Binary format detection
+    if (isOpusFormat(buffer, filename)) {
+        return parseOpus(buffer);
+    }
+    if (isAsdFormat(buffer, filename)) {
+        return parseAsd(buffer);
+    }
+    if (isSpcFormat(buffer, filename)) {
+        return parseSpc(buffer);
+    }
+
     const trimmed = content.trim();
     const isJcamp = trimmed.startsWith('##TITLE') || trimmed.includes('##JCAMP-DX') ||
         filename.endsWith('.dx') || filename.endsWith('.jdx') || filename.endsWith('.jcamp');
@@ -194,3 +465,6 @@ exports.parseSpectralFile = (rawInput, filename = '') => {
 };
 
 exports.calculateChecksum = calculateChecksum;
+exports.parseOpus = parseOpus;
+exports.parseAsd = parseAsd;
+exports.parseSpc = parseSpc;

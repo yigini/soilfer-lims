@@ -346,7 +346,7 @@ exports.uploadBatch = async (req, res) => {
                     const ext = path.extname(file.originalname).toLowerCase();
                     let sourceFormat = 'CSV';
                     if (ext === '.dx' || ext === '.jdx' || ext === '.jcamp') sourceFormat = 'JCAMP';
-                    else if (ext === '.opus') sourceFormat = 'OPUS';
+                    else if (ext === '.opus' || /\.[0-9]+$/.test(ext)) sourceFormat = 'OPUS';
                     else if (ext === '.spc') sourceFormat = 'SPC';
                     else if (ext === '.asd') sourceFormat = 'ASD';
 
@@ -403,6 +403,8 @@ exports.uploadBatch = async (req, res) => {
                     if (!scanItem.quantity) scanItem.quantity = parsed.quantity;
                     if (!scanItem.resolution && parsed.resolution) scanItem.resolution = parsed.resolution;
                     if (!scanItem.instrument && parsed.instrument) scanItem.instrument = parsed.instrument;
+                    if (!scanItem.coAddedScans && parsed.coAddedScans) scanItem.coAddedScans = parsed.coAddedScans;
+                    if (!scanItem.backgroundRef && parsed.backgroundRef) scanItem.backgroundRef = parsed.backgroundRef;
                     scanItem.sourceFormat = parsed.format;
                     scanItem.sha256 = parsed.sha256;
                 } catch (parseErr) {
