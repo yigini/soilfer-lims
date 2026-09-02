@@ -166,9 +166,10 @@ function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
     }
 
     return {
-        id: sample.id,
-        labId: sample.labId || null,
+        id: sample.originalId || sample.id,
+        sampleId: sample.originalId || sample.id,
         originalId: sample.originalId,
+        labId: sample.labId || null,
         country: sample.country || sample.countryName || 'UNKNOWN',
         projectCode: sample.projectCode || null,
         status: sample.status,
