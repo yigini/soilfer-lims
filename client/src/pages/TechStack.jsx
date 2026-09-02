@@ -83,10 +83,26 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.3.0',
+        date: 'September 2026',
+        tag: 'Operations Engine, Spectral Rebuild & Workflow Integrity',
+        badgeColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+        changes: [
+            'Sample Detail & Operations Reconciliation (Vol. XIII): Implemented 3-way analysis reconciliation (delete unstarted, waive in-progress with mandatory audit reasons, prevent deletion of result-bearing work).',
+            'Sample-Bound Lab Isolation: Enforced strict sample-level custody checks blocking cross-laboratory work assignment for all roles (including Super Admin).',
+            'Prerequisite Gate Enforcement: Server-side validation (HTTP 412) requiring sample preparation completion before starting work or entering results.',
+            'Native Binary Spectral Parsers: Direct binary parsing for Bruker OPUS, ASD FieldSpec, and Galactic SPC formats with auto-extraction of acquisition parameters.',
+            'Scheduled Escalation Engine (MAP-19): Background service monitoring unassigned work (>48h) and stalled work (>72h), alerting managers automatically.',
+            'Multi-Episode Analytical Tracking: Distinct analytical passes for reopened samples, capturing reasons, timestamps, and multi-approval dates on Certificates of Analysis.',
+            'Declarative Deployment Profiles: Multi-lab configuration engine supporting SoilFER 7-lab reference setup and standalone deployments.',
+            'GLOSOLAN Metrology & QA Engine: ISO 13528 proficiency testing evaluation, batch QC disposition flagging, and full result provenance tracking (MEASURED, DERIVED, IMPORTED).',
+        ]
+    },
+    {
         version: 'v1.2.0',
         date: 'August 2026',
         tag: 'Visual Identity & Donor Integration',
-        badgeColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
         changes: [
             'Visual Rebrand: Integrated the official illustrated SoilFER logo across desktop, mobile headers, sidebar, and reports.',
             'Official Donor Badges: Added official vector assets for the US Department of State and Japan MOFA/ODA with direct portal links.',
