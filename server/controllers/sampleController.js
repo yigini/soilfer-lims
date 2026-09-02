@@ -501,13 +501,13 @@ exports.updateStatus = async (req, res) => {
             updates.preparationStatus = 'PENDING';
         }
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: updates
-        });
+        const { transitionSample } = require('../services/sampleStateService');
+        const nextStatus = status;
+        delete updates.status;
+        const updated = await transitionSample(id, nextStatus, user, updates.notes || updates.reason || 'Status updated via API', updates);
 
         // Post-Update Hook for Work Items
-        if (status === 'ACCEPTED') {
+        if (nextStatus === 'ACCEPTED') {
             try {
                 const workItemController = require('./workItemController');
                 await workItemController.generateWorkItemsForSample(updated);
@@ -743,13 +743,10 @@ exports.receiveSample = async (req, res) => {
         const beforeState = sample.status;
         const now = new Date();
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                status: workflow.SAMPLE_STATES.RECEIVED,
-                receptionDate: now,
-                receivedBy: user.username
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(id, workflow.SAMPLE_STATES.RECEIVED, user, 'Sample received at lab', {
+            receptionDate: now,
+            receivedBy: user.username
         });
 
         // Audit: SAMPLE_RECEIVED
@@ -914,18 +911,15 @@ exports.undoIntake = async (req, res) => {
         }
 
         // Transaction: Delete WorkItems, Update Sample, Audit
-        await prisma.$transaction([
-            prisma.workItem.deleteMany({ where: { sampleId: String(id) } }),
-            prisma.sample.update({
-                where: { id: String(id) },
-                data: {
-                    status: 'RECEIVED',
-                    dryingStatus: null,
-                    preparationStatus: null,
-                    acceptedBy: null,
-                    acceptedAt: null
-                }
-            }),
+        await prisma.workItem.deleteMany({ where: { sampleId: String(id) } });
+
+        const { transitionSample } = require('../services/sampleStateService');
+        await transitionSample(id, 'RECEIVED', user, `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`, {
+            dryingStatus: null,
+            preparationStatus: null,
+            acceptedBy: null,
+            acceptedAt: null
+        });
             prisma.auditLog.create({
                 data: {
                     id: `audit-undo-${Date.now()}`,
@@ -1230,17 +1224,14 @@ exports.acceptSample = async (req, res) => {
             note: `Intake Accepted. Assigned Lab ID: ${labId}`
         });
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                labId: labId,
-                status: 'ACCEPTED',
-                dryingStatus: 'PENDING',
-                preparationStatus: 'PENDING',
-                acceptedBy: user.username,
-                acceptedAt: now,
-                history: JSON.stringify(history)
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(id, 'ACCEPTED', user, `Intake Accepted. Assigned Lab ID: ${labId}`, {
+            labId: labId,
+            dryingStatus: 'PENDING',
+            preparationStatus: 'PENDING',
+            acceptedBy: user.username,
+            acceptedAt: now,
+            history: JSON.stringify(history)
         });
 
         let workItemWarning = null;
@@ -1336,27 +1327,26 @@ exports.deleteSample = async (req, res) => {
             await prisma.$transaction([
                 prisma.workItem.deleteMany({ where: { sampleId: String(id) } }),
                 prisma.submission.deleteMany({ where: { sampleId: String(id) } }),
-                prisma.result.deleteMany({ where: { sampleId: String(id) } }),
-                prisma.sample.update({
-                    where: { id: String(id) },
-                    data: {
-                        status: 'EXPECTED',
-                        receptionData: null,
-                        receptionDate: null,
-                        receivedBy: null,
-                        dryingStatus: null,
-                        preparationStatus: null,
-                        acceptedBy: null,
-                        acceptedAt: null,
-                        approvedBy: null,
-                        approvedAt: null,
-                        requiredAnalyses: null,
-                        analysisGroupIds: null,
-                        lastSubmissionId: null,
-                        lastSubmissionType: null,
-                        lastSubmissionAt: null
-                    }
-                }),
+                prisma.result.deleteMany({ where: { sampleId: String(id) } })
+            ]);
+
+            const { transitionSample } = require('../services/sampleStateService');
+            await transitionSample(id, 'EXPECTED', user, 'Sample reset/reverted to EXPECTED by manager', {
+                receptionData: null,
+                receptionDate: null,
+                receivedBy: null,
+                dryingStatus: null,
+                preparationStatus: null,
+                acceptedBy: null,
+                acceptedAt: null,
+                approvedBy: null,
+                approvedAt: null,
+                requiredAnalyses: null,
+                analysisGroupIds: null,
+                lastSubmissionId: null,
+                lastSubmissionType: null,
+                lastSubmissionAt: null
+            });
                 prisma.auditLog.create({
                     data: {
                         id: `audit-revert-${Date.now()}`,
@@ -1482,27 +1472,24 @@ exports.batchDeleteSamples = async (req, res) => {
 
         // REVERT: Project samples → back to EXPECTED
         for (const sample of toRevert) {
-            txOps.push(
-                prisma.sample.update({
-                    where: { id: String(sample.id) },
-                    data: {
-                        status: 'EXPECTED',
-                        labId: null,
-                        receptionData: null,
-                        fieldMetadata: null,
-                        requiredAnalyses: null,
-                        analysisGroupIds: null,
-                        metadata: null,
-                        assignedLab: sample.assignedLab, // Keep lab assignment
-                        history: JSON.stringify([{
-                            status: 'REVERT_TO_EXPECTED',
-                            changedBy: user.username,
-                            timestamp: new Date(),
-                            note: 'Draft/intake discarded. Sample reverted to EXPECTED status.'
-                        }])
-                    }
-                })
-            );
+            const { transitionSample } = require('../services/sampleStateService');
+            await transitionSample(sample.id, 'EXPECTED', user, 'Draft/intake discarded. Sample reverted to EXPECTED status.', {
+                labId: null,
+                receptionData: null,
+                fieldMetadata: null,
+                requiredAnalyses: null,
+                analysisGroupIds: null,
+                metadata: null,
+                assignedLab: sample.assignedLab,
+                history: JSON.stringify([{
+                    status: 'EXPECTED',
+                    action: 'REVERT_TO_EXPECTED',
+                    changedBy: user.username,
+                    timestamp: new Date(),
+                    note: 'Draft/intake discarded. Sample reverted to EXPECTED status.'
+                }])
+            }).catch(e => console.warn('[undoReception] Warning reverting sample:', e.message));
+
             txOps.push(prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } }));
             txOps.push(prisma.result.deleteMany({ where: { sampleId: String(sample.id) } }));
         }
@@ -1768,13 +1755,10 @@ exports.approveSample = async (req, res) => {
         }
 
         const now = new Date();
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                status: 'APPROVED',
-                approvedBy: req.user.username,
-                approvedAt: now
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(id, 'APPROVED', req.user, 'Final Approval by Manager', {
+            approvedBy: req.user.username,
+            approvedAt: now
         });
 
         await prisma.auditLog.create({
@@ -1826,13 +1810,10 @@ exports.undoApproval = async (req, res) => {
 
         const previousStatus = sample.status;
         const now = new Date();
-        await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                status: 'ACCEPTED',
-                approvedBy: null,
-                approvedAt: null
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        await transitionSample(id, 'PROCESSING', user, 'Approval revoked by manager', {
+            approvedBy: null,
+            approvedAt: null
         });
 
         // Reset all ACCEPTED work items to SUBMITTED
@@ -1895,12 +1876,9 @@ exports.archiveSample = async (req, res) => {
         if (notes) meta.archiveNotes = notes;
 
         const now = new Date();
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                status: 'ARCHIVED',
-                metadata: JSON.stringify(meta)
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(id, 'ARCHIVED', user, `Sample archived at location ${archiveLocation || 'ARCHIVE'}`, {
+            metadata: JSON.stringify(meta)
         });
 
         await prisma.auditLog.create({
@@ -1950,12 +1928,9 @@ exports.disposeSample = async (req, res) => {
         if (notes) meta.disposalNotes = notes;
 
         const now = new Date();
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                status: 'DISPOSED',
-                metadata: JSON.stringify(meta)
-            }
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(id, 'DISPOSED', user, `Sample disposed via ${disposalMethod || 'STANDARD'}`, {
+            metadata: JSON.stringify(meta)
         });
 
         await prisma.auditLog.create({

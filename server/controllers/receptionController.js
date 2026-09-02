@@ -109,42 +109,32 @@ exports.processIntake = async (req, res) => {
 
         if (decision === 'REJECTED') {
             history.push({
-                status: 'NON_CONFORMING',
+                status: 'REJECTED',
                 changedBy: receivedBy,
                 timestamp: now,
                 reason: ncReason
             });
-            await prisma.sample.update({
-                where: { id: sample.id },
-                data: {
-                    status: 'NON_CONFORMING',
-                    metadata: JSON.stringify({
-                        nonConformance: {
-                            reason: ncReason,
-                            checklist,
-                            notes,
-                            rejectedBy: receivedBy,
-                            at: now
-                        }
-                    }),
-                    history: JSON.stringify(history)
-                }
+
+            const { transitionSample } = require('../services/sampleStateService');
+            const updated = await transitionSample(sample.id, 'EXPECTED', user, `Sample rejected during intake: ${ncReason}`, {
+                rejectionReason: ncReason,
+                metadata: JSON.stringify({
+                    nonConformance: {
+                        reason: ncReason,
+                        checklist,
+                        notes,
+                        rejectedBy: receivedBy,
+                        at: now
+                    }
+                }),
+                history: JSON.stringify(history)
             });
 
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-rej-${Date.now()}`,
-                    entity: 'SAMPLE',
-                    entityId: sample.id,
-                    action: 'NON_CONFORMANCE',
-                    details: `Sample rejected: ${ncReason}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: sample.id
-                }
+            return res.json({
+                success: true,
+                message: 'Sample rejected and reverted to EXPECTED with non-conformance recorded.',
+                sample: updated
             });
-
-            return res.json({ success: false, message: 'Sample marked as Non-Conforming.' });
         }
 
         if (req.body.isDraft) {
@@ -352,10 +342,10 @@ exports.processIntake = async (req, res) => {
         }
 
         console.log(`[INTAKE] Updating sample ${sample.id} with status RECEIVED`);
-        const updated = await prisma.sample.update({
-            where: { id: String(sample.id) },
-            data: updateData
-        });
+        const { transitionSample } = require('../services/sampleStateService');
+        const nextStatus = updateData.status || 'RECEIVED';
+        delete updateData.status;
+        const updated = await transitionSample(sample.id, nextStatus, user, 'Intake completed at reception', updateData);
 
         // Automatically generate work items for specified analyses
         try {
@@ -444,35 +434,33 @@ exports.discardDraft = async (req, res) => {
 
         if (isPreRegistered) {
             // REVERT to EXPECTED — transactional (Finding #8)
-            await prisma.$transaction([
-                prisma.sample.update({
-                    where: { id: String(sample.id) },
-                    data: {
-                        status: 'EXPECTED',
-                        labId: null,
-                        receptionData: null,
-                        receptionDate: null,
-                        receivedBy: null,
-                        requiredAnalyses: null,
-                        analysisGroupIds: null,
-                        assignedLab: sample.assignedLab,
-                        history: JSON.stringify([{
-                            status: 'REVERT_TO_EXPECTED',
-                            changedBy: user.username,
-                            timestamp: new Date(),
-                            note: 'Draft/intake discarded by reception. Sample reverted to EXPECTED.'
-                        }])
-                    }
-                }),
-                prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } }),
-                prisma.result.deleteMany({ where: { sampleId: String(sample.id) } }),
-                // Preserve audit trail — log the discard action instead of deleting evidence
-                prisma.auditLog.create({
-                    data: {
-                        id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                        entity: 'SAMPLE',
-                        entityId: String(sample.id),
-                        action: 'DRAFT_DISCARDED',
+            await prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
+            await prisma.result.deleteMany({ where: { sampleId: String(sample.id) } });
+
+            const { transitionSample } = require('../services/sampleStateService');
+            await transitionSample(sample.id, 'EXPECTED', user, 'Draft/intake discarded by reception. Sample reverted to EXPECTED.', {
+                labId: null,
+                receptionData: null,
+                receptionDate: null,
+                receivedBy: null,
+                requiredAnalyses: null,
+                analysisGroupIds: null,
+                assignedLab: sample.assignedLab,
+                history: JSON.stringify([{
+                    status: 'EXPECTED',
+                    action: 'REVERT_TO_EXPECTED',
+                    changedBy: user.username,
+                    timestamp: new Date(),
+                    note: 'Draft/intake discarded by reception. Sample reverted to EXPECTED.'
+                }])
+            });
+
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    entity: 'SAMPLE',
+                    entityId: String(sample.id),
+                    action: 'DRAFT_DISCARDED',
                         details: `Project sample ${sample.originalId} reverted to EXPECTED by reception.`,
                         performedBy: user.username,
                         timestamp: new Date(),

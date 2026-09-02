@@ -848,15 +848,15 @@ exports.reviewWorkItem = async (req, res) => {
 
         if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
             if (item.analysis === 'ARCHIVING' || item.analysis === 'ARCH' || item.analysis === 'Archive') {
-                operations.push(prisma.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { status: 'ARCHIVED' }
-                }));
+                const { transitionSample } = require('../services/sampleStateService');
+                await transitionSample(item.sampleId, 'ARCHIVED', user, 'Sample archived via work item review').catch(err => {
+                    console.warn('[reviewItem] Warning: sample transition to ARCHIVED failed:', err.message);
+                });
             } else if (item.analysis === 'DISPOSAL' || item.analysis === 'DISP' || item.analysis === 'Dispose') {
-                operations.push(prisma.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { status: 'DISPOSED' }
-                }));
+                const { transitionSample } = require('../services/sampleStateService');
+                await transitionSample(item.sampleId, 'DISPOSED', user, 'Sample disposed via work item review').catch(err => {
+                    console.warn('[reviewItem] Warning: sample transition to DISPOSED failed:', err.message);
+                });
             }
 
             // Sync spectralData status to APPROVED when spectral work item is accepted
@@ -1060,15 +1060,15 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
             if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
                 if (item.analysis === 'ARCHIVING' || item.analysis === 'ARCH' || item.analysis === 'Archive') {
-                    operations.push(prisma.sample.update({
-                        where: { id: String(item.sampleId) },
-                        data: { status: 'ARCHIVED' }
-                    }));
+                    const { transitionSample } = require('../services/sampleStateService');
+                    await transitionSample(item.sampleId, 'ARCHIVED', user, 'Sample archived via batch work item review').catch(err => {
+                        console.warn('[reviewBatch] Warning: sample transition to ARCHIVED failed:', err.message);
+                    });
                 } else if (item.analysis === 'DISPOSAL' || item.analysis === 'DISP' || item.analysis === 'Dispose') {
-                    operations.push(prisma.sample.update({
-                        where: { id: String(item.sampleId) },
-                        data: { status: 'DISPOSED' }
-                    }));
+                    const { transitionSample } = require('../services/sampleStateService');
+                    await transitionSample(item.sampleId, 'DISPOSED', user, 'Sample disposed via batch work item review').catch(err => {
+                        console.warn('[reviewBatch] Warning: sample transition to DISPOSED failed:', err.message);
+                    });
                 }
 
                 // Sync spectralData status when spectral work item is approved

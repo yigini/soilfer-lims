@@ -111,6 +111,7 @@ model Sample {
   requiredAnalyses  String?    // JSON string: Array of analysis codes
   analysisGroupIds  String?    // JSON string: Array of analysis group IDs
   history           String?    // JSON string: Audit trail for this sample
+  rejectionReason   String?    // Detailed explanation when sample rejected during intake
 
   // Approvals
   acceptedBy        String?

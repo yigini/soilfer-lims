@@ -146,15 +146,6 @@ exports.createSubmission = async (req, res) => {
                     createdAt: now
                 }
             }),
-            prisma.sample.update({
-                where: { id: String(sampleId) },
-                data: {
-                    status: type === 'FULL' ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL',
-                    lastSubmissionId: submissionId,
-                    lastSubmissionType: type,
-                    lastSubmissionAt: now
-                }
-            }),
             prisma.auditLog.create({
                 data: {
                     id: `audit-sub-main-${Date.now()}`,
@@ -204,6 +195,16 @@ exports.createSubmission = async (req, res) => {
         }
 
         const [submission] = await prisma.$transaction(operations);
+
+        const { transitionSample } = require('../services/sampleStateService');
+        const targetStatus = type === 'FULL' ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
+        await transitionSample(sampleId, targetStatus, user, `${user.username} submitted ${validItems.length} items for ${type} review`, {
+            lastSubmissionId: submissionId,
+            lastSubmissionType: type,
+            lastSubmissionAt: now
+        }).catch(err => {
+            console.warn('[createSubmission] Warning: sample status transition failed:', err.message);
+        });
 
         res.status(201).json({
             submission,
