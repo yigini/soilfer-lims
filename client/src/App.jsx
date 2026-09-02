@@ -284,8 +284,8 @@ function App() {
             <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
             <Route path="/projects" element={<RequireAuth permission="MANAGE_PROJECTS"><Projects /></RequireAuth>} />
 
-            <Route path="/admin" element={<RequireAuth permission="MANAGE_BRANDING"><AdminPanel /></RequireAuth>} />
-            <Route path="/admin/audit" element={<RequireAuth permission="MANAGE_USERS"><AuditLogs /></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth permission="MANAGE_ANALYSES"><AdminPanel /></RequireAuth>} />
+            <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
             <Route path="/admin/labs" element={<RequireAuth requiredRole="SUPER_ADMIN"><LabManagement /></RequireAuth>} />
 
             {/* General Access */}
