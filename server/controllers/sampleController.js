@@ -1034,11 +1034,11 @@ exports.getSampleDetail = async (req, res) => {
 
         const derivedDryingStatus = dryingItem
             ? (['ACCEPTED', 'COMPLETED'].includes(dryingItem.status) ? 'DONE' : (dryingItem.status === 'ON_HOLD' ? 'FAILED' : 'PENDING'))
-            : (sample.dryingStatus || 'PENDING');
+            : (sample.dryingStatus !== undefined ? sample.dryingStatus : null);
 
         const derivedPrepStatus = prepItem
             ? (['ACCEPTED', 'COMPLETED'].includes(prepItem.status) ? 'DONE' : 'PENDING')
-            : (sample.preparationStatus || 'PENDING');
+            : (sample.preparationStatus !== undefined ? sample.preparationStatus : null);
 
         const enrichedSample = {
             ...sample,
@@ -1697,12 +1697,10 @@ exports.updateSampleAnalyses = async (req, res) => {
         };
 
         // If sample was in a final/history state, and new analyses are added, 
-        // we move it back to PROCESSING status. 
+        // we move it back to PROCESSING status without fabricating preparation records.
         if (['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status) && analyses && analyses.length > 0) {
             updates.status = 'PROCESSING';
-            // Ensure processing flags allow technicians to see it
-            if (sample.dryingStatus === null) updates.dryingStatus = 'DONE';
-            if (sample.preparationStatus === null) updates.preparationStatus = 'DONE';
+            // SD-08: Leave dryingStatus and preparationStatus as whatever they were (including null if bypassed).
         }
 
         const updated = await prisma.sample.update({
