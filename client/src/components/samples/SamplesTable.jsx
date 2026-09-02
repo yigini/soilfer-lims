@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import InfoTooltip from '../common/InfoTooltip';
+import { getAnalysisDisplayName } from '../../utils/analysisNames';
 
 const STATE_CONFIG = {
     'EXPECTED': { icon: CalendarClock, color: 'text-gray-500', bg: 'bg-gray-100', label: 'Expected' },
@@ -484,7 +485,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                                     {s.items.map((item, idx) => (
                                                                         <div key={idx} className="flex items-center gap-2 py-0.5 pl-4">
                                                                             <span className={WI_STATUS_COLOR[item.status] || 'text-gray-500'}>{WI_STATUS_ICON[item.status] || '○'}</span>
-                                                                            <span className="font-bold uppercase tracking-wider">{item.analysis}</span>
+                                                                            <span className="font-bold">{item.analysisName || getAnalysisDisplayName(item.analysis)}</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>

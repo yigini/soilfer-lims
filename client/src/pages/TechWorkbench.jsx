@@ -10,6 +10,7 @@ import {
     Activity, Zap, FileText, Search, ChevronDown, Wrench, ShieldAlert,
     Droplets, FlaskConical, Radio, Download, XCircle, Info
 } from 'lucide-react';
+import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -1188,7 +1189,7 @@ const TechWorkbench = () => {
                                     }`}
                             >
                                 <div className={`w-2 h-2 rounded-full ${tabColor.dot}`} title={`Status`} />
-                                <span>{group.analysisName}</span>
+                                <span>{group.analysisName || getAnalysisDisplayName(group.analysis)}</span>
                                 {group.equipmentRequired && <Wrench size={12} className="text-gray-400" title="Equipment required" />}
                                 <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold ${isActive
                                     ? tabColor.badge

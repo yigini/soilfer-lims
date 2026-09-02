@@ -176,6 +176,29 @@ exports.getAnalyticalResults = async (req, res) => {
 
         const sortedKeys = Array.from(analysisKeys).sort();
 
+        // Fetch display names for columns
+        const analysisDefinitions = await prisma.analysis.findMany({
+            where: { code: { in: sortedKeys } },
+            select: { code: true, name: true, units: true }
+        });
+        const defMap = {};
+        analysisDefinitions.forEach(d => { defMap[d.code] = d; });
+
+        const { getAnalysisName } = require('../services/analysisService');
+
+        const resultCols = await Promise.all(sortedKeys.map(async k => {
+            const def = defMap[k];
+            const name = def?.name || await getAnalysisName(k);
+            const unitSuffix = def?.units ? ` (${def.units})` : '';
+            return {
+                key: k,
+                label: `${name}${unitSuffix}`,
+                shortLabel: name,
+                unit: def?.units || null,
+                isResult: true
+            };
+        }));
+
         res.json({
             data: flattenedData,
             columns: [
@@ -186,7 +209,7 @@ exports.getAnalyticalResults = async (req, res) => {
                 { key: 'status', label: 'Status' },
                 { key: 'collectionDate', label: 'Collected' },
                 { key: 'receptionDate', label: 'Received' },
-                ...sortedKeys.map(k => ({ key: k, label: k, isResult: true }))
+                ...resultCols
             ]
         });
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, ShieldCheck, Check, X, AlertOctagon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getAnalysisDisplayName } from '../../utils/analysisNames';
 
 const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewSubmission, onReviewItem }) => {
     const { user } = useAuth();
@@ -22,17 +23,17 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
     return (
         <div className="space-y-6">
 
-            {/* TECH: Create Submission */}
+            {/* TECHNICIAN: Create Submission */}
             {isTech && (
-                <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-xl border border-indigo-100 dark:border-indigo-800">
-                    <h3 className="font-bold text-indigo-900 dark:text-indigo-100 mb-4 flex items-center gap-2">
-                        <Send size={18} /> Submit Results
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <Send size={18} className="text-indigo-600" /> Submit Results for Approval
                     </h3>
 
                     {eligibleItems.length > 0 ? (
                         <>
-                            <div className="mb-4 text-sm">
-                                <p className="mb-2 font-bold">Select Items for Partial Submission:</p>
+                            <div className="mb-4">
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Select Completed Items to Submit</label>
                                 <div className="flex flex-wrap gap-2">
                                     {eligibleItems.map(item => (
                                         <button
@@ -43,7 +44,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
                                                 : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-300'
                                                 }`}
                                         >
-                                            {item.analysis}
+                                            {item.analysisName || getAnalysisDisplayName(item.analysis)}
                                         </button>
                                     ))}
                                 </div>
@@ -99,7 +100,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
                                     {sub.itemsDetails && sub.itemsDetails.map(item => (
                                         <div key={item.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 px-2 -mx-2 rounded">
                                             <div className="flex items-center gap-4">
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">{item.analysis}</span>
+                                                <span className="font-medium text-gray-700 dark:text-gray-300">{item.analysisName || getAnalysisDisplayName(item.analysis)}</span>
                                                 <span className="font-mono font-bold">{item.result}</span>
                                             </div>
                                             <div className="flex items-center gap-1">

@@ -47,26 +47,11 @@ const ANALYSIS_ROOM = {
     ARCHIVING: ROOMS.ARCHIVE, ARCH: ROOMS.ARCHIVE, DISPOSAL: ROOMS.ARCHIVE, DISP: ROOMS.ARCHIVE,
 };
 
-const DISPLAY_NAMES = {
-    DRYING: 'Drying', PREPARATION: 'Sieving & Prep',
-    TEXTURE: 'Texture', SAND: 'Sand', SILT: 'Silt', CLAY: 'Clay', GRAVEL: 'Gravel',
-    BULK_DENSITY: 'Bulk Density', BD: 'Bulk Density',
-    MC: 'Moisture', MOIST: 'Moisture',
-    PH: 'pH', PH_H2O: 'pH (H₂O)', PH_KCL: 'pH (KCl)',
-    EC: 'Elec. Conductivity', SOC: 'Organic Carbon', OC: 'Organic Carbon',
-    TN: 'Total Nitrogen', TC: 'Total Carbon', CEC: 'Cation Exchange',
-    AV_P: 'Avail. P', P_BRAY: 'P (Bray)', P_OLSEN: 'P (Olsen)',
-    EX_ACIDITY: 'Exch. Acidity', CACO3: 'CaCO₃',
-    K_EXCH: 'K (Exch.)', CA_EXCH: 'Ca (Exch.)', MG_EXCH: 'Mg (Exch.)',
-    NA_EXCH: 'Na (Exch.)', AL_EXCH: 'Al (Exch.)', H_EXCH: 'H (Exch.)',
-    MIR: 'Mid-Infrared', VISNIR: 'Vis-NIR', XRF: 'XRF',
-    ARCHIVING: 'Archiving', DISPOSAL: 'Disposal',
-};
+import { getAnalysisDisplayName } from './analysisNames';
 
 export function getDisplayName(code) {
-    const up = code.toUpperCase();
-    return DISPLAY_NAMES[up] || DISPLAY_NAMES[code] ||
-        code.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    if (!code) return '—';
+    return getAnalysisDisplayName(code);
 }
 
 export function getRoom(code) {

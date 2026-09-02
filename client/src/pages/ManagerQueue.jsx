@@ -9,6 +9,7 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
+import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -335,10 +336,10 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
     const title = item.labId || (type === 'assign' ? `Sample ${item.sampleId}` : (String(item.originalId) || item.type));
     const subtitle = type === 'assign'
-        ? (item.analyses ? item.analyses.join(', ') : t('queue.noAnalyses', 'No analyses'))
+        ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
         : (type === 'review' && item.isAggregated)
-            ? `${item.types?.join('/') || ''} ${t('queue.cardReview', 'Review')}`
-            : (item.clientName || item.analysis || t('queue.unknownClient', 'Unknown Client'));
+            ? `${item.types?.map(t => getAnalysisDisplayName(t)).join('/') || ''} ${t('queue.cardReview', 'Review')}`
+            : (item.clientName || (item.analysis ? getAnalysisDisplayName(item.analysis) : t('queue.unknownClient', 'Unknown Client')));
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));

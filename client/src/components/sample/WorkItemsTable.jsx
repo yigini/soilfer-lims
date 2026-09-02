@@ -6,6 +6,7 @@ import SpectraBatchUpload from '../SpectraBatchUpload';
 import { useAuth } from '../../context/AuthContext';
 import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
+import { getAnalysisDisplayName } from '../../utils/analysisNames';
 
 const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssignmentSuccess, onReview, onReviewBulk }) => {
     const { user } = useAuth();
@@ -422,8 +423,13 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 </td>
                                             )}
                                             <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
-                                                <div className="font-bold text-xs text-gray-900 dark:text-gray-100">{item.analysis}</div>
-                                                <div className="text-[9px] text-gray-400 font-mono uppercase tracking-tighter">TASK: {String(item.id).split('-').pop()}</div>
+                                                <div className="font-bold text-xs text-gray-900 dark:text-gray-100">
+                                                    {item.analysisName || getAnalysisDisplayName(item.analysis)}
+                                                </div>
+                                                <div className="text-[10px] text-gray-400 font-mono flex items-center gap-1.5 mt-0.5">
+                                                    <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700/80 rounded text-gray-600 dark:text-gray-300 font-semibold">{item.analysis}</span>
+                                                    <span>• TASK: {String(item.id).split('-').pop()}</span>
+                                                </div>
                                                 {effectiveBlocked && (
                                                     <div className="text-[9px] text-amber-600 font-bold mt-1 uppercase flex items-center gap-1">
                                                         <ShieldAlert size={10} /> {lockReason}

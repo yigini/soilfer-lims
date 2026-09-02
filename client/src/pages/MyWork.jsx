@@ -8,6 +8,7 @@ import {
     RefreshCw, ClipboardList, ArrowUpRight, Filter
 } from 'lucide-react';
 import { formatLastUpdated } from '../hooks/useRealtimeData';
+import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 // ─── Live Indicator ───
 const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
@@ -252,7 +253,7 @@ const MyWork = () => {
                                             {group.labId || group.sampleId.substring(0, 12)}
                                         </div>
                                         <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
-                                            {group.analyses?.join(', ')}
+                                            {group.analyses?.map(a => getAnalysisDisplayName(a)).join(', ')}
                                         </div>
                                     </div>
                                 </div>

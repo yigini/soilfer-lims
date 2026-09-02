@@ -1,42 +1,11 @@
 /**
- * Shared Analysis Service
- * 
- * Single source of truth for analysis name lookup and caching.
- * Replaces the duplicated loadMethods/getAnalysisName functions
- * previously scattered across workItemController and submissionController.
+ * Standard SoilFER Analysis & Parameter Display Names
+ * Converts technical laboratory codes (e.g. PH_H2O, SOC, TN, P_OLSEN, SAND)
+ * into real, human-readable analytical names.
  */
-const prisma = require('../prisma');
 
-// In-memory cache with TTL
-let cache = null;
-let cacheTime = null;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-/**
- * Load all analyses from DB with caching.
- * Returns array of { code, name, unit, categoryId, validation }
- */
-const loadAnalyses = async () => {
-    const now = Date.now();
-    if (cache && cacheTime && (now - cacheTime) < CACHE_TTL) {
-        return cache;
-    }
-    const analyses = await prisma.analysis.findMany({
-        include: { category: { select: { name: true } } }
-    });
-    cache = analyses.map(a => ({
-        code: a.code,
-        name: a.name,
-        unit: a.units,
-        categoryId: a.categoryId,
-        categoryName: a.category?.name || null,
-        validation: a.validation ? JSON.parse(a.validation) : null
-    }));
-    cacheTime = now;
-    return cache;
-};
-
-const FALLBACK_ANALYSIS_NAMES = {
+export const ANALYSIS_DISPLAY_NAMES = {
+    // Chemical Properties
     'PH_H2O': 'Soil pH (1:2.5 Water)',
     'PH_CACL2': 'Soil pH (0.01M CaCl₂)',
     'PH_KCL': 'Soil pH (1M KCl)',
@@ -50,6 +19,8 @@ const FALLBACK_ANALYSIS_NAMES = {
     'CACO3': 'Total Carbonate Equivalent (CaCO₃)',
     'totalCarbonateEquivalent': 'Total Carbonate Equivalent (CaCO₃)',
     'GYPSUM': 'Gypsum Content (CaSO₄·2H₂O)',
+
+    // Plant Nutrients & Micronutrients
     'TN': 'Total Nitrogen (TN)',
     'nitrogenTotal': 'Total Nitrogen (TN)',
     'P_OLSEN': 'Available Phosphorus (Olsen P)',
@@ -60,6 +31,8 @@ const FALLBACK_ANALYSIS_NAMES = {
     'EXT_CU': 'Extractable Copper (Cu)',
     'EXT_MN': 'Extractable Manganese (Mn)',
     'EXT_B': 'Extractable Boron (B)',
+
+    // Cation Exchange & Bases
     'CEC': 'Cation Exchange Capacity (CEC)',
     'cationExchangeCapacitySoil': 'Cation Exchange Capacity (CEC)',
     'ECEC': 'Effective CEC (ECEC)',
@@ -71,6 +44,8 @@ const FALLBACK_ANALYSIS_NAMES = {
     'EXCH_ACID': 'Exchangeable Acidity (Al³⁺ + H⁺)',
     'acidityExchangeable': 'Exchangeable Acidity (Al³⁺ + H⁺)',
     'baseSaturation': 'Base Saturation (%)',
+
+    // Physical Properties & Texture
     'SAND': 'Sand Fraction (0.05 – 2.0 mm)',
     'SILT': 'Silt Fraction (0.002 – 0.05 mm)',
     'CLAY': 'Clay Fraction (< 0.002 mm)',
@@ -80,6 +55,8 @@ const FALLBACK_ANALYSIS_NAMES = {
     'bulkDensityFineEarth': 'Bulk Density (Fine Earth)',
     'BD_WHOLE': 'Bulk Density (Whole Soil)',
     'bulkDensityWholeSoil': 'Bulk Density (Whole Soil)',
+
+    // Operational Gates & Spectroscopy
     'DRYING': 'Sample Drying (Station 01)',
     'PREPARATION': 'Sample Milling & Sieving (Station 02)',
     'SPEC_VIS_NIR': 'Vis-NIR Soil Spectroscopy',
@@ -89,39 +66,15 @@ const FALLBACK_ANALYSIS_NAMES = {
 };
 
 /**
- * Resolve analysis code to display name.
- * Returns the name if found in DB or fallback map, otherwise the code itself.
+ * Returns the human-readable display name for any analysis parameter code.
+ * If fallbackName is already a descriptive name, it is preferred.
  */
-const getAnalysisName = async (code) => {
-    if (!code) return '—';
-    const analyses = await loadAnalyses();
-    const match = analyses.find(a => a.code === code);
-    if (match && match.name) return match.name;
-    return FALLBACK_ANALYSIS_NAMES[code] || code;
+export const getAnalysisDisplayName = (code, fallbackName) => {
+    if (!code) return fallbackName || '—';
+    if (fallbackName && fallbackName !== code && !fallbackName.startsWith('http') && fallbackName.length > 2) {
+        return fallbackName;
+    }
+    return ANALYSIS_DISPLAY_NAMES[code] || fallbackName || code;
 };
 
-/**
- * Get the category name for a given analysis code.
- * Used by workItemController to dynamically assign work item categories.
- */
-const getAnalysisCategory = async (code) => {
-    const analyses = await loadAnalyses();
-    const match = analyses.find(a => a.code === code);
-    return match?.categoryName || 'Analysis';
-};
-
-/**
- * Invalidate the cache.
- * Should be called after create/update/delete in analysisController.
- */
-const invalidateCache = () => {
-    cache = null;
-    cacheTime = null;
-};
-
-module.exports = {
-    loadAnalyses,
-    getAnalysisName,
-    getAnalysisCategory,
-    invalidateCache
-};
+export default getAnalysisDisplayName;
