@@ -24,7 +24,11 @@
         "clear": "Clear",
         "apply": "Apply",
         "reset": "Reset",
-        "ok": "OK"
+        "ok": "OK",
+        "previous": "Previous",
+        "pageOf": "Page {{page}} of {{totalPages}}",
+        "noRecords": "No records found.",
+        "actions": "Actions"
     },
     "login": {
         "title": "Sign in to SoilFER LIMS",

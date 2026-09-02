@@ -24,7 +24,11 @@
         "clear": "Limpiar",
         "apply": "Aplicar",
         "reset": "Restablecer",
-        "ok": "Aceptar"
+        "ok": "Aceptar",
+        "previous": "Anterior",
+        "pageOf": "Página {{page}} de {{totalPages}}",
+        "noRecords": "No se encontraron registros.",
+        "actions": "Acciones"
     },
     "login": {
         "title": "Iniciar sesión en SoilFER LIMS",

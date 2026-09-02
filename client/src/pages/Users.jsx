@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Plus, Search, Edit2, Trash2, Shield, User, MapPin, Eye, Lock } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Shield, User, MapPin, Eye, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import UserDialog from '../components/UserDialog';
 import { useDialog } from '../context/DialogContext';
 
@@ -239,21 +239,27 @@ const Users = () => {
             </div>
 
             {/* Pagination settings */}
-            <div className="mt-4 flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="mt-5 flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs">
                 <button
                     disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
-                    className="px-4 py-2 border dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
+                    <ChevronLeft size={16} />
                     {t('common.previous', 'Previous')}
                 </button>
-                <span>{t('common.pageOf', { page, totalPages }, `Page ${page} of ${totalPages}`)}</span>
+                <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
+                        {t('common.pageOf', { page, totalPages }, `Page ${page} of ${totalPages}`)}
+                    </span>
+                </div>
                 <button
-                    disabled={page === totalPages}
+                    disabled={page === totalPages || totalPages === 0}
                     onClick={() => setPage(p => p + 1)}
-                    className="px-4 py-2 border dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                     {t('common.next', 'Next')}
+                    <ChevronRight size={16} />
                 </button>
             </div>
 

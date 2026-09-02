@@ -124,23 +124,39 @@ export const LanguageProvider = ({ children }) => {
     };
 
     const t = useMemo(() => {
-        return (key, paramsOrFallback = {}) => {
-            // Support t('key', 'Fallback String') as well as t('key', { param: 'value' })
-            const fallback = typeof paramsOrFallback === 'string' ? paramsOrFallback : null;
-            const params = typeof paramsOrFallback === 'object' ? paramsOrFallback : {};
+        return (key, paramsOrFallback = {}, maybeFallback = null) => {
+            // Support:
+            // 1. t('key', 'Fallback')
+            // 2. t('key', { param: 'val' })
+            // 3. t('key', { param: 'val' }, 'Fallback {{param}}')
+            let fallback = null;
+            let params = {};
+
+            if (typeof paramsOrFallback === 'string') {
+                fallback = paramsOrFallback;
+            } else if (typeof paramsOrFallback === 'object' && paramsOrFallback !== null) {
+                params = paramsOrFallback;
+                if (typeof maybeFallback === 'string') {
+                    fallback = maybeFallback;
+                }
+            }
 
             const normalized = normalizeLocale(locale);
             const localePack = translations[normalized];
             const fallbackPack = translations.en;
-            if (!localePack) return fallback || key;
+            if (!localePack) return fallback ? applyParams(fallback, params) : key;
 
-            const value =
-                localePack.flat[key] ??
-                fallbackPack.flat[key] ??
-                fallback ??
-                key;
+            const foundVal = localePack.flat[key] ?? fallbackPack.flat[key];
 
-            return applyParams(value, params) || fallback || key;
+            if (foundVal !== undefined && foundVal !== null) {
+                return applyParams(foundVal, params);
+            }
+
+            if (fallback) {
+                return applyParams(fallback, params);
+            }
+
+            return key;
         };
     }, [locale, translations]);
 
