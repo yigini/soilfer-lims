@@ -202,6 +202,62 @@ const UNITS = [
         quantityKind: 'DIMENSIONLESS',
         factorToBase: 1.0,
         synonyms: JSON.stringify(['index', 'ratio', 'dimensionless', '-'])
+    },
+    {
+        code: '(mmol/L)⁰˙⁵',
+        display: '(mmol/L)⁰˙⁵',
+        quantityKind: 'SAR',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['(mmol/L)^0.5', '(mmol/l)^0.5', 'mmol/L^0.5', '(mmol/L)0.5', '(mmol/L)⁰˙⁵'])
+    },
+    {
+        code: 'mg_CO2_C_kg_d',
+        display: 'mg CO₂-C/kg/d',
+        quantityKind: 'RESPIRATION_RATE',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['mg CO2-C/kg/d', 'mg CO2-C/kg/day', 'mg/kg/day'])
+    },
+    {
+        code: 'mg_CO2_C_g_MBC_d',
+        display: 'mg CO₂-C/g MBC/d',
+        quantityKind: 'METABOLIC_QUOTIENT',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['mg CO2-C/g MBC/d', 'mg CO2-C/g microbial C/d'])
+    },
+    {
+        code: 'umol_pNP_g_h',
+        display: 'µmol pNP/g/h',
+        quantityKind: 'ENZYMATIC_ACTIVITY',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['µmol pNP/g/h', 'umol pNP/g/h', 'umol/g/h'])
+    },
+    {
+        code: 'ug_NH4_N_g_2h',
+        display: 'µg NH₄-N/g/2h',
+        quantityKind: 'ENZYMATIC_ACTIVITY',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['µg NH4-N/g/2h', 'ug NH4-N/g/2h', 'ug/g/2h'])
+    },
+    {
+        code: 'ug_TPF_g_24h',
+        display: 'µg TPF/g/24h',
+        quantityKind: 'ENZYMATIC_ACTIVITY',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['µg TPF/g/24h', 'ug TPF/g/24h', 'ug/g/24h'])
+    },
+    {
+        code: 'ug_FDA_g_h',
+        display: 'µg FDA/g/h',
+        quantityKind: 'ENZYMATIC_ACTIVITY',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['µg FDA/g/h', 'ug FDA/g/h', 'ug/g/h'])
+    },
+    {
+        code: 'nGy/h',
+        display: 'nGy/h',
+        quantityKind: 'RADIATION_DOSE_RATE',
+        factorToBase: 1.0,
+        synonyms: JSON.stringify(['nGy/h', 'nanoGray/h', 'nGy/hr'])
     }
 ];
 
