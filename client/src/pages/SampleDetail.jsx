@@ -330,20 +330,8 @@ const SampleDetail = () => {
                 if (archivingItem) targetStatus = 'ARCHIVED';
                 if (disposalItem) targetStatus = 'DISPOSED';
 
-                // WORKAROUND: Legacy Server Logic requires passing through APPROVED before ARCHIVED
-                // Check if current status is NOT Approved, but target IS Final
-                if (['ARCHIVED', 'DISPOSED'].includes(targetStatus) && sample.status !== 'APPROVED') {
-                    // Step 1: Intermediate Approval
-                    try {
-                        await axios.put(`/api/samples/${id}/status`, { status: 'APPROVED', reason: 'Intermediate Step for Archiving' });
-                    } catch (ignore) {
-                        // Ignore if it fails? No, if it fails maybe because it's already approved or something.
-                        // But mostly strict validation.
-                        console.warn("Intermediate approval failed or skipped", ignore);
-                    }
-                }
-
-                // Step 2: Final Status
+                // SD-07: Removed forced intermediate approval workaround.
+                // Transitions are governed by server-side workflow rules without synthetic bypass.
                 await axios.put(`/api/samples/${id}/status`, { status: targetStatus });
 
                 showInfo(t('common.success', 'Success'), `${t('samples.title', 'Sample')} → ${getStatusLabel(targetStatus, t)}`);
@@ -451,6 +439,7 @@ const SampleDetail = () => {
                     <SampleSummary
                         sample={sample}
                         user={user}
+                        workflowSummary={workflowSummary}
                         dryingStatus={dryingStatus}
                         prepStatus={prepStatus}
                         archivingStatus={archivingStatus}

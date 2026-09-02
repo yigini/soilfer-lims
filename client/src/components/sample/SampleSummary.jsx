@@ -14,6 +14,7 @@ const SampleSummary = ({
     setDrawerOpen,
     onApproveIntake,
     onUndoIntake,
+    workflowSummary,
     onFinalApproval,
     onUndoApproval,
     onArchive,
@@ -243,7 +244,17 @@ const SampleSummary = ({
                             )}
 
                             {/* APPROVED + PENDING POST-ANALYTICAL ACTIONS */}
-                            {(isApproved || sample.status === 'APPROVED' || sample.status === 'PROCESSING') && (
+                            {(isApproved || sample.status === 'APPROVED' || sample.status === 'PROCESSING') && (() => {
+                                const canArchive = workflowSummary?.eligibility?.canArchive ?? (isApproved && allAccepted);
+                                const canDispose = workflowSummary?.eligibility?.canDispose ?? (isApproved && allAccepted);
+                                const archiveDisabledReason = !canArchive
+                                    ? (workflowSummary?.nextActions?.[0] || 'Sample results must be approved before archiving')
+                                    : null;
+                                const disposeDisabledReason = !canDispose
+                                    ? (workflowSummary?.nextActions?.[0] || 'Sample results must be approved before disposal')
+                                    : null;
+
+                                return (
                                 <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-500">
                                     {isApproved && (
                                         <button
@@ -262,14 +273,16 @@ const SampleSummary = ({
                                     ) : (
                                         <button
                                             onClick={() => {
+                                                if (!canArchive) return;
                                                 onArchive && onArchive();
                                                 setTimeout(() => {
                                                     const el = document.getElementById('wi-row-ARCHIVING');
                                                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }, 300);
                                             }}
-                                            disabled={!isApproved || sample.workItems?.some(w => w.analysis === 'DISPOSAL' && w.assignedTo)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-bold border shadow-sm transition-all flex items-center gap-1 ${isApproved
+                                            disabled={!canArchive || sample.workItems?.some(w => w.analysis === 'DISPOSAL' && w.assignedTo)}
+                                            title={!canArchive ? archiveDisabledReason : undefined}
+                                            className={`px-4 py-2 rounded-lg text-sm font-bold border shadow-sm transition-all flex items-center gap-1 ${canArchive
                                                 ? (archivingStatus ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200')
                                                 : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed opacity-50'
                                                 }`}
@@ -286,14 +299,16 @@ const SampleSummary = ({
                                     ) : (
                                         <button
                                             onClick={() => {
+                                                if (!canDispose) return;
                                                 onDispose && onDispose();
                                                 setTimeout(() => {
                                                     const el = document.getElementById('wi-row-DISPOSAL');
                                                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }, 300);
                                             }}
-                                            disabled={!isApproved || sample.workItems?.some(w => w.analysis === 'ARCHIVING' && w.assignedTo)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-bold border shadow-sm transition-all flex items-center gap-1 ${isApproved
+                                            disabled={!canDispose || sample.workItems?.some(w => w.analysis === 'ARCHIVING' && w.assignedTo)}
+                                            title={!canDispose ? disposeDisabledReason : undefined}
+                                            className={`px-4 py-2 rounded-lg text-sm font-bold border shadow-sm transition-all flex items-center gap-1 ${canDispose
                                                 ? (sample.workItems?.some(w => w.analysis === 'DISPOSAL') ? 'bg-red-100 text-red-700 border-red-300' : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200')
                                                 : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed opacity-50'
                                                 }`}
@@ -302,7 +317,8 @@ const SampleSummary = ({
                                         </button>
                                     )}
                                 </div>
-                            )}
+                                );
+                            })()}
                         </>
                     )}
                 </div>
