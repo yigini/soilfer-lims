@@ -9,44 +9,45 @@ const AnalysisConfig = () => {
     const { t } = useLanguage();
     const [view, setView] = useState('analyses'); // analyses, groups, categories
 
+    const navItems = [
+        { id: 'analyses', label: t('analytics.testMethods', 'Analyses & Methodologies'), icon: LayoutList, desc: 'Individual parameters' },
+        { id: 'groups', label: 'Analysis Packages', icon: Layers, desc: 'Grouped test suites' },
+        { id: 'categories', label: 'Property Categories', icon: Tag, desc: 'Domain groupings' }
+    ];
+
     return (
-        <div className="flex flex-col lg:flex-row h-full gap-4 w-full min-w-0">
-            {/* Sub-Sidebar */}
-            <div className="w-full lg:w-56 bg-gray-50 dark:bg-gray-800/80 border lg:border-r border-gray-200 dark:border-gray-700 p-2.5 space-y-1.5 flex-shrink-0 rounded-xl">
-                <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2.5">
-                    {t('nav.settings', 'Laboratory Setup')}
+        <div className="flex flex-col lg:flex-row h-full gap-5 w-full min-w-0 font-sans">
+            {/* Sub-Navigation */}
+            <div className="w-full lg:w-60 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 space-y-1.5 flex-shrink-0 rounded-2xl shadow-sm h-fit">
+                <div className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 px-3 pt-1">
+                    {t('nav.settings', 'Catalogue Setup')}
                 </div>
 
-                {/* 1. Analyses & Methods */}
-                <button
-                    onClick={() => setView('analyses')}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'analyses' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
-                >
-                    <LayoutList size={16} />
-                    <span>{t('analytics.testMethods', 'Analyses & Methodologies')}</span>
-                </button>
-
-                {/* 2. Analysis Packages / Suites */}
-                <button
-                    onClick={() => setView('groups')}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'groups' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
-                >
-                    <Layers size={16} />
-                    <span>Analysis Packages</span>
-                </button>
-
-                {/* 3. Categories */}
-                <button
-                    onClick={() => setView('categories')}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'categories' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
-                >
-                    <Tag size={16} />
-                    <span>Property Categories</span>
-                </button>
+                {navItems.map(item => {
+                    const isActive = view === item.id;
+                    const Icon = item.icon;
+                    return (
+                        <button
+                            key={item.id}
+                            onClick={() => setView(item.id)}
+                            className={`w-full text-left px-3.5 py-3 rounded-xl flex items-center gap-3 text-xs transition-all ${
+                                isActive
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-200/80 dark:border-emerald-800 shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 font-semibold border border-transparent'
+                            }`}
+                        >
+                            <Icon size={17} className={isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'} />
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate">{item.label}</div>
+                                <div className="text-[10px] font-normal text-gray-400 dark:text-gray-500 truncate">{item.desc}</div>
+                            </div>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden pb-4 pt-1">
+            <div className="flex-1 min-w-0 overflow-x-hidden">
                 {view === 'analyses' && <AnalysisManager />}
                 {view === 'groups' && <GroupManager />}
                 {view === 'categories' && <CategoryManager />}
