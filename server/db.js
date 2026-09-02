@@ -143,10 +143,13 @@ const samplesDb = {
     findById: (id) => {
         const row = db.prepare('SELECT * FROM Sample WHERE id = ?').get(id);
         if (!row) return null;
+        const meta = row.metadata ? JSON.parse(row.metadata) : {};
         return {
             ...row,
+            archiveLocation: meta.archiveLocation || row.archiveLocation,
+            disposalMethod: meta.disposalMethod || row.disposalMethod,
             requiredAnalyses: row.requiredAnalyses ? JSON.parse(row.requiredAnalyses) : [],
-            metadata: row.metadata ? JSON.parse(row.metadata) : {},
+            metadata: meta,
             history: row.history ? JSON.parse(row.history) : []
         };
     },

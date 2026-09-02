@@ -13,6 +13,6 @@ router.get('/rounds', verifyToken, ptController.getRounds);
 router.get('/summary', verifyToken, ptController.getSummary);
 
 // Delete PT round
-router.delete('/rounds/:id', verifyToken, ptController.deleteRound);
+router.delete('/rounds/:id', verifyToken, checkPermission('APPROVE_RESULTS'), ptController.deleteRound);
 
 module.exports = router;

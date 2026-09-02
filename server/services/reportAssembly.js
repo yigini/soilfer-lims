@@ -113,7 +113,10 @@ async function assembleReport(sampleId, user) {
             },
             flags,
             isValid: result.isValid,
-            provenance: result.provenance || 'MEASURED'
+            provenance: result.provenance || 'MEASURED',
+            basis: result.basis || 'AIR_DRY',
+            replicateNo: result.replicateNo || 1,
+            censoring: result.censoring || 'NONE'
         });
     }
 

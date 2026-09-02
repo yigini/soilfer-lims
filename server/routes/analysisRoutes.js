@@ -12,7 +12,7 @@ router.get('/gates', verifyToken, analysisController.getOperationalGates);
 router.get('/units', verifyToken, analysisController.getUnits);
 router.get('/references', verifyToken, analysisController.getMethodReferences);
 router.get('/lab-defaults/:labId', verifyToken, analysisController.getLabMethodDefaults);
-router.put('/lab-defaults/:labId', verifyToken, analysisController.updateLabMethodDefaults);
+router.put('/lab-defaults/:labId', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.updateLabMethodDefaults);
 
 // Analyses — MANAGE_ANALYSES permission
 router.post('/analyses', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.createAnalysis);

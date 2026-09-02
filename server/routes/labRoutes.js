@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prisma');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 const bcrypt = require('bcryptjs');
 
 router.use(verifyToken);
@@ -121,8 +121,7 @@ router.get('/:id/staff', async (req, res) => {
 });
 
 // ─── PATCH /api/labs/:id/toggle-active ─── Toggle lab active status
-router.patch('/:id/toggle-active', async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
     try {
         const lab = await prisma.lab.findUnique({ where: { id: req.params.id } });
@@ -166,8 +165,7 @@ router.patch('/:id/toggle-active', async (req, res) => {
 });
 
 // ─── PATCH /api/labs/:id/staff/:userId/toggle ─── Toggle individual staff member active status
-router.patch('/:id/staff/:userId/toggle', async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+router.patch('/:id/staff/:userId/toggle', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
     try {
         const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
@@ -201,8 +199,7 @@ router.patch('/:id/staff/:userId/toggle', async (req, res) => {
 });
 
 // ─── PATCH /api/labs/:id/staff/:userId/reset-password ─── Reset staff password
-router.patch('/:id/staff/:userId/reset-password', async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
     try {
         const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
@@ -238,8 +235,7 @@ router.patch('/:id/staff/:userId/reset-password', async (req, res) => {
 });
 
 // ─── POST /api/labs ─── Create a new lab with auto-generated staff + test project
-router.post('/', async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
     const {
         projectId,
@@ -348,8 +344,7 @@ router.post('/', async (req, res) => {
 });
 
 // ─── PUT /api/labs/:id ─── Update lab details
-router.put('/:id', async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
     const { projectId, capacity, ...labData } = req.body;
 

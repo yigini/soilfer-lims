@@ -3,10 +3,11 @@ const router = express.Router();
 const equipmentController = require('../controllers/equipmentController');
 const equipmentEventController = require('../controllers/equipmentEventController');
 const equipmentEligibilityController = require('../controllers/equipmentEligibilityController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
-// All equipment routes require authentication
+// All equipment routes require authentication and MANAGE_EQUIPMENT permission
 router.use(verifyToken);
+router.use(checkPermission('MANAGE_EQUIPMENT'));
 
 // Events (static paths first, before /:id)
 router.post('/events', equipmentEventController.logEvent);

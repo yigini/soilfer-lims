@@ -1865,33 +1865,88 @@ exports.archiveSample = async (req, res) => {
             return res.status(409).json({ error: 'Sample must be in APPROVED status before archiving.' });
         }
 
+        // WP-09: Block terminal transitions while work is live
+        const activeWork = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                status: { notIn: ['ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0) {
+            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+            return res.status(409).json({
+                error: `Cannot archive sample: active work items are not terminal: ${codes}`,
+                activeWorkItems: activeWork
+            });
+        }
+
+        // WP-08: Check mutual exclusion with DISPOSAL
+        const existingDisposal = await prisma.workItem.findFirst({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DISPOSAL', 'DISP'] },
+                status: { notIn: ['WAIVED', 'CANCELLED'] }
+            }
+        });
+        if (existingDisposal && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingDisposal.status)) {
+            return res.status(409).json({
+                error: 'Cannot archive: A disposal task is already active or completed for this sample.'
+            });
+        }
+
+        // WP-08: Create or retrieve ARCHIVING work item
+        let archiveItem = await prisma.workItem.findFirst({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['ARCHIVING', 'ARCH'] }
+            }
+        });
+
+        if (!archiveItem) {
+            archiveItem = await prisma.workItem.create({
+                data: {
+                    id: `WI-ARCH-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                    sampleId: String(id),
+                    analysis: 'ARCHIVING',
+                    status: 'PENDING',
+                    priority: sample.priority || 'NORMAL',
+                    labId: sample.labId || sample.assignedLab || user.labId || null,
+                    assignedLab: sample.assignedLab || sample.labId || user.labId || null
+                }
+            });
+        }
+
         const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
         if (archiveLocation) meta.archiveLocation = archiveLocation;
         if (notes) meta.archiveNotes = notes;
 
-        const now = new Date();
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(id, 'ARCHIVED', user, `Sample archived at location ${archiveLocation || 'ARCHIVE'}`, {
-            metadata: JSON.stringify(meta)
+        await prisma.sample.update({
+            where: { id: String(id) },
+            data: { metadata: JSON.stringify(meta) }
         });
 
+        const now = new Date();
         await prisma.auditLog.create({
             data: {
                 id: `audit-arch-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
-                action: 'SAMPLE_ARCHIVED',
-                details: `Sample archived at location ${archiveLocation || 'ARCHIVE'}`,
+                action: 'ARCHIVE_TASK_CREATED',
+                details: `Archiving work item created for location ${archiveLocation || 'ARCHIVE'}`,
                 performedBy: user.username,
                 timestamp: now,
-                sampleId: String(id)
+                sampleId: String(id),
+                labId: sample.labId || user.labId || null
             }
         });
 
         res.json({
-            ...updated,
             success: true,
-            status: 'ARCHIVED',
+            message: 'Archiving task created. Please assign a technician in the work items table.',
+            status: sample.status,
+            workItem: archiveItem,
             archiveLocation: archiveLocation || meta.archiveLocation || 'ARCHIVE'
         });
     } catch (error) {
@@ -1917,33 +1972,88 @@ exports.disposeSample = async (req, res) => {
             return res.status(409).json({ error: 'Sample must be in APPROVED status before disposal.' });
         }
 
+        // WP-09: Block terminal transitions while work is live
+        const activeWork = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                status: { notIn: ['ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0) {
+            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+            return res.status(409).json({
+                error: `Cannot dispose sample: active work items are not terminal: ${codes}`,
+                activeWorkItems: activeWork
+            });
+        }
+
+        // WP-08: Check mutual exclusion with ARCHIVING
+        const existingArchiving = await prisma.workItem.findFirst({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['ARCHIVING', 'ARCH'] },
+                status: { notIn: ['WAIVED', 'CANCELLED'] }
+            }
+        });
+        if (existingArchiving && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingArchiving.status)) {
+            return res.status(409).json({
+                error: 'Cannot dispose: An archiving task is already assigned or completed for this sample.'
+            });
+        }
+
+        // WP-08: Create or retrieve DISPOSAL work item
+        let disposalItem = await prisma.workItem.findFirst({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DISPOSAL', 'DISP'] }
+            }
+        });
+
+        if (!disposalItem) {
+            disposalItem = await prisma.workItem.create({
+                data: {
+                    id: `WI-DISP-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                    sampleId: String(id),
+                    analysis: 'DISPOSAL',
+                    status: 'PENDING',
+                    priority: sample.priority || 'NORMAL',
+                    labId: sample.labId || sample.assignedLab || user.labId || null,
+                    assignedLab: sample.assignedLab || sample.labId || user.labId || null
+                }
+            });
+        }
+
         const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
         if (disposalMethod) meta.disposalMethod = disposalMethod;
         if (notes) meta.disposalNotes = notes;
 
-        const now = new Date();
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(id, 'DISPOSED', user, `Sample disposed via ${disposalMethod || 'STANDARD'}`, {
-            metadata: JSON.stringify(meta)
+        await prisma.sample.update({
+            where: { id: String(id) },
+            data: { metadata: JSON.stringify(meta) }
         });
 
+        const now = new Date();
         await prisma.auditLog.create({
             data: {
                 id: `audit-disp-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
-                action: 'SAMPLE_DISPOSED',
-                details: `Sample disposed via ${disposalMethod || 'STANDARD'}`,
+                action: 'DISPOSAL_TASK_CREATED',
+                details: `Disposal work item created via ${disposalMethod || 'STANDARD'}`,
                 performedBy: user.username,
                 timestamp: now,
-                sampleId: String(id)
+                sampleId: String(id),
+                labId: sample.labId || user.labId || null
             }
         });
 
         res.json({
-            ...updated,
             success: true,
-            status: 'DISPOSED',
+            message: 'Disposal task created. Please assign a technician in the work items table.',
+            status: sample.status,
+            workItem: disposalItem,
             disposalMethod: disposalMethod || meta.disposalMethod || 'STANDARD'
         });
     } catch (error) {

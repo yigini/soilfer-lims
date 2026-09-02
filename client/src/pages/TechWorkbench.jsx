@@ -578,7 +578,9 @@ const TechWorkbench = () => {
                             value: val,
                             equipmentId: d?.equipmentId || comp.equipmentId || undefined,
                             version: versionMapRef.current[comp.workItemId] ?? comp.version,
-                            overrideReason: d?.overrideReason || undefined
+                            overrideReason: d?.overrideReason || undefined,
+                            basis: d?.basis || comp.basis || 'AIR_DRY',
+                            replicateNo: d?.replicateNo || comp.replicateNo || 1
                         });
                     }
                 });
@@ -590,13 +592,18 @@ const TechWorkbench = () => {
                 const draft = draftValues[i.workItemId];
                 return isDraft ? (draft && draft.value) : ((draft && draft.value) || i.currentResult);
             })
-            .map(i => ({
-                workItemId: i.workItemId,
-                value: draftValues[i.workItemId]?.value || i.currentResult,
-                equipmentId: draftValues[i.workItemId]?.equipmentId || i.equipmentId || undefined,
-                version: versionMapRef.current[i.workItemId] ?? i.version,
-                overrideReason: draftValues[i.workItemId]?.overrideReason || undefined
-            }));
+            .map(i => {
+                const draft = draftValues[i.workItemId];
+                return {
+                    workItemId: i.workItemId,
+                    value: draft?.value || i.currentResult,
+                    equipmentId: draft?.equipmentId || i.equipmentId || undefined,
+                    version: versionMapRef.current[i.workItemId] ?? i.version,
+                    overrideReason: draft?.overrideReason || undefined,
+                    basis: draft?.basis || i.basis || 'AIR_DRY',
+                    replicateNo: draft?.replicateNo || i.replicateNo || 1
+                };
+            });
     };
 
     // ─── Ref to track latest draftValues for auto-save ───
@@ -1309,6 +1316,8 @@ const TechWorkbench = () => {
                                                 <th className="pb-2 pr-4 font-medium text-gray-500 dark:text-gray-400">
                                                     Result {activeGroup.unit && <span className="font-normal text-gray-400">({activeGroup.unit})</span>}
                                                 </th>
+                                                <th className="pb-2 pr-3 font-medium text-gray-500 dark:text-gray-400">Basis</th>
+                                                <th className="pb-2 pr-3 font-medium text-gray-500 dark:text-gray-400">Rep</th>
                                                 {activeGroup.equipmentRequired && (
                                                     <th className="pb-2 pr-4 font-medium text-gray-500 dark:text-gray-400">
                                                         <span className="flex items-center gap-1"><Wrench size={12} /> Equipment</span>
@@ -1476,6 +1485,30 @@ const TechWorkbench = () => {
                                                             disabled={isCompleted || !!blocked}
                                                             title={blocked || ''}
                                                         />
+                                                    </td>
+                                                    <td className="py-2.5 pr-3">
+                                                        <select
+                                                            value={draft?.basis || item.basis || 'AIR_DRY'}
+                                                            onChange={e => updateDraft(item.workItemId, 'basis', e.target.value)}
+                                                            disabled={isCompleted || !!blocked}
+                                                            className="px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        >
+                                                            <option value="AIR_DRY">Air-dry</option>
+                                                            <option value="OVEN_DRY">Oven-dry</option>
+                                                            <option value="FIELD_MOIST">Field-moist</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="py-2.5 pr-3">
+                                                        <select
+                                                            value={draft?.replicateNo || item.replicateNo || 1}
+                                                            onChange={e => updateDraft(item.workItemId, 'replicateNo', parseInt(e.target.value))}
+                                                            disabled={isCompleted || !!blocked}
+                                                            className="px-1.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-mono outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        >
+                                                            <option value={1}>R1</option>
+                                                            <option value={2}>R2</option>
+                                                            <option value={3}>R3</option>
+                                                        </select>
                                                     </td>
                                                     {activeGroup.equipmentRequired && (
                                                         <td className="py-2.5 pr-4">

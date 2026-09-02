@@ -10,7 +10,7 @@ router.get('/', verifyToken, spectralController.getLibrary);
 router.get('/:id', verifyToken, spectralController.getScan);
 
 // Pre-upload: check which lab IDs match existing samples
-router.post('/check-matches', verifyToken, spectralController.checkMatches);
+router.post('/check-matches', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.checkMatches);
 
 // Batch Upload (technicians+)
 router.post('/batch', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.uploadBatch);

@@ -242,7 +242,7 @@ exports.assignWork = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
             return res.status(403).json({ error: 'Only Managers can assign work.' });
         }
 
@@ -477,7 +477,7 @@ exports.reassignWork = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
             return res.status(403).json({ error: 'Only Managers can reassign work.' });
         }
 
@@ -828,11 +828,14 @@ exports.updateWorkItemStatus = async (req, res) => {
 
 exports.reviewWorkItem = async (req, res) => {
     const { id } = req.params;
-    const { status, note } = req.body;
+    let { status, note, decision } = req.body;
+    if (!status && decision) {
+        status = decision === 'ACCEPT' ? 'ACCEPTED' : (decision === 'REJECT' ? 'REANALYSIS_REQUIRED' : decision);
+    }
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
         }
 

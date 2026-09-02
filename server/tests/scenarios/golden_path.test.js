@@ -134,6 +134,9 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await request(app).post(`/api/samples/${sampleId}/approve`).set('Authorization', `Bearer ${mgrToken}`);
         const archiveRes = await request(app).post(`/api/samples/${sampleId}/archive`).set('Authorization', `Bearer ${mgrToken}`).send({ archiveLocation: 'A1' });
         expect(archiveRes.status).toBe(200);
+        const archItem = archiveRes.body.workItem;
+        expect(archItem).toBeDefined();
+        await request(app).post(`/api/work/${archItem.id}/review`).set('Authorization', `Bearer ${mgrToken}`).send({ status: 'ACCEPTED' });
         expect(samplesDb.findById(sampleId).status).toBe('ARCHIVED');
     });
 
@@ -180,6 +183,9 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             .set('Authorization', `Bearer ${mgrSilverToken}`)
             .send({ disposalMethod: 'Standard protocol' });
         expect(disposeRes.status).toBe(200);
+        const dispItem = disposeRes.body.workItem;
+        expect(dispItem).toBeDefined();
+        await request(app).post(`/api/work/${dispItem.id}/review`).set('Authorization', `Bearer ${mgrSilverToken}`).send({ status: 'ACCEPTED' });
         expect(samplesDb.findById(sampleId).status).toBe('DISPOSED');
     });
 

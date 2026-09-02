@@ -78,15 +78,23 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
         expect(res.status).toBe(409);
     });
 
-    test('Scenario 4: Archive Success', async () => {
+    test('Scenario 4: Archive Success (Task Created and Approved to ARCHIVED)', async () => {
         const res = await request(app)
             .post(`/api/samples/${sampleId}/archive`)
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({ archiveLocation: 'Shelf A', notes: 'Done' });
 
         expect(res.status).toBe(200);
-        expect(res.body.status).toBe('ARCHIVED');
-        expect(res.body.archiveLocation).toBe('Shelf A');
+        expect(res.body.message).toMatch(/Archiving task created/i);
+
+        // Accepting the ARCHIVING work item completes the transition to ARCHIVED
+        const archItem = (await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId })).body.data.find(i => i.analysis === 'ARCHIVING');
+        expect(archItem).toBeDefined();
+        await request(app).post(`/api/work/${archItem.id}/review`).set('Authorization', `Bearer ${mgrToken}`).send({ decision: 'ACCEPT' });
+
+        const finalSample = samplesDb.findById(sampleId);
+        expect(finalSample.status).toBe('ARCHIVED');
+        expect(finalSample.archiveLocation).toBe('Shelf A');
     });
 
     test('Scenario 5: Immutability (Cannot revert Archived)', async () => {

@@ -2,16 +2,110 @@ const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const { PERMISSIONS, ROLES } = require('../../config/roles');
+const fs = require('fs');
+const path = require('path');
+
+const MOUNTED_ROUTERS = [
+    { prefix: '/api/admin', file: 'adminRoutes.js' },
+    { prefix: '/api/users', file: 'userRoutes.js' },
+    { prefix: '/api/projects', file: 'projectRoutes.js' },
+    { prefix: '/api/config', file: 'analysisRoutes.js' },
+    { prefix: '/api/samples', file: 'sampleRoutes.js' },
+    { prefix: '/api/results', file: 'resultsRoutes.js' },
+    { prefix: '/api/data-results', file: 'dataResultsRoutes.js' },
+    { prefix: '/api/inventory', file: 'inventoryRoutes.js' },
+    { prefix: '/api/equipment', file: 'equipmentRoutes.js' },
+    { prefix: '/api/spectral', file: 'spectralRoutes.js' },
+    { prefix: '/api/reception', file: 'receptionRoutes.js' },
+    { prefix: '/api/work', file: 'workRoutes.js' },
+    { prefix: '/api/workbench', file: 'workbenchRoutes.js' },
+    { prefix: '/api/labs', file: 'labRoutes.js' },
+    { prefix: '/api/exports', file: 'exportRoutes.js' },
+    { prefix: '/api/import', file: 'importRoutes.js' },
+    { prefix: '/api/reports', file: 'reportRoutes.js' },
+    { prefix: '/api/qc', file: 'qcRoutes.js' },
+    { prefix: '/api/pt', file: 'ptRoutes.js' },
+    { prefix: '/api/submissions', file: 'submissionRoutes.js' },
+    { prefix: '/api/reviews', file: 'reviewRoutes.js' },
+    { prefix: '/api/v1/data-exchange', file: 'sisRoutes.js' },
+    { prefix: '/api/kobo', file: 'koboRoutes.js' }
+];
+
+// Exempt endpoints that are inherently personal user actions or public auth
+const EXEMPT_MUTATING_PATHS = [
+    '/api/auth/login',
+    '/api/auth/change-password',
+    '/api/notifications/mark-read',
+    '/api/notifications/mark-all-read',
+    '/api/notifications/clear-all',
+    '/api/notifications/send',
+    '/api/messages/send',
+    '/api/messages/draft',
+    '/api/messages/read',
+    '/api/messages/move'
+];
+
+function extractMutatingRoutes() {
+    const discovered = [];
+
+    for (const m of MOUNTED_ROUTERS) {
+        const filePath = path.join(__dirname, '..', '..', 'routes', m.file);
+        if (!fs.existsSync(filePath)) continue;
+        const router = require(filePath);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+
+        // Check for router-level permission
+        let routerPerm = null;
+        const routerUsePermMatch = fileContent.match(/router\.use\([^)]*checkPermission\(['"]([^'"]+)['"]\)/);
+        if (routerUsePermMatch) routerPerm = routerUsePermMatch[1];
+
+        // Also inspect router.stack for router-level middleware
+        (router.stack || []).forEach(layer => {
+            if (layer.route) {
+                const methods = Object.keys(layer.route.methods).filter(k => ['post', 'put', 'patch', 'delete'].includes(k));
+                methods.forEach(method => {
+                    const fullPath = (m.prefix + (layer.route.path === '/' ? '' : layer.route.path)).replace(/\/+/g, '/');
+                    if (EXEMPT_MUTATING_PATHS.includes(fullPath)) return;
+
+                    let routePerm = routerPerm;
+                    layer.route.stack.forEach(h => {
+                        const fnStr = h.handle?.toString() || '';
+                        const permMatch = fnStr.match(/checkPermission\(['"]([^'"]+)['"]\)/);
+                        if (permMatch) routePerm = permMatch[1];
+                    });
+
+                    // Also search the route definition line in fileContent
+                    const lines = fileContent.split('\n');
+                    const routeLine = lines.find(l => l.includes(`.${method.toLowerCase()}('` + layer.route.path) || l.includes(`.${method.toLowerCase()}("` + layer.route.path));
+                    if (routeLine) {
+                        const linePerm = routeLine.match(/checkPermission\(['"]([^'"]+)['"]\)/);
+                        if (linePerm) routePerm = linePerm[1];
+                    }
+
+                    discovered.push({
+                        method: method.toUpperCase(),
+                        path: fullPath,
+                        file: m.file,
+                        permission: routePerm
+                    });
+                });
+            }
+        });
+    }
+
+    return discovered;
+}
 
 describe('WP-42: Dynamic RBAC Matrix & Route Enforcement', () => {
     let tokens = {};
+    let mutatingRoutes = [];
+    const testRoles = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'AUDIT_USER'];
 
     beforeAll(async () => {
-        // Generate tokens for each primary role
-        const testRoles = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'VIEWER', 'AUDIT_USER'];
         for (const role of testRoles) {
             tokens[role] = await getAuthToken(role, 'GTM-LAB1', ['GTM'], ['SOILFER-US']);
         }
+        mutatingRoutes = extractMutatingRoutes();
     });
 
     describe('1. Canonical Permission Matrix Verification', () => {
@@ -23,6 +117,9 @@ describe('WP-42: Dynamic RBAC Matrix & Route Enforcement', () => {
             expect(PERMISSIONS['MANAGE_BRANDING']).toBeDefined();
             expect(PERMISSIONS['VIEW_AUDIT']).toBeDefined();
             expect(PERMISSIONS['MANAGE_EQUIPMENT']).toBeDefined();
+            expect(PERMISSIONS['MANAGE_INVENTORY']).toBeDefined();
+            expect(PERMISSIONS['CREATE_SAMPLE']).toBeDefined();
+            expect(PERMISSIONS['RECEIVE_SAMPLE']).toBeDefined();
         });
 
         test('SUPER_ADMIN has all administrative permissions', () => {
@@ -32,88 +129,64 @@ describe('WP-42: Dynamic RBAC Matrix & Route Enforcement', () => {
         });
     });
 
-    describe('2. Mutating Endpoint Role Enforcement', () => {
-        // A. Users Management (MANAGE_USERS: SUPER_ADMIN, MASTER_USER, LAB_MANAGER)
-        test('POST /api/users blocks unauthorized roles (LAB_TECHNICIAN, VIEWER)', async () => {
-            const resTech = await request(app)
-                .post('/api/users')
-                .set('Authorization', `Bearer ${tokens['LAB_TECHNICIAN']}`)
-                .send({ username: 'hacker_tech', role: 'LAB_TECHNICIAN' });
-            expect(resTech.status).toBe(403);
-
-            const resViewer = await request(app)
-                .post('/api/users')
-                .set('Authorization', `Bearer ${tokens['VIEWER']}`)
-                .send({ username: 'hacker_viewer', role: 'VIEWER' });
-            expect(resViewer.status).toBe(403);
+    describe('2. Exhaustive Route Permission Key Coverage (Zero-Unprotected Surface)', () => {
+        test('Mutating route extractor finds routes across all registered routers', () => {
+            expect(mutatingRoutes.length).toBeGreaterThanOrEqual(80);
         });
 
-        // B. Work Item Assignment (MANAGE_USERS / ASSIGN_WORK: LAB_MANAGER, SUPER_ADMIN)
-        test('POST /api/work/assign blocks LAB_TECHNICIAN and VIEWER', async () => {
-            const resTech = await request(app)
-                .post('/api/work/assign')
-                .set('Authorization', `Bearer ${tokens['LAB_TECHNICIAN']}`)
-                .send({ workItemIds: [] });
-            expect(resTech.status).toBe(403);
+        test('Every mutating route declares a valid permission key from config/roles.js', () => {
+            const missingKeys = [];
+            const invalidKeys = [];
 
-            const resViewer = await request(app)
-                .post('/api/work/assign')
-                .set('Authorization', `Bearer ${tokens['VIEWER']}`)
-                .send({ workItemIds: [] });
-            expect(resViewer.status).toBe(403);
+            for (const r of mutatingRoutes) {
+                if (!r.permission) {
+                    missingKeys.push(`${r.method} ${r.path} (${r.file})`);
+                } else if (!PERMISSIONS[r.permission]) {
+                    invalidKeys.push(`${r.method} ${r.path} -> '${r.permission}' not in roles.js`);
+                }
+            }
+
+            expect(missingKeys).toEqual([]);
+            expect(invalidKeys).toEqual([]);
         });
+    });
 
-        // C. Branding & Admin Config (MANAGE_BRANDING: SUPER_ADMIN only)
-        test('POST /api/config/categories blocks LAB_MANAGER and LAB_TECHNICIAN', async () => {
-            const resMgr = await request(app)
-                .post('/api/config/categories')
-                .set('Authorization', `Bearer ${tokens['LAB_MANAGER']}`)
-                .send({ name: 'Unauthorized Category' });
-            expect(resMgr.status).toBe(403);
+    describe('3. Live HTTP Enforcement Matrix across Defined Roles', () => {
+        // Representative endpoints across different permissions to test live HTTP 403 vs Allowed
+        const matrixCases = [
+            { perm: 'MANAGE_USERS', method: 'post', path: '/api/users', sampleBody: { username: 'test_u' } },
+            { perm: 'ASSIGN_WORK', method: 'post', path: '/api/work/assign', sampleBody: { workItemIds: [] } },
+            { perm: 'MANAGE_BRANDING', method: 'post', path: '/api/config/categories', sampleBody: { name: 'Test' } },
+            { perm: 'MANAGE_EQUIPMENT', method: 'post', path: '/api/equipment', sampleBody: { name: 'Meter' } },
+            { perm: 'RECEIVE_SAMPLE', method: 'post', path: '/api/samples/SMP-TEST/receive', sampleBody: {} },
+            { perm: 'APPROVE_RESULTS', method: 'post', path: '/api/samples/SMP-TEST/approve', sampleBody: {} },
+            { perm: 'ENTER_RESULTS', method: 'post', path: '/api/workbench/batch-save', sampleBody: { entries: [] } }
+        ];
 
-            const resTech = await request(app)
-                .post('/api/config/categories')
-                .set('Authorization', `Bearer ${tokens['LAB_TECHNICIAN']}`)
-                .send({ name: 'Unauthorized Category' });
-            expect(resTech.status).toBe(403);
-        });
+        matrixCases.forEach(({ perm, method, path, sampleBody }) => {
+            describe(`Permission '${perm}' on ${method.toUpperCase()} ${path}`, () => {
+                const allowedRoles = PERMISSIONS[perm] || [];
+                const deniedRoles = testRoles.filter(r => !allowedRoles.includes(r));
 
-        test('PUT /api/admin/settings/branding blocks non-SUPER_ADMIN', async () => {
-            const resMgr = await request(app)
-                .put('/api/admin/settings/branding')
-                .set('Authorization', `Bearer ${tokens['LAB_MANAGER']}`)
-                .send({ appTitle: 'Hacked Title' });
-            expect(resMgr.status).toBe(403);
+                testRoles.forEach(role => {
+                    const isAllowed = allowedRoles.includes(role);
+                    test(`Role ${role} is ${isAllowed ? 'ALLOWED' : 'DENIED (403)'}`, async () => {
+                        const token = tokens[role];
+                        const req = request(app)[method](path)
+                            .set('Authorization', `Bearer ${token}`)
+                            .send(sampleBody);
 
-            const resTech = await request(app)
-                .put('/api/admin/settings/branding')
-                .set('Authorization', `Bearer ${tokens['LAB_TECHNICIAN']}`)
-                .send({ appTitle: 'Hacked Title' });
-            expect(resTech.status).toBe(403);
-        });
-
-        // D. Sample Reception & Intake (RECEIVE_SAMPLE: SUPER_ADMIN, MASTER_USER, LAB_MANAGER, SAMPLE_RECEPTION)
-        test('POST /api/samples/:id/receive blocks VIEWER and LAB_TECHNICIAN', async () => {
-            const resViewer = await request(app)
-                .post('/api/samples/SMP-TEST-DUMMY/receive')
-                .set('Authorization', `Bearer ${tokens['VIEWER']}`)
-                .send({});
-            expect(resViewer.status).toBe(403);
-        });
-
-        // E. Results Approval (APPROVE_RESULTS: SUPER_ADMIN, LAB_MANAGER)
-        test('POST /api/samples/:id/approve blocks LAB_TECHNICIAN and SAMPLE_RECEPTION', async () => {
-            const resTech = await request(app)
-                .post('/api/samples/SMP-TEST-DUMMY/approve')
-                .set('Authorization', `Bearer ${tokens['LAB_TECHNICIAN']}`)
-                .send({});
-            expect(resTech.status).toBe(403);
-
-            const resRx = await request(app)
-                .post('/api/samples/SMP-TEST-DUMMY/approve')
-                .set('Authorization', `Bearer ${tokens['SAMPLE_RECEPTION']}`)
-                .send({});
-            expect(resRx.status).toBe(403);
+                        const res = await req;
+                        if (isAllowed) {
+                            // Should not be forbidden
+                            expect(res.status).not.toBe(403);
+                        } else {
+                            // Must strictly be 403 Forbidden
+                            expect(res.status).toBe(403);
+                        }
+                    });
+                });
+            });
         });
     });
 });

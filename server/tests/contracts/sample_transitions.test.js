@@ -101,4 +101,93 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
             }
         }
     });
+
+    test('6. WP-09: Block terminal transitions while work items are live', async () => {
+        const sampleController = require('../../controllers/sampleController');
+        
+        // Advance sample to APPROVED
+        await prisma.sample.update({
+            where: { id: testSample.id },
+            data: { status: 'APPROVED' }
+        });
+
+        // Create an active work item
+        const activeWi = await prisma.workItem.create({
+            data: {
+                id: `WI-TEST-${Date.now()}`,
+                sampleId: testSample.id,
+                analysis: 'PH',
+                status: 'IN_PROGRESS'
+            }
+        });
+
+        const req = {
+            params: { id: testSample.id },
+            user: { username: 'test_mgr', role: 'LAB_MANAGER', permissions: ['DISPOSE_SAMPLE', 'ARCHIVE_SAMPLE'] },
+            body: {}
+        };
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        // Attempt disposal while PH is IN_PROGRESS
+        await sampleController.disposeSample(req, res);
+        expect(res.status).toHaveBeenCalledWith(409);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.stringContaining('PH (IN_PROGRESS)')
+        }));
+
+        // Attempt archive while PH is IN_PROGRESS
+        const resArch = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        await sampleController.archiveSample(req, resArch);
+        expect(resArch.status).toHaveBeenCalledWith(409);
+        expect(resArch.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.stringContaining('PH (IN_PROGRESS)')
+        }));
+
+        // Cleanup active work item
+        await prisma.workItem.delete({ where: { id: activeWi.id } });
+    });
+
+    test('7. WP-08: disposeSample creates DISPOSAL work item and leaves sample APPROVED', async () => {
+        const sampleController = require('../../controllers/sampleController');
+        
+        await prisma.sample.update({
+            where: { id: testSample.id },
+            data: { status: 'APPROVED' }
+        });
+
+        const req = {
+            params: { id: testSample.id },
+            user: { username: 'test_mgr', role: 'LAB_MANAGER', permissions: ['DISPOSE_SAMPLE'] },
+            body: { disposalMethod: 'INCINERATION' }
+        };
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        await sampleController.disposeSample(req, res);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            success: true,
+            status: 'APPROVED',
+            message: expect.stringContaining('Disposal task created')
+        }));
+
+        // Verify DISPOSAL work item was created
+        const dispItem = await prisma.workItem.findFirst({
+            where: { sampleId: testSample.id, analysis: 'DISPOSAL' }
+        });
+        expect(dispItem).not.toBeNull();
+        expect(dispItem.status).toBe('PENDING');
+
+        // Verify sample status is STILL APPROVED (2-step workflow)
+        const currentSample = await prisma.sample.findUnique({ where: { id: testSample.id } });
+        expect(currentSample.status).toBe('APPROVED');
+
+        // Cleanup
+        await prisma.workItem.deleteMany({ where: { sampleId: testSample.id } });
+    });
 });
+

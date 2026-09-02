@@ -116,11 +116,15 @@ exports.saveResults = async (req, res) => {
 
             const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
 
-            // Supersede previous active result
+            const repNo = (m.replicateNo !== undefined && m.replicateNo !== null) ? Number(m.replicateNo) : 1;
+            const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
+
+            // Supersede previous active result ONLY for the matching replicate number
             operations.push(prisma.result.updateMany({
                 where: {
                     sampleId,
                     param: m.param,
+                    replicateNo: repNo,
                     isCurrent: true
                 },
                 data: {
@@ -141,10 +145,10 @@ exports.saveResults = async (req, res) => {
                     flags: JSON.stringify(m.validation?.flags || []),
                     isValid: m.validation?.valid,
                     censoring: censoringType,
-                    basis: m.basis || 'AIR_DRY',
+                    basis: validBasis,
                     provenance: m.provenance || 'MEASURED',
                     methodologyId: m.methodologyId || null,
-                    replicateNo: 1,
+                    replicateNo: repNo,
                     isCurrent: true,
                     enteredBy: user ? user.username : 'SYSTEM',
                     analysedAt: now,

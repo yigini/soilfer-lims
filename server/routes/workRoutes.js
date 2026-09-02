@@ -9,13 +9,13 @@ router.use(verifyToken);
 router.get('/', workItemController.getWorkItems);
 
 // Manager assigns work (batch)
-router.post('/assign', checkPermission('ASSIGN_LAB_ID'), workItemController.assignWork);
+router.post('/assign', checkPermission('ASSIGN_WORK'), workItemController.assignWork);
 
 // Manager assigns single work item
-router.post('/:id/assign', checkPermission('ASSIGN_LAB_ID'), workItemController.assignSingle);
+router.post('/:id/assign', checkPermission('ASSIGN_WORK'), workItemController.assignSingle);
 
 // Manager reassigns work item
-router.post('/:id/reassign', checkPermission('ASSIGN_LAB_ID'), workItemController.reassignWork);
+router.post('/:id/reassign', checkPermission('ASSIGN_WORK'), workItemController.reassignWork);
 
 // Technician updates status/result
 router.put('/:id/status', checkPermission('CHANGE_STATUS'), workItemController.updateWorkItemStatus);

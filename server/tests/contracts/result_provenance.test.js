@@ -101,4 +101,80 @@ describe('WP-31: Result Provenance Tracking', () => {
         expect(clayItem?.provenance).toBe('PREDICTED');
         expect(texItem?.provenance).toBe('DERIVED');
     });
+
+    test('4. WP-40: saveResults accepts chosen basis and stores censoring correctly', async () => {
+        const req = {
+            params: { sampleId: testSampleId },
+            body: {
+                measurements: [
+                    { param: 'SOC', value: '<0.01', unit: 'g/kg', basis: 'OVEN_DRY', validation: { valid: true } }
+                ]
+            },
+            user: { username: 'test_analyst' }
+        };
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        await resultsController.saveResults(req, res);
+        expect(res.json).toHaveBeenCalled();
+
+        const socRes = await prisma.result.findFirst({ where: { sampleId: testSampleId, param: 'SOC', isCurrent: true } });
+        expect(socRes).not.toBeNull();
+        expect(socRes.basis).toBe('OVEN_DRY');
+        expect(socRes.censoring).toBe('BELOW_LOQ');
+        createdResultIds.push(socRes.id);
+    });
+
+    test('5. WP-40: saveResults supports multiple replicates without overwriting previous determination', async () => {
+        const reqR1 = {
+            params: { sampleId: testSampleId },
+            body: {
+                measurements: [
+                    { param: 'TOTAL_N', value: '1.20', unit: 'g/kg', replicateNo: 1, validation: { valid: true } }
+                ]
+            },
+            user: { username: 'test_analyst' }
+        };
+        const reqR2 = {
+            params: { sampleId: testSampleId },
+            body: {
+                measurements: [
+                    { param: 'TOTAL_N', value: '1.24', unit: 'g/kg', replicateNo: 2, validation: { valid: true } }
+                ]
+            },
+            user: { username: 'test_analyst' }
+        };
+        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+        await resultsController.saveResults(reqR1, res);
+        await resultsController.saveResults(reqR2, res);
+
+        const activeResults = await prisma.result.findMany({
+            where: { sampleId: testSampleId, param: 'TOTAL_N', isCurrent: true },
+            orderBy: { replicateNo: 'asc' }
+        });
+
+        expect(activeResults.length).toBe(2);
+        expect(activeResults[0].replicateNo).toBe(1);
+        expect(activeResults[0].value).toBe('1.20');
+        expect(activeResults[1].replicateNo).toBe(2);
+        expect(activeResults[1].value).toBe('1.24');
+        activeResults.forEach(r => createdResultIds.push(r.id));
+    });
+
+    test('6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items', async () => {
+        const { content } = await assembleReport(testSampleId, { username: 'admin' });
+        const allItems = content.resultGroups.flatMap(g => g.items || []);
+        
+        const socItem = allItems.find(i => i.param === 'SOC');
+        expect(socItem).toBeDefined();
+        expect(socItem.basis).toBe('OVEN_DRY');
+        expect(socItem.censoring).toBe('BELOW_LOQ');
+
+        const nItems = allItems.filter(i => i.param === 'TOTAL_N');
+        expect(nItems.length).toBeGreaterThanOrEqual(1);
+    });
 });
+
