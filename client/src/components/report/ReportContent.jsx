@@ -259,7 +259,26 @@ const ReportContent = ({ data }) => {
                                     {(group.items || []).map((item, i) => {
                                         return (
                                             <tr key={i}>
-                                                <td className="param-name">{toScalar(item.name || item.param)}</td>
+                                                <td className="param-name">
+                                                    {toScalar(item.name || item.param)}
+                                                    {item.provenance && item.provenance !== 'MEASURED' && (
+                                                        <span style={{
+                                                            marginLeft: 8,
+                                                            fontSize: '9px',
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '0.04em',
+                                                            padding: '1px 6px',
+                                                            borderRadius: 4,
+                                                            background: item.provenance === 'DERIVED' ? '#f3f4f6' : (item.provenance === 'PREDICTED' ? '#e0f2fe' : '#fef3c7'),
+                                                            color: item.provenance === 'DERIVED' ? '#374151' : (item.provenance === 'PREDICTED' ? '#0369a1' : '#92400e'),
+                                                            border: '1px solid currentColor',
+                                                            fontWeight: 600,
+                                                            display: 'inline-block'
+                                                        }}>
+                                                            {item.provenance === 'DERIVED' ? 'Calculated' : (item.provenance === 'PREDICTED' ? 'Predicted' : 'Imported')}
+                                                        </span>
+                                                    )}
+                                                </td>
                                                 <td className="param-method">{toScalar(item.standard || item.method, 'Standard Laboratory Method')}</td>
                                                 <td className="param-value">
                                                     {formatResultValue(item.value, item.decimalPlaces, item.param)}

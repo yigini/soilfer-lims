@@ -142,6 +142,7 @@ exports.saveResults = async (req, res) => {
                     isValid: m.validation?.valid,
                     censoring: censoringType,
                     basis: m.basis || 'AIR_DRY',
+                    provenance: m.provenance || 'MEASURED',
                     methodologyId: m.methodologyId || null,
                     replicateNo: 1,
                     isCurrent: true,

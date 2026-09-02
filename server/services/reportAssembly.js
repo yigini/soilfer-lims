@@ -112,7 +112,8 @@ async function assembleReport(sampleId, user) {
                 advisory: interp.advisory
             },
             flags,
-            isValid: result.isValid
+            isValid: result.isValid,
+            provenance: result.provenance || 'MEASURED'
         });
     }
 
