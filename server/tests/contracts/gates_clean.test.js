@@ -72,8 +72,8 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
             .put(`/api/work/${phItem}/status`)
             .set('Authorization', `Bearer ${managerToken}`)
             .send({ status: 'IN_PROGRESS' });
-        expect(anaRes.status).toBe(400);
-        expect(anaRes.body.error).toMatch(/Drying\/Preparation not completed/);
+        expect(anaRes.status).toBe(412);
+        expect(anaRes.body.error).toMatch(/Sample preparation has not been completed/i);
 
         // 6. Complete Prep (via Phase API)
         // Must mark Prep as DONE.

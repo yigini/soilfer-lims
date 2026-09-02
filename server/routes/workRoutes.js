@@ -20,6 +20,9 @@ router.post('/:id/reassign', checkPermission('ASSIGN_WORK'), workItemController.
 // Technician updates status/result
 router.put('/:id/status', checkPermission('CHANGE_STATUS'), workItemController.updateWorkItemStatus);
 
+// Technician starts work (SD-05)
+router.post('/:id/start', checkPermission('CHANGE_STATUS'), workItemController.startWork);
+
 // Manager Reviews (Bulk)
 router.post('/review/bulk', checkPermission('APPROVE_RESULTS'), workItemController.reviewWorkItemsBulk);
 

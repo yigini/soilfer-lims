@@ -430,11 +430,19 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700/80 rounded text-gray-600 dark:text-gray-300 font-semibold">{item.analysis}</span>
                                                     <span>• TASK: {String(item.id).split('-').pop()}</span>
                                                 </div>
-                                                {effectiveBlocked && (
+                                                {!isPrepComplete && !isOpsGate && !isPostAnalytical && !isCompleted && !isSealed ? (
+                                                    <div 
+                                                        title="Sample preparation has not been completed. This analysis can be pre-assigned, but the technician cannot start work or enter results until preparation is complete."
+                                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 mt-1 rounded bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 text-[10px] font-medium"
+                                                    >
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                                        prep pending
+                                                    </div>
+                                                ) : (effectiveBlocked && (
                                                     <div className="text-[9px] text-amber-600 font-bold mt-1 uppercase flex items-center gap-1">
                                                         <ShieldAlert size={10} /> {lockReason}
                                                     </div>
-                                                )}
+                                                ))}
                                                 {item.reanalysisReason && (
                                                     <div className="text-xs text-red-500 mt-1 flex items-center gap-1 font-bold">
                                                         <AlertTriangle size={10} /> Redo: {item.reanalysisReason}
@@ -448,11 +456,11 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 {isManager ? (
                                                     <div className="relative flex items-center gap-2">
                                                         <select
-                                                            title={effectiveBlocked ? lockReason : "Assign Technician"}
-                                                            className={`bg-transparent border-none text-xs text-gray-700 dark:text-gray-300 focus:ring-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 -ml-1 w-full ${effectiveBlocked ? 'opacity-50 cursor-not-allowed' : ''} ${assigning === item.id ? 'opacity-30' : ''}`}
+                                                            title={isPostAnalytical && !allAnalysesApproved ? lockReason : "Assign Technician"}
+                                                            className={`bg-transparent border-none text-xs text-gray-700 dark:text-gray-300 focus:ring-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 -ml-1 w-full ${assigning === item.id ? 'opacity-30' : ''}`}
                                                             value={item.assignedTo || ''}
                                                             onChange={(e) => handleAssign(item.id, e.target.value)}
-                                                            disabled={['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) || effectiveBlocked || assigning === item.id || (
+                                                            disabled={['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) || assigning === item.id || (
                                                                 // DISABLE if mutual exclusion task is already assigned
                                                                 (item.analysis === 'ARCHIVING' && workItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) ||
                                                                 (item.analysis === 'DISPOSAL' && workItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))

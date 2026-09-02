@@ -870,8 +870,9 @@ exports.updateWorkItemStatus = async (req, res) => {
                         return res.status(400).json({ error: 'Analysis locked: Drying not completed.' });
                     }
                 } else if (item.category !== 'Operational Gates') {
-                    if (sample.dryingStatus !== 'DONE' || sample.preparationStatus !== 'DONE') {
-                        return res.status(400).json({ error: 'Analysis locked: Drying/Preparation not completed.' });
+                    // SD-05: Enforce prerequisite gate on execution (HTTP 412 Precondition Failed)
+                    if (sample.preparationStatus !== 'DONE') {
+                        return res.status(412).json({ error: 'Sample preparation has not been completed' });
                     }
                 }
             }
@@ -1067,6 +1068,15 @@ exports.updateWorkItemStatus = async (req, res) => {
         console.error('[updateWorkItemStatus] Error:', error);
         res.status(500).json({ error: 'Failed to update status' });
     }
+};
+
+/**
+ * SD-05: Dedicated startWork endpoint
+ * POST /api/work/:id/start
+ */
+exports.startWork = async (req, res) => {
+    req.body = { ...req.body, status: workflow.WORK_ITEM_STATES.IN_PROGRESS };
+    return await exports.updateWorkItemStatus(req, res);
 };
 
 exports.reviewWorkItem = async (req, res) => {

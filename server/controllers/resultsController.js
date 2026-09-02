@@ -101,6 +101,11 @@ exports.saveResults = async (req, res) => {
             return res.status(400).json({ error: `Sample is not in Processing phase (current: ${sample.status})` });
         }
 
+        // SD-05: Enforce prerequisite gate on work execution (HTTP 412 Precondition Failed)
+        if (sample.preparationStatus !== 'DONE') {
+            return res.status(412).json({ error: 'Sample preparation has not been completed' });
+        }
+
         // Validate
         const validatedMeasurements = await validationController.validateBatch(measurements);
 

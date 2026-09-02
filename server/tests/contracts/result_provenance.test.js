@@ -13,6 +13,8 @@ describe('WP-31: Result Provenance Tracking', () => {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
                 status: 'PROCESSING',
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
                 labId: 'LAB-DEFAULT',
                 assignedLab: 'LAB-DEFAULT'
             }
