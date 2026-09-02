@@ -361,12 +361,34 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
                 };
             });
 
-            // Recent activity (last 10)
-            const recentLogs = await prisma.auditLog.findMany({
-                orderBy: { timestamp: 'desc' },
-                take: 10,
-                where: user.role === 'SUPER_ADMIN' ? {} : { entity: 'SAMPLE' },
-            });
+            // Recent activity (last 10) scoped to laboratory
+            let recentLogs;
+            if (user.role === 'SUPER_ADMIN') {
+                recentLogs = await prisma.auditLog.findMany({
+                    orderBy: { timestamp: 'desc' },
+                    take: 10,
+                });
+            } else if (user.labId) {
+                recentLogs = await prisma.$queryRaw`
+                    SELECT DISTINCT a.* FROM AuditLog a
+                    LEFT JOIN Sample s ON (a.sampleId = s.id OR a.entityId = s.id)
+                    LEFT JOIN User u ON a.performedBy = u.username
+                    WHERE (
+                        a.labId = ${user.labId}
+                        OR s.labId = ${user.labId}
+                        OR s.assignedLab = ${user.labId}
+                        OR u.labId = ${user.labId}
+                    )
+                    ORDER BY a.timestamp DESC
+                    LIMIT 10
+                `;
+            } else {
+                recentLogs = await prisma.auditLog.findMany({
+                    where: { performedBy: user.username },
+                    orderBy: { timestamp: 'desc' },
+                    take: 10,
+                });
+            }
             const recentActivity = recentLogs.map(log => ({
                 id: log.id,
                 action: log.action,
@@ -496,12 +518,34 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             });
         }
 
-        // Recent activity
-        const recentLogs = await prisma.auditLog.findMany({
-            orderBy: { timestamp: 'desc' },
-            take: 8,
-            where: user.role === 'SUPER_ADMIN' ? {} : { entity: 'SAMPLE' },
-        });
+        // Recent activity scoped to laboratory
+        let recentLogs;
+        if (user.role === 'SUPER_ADMIN') {
+            recentLogs = await prisma.auditLog.findMany({
+                orderBy: { timestamp: 'desc' },
+                take: 8,
+            });
+        } else if (user.labId) {
+            recentLogs = await prisma.$queryRaw`
+                SELECT DISTINCT a.* FROM AuditLog a
+                LEFT JOIN Sample s ON (a.sampleId = s.id OR a.entityId = s.id)
+                LEFT JOIN User u ON a.performedBy = u.username
+                WHERE (
+                    a.labId = ${user.labId}
+                    OR s.labId = ${user.labId}
+                    OR s.assignedLab = ${user.labId}
+                    OR u.labId = ${user.labId}
+                )
+                ORDER BY a.timestamp DESC
+                LIMIT 8
+            `;
+        } else {
+            recentLogs = await prisma.auditLog.findMany({
+                where: { performedBy: user.username },
+                orderBy: { timestamp: 'desc' },
+                take: 8,
+            });
+        }
         const recentActivity = recentLogs.map(log => ({
             id: log.id,
             action: log.action,
@@ -601,20 +645,34 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
             }
         });
 
-        // Recent Activity
-        // Logic: Filter by entityId if not super admin? 
-        // For simplicity/performance: Show global recent for Admin, or scoped.
-        // Doing a simple fetch for now.
-        const recentLogs = await prisma.auditLog.findMany({
-            orderBy: { timestamp: 'desc' },
-            take: 5,
-            where: user.role === 'SUPER_ADMIN' ? {} : {
-                // Approximate scoping: entity 'SAMPLE'
-                entity: 'SAMPLE'
-                // We can't easily join to verify sample access in one query here without complexity.
-                // Accepting minor info leak of "Sample X change" for now, or just restricting to 'SAMPLE' entity.
-            }
-        });
+        // Recent Activity strictly scoped to laboratory
+        let recentLogs;
+        if (user.role === 'SUPER_ADMIN') {
+            recentLogs = await prisma.auditLog.findMany({
+                orderBy: { timestamp: 'desc' },
+                take: 5,
+            });
+        } else if (user.labId) {
+            recentLogs = await prisma.$queryRaw`
+                SELECT DISTINCT a.* FROM AuditLog a
+                LEFT JOIN Sample s ON (a.sampleId = s.id OR a.entityId = s.id)
+                LEFT JOIN User u ON a.performedBy = u.username
+                WHERE (
+                    a.labId = ${user.labId}
+                    OR s.labId = ${user.labId}
+                    OR s.assignedLab = ${user.labId}
+                    OR u.labId = ${user.labId}
+                )
+                ORDER BY a.timestamp DESC
+                LIMIT 5
+            `;
+        } else {
+            recentLogs = await prisma.auditLog.findMany({
+                where: { performedBy: user.username },
+                orderBy: { timestamp: 'desc' },
+                take: 5,
+            });
+        }
 
         const recentActivity = recentLogs.map(log => ({
             id: log.id,
