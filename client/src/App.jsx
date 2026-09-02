@@ -167,7 +167,7 @@ const Layout = ({ children }) => {
             `}>
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
                     {!sidebarCollapsed && (
-                        <img src={['SUPER_ADMIN', 'MASTER_USER'].includes(user?.role) ? '/assets/img/logo.png' : (theme.logoUrl || '/assets/img/logo.png')} alt="Lab Logo" className="h-10 w-auto object-contain dark:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] dark:brightness-125" onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/logo.png'; }} />
+                        <img src={theme?.logoUrl || '/assets/img/soilfer-logo.png'} alt="SoilFER LIMS" className="h-10 w-auto object-contain dark:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] dark:brightness-125" onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/soilfer-logo.png'; }} />
                     )}
                     <button className="md:hidden p-2 text-gray-500" onClick={() => setIsSidebarOpen(false)}>
                         <X size={20} />

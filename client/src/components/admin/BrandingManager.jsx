@@ -14,15 +14,15 @@ const BrandingManager = () => {
 
     // Form State
     const [formData, setFormData] = useState({
-        title: '',
-        colors: { primary: '#3b82f6', secondary: '#1e40af', accent: '#60a5fa' },
-        logoUrl: '/assets/img/logo.png', // Default
-        tagline: '',
-        organization: '',
-        contactEmail: '',
+        title: 'SoilFER LIMS',
+        colors: { primary: '#047857', secondary: '#111827', accent: '#D97706' },
+        logoUrl: '/assets/img/soilfer-logo.png', // Default
+        tagline: 'Global & Local Laboratory Information Management System',
+        organization: 'FAO Global Soil Partnership / SoilFER Programme',
+        contactEmail: 'GLOSOLAN@fao.org',
         defaultLanguage: 'en',
         dateFormat: 'YYYY-MM-DD',
-        footerText: '',
+        footerText: 'SoilFER-LIMS · Aligned with FAO Global Soil Partnership & GLOSOLAN',
         cesiumToken: ''
     });
 

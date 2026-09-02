@@ -7,12 +7,12 @@ export const ThemeProvider = ({ children }) => {
     // Branding theme (colors, title, etc.)
     const [theme, setTheme] = useState({
         colors: {
-            primary: '#2563EB',
+            primary: '#047857',
             secondary: '#111827',
             accent: '#D97706'
         },
         title: 'SoilFER LIMS',
-        logoUrl: '/assets/img/logo.png'
+        logoUrl: '/assets/img/soilfer-logo.png'
     });
 
     // Dark mode state
