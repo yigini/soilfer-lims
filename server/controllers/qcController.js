@@ -1,5 +1,5 @@
 const prisma = require('../prisma');
-const { evaluateBatchQc, checkBatchDisposition } = require('../services/qcService');
+const { evaluateBatchQc, checkBatchDisposition, flagBatchResults } = require('../services/qcService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -8,6 +8,74 @@ const BATCH_STATES = {
     QC_FAIL: 'QC_FAIL',
     CLOSED: 'CLOSED'
 };
+
+/**
+ * Persists evaluated QC results into typed BatchQcResult rows
+ */
+async function syncTypedQcItems(batchId, evaluated) {
+    if (!evaluated) return;
+    try {
+        await prisma.batchQcResult.deleteMany({ where: { batchId } });
+
+        const items = [];
+        (evaluated.blanks || []).forEach((b, idx) => {
+            items.push({
+                id: b.id || `BLK-${batchId}-${idx}-${Date.now()}`,
+                batchId,
+                type: 'BLANK',
+                label: b.label || 'Method Blank',
+                expected: 0,
+                measured: b.value !== null && b.value !== undefined ? Number(b.value) : null,
+                value1: null,
+                value2: null,
+                recoveryPct: null,
+                rpd: null,
+                status: b.status || 'PASS',
+                details: b.details || null
+            });
+        });
+
+        (evaluated.duplicates || []).forEach((d, idx) => {
+            items.push({
+                id: d.id || `DUP-${batchId}-${idx}-${Date.now()}`,
+                batchId,
+                type: 'DUPLICATE',
+                label: d.label || 'Analytical Duplicate',
+                expected: null,
+                measured: null,
+                value1: d.value1 !== null && d.value1 !== undefined ? Number(d.value1) : null,
+                value2: d.value2 !== null && d.value2 !== undefined ? Number(d.value2) : null,
+                recoveryPct: null,
+                rpd: d.rpd !== null && d.rpd !== undefined ? Number(d.rpd) : null,
+                status: d.status || 'PASS',
+                details: d.details || null
+            });
+        });
+
+        (evaluated.controls || []).forEach((c, idx) => {
+            items.push({
+                id: c.id || `CRM-${batchId}-${idx}-${Date.now()}`,
+                batchId,
+                type: 'CONTROL',
+                label: c.label || 'Certified Reference Material',
+                expected: c.expected !== null && c.expected !== undefined ? Number(c.expected) : null,
+                measured: c.measured !== null && c.measured !== undefined ? Number(c.measured) : null,
+                value1: null,
+                value2: null,
+                recoveryPct: c.recoveryPct !== null && c.recoveryPct !== undefined ? Number(c.recoveryPct) : null,
+                rpd: null,
+                status: c.status || 'PASS',
+                details: c.details || null
+            });
+        });
+
+        if (items.length > 0) {
+            await prisma.batchQcResult.createMany({ data: items });
+        }
+    } catch (e) {
+        console.error('[syncTypedQcItems] Error syncing typed QC rows:', e);
+    }
+}
 
 exports.createBatch = async (req, res) => {
     const { analysis, instrument, notes } = req.body;
@@ -70,6 +138,7 @@ exports.getBatches = async (req, res) => {
 
         const batches = await prisma.batch.findMany({
             where,
+            include: { qcItems: true },
             orderBy: { createdAt: 'desc' }
         });
 
@@ -90,6 +159,7 @@ exports.updateBatch = async (req, res) => {
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
         const data = { ...updates };
+        let evaluated = null;
 
         // Auto-evaluate QC data if provided
         if (updates.qcResults || updates.blanks || updates.duplicates || updates.controls) {
@@ -98,7 +168,7 @@ exports.updateBatch = async (req, res) => {
                 duplicates: updates.duplicates,
                 controls: updates.controls
             };
-            const evaluated = evaluateBatchQc(qcPayload);
+            evaluated = evaluateBatchQc(qcPayload);
             data.qcResults = JSON.stringify(evaluated);
             if (!updates.status && evaluated.overallStatus !== 'OPEN') {
                 data.status = evaluated.overallStatus;
@@ -122,8 +192,15 @@ exports.updateBatch = async (req, res) => {
 
         const updatedBatch = await prisma.batch.update({
             where: { id },
-            data
+            data,
+            include: { qcItems: true }
         });
+
+        // WP-29: Sync typed BatchQcResult rows and flag results carrying batchId
+        if (evaluated) {
+            await syncTypedQcItems(id, evaluated);
+        }
+        await flagBatchResults(prisma, id, updatedBatch.status, updatedBatch.disposition);
 
         res.json({
             success: true,
@@ -164,8 +241,13 @@ exports.evaluateBatch = async (req, res) => {
                 qcResults: JSON.stringify(evaluated),
                 status: newStatus,
                 history: JSON.stringify(history)
-            }
+            },
+            include: { qcItems: true }
         });
+
+        // WP-29: Sync typed rows and flag results
+        await syncTypedQcItems(id, evaluated);
+        await flagBatchResults(prisma, id, newStatus, updatedBatch.disposition);
 
         res.json({
             success: true,
@@ -272,6 +354,9 @@ exports.dispositionBatch = async (req, res) => {
             where: { id },
             data: { disposition: JSON.stringify(disposition) }
         });
+
+        // WP-29: Re-evaluate Result flags based on manager disposition override
+        await flagBatchResults(prisma, id, 'QC_FAIL', disposition);
 
         res.json({ success: true, disposition: disposition });
     } catch (error) {

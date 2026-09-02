@@ -147,10 +147,13 @@ function evaluateBatchQc(qcData = {}) {
 
 /**
  * Check if a batch allows work items to be accepted in review
+/**
+ * Check if a batch allows work items to be accepted in review
  * @param {Object} batch - Batch object with status and optional disposition
+ * @param {Object} options - Optional { prisma: PrismaClient, flagResults: boolean }
  * @returns {{ allowed: boolean, status: string, warning?: string, error?: string }}
  */
-function checkBatchDisposition(batch) {
+function checkBatchDisposition(batch, options = {}) {
     if (!batch) {
         return { allowed: true, status: 'N/A' };
     }
@@ -183,10 +186,70 @@ function checkBatchDisposition(batch) {
     return { allowed: true, status: batch.status };
 }
 
+/**
+ * Flags or clears flags on results carrying a batchId based on batch status and disposition
+ * @param {Object} prismaClient - Prisma client instance
+ * @param {string} batchId - The batch ID
+ * @param {string} status - The batch status ('QC_PASS', 'QC_FAIL', etc.)
+ * @param {Object|string} disposition - The batch disposition
+ * @returns {Promise<number>} Number of results updated
+ */
+async function flagBatchResults(prismaClient, batchId, status, disposition = null) {
+    if (!prismaClient || !batchId) return 0;
+
+    let parsedDisp = disposition;
+    if (typeof parsedDisp === 'string') {
+        try { parsedDisp = JSON.parse(parsedDisp); } catch (e) { parsedDisp = null; }
+    }
+
+    const isOverridden = parsedDisp && parsedDisp.decision === 'PROCEED_WITH_WARNING';
+    const results = await prismaClient.result.findMany({ where: { batchId } });
+    let count = 0;
+
+    for (const res of results) {
+        let flags = [];
+        try {
+            flags = typeof res.flags === 'string' ? JSON.parse(res.flags) : (res.flags || []);
+        } catch (e) {
+            flags = [];
+        }
+
+        if (status === 'QC_FAIL') {
+            if (isOverridden) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+                if (!flags.includes('QC_WARNING_OVERRIDDEN')) flags.push('QC_WARNING_OVERRIDDEN');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: true, flags: JSON.stringify(flags) }
+                });
+            } else {
+                if (!flags.includes('QC_BATCH_FAILED')) flags.push('QC_BATCH_FAILED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: false, flags: JSON.stringify(flags) }
+                });
+            }
+            count++;
+        } else if (status === 'QC_PASS') {
+            if (flags.includes('QC_BATCH_FAILED')) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: true, flags: JSON.stringify(flags) }
+                });
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
 module.exports = {
     evaluateBlank,
     evaluateDuplicate,
     evaluateControl,
     evaluateBatchQc,
-    checkBatchDisposition
+    checkBatchDisposition,
+    flagBatchResults
 };

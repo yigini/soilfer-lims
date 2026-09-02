@@ -205,6 +205,26 @@ model Batch {
 
   // Relations
   workItems   WorkItem[]
+  qcItems     BatchQcResult[]
+}
+
+model BatchQcResult {
+  id          String   @id
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  type        String   // BLANK, DUPLICATE, CONTROL
+  label       String?
+  expected    Float?
+  measured    Float?
+  value1      Float?
+  value2      Float?
+  recoveryPct Float?
+  rpd         Float?
+  status      String   // PASS, FAIL, INVALID
+  details     String?
+  createdAt   DateTime @default(now())
+
+  @@index([batchId])
 }
 
 // --- MANAGEMENT MODELS ---
@@ -277,7 +297,29 @@ model Lab {
   updatedAt   DateTime   @default(now()) @updatedAt
 
   // Relations
-  projectLabs ProjectLab[]  // Many-to-many: projects this lab is assigned to
+  projectLabs       ProjectLab[]  // Many-to-many: projects this lab is assigned to
+  proficiencyRounds ProficiencyRound[]
+}
+
+model ProficiencyRound {
+  id            String   @id
+  provider      String   // e.g. "Wepal", "BIPEA", "GLOSOLAN-RingTrial", "FAO/IAEA"
+  roundRef      String   // e.g. "ISE-2026-1", "GLOSOLAN-RT-2"
+  labId         String   // References Lab(id)
+  lab           Lab      @relation(fields: [labId], references: [id])
+  analysisCode  String   // References Analysis(code)
+  assignedValue Float    // Consensus/certified value
+  uncertainty   Float?   // Standard uncertainty or target std dev (sigma_pt)
+  labResult     Float    // Result reported by the participating laboratory
+  zScore        Float?   // Calculated: (labResult - assignedValue) / uncertainty
+  outcome       String   // SATISFACTORY (|z|<=2), QUESTIONABLE (2<|z|<3), UNSATISFACTORY (|z|>=3)
+  date          DateTime // Date of round / submission
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([labId, analysisCode])
+  @@index([date])
 }
 
 // Junction table for many-to-many Project <-> Lab relationship
@@ -619,6 +661,7 @@ model Result {
   isValid       Boolean?
   censoring     String?   @default("NONE") // NONE, BELOW_LOQ, ABOVE_RANGE
   basis         String?   @default("AIR_DRY") // AIR_DRY, OVEN_DRY, FIELD_MOIST
+  provenance    String    @default("MEASURED") // MEASURED, PREDICTED, DERIVED, IMPORTED
   methodologyId String?
   replicateNo   Int       @default(1)
   isCurrent     Boolean   @default(true)
