@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
-const { validateSpectra } = require('../services/spectralValidation');
+const { validateSpectra, evaluateReplicateAgreement } = require('../services/spectralValidation');
 const { parseSpectralFile } = require('../services/spectralParser');
+const { screenScanAgainstLibrary } = require('../services/spectralOutlier');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -415,8 +416,9 @@ exports.uploadBatch = async (req, res) => {
                 }
             }
 
-            // --- STRICT MATCH: Reject unmatched spectra ---
-            if (!sample) {
+            // --- STRICT MATCH: Reject unmatched spectra (unless CONTROL scan) ---
+            const isControlScan = scanItem.scanType === 'CONTROL';
+            if (!sample && !isControlScan) {
                 console.log(`[SPECTRAL] No matching sample for LabID=${scanItem.labId}. Skipping upload.`);
                 results.skipped++;
                 if (scanItem.labId && !results.skippedLabIds.includes(scanItem.labId)) {
@@ -519,6 +521,18 @@ exports.uploadBatch = async (req, res) => {
                 if (eq) equipmentId = eq.id;
             }
 
+            // SL-17: Load instrument-specific QC tolerances if available
+            let equipmentLimits = null;
+            if (equipmentId) {
+                const eqAsset = await prisma.equipmentAsset.findUnique({
+                    where: { id: equipmentId },
+                    select: { id: true, qcLimits: true }
+                });
+                if (eqAsset && eqAsset.qcLimits) {
+                    try { equipmentLimits = JSON.parse(eqAsset.qcLimits); } catch (e) {}
+                }
+            }
+
             // SL-12: Find prior active scan for supersession
             let priorScan = null;
             let supersedesId = null;
@@ -536,8 +550,70 @@ exports.uploadBatch = async (req, res) => {
                 if (priorScan) supersedesId = priorScan.id;
             }
 
-            // 2. Validate Data in native delivered order
-            const validation = validateSpectra(wavelengths, values, scanItem.modality);
+            // SL-07 & SL-17: Typed physical quantity & signal metadata
+            const quantity = scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
+            const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
+            const region = scanItem.region || scanItem.modality || 'NIR';
+
+            // SL-17 & SL-18: Spectroscopist-Grade Validation with Artefact Checks
+            const validation = validateSpectra(wavelengths, values, scanItem.modality, {
+                quantity,
+                equipmentLimits,
+                instrumentRange: scanItem.instrumentRange,
+                resolution: scanItem.resolution
+            });
+
+            // SL-19: Replicate Agreement Evaluation
+            if (sample && replicateNo > 1) {
+                const priorReplicate = await prisma.spectralData.findFirst({
+                    where: {
+                        sampleId: sample.id,
+                        modality: scanItem.modality || 'NIR',
+                        replicateNo: { not: replicateNo },
+                        isCurrent: true,
+                        status: { not: 'DELETED' }
+                    }
+                });
+                if (priorReplicate && priorReplicate.wavelengths && priorReplicate.values) {
+                    try {
+                        const repW = JSON.parse(priorReplicate.wavelengths);
+                        const repV = JSON.parse(priorReplicate.values);
+                        const repCheck = evaluateReplicateAgreement(wavelengths, values, repW, repV, {
+                            quantity,
+                            maxRmsd: equipmentLimits ? equipmentLimits.maxRmsd : undefined
+                        });
+                        if (!repCheck.pass) {
+                            validation.flags.push(`REPLICATE_DISAGREEMENT:${priorReplicate.id}:RMSD=${repCheck.rmsd}`);
+                            if (validation.qcStatus !== 'FAIL') validation.qcStatus = 'WARN';
+                        }
+                    } catch (repErr) {
+                        console.warn('[SPECTRAL] Replicate agreement error:', repErr.message);
+                    }
+                }
+            }
+
+            // SL-20: Library Outlier Screening
+            if (!isControlScan && validation.qcStatus !== 'FAIL' && effectiveLabId) {
+                try {
+                    const approvedLibraryScans = await prisma.spectralData.findMany({
+                        where: {
+                            labId: effectiveLabId,
+                            modality: scanItem.modality || 'NIR',
+                            status: 'APPROVED',
+                            isCurrent: true
+                        },
+                        select: { values: true },
+                        take: 20
+                    });
+                    const outlierCheck = screenScanAgainstLibrary(wavelengths, values, approvedLibraryScans);
+                    if (outlierCheck.isOutlier) {
+                        validation.flags.push(`SPECTRAL_OUTLIER:${outlierCheck.reason || 'ANOMALY'}`);
+                        if (validation.qcStatus !== 'FAIL') validation.qcStatus = 'WARN';
+                    }
+                } catch (outlierErr) {
+                    console.warn('[SPECTRAL] Outlier check error:', outlierErr.message);
+                }
+            }
 
             let workflowStatus;
             if (validation.qcStatus === 'FAIL') {
@@ -547,11 +623,6 @@ exports.uploadBatch = async (req, res) => {
             } else {
                 workflowStatus = 'VALIDATED';
             }
-
-            // SL-07: Typed physical quantity & signal metadata
-            const quantity = scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
-            const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
-            const region = scanItem.region || scanItem.modality || 'NIR';
 
             // SL-15 & SL-16: Atomic Database Transaction
             let newScan;
@@ -623,6 +694,7 @@ exports.uploadBatch = async (req, res) => {
                             }),
                             qcStatus: validation.qcStatus,
                             qcFlags: JSON.stringify(validation.flags),
+                            scanType: isControlScan ? 'CONTROL' : 'SAMPLE',
                             status: workflowStatus,
                             uploadedBy: user ? user.id : null,
                             ...(canAutoApprove && validation.qcStatus !== 'FAIL' ? {
@@ -1232,3 +1304,49 @@ exports.downloadRawScan = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+// SL-21: Instrument Control Scans & Drift Tracking (ASTM E1421)
+exports.getControlDrifts = async (req, res) => {
+    try {
+        const user = req.user;
+        const { equipmentId, days = 30 } = req.query;
+        const sinceDate = new Date(Date.now() - parseInt(days) * 24 * 60 * 60 * 1000);
+
+        let where = {
+            scanType: 'CONTROL',
+            status: { not: 'DELETED' },
+            timestamp: { gte: sinceDate }
+        };
+
+        if (equipmentId) where.equipmentId = equipmentId;
+        where = scopeGuard.buildScopedWhere(user, where, { entityType: 'Spectral', labField: 'labId' });
+
+        const controlScans = await prisma.spectralData.findMany({
+            where,
+            orderBy: { timestamp: 'asc' },
+            select: {
+                id: true,
+                equipmentId: true,
+                labId: true,
+                timestamp: true,
+                modality: true,
+                quantity: true,
+                resolution: true,
+                qcStatus: true,
+                qcFlags: true,
+                sha256: true,
+                metadata: true
+            }
+        });
+
+        res.json({
+            success: true,
+            count: controlScans.length,
+            scans: controlScans
+        });
+    } catch (e) {
+        console.error('getControlDrifts error:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+

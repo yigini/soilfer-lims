@@ -488,6 +488,7 @@ model EquipmentAsset {
   criticality        String     // CRITICAL | IMPORTANT | NON_CRITICAL
   commissioningDate  DateTime?
   notes              String?
+  qcLimits           String?    // JSON string storing instrument-specific tolerances: min/max range, noise, baseline, RMSD
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -630,6 +631,7 @@ model SpectralData {
   supersedeReason String?
 
   // Workflow Status: PENDING -> VALIDATED -> APPROVED (or REJECTED)
+  scanType       String?    @default("SAMPLE") // SAMPLE, CONTROL
   status         String?    @default("PENDING") // PENDING, VALIDATED, APPROVED, REJECTED, ARCHIVED, DELETED
   reviewedBy     String?    // Manager who approved/rejected
   reviewedAt     DateTime?  // When it was approved/rejected
@@ -639,6 +641,7 @@ model SpectralData {
   @@index([sampleId, isCurrent])
   @@index([sha256])
   @@index([equipmentId])
+  @@index([equipmentId, scanType])
 }
 
 // --- ADMIN & SYSTEM MODELS ---

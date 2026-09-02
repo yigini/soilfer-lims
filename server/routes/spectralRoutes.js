@@ -9,6 +9,9 @@ router.get('/', verifyToken, spectralController.getLibrary);
 // Library Statistics & Tile Aggregations (SL-04)
 router.get('/stats', verifyToken, spectralController.getLibraryStats);
 
+// SL-21: Instrument Control Scans & Drift History
+router.get('/control-drifts', verifyToken, spectralController.getControlDrifts);
+
 // Detail / Viewer
 router.get('/:id', verifyToken, spectralController.getScan);
 
