@@ -134,4 +134,134 @@ describe('WP-41: Multi-Tenancy Lab Isolation Regression Suite', () => {
             expect(canAccessEntity(gtmUser, hndEntity)).toBe(false);
         });
     });
+
+    describe('4. SD-02: Work Assignment & Reassignment Sample-Bound Isolation', () => {
+        let wiGTMId;
+        const testSampleId = 'SMP-TEST-SD02-GTM-' + Date.now();
+        const gtmTechUsername = 'test_lab_technician_gtmlab1';
+        const hndTechUsername = 'test_lab_technician_hndlab1';
+
+        beforeAll(async () => {
+            // Ensure technicians exist in Prisma User table
+            await prisma.user.upsert({
+                where: { username: gtmTechUsername },
+                update: { role: 'LAB_TECHNICIAN', labId: 'GTM-LAB1', isActive: true },
+                create: {
+                    id: 'usr-gtm-tech-sd02',
+                    username: gtmTechUsername,
+                    email: 'gtm_tech_sd02@soilfer.org',
+                    password: 'hash',
+                    role: 'LAB_TECHNICIAN',
+                    labId: 'GTM-LAB1',
+                    isActive: true
+                }
+            });
+            await prisma.user.upsert({
+                where: { username: hndTechUsername },
+                update: { role: 'LAB_TECHNICIAN', labId: 'HND-LAB1', isActive: true },
+                create: {
+                    id: 'usr-hnd-tech-sd02',
+                    username: hndTechUsername,
+                    email: 'hnd_tech_sd02@soilfer.org',
+                    password: 'hash',
+                    role: 'LAB_TECHNICIAN',
+                    labId: 'HND-LAB1',
+                    isActive: true
+                }
+            });
+
+            // Create a dedicated active sample in GTM
+            await prisma.sample.create({
+                data: {
+                    id: testSampleId,
+                    originalId: testSampleId,
+                    assignedLab: 'GTM-LAB1',
+                    labId: 'GTM-LAB1',
+                    country: 'GTM',
+                    projectCode: 'SOILFER-US',
+                    status: 'PROCESSING',
+                    matrix: 'SOIL'
+                }
+            });
+
+            // Ensure a work item exists on the GTM sample
+            const wi = await prisma.workItem.create({
+                data: {
+                    id: 'WI-TEST-SD02-' + Date.now(),
+                    sampleId: testSampleId,
+                    assignedLab: 'GTM-LAB1',
+                    labId: 'GTM-LAB1',
+                    analysis: 'PH_H2O',
+                    status: 'NOT_ASSIGNED'
+                }
+            });
+            wiGTMId = wi.id;
+        });
+
+        afterAll(async () => {
+            await prisma.workItem.deleteMany({
+                where: { id: wiGTMId }
+            });
+            await prisma.sample.deleteMany({
+                where: { id: testSampleId }
+            });
+        });
+
+        test('SUPER_ADMIN cannot assign a GTM sample work item to an HND technician (HTTP 403)', async () => {
+            const res = await request(app)
+                .post('/api/work/assign')
+                .set('Authorization', `Bearer ${tokenSuperAdmin}`)
+                .send({
+                    workItemIds: [wiGTMId],
+                    assignee: hndTechUsername
+                });
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toMatch(/is not in GTM-LAB1/);
+        });
+
+        test('SUPER_ADMIN cannot reassign a GTM sample work item to an HND technician (HTTP 403)', async () => {
+            const res = await request(app)
+                .post(`/api/work/${wiGTMId}/reassign`)
+                .set('Authorization', `Bearer ${tokenSuperAdmin}`)
+                .send({
+                    technicianUserId: hndTechUsername,
+                    reason: 'Cross-lab assignment attempt by admin'
+                });
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toMatch(/is not in GTM-LAB1/);
+        });
+
+        test('GTM Manager assigning a GTM sample work item to a GTM technician succeeds (HTTP 200)', async () => {
+            const res = await request(app)
+                .post('/api/work/assign')
+                .set('Authorization', `Bearer ${tokenGTMManager}`)
+                .send({
+                    workItemIds: [wiGTMId],
+                    assignee: gtmTechUsername
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+
+            const updated = await prisma.workItem.findUnique({ where: { id: wiGTMId } });
+            expect(updated.assignedTo).toBe(gtmTechUsername);
+            expect(updated.status).toBe('ASSIGNED');
+        });
+
+        test('GTM Manager reassigning a GTM work item to another/same GTM technician succeeds (HTTP 200)', async () => {
+            const res = await request(app)
+                .post(`/api/work/${wiGTMId}/reassign`)
+                .set('Authorization', `Bearer ${tokenGTMManager}`)
+                .send({
+                    technicianUserId: gtmTechUsername,
+                    reason: 'Reassigning within same lab'
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.workItem.assignedTo).toBe(gtmTechUsername);
+            expect(res.body.newAssignee).toBe(gtmTechUsername);
+        });
+    });
 });

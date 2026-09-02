@@ -264,25 +264,39 @@ exports.assignWork = async (req, res) => {
             return res.status(400).json({ error: `User '${assignee}' is not a LAB_TECHNICIAN` });
         }
 
-        if (user.role === 'LAB_MANAGER') {
-            if (techUser.labId !== user.labId) {
-                return res.status(403).json({
-                    error: `Cannot assign to technician in different lab. Your lab: ${user.labId}, Tech lab: ${techUser.labId}`
-                });
-            }
-        }
-
         const dbItems = await prisma.workItem.findMany({
             where: { id: { in: workItemIds } }
         });
 
-        // Fetch samples to validate status
-        const sampleIds = [...new Set(dbItems.map(i => i.sampleId))];
+        if (dbItems.length === 0) {
+            return res.status(404).json({ error: 'No work items found' });
+        }
+
+        // Fetch samples to validate status and laboratory ownership
+        const sampleIds = [...new Set(dbItems.map(i => i.sampleId).filter(Boolean))];
         const samples = await prisma.sample.findMany({
             where: { id: { in: sampleIds } }
         });
         const sampleMap = {};
         samples.forEach(s => sampleMap[s.id] = s);
+
+        // SD-02: Isolation belongs to the sample, not the actor.
+        // One unconditional rule for every role:
+        // A super admin may act across laboratories; they must not be able to create a cross-laboratory assignment.
+        for (const item of dbItems) {
+            const sample = sampleMap[item.sampleId];
+            const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
+            if (!owningLab || techUser.labId !== owningLab) {
+                return res.status(403).json({
+                    error: `Cannot assign to technician in different lab. Technician ${techUser.username} (${techUser.labId}) is not in ${owningLab}`
+                });
+            }
+            if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
+                return res.status(403).json({
+                    error: `Work item belongs to different lab scope (Req: ${user.labId}, Has: ${owningLab})`
+                });
+            }
+        }
 
         let assignedCount = 0;
         let errors = [];
@@ -306,16 +320,6 @@ exports.assignWork = async (req, res) => {
                     error: `Cannot assign work. Sample is in '${sample.status}'. Please ACCEPT the sample first.`
                 });
                 continue;
-            }
-
-            if (user.role === 'LAB_MANAGER') {
-                // Check if either field matches user lab
-                const labMatched = (item.assignedLab === user.labId) || (item.labId === user.labId);
-
-                if (!labMatched) {
-                    errors.push({ id: item.id, error: `Work item belongs to different lab scope (Req: ${user.labId}, Has: ${item.assignedLab}/${item.labId})` });
-                    continue;
-                }
             }
 
             if (item.status === 'ACCEPTED') {
@@ -491,11 +495,17 @@ exports.reassignWork = async (req, res) => {
         if (!techUser) return res.status(404).json({ error: `Technician '${technicianUserId}' not found` });
         if (techUser.role !== 'LAB_TECHNICIAN') return res.status(400).json({ error: `User '${technicianUserId}' is not a LAB_TECHNICIAN` });
 
-        if (user.role === 'LAB_MANAGER') {
-            if (techUser.labId !== user.labId) return res.status(403).json({ error: 'Cannot reassign to technician in different lab' });
-            if (item.labId && item.labId !== user.labId && item.assignedLab !== user.labId) {
-                return res.status(403).json({ error: 'Work item outside your lab scope' });
-            }
+        // SD-02: Isolation belongs to the sample, not the actor.
+        const sample = item.sampleId ? await prisma.sample.findUnique({ where: { id: item.sampleId } }) : null;
+        const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
+        if (!owningLab || techUser.labId !== owningLab) {
+            return res.status(403).json({
+                error: `Cannot reassign to technician in different lab. Technician ${techUser.username} (${techUser.labId}) is not in ${owningLab}`
+            });
+        }
+
+        if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
+            return res.status(403).json({ error: 'Work item outside your lab scope' });
         }
 
         const previousAssignee = item.assignedTo;
@@ -529,12 +539,13 @@ exports.reassignWork = async (req, res) => {
                 entity: 'WORKITEM',
                 entityId: id,
                 action: 'WORKITEM_REASSIGNED',
-                details: `${user.username} reassigned ${analysis} from ${previousAssignee || 'Unassigned'} to ${technicianUserId}`,
+                details: `${user.username} reassigned ${analysis} from ${previousAssignee || 'Unassigned'} to ${technicianUserId}. Reason: ${reason}`,
                 performedBy: user.username,
                 timestamp: now,
                 sampleId: item.sampleId,
                 analysisCode: item.analysis,
-                reason: reason
+                labId: owningLab,
+                after: JSON.stringify({ assignedTo: technicianUserId, reason })
             }
         });
 
