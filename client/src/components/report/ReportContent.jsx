@@ -308,10 +308,15 @@ const ReportContent = ({ data }) => {
             </section>
 
             {/* ═══════════════════════════════════════════════════
-                5. ANALYSIS RESULTS
+                5. ANALYSIS RESULTS (CERTIFICATE OF ANALYSIS)
             ═══════════════════════════════════════════════════ */}
             <section className="report-section">
-                <h2 className="report-section-title">Analysis Results</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h2 className="report-section-title" style={{ margin: 0 }}>Certificate of Analysis</h2>
+                    <span style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                        Analytical Measurements (ISO/IEC 17025)
+                    </span>
+                </div>
 
                 {safeGroups.length > 0 ? (
                     safeGroups.map((group, idx) => (
@@ -320,39 +325,22 @@ const ReportContent = ({ data }) => {
                             <table className="report-results-table">
                                 <thead>
                                     <tr>
-                                        <th style={{ width: hasMethodColumn ? '24%' : '30%' }}>Parameter</th>
-                                        <th style={{ width: '12%', textAlign: 'right' }}>Result</th>
-                                        <th style={{ width: '10%' }}>Unit</th>
-                                        <th style={{ width: '14%' }}>Rating</th>
-                                        <th style={{ width: hasMethodColumn ? '18%' : '25%' }}>Reference Range</th>
-                                        {hasMethodColumn && <th style={{ width: '22%' }}>Method</th>}
+                                        <th style={{ width: '32%' }}>Parameter</th>
+                                        <th style={{ width: '28%' }}>Method / Standard</th>
+                                        <th style={{ width: '20%', textAlign: 'right' }}>Result</th>
+                                        <th style={{ width: '20%' }}>Unit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {(group.items || []).map((item, i) => {
-                                        const interp = getInterpretation(item.param, item.value, item.unit);
-                                        const indicator = interp ? LEVEL_INDICATOR[interp.level] : null;
-                                        const isCritical = interp?.level === 'critical';
-                                        const isLow = interp?.level === 'low' || interp?.level === 'high';
-
                                         return (
-                                            <tr key={i} className={isCritical ? 'row-critical' : isLow ? 'row-attention' : ''}>
+                                            <tr key={i}>
                                                 <td className="param-name">{toScalar(item.name || item.param)}</td>
+                                                <td className="param-method">{toScalar(item.standard || item.method, 'Standard Laboratory Method')}</td>
                                                 <td className="param-value">
                                                     {formatResultValue(item.value, item.decimalPlaces, item.param)}
                                                 </td>
-                                                <td className="param-unit">{toScalar(item.unit, '')}</td>
-                                                <td className="param-rating">
-                                                    {interp ? (
-                                                        <span className="rating-badge" style={{ color: indicator.color }}>
-                                                            <span className="rating-symbol">{indicator.symbol}</span> {interp.label}
-                                                        </span>
-                                                    ) : '—'}
-                                                </td>
-                                                <td className="param-ref">{interp?.ref || '—'}</td>
-                                                {hasMethodColumn && (
-                                                    <td className="param-method">{toScalar(item.standard || item.method, '—')}</td>
-                                                )}
+                                                <td className="param-unit">{toScalar(item.unit, '—')}</td>
                                             </tr>
                                         );
                                     })}
