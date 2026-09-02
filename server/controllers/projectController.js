@@ -724,19 +724,6 @@ exports.restoreProject = async (req, res) => {
     }
 };
 
-// Hardcoded Targets from Dashboard Logic
-const TARGETS = {
-    'SoilFER-USA': { sites: 16836, samples: 33672 }, // Aggregate of ZMB, GTM, HND, GHA, KEN
-    'SoilFER-JPN': { sites: 3429, samples: 6858 },    // Aggregate of MOZ, TUN
-    'SoilFER-ZMB': { sites: 5404, samples: 10808 },
-    'SoilFER-GTM': { sites: 4204, samples: 8408 },
-    'SoilFER-HND': { sites: 3500, samples: 7000 },
-    'SoilFER-GHA': { sites: 1892, samples: 3784 },
-    'SoilFER-KEN': { sites: 1836, samples: 3672 },
-    'SoilFER-MOZ': { sites: 1873, samples: 3746 },
-    'SoilFER-TUN': { sites: 1556, samples: 3112 }
-};
-
 exports.getProjectStats = async (req, res) => {
     const { id } = req.params;
     try {
@@ -759,19 +746,12 @@ exports.getProjectStats = async (req, res) => {
             altLabField: 'assignedLab'
         });
 
-        // Retain specific Logic for target display if needed...
-        // For stats, we just want to count samples visible to the user.
-        // User's lab target is calculated below based on TARGETS constant.
-
-        let projectTargets = TARGETS[project.code] || { sites: 0, samples: 0 };
-        if (req.user.labId && req.user.role === 'LAB_MANAGER') {
-            // Try to refine target to specific country if applicable
-            const userLab = await prisma.lab.findUnique({ where: { id: req.user.labId } });
-            if (userLab && (project.code === 'SoilFER-USA' || project.code === 'SoilFER-JPN')) {
-                const countryTargetKey = `SoilFER-${userLab.country}`;
-                if (TARGETS[countryTargetKey]) projectTargets = TARGETS[countryTargetKey];
-            }
-        }
+        // Dynamic targets derived from project record
+        const expectedSamples = project.expectedSampleCount || 0;
+        const projectTargets = {
+            sites: Math.round(expectedSamples / 2),
+            samples: expectedSamples
+        };
 
         // Fetch samples to calculate status counts
         const samples = await prisma.sample.findMany({

@@ -7,18 +7,6 @@ const koboService = require('../services/koboService');
 const workflow = require('../workflowContract');
 const crypto = require('crypto');
 
-// Lab ID to country and project mapping
-const LAB_CONFIG = {
-    'GTM-LAB1': { iso: 'GTM', name: 'Guatemala', project: 'SOILFER-US' },
-    'HND-LAB1': { iso: 'HND', name: 'Honduras', project: 'SOILFER-US' },
-    'ZMB-LAB1': { iso: 'ZMB', name: 'Zambia', project: 'SOILFER-US' },
-    'GHA-LAB1': { iso: 'GHA', name: 'Ghana', project: 'SOILFER-US' },
-    'KEN-LAB1': { iso: 'KEN', name: 'Kenya', project: 'SOILFER-US' },
-    'MOZ-LAB1': { iso: 'MOZ', name: 'Mozambique', project: 'SOILFER-JPN' },
-    'TUN-LAB1': { iso: 'TUN', name: 'Tunisia', project: 'SOILFER-JPN' }
-};
-
-
 /**
  * GET /api/kobo/configs
  * Get all Kobo configurations (admin only)
@@ -260,14 +248,31 @@ async function syncLabSubmissions(config, performedBy) {
     // Parse field mapping
     const fieldMapping = config.fieldMapping ? JSON.parse(config.fieldMapping) : null;
 
-    // Get country info from LAB_CONFIG (for legacy SoilFER labs) or derive from config
-    const labInfo = LAB_CONFIG[config.labId] || { iso: 'GEN', name: config.labName || 'Unknown' };
+    // Resolve lab and country info from database
+    const lab = await prisma.lab.findFirst({
+        where: { OR: [{ id: config.labId }, { code: config.labId }] },
+        include: { projects: { include: { project: true } } }
+    });
+    const labInfo = {
+        iso: lab?.code?.split('-')[0] || lab?.country || 'GEN',
+        name: lab?.name || config.labName || 'Unknown'
+    };
 
-    // Use config.projectCode if available (project-scoped configs), else fall back to LAB_CONFIG
-    const projectCode = config.projectCode || labInfo.project || 'SOILFER-US';
+    // Use config.projectCode if available, else derive from lab's assigned projects in database
+    let projectCode = config.projectCode;
+    if (!projectCode && lab?.projects && lab.projects.length > 0) {
+        projectCode = lab.projects[0].project?.code || lab.projects[0].projectCode;
+    }
+
+    if (!projectCode) {
+        throw new Error(`[KOBO] Laboratory '${config.labId}' has no assigned project configured. Import aborted.`);
+    }
 
     // Get project by code
     const project = await prisma.project.findUnique({ where: { code: projectCode } });
+    if (!project) {
+        throw new Error(`[KOBO] Configured project '${projectCode}' does not exist in the database.`);
+    }
 
     let newCount = 0;
     let skippedCount = 0;

@@ -26,7 +26,9 @@ async function seed() {
         return;
     }
 
-    const defaultPassword = await bcrypt.hash('password', 10);
+    const crypto = require('crypto');
+    const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(6).toString('base64url');
+    const defaultPassword = await bcrypt.hash(initialPassword, 10);
     const now = new Date();
 
     if (MODE === 'global') {
@@ -52,6 +54,11 @@ async function seed() {
         });
 
         console.log('  ✓ Created user: admin (SUPER_ADMIN)');
+        console.log('  ┌────────────────────────────────────────────────────────┐');
+        console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');
+        console.log(`  │    Username: admin                                     │`);
+        console.log(`  │    Password: ${initialPassword.padEnd(42)}│`);
+        console.log('  └────────────────────────────────────────────────────────┘');
         console.log('    ⚠ You will be prompted to set a new password on first login.\n');
         console.log('  Next steps:');
         console.log('    1. Log in as admin');
@@ -99,6 +106,11 @@ async function seed() {
         });
 
         console.log('  ✓ Created user: admin (LAB_MANAGER)');
+        console.log('  ┌────────────────────────────────────────────────────────┐');
+        console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');
+        console.log(`  │    Username: admin                                     │`);
+        console.log(`  │    Password: ${initialPassword.padEnd(42)}│`);
+        console.log('  └────────────────────────────────────────────────────────┘');
         console.log('    ⚠ You will be prompted to set a new password on first login.\n');
         console.log('  Next steps:');
         console.log('    1. Log in as admin');

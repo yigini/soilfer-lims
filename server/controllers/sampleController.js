@@ -5,35 +5,6 @@ const workflow = require('../workflowContract');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 
-const COUNTRY_MAP = {
-    'Afghanistan': 'AFG',
-    'Bangladesh': 'BGD',
-    'Guatemala': 'GTM',
-    'Honduras': 'HND',
-    'Peru': 'PER',
-    'Uganda': 'UGA',
-    'Zambia': 'ZMB',
-    'Mozambique': 'MOZ',
-    'Tunisia': 'TUN',
-    'Unknown': 'GEN'
-};
-
-const LAB_MAPPING = {
-    'GTM': 'GTM-LAB1',
-    'HND': 'HND-LAB1',
-    'GHA': 'GHA-LAB1',
-    'KEN': 'KEN-LAB1',
-    'ZMB': 'ZMB-LAB1',
-    'TUN': 'TUN-LAB1',
-    'MOZ': 'MOZ-LAB1',
-    'AFG': 'AFG-LAB1',
-    'PER': 'PER-LAB1',
-    'UGA': 'UGA-LAB1',
-    'BGD': 'BGD-LAB1'
-};
-
-// NOTE: syncFromExternal has been removed - sync is now handled by koboController.syncAll
-
 
 /**
  * SEARCH EXPECTED SAMPLES - For Reception Autocomplete
