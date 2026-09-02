@@ -59,7 +59,8 @@ const apiKeyAuth = async (req, res, next) => {
                 name: apiKey.name,
                 role: apiKey.role,
                 countries: apiKey.countries ? JSON.parse(apiKey.countries) : null,
-                projects: apiKey.projects ? JSON.parse(apiKey.projects) : null
+                projects: apiKey.projects ? JSON.parse(apiKey.projects) : null,
+                labs: apiKey.labs ? JSON.parse(apiKey.labs) : [] // SL-22: absent scope defaults to empty array (deny)
             };
 
             return next();
@@ -82,7 +83,8 @@ const apiKeyAuth = async (req, res, next) => {
                 role: user.role,
                 countries: user.countries ? JSON.parse(user.countries) : null,
                 projects: user.projects ? JSON.parse(user.projects) : null,
-                labId: user.labId
+                labId: user.labId,
+                labs: user.role === 'SUPER_ADMIN' ? ['*'] : (user.labId ? [user.labId] : [])
             };
 
             return next();

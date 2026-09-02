@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sisController = require('../controllers/sisController');
+const spectralExportController = require('../controllers/spectralExportController');
 const apiKeyAuth = require('../middleware/apiKeyAuth');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
@@ -18,6 +19,7 @@ router.get('/results', apiKeyAuth, sisController.getResultsMatrix);
 
 // 4. Spectroscopy Dataset (NIR/MIR)
 router.get('/spectra', apiKeyAuth, sisController.getSpectra);
+router.get('/spectra/export', apiKeyAuth, spectralExportController.exportSpectra);
 
 // 5. Delta Synchronization Endpoint for Incremental ETL
 router.get('/sync', apiKeyAuth, sisController.syncDelta);

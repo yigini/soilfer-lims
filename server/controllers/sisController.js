@@ -439,20 +439,35 @@ exports.getResultsMatrix = async (req, res) => {
 // ─── 5. GET /api/v1/sis/spectra (Spectroscopy Dataset) ───
 exports.getSpectra = async (req, res) => {
     try {
-        const { modality, limit = 50, page = 1 } = req.query;
+        const { modality, limit = 50, cursor, instrument, equipmentId, qcStatus, withReference } = req.query;
         const take = Math.min(200, parseInt(limit) || 50);
-        const skip = (Math.max(1, parseInt(page) || 1) - 1) * take;
 
-        const where = { status: 'APPROVED' };
+        const where = {
+            status: { in: ['APPROVED', 'VALIDATED'] },
+            isCurrent: true
+        };
+
         if (modality) where.modality = modality.toUpperCase();
+        if (qcStatus) where.qcStatus = qcStatus.toUpperCase();
+        if (instrument || equipmentId) where.equipmentId = instrument || equipmentId;
 
-        // Scope spectra by key permissions
-        const keyLabs = req.sisAuth?.labs || [];
-        const hasGlobalLab = keyLabs.length === 0 || keyLabs.includes('*');
-        if (!hasGlobalLab) {
+        // SL-22: Strict Scope Enforcement for API Keys (absent scope defaults to DENY)
+        const keyLabs = req.sisAuth?.labs;
+        const isGlobalLab = Array.isArray(keyLabs) && keyLabs.includes('*');
+
+        if (!isGlobalLab) {
+            if (!Array.isArray(keyLabs) || keyLabs.length === 0) {
+                // Deny: key lacks laboratory access
+                return res.json({
+                    status: 'success',
+                    meta: { cursor: null, hasMore: false, schema: "spectra/v1", total: 0 },
+                    data: []
+                });
+            }
             where.labId = { in: keyLabs };
         }
 
+        // Country scoping
         const keyCountries = req.sisAuth?.countries || [];
         const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
         if (!hasGlobalCountry) {
@@ -469,36 +484,167 @@ exports.getSpectra = async (req, res) => {
             where.sampleId = { in: allowedIds };
         }
 
-        const [total, records] = await Promise.all([
-            prisma.spectralData.count({ where }),
-            prisma.spectralData.findMany({
-                where,
-                take,
-                skip,
-                orderBy: { timestamp: 'desc' }
-            })
-        ]);
+        // SL-24: Cursor Pagination on (timestamp, id)
+        if (cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf8'));
+                if (decoded && decoded.timestamp && decoded.id) {
+                    where.AND = [
+                        ...(where.AND || []),
+                        {
+                            OR: [
+                                { timestamp: { lt: new Date(decoded.timestamp) } },
+                                {
+                                    timestamp: new Date(decoded.timestamp),
+                                    id: { lt: decoded.id }
+                                }
+                            ]
+                        }
+                    ];
+                }
+            } catch (e) {
+                console.warn('[SIS_SPECTRA] Invalid cursor ignored:', e.message);
+            }
+        }
 
-        const formatted = records.map(r => ({
-            id: r.id,
-            sampleId: r.sampleId,
-            labId: r.labId,
-            modality: r.modality,
-            filename: r.filename,
-            timestamp: r.timestamp,
-            qcStatus: r.qcStatus,
-            wavelengths: r.wavelengths ? JSON.parse(r.wavelengths) : [],
-            values: r.values ? JSON.parse(r.values) : []
-        }));
+        // Fetch take + 1 to determine hasMore
+        const records = await prisma.spectralData.findMany({
+            where,
+            take: take + 1,
+            orderBy: [
+                { timestamp: 'desc' },
+                { id: 'desc' }
+            ],
+            include: {
+                equipment: {
+                    select: { id: true, name: true, model: true, manufacturer: true }
+                }
+            }
+        });
 
+        const hasMore = records.length > take;
+        const pageRecords = hasMore ? records.slice(0, take) : records;
+
+        let nextCursor = null;
+        if (hasMore && pageRecords.length > 0) {
+            const lastItem = pageRecords[pageRecords.length - 1];
+            nextCursor = Buffer.from(JSON.stringify({
+                timestamp: lastItem.timestamp,
+                id: lastItem.id
+            })).toString('base64');
+        }
+
+        // SL-23: Paired Reference Chemistry
+        const shouldAttachRef = withReference === true || withReference === 'true' || withReference === '1';
+        let refMap = {};
+        if (shouldAttachRef) {
+            const sampleIds = [...new Set(pageRecords.map(r => r.sampleId).filter(Boolean))];
+            if (sampleIds.length > 0) {
+                const refResults = await prisma.result.findMany({
+                    where: {
+                        sampleId: { in: sampleIds },
+                        isCurrent: true,
+                        provenance: 'MEASURED'
+                    },
+                    select: {
+                        id: true,
+                        sampleId: true,
+                        param: true,
+                        value: true,
+                        numericValue: true,
+                        unit: true,
+                        methodologyId: true,
+                        basis: true,
+                        provenance: true
+                    }
+                });
+                for (const rf of refResults) {
+                    if (!refMap[rf.sampleId]) refMap[rf.sampleId] = [];
+                    const val = rf.numericValue !== null && rf.numericValue !== undefined ? rf.numericValue : (parseFloat(rf.value) || rf.value);
+                    refMap[rf.sampleId].push({
+                        param: rf.param,
+                        value: val,
+                        unit: rf.unit,
+                        method: rf.methodologyId,
+                        basis: rf.basis || 'AIR_DRY',
+                        provenance: rf.provenance || 'MEASURED',
+                        resultId: rf.id
+                    });
+                }
+            }
+        }
+
+        // SL-23: Rich Payload Format
+        const formatted = pageRecords.map(r => {
+            const axis = r.wavelengths ? JSON.parse(r.wavelengths) : [];
+            const values = r.values ? JSON.parse(r.values) : [];
+            const sampleRefs = refMap[r.sampleId] || [];
+
+            return {
+                id: r.id,
+                sha256: r.sha256,
+                sampleId: r.sampleId,
+                labId: r.labId,
+                signal: {
+                    quantity: r.quantity,
+                    axisUnit: r.axisUnit,
+                    axisDirection: r.axisDirection,
+                    isRaw: r.isRaw,
+                    nPoints: axis.length
+                },
+                acquisition: {
+                    equipmentId: r.equipmentId,
+                    model: r.equipment ? (r.equipment.model || r.equipment.name) : null,
+                    accessory: r.accessory,
+                    resolution: r.resolution,
+                    coAddedScans: r.coAddedScans,
+                    background: r.backgroundRef,
+                    backgroundRef: r.backgroundRef,
+                    backgroundAt: r.backgroundAt,
+                    scannedAt: r.timestamp
+                },
+                preparation: {
+                    preparation: r.preparation,
+                    moistureState: r.moistureState,
+                    windowMaterial: r.windowMaterial,
+                    replicateNo: r.replicateNo
+                },
+                qc: {
+                    status: r.qcStatus,
+                    flags: r.qcFlags ? JSON.parse(r.qcFlags) : [],
+                    approvedAt: r.reviewedAt,
+                    reviewedBy: r.reviewedBy
+                },
+                ...(shouldAttachRef ? {
+                    reference: sampleRefs
+                } : {}),
+                axis,
+                values
+            };
+        });
+
+        // SL-24: ETag & 304 Validation
+        const payloadJson = JSON.stringify(formatted);
+        const etag = crypto.createHash('sha256').update(payloadJson).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();
+        }
+
+        res.setHeader('ETag', etag);
         res.json({
             status: 'success',
-            meta: { total, page: parseInt(page) || 1, limit: take },
+            meta: {
+                cursor: nextCursor,
+                hasMore,
+                schema: "spectra/v1",
+                count: formatted.length
+            },
             data: formatted
         });
     } catch (err) {
         console.error('[SIS_SPECTRA_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve spectral dataset.' });
+        res.status(500).json({ error: 'Failed to retrieve spectral dataset: ' + err.message });
     }
 };
 
