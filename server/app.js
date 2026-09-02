@@ -217,7 +217,6 @@ app.get('/api/config/categories', verifyToken, analysisController.getCategories)
 app.get('/api/config/analyses', verifyToken, analysisController.getAnalyses);
 app.get('/api/config/methodologies', verifyToken, analysisController.getMethodologies);
 app.get('/api/config/groups', verifyToken, analysisController.getGroups);
-app.get('/api/config/glosis/catalog', verifyToken, analysisController.getGlosisCatalog);
 app.use('/api/config', verifyToken, require('./routes/analysisRoutes'));
 
 // Admin Config Routes

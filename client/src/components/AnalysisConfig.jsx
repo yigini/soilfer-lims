@@ -3,17 +3,16 @@ import { useLanguage } from '../context/LanguageContext';
 import AnalysisManager from './admin/AnalysisManager';
 import GroupManager from './admin/GroupManager';
 import CategoryManager from './admin/CategoryManager';
-import GlosisExplorer from './admin/GlosisExplorer';
-import { LayoutList, Layers, Tag, Globe, BookOpen } from 'lucide-react';
+import { LayoutList, Layers, Tag } from 'lucide-react';
 
 const AnalysisConfig = () => {
     const { t } = useLanguage();
-    const [view, setView] = useState('analyses'); // analyses, groups, categories, glosis
+    const [view, setView] = useState('analyses'); // analyses, groups, categories
 
     return (
         <div className="flex flex-col lg:flex-row h-full gap-4 w-full min-w-0">
             {/* Sub-Sidebar */}
-            <div className="w-full lg:w-52 bg-gray-50 dark:bg-gray-800/80 border lg:border-r border-gray-200 dark:border-gray-700 p-2.5 space-y-1.5 flex-shrink-0 rounded-xl">
+            <div className="w-full lg:w-56 bg-gray-50 dark:bg-gray-800/80 border lg:border-r border-gray-200 dark:border-gray-700 p-2.5 space-y-1.5 flex-shrink-0 rounded-xl">
                 <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2.5">
                     {t('nav.settings', 'Laboratory Setup')}
                 </div>
@@ -24,7 +23,7 @@ const AnalysisConfig = () => {
                     className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'analyses' ? 'bg-white dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
                 >
                     <LayoutList size={16} />
-                    <span>{t('analytics.testMethods', 'Analyses & Methods')}</span>
+                    <span>{t('analytics.testMethods', 'Analyses & Methodologies')}</span>
                 </button>
 
                 {/* 2. Analysis Packages / Suites */}
@@ -44,17 +43,6 @@ const AnalysisConfig = () => {
                     <Tag size={16} />
                     <span>Property Categories</span>
                 </button>
-
-                {/* 4. GloSIS Procedures Library */}
-                <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
-                    <button
-                        onClick={() => setView('glosis')}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${view === 'glosis' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-700' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 font-medium'}`}
-                    >
-                        <Globe size={16} className="text-emerald-600 dark:text-emerald-400" />
-                        <span>GloSIS Procedures</span>
-                    </button>
-                </div>
             </div>
 
             {/* Content Area */}
@@ -62,11 +50,11 @@ const AnalysisConfig = () => {
                 {view === 'analyses' && <AnalysisManager />}
                 {view === 'groups' && <GroupManager />}
                 {view === 'categories' && <CategoryManager />}
-                {view === 'glosis' && <GlosisExplorer />}
             </div>
         </div>
     );
 };
 
 export default AnalysisConfig;
+
 

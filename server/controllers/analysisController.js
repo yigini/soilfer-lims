@@ -110,32 +110,10 @@ exports.getOperationalGates = async (req, res) => {
     }
 };
 
-// --- GLOSIS CATALOG ---
-
-exports.getGlosisCatalog = async (req, res) => {
-    try {
-        const fs = require('fs');
-        const path = require('path');
-        const catalogPath = path.join(__dirname, '..', 'config', 'glosis_catalog.json');
-        if (fs.existsSync(catalogPath)) {
-            const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-            res.json(catalog);
-        } else {
-            res.status(404).json({ error: 'GloSIS catalog not initialized' });
-        }
-    } catch (err) {
-        console.error('[getGlosisCatalog] Error:', err);
-        res.status(500).json({ error: 'Failed to fetch GloSIS catalog' });
-    }
-};
-
 // --- ANALYSES CRUD ---
 
 exports.createAnalysis = async (req, res) => {
-    const { 
-        code, name, description, categoryId, units, validation, 
-        methodLabel, methodDefinition, methodCitation, glosisAttribute, glosisUri 
-    } = req.body;
+    const { code, name, description, categoryId, units, validation } = req.body;
     const user = req.user;
 
     if (!code || !name) return res.status(400).json({ error: 'Code and Name are required' });
@@ -149,15 +127,10 @@ exports.createAnalysis = async (req, res) => {
                 code,
                 name,
                 description: description || null,
-                categoryId,
-                units,
+                categoryId: categoryId || null,
+                units: units || null,
                 status: 'active',
-                validation: validation ? JSON.stringify(validation) : null,
-                methodLabel: methodLabel || null,
-                methodDefinition: methodDefinition || null,
-                methodCitation: methodCitation || null,
-                glosisAttribute: glosisAttribute || null,
-                glosisUri: glosisUri || null,
+                validation: validation ? (typeof validation === 'string' ? validation : JSON.stringify(validation)) : null,
                 labId: user.role !== 'SUPER_ADMIN' ? user.labId : null
             }
         });
@@ -168,7 +141,7 @@ exports.createAnalysis = async (req, res) => {
                 entity: 'ANALYSIS',
                 entityId: code,
                 action: 'CREATE',
-                details: `Created analysis ${name} (${code}) [Method: ${methodLabel || 'Standard'}]`,
+                details: `Created analysis ${name} (${code})`,
                 performedBy: user.username,
                 timestamp: new Date()
             }
@@ -201,10 +174,7 @@ exports.updateAnalysis = async (req, res) => {
 
         // Whitelist: only allow safe fields to be updated
         const data = {};
-        const ALLOWED_FIELDS = [
-            'name', 'description', 'categoryId', 'units', 'validation', 'status',
-            'methodLabel', 'methodDefinition', 'methodCitation', 'glosisAttribute', 'glosisUri'
-        ];
+        const ALLOWED_FIELDS = ['name', 'description', 'categoryId', 'units', 'validation', 'status'];
         for (const field of ALLOWED_FIELDS) {
             if (updates[field] !== undefined) {
                 data[field] = updates[field];
