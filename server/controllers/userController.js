@@ -79,7 +79,10 @@ exports.getUsers = async (req, res) => {
                 where,
                 skip,
                 take: limitNum,
-                orderBy: { createdAt: 'desc' }
+                orderBy: [
+                    { role: 'asc' },
+                    { username: 'asc' }
+                ]
             }),
             prisma.user.count({ where })
         ]);
