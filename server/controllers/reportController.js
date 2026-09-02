@@ -5,6 +5,7 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
 const { assembleReport } = require('../services/reportAssembly');
+const { generateReportPdfBuffer } = require('../services/pdfGenerator');
 
 // ─── HELPERS ─────────────────────────────────────────────
 
@@ -445,8 +446,7 @@ async function getPublicReport(req, res) {
 
 /**
  * GET /api/reports/public/:token/pdf
- * Server-side PDF generation using Puppeteer.
- * Renders the public report HTML and converts to A4 PDF.
+ * Public PDF report download using PDFKit.
  */
 async function getPublicReportPdf(req, res) {
     try {
@@ -486,68 +486,94 @@ async function getPublicReportPdf(req, res) {
             return res.status(404).json({ error: 'Report content not available' });
         }
 
-        // Try Puppeteer for server-side PDF
-        let puppeteer;
-        try {
-            puppeteer = require('puppeteer');
-        } catch (e) {
-            console.warn('[Report] Puppeteer not available for server-side PDF generation');
-            return res.status(503).json({
-                error: 'PDF_SERVICE_UNAVAILABLE',
-                message: 'Server-side PDF rendering is not configured on this host. Please use the in-browser print/export option.',
-                version: report.version,
-                generatedAt: report.generatedAt
-            });
-        }
+        const sampleId = content.sample?.labId || content.sample?.originalId || report.sampleId || 'Report';
+        const pdfBuffer = await generateReportPdfBuffer(content);
 
-        // Build the public report URL
-        const host = req.get('host') || 'localhost:4000';
-        const protocol = req.protocol || 'http';
-        const publicUrl = `${protocol}://${host}/report/${token}`;
-
-        const browser = await puppeteer.launch({
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="SoilFER_Report_${sampleId}_v${report.version}.pdf"`,
+            'Content-Length': pdfBuffer.length
         });
-
-        try {
-            const page = await browser.newPage();
-            await page.goto(publicUrl, { waitUntil: 'networkidle0', timeout: 30000 });
-
-            // Wait a bit for React to render
-            await page.waitForSelector('.report-container', { timeout: 10000 }).catch(() => { });
-
-            const labName = content.lab?.name || 'Laboratory';
-            const sampleId = content.sample?.labId || content.sample?.originalId || 'Report';
-
-            const pdfBuffer = await page.pdf({
-                format: 'A4',
-                margin: { top: '20mm', bottom: '25mm', left: '15mm', right: '15mm' },
-                printBackground: true,
-                displayHeaderFooter: true,
-                headerTemplate: `<div style="width:100%;font-size:8px;padding:5mm 15mm;color:#999;display:flex;justify-content:space-between;"><span>${labName}</span><span>Soil Analysis Report — ${sampleId}</span></div>`,
-                footerTemplate: `<div style="width:100%;font-size:7px;padding:5mm 15mm;color:#999;border-top:0.5px solid #ddd;display:flex;justify-content:space-between;"><span>Generated ${new Date(report.generatedAt).toLocaleDateString()}</span><span>v${report.version}</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>`
-            });
-
-            res.set({
-                'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="report-${sampleId}-v${report.version}.pdf"`,
-                'Content-Length': pdfBuffer.length
-            });
-            res.send(pdfBuffer);
-        } finally {
-            await browser.close();
-        }
+        return res.send(pdfBuffer);
     } catch (err) {
         console.error('[Report] PDF generation error:', err);
-        res.status(500).json({ error: 'Failed to generate PDF' });
+        return res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+}
+
+/**
+ * GET /api/reports/:reportId/pdf
+ * Authenticated PDF download for a specific report ID.
+ */
+async function getReportPdf(req, res) {
+    try {
+        const { reportId } = req.params;
+        const report = await prisma.report.findUnique({ where: { id: reportId } });
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;
+        if (!content) {
+            return res.status(404).json({ error: 'Report content not available' });
+        }
+
+        const sampleId = content.sample?.labId || content.sample?.originalId || report.sampleId || 'Report';
+        const pdfBuffer = await generateReportPdfBuffer(content);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `inline; filename="SoilFER_Report_${sampleId}_v${report.version}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        return res.send(pdfBuffer);
+    } catch (err) {
+        console.error('[Report] PDF get error:', err);
+        return res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+}
+
+/**
+ * GET /api/reports/sample/:sampleId/pdf
+ * Authenticated PDF generation for a sample (uses published report or assembles on-the-fly).
+ */
+async function getSampleReportPdf(req, res) {
+    try {
+        const { sampleId } = req.params;
+        let report = await prisma.report.findFirst({
+            where: { sampleId, status: 'PUBLISHED' },
+            orderBy: { version: 'desc' }
+        });
+
+        let content;
+        if (report && report.content) {
+            content = typeof report.content === 'string' ? JSON.parse(report.content) : report.content;
+        } else {
+            const assembled = await assembleReport(sampleId, req.user);
+            content = assembled.content;
+        }
+
+        const sId = content.sample?.labId || content.sample?.originalId || sampleId;
+        const pdfBuffer = await generateReportPdfBuffer(content);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `inline; filename="SoilFER_Certificate_${sId}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        return res.send(pdfBuffer);
+    } catch (err) {
+        console.error('[Report] Sample PDF error:', err);
+        return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
     }
 }
 
 module.exports = {
     generateReport,
     getReport,
+    getReportPdf,
     getReportBySample,
+    getSampleReportPdf,
     searchReports,
     createShareLink,
     listShareLinks,

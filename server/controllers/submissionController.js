@@ -26,7 +26,7 @@ const getWorkItemsForSample = async (sampleId) => {
 // =============================================================================
 // HELPER: Check FULL submission eligibility (Using Workflow Engine)
 // =============================================================================
-const checkFullEligibility = async (sampleId) => {
+const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => {
     const workflowEngine = require('../utils/workflowEngine');
     const items = await getWorkItemsForSample(sampleId);
     const blocking = [];
@@ -39,29 +39,29 @@ const checkFullEligibility = async (sampleId) => {
         // Skip Post-Analytical items for full submission eligibility
         if (config.category === workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL) return;
 
-        // Eligible states: COMPLETED, ACCEPTED, WAIVED (gates), or SUBMITTED/ACCEPTED (analyses)
-        if (['COMPLETED', 'ACCEPTED', 'WAIVED', 'SUBMITTED'].includes(item.status)) {
+        // An item is eligible for FULL closure if it's already accepted/waived OR included in this submission
+        if (['ACCEPTED', 'WAIVED'].includes(item.status) || (currentSubmissionItemIds.includes(item.id) && item.status === 'COMPLETED')) {
             eligible.push(item);
         } else {
             blocking.push({
                 id: item.id,
                 analysis: item.analysis,
-                displayName: config.displayName,
+                displayName: config.displayName || item.analysis,
                 status: item.status,
                 reason: item.status === 'REANALYSIS_REQUIRED' ? item.reanalysisReason : null
             });
         }
     });
 
+    const nonPostItems = items.filter(i =>
+        workflowEngine.getAnalysisConfig(i.analysis).category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL
+    );
+
     return {
-        isEligible: blocking.length === 0 && items.filter(i =>
-            workflowEngine.getAnalysisConfig(i.analysis).category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL
-        ).length > 0,
+        isEligible: blocking.length === 0 && nonPostItems.length > 0,
         blocking,
         eligible,
-        totalRequired: items.filter(i =>
-            workflowEngine.getAnalysisConfig(i.analysis).category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL
-        ).length
+        totalRequired: nonPostItems.length
     };
 };
 
@@ -115,7 +115,7 @@ exports.createSubmission = async (req, res) => {
         }
 
         if (type === 'FULL') {
-            const eligibility = await checkFullEligibility(sampleId);
+            const eligibility = await checkFullEligibility(sampleId, workItemIds);
             if (!eligibility.isEligible) {
                 return res.status(409).json({
                     error: 'Not eligible for FULL submission',

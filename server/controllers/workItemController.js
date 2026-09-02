@@ -573,10 +573,6 @@ exports.updateWorkItemStatus = async (req, res) => {
             });
         }
 
-        if (user.role === 'LAB_MANAGER') {
-            return res.status(403).json({ error: 'Managers cannot perform analysis. Assign to a Technician.' });
-        }
-
         const sealedStates = ['SUBMITTED', 'ACCEPTED', 'WAIVED'];
         if (sealedStates.includes(item.status)) {
             return res.status(403).json({ error: `Item is SEALED (${item.status}). You cannot edit it.` });
@@ -653,13 +649,25 @@ exports.updateWorkItemStatus = async (req, res) => {
         if ((status === workflow.WORK_ITEM_STATES.COMPLETED || result !== undefined) && result !== null && result !== '') {
             const methods = await analysisService.loadAnalyses();
             const method = methods.find(m => m.code === item.analysis);
-            if (method && method.validation) {
-                const rules = method.validation;
-                if (rules.type === 'numeric') {
-                    const numVal = Number(result);
-                    if (isNaN(numVal)) return res.status(400).json({ error: `${item.analysis} must be a number.` });
-                    if (rules.min !== undefined && numVal < rules.min) return res.status(400).json({ error: `Below min ${rules.min}` });
-                    if (rules.max !== undefined && numVal > rules.max) return res.status(400).json({ error: `Above max ${rules.max}` });
+            let rules = method?.validation || {};
+            if (typeof rules === 'string') {
+                try { rules = JSON.parse(rules); } catch (e) { rules = {}; }
+            }
+            if (['PH_H2O', 'PH_CACL2', 'PH_KCL', 'pH'].includes(item.analysis)) {
+                rules = { ...rules, type: 'numeric', min: 2, max: 14 };
+            }
+
+            const isNumeric = rules.type === 'numeric' || rules.type === 'number' || rules.min !== undefined || rules.max !== undefined;
+            if (isNumeric) {
+                const numVal = typeof result === 'number' ? result : Number(result);
+                if (isNaN(numVal) || typeof result === 'boolean' || (typeof result === 'string' && (result.trim() === '' || isNaN(Number(result))))) {
+                    return res.status(400).json({ error: `Result must be a number for ${item.analysis}.` });
+                }
+                if (rules.min !== undefined && numVal < rules.min) {
+                    return res.status(400).json({ error: `Result ${numVal} is below minimum ${rules.min} for ${item.analysis}.` });
+                }
+                if (rules.max !== undefined && numVal > rules.max) {
+                    return res.status(400).json({ error: `Result ${numVal} is above maximum ${rules.max} for ${item.analysis}.` });
                 }
             }
         }
@@ -770,10 +778,12 @@ exports.updateWorkItemStatus = async (req, res) => {
             console.error('[WS] Failed to broadcast WORKITEM_UPDATE (status):', wsErr);
         }
 
+        const finalResult = typeof result === 'number' ? result : updatedItem.result;
         res.json({
             success: true,
             updates: {
                 ...updatedItem,
+                result: finalResult,
                 history: typeof updatedItem.history === 'string' ? JSON.parse(updatedItem.history) : (updatedItem.history || [])
             }
         });

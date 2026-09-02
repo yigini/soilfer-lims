@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const { evaluateBatchQc, checkBatchDisposition } = require('../services/qcService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -89,30 +90,92 @@ exports.updateBatch = async (req, res) => {
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
         const data = { ...updates };
-        if (updates.status && updates.status !== batch.status) {
+
+        // Auto-evaluate QC data if provided
+        if (updates.qcResults || updates.blanks || updates.duplicates || updates.controls) {
+            const qcPayload = updates.qcResults || {
+                blanks: updates.blanks,
+                duplicates: updates.duplicates,
+                controls: updates.controls
+            };
+            const evaluated = evaluateBatchQc(qcPayload);
+            data.qcResults = JSON.stringify(evaluated);
+            if (!updates.status && evaluated.overallStatus !== 'OPEN') {
+                data.status = evaluated.overallStatus;
+            }
+        } else if (updates.qcResults && typeof updates.qcResults === 'object') {
+            data.qcResults = JSON.stringify(updates.qcResults);
+        }
+
+        if (data.status && data.status !== batch.status) {
             const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
             history.push({
-                status: updates.status,
+                status: data.status,
                 changedBy: user.username,
                 timestamp: new Date()
             });
             data.history = JSON.stringify(history);
         }
 
-        // Handle JSON fields if they are in updates
-        if (updates.qcResults) data.qcResults = JSON.stringify(updates.qcResults);
-        if (updates.workItemIds) data.workItemIds = JSON.stringify(updates.workItemIds);
-        if (updates.disposition) data.disposition = JSON.stringify(updates.disposition);
+        if (updates.workItemIds) data.workItemIds = typeof updates.workItemIds === 'string' ? updates.workItemIds : JSON.stringify(updates.workItemIds);
+        if (updates.disposition) data.disposition = typeof updates.disposition === 'string' ? updates.disposition : JSON.stringify(updates.disposition);
 
         const updatedBatch = await prisma.batch.update({
             where: { id },
             data
         });
 
-        res.json({ success: true, batch: updatedBatch });
+        res.json({
+            success: true,
+            id: updatedBatch.id,
+            status: updatedBatch.status,
+            batch: updatedBatch
+        });
     } catch (error) {
         console.error('[updateBatch] Error:', error);
         res.status(500).json({ error: 'Failed to update batch' });
+    }
+};
+
+exports.evaluateBatch = async (req, res) => {
+    const { id } = req.params;
+    const { blanks, duplicates, controls } = req.body;
+    const user = req.user;
+
+    try {
+        const batch = await prisma.batch.findUnique({ where: { id } });
+        if (!batch) return res.status(404).json({ error: 'Batch not found' });
+
+        const evaluated = evaluateBatchQc({ blanks, duplicates, controls });
+        const newStatus = evaluated.overallStatus !== 'OPEN' ? evaluated.overallStatus : batch.status;
+
+        const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
+        if (newStatus !== batch.status) {
+            history.push({
+                status: newStatus,
+                changedBy: user.username,
+                timestamp: new Date()
+            });
+        }
+
+        const updatedBatch = await prisma.batch.update({
+            where: { id },
+            data: {
+                qcResults: JSON.stringify(evaluated),
+                status: newStatus,
+                history: JSON.stringify(history)
+            }
+        });
+
+        res.json({
+            success: true,
+            status: newStatus,
+            evaluation: evaluated,
+            batch: updatedBatch
+        });
+    } catch (error) {
+        console.error('[evaluateBatch] Error:', error);
+        res.status(500).json({ error: 'Failed to evaluate batch' });
     }
 };
 
@@ -157,11 +220,24 @@ exports.checkItemBatchStatus = async (workItemId) => {
             include: { batch: true }
         });
 
-        if (!item || !item.batchId) {
+        if (!item || !item.batchId || !item.batch) {
             return { batchId: null, status: 'N/A' };
         }
 
-        return { batchId: item.batchId, status: item.batch.status };
+        const batch = item.batch;
+        let disposition = null;
+        if (batch.disposition) {
+            try {
+                disposition = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+            } catch (e) { }
+        }
+
+        // If batch failed but has PROCEED_WITH_WARNING disposition from manager, allow downstream acceptance!
+        if (batch.status === 'QC_FAIL' && disposition && disposition.decision === 'PROCEED_WITH_WARNING') {
+            return { batchId: item.batchId, status: 'QC_PASS_WITH_WARNING', disposition };
+        }
+
+        return { batchId: item.batchId, status: item.batch.status, disposition };
     } catch (error) {
         console.error('[checkItemBatchStatus] Error:', error);
         return { batchId: null, status: 'ERROR' };

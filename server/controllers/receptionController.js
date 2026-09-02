@@ -239,6 +239,10 @@ exports.processIntake = async (req, res) => {
             });
         }
 
+        if (Array.isArray(req.body.requiredAnalyses)) {
+            req.body.requiredAnalyses.forEach(code => requiredAnalyses.add(code));
+        }
+
         if (Array.isArray(analysisAdditions)) {
             analysisAdditions.forEach(code => requiredAnalyses.add(code));
         }
@@ -352,6 +356,14 @@ exports.processIntake = async (req, res) => {
             where: { id: String(sample.id) },
             data: updateData
         });
+
+        // Automatically generate work items for specified analyses
+        try {
+            const workItemController = require('./workItemController');
+            await workItemController.generateWorkItemsForSample(updated);
+        } catch (wiErr) {
+            console.warn('[INTAKE] Warning: Failed to generate work items during intake:', wiErr.message);
+        }
 
         await prisma.auditLog.create({
             data: {

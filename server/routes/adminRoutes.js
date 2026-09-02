@@ -7,7 +7,7 @@ router.use(verifyToken);
 
 router.get('/ping', (req, res) => res.send('pong'));
 router.get('/system-logs', checkPermission('MANAGE_BRANDING'), adminController.getAuditLogs);
-router.get('/settings', adminController.getSettings);
+router.get('/settings', checkPermission('MANAGE_BRANDING'), adminController.getSettings);
 router.put('/settings/branding', checkPermission('MANAGE_BRANDING'), adminController.updateBranding);
 router.get('/languages', adminController.getLanguages);
 router.post('/languages', checkPermission('MANAGE_BRANDING'), adminController.createLanguage);

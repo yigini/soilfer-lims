@@ -3,6 +3,7 @@
  * Assembles a complete report payload from sample data, results, work items, and lab context.
  */
 const prisma = require('../prisma');
+const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
 
 /**
  * Assemble a full report object for a given sample.
@@ -81,7 +82,7 @@ async function assembleReport(sampleId, user) {
     } catch (e) { /* methodologies table may be empty */ }
     const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
 
-    // 7. Group results by category
+    // 7. Group results by category and apply controlled units & agronomic interpretation
     const groupedResults = {};
     for (const result of sample.results) {
         const analysis = analysisMap.get(result.param);
@@ -95,14 +96,21 @@ async function assembleReport(sampleId, user) {
 
         const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
         const methodology = methodMap.get(result.param);
+        const rawUnit = result.unit || analysis?.units || '';
+        const interp = interpretParameter(result.param, result.value, rawUnit);
 
         groupedResults[category].items.push({
             param: result.param,
             name: analysis?.name || result.param,
             value: result.value,
-            unit: analysis?.units || result.unit || '',
+            unit: interp.unit || rawUnit,
             method: methodology?.name || null,
             standard: methodology?.standard || null,
+            interpretation: {
+                rating: interp.rating,
+                label: interp.label,
+                advisory: interp.advisory
+            },
             flags,
             isValid: result.isValid
         });
@@ -117,6 +125,13 @@ async function assembleReport(sampleId, user) {
     for (const [catId, group] of Object.entries(groupedResults)) {
         group.categoryName = categoryMap.get(catId) || catId;
     }
+
+    // 8b. Compute comprehensive multi-parameter soil diagnostics
+    const soilDiagnostics = evaluateSoilProfile(sample.results.map(r => ({
+        param: r.param,
+        value: r.value,
+        unit: r.unit || analysisMap.get(r.param)?.units
+    })));
 
     // 9. Work item summary
     const workItemSummary = sample.workItems.map(wi => ({
@@ -210,6 +225,8 @@ async function assembleReport(sampleId, user) {
         labBranding,
         // Results (grouped by category)
         resultGroups: Object.values(groupedResults),
+        // Holistic Multi-Parameter Soil Metrology & Diagnostics
+        diagnostics: soilDiagnostics,
         // Methodologies footnotes
         methodologies: usedMethods,
         // Work Items

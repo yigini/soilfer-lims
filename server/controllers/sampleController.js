@@ -587,7 +587,9 @@ exports.updatePhaseStatus = async (req, res) => {
         if (phase === 'DRYING') {
             updates.dryingStatus = status;
             if (status === 'FAILED') {
-                updates.dryingFailedReason = reason;
+                const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+                meta.dryingFailedReason = reason;
+                updates.metadata = JSON.stringify(meta);
                 updates.status = 'ON_HOLD';
                 await prisma.auditLog.create({
                     data: {
@@ -598,7 +600,6 @@ exports.updatePhaseStatus = async (req, res) => {
                         details: `Drying FAILED: ${reason}`,
                         performedBy: user.username,
                         timestamp: new Date(),
-                        reason: reason,
                         sampleId: String(id)
                     }
                 });
@@ -804,17 +805,24 @@ exports.createWalkInSample = async (req, res) => {
         // Determine lab from user
         const assignedLab = user.labId || `LAB-${countryCode}`;
 
-        // NEW: Automated Short Sample ID for Walk-ins
+        // Automated Short Sample ID for Walk-ins / PT
         const prefix = sampleType === 'PT' ? 'P' : 'W';
         const autoId = await idGenerator.generateWalkInId(countryCode, prefix);
+        const originalId = sampleType === 'PT' && ptRound ? `PT-${ptRound}-${autoId}` : autoId;
         const sampleId = autoId;
         const now = new Date();
+
+        const sampleMeta = {
+            sampleType: sampleType || 'WALKIN',
+            ptRound: ptRound || null,
+            expectedValues: expectedValues || null
+        };
 
         // Create sample
         const newSample = await prisma.sample.create({
             data: {
                 id: sampleId,
-                originalId: autoId,
+                originalId: originalId,
                 status: 'RECEIVED', // Walk-ins start as RECEIVED
                 projectCode: countryCode,
                 countryName: countryCode, // Using projectCode as country proxy
@@ -823,11 +831,7 @@ exports.createWalkInSample = async (req, res) => {
                 receivedBy: user.username,
                 requiredAnalyses: analyses ? JSON.stringify(analyses) : '[]',
                 labId: autoId, // Walk-ins use their short ID as Lab ID (Finding #5)
-                metadata: JSON.stringify({
-                    sampleType: sampleType || 'WALKIN',
-                    ptRound: ptRound || null,
-                    expectedValues: expectedValues || null
-                }),
+                metadata: JSON.stringify(sampleMeta),
                 fieldMetadata: JSON.stringify({
                     submitterName: { value: submitter, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
                     submitterContact: { value: submitterContact, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
@@ -858,7 +862,14 @@ exports.createWalkInSample = async (req, res) => {
             }
         });
 
-        res.status(201).json({ sample: newSample });
+        res.status(201).json({
+            sample: {
+                ...newSample,
+                sampleType: sampleMeta.sampleType,
+                ptRound: sampleMeta.ptRound,
+                expectedValues: sampleMeta.expectedValues
+            }
+        });
     } catch (error) {
         console.error('Create Walk-in Error:', error);
         res.status(500).json({ error: 'Failed to create walk-in sample' });
@@ -1255,7 +1266,16 @@ exports.acceptSample = async (req, res) => {
             }
         });
 
-        res.json({ ...updated, warning: workItemWarning || undefined });
+        let workItems = [];
+        try {
+            workItems = await prisma.workItem.findMany({
+                where: { sampleId: String(id) }
+            });
+        } catch (e) {
+            console.error('[ACCEPT] Failed to fetch generated work items:', e);
+        }
+
+        res.json({ ...updated, workItems, warning: workItemWarning || undefined });
     } catch (error) {
         console.error('[acceptSample] Error:', error);
         res.status(500).json({ error: 'Failed to accept sample' });
@@ -1737,6 +1757,16 @@ exports.approveSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
+        // Check if there are unapproved/pending work items
+        const workItems = await prisma.workItem.findMany({ where: { sampleId: String(id) } });
+        const unapprovedItems = workItems.filter(w => !['ACCEPTED', 'COMPLETED', 'CANCELLED'].includes(w.status));
+        if (unapprovedItems.length > 0) {
+            return res.status(409).json({
+                error: 'Work items pending approval or completion',
+                blockers: unapprovedItems.map(w => ({ id: w.id, analysis: w.analysis, status: w.status }))
+            });
+        }
+
         const now = new Date();
         const updated = await prisma.sample.update({
             where: { id: String(id) },
@@ -1773,7 +1803,7 @@ exports.approveSample = async (req, res) => {
             }
         });
 
-        res.json({ success: true, sample: updated });
+        res.json({ ...updated, success: true, status: 'APPROVED' });
     } catch (error) {
         console.error('[approveSample] Error:', error);
         res.status(500).json({ error: 'Failed to approve sample' });
@@ -1846,6 +1876,7 @@ exports.undoApproval = async (req, res) => {
 exports.archiveSample = async (req, res) => {
     const { id } = req.params;
     const user = req.user;
+    const { archiveLocation, notes } = req.body;
 
     try {
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -1855,66 +1886,52 @@ exports.archiveSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // Check if Archiving WI already exists
-        const existing = await prisma.workItem.findFirst({
-            where: { sampleId: String(id), analysis: 'ARCHIVING' }
-        });
-        if (existing) {
-            return res.status(400).json({ error: 'Archival already requested' });
+        if (sample.status !== 'APPROVED') {
+            return res.status(409).json({ error: 'Sample must be in APPROVED status before archiving.' });
         }
 
-        const now = new Date();
-        const wiId = `WI-${Date.now()}-ARCH`;
-        const history = [{
-            status: 'NOT_ASSIGNED',
-            assignedTo: null,
-            timestamp: now,
-            note: 'Archival Requested'
-        }];
+        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        if (archiveLocation) meta.archiveLocation = archiveLocation;
+        if (notes) meta.archiveNotes = notes;
 
-        const wi = await prisma.workItem.create({
+        const now = new Date();
+        const updated = await prisma.sample.update({
+            where: { id: String(id) },
             data: {
-                id: wiId,
-                sampleId: String(id),
-                labId: sample.labId,
-                assignedLab: sample.assignedLab,
-                analysis: 'ARCHIVING',
-                category: 'Post-Analytical',
-                status: 'NOT_ASSIGNED',
-                assignedTo: null,
-                priority: 'NORMAL',
-                createdAt: now,
-                history: JSON.stringify(history)
+                status: 'ARCHIVED',
+                metadata: JSON.stringify(meta)
             }
         });
-
-        // No longer changing sample status to ARCHIVING_PENDING to keep UI consistent
-        // Sample stays APPROVED while pending post-analytical work
-
 
         await prisma.auditLog.create({
             data: {
                 id: `audit-arch-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
-                action: 'ARCHIVAL_REQUESTED',
-                details: 'Archival requested',
+                action: 'SAMPLE_ARCHIVED',
+                details: `Sample archived at location ${archiveLocation || 'ARCHIVE'}`,
                 performedBy: user.username,
                 timestamp: now,
                 sampleId: String(id)
             }
         });
 
-        res.json({ success: true, workItem: { ...wi, history } });
+        res.json({
+            ...updated,
+            success: true,
+            status: 'ARCHIVED',
+            archiveLocation: archiveLocation || meta.archiveLocation || 'ARCHIVE'
+        });
     } catch (error) {
         console.error('[archiveSample] Error:', error);
-        res.status(500).json({ error: 'Failed to request archival' });
+        res.status(500).json({ error: 'Failed to archive sample' });
     }
 };
 
 exports.disposeSample = async (req, res) => {
     const { id } = req.params;
     const user = req.user;
+    const { disposalMethod, notes } = req.body;
 
     try {
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -1924,60 +1941,45 @@ exports.disposeSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // Check if Disposal WI already exists
-        const existing = await prisma.workItem.findFirst({
-            where: { sampleId: String(id), analysis: 'DISPOSAL' }
-        });
-        if (existing) {
-            return res.status(400).json({ error: 'Disposal already requested' });
+        if (sample.status !== 'APPROVED') {
+            return res.status(409).json({ error: 'Sample must be in APPROVED status before disposal.' });
         }
 
-        const now = new Date();
-        const wiId = `WI-${Date.now()}-DISP`;
-        const history = [{
-            status: 'NOT_ASSIGNED',
-            assignedTo: null,
-            timestamp: now,
-            note: 'Disposal Requested'
-        }];
+        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        if (disposalMethod) meta.disposalMethod = disposalMethod;
+        if (notes) meta.disposalNotes = notes;
 
-        const wi = await prisma.workItem.create({
+        const now = new Date();
+        const updated = await prisma.sample.update({
+            where: { id: String(id) },
             data: {
-                id: wiId,
-                sampleId: String(id),
-                labId: sample.labId,
-                assignedLab: sample.assignedLab,
-                analysis: 'DISPOSAL',
-                category: 'Post-Analytical',
-                status: 'NOT_ASSIGNED',
-                assignedTo: null,
-                priority: 'NORMAL',
-                createdAt: now,
-                history: JSON.stringify(history)
+                status: 'DISPOSED',
+                metadata: JSON.stringify(meta)
             }
         });
-
-        // No longer changing sample status to DISPOSAL_PENDING to keep UI consistent
-        // Sample stays APPROVED while pending post-analytical work
-
 
         await prisma.auditLog.create({
             data: {
                 id: `audit-disp-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
-                action: 'DISPOSAL_REQUESTED',
-                details: 'Disposal requested',
+                action: 'SAMPLE_DISPOSED',
+                details: `Sample disposed via ${disposalMethod || 'STANDARD'}`,
                 performedBy: user.username,
                 timestamp: now,
                 sampleId: String(id)
             }
         });
 
-        res.json({ success: true, workItem: { ...wi, history } });
+        res.json({
+            ...updated,
+            success: true,
+            status: 'DISPOSED',
+            disposalMethod: disposalMethod || meta.disposalMethod || 'STANDARD'
+        });
     } catch (error) {
         console.error('[disposeSample] Error:', error);
-        res.status(500).json({ error: 'Failed to request disposal' });
+        res.status(500).json({ error: 'Failed to dispose sample' });
     }
 };
 

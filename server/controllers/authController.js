@@ -52,7 +52,13 @@ exports.login = async (req, res) => {
 
         // Return user info with effective permissions
         const safeUser = sanitizeUser(user);
-        return success(res, 'AUTH.LOGIN_SUCCESS', 'Login successful', null, 200, { token, user: safeUser });
+        return res.status(200).json({
+            messageCode: 'AUTH.LOGIN_SUCCESS',
+            message: 'Login successful',
+            token,
+            user: safeUser,
+            data: { token, user: safeUser }
+        });
     } catch (err) {
         console.error('[AUTH] Login Error:', err);
         return error(res, 500, 'AUTH.INTERNAL', 'Internal server error');

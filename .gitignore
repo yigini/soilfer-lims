@@ -11,12 +11,14 @@ build/
 .env.*.local
 
 # ─── Database ───
-server/prisma/dev.db
-server/prisma/dev.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+server/prisma/*.db-shm
+server/prisma/*.db-wal
 server/prisma/dev - Copy*
 server/prisma_client/
-server/prisma/dev.db-shm
-server/prisma/dev.db-wal
+*.db
+*.db-journal
 
 # ─── Data & Uploads ───
 server/data/

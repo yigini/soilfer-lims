@@ -25,9 +25,9 @@ router.post('/methodologies', verifyToken, checkPermission('MANAGE_ANALYSES'), a
 router.put('/methodologies/:id', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.updateMethodology);
 router.delete('/methodologies/:id', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.deleteMethodology);
 
-// Categories — MANAGE_ANALYSES permission
-router.post('/categories', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.createCategory);
-router.put('/categories/:id', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.updateCategory);
-router.delete('/categories/:id', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.deleteCategory);
+// Categories — MANAGE_BRANDING permission (Global configuration)
+router.post('/categories', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createCategory);
+router.put('/categories/:id', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.updateCategory);
+router.delete('/categories/:id', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.deleteCategory);
 
 module.exports = router;

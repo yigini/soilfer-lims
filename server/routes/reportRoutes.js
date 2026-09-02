@@ -18,8 +18,14 @@ router.get('/search', verifyToken, ctrl.searchReports);
 // Get report by ID
 router.get('/:reportId', verifyToken, ctrl.getReport);
 
+// Get report PDF by ID
+router.get('/:reportId/pdf', verifyToken, ctrl.getReportPdf);
+
 // Get latest report for a sample
 router.get('/sample/:sampleId', verifyToken, ctrl.getReportBySample);
+
+// Get latest report PDF for a sample
+router.get('/sample/:sampleId/pdf', verifyToken, ctrl.getSampleReportPdf);
 
 // ─── Sharing (manager-only) ─────────────────────────────
 

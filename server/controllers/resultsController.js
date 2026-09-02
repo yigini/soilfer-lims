@@ -170,10 +170,17 @@ exports.saveResults = async (req, res) => {
 
         await prisma.$transaction(operations);
 
+        // Compute cross-parameter sample matrix diagnostics
+        const allActiveResults = await prisma.result.findMany({
+            where: { sampleId, isCurrent: true }
+        });
+        const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
+
         // Return validation feedback
         res.json({
             success: true,
-            validation: validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags }))
+            validation: validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
+            matrixDiagnostics
         });
 
     } catch (error) {
@@ -191,10 +198,12 @@ exports.submitForApproval = async (req, res) => {
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
         // Check if results exist
-        const resultCount = await prisma.result.count({ where: { sampleId } });
-        if (resultCount === 0) {
+        const allActiveResults = await prisma.result.findMany({ where: { sampleId, isCurrent: true } });
+        if (allActiveResults.length === 0) {
             return res.status(400).json({ error: 'No results entered' });
         }
+
+        const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
 
         await prisma.sample.update({
             where: { id: sampleId },
@@ -209,11 +218,11 @@ exports.submitForApproval = async (req, res) => {
                 action: 'SUBMIT_FOR_APPROVAL',
                 performedBy: user ? user.username : 'SYSTEM',
                 timestamp: new Date(),
-                details: 'Sample submitted for approval (Status: COMPLETED)'
+                details: `Sample submitted for approval (Status: COMPLETED). Matrix Warnings: ${matrixDiagnostics.warnings.length}`
             }
         });
 
-        res.json({ success: true, status: 'COMPLETED' });
+        res.json({ success: true, status: 'COMPLETED', matrixDiagnostics });
     } catch (error) {
         console.error('[submitForApproval] Error:', error);
         res.status(500).json({ error: 'Failed to submit for approval' });
