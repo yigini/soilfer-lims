@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
+const { normalizeUnit } = require('../services/interpretationService');
 
 // Helper to build scoped database query based on SIS Auth permissions
 function buildSisWhere(sisAuth, query = {}) {
@@ -118,9 +119,9 @@ function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
     try { reception = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : (sample.receptionData || {}); } catch(e) {}
 
     // Extract GPS
-    const lat = field.latitude || field.lat || field.gps_lat || (field.coordinates ? field.coordinates.lat : null) || null;
-    const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || null;
-    const accuracy = field.accuracy || field.gps_accuracy || (field.coordinates ? field.coordinates.accuracy : null) || null;
+    const lat = field.latitude || field.lat || field.gps_lat || (field.coordinates ? field.coordinates.lat : null) || meta.latitude || meta.lat || meta.gpsY || null;
+    const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || meta.longitude || meta.lng || meta.gpsX || null;
+    const accuracy = field.accuracy || field.gps_accuracy || (field.coordinates ? field.coordinates.accuracy : null) || meta.accuracy || null;
 
     // Depth resolution (Sample columns > field metadata > reception)
     const topCm = sample.depthTop ?? (field.depthTop !== undefined ? Number(field.depthTop) : 0);
@@ -140,10 +141,19 @@ function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
             const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
             const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
 
+            const rawUnit = r.unit || aMeta.units || null;
+            const norm = normalizeUnit(r.param, r.value, rawUnit);
+            const numVal = r.numericValue !== null && r.numericValue !== undefined ? r.numericValue : (isNaN(Number(r.value)) ? r.value : Number(r.value));
+            const normVal = norm.normalizedValue !== null ? norm.normalizedValue : numVal;
+            const controlledUnit = norm.standardUnit || rawUnit;
+
             analyticalResults[r.param] = {
-                value: r.numericValue !== null && r.numericValue !== undefined ? r.numericValue : (isNaN(Number(r.value)) ? r.value : Number(r.value)),
+                value: normVal, // legacy alias points to normalised value
+                as_measured: numVal,
+                unit: rawUnit,
+                normalized: normVal,
+                controlled_unit: controlledUnit,
                 rawEntry: r.value,
-                unit: r.unit || aMeta.units || null,
                 qudtUnit: qudtUnit,
                 basis: r.basis || 'AIR_DRY',
                 censoring: r.censoring || 'NONE',
@@ -344,9 +354,14 @@ exports.getGeoJson = async (req, res) => {
                     crop: formatted.provenance.site.currentCrop
                 };
 
-                // Add analytical keys
+                // Add analytical keys (WP-22 dual export schema)
                 Object.entries(formatted.analyticalResults).forEach(([param, resObj]) => {
-                    flatProperties[param.toLowerCase()] = resObj.value;
+                    const p = param.toLowerCase();
+                    flatProperties[p] = resObj.normalized !== undefined ? resObj.normalized : resObj.value;
+                    flatProperties[`${p}_as_measured`] = resObj.as_measured !== undefined ? resObj.as_measured : resObj.value;
+                    flatProperties[`${p}_unit`] = resObj.unit;
+                    flatProperties[`${p}_normalized`] = resObj.normalized !== undefined ? resObj.normalized : resObj.value;
+                    flatProperties[`${p}_controlled_unit`] = resObj.controlled_unit;
                 });
 
                 features.push({

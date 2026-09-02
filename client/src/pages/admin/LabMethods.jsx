@@ -1,0 +1,341 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { 
+    FlaskConical, CheckCircle2, AlertCircle, Save, 
+    RefreshCw, Filter, ShieldCheck, Sparkles, Building2
+} from 'lucide-react';
+
+const LabMethods = () => {
+    const { user } = useAuth();
+    const { t } = useLanguage();
+
+    const [labs, setLabs] = useState([]);
+    const [selectedLabId, setSelectedLabId] = useState(user?.labId || 'LAB-DEFAULT');
+    const [defaults, setDefaults] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState(null);
+    const [filterMatrix, setFilterMatrix] = useState('ALL');
+    const [filterModule, setFilterModule] = useState('ALL');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
+
+    // Fetch labs list if user has access to multiple labs
+    useEffect(() => {
+        const fetchLabs = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/labs', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setLabs(data);
+                    if (!user?.labId && data.length > 0) {
+                        setSelectedLabId(data[0].id);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load labs list:', err);
+            }
+        };
+        fetchLabs();
+    }, [user]);
+
+    // Fetch lab defaults
+    const loadLabDefaults = async (labId) => {
+        if (!labId) return;
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/config/lab-defaults/${labId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setDefaults(data);
+                // Check if any overrides exist — if none, trigger setup wizard prompt
+                const hasOverrides = data.some(d => d.isOverridden);
+                if (!hasOverrides && data.length > 0) {
+                    setIsWizardOpen(true);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load defaults:', err);
+            setMessage({ type: 'error', text: 'Failed to load laboratory methodology defaults.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedLabId) {
+            loadLabDefaults(selectedLabId);
+        }
+    }, [selectedLabId]);
+
+    const handleMethodChange = (analysisCode, methodologyId) => {
+        setDefaults(prev => prev.map(item => {
+            if (item.analysisCode === analysisCode) {
+                return {
+                    ...item,
+                    chosenMethodologyId: methodologyId,
+                    effectiveMethodologyId: methodologyId,
+                    isOverridden: true
+                };
+            }
+            return item;
+        }));
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        setMessage(null);
+        try {
+            const token = localStorage.getItem('token');
+            const payload = defaults
+                .filter(d => d.chosenMethodologyId !== null)
+                .map(d => ({
+                    analysisCode: d.analysisCode,
+                    methodologyId: d.chosenMethodologyId
+                }));
+
+            const res = await fetch(`/api/config/lab-defaults/${selectedLabId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ defaults: payload })
+            });
+
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Laboratory methodology defaults successfully saved.' });
+                setIsWizardOpen(false);
+                await loadLabDefaults(selectedLabId);
+            } else {
+                const errData = await res.json();
+                setMessage({ type: 'error', text: errData.error || 'Failed to save defaults.' });
+            }
+        } catch (err) {
+            console.error('Error saving lab defaults:', err);
+            setMessage({ type: 'error', text: 'Connection error while saving methodology defaults.' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Filter list
+    const filteredDefaults = defaults.filter(item => {
+        if (filterMatrix !== 'ALL' && item.matrix !== filterMatrix) return false;
+        if (filterModule !== 'ALL' && item.module !== filterModule) return false;
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            return item.analysisCode.toLowerCase().includes(q) || item.analysisName.toLowerCase().includes(q);
+        }
+        return true;
+    });
+
+    return (
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                            <FlaskConical className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Laboratory Methodology Defaults</h1>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure standard operating procedures and default methods for work items</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Lab Selector & Actions */}
+                <div className="flex flex-wrap items-center gap-3">
+                    {labs.length > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <select
+                                value={selectedLabId}
+                                onChange={(e) => setSelectedLabId(e.target.value)}
+                                className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                            >
+                                {labs.map(l => (
+                                    <option key={l.id} value={l.id}>{l.name || l.id} ({l.code || l.id})</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    <button
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm disabled:opacity-50"
+                    >
+                        {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        Save Defaults
+                    </button>
+                </div>
+            </div>
+
+            {/* Notification Banner */}
+            {message && (
+                <div className={`p-4 rounded-lg flex items-center gap-3 text-sm ${
+                    message.type === 'success' 
+                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800' 
+                        : 'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+                }`}>
+                    {message.type === 'success' ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+                    <span>{message.text}</span>
+                </div>
+            )}
+
+            {/* First-Run Setup Wizard Banner */}
+            {isWizardOpen && (
+                <div className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border-2 border-emerald-500/30 rounded-xl space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <Sparkles className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Laboratory Method Onboarding Wizard</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                    This laboratory does not currently have custom methodology overrides. Default FAO GLOSOLAN SOPs are active. 
+                                    Review the table below, customize any methods matching your laboratory instruments, and confirm the list.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setIsWizardOpen(false)}
+                            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 uppercase font-semibold"
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Filter Bar */}
+            <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <input
+                    type="text"
+                    placeholder="Search analyses..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 min-w-[200px] px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                />
+
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Matrix:</span>
+                    <select
+                        value={filterMatrix}
+                        onChange={(e) => setFilterMatrix(e.target.value)}
+                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                    >
+                        <option value="ALL">All Matrices</option>
+                        <option value="SOIL">Soil</option>
+                        <option value="PLANT">Plant Tissue</option>
+                        <option value="WATER">Water</option>
+                        <option value="FERTILIZER">Fertilizer</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Module:</span>
+                    <select
+                        value={filterModule}
+                        onChange={(e) => setFilterModule(e.target.value)}
+                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                    >
+                        <option value="ALL">All Modules</option>
+                        <option value="FERTILITY">Fertility</option>
+                        <option value="HEALTH">Health</option>
+                        <option value="ENVIRONMENTAL">Environmental</option>
+                        <option value="QUALITY">Quality</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                {loading ? (
+                    <div className="p-12 text-center text-gray-500 flex flex-col items-center gap-3">
+                        <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
+                        <span>Loading methodology defaults...</span>
+                    </div>
+                ) : filteredDefaults.length === 0 ? (
+                    <div className="p-12 text-center text-gray-500">
+                        No analytical parameters match the selected filters.
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 uppercase text-xs font-semibold border-b border-gray-200 dark:border-gray-700">
+                                <tr>
+                                    <th className="px-6 py-4">Parameter</th>
+                                    <th className="px-6 py-4">Matrix / Module</th>
+                                    <th className="px-6 py-4">Active Methodology</th>
+                                    <th className="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {filteredDefaults.map(item => {
+                                    return (
+                                        <tr key={item.analysisCode} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-semibold text-gray-900 dark:text-white">{item.analysisName}</div>
+                                                <div className="text-xs text-mono text-gray-400">{item.analysisCode}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                        {item.matrix}
+                                                    </span>
+                                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
+                                                        {item.module}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 min-w-[320px]">
+                                                {item.methodologies.length > 0 ? (
+                                                    <select
+                                                        value={item.effectiveMethodologyId || ''}
+                                                        onChange={(e) => handleMethodChange(item.analysisCode, e.target.value)}
+                                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                                                    >
+                                                        {item.methodologies.map(m => (
+                                                            <option key={m.id} value={m.id}>
+                                                                {m.name} {m.standard ? `(${m.standard})` : ''} {m.isDefault ? '★ [GLOSOLAN Default]' : ''}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400 italic">Standard procedure only</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {item.isOverridden ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+                                                        <ShieldCheck className="w-3.5 h-3.5" /> Lab Choice
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                        GLOSOLAN Standard
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default LabMethods;

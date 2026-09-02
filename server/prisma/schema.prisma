@@ -113,6 +113,11 @@ model Sample {
   history           String?    // JSON string: Audit trail for this sample
   rejectionReason   String?    // Detailed explanation when sample rejected during intake
 
+  // Matrix & Module (WP-18)
+  matrix            String     @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
+  plantPart         String?    // LEAF, PETIOLE, WHOLE_PLANT, GRAIN, ROOT, FRUIT
+  growthStage       String?    // VEGETATIVE, FLOWERING, FRUITING, MATURITY
+
   // Approvals
   acceptedBy        String?
   acceptedAt        DateTime?
@@ -153,6 +158,8 @@ model WorkItem {
   dueDate        DateTime?
   
   result         String?
+  methodologyId  String?
+  methodology    Methodology? @relation(fields: [methodologyId], references: [id])
   equipmentId    String?
   completedAt    DateTime?
   version        Int       @default(0)
@@ -627,6 +634,43 @@ model Result {
   @@index([batchId])
 }
 
+model Unit {
+  code         String     @id // e.g. "g/kg", "mg/kg", "cmol(+)/kg", "%", "dS/m", "pH_units"
+  display      String     // e.g. "g/kg", "mg/kg", "cmol(+)/kg"
+  quantityKind String     // e.g. "MASS_FRACTION", "CONCENTRATION", "CEC", "DIMENSIONLESS", "CONDUCTIVITY"
+  factorToBase Float      @default(1.0) // Conversion factor to multiply to reach base unit
+  synonyms     String?    // JSON string array e.g. ["ppm", "mg/l", "g/100g"]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  analyses     Analysis[]
+}
+
+model MethodReference {
+  id            String        @id // e.g. "GLOSOLAN-SOP-01", "ISO-10390-2021"
+  authority     String        // e.g. "GLOSOLAN", "ISO", "AOAC", "USDA"
+  citation      String        // Bibliographic citation
+  title         String        // Descriptive title
+  year          Int?          // Publication year
+  url           String?       // Standard / SOP URL
+  status        String        @default("ACTIVE") // ACTIVE, UNDER_PUBLICATION, SUPERSEDED
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  methodologies Methodology[]
+}
+
+model LabMethodDefault {
+  id            String   @id @default(uuid())
+  labId         String
+  analysisCode  String
+  methodologyId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([labId, analysisCode])
+}
+
 model AnalysisCategory {
   id       String     @id
   name     String
@@ -641,7 +685,12 @@ model Analysis {
   categoryId         String?
   category           AnalysisCategory? @relation(fields: [categoryId], references: [id])
   units              String?
+  unitCode           String?           // References Unit(code)
+  unit               Unit?             @relation(fields: [unitCode], references: [code])
   qudtUnit           String?           // QUDT unit identifier (e.g. "GM-PER-KiloGM", "PERCENT", "DeciSIEMENS-PER-M")
+  matrix             String            @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
+  module             String            @default("FERTILITY") // FERTILITY, HEALTH, ENVIRONMENTAL, QUALITY
+  isGlobal           Boolean           @default(true)
   status             String?           // active, inactive
   validation         String?           // JSON string: validation rules
   decimalPlaces      Int?              @default(2)
@@ -667,26 +716,30 @@ model AnalysisGroup {
 }
 
 model Methodology {
-  id               String   @id @default(uuid())
+  id               String           @id @default(uuid())
   analysisCode     String
-  analysis         Analysis @relation(fields: [analysisCode], references: [code])
-  name             String   // e.g. "pH in Water (1:2.5)"
-  standard         String?  // e.g. "ISO 10390:2021"
-  qudtUnit         String?  // QUDT unit override
+  analysis         Analysis         @relation(fields: [analysisCode], references: [code])
+  name             String           // e.g. "pH in Water (1:2.5)"
+  standard         String?          // e.g. "ISO 10390:2021"
+  referenceId      String?          // References MethodReference(id)
+  reference        MethodReference? @relation(fields: [referenceId], references: [id])
+  qudtUnit         String?          // QUDT unit override
   decimalPlaces    Int?
   lod              Float?
   loq              Float?
   uncertainty      Float?
-  isDefault        Boolean  @default(false)
+  isDefault        Boolean          @default(false)
   labId            String?
-  glosisProcedure  String?  // GloSIS Procedure ID (e.g. "pH_h2o-1-2.5", "P_extr-olsen")
-  glosisNotation   String?  // GloSIS Notation
-  glosisDefinition String?  // Procedure Definition text
-  glosisReference  String?  // Standard reference / DOI URL
-  glosisCitation   String?  // Bibliographic citation text
-  glosisUri        String?  // Linked Data Procedure URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  glosisProcedure  String?          // GloSIS Procedure ID (e.g. "pH_h2o-1-2.5", "P_extr-olsen")
+  glosisNotation   String?          // GloSIS Notation
+  glosisDefinition String?          // Procedure Definition text
+  glosisReference  String?          // Standard reference / DOI URL
+  glosisCitation   String?          // Bibliographic citation text
+  glosisUri        String?          // Linked Data Procedure URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  workItems        WorkItem[]
 }
 
 model OperationalGate {

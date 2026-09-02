@@ -4,7 +4,6 @@ const { getAuthToken } = require('../setup');
 const { samplesDb } = require('../../db');
 const prisma = require('../../prisma');
 const {
-    CONTROLLED_UNITS,
     normalizeUnit,
     interpretParameter,
     evaluateSoilProfile
@@ -153,5 +152,68 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
         expect(content.diagnostics.texture.className).toBe('Sandy Loam');
         expect(content.diagnostics.stoichiometry).toBeDefined();
         expect(content.diagnostics.stoichiometry.cnRatio).toBeCloseTo(12.5, 1);
+    });
+
+    test('5. WP-04: Fail closed on unrecognised unit', () => {
+        const socInvalid = normalizeUnit('SOC', 10, 'g/100g');
+        expect(socInvalid.normalizedValue).toBeNull();
+        expect(socInvalid.unrecognizedUnit).toBe('g/100g');
+
+        const interp = interpretParameter('SOC', 10, 'g/100g');
+        expect(interp.normalizedValue).toBeNull();
+        expect(interp.advisory).toMatch(/Unrecognized unit/);
+    });
+
+    test('6. WP-05: Cation mg/kg to cmol(+)/kg conversions', () => {
+        // 200 mg/kg K: 200 / 391 = 0.51 cmol/kg -> rates Adequate / Optimal (0.2 - 0.6)
+        const kNorm = normalizeUnit('EXCH_K', 200, 'mg/kg');
+        expect(kNorm.normalizedValue).toBeCloseTo(0.51, 2);
+        const kInterp = interpretParameter('EXCH_K', 200, 'mg/kg');
+        expect(kInterp.rating).toBe('OPTIMAL');
+        expect(kInterp.label).toMatch(/Adequate Potassium/);
+
+        // 1600 mg/kg Ca: 1600 / 200.4 = 7.98 cmol/kg -> rates Optimal (2 - 10)
+        const caNorm = normalizeUnit('EXCH_CA', 1600, 'mg/kg');
+        expect(caNorm.normalizedValue).toBeCloseTo(7.98, 2);
+        const caInterp = interpretParameter('EXCH_CA', 1600, 'mg/kg');
+        expect(caInterp.rating).toBe('OPTIMAL');
+        expect(caInterp.label).toMatch(/Optimal/);
+    });
+
+    test('7. WP-18: Total N of 30 g/kg rates High in SOIL and Adequate in PLANT', () => {
+        // In Soil: 30 g/kg (3.0%) is high (> 2.5 g/kg)
+        const soilInterp = interpretParameter('TN', 30, 'g/kg', { matrix: 'SOIL' });
+        expect(soilInterp.rating).toBe('HIGH');
+        expect(soilInterp.label).toMatch(/High Nitrogen/);
+
+        // In Plant: 30 g/kg (3.0%) is within target foliar sufficiency (20 - 40 g/kg)
+        const plantInterp = interpretParameter('TN', 30, 'g/kg', { matrix: 'PLANT' });
+        expect(plantInterp.rating).toBe('OPTIMAL');
+        expect(plantInterp.label).toMatch(/Adequate Plant Tissue N/);
+    });
+
+    test('8. WP-23: Extended interpretation coverage with calibration methods', () => {
+        // PH_CACL2
+        const phCaCl2 = interpretParameter('PH_CACL2', 5.5);
+        expect(phCaCl2.rating).toBe('MODERATE');
+        expect(phCaCl2.method).toMatch(/0.01 M CaCl2/);
+
+        // EC_E
+        const ece = interpretParameter('EC_E', 3.2, 'dS/m');
+        expect(ece.rating).toBe('MODERATE');
+        expect(ece.label).toMatch(/Slightly Saline/);
+        expect(ece.method).toMatch(/Saturated Paste Extract/);
+
+        // P_BRAY2
+        const pBray2 = interpretParameter('P_BRAY2', 25, 'mg/kg');
+        expect(pBray2.rating).toBe('OPTIMAL');
+        expect(pBray2.label).toMatch(/Adequate/);
+        expect(pBray2.method).toMatch(/Bray.*2/);
+
+        // P_MEHLICH1
+        const pMehlich1 = interpretParameter('P_MEHLICH1', 18, 'mg/kg');
+        expect(pMehlich1.rating).toBe('OPTIMAL');
+        expect(pMehlich1.label).toMatch(/Optimum/);
+        expect(pMehlich1.method).toMatch(/Mehlich-1/);
     });
 });

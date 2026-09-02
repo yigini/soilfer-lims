@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const { normalizeUnit } = require('../services/interpretationService');
 
 // Helper: Scoping
 // Note: Prisma 'where' clause usually handles scoping better than array filtering
@@ -192,13 +193,33 @@ exports.getExportData = async (req, res) => {
                 if (sample.results) {
                     sample.results.forEach(r => {
                         const colKey = r.param;
-                        row[colKey] = r.value;
-                        if (!columns.includes(colKey)) columns.push(colKey);
+                        const pLower = colKey.toLowerCase();
+                        const rawUnit = r.unit || (analysesMap[colKey] ? analysesMap[colKey].units : '');
+                        const norm = normalizeUnit(colKey, r.value, rawUnit);
+
+                        const asMeasured = isNaN(Number(r.value)) ? r.value : Number(r.value);
+                        const normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
+                        const controlledUnit = norm.standardUnit || rawUnit;
+
+                        // Legacy column points to normalized value
+                        row[colKey] = normalized;
+
+                        // WP-22: Dual export representation
+                        row[`${pLower}_as_measured`] = asMeasured;
+                        row[`${pLower}_unit`] = rawUnit;
+                        row[`${pLower}_normalized`] = normalized;
+                        row[`${pLower}_controlled_unit`] = controlledUnit;
+
+                        const newCols = [colKey, `${pLower}_as_measured`, `${pLower}_unit`, `${pLower}_normalized`, `${pLower}_controlled_unit`];
+                        newCols.forEach(c => {
+                            if (!columns.includes(c)) columns.push(c);
+                        });
+
                         if (!analysisMetadata[colKey]) {
                             const config = analysesMap[colKey] || {};
                             analysisMetadata[colKey] = {
                                 name: config.name || colKey,
-                                unit: config.units || '-',
+                                unit: controlledUnit,
                                 method: 'Internal'
                             };
                         }

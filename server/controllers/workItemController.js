@@ -107,6 +107,26 @@ exports.generateWorkItemsForSample = async (sample) => {
                 note: 'Work Item Generated'
             }];
 
+            // WP-20: Resolve methodology for this lab and analysis
+            let defaultMethodId = null;
+            const targetLab = sample.assignedLab || sample.labId;
+            if (targetLab) {
+                const labDefault = await prisma.labMethodDefault.findFirst({
+                    where: { labId: targetLab, analysisCode }
+                });
+                if (labDefault) {
+                    defaultMethodId = labDefault.methodologyId;
+                }
+            }
+            if (!defaultMethodId) {
+                const globalDefault = await prisma.methodology.findFirst({
+                    where: { analysisCode, isDefault: true }
+                });
+                if (globalDefault) {
+                    defaultMethodId = globalDefault.id;
+                }
+            }
+
             const wi = await prisma.workItem.create({
                 data: {
                     id: wiId,
@@ -118,6 +138,7 @@ exports.generateWorkItemsForSample = async (sample) => {
                     status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
                     assignedTo: null,
                     priority: 'NORMAL',
+                    methodologyId: defaultMethodId,
                     history: JSON.stringify(history)
                 }
             });

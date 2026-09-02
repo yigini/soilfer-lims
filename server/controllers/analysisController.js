@@ -625,3 +625,134 @@ exports.deleteCategory = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete category' });
     }
 };
+
+// --- UNITS & METHOD REFERENCES (WP-16, WP-17) ---
+
+exports.getUnits = async (req, res) => {
+    try {
+        const units = await prisma.unit.findMany({
+            orderBy: { code: 'asc' }
+        });
+        const parsed = units.map(u => ({
+            ...u,
+            synonyms: typeof u.synonyms === 'string' ? JSON.parse(u.synonyms) : (u.synonyms || [])
+        }));
+        res.json(parsed);
+    } catch (error) {
+        console.error('[getUnits] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch units' });
+    }
+};
+
+exports.getMethodReferences = async (req, res) => {
+    try {
+        const refs = await prisma.methodReference.findMany({
+            orderBy: [{ authority: 'asc' }, { year: 'desc' }]
+        });
+        res.json(refs);
+    } catch (error) {
+        console.error('[getMethodReferences] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch method references' });
+    }
+};
+
+// --- LAB METHOD DEFAULTS (WP-20) ---
+
+exports.getLabMethodDefaults = async (req, res) => {
+    const { labId } = req.params;
+    try {
+        const defaults = await prisma.labMethodDefault.findMany({
+            where: { labId }
+        });
+
+        const [analyses, methodologies] = await Promise.all([
+            prisma.analysis.findMany({
+                where: { status: { not: 'inactive' } },
+                include: { methodologies: true },
+                orderBy: { code: 'asc' }
+            }),
+            prisma.methodology.findMany()
+        ]);
+
+        const defaultsMap = new Map(defaults.map(d => [d.analysisCode, d.methodologyId]));
+
+        const result = analyses.map(a => {
+            const chosenMethodId = defaultsMap.get(a.code);
+            const defaultMethod = a.methodologies.find(m => m.isDefault) || a.methodologies[0] || null;
+            const effectiveMethodId = chosenMethodId || defaultMethod?.id || null;
+
+            return {
+                analysisCode: a.code,
+                analysisName: a.name,
+                matrix: a.matrix,
+                module: a.module,
+                chosenMethodologyId: chosenMethodId || null,
+                effectiveMethodologyId: effectiveMethodId,
+                isOverridden: !!chosenMethodId,
+                methodologies: a.methodologies.map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    standard: m.standard,
+                    isDefault: m.isDefault
+                }))
+            };
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('[getLabMethodDefaults] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch lab method defaults' });
+    }
+};
+
+exports.updateLabMethodDefaults = async (req, res) => {
+    const { labId } = req.params;
+    const { defaults } = req.body;
+    const user = req.user;
+
+    if (user.role !== 'SUPER_ADMIN' && user.labId !== labId) {
+        return res.status(403).json({ error: 'Permission denied: Cannot modify defaults for this lab.' });
+    }
+
+    if (!Array.isArray(defaults)) {
+        return res.status(400).json({ error: 'Invalid defaults payload: expected array.' });
+    }
+
+    try {
+        for (const item of defaults) {
+            const { analysisCode, methodologyId } = item;
+            if (!analysisCode) continue;
+
+            if (!methodologyId) {
+                await prisma.labMethodDefault.deleteMany({
+                    where: { labId, analysisCode }
+                });
+            } else {
+                await prisma.labMethodDefault.upsert({
+                    where: {
+                        labId_analysisCode: { labId, analysisCode }
+                    },
+                    update: { methodologyId },
+                    create: { labId, analysisCode, methodologyId }
+                });
+            }
+        }
+
+        await prisma.auditLog.create({
+            data: {
+                id: crypto.randomUUID(),
+                entity: 'LAB_METHOD_DEFAULT',
+                entityId: labId,
+                action: 'UPDATE',
+                details: `Updated ${defaults.length} method defaults for lab ${labId}`,
+                performedBy: user.username,
+                timestamp: new Date()
+            }
+        });
+
+        res.json({ success: true, count: defaults.length });
+    } catch (error) {
+        console.error('[updateLabMethodDefaults] Error:', error);
+        res.status(500).json({ error: 'Failed to update lab method defaults' });
+    }
+};

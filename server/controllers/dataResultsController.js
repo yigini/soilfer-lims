@@ -1,4 +1,5 @@
 const prisma = require('../prisma');
+const { normalizeUnit } = require('../services/interpretationService');
 
 exports.getAnalyticalResults = async (req, res) => {
     try {
@@ -80,6 +81,13 @@ exports.getAnalyticalResults = async (req, res) => {
         const analysisKeys = new Set();
         const EXCLUDED_ANALYSES = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL', 'ARCH', 'DISP', 'DISPOSAL_PENDING'];
 
+        // Preload analysis definitions for unit normalization
+        const allDefs = await prisma.analysis.findMany({
+            select: { code: true, name: true, units: true }
+        });
+        const defMap = {};
+        allDefs.forEach(d => { defMap[d.code] = d; });
+
         const flattenedData = samples.map(s => {
             const resultObj = {
                 id: s.id,
@@ -91,8 +99,6 @@ exports.getAnalyticalResults = async (req, res) => {
                 submitter: s.submitter || parseJson(s.metadata)?.submitterName || '',
                 collectionDate: s.collectionDate,
                 receptionDate: s.receptionDate,
-                // Location? Not in root schema, probably in metadata or fieldMetadata?
-                // Legacy said s.location.lat. Schema has fieldMetadata.
                 latitude: '',
                 longitude: '',
             };
@@ -132,11 +138,22 @@ exports.getAnalyticalResults = async (req, res) => {
                     // Spectral: show checkmark ONLY if WI is completed/accepted/approved
                     const spectralDoneStatuses = ['ACCEPTED', 'COMPLETED', 'APPROVED', 'SUBMITTED', 'SUBMITTED_PARTIAL'];
                     if (item && item.result && spectralDoneStatuses.includes(item.status)) {
+                        const rawUnit = defMap[analysisCode]?.units || '';
+                        const norm = normalizeUnit(analysisCode, item.result, rawUnit);
+                        const asMeasured = isNaN(Number(item.result)) ? item.result : Number(item.result);
+                        const normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
+                        const pLower = analysisCode.toLowerCase();
+
+                        resultObj[`${pLower}_as_measured`] = asMeasured;
+                        resultObj[`${pLower}_unit`] = rawUnit;
+                        resultObj[`${pLower}_normalized`] = normalized;
+                        resultObj[`${pLower}_controlled_unit`] = norm.standardUnit || rawUnit;
+
                         // For approved results, return plain value; for submitted/completed, wrap with status
                         if (['APPROVED', 'ACCEPTED'].includes(item.status)) {
-                            resultObj[analysisCode] = item.result;
+                            resultObj[analysisCode] = normalized;
                         } else {
-                            resultObj[analysisCode] = { status: 'SUBMITTED', value: item.result, assignedTo: item.assignedTo || 'Unknown' };
+                            resultObj[analysisCode] = { status: 'SUBMITTED', value: normalized, assignedTo: item.assignedTo || 'Unknown' };
                         }
                     } else if (spectralExists && item && spectralDoneStatuses.includes(item.status)) {
                         resultObj[analysisCode] = 'Spectrum Uploaded';
@@ -175,14 +192,6 @@ exports.getAnalyticalResults = async (req, res) => {
         });
 
         const sortedKeys = Array.from(analysisKeys).sort();
-
-        // Fetch display names for columns
-        const analysisDefinitions = await prisma.analysis.findMany({
-            where: { code: { in: sortedKeys } },
-            select: { code: true, name: true, units: true }
-        });
-        const defMap = {};
-        analysisDefinitions.forEach(d => { defMap[d.code] = d; });
 
         const { getAnalysisName } = require('../services/analysisService');
 

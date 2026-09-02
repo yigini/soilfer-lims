@@ -136,7 +136,8 @@ const samplesDb = {
             projectCode,
             dryingStatus,
             preparationStatus,
-            receptionDate
+            receptionDate,
+            requiredAnalyses
         };
     },
     findById: (id) => {
