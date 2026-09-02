@@ -12,7 +12,7 @@ const VALIDATION_RULES = {
         monotonic: true // Wavelengths must strictly increase
     },
     MIR: {
-        minWavenumber: 600,
+        minWavenumber: 400, // cm-1: Widened to 400 to support full-range KBr scans and clay lattice vibrations
         maxWavenumber: 4000, // cm-1
         monotonic: true // Usually decreasing for cm-1, handled dynamically
     }
@@ -23,9 +23,10 @@ const VALIDATION_RULES = {
  * @param {Array} wavelengths - Array of numeric wavelengths/wavenumbers
  * @param {Array} values - Array of numeric absorbance/reflectance values
  * @param {String} modality - 'NIR' or 'MIR'
+ * @param {Object} [options] - Optional settings e.g. { instrumentRange: { minWavenumber, maxWavenumber } }
  * @returns {Object} { isValid: boolean, qcStatus: 'PASS'|'WARN'|'FAIL', flags: [] }
  */
-exports.validateSpectra = (wavelengths, values, modality) => {
+exports.validateSpectra = (wavelengths, values, modality, options = {}) => {
     const flags = [];
     let qcStatus = 'PASS';
 
@@ -53,7 +54,8 @@ exports.validateSpectra = (wavelengths, values, modality) => {
     }
 
     // 3. Range Checks
-    const config = VALIDATION_RULES[modality] || VALIDATION_RULES.NIR;
+    const baseConfig = VALIDATION_RULES[modality] || VALIDATION_RULES.NIR;
+    const config = { ...baseConfig, ...(options.instrumentRange || {}) };
     const minW = Math.min(...wavelengths);
     const maxW = Math.max(...wavelengths);
 
@@ -63,7 +65,7 @@ exports.validateSpectra = (wavelengths, values, modality) => {
             qcStatus = 'WARN';
         }
     } else if (modality === 'MIR') {
-        // MIR usually 4000-600 cm-1
+        // MIR full range is 4000-400 cm-1 (KBr optics encompass 400-600 cm-1)
         if (minW < config.minWavenumber || maxW > config.maxWavenumber) {
             flags.push('WAVENUMBER_OUT_OF_RANGE'); // Warn mostly, unexpected instrument range
             qcStatus = 'WARN';
