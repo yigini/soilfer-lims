@@ -161,7 +161,7 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
         const meta = JSON.parse(createdScan.metadata);
         expect(meta.axisDirection).toBe('DESCENDING');
         expect(meta.axisUnit).toBe('WAVENUMBER_CM1');
-        expect(meta.quantity).toBe('ABSORBANCE');
+        expect(meta.quantity).toBe('UNVERIFIED');
     });
 
     test('SL-04: Pagination and server-side stats endpoint', async () => {

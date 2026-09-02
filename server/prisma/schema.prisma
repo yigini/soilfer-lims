@@ -596,9 +596,9 @@ model SpectralData {
   parserVersion  String?    @default("1.0.0")
 
   // SL-07: Signal & Physical Quantity
-  quantity       String     @default("ABSORBANCE") // ABSORBANCE, REFLECTANCE, LOG_1_R, KUBELKA_MUNK, TRANSMITTANCE, UNVERIFIED
+  quantity       String     @default("UNVERIFIED") // ABSORBANCE, REFLECTANCE, LOG_1_R, KUBELKA_MUNK, TRANSMITTANCE, UNVERIFIED
   axisUnit       String     @default("WAVENUMBER_CM1") // WAVENUMBER_CM1, WAVELENGTH_NM
-  axisDirection  String     @default("DESCENDING") // ASCENDING, DESCENDING, UNORDERED
+  axisDirection  String     @default("UNORDERED") // ASCENDING, DESCENDING, UNORDERED
   region         String?    // VIS, VNIR, NIR, MIR, COMBINED
   isRaw          Boolean    @default(true)
 

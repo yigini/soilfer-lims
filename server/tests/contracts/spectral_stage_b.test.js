@@ -80,6 +80,7 @@ describe('Spectral Library Stage B (SL-06 to SL-12)', () => {
                         filename: 'alpha_mir_sample01_rep1.csv',
                         labId: sampleGtmId,
                         modality: 'MIR',
+                        quantity: 'ABSORBANCE',
                         wavelengths,
                         values,
                         rawContent: rawCsv,

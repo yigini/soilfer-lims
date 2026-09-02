@@ -211,9 +211,9 @@ exports.getScan = async (req, res) => {
 
         const meta = parseJson(scan.metadata) || {};
         const isDescending = wavelengths.length > 1 ? wavelengths[0] > wavelengths[wavelengths.length - 1] : false;
-        const axisDirection = meta.axisDirection || (isDescending ? 'DESCENDING' : 'ASCENDING');
-        const quantity = meta.quantity || (scan.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
-        const axisUnit = meta.axisUnit || (scan.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
+        const axisDirection = scan.axisDirection || meta.axisDirection || (isDescending ? 'DESCENDING' : 'ASCENDING');
+        const quantity = scan.quantity || meta.quantity || 'UNVERIFIED';
+        const axisUnit = scan.axisUnit || meta.axisUnit || (scan.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
 
         // Transform for UI Chart
         const chartData = wavelengths.map((w, i) => ({
@@ -550,8 +550,8 @@ exports.uploadBatch = async (req, res) => {
                 if (priorScan) supersedesId = priorScan.id;
             }
 
-            // SL-07 & SL-17: Typed physical quantity & signal metadata
-            const quantity = scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
+            // SL-07 & SL-17: Typed physical quantity & signal metadata (never guess; default to UNVERIFIED)
+            const quantity = scanItem.quantity || 'UNVERIFIED';
             const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
             const region = scanItem.region || scanItem.modality || 'NIR';
 
