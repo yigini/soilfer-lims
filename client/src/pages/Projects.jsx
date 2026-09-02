@@ -19,6 +19,19 @@ import { useLanguage } from '../context/LanguageContext';
 import * as XLSX from 'xlsx';
 import InfoTooltip from '../components/common/InfoTooltip';
 
+export const getProjectLabIds = (p) => {
+    if (!p) return [];
+    if (Array.isArray(p.assignedLabs) && p.assignedLabs.length > 0) return p.assignedLabs;
+    if (Array.isArray(p.assignedLabIds) && p.assignedLabIds.length > 0) return p.assignedLabIds;
+    if (typeof p.assignedLabIds === 'string' && p.assignedLabIds.trim()) {
+        try {
+            const parsed = JSON.parse(p.assignedLabIds);
+            if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+    }
+    return [];
+};
+
 const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, handleArchive, handleRestore, initiateDelete, onViewSamples }) => {
     if (!project) return null;
 
@@ -150,18 +163,9 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                             <label className="text-[10px] font-bold text-purple-600 uppercase tracking-widest">Assigned Laboratories</label>
                             <div className="p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-xl border border-purple-100 dark:border-purple-800">
                                 {(() => {
-                                    let labs = [];
-                                    if (project.assignedLabIds) {
-                                        try {
-                                            labs = typeof project.assignedLabIds === 'string'
-                                                ? JSON.parse(project.assignedLabIds)
-                                                : project.assignedLabIds;
-                                        } catch (e) {
-                                            console.error('Failed to parse assignedLabIds:', e);
-                                        }
-                                    }
+                                    const labs = getProjectLabIds(project);
 
-                                    if (Array.isArray(labs) && labs.length > 0) {
+                                    if (labs.length > 0) {
                                         return (
                                             <div className="flex flex-wrap gap-2">
                                                 {labs.map(labId => (
@@ -702,16 +706,7 @@ const Projects = () => {
         setKoboTestMessage('');
         if (proj) {
             // Parse assignedLabIds robustly
-            let parsedLabIds = [];
-            if (Array.isArray(proj.assignedLabIds)) {
-                parsedLabIds = proj.assignedLabIds;
-            } else if (typeof proj.assignedLabIds === 'string' && proj.assignedLabIds.trim()) {
-                try {
-                    parsedLabIds = JSON.parse(proj.assignedLabIds);
-                } catch (e) {
-                    parsedLabIds = [];
-                }
-            }
+            let parsedLabIds = getProjectLabIds(proj);
 
             const baseFormData = {
                 code: proj.code,
@@ -792,11 +787,7 @@ const Projects = () => {
             const matchesPriority = filterPriority === 'ALL' || p.priority === filterPriority;
             const matchesLab = !showOnlyMyLab ||
                 (p.labId === user.labId) ||
-                (p.assignedLabIds && (
-                    typeof p.assignedLabIds === 'string'
-                        ? p.assignedLabIds.includes(`"${user.labId}"`)
-                        : (Array.isArray(p.assignedLabIds) && p.assignedLabIds.includes(user.labId))
-                ));
+                getProjectLabIds(p).includes(user.labId);
 
             return matchesSearch && matchesStatus && matchesType && matchesPriority && matchesLab;
         })
@@ -1016,20 +1007,18 @@ const Projects = () => {
                                                         </div>
                                                         <div className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">{p.name}</div>
                                                         {/* Show assigned labs for global projects */}
-                                                        {!p.labId && p.assignedLabIds && (() => {
-                                                            try {
-                                                                const labs = typeof p.assignedLabIds === 'string' ? JSON.parse(p.assignedLabIds) : p.assignedLabIds;
-                                                                if (Array.isArray(labs) && labs.length > 0) {
-                                                                    return (
-                                                                        <div className="flex flex-wrap gap-1 mt-1.5">
-                                                                            {labs.slice(0, 3).map(lid => (
-                                                                                <span key={lid} className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 text-[8px] font-bold border border-blue-100">{lid}</span>
-                                                                            ))}
-                                                                            {labs.length > 3 && <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[8px] font-bold">+{labs.length - 3} more</span>}
-                                                                        </div>
-                                                                    );
-                                                                }
-                                                            } catch (e) { }
+                                                        {!p.labId && (() => {
+                                                            const labs = getProjectLabIds(p);
+                                                            if (labs.length > 0) {
+                                                                return (
+                                                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                                                        {labs.slice(0, 3).map(lid => (
+                                                                            <span key={lid} className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 text-[8px] font-bold border border-blue-100">{lid}</span>
+                                                                        ))}
+                                                                        {labs.length > 3 && <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[8px] font-bold">+{labs.length - 3} more</span>}
+                                                                    </div>
+                                                                );
+                                                            }
                                                             return null;
                                                         })()}
                                                     </div>

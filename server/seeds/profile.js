@@ -61,13 +61,15 @@ async function seedProfile(profileName = 'soilfer', prismaClient = prisma) {
     if (fs.existsSync(projectsPath)) {
         const projects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
         for (const proj of projects) {
+            const assignedLabIdsJson = Array.isArray(proj.assignedLabs) ? JSON.stringify(proj.assignedLabs) : (proj.assignedLabIds || null);
             const created = await prismaClient.project.upsert({
                 where: { code: proj.code },
                 update: {
                     name: proj.name,
                     status: proj.status || 'ACTIVE',
                     projectType: proj.projectType || 'OPEN_INTAKE',
-                    expectedSampleCount: proj.expectedSampleCount || 0
+                    expectedSampleCount: proj.expectedSampleCount || 0,
+                    assignedLabIds: assignedLabIdsJson
                 },
                 create: {
                     id: proj.id || proj.code,
@@ -75,7 +77,8 @@ async function seedProfile(profileName = 'soilfer', prismaClient = prisma) {
                     name: proj.name,
                     status: proj.status || 'ACTIVE',
                     projectType: proj.projectType || 'OPEN_INTAKE',
-                    expectedSampleCount: proj.expectedSampleCount || 0
+                    expectedSampleCount: proj.expectedSampleCount || 0,
+                    assignedLabIds: assignedLabIdsJson
                 }
             });
 

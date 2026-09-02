@@ -79,12 +79,17 @@ exports.getProjects = async (req, res) => {
             const assignedLabs = await prisma.$queryRaw`
                 SELECT labId FROM ProjectLab WHERE projectCode = ${p.code}
             `;
+            const labList = assignedLabs.map(l => l.labId);
+            const resolvedAssignedLabIds = (p.assignedLabIds && p.assignedLabIds !== '[]')
+                ? p.assignedLabIds
+                : (labList.length > 0 ? JSON.stringify(labList) : null);
 
             return {
                 ...p,
                 receivedCount,
                 totalCount,
-                assignedLabs: assignedLabs.map(l => l.labId),
+                assignedLabs: labList,
+                assignedLabIds: resolvedAssignedLabIds,
                 isGlobal: !p.labId,
                 isLocked: user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN' && !p.labId
             };
@@ -109,7 +114,19 @@ exports.getProject = async (req, res) => {
             return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: Project belongs to another lab');
         }
 
-        res.json(project);
+        const assignedLabs = await prisma.$queryRaw`
+            SELECT labId FROM ProjectLab WHERE projectCode = ${project.code}
+        `;
+        const labList = assignedLabs.map(l => l.labId);
+        const resolvedAssignedLabIds = (project.assignedLabIds && project.assignedLabIds !== '[]')
+            ? project.assignedLabIds
+            : (labList.length > 0 ? JSON.stringify(labList) : null);
+
+        res.json({
+            ...project,
+            assignedLabs: labList,
+            assignedLabIds: resolvedAssignedLabIds
+        });
     } catch (err) {
         return error(res, 500, 'PROJECT_FETCH_ERROR', null, 'Failed to fetch project');
     }
