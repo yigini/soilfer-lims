@@ -743,14 +743,24 @@ model Analysis {
   loq                Float?
   uncertainty        Float?
   labId              String?
-  glosisProperty     String?           // GloSIS Property code (e.g. "glosis_cl:ClayPropertyCode", "glosis_cl:TotalNitrogenPropertyCode")
-  glosisPropertyUri  String?           // GloSIS Property URI
-  glosisAttribute    String?           // Legacy codelist group (e.g. "nitrogenTotal", "carbonOrganic")
-  glosisUri          String?           // Legacy URI
-  methodLabel        String?           // Selected Method Label (from glosis_procedure.csv e.g. TotalN_kjeldahl)
+  methodLabel        String?           // Selected Method Label e.g. TotalN_kjeldahl
   methodDefinition   String?           // Procedure description
   methodCitation     String?           // Procedure scientific reference / standard
   methodologies      Methodology[]
+}
+
+model ExternalMapping {
+  id         String   @id @default(uuid())
+  entityType String   // ANALYSIS, METHODOLOGY, UNIT
+  entityKey  String   // code or id
+  scheme     String   // GLOSIS, QUDT, AGROVOC
+  code       String   // external identifier
+  uri        String?  // Linked Data URI
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([entityType, entityKey])
+  @@index([scheme, code])
 }
 
 model AnalysisGroup {
@@ -775,12 +785,6 @@ model Methodology {
   uncertainty      Float?
   isDefault        Boolean          @default(false)
   labId            String?
-  glosisProcedure  String?          // GloSIS Procedure ID (e.g. "pH_h2o-1-2.5", "P_extr-olsen")
-  glosisNotation   String?          // GloSIS Notation
-  glosisDefinition String?          // Procedure Definition text
-  glosisReference  String?          // Standard reference / DOI URL
-  glosisCitation   String?          // Bibliographic citation text
-  glosisUri        String?          // Linked Data Procedure URI (e.g. "http://glosis.org/ont/procedure/P_extr-olsen")
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 

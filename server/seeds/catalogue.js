@@ -84,9 +84,7 @@ async function seedCatalogue(options = {}) {
                     name: m.name,
                     standard: m.standard,
                     referenceId: m.referenceId,
-                    isDefault: m.isDefault,
-                    glosisProcedure: m.glosisProcedure,
-                    glosisDefinition: m.glosisDefinition
+                    isDefault: m.isDefault
                 },
                 create: {
                     id: m.id,
@@ -94,9 +92,7 @@ async function seedCatalogue(options = {}) {
                     name: m.name,
                     standard: m.standard,
                     referenceId: m.referenceId,
-                    isDefault: m.isDefault,
-                    glosisProcedure: m.glosisProcedure,
-                    glosisDefinition: m.glosisDefinition
+                    isDefault: m.isDefault
                 }
             });
         }
@@ -258,9 +254,7 @@ async function seedCatalogue(options = {}) {
                         name: m.name,
                         standard: m.standard,
                         referenceId: m.referenceId,
-                        isDefault: m.isDefault,
-                        glosisProcedure: m.glosisProcedure,
-                        glosisDefinition: m.glosisDefinition
+                        isDefault: m.isDefault
                     }
                 });
             }
