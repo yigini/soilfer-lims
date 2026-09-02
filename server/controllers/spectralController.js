@@ -2,6 +2,7 @@ const prisma = require('../prisma');
 const { validateSpectra } = require('../services/spectralValidation');
 const crypto = require('crypto');
 const { broadcastToLab } = require('../wsServer');
+const scopeGuard = require('../utils/scopeGuard');
 
 // Helper: Calculate Checksum
 const calculateChecksum = (dataString) => {
@@ -10,7 +11,7 @@ const calculateChecksum = (dataString) => {
 
 exports.getLibrary = async (req, res) => {
     try {
-        const { status, modality, qcStatus, search } = req.query;
+        const { status, modality, qcStatus, search, page, limit } = req.query;
         const user = req.user;
 
         // Build the query conditions
@@ -54,8 +55,9 @@ exports.getLibrary = async (req, res) => {
 
         console.log('[getLibrary] Query:', JSON.stringify(where, null, 2));
 
-        // Return summary (exclude huge data arrays), ordered by most recent first
-        const scans = await prisma.spectralData.findMany({
+        const total = await prisma.spectralData.count({ where });
+
+        let findQuery = {
             where,
             orderBy: { timestamp: 'desc' },
             select: {
@@ -75,7 +77,22 @@ exports.getLibrary = async (req, res) => {
                 reviewedAt: true,
                 reviewNotes: true,
             }
-        });
+        };
+
+        let pageNum = null;
+        let limitNum = null;
+        let totalPages = 1;
+
+        if (limit !== 'all') {
+            pageNum = parseInt(page) || 1;
+            limitNum = parseInt(limit) || 50;
+            findQuery.skip = (pageNum - 1) * limitNum;
+            findQuery.take = limitNum;
+            totalPages = Math.ceil(total / limitNum) || 1;
+        }
+
+        // Return summary (exclude huge data arrays), ordered by most recent first
+        const scans = await prisma.spectralData.findMany(findQuery);
 
         // Fetch sample labIds for display
         const sampleIds = [...new Set(scans.map(s => s.sampleId).filter(Boolean))];
@@ -96,9 +113,42 @@ exports.getLibrary = async (req, res) => {
             };
         });
 
-        res.json({ success: true, count: summary.length, data: summary });
+        res.json({
+            success: true,
+            count: summary.length,
+            total,
+            page: pageNum || 1,
+            totalPages,
+            data: summary
+        });
     } catch (e) {
         console.error("Spectral Library Error:", e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+exports.getLibraryStats = async (req, res) => {
+    try {
+        const user = req.user;
+        let baseWhere = { status: { not: 'DELETED' } };
+        baseWhere = scopeGuard.buildScopedWhere(user, baseWhere, { entityType: 'Spectral', labField: 'labId' });
+
+        const [total, nir, mir, pending, validated, approved, rejected] = await Promise.all([
+            prisma.spectralData.count({ where: baseWhere }),
+            prisma.spectralData.count({ where: { ...baseWhere, modality: 'NIR' } }),
+            prisma.spectralData.count({ where: { ...baseWhere, modality: 'MIR' } }),
+            prisma.spectralData.count({ where: { ...baseWhere, status: 'PENDING' } }),
+            prisma.spectralData.count({ where: { ...baseWhere, status: 'VALIDATED' } }),
+            prisma.spectralData.count({ where: { ...baseWhere, status: 'APPROVED' } }),
+            prisma.spectralData.count({ where: { ...baseWhere, status: 'REJECTED' } })
+        ]);
+
+        res.json({
+            success: true,
+            data: { total, nir, mir, pending, validated, approved, rejected }
+        });
+    } catch (e) {
+        console.error("Spectral Stats Error:", e);
         res.status(500).json({ error: e.message });
     }
 };
@@ -110,7 +160,6 @@ exports.getScan = async (req, res) => {
         if (!scan) return res.status(404).json({ error: 'Scan not found' });
 
         // Lab Isolation Check (Phase 1 - Scope Guard)
-        const scopeGuard = require('../utils/scopeGuard');
         if (!scopeGuard.canAccessEntity(user, scan, { labField: 'labId' })) {
             return res.status(403).json({ error: 'Security Violation: Access denied to spectral data outside of your lab context.' });
         }
@@ -124,19 +173,29 @@ exports.getScan = async (req, res) => {
             return res.status(500).json({ error: 'Corrupt spectral data' });
         }
 
+        const meta = parseJson(scan.metadata) || {};
+        const isDescending = wavelengths.length > 1 ? wavelengths[0] > wavelengths[wavelengths.length - 1] : false;
+        const axisDirection = meta.axisDirection || (isDescending ? 'DESCENDING' : 'ASCENDING');
+        const quantity = meta.quantity || (scan.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
+        const axisUnit = meta.axisUnit || (scan.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
+
         // Transform for UI Chart
         const chartData = wavelengths.map((w, i) => ({
             wavelength: w,
-            absorbance: values ? values[i] : 0
+            absorbance: values ? values[i] : 0,
+            value: values ? values[i] : 0
         }));
 
         res.json({
             ...scan,
-            metadata: parseJson(scan.metadata),
+            metadata: meta,
             qcFlags: parseJson(scan.qcFlags),
             wavelengths,
             values,
-            chartData
+            chartData,
+            axisDirection,
+            quantity,
+            axisUnit
         });
     } catch (e) {
         console.error("[ERROR] getScan failed:", e);
@@ -159,8 +218,6 @@ exports.checkMatches = async (req, res) => {
         const matched = [];
         const unmatched = [];
 
-        // Lab Isolation (Phase 1 Refactor)
-        const scopeGuard = require('../utils/scopeGuard');
         const user = req.user; // Ensure you have authMiddleware in route
 
         // Build base scope (e.g. { labId: 'GTM-LAB1' })
@@ -357,14 +414,19 @@ exports.uploadBatch = async (req, res) => {
                 scanVersion = existingCount + 1;
             }
 
-            // 1.6 Auto-Sort Data
-            const combined = scanItem.wavelengths.map((w, i) => ({ w, v: scanItem.values[i] }));
-            combined.sort((a, b) => a.w - b.w);
-            const sortedWavelengths = combined.map(c => c.w);
-            const sortedValues = combined.map(c => c.v);
+            // 1.6 Native Axis Ingest & Direction Detection (SL-02)
+            const wavelengths = scanItem.wavelengths;
+            const values = scanItem.values;
+            let increasing = true;
+            let decreasing = true;
+            for (let i = 1; i < wavelengths.length; i++) {
+                if (wavelengths[i] <= wavelengths[i - 1]) increasing = false;
+                if (wavelengths[i] >= wavelengths[i - 1]) decreasing = false;
+            }
+            const axisDirection = increasing ? 'ASCENDING' : (decreasing ? 'DESCENDING' : 'UNORDERED');
 
-            // 2. Validate Data
-            const validation = validateSpectra(sortedWavelengths, sortedValues, scanItem.modality);
+            // 2. Validate Data in native delivered order
+            const validation = validateSpectra(wavelengths, values, scanItem.modality);
 
             // Determine workflow status based on QC and autoApprove
             let workflowStatus;
@@ -384,8 +446,8 @@ exports.uploadBatch = async (req, res) => {
                     labId: sample ? (sample.assignedLab || (user ? user.labId : null)) : (user ? user.labId : null),
                     modality: scanItem.modality || 'NIR',
                     filename: scanItem.filename,
-                    wavelengths: JSON.stringify(sortedWavelengths),
-                    values: JSON.stringify(sortedValues),
+                    wavelengths: JSON.stringify(wavelengths),
+                    values: JSON.stringify(values),
                     metadata: JSON.stringify({
                         filename: scanItem.filename,
                         instrument: scanItem.instrument || 'Unknown',
@@ -395,7 +457,11 @@ exports.uploadBatch = async (req, res) => {
                         scanVersion: scanVersion,
                         csvLabId: scanItem.labId,
                         linkedSampleId: sample ? sample.id : null,
-                        autoApproved: canAutoApprove ? true : undefined
+                        autoApproved: canAutoApprove ? true : undefined,
+                        axisDirection: axisDirection,
+                        axisUnit: scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM'),
+                        quantity: scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE'),
+                        sha256: calculateChecksum(JSON.stringify(wavelengths) + JSON.stringify(values))
                     }),
                     qcStatus: validation.qcStatus,
                     qcFlags: JSON.stringify(validation.flags),

@@ -61,8 +61,26 @@ const SpectralLibrary = () => {
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
     const isTrashView = filters.status === 'DELETED';
 
-    // Stats
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [serverStats, setServerStats] = useState(null);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            const res = await axios.get('/api/spectral/stats');
+            if (res.data?.data) {
+                setServerStats(res.data.data);
+            }
+        } catch (e) {
+            console.error("Failed to load spectral stats:", e);
+        }
+    }, []);
+
+    // Stats: use serverStats if available, otherwise compute from loaded list
     const stats = useMemo(() => {
+        if (serverStats) return serverStats;
         const total = spectraList.length;
         const nir = spectraList.filter(s => s.modality === 'NIR').length;
         const mir = spectraList.filter(s => s.modality === 'MIR').length;
@@ -71,20 +89,30 @@ const SpectralLibrary = () => {
         const approved = spectraList.filter(s => s.status === 'APPROVED').length;
         const rejected = spectraList.filter(s => s.status === 'REJECTED').length;
         return { total, nir, mir, pending, validated, approved, rejected };
-    }, [spectraList]);
+    }, [serverStats, spectraList]);
 
     const fetchLibrary = useCallback(async () => {
         setLoading(true);
         setSelectedIds(new Set());
         try {
-            const res = await axios.get('/api/spectral', { params: filters });
+            const res = await axios.get('/api/spectral', { params: { ...filters, page, limit: pageSize } });
             setSpectraList(res.data.data || []);
+            setTotalRecords(res.data.total !== undefined ? res.data.total : (res.data.data ? res.data.data.length : 0));
+            setTotalPages(res.data.totalPages || 1);
         } catch (e) {
             console.error(e);
             showDialog({ type: 'error', title: 'Error', message: 'Failed to load spectral library' });
         } finally {
             setLoading(false);
         }
+    }, [filters, page, pageSize]);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
+
+    useEffect(() => {
+        setPage(1);
     }, [filters]);
 
     // Soft delete (move to trash)
@@ -905,6 +933,41 @@ const SpectralLibrary = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                    {/* Pagination Bar (SL-04) */}
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-2">
+                            <span>Showing {spectraList.length} of {totalRecords} scans</span>
+                            <span className="text-gray-300 dark:text-gray-600">|</span>
+                            <span>Per page:</span>
+                            <select
+                                value={pageSize}
+                                onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+                                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs"
+                            >
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                                <option value={200}>200</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span>Page {page} of {totalPages}</span>
+                            <button
+                                disabled={page <= 1 || loading}
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                disabled={page >= totalPages || loading}
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

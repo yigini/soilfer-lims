@@ -6,6 +6,9 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 // List / Explorer (any authenticated user can browse)
 router.get('/', verifyToken, spectralController.getLibrary);
 
+// Library Statistics & Tile Aggregations (SL-04)
+router.get('/stats', verifyToken, spectralController.getLibraryStats);
+
 // Detail / Viewer
 router.get('/:id', verifyToken, spectralController.getScan);
 
