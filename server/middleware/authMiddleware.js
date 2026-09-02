@@ -105,55 +105,8 @@ const checkPermission = (permissionKey) => {
     };
 };
 
-/**
- * Factory to check if user has access to the requested resource's scope.
- */
-const checkScope = (req, res, next) => {
-    const user = req.user;
-
-    if (user.role === 'SUPER_ADMIN') {
-        return next();
-    }
-
-    const userLabId = user.labId;
-    const isLabStaff = ['LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION'].includes(user.role);
-
-    // 1. Mandatory Lab Isolation for Lab Staff
-    if (isLabStaff && userLabId) {
-        const requestedLab = req.params.labId || req.body.labId || req.query.labId || req.body.assignedLab;
-        if (requestedLab && requestedLab !== userLabId) {
-            return res.status(403).json({ error: `Security Violation: You are restricted to lab context ${userLabId}` });
-        }
-
-        // Anti-leak: For lab staff, we don't care about their "countries/projects" if they are at a lab, 
-        // they only see what is IN the lab. 
-        // However, we'll keep the permissive filters if helpful, but the controller MUST filter by labId.
-    }
-
-    // 2. Country Scope Check
-    const targetCountry = req.body.country || req.query.country || req.params.country || req.body.projectCode;
-    if (targetCountry && user.countries && user.countries.length > 0) {
-        if (!user.countries.includes(targetCountry)) {
-            // Note: We only block if the country is EXPLICITLY requested. 
-            // Generic list fetches are filtered in controllers.
-            return res.status(403).json({ error: `Access denied for country territory: ${targetCountry}` });
-        }
-    }
-
-    // 3. Project Scope Check
-    const targetProject = req.body.projectId || req.query.projectId || req.params.projectId || req.body.projectCode;
-    if (targetProject && user.projects && user.projects.length > 0) {
-        if (!user.projects.includes(targetProject)) {
-            return res.status(403).json({ error: `Access denied for project scope: ${targetProject}` });
-        }
-    }
-
-    next();
-};
-
 module.exports = {
     verifyToken,
     checkPermission,
-    checkScope,
     PERMISSIONS
 };

@@ -222,32 +222,6 @@ function canAccessEntity(user, entity, options = {}) {
 }
 
 /**
- * Express Middleware to enforce lab scope on route level.
- * Useful for routes that should ONLY be accessible by users with a lab.
- * 
- * @param {Object} options - Options for the middleware.
- * @param {boolean} options.allowGlobal - If true, SUPER_ADMIN is allowed through.
- * @returns {Function} - Express middleware function.
- */
-function requireLabScope(options = { allowGlobal: true }) {
-    return (req, res, next) => {
-        try {
-            const labScope = getLabScope(req.user);
-
-            if (labScope === null && !options.allowGlobal) {
-                return res.status(403).json({ error: 'This action requires a lab assignment.' });
-            }
-
-            // Attach to request for easy access in controller
-            req.labScope = labScope;
-            next();
-        } catch (error) {
-            return res.status(403).json({ error: error.message });
-        }
-    };
-}
-
-/**
  * Helper to check if user can manage a specific lab.
  * Managers can only manage their own lab. SUPER_ADMIN can manage any.
  * 
@@ -286,7 +260,6 @@ module.exports = {
     getLabScope,
     buildScopedWhere,
     canAccessEntity,
-    requireLabScope,
     canManageLab,
     ensureScope
 };

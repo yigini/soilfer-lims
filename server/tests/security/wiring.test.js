@@ -36,8 +36,14 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         expect(contract.SAMPLE_STATE_LIST.length).toBeGreaterThan(0);
     });
 
-    test('3. utils/scopeGuard.js exported functions have active call sites', () => {
+    test('3. utils/scopeGuard.js exported functions have active call sites and no dead code (WP-28)', () => {
         const scopeGuard = require('../../utils/scopeGuard');
+        const authMiddleware = require('../../middleware/authMiddleware');
+
+        // Dead middleware check
+        expect(authMiddleware.checkScope).toBeUndefined();
+        expect(scopeGuard.requireLabScope).toBeUndefined();
+
         const serverFiles = getAllFiles(path.join(serverDir, 'controllers'))
             .concat(getAllFiles(path.join(serverDir, 'routes')))
             .concat(getAllFiles(path.join(serverDir, 'services')));
@@ -54,7 +60,8 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
             }
         }
 
-        // Note: WP-28 will clean up dead functions like requireLabScope if unused
+        // WP-28: Dead security functions deleted from codebase
+        expect(uncalledFunctions).not.toContain('requireLabScope');
         expect(exportedKeys.length).toBeGreaterThan(0);
     });
 
