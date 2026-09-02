@@ -571,6 +571,105 @@ const REFERENCES = [
         year: 2011,
         url: 'https://doi.org/10.1071/9780643101364',
         status: 'ACTIVE'
+    },
+    {
+        id: 'WEIL-2003',
+        authority: 'Literature',
+        citation: 'Weil, R.R., et al. (2003) Estimating active carbon for soil quality assessment: a simplified method for laboratory and field use. Am. J. Altern. Agric. 18(1), 3-17.',
+        title: 'Active Carbon (POXC) by Permanganate Oxidation',
+        year: 2003,
+        url: 'https://doi.org/10.1079/AJAA2003003',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-14255-1998',
+        authority: 'ISO',
+        citation: 'ISO 14255:1998: Soil quality — Determination of nitrate nitrogen, ammonium nitrogen and total soluble nitrogen in air-dry soils using calcium chloride solution as extractant.',
+        title: 'Soil Quality — Determination of Nitrate and Ammonium Nitrogen in Calcium Chloride Extract',
+        year: 1998,
+        url: 'https://www.iso.org/standard/23971.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-16072-2002',
+        authority: 'ISO',
+        citation: 'ISO 16072:2002: Soil quality — Laboratory methods for determination of microbial soil respiration.',
+        title: 'Soil Quality — Laboratory Methods for Determination of Microbial Soil Respiration',
+        year: 2002,
+        url: 'https://www.iso.org/standard/29088.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-14240-2007',
+        authority: 'ISO',
+        citation: 'ISO 14240-2:2007: Soil quality — Determination of soil microbial biomass — Part 2: Fumigation-extraction method.',
+        title: 'Soil Quality — Determination of Soil Microbial Biomass (Fumigation-Extraction)',
+        year: 2007,
+        url: 'https://www.iso.org/standard/41981.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'GLOSOLAN-SPEC-01',
+        authority: 'GLOSOLAN',
+        citation: 'FAO GLOSOLAN (2022) Standard operating procedure for soil mid-infrared (MIR) diffuse reflectance spectroscopy.',
+        title: 'Standard Operating Procedure for Soil Mid-Infrared Spectroscopy (DRIFTS)',
+        year: 2022,
+        url: 'https://www.fao.org/global-soil-partnership/glosolan/soil-spectroscopy/en/',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'GLOSOLAN-SPEC-02',
+        authority: 'GLOSOLAN',
+        citation: 'FAO GLOSOLAN (2022) Standard operating procedure for soil visible and near-infrared (Vis-NIR) diffuse reflectance spectroscopy.',
+        title: 'Standard Operating Procedure for Soil Visible and Near-Infrared Spectroscopy',
+        year: 2022,
+        url: 'https://www.fao.org/global-soil-partnership/glosolan/soil-spectroscopy/en/',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-5315-1984',
+        authority: 'ISO',
+        citation: 'ISO 5315:1984: Fertilizers — Determination of total nitrogen content — Titrimetric method after Devarda alloy reduction.',
+        title: 'Fertilizers — Determination of Total Nitrogen Content (Devarda Alloy Titrimetric)',
+        year: 1984,
+        url: 'https://www.iso.org/standard/11382.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-6598-1985',
+        authority: 'ISO',
+        citation: 'ISO 6598:1985: Fertilizers — Determination of phosphorus content — Quinoline phosphomolybdate gravimetric method.',
+        title: 'Fertilizers — Determination of Phosphorus Content (Quimociac Gravimetric Method)',
+        year: 1985,
+        url: 'https://www.iso.org/standard/13019.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'GLOSOLAN-FERT-01',
+        authority: 'GLOSOLAN',
+        citation: 'FAO GLOSOLAN (2024) Standard operating procedure for fertilizer trace elements and contaminants by ICP-OES.',
+        title: 'Standard Operating Procedure for Trace Elements and Heavy Metals in Fertilizers',
+        year: 2024,
+        url: 'https://www.fao.org/global-soil-partnership/glosolan/en/',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-10523-2008',
+        authority: 'ISO',
+        citation: 'ISO 10523:2008: Water quality — Determination of pH.',
+        title: 'Water Quality — Potentiometric Determination of pH in Water and Aqueous Solutions',
+        year: 2008,
+        url: 'https://www.iso.org/standard/38314.html',
+        status: 'ACTIVE'
+    },
+    {
+        id: 'ISO-7888-1985',
+        authority: 'ISO',
+        citation: 'ISO 7888:1985: Water quality — Determination of electrical conductivity.',
+        title: 'Water Quality — Determination of Electrical Conductivity of Water',
+        year: 1985,
+        url: 'https://www.iso.org/standard/14797.html',
+        status: 'ACTIVE'
     }
 ];
 
