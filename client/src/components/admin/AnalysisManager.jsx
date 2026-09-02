@@ -363,15 +363,15 @@ const AnalysisManager = () => {
             {/* Master Table Card */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left text-xs min-w-[760px]">
-                        <thead className="bg-gray-50/80 dark:bg-gray-900/60 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold text-[11px]">
+                    <table className="w-full text-left text-xs min-w-[840px]">
+                        <thead className="bg-gray-50/90 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-gray-500 dark:text-gray-400 font-extrabold text-[11px]">
                             <tr>
-                                <th className="py-3.5 px-4 w-[16%]">Code</th>
-                                <th className="py-3.5 px-4 w-[34%]">Parameter Name</th>
+                                <th className="py-3.5 px-5 w-[15%]">Code</th>
+                                <th className="py-3.5 px-4 w-[35%]">Parameter Name</th>
                                 <th className="py-3.5 px-4 w-[22%]">Category</th>
                                 <th className="py-3.5 px-4 w-[10%]">Units</th>
                                 <th className="py-3.5 px-4 w-[10%]">Methods</th>
-                                <th className="py-3.5 px-4 w-[8%] text-right">Actions</th>
+                                <th className="py-3.5 px-5 w-[8%] text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -381,68 +381,68 @@ const AnalysisManager = () => {
                                 const catName = categories.find(c => c.id === a.categoryId)?.name || a.categoryId || 'General';
 
                                 return (
-                                    <tr key={a.code} className="hover:bg-emerald-50/30 dark:hover:bg-gray-700/30 transition-colors group">
+                                    <tr key={a.code} className="hover:bg-emerald-50/40 dark:hover:bg-gray-700/40 transition-colors group">
                                         {/* Code */}
-                                        <td className="py-3.5 px-4 align-top">
-                                            <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[11px] border border-slate-200 dark:border-slate-700 tracking-wide font-sans">
+                                        <td className="py-3.5 px-5 align-middle">
+                                            <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 tracking-wide font-sans">
                                                 {a.code}
                                             </span>
                                         </td>
 
                                         {/* Parameter Name */}
-                                        <td className="py-3.5 px-4 align-top">
-                                            <div className="font-bold text-gray-900 dark:text-gray-100 text-xs leading-snug">
+                                        <td className="py-3.5 px-4 align-middle">
+                                            <div className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-snug">
                                                 {a.name}
                                             </div>
                                             {a.description && (
-                                                <div className="text-[11px] text-gray-400 dark:text-gray-500 line-clamp-1 mt-0.5" title={a.description}>
+                                                <div className="text-[11px] text-gray-400 dark:text-gray-400 font-medium truncate max-w-md mt-0.5" title={a.description}>
                                                     {a.description}
                                                 </div>
                                             )}
                                         </td>
 
                                         {/* Category */}
-                                        <td className="py-3.5 px-4 align-top">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 dark:bg-gray-700/70 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 whitespace-nowrap">
+                                        <td className="py-3.5 px-4 align-middle">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 whitespace-nowrap">
                                                 {catName}
                                             </span>
                                         </td>
 
                                         {/* Units */}
-                                        <td className="py-3.5 px-4 align-top">
-                                            <span className="font-semibold text-gray-700 dark:text-gray-300 text-xs">
+                                        <td className="py-3.5 px-4 align-middle">
+                                            <span className="inline-block px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-900 font-semibold text-gray-700 dark:text-gray-300 text-xs border border-gray-200/80 dark:border-gray-700">
                                                 {a.units || '—'}
                                             </span>
                                         </td>
 
                                         {/* Methods */}
-                                        <td className="py-3.5 px-4 align-top">
+                                        <td className="py-3.5 px-4 align-middle">
                                             <button
                                                 onClick={() => setActiveMethodAnalysis(a)}
-                                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-[11px] whitespace-nowrap shadow-sm"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-xs whitespace-nowrap shadow-sm"
                                                 title={methods.length > 0 ? `Configured methods: ${methods.map(m => m.name).join(', ')}` : 'Click to configure standard analytical method'}
                                             >
-                                                <FlaskConical size={12} />
+                                                <FlaskConical size={13} />
                                                 <span>{methods.length > 0 ? `${methods.length} Method${methods.length > 1 ? 's' : ''}` : 'Configure'}</span>
                                             </button>
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="py-3.5 px-4 align-top text-right">
+                                        <td className="py-3.5 px-5 align-middle text-right">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button
                                                     onClick={() => setEditingItem({ ...a, _isNew: false })}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors"
+                                                    className="p-2 rounded-xl text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors"
                                                     title="Edit Parameter"
                                                 >
-                                                    <Edit2 size={14} />
+                                                    <Edit2 size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(a.code, a.name)}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
+                                                    className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
                                                     title="Delete Parameter"
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <Trash2 size={15} />
                                                 </button>
                                             </div>
                                         </td>
@@ -453,7 +453,7 @@ const AnalysisManager = () => {
                     </table>
                 </div>
 
-                <div className="p-3 text-xs font-medium text-gray-500 dark:text-gray-400 text-center border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                <div className="p-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 text-center border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
                     Showing {filtered.length} of {analyses.length} standard soil analysis parameters
                 </div>
             </div>
