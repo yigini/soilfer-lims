@@ -1,8 +1,24 @@
+const fs = require('fs');
+const path = require('path');
 const jwt = require('jsonwebtoken');
-const { usersDb } = require('../db');
 
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-123';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-12345';
+
+const tmpDbFile = path.resolve(__dirname, '.tmp', 'current_test_db.txt');
+if (!process.env.DATABASE_PATH && fs.existsSync(tmpDbFile)) {
+    try {
+        const p = fs.readFileSync(tmpDbFile, 'utf8').trim();
+        if (p && fs.existsSync(p)) {
+            process.env.DATABASE_PATH = p;
+            process.env.DATABASE_URL = `file:${p}`;
+        }
+    } catch (e) {
+        // Fallback
+    }
+}
+
+const { usersDb } = require('../db');
 
 /**
  * Generates a signed JWT for a given user object.

@@ -84,26 +84,28 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Automated Daily Database Backup Schedule (runs every 24h)
-try {
-    const { performBackup } = require('./scripts/backup_db');
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-    setInterval(() => {
-        performBackup()
-            .then(p => p && console.log(`[BACKUP_SCHEDULE] Completed: ${p}`))
-            .catch(e => console.error('[BACKUP_SCHEDULE] Error:', e.message));
-    }, ONE_DAY_MS);
-    console.log('[BACKUP_SCHEDULE] Backup interval active (24h)');
-} catch (e) {
-    console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
-}
+if (process.env.NODE_ENV !== 'test') {
+    // Automated Daily Database Backup Schedule (runs every 24h)
+    try {
+        const { performBackup } = require('./scripts/backup_db');
+        const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+        setInterval(() => {
+            performBackup()
+                .then(p => p && console.log(`[BACKUP_SCHEDULE] Completed: ${p}`))
+                .catch(e => console.error('[BACKUP_SCHEDULE] Error:', e.message));
+        }, ONE_DAY_MS);
+        console.log('[BACKUP_SCHEDULE] Backup interval active (24h)');
+    } catch (e) {
+        console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
+    }
 
-// Automated KoboToolbox Background Sync Scheduler
-try {
-    const { startScheduler } = require('./services/koboScheduler');
-    startScheduler(60000); // Check every 60s
-} catch (e) {
-    console.warn('[KOBO_SCHEDULER] Could not start Kobo scheduler:', e.message);
+    // Automated KoboToolbox Background Sync Scheduler
+    try {
+        const { startScheduler } = require('./services/koboScheduler');
+        startScheduler(60000); // Check every 60s
+    } catch (e) {
+        console.warn('[KOBO_SCHEDULER] Could not start Kobo scheduler:', e.message);
+    }
 }
 
 if (process.env.NODE_ENV !== 'production') {

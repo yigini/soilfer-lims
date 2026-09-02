@@ -6,8 +6,10 @@ const path = require('path');
 // Use better-sqlite3 driver adapter on all platforms.
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
-const dbPath = path.resolve(__dirname, 'prisma', 'dev.db');
-console.log(`[PRISMA] Using better-sqlite3 adapter — DB: ${dbPath}`);
+const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, 'prisma', 'dev.db');
+if (process.env.NODE_ENV !== 'test') {
+    console.log(`[PRISMA] Using better-sqlite3 adapter — DB: ${dbPath}`);
+}
 
 const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
 const prisma = new PrismaClient({ adapter });
