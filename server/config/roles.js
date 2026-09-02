@@ -94,10 +94,22 @@ const PERMISSIONS = {
         'SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN'
     ],
     'APPROVE_RESULTS': [
-        'SUPER_ADMIN', 'LAB_MANAGER'
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
     ],
     'BATCH_APPROVAL': [
-        'SUPER_ADMIN', 'LAB_MANAGER'
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
+    ],
+    'DISPOSE_SAMPLE': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
+    ],
+    'ARCHIVE_SAMPLE': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
+    ],
+    'DELETE_SAMPLE': [
+        'SUPER_ADMIN', 'MASTER_USER'
+    ],
+    'ASSIGN_WORK': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
     ],
 
     // Inventory
@@ -169,10 +181,21 @@ function getPermissionsForRole(role) {
     return granted;
 }
 
+/**
+ * Checks if a user has a specific permission key.
+ */
+function hasPermission(user, permission) {
+    if (!user || !user.role) return false;
+    const allowed = PERMISSIONS[permission];
+    if (!allowed) return false;
+    return allowed.includes(user.role.toUpperCase());
+}
+
 module.exports = {
     ROLES,
     ALL_ROLES,
     ALLOWED_SUB_ROLES,
     PERMISSIONS,
-    getPermissionsForRole
+    getPermissionsForRole,
+    hasPermission
 };

@@ -26,9 +26,9 @@ router.get('/:id/map-state', checkPermission('VIEW_SAMPLES'), sampleController.g
 // Final Approval + Closure
 router.post('/:id/approve', checkPermission('APPROVE_RESULTS'), sampleController.approveSample);
 router.post('/:id/undo-approve', checkPermission('APPROVE_RESULTS'), sampleController.undoApproval);
-router.post('/:id/archive', checkPermission('APPROVE_RESULTS'), sampleController.archiveSample);
-router.post('/:id/dispose', checkPermission('APPROVE_RESULTS'), sampleController.disposeSample);
-router.delete('/:id', checkPermission('APPROVE_RESULTS'), sampleController.deleteSample);
-router.post('/batch-delete', checkPermission('APPROVE_RESULTS'), sampleController.batchDeleteSamples);
+router.post('/:id/archive', checkPermission('ARCHIVE_SAMPLE'), sampleController.archiveSample);
+router.post('/:id/dispose', checkPermission('DISPOSE_SAMPLE'), sampleController.disposeSample);
+router.delete('/:id', checkPermission('DELETE_SAMPLE'), sampleController.deleteSample);
+router.post('/batch-delete', checkPermission('DELETE_SAMPLE'), sampleController.batchDeleteSamples);
 
 module.exports = router;

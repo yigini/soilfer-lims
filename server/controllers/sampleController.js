@@ -2,6 +2,8 @@ const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const idGenerator = require('../services/idGenerator');
 const workflow = require('../workflowContract');
+const { hasPermission } = require('../config/roles');
+const scopeGuard = require('../utils/scopeGuard');
 
 const COUNTRY_MAP = {
     'Afghanistan': 'AFG',
@@ -408,21 +410,21 @@ exports.getSamples = async (req, res) => {
     }
 };
 
-const ROLE_PERMISSIONS = {
-    'RECEIVED': ['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'],
-    'ACCEPTED': ['LAB_MANAGER', 'SUPER_ADMIN'],
-    'LAB_ID_ASSIGNED': ['LAB_MANAGER', 'SUPER_ADMIN'],
-    'PROCESSING': ['LAB_MANAGER', 'SUPER_ADMIN'],
-    'APPROVED': ['LAB_MANAGER', 'SUPER_ADMIN'],
-    'ARCHIVED': ['LAB_MANAGER', 'SUPER_ADMIN'],
-    'DISPOSED': ['LAB_MANAGER', 'SUPER_ADMIN']
+const STATUS_REQUIRED_PERMISSIONS = {
+    'RECEIVED': 'RECEIVE_SAMPLE',
+    'ACCEPTED': 'APPROVE_RESULTS',
+    'PROCESSING': 'CHANGE_STATUS',
+    'ANALYZED': 'ENTER_RESULTS',
+    'APPROVED': 'APPROVE_RESULTS',
+    'RELEASED': 'APPROVE_RESULTS',
+    'ARCHIVED': 'ARCHIVE_SAMPLE',
+    'DISPOSED': 'DISPOSE_SAMPLE'
 };
 
 exports.updateStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const user = req.user;
-    const userRole = user ? user.role : 'GUEST';
 
     try {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
@@ -450,7 +452,7 @@ exports.updateStatus = async (req, res) => {
         }
 
         // 1. Validate Transition
-        const isManagerOverride = ['LAB_MANAGER', 'SUPER_ADMIN'].includes(userRole) &&
+        const isManagerOverride = hasPermission(user, 'APPROVE_RESULTS') &&
             ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status);
 
         if (!isManagerOverride && !workflow.isValidSampleTransition(sample.status, status)) {
@@ -460,8 +462,8 @@ exports.updateStatus = async (req, res) => {
         }
 
         // 2. Validate Permissions
-        const requiredRoles = ROLE_PERMISSIONS[status];
-        if (requiredRoles && !requiredRoles.includes(userRole)) {
+        const reqPerm = STATUS_REQUIRED_PERMISSIONS[status];
+        if (reqPerm && !hasPermission(user, reqPerm)) {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
 
@@ -545,7 +547,7 @@ exports.updatePhaseStatus = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_TECHNICIAN', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'ENTER_RESULTS')) {
             return error(res, 403, 'INSUFFICIENT_PERMISSIONS', null, 'Only Lab Technicians and Managers can update drying/preparation gates');
         }
 
@@ -678,16 +680,14 @@ exports.updatePhaseStatus = async (req, res) => {
 const workItemController = require('./workItemController');
 
 const userHasScopeForSample = async (user, sample) => {
-    if (user.role === 'SUPER_ADMIN') return true;
+    if (scopeGuard.hasGlobalAccess(user)) return true;
 
     // 1. Mandatory Lab Match for Lab Staff
-    if (['LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN'].includes(user.role)) {
+    if (hasPermission(user, 'CHANGE_STATUS')) {
         if (user.labId && (sample.assignedLab === user.labId || sample.labId === user.labId)) {
             return true;
         }
 
-        // Technicians can see samples they are assigned to, even if they've changed labs? 
-        // No, keep it strict to Current Lab.
         if (user.role === 'LAB_TECHNICIAN') {
             const hasAssignment = await prisma.workItem.findFirst({
                 where: {
@@ -723,7 +723,7 @@ exports.receiveSample = async (req, res) => {
 
     try {
         // Permission check
-        if (!['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'RECEIVE_SAMPLE')) {
             return res.status(403).json({ error: 'Only Intake Officers and Managers can receive samples' });
         }
 
@@ -786,7 +786,7 @@ exports.createWalkInSample = async (req, res) => {
     const user = req.user;
 
     // Permission check
-    if (!['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+    if (!hasPermission(user, 'CREATE_SAMPLE')) {
         return res.status(403).json({ error: 'Only Intake Officers and Managers can create walk-in samples' });
     }
 
@@ -885,7 +885,7 @@ exports.undoIntake = async (req, res) => {
     const user = req.user;
 
     // RBAC: Only Managers/Admins
-    if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+    if (!hasPermission(user, 'APPROVE_RESULTS')) {
         return res.status(403).json({ error: 'Only Managers can undo intake' });
     }
 
@@ -894,7 +894,7 @@ exports.undoIntake = async (req, res) => {
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
         // Lab scope guard — prevent cross-lab mutations (Finding #1)
-        if (user.role !== 'SUPER_ADMIN' && sample.assignedLab && sample.assignedLab !== user.labId) {
+        if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
             return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
         }
 
@@ -1191,7 +1191,7 @@ exports.acceptSample = async (req, res) => {
     const { user } = req;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Only Managers can accept intakes.' });
         }
 
@@ -1199,7 +1199,7 @@ exports.acceptSample = async (req, res) => {
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
         // Lab scope guard — prevent cross-lab mutations (Finding #1)
-        if (user.role !== 'SUPER_ADMIN' && sample.assignedLab && sample.assignedLab !== user.labId) {
+        if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
             return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
         }
 
@@ -1281,10 +1281,9 @@ exports.deleteSample = async (req, res) => {
 
     try {
         // PERMISSION CHECK
-        // SUPER_ADMIN/MASTER_USER can delete anything.
-        // LAB_MANAGER and SAMPLE_RECEPTION can delete drafts/errors.
-        const deletableRoles = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'];
-        const canDelete = deletableRoles.includes(user.role);
+        // SUPER_ADMIN/MASTER_USER (DELETE_SAMPLE) can delete anything.
+        // LAB_MANAGER and SAMPLE_RECEPTION (RECEIVE_SAMPLE) can delete drafts/errors.
+        const canDelete = hasPermission(user, 'DELETE_SAMPLE') || hasPermission(user, 'RECEIVE_SAMPLE');
 
         if (!canDelete) {
             return res.status(403).json({ error: 'You do not have permission to delete samples.' });
@@ -1294,7 +1293,7 @@ exports.deleteSample = async (req, res) => {
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
         // ROLE-BASED STATUS & ISOLATION CHECK
-        if (user.role !== 'SUPER_ADMIN' && user.role !== 'MASTER_USER') {
+        if (!hasPermission(user, 'DELETE_SAMPLE')) {
             // Only allow deleting DRAFT, EXPECTED or RECEIVED (not yet approved)
             const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED'];
             if (!deletableStatuses.includes(sample.status)) {
@@ -1402,8 +1401,8 @@ exports.batchDeleteSamples = async (req, res) => {
     }
 
     try {
-        const isSuperAdmin = ['SUPER_ADMIN', 'MASTER_USER'].includes(user.role);
-        const isLabStaff = ['LAB_MANAGER', 'SAMPLE_RECEPTION', 'ADMIN'].includes(user.role);
+        const isSuperAdmin = hasPermission(user, 'DELETE_SAMPLE');
+        const isLabStaff = hasPermission(user, 'RECEIVE_SAMPLE') || hasPermission(user, 'CHANGE_STATUS');
 
         const samples = await prisma.sample.findMany({
             where: { id: { in: ids.map(id => String(id)) } }
@@ -1549,7 +1548,7 @@ exports.updateSampleMetadata = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Insufficient permissions to edit metadata.' });
         }
 
@@ -1608,7 +1607,7 @@ exports.updateSampleProject = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'MANAGE_PROJECTS')) {
             return res.status(403).json({ error: 'Only Managers can move samples between projects.' });
         }
 
@@ -1670,7 +1669,7 @@ exports.updateSampleAnalyses = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Insufficient permissions to edit analyses.' });
         }
 
@@ -1737,10 +1736,10 @@ exports.updateSampleAnalyses = async (req, res) => {
 
 exports.approveSample = async (req, res) => {
     const { id } = req.params;
-    const userRole = req.user.role;
+    const user = req.user;
 
     try {
-        if (userRole !== 'LAB_MANAGER' && userRole !== 'SUPER_ADMIN') {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Only Managers can approve samples.' });
         }
 
@@ -1799,10 +1798,10 @@ exports.approveSample = async (req, res) => {
 
 exports.undoApproval = async (req, res) => {
     const { id } = req.params;
-    const userRole = req.user.role;
+    const user = req.user;
 
     try {
-        if (userRole !== 'LAB_MANAGER' && userRole !== 'SUPER_ADMIN') {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Only Managers can undo approval.' });
         }
 
@@ -1863,7 +1862,7 @@ exports.archiveSample = async (req, res) => {
     const { archiveLocation, notes } = req.body;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'ARCHIVE_SAMPLE')) {
             return res.status(403).json({ error: 'Insufficient permissions to archive.' });
         }
 
@@ -1915,7 +1914,7 @@ exports.disposeSample = async (req, res) => {
     const { disposalMethod, notes } = req.body;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'DISPOSE_SAMPLE')) {
             return res.status(403).json({ error: 'Insufficient permissions to dispose.' });
         }
 
