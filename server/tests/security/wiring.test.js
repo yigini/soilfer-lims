@@ -97,4 +97,47 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         // Documents unimported components (e.g. SampleTimeline before WP-27)
         expect(componentFiles.length).toBeGreaterThan(0);
     });
+
+    // SD-16: Extended Wiring Assertions for Sample Page & Controls
+
+    test('6. SD-16: No client file issues a status write the user did not request (catches SD-07)', () => {
+        const sampleDetailCode = fs.readFileSync(path.join(clientDir, 'pages/SampleDetail.jsx'), 'utf8');
+
+        // Check for deleted forced-approval workaround
+        expect(sampleDetailCode).not.toContain('Intermediate Step for Archiving');
+
+        // Verify handleArchive does not issue silent /approve calls
+        const archiveHandlerMatch = sampleDetailCode.match(/const handleArchive = async \(\) => \{([\s\S]*?)\};/);
+        expect(archiveHandlerMatch).not.toBeNull();
+        const archiveHandlerBody = archiveHandlerMatch[1];
+        expect(archiveHandlerBody).not.toContain('/approve');
+    });
+
+    test('7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06)', () => {
+        const sampleRoutesCode = fs.readFileSync(path.join(serverDir, 'routes/sampleRoutes.js'), 'utf8');
+        const sampleControllerCode = fs.readFileSync(path.join(serverDir, 'controllers/sampleController.js'), 'utf8');
+
+        // Route must gate EDIT_ANALYSES
+        expect(sampleRoutesCode).toMatch(/router\.put\(['"]\/:id\/analyses['"],\s*checkPermission\(['"]EDIT_ANALYSES['"]\)/);
+
+        // Controller must use hasPermission('EDIT_ANALYSES') and not hardcode role array
+        expect(sampleControllerCode).toContain("hasPermission(user, 'EDIT_ANALYSES')");
+        const updateAnalysesFn = sampleControllerCode.match(/exports\.updateSampleAnalyses = async \([\s\S]*?try \{([\s\S]*?)const sample/);
+        expect(updateAnalysesFn).not.toBeNull();
+        expect(updateAnalysesFn[1]).not.toMatch(/\['LAB_MANAGER',\s*'SUPER_ADMIN'\]\.includes\(user\.role\)/);
+    });
+
+    test('8. SD-16: Every gate the client renders has an active server counterpart (catches SD-05)', () => {
+        const workItemControllerCode = fs.readFileSync(path.join(serverDir, 'controllers/workItemController.js'), 'utf8');
+        const resultsControllerCode = fs.readFileSync(path.join(serverDir, 'controllers/resultsController.js'), 'utf8');
+
+        // workItemController must reject execution if preparationStatus !== 'DONE' with 412
+        expect(workItemControllerCode).toContain("sample.preparationStatus !== 'DONE'");
+        expect(workItemControllerCode).toContain("status(412)");
+
+        // resultsController must reject result entry if preparationStatus !== 'DONE' with 412
+        expect(resultsControllerCode).toContain("sample.preparationStatus !== 'DONE'");
+        expect(resultsControllerCode).toContain("status(412)");
+    });
 });
+
