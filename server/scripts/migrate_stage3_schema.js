@@ -57,8 +57,11 @@ addCol('Sample', 'growthStage', 'TEXT');
 addCol('Analysis', 'unitCode', 'TEXT');
 addCol('Analysis', 'matrix', "TEXT DEFAULT 'SOIL'");
 addCol('Analysis', 'module', "TEXT DEFAULT 'FERTILITY'");
+addCol('Analysis', 'isGlobal', "BOOLEAN DEFAULT 1");
 
 addCol('Methodology', 'referenceId', 'TEXT');
+
+addCol('WorkItem', 'methodologyId', 'TEXT');
 
 console.log('Stage 3 DDL schema migration completed successfully.');
 db.close();
