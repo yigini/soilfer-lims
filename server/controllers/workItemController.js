@@ -1091,7 +1091,7 @@ exports.startWork = async (req, res) => {
 
 exports.reviewWorkItem = async (req, res) => {
     const { id } = req.params;
-    let { status, note, decision } = req.body;
+    let { status, note, decision, reason } = req.body;
     if (!status && decision) {
         status = decision === 'ACCEPT' ? 'ACCEPTED' : (decision === 'REJECT' ? 'REANALYSIS_REQUIRED' : decision);
     }
@@ -1100,6 +1100,15 @@ exports.reviewWorkItem = async (req, res) => {
     try {
         if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
+        }
+
+        const effectiveReason = (note || reason || '').trim();
+
+        // SD-10: Require mandatory reason on rejection
+        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+            if (!effectiveReason) {
+                return res.status(400).json({ error: 'A reason is required when rejecting work for reanalysis' });
+            }
         }
 
         const item = await prisma.workItem.findUnique({ where: { id } });
@@ -1123,17 +1132,22 @@ exports.reviewWorkItem = async (req, res) => {
         const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
         history.push({
             status,
-            note: note || 'Manager Review',
+            note: effectiveReason || note || 'Manager Review',
             changedBy: user.username,
             timestamp: now
         });
 
+        const updateData = {
+            status,
+            history: JSON.stringify(history)
+        };
+        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+            updateData.reanalysisReason = effectiveReason;
+        }
+
         const updated = await prisma.workItem.update({
             where: { id },
-            data: {
-                status,
-                history: JSON.stringify(history)
-            }
+            data: updateData
         });
 
         const operations = [];
@@ -1317,12 +1331,19 @@ exports.reviewWorkItem = async (req, res) => {
 };
 
 exports.reviewWorkItemsBulk = async (req, res) => {
-    const { workItemIds, status, note } = req.body;
+    const { workItemIds, status, note, reason } = req.body;
     const user = req.user;
 
     try {
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
+        }
+
+        const effectiveReason = (note || reason || '').trim();
+        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+            if (!effectiveReason) {
+                return res.status(400).json({ error: 'A reason is required when rejecting work for reanalysis' });
+            }
         }
 
         if (!workItemIds || !Array.isArray(workItemIds) || workItemIds.length === 0) {
@@ -1341,17 +1362,22 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({
                 status,
-                note: note || 'Bulk Manager Review',
+                note: effectiveReason || note || 'Bulk Manager Review',
                 changedBy: user.username,
                 timestamp: now
             });
 
+            const updateData = {
+                status,
+                history: JSON.stringify(history)
+            };
+            if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+                updateData.reanalysisReason = effectiveReason;
+            }
+
             operations.push(prisma.workItem.update({
                 where: { id: item.id },
-                data: {
-                    status,
-                    history: JSON.stringify(history)
-                }
+                data: updateData
             }));
 
             if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {

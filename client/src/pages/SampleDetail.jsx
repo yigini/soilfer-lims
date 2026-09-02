@@ -157,6 +157,8 @@ const SampleDetail = () => {
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
     // Info Modal State (Alerts/Errors)
     const [infoModal, setInfoModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+    // Reopening Modal State (SD-10: Mandatory Reason)
+    const [undoApprovalModal, setUndoApprovalModal] = useState({ isOpen: false, reason: '' });
 
     // Generic Action Wrapper
     const requestConfirmation = (title, message, action) => {
@@ -343,16 +345,8 @@ const SampleDetail = () => {
         });
     };
 
-    const handleUndoApproval = async () => {
-        requestConfirmation(t('sampleDetail.undoApproval', 'Undo Approval'), t('forms.confirmUndoApproval', 'Undo Final Approval? Sample will return to ACCEPTED state.'), async () => {
-            try {
-                await axios.post(`/api/samples/${id}/undo-approve`);
-                showInfo(t('common.success', 'Success'), t('forms.approvalUndone', 'Approval Undone. Reverted to ACCEPTED.'));
-                fetchData();
-            } catch (err) {
-                showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
-            }
-        });
+    const handleUndoApproval = () => {
+        setUndoApprovalModal({ isOpen: true, reason: '' });
     };
 
     const handleArchive = async () => {
@@ -624,6 +618,58 @@ const SampleDetail = () => {
                                 className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg transition-all transform hover:scale-105"
                             >
                                 {t('common.confirm', 'Confirm')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* REOPEN / UNDO APPROVAL MODAL (MANDATORY REASON) */}
+            {undoApprovalModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                            {t('sampleDetail.undoApproval', 'Undo Final Approval')}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            {t('forms.undoApprovalPrompt', 'Reverting approval will return the sample to PROCESSING and reset accepted work items. Under ISO 17025 compliance, a mandatory reason is required.')}
+                        </p>
+                        <div className="mb-4">
+                            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                {t('forms.reasonForReopening', 'Reason for Reopening')} <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                value={undoApprovalModal.reason}
+                                onChange={(e) => setUndoApprovalModal(prev => ({ ...prev, reason: e.target.value }))}
+                                placeholder={t('forms.undoReasonPlaceholder', 'Enter mandatory reason (e.g., Client requested re-analysis, QC verification issue)...')}
+                                className="w-full text-xs p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="flex items-center justify-end gap-3">
+                            <button
+                                onClick={() => setUndoApprovalModal({ isOpen: false, reason: '' })}
+                                className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    const reason = undoApprovalModal.reason.trim();
+                                    if (!reason) return;
+                                    try {
+                                        await axios.post(`/api/samples/${id}/undo-approve`, { reason });
+                                        setUndoApprovalModal({ isOpen: false, reason: '' });
+                                        showInfo(t('common.success', 'Success'), t('forms.approvalUndone', 'Approval Undone. Reverted to PROCESSING.'));
+                                        fetchData();
+                                    } catch (err) {
+                                        showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
+                                    }
+                                }}
+                                disabled={!undoApprovalModal.reason.trim()}
+                                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold shadow-lg transition-all text-sm"
+                            >
+                                {t('common.confirm', 'Reopen Sample')}
                             </button>
                         </div>
                     </div>

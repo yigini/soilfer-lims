@@ -1802,11 +1802,17 @@ exports.approveSample = async (req, res) => {
 
 exports.undoApproval = async (req, res) => {
     const { id } = req.params;
+    const { reason } = req.body || {};
     const user = req.user;
 
     try {
         if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Only Managers can undo approval.' });
+        }
+
+        const effectiveReason = (reason || '').trim();
+        if (!effectiveReason) {
+            return res.status(400).json({ error: 'A reason is required when reopening a finished sample' });
         }
 
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
@@ -1817,7 +1823,7 @@ exports.undoApproval = async (req, res) => {
         const previousStatus = sample.status;
         const now = new Date();
         const { transitionSample } = require('../services/sampleStateService');
-        await transitionSample(id, 'PROCESSING', user, 'Approval revoked by manager', {
+        await transitionSample(id, 'PROCESSING', user, effectiveReason, {
             approvedBy: null,
             approvedAt: null
         });
@@ -1846,7 +1852,7 @@ exports.undoApproval = async (req, res) => {
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'UNDO_APPROVAL',
-                details: `Reverted from ${previousStatus} to ACCEPTED. Reset ${count} work items to SUBMITTED and removed post-analytical tasks.`,
+                details: `Reverted from ${previousStatus} to PROCESSING. Reason: ${effectiveReason}. Reset ${count} work items to SUBMITTED and removed post-analytical tasks.`,
                 performedBy: req.user.username,
                 timestamp: now,
                 sampleId: String(id)

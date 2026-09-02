@@ -97,7 +97,7 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         const res = await request(app)
             .post(`/api/samples/${sampleNullId}/undo-approve`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
-            .send();
+            .send({ reason: 'Audit verification test' });
 
         expect(res.status).toBe(200);
 
