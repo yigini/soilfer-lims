@@ -88,6 +88,9 @@ const PERMISSIONS = {
     'CHANGE_STATUS': [
         'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN'
     ],
+    'EDIT_ANALYSES': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'
+    ],
 
     // Results & Workbench
     'ENTER_RESULTS': [

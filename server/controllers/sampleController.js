@@ -1662,7 +1662,7 @@ exports.updateSampleAnalyses = async (req, res) => {
     const effectiveReason = reason || waiverReason;
 
     try {
-        if (!hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'APPROVE_RESULTS')) {
+        if (!hasPermission(user, 'EDIT_ANALYSES')) {
             return res.status(403).json({ error: 'Insufficient permissions to edit analyses.' });
         }
 

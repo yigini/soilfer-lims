@@ -19,7 +19,7 @@ router.post('/:id/accept', checkPermission('RECEIVE_SAMPLE'), sampleController.a
 router.post('/:id/undo-intake', checkPermission('RECEIVE_SAMPLE'), sampleController.undoIntake);
 router.put('/:id/metadata', checkPermission('CHANGE_STATUS'), sampleController.updateSampleMetadata);
 router.put('/:id/project', checkPermission('CHANGE_STATUS'), sampleController.updateSampleProject);
-router.put('/:id/analyses', checkPermission('CHANGE_STATUS'), sampleController.updateSampleAnalyses);
+router.put('/:id/analyses', checkPermission('EDIT_ANALYSES'), sampleController.updateSampleAnalyses);
 router.get('/:id/detail', checkPermission('VIEW_SAMPLES'), sampleController.getSampleDetail);
 router.get('/:id/map-state', checkPermission('VIEW_SAMPLES'), sampleController.getMapState);
 
