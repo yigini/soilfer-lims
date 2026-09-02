@@ -1,0 +1,51 @@
+[
+  {
+    "id": "GTM-LAB1",
+    "name": "SoilFER Guatemala Lab",
+    "code": "GTM",
+    "country": "GTM",
+    "isActive": true
+  },
+  {
+    "id": "HND-LAB1",
+    "name": "SoilFER Honduras Lab",
+    "code": "HND",
+    "country": "HND",
+    "isActive": true
+  },
+  {
+    "id": "GHA-LAB1",
+    "name": "SoilFER Ghana Lab",
+    "code": "GHA",
+    "country": "GHA",
+    "isActive": true
+  },
+  {
+    "id": "KEN-LAB1",
+    "name": "SoilFER Kenya Lab",
+    "code": "KEN",
+    "country": "KEN",
+    "isActive": true
+  },
+  {
+    "id": "ZMB-LAB1",
+    "name": "SoilFER Zambia Lab",
+    "code": "ZMB",
+    "country": "ZMB",
+    "isActive": true
+  },
+  {
+    "id": "TUN-LAB1",
+    "name": "SoilFER Tunisia Lab",
+    "code": "TUN",
+    "country": "TUN",
+    "isActive": true
+  },
+  {
+    "id": "MOZ-LAB1",
+    "name": "SoilFER Mozambique Lab",
+    "code": "MOZ",
+    "country": "MOZ",
+    "isActive": true
+  }
+]

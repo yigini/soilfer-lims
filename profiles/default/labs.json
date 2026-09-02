@@ -1,0 +1,9 @@
+[
+  {
+    "id": "DEFAULT-LAB",
+    "name": "Primary Analytical Laboratory",
+    "code": "LAB01",
+    "country": "INT",
+    "isActive": true
+  }
+]

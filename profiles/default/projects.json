@@ -1,0 +1,10 @@
+[
+  {
+    "id": "DEFAULT-PROJECT",
+    "code": "ROUTINE",
+    "name": "Routine Soil Testing",
+    "projectType": "OPEN_INTAKE",
+    "expectedSampleCount": 1000,
+    "assignedLabs": ["DEFAULT-LAB"]
+  }
+]

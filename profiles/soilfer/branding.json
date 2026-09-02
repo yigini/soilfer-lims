@@ -1,0 +1,9 @@
+{
+  "title": "SoilFER-LIMS",
+  "subtitle": "Global Soil Partnership / FAO Laboratory Information Management System",
+  "colors": {
+    "primary": "#059669",
+    "accent": "#d97706"
+  },
+  "logoUrl": "/fao_logo.png"
+}

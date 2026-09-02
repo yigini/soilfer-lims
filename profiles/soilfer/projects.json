@@ -1,0 +1,18 @@
+[
+  {
+    "id": "SoilFER-USA",
+    "code": "SOILFER-US",
+    "name": "SoilFER USA Program",
+    "projectType": "OPEN_INTAKE",
+    "expectedSampleCount": 33672,
+    "assignedLabs": ["GTM-LAB1", "HND-LAB1", "GHA-LAB1", "KEN-LAB1", "ZMB-LAB1"]
+  },
+  {
+    "id": "SoilFER-JPN",
+    "code": "SOILFER-JPN",
+    "name": "SoilFER Japan Program",
+    "projectType": "OPEN_INTAKE",
+    "expectedSampleCount": 6858,
+    "assignedLabs": ["MOZ-LAB1", "TUN-LAB1"]
+  }
+]
