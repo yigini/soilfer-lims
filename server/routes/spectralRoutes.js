@@ -12,6 +12,9 @@ router.get('/stats', verifyToken, spectralController.getLibraryStats);
 // Detail / Viewer
 router.get('/:id', verifyToken, spectralController.getScan);
 
+// SL-06: Raw Instrument File Download
+router.get('/:id/raw', verifyToken, spectralController.downloadRawScan);
+
 // Pre-upload: check which lab IDs match existing samples
 router.post('/check-matches', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.checkMatches);
 

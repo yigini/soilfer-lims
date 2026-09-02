@@ -496,6 +496,7 @@ model EquipmentAsset {
   scheduleRules      EquipmentScheduleRule[]
   events             EquipmentEvent[]
   usage              WorkItemEquipmentUse[]
+  spectralScans      SpectralData[]
 }
 
 model EquipmentQualification {
@@ -577,7 +578,7 @@ model SpectralData {
   labId          String?
   modality       String   // NIR, MIR
   filename       String
-  scanIp         String?
+  scanIp         String?  // Deprecated (SL-08), retained for backward compatibility
   uploadedBy     String?
   timestamp      DateTime @default(now())
   metadata       String?    // JSON string
@@ -587,11 +588,57 @@ model SpectralData {
   qcStatus       String?    // PASS, WARN, FAIL
   qcFlags        String?    // JSON string: Array of flags
   
+  // SL-06: Raw File Storage & Integrity
+  sourceFile     String?    // Relative storage path on disk: uploads/spectra/{id}_{filename}
+  sourceFormat   String?    // CSV, JCAMP, OPUS, SPC, ASD
+  sha256         String?    // SHA-256 hash of original file / point data
+  parserVersion  String?    @default("1.0.0")
+
+  // SL-07: Signal & Physical Quantity
+  quantity       String     @default("ABSORBANCE") // ABSORBANCE, REFLECTANCE, LOG_1_R, KUBELKA_MUNK, TRANSMITTANCE, UNVERIFIED
+  axisUnit       String     @default("WAVENUMBER_CM1") // WAVENUMBER_CM1, WAVELENGTH_NM
+  axisDirection  String     @default("DESCENDING") // ASCENDING, DESCENDING, UNORDERED
+  region         String?    // VIS, VNIR, NIR, MIR, COMBINED
+  isRaw          Boolean    @default(true)
+
+  // SL-08: Equipment Register Link
+  equipmentId    String?
+  equipment      EquipmentAsset? @relation(fields: [equipmentId], references: [id])
+
+  // SL-09: Optical Acquisition Columns
+  resolution     Float?     // cm-1 or nm
+  coAddedScans   Int?       // e.g. 16, 32, 64
+  accessory      String?    // DRIFT, ATR, INTEGRATING_SPHERE, CONTACT_PROBE, TRANSMISSION
+  backgroundRef  String?    // GOLD, KBR, SPECTRALON, AIR, INTERNAL
+  backgroundAt   DateTime?
+  detector       String?    // DTGS, MCT, IN_GA_AS, SI
+  beamsplitter   String?    // KBR, ZN_SE, QUARTZ
+
+  // SL-10: Sample Presentation Columns
+  preparation    String?    // SIEVED_2MM, BALL_MILLED, AGATE_100UM, FINE_GROUND
+  moistureState  String?    // AIR_DRY, OVEN_DRY, FIELD_MOIST
+  windowMaterial String?    // KBR, ZN_SE, DIAMOND, QUARTZ, NONE
+  replicateNo    Int        @default(1)
+  ambientTemp    Float?
+  ambientRh      Float?
+
+  // SL-12: Supersession Model
+  isCurrent      Boolean    @default(true)
+  supersedes     String?    // ID of prior scan
+  supersededBy   String?    // ID of superseding scan
+  supersededAt   DateTime?
+  supersedeReason String?
+
   // Workflow Status: PENDING -> VALIDATED -> APPROVED (or REJECTED)
   status         String?    @default("PENDING") // PENDING, VALIDATED, APPROVED, REJECTED, ARCHIVED, DELETED
   reviewedBy     String?    // Manager who approved/rejected
   reviewedAt     DateTime?  // When it was approved/rejected
   reviewNotes    String?    // Optional notes from manager
+
+  @@index([labId, isCurrent])
+  @@index([sampleId, isCurrent])
+  @@index([sha256])
+  @@index([equipmentId])
 }
 
 // --- ADMIN & SYSTEM MODELS ---

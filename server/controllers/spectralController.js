@@ -1,8 +1,15 @@
 const prisma = require('../prisma');
 const { validateSpectra } = require('../services/spectralValidation');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const { broadcastToLab } = require('../wsServer');
 const scopeGuard = require('../utils/scopeGuard');
+
+const UPLOADS_SPECTRA_DIR = path.join(__dirname, '..', 'uploads', 'spectra');
+if (!fs.existsSync(UPLOADS_SPECTRA_DIR)) {
+    try { fs.mkdirSync(UPLOADS_SPECTRA_DIR, { recursive: true }); } catch (e) {}
+}
 
 // Helper: Calculate Checksum
 const calculateChecksum = (dataString) => {
@@ -11,7 +18,7 @@ const calculateChecksum = (dataString) => {
 
 exports.getLibrary = async (req, res) => {
     try {
-        const { status, modality, qcStatus, search, page, limit } = req.query;
+        const { status, modality, qcStatus, search, page, limit, includeSuperseded } = req.query;
         const user = req.user;
 
         // Build the query conditions
@@ -23,6 +30,11 @@ exports.getLibrary = async (req, res) => {
             andConditions.push({ status: status });
         } else {
             andConditions.push({ status: { not: 'DELETED' } });
+        }
+
+        // SL-12: Filter to current non-superseded scans by default
+        if (includeSuperseded !== 'true') {
+            andConditions.push({ isCurrent: true });
         }
 
         // Add modality filter
@@ -76,6 +88,28 @@ exports.getLibrary = async (req, res) => {
                 reviewedBy: true,
                 reviewedAt: true,
                 reviewNotes: true,
+                sourceFile: true,
+                sourceFormat: true,
+                sha256: true,
+                quantity: true,
+                axisUnit: true,
+                axisDirection: true,
+                region: true,
+                isRaw: true,
+                equipmentId: true,
+                resolution: true,
+                coAddedScans: true,
+                accessory: true,
+                backgroundRef: true,
+                detector: true,
+                beamsplitter: true,
+                preparation: true,
+                moistureState: true,
+                windowMaterial: true,
+                replicateNo: true,
+                isCurrent: true,
+                supersedes: true,
+                supersededBy: true
             }
         };
 
@@ -425,6 +459,84 @@ exports.uploadBatch = async (req, res) => {
             }
             const axisDirection = increasing ? 'ASCENDING' : (decreasing ? 'DESCENDING' : 'UNORDERED');
 
+            // SL-11: Checksum Deduplication
+            const effectiveLabId = sample ? (sample.assignedLab || sample.labId || (user ? user.labId : null)) : (user ? user.labId : null);
+            const arrayString = JSON.stringify(wavelengths) + JSON.stringify(values);
+            const sha256Hash = scanItem.sha256 || calculateChecksum(scanItem.rawContent || arrayString);
+
+            const duplicate = await prisma.spectralData.findFirst({
+                where: {
+                    labId: effectiveLabId,
+                    sha256: sha256Hash,
+                    status: { not: 'DELETED' }
+                }
+            });
+            if (duplicate) {
+                console.log(`[SPECTRAL] Duplicate detected with sha256=${sha256Hash}. Skipping.`);
+                results.skipped++;
+                results.errors.push({
+                    filename: scanItem.filename,
+                    error: `Duplicate spectrum rejected: identical content hash already exists in this lab (Scan ID: ${duplicate.id}).`
+                });
+                continue;
+            }
+
+            // SL-06: Raw File Storage
+            const newScanId = `spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            let sourceFilePath = null;
+            try {
+                let rawContent = scanItem.rawContent;
+                if (!rawContent) {
+                    const lines = ['wavelength,value'];
+                    for (let i = 0; i < wavelengths.length; i++) {
+                        lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+                    }
+                    rawContent = lines.join('\n');
+                }
+                const safeName = (scanItem.filename || 'scan.csv').replace(/[^a-zA-Z0-9._-]/g, '_');
+                const fullFilePath = path.join(UPLOADS_SPECTRA_DIR, `${newScanId}_${safeName}`);
+                fs.writeFileSync(fullFilePath, rawContent, 'utf8');
+                sourceFilePath = path.relative(path.join(__dirname, '..'), fullFilePath).replace(/\\/g, '/');
+            } catch (fsErr) {
+                console.warn('[SPECTRAL] Warning: Failed to persist raw file blob:', fsErr.message);
+            }
+
+            // SL-08: Equipment Register Link
+            let equipmentId = scanItem.equipmentId || null;
+            if (!equipmentId && effectiveLabId) {
+                const eq = await prisma.equipmentAsset.findFirst({
+                    where: { labId: effectiveLabId, assetType: 'SPECTROMETER', status: 'IN_SERVICE' }
+                });
+                if (eq) equipmentId = eq.id;
+            }
+
+            // SL-12: Supersession Model
+            let supersedesId = null;
+            const replicateNo = scanItem.replicateNo ? parseInt(scanItem.replicateNo) : 1;
+            if (sample) {
+                const priorScan = await prisma.spectralData.findFirst({
+                    where: {
+                        sampleId: sample.id,
+                        modality: scanItem.modality || 'NIR',
+                        replicateNo: replicateNo,
+                        isCurrent: true,
+                        status: { not: 'DELETED' }
+                    }
+                });
+                if (priorScan) {
+                    await prisma.spectralData.update({
+                        where: { id: priorScan.id },
+                        data: {
+                            isCurrent: false,
+                            supersededBy: newScanId,
+                            supersededAt: new Date(),
+                            supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
+                        }
+                    });
+                    supersedesId = priorScan.id;
+                }
+            }
+
             // 2. Validate Data in native delivered order
             const validation = validateSpectra(wavelengths, values, scanItem.modality);
 
@@ -438,16 +550,46 @@ exports.uploadBatch = async (req, res) => {
                 workflowStatus = 'VALIDATED';
             }
 
+            // SL-07: Typed physical quantity & signal metadata
+            const quantity = scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE');
+            const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
+            const region = scanItem.region || scanItem.modality || 'NIR';
+
             // 3. Create Record
             const newScan = await prisma.spectralData.create({
                 data: {
-                    id: `spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: newScanId,
                     sampleId: sample ? sample.id : null,
-                    labId: sample ? (sample.assignedLab || (user ? user.labId : null)) : (user ? user.labId : null),
+                    labId: effectiveLabId,
                     modality: scanItem.modality || 'NIR',
                     filename: scanItem.filename,
                     wavelengths: JSON.stringify(wavelengths),
                     values: JSON.stringify(values),
+                    sourceFile: sourceFilePath,
+                    sourceFormat: scanItem.sourceFormat || 'CSV',
+                    sha256: sha256Hash,
+                    parserVersion: '1.0.0',
+                    quantity: quantity,
+                    axisUnit: axisUnit,
+                    axisDirection: axisDirection,
+                    region: region,
+                    isRaw: scanItem.isRaw !== undefined ? Boolean(scanItem.isRaw) : true,
+                    equipmentId: equipmentId,
+                    resolution: scanItem.resolution ? parseFloat(scanItem.resolution) : null,
+                    coAddedScans: scanItem.coAddedScans ? parseInt(scanItem.coAddedScans) : null,
+                    accessory: scanItem.accessory || null,
+                    backgroundRef: scanItem.backgroundRef || null,
+                    backgroundAt: scanItem.backgroundAt ? new Date(scanItem.backgroundAt) : null,
+                    detector: scanItem.detector || null,
+                    beamsplitter: scanItem.beamsplitter || null,
+                    preparation: scanItem.preparation || null,
+                    moistureState: scanItem.moistureState || 'AIR_DRY',
+                    windowMaterial: scanItem.windowMaterial || null,
+                    replicateNo: replicateNo,
+                    ambientTemp: scanItem.ambientTemp ? parseFloat(scanItem.ambientTemp) : null,
+                    ambientRh: scanItem.ambientRh ? parseFloat(scanItem.ambientRh) : null,
+                    isCurrent: true,
+                    supersedes: supersedesId,
                     metadata: JSON.stringify({
                         filename: scanItem.filename,
                         instrument: scanItem.instrument || 'Unknown',
@@ -459,16 +601,16 @@ exports.uploadBatch = async (req, res) => {
                         linkedSampleId: sample ? sample.id : null,
                         autoApproved: canAutoApprove ? true : undefined,
                         axisDirection: axisDirection,
-                        axisUnit: scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM'),
-                        quantity: scanItem.quantity || (scanItem.modality === 'MIR' ? 'ABSORBANCE' : 'REFLECTANCE'),
-                        sha256: calculateChecksum(JSON.stringify(wavelengths) + JSON.stringify(values))
+                        axisUnit: axisUnit,
+                        quantity: quantity,
+                        sha256: sha256Hash
                     }),
                     qcStatus: validation.qcStatus,
                     qcFlags: JSON.stringify(validation.flags),
                     status: workflowStatus,
                     uploadedBy: user ? user.id : null,
                     ...(canAutoApprove && validation.qcStatus !== 'FAIL' ? {
-                        reviewedBy: user.id,
+                        reviewedBy: user.username || user.id,
                         reviewedAt: new Date()
                     } : {})
                 }
@@ -919,6 +1061,15 @@ exports.reviewSpectrum = async (req, res) => {
             return res.status(400).json({ error: `Cannot review spectrum in ${scan.status} status.` });
         }
 
+        if (action === 'APPROVE') {
+            // SL-07: Cannot approve if physical quantity is unconfirmed or UNVERIFIED
+            if (!scan.quantity || scan.quantity === 'UNVERIFIED') {
+                return res.status(400).json({
+                    error: 'Cannot approve spectrum: physical quantity must be confirmed (cannot be empty or UNVERIFIED).'
+                });
+            }
+        }
+
         const newStatus = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
 
         // 3. Update spectrum
@@ -1003,4 +1154,52 @@ exports.reviewSpectrum = async (req, res) => {
 
 const parseJson = (str) => {
     try { return str ? JSON.parse(str) : null; } catch (e) { return null; }
+};
+
+/**
+ * SL-06: Download raw instrument file with byte identity and SHA-256 ETag
+ */
+exports.downloadRawScan = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        const scan = await prisma.spectralData.findUnique({ where: { id } });
+        if (!scan) return res.status(404).json({ error: 'Spectrum not found' });
+
+        if (!scopeGuard.canAccessEntity(user, scan, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: spectrum outside your laboratory scope.' });
+        }
+
+        const filename = scan.filename || `scan_${scan.id}.csv`;
+
+        if (scan.sourceFile) {
+            const absolutePath = path.isAbsolute(scan.sourceFile)
+                ? scan.sourceFile
+                : path.join(__dirname, '..', scan.sourceFile);
+
+            if (fs.existsSync(absolutePath)) {
+                if (scan.sha256) res.setHeader('ETag', scan.sha256);
+                return res.download(absolutePath, filename);
+            }
+        }
+
+        // Fallback: Reconstruct from stored JSON arrays
+        const wavelengths = parseJson(scan.wavelengths) || [];
+        const values = parseJson(scan.values) || [];
+        const lines = ['wavelength,value'];
+        for (let i = 0; i < wavelengths.length; i++) {
+            lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+        }
+        const csvContent = lines.join('\n');
+        const hash = scan.sha256 || calculateChecksum(csvContent);
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('ETag', hash);
+        return res.send(csvContent);
+    } catch (e) {
+        console.error("Download Raw Scan Error:", e);
+        res.status(500).json({ error: e.message });
+    }
 };
