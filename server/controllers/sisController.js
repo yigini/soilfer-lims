@@ -43,18 +43,44 @@ function buildSisWhere(sisAuth, query = {}) {
         where.projectCode = { in: keyProjects };
     }
 
-    // 4. Lab scoping
+    // 4. Lab scoping (SL-22: API keys without explicit lab access are strictly DENIED)
+    const isApiKey = sisAuth?.type === 'API_KEY';
     const keyLabs = sisAuth?.labs || [];
-    const hasGlobalLab = keyLabs.length === 0 || keyLabs.includes('*');
+    const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && sisAuth?.role === 'SUPER_ADMIN');
 
-    if (query.labId) {
-        if (hasGlobalLab || keyLabs.includes(query.labId)) {
+    if (isApiKey) {
+        if (!hasGlobalLab) {
+            if (keyLabs.length === 0) {
+                // Deny: API key lacks explicit laboratory authorization
+                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+            } else if (query.labId) {
+                if (keyLabs.includes(query.labId)) {
+                    where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+                } else {
+                    where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+                }
+            } else {
+                where.OR = [{ labId: { in: keyLabs } }, { assignedLab: { in: keyLabs } }];
+            }
+        } else if (query.labId) {
             where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
-        } else {
-            where.OR = [{ labId: '__impossible__' }, { assignedLab: '__impossible__' }];
         }
-    } else if (!hasGlobalLab) {
-        where.OR = [{ labId: { in: keyLabs } }, { assignedLab: { in: keyLabs } }];
+    } else {
+        // JWT User scoping
+        if (query.labId) {
+            if (hasGlobalLab || keyLabs.includes(query.labId) || sisAuth?.labId === query.labId) {
+                where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+            } else {
+                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+            }
+        } else if (!hasGlobalLab) {
+            const allowedLabs = keyLabs.length > 0 ? keyLabs : (sisAuth?.labId ? [sisAuth.labId] : []);
+            if (allowedLabs.length > 0) {
+                where.OR = [{ labId: { in: allowedLabs } }, { assignedLab: { in: allowedLabs } }];
+            } else {
+                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+            }
+        }
     }
 
     // 5. Incremental sync timestamp filter
@@ -265,10 +291,14 @@ exports.getSamples = async (req, res) => {
 exports.getSampleById = async (req, res) => {
     try {
         const { id } = req.params;
+        const baseWhere = buildSisWhere(req.sisAuth, {});
         const [sample, maps] = await Promise.all([
             prisma.sample.findFirst({
                 where: {
-                    OR: [{ id }, { originalId: id }, { labId: id }]
+                    AND: [
+                        baseWhere,
+                        { OR: [{ id }, { originalId: id }, { labId: id }] }
+                    ]
                 },
                 include: {
                     results: true,
@@ -664,6 +694,28 @@ exports.syncDelta = async (req, res) => {
             return res.status(400).json({ error: 'Invalid ISO-8601 date format for updatedSince.' });
         }
 
+        const spectralWhere = { timestamp: { gte: sinceDate } };
+        const isApiKey = req.sisAuth?.type === 'API_KEY';
+        const keyLabs = req.sisAuth?.labs || [];
+        const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
+
+        if (isApiKey) {
+            if (!hasGlobalLab) {
+                if (keyLabs.length === 0) {
+                    spectralWhere.labId = '__denied__';
+                } else {
+                    spectralWhere.labId = { in: keyLabs };
+                }
+            }
+        } else if (!hasGlobalLab) {
+            const allowedLabs = keyLabs.length > 0 ? keyLabs : (req.sisAuth?.labId ? [req.sisAuth.labId] : []);
+            if (allowedLabs.length > 0) {
+                spectralWhere.labId = { in: allowedLabs };
+            } else {
+                spectralWhere.labId = '__denied__';
+            }
+        }
+
         const where = buildSisWhere(req.sisAuth, { updatedSince });
 
         const [samples, spectra] = await Promise.all([
@@ -674,7 +726,7 @@ exports.syncDelta = async (req, res) => {
                 take: 1000
             }),
             prisma.spectralData.findMany({
-                where: { timestamp: { gte: sinceDate } },
+                where: spectralWhere,
                 take: 1000,
                 orderBy: { timestamp: 'asc' }
             })
@@ -704,11 +756,33 @@ exports.syncDelta = async (req, res) => {
 exports.getStats = async (req, res) => {
     try {
         const sampleWhere = buildSisWhere(req.sisAuth, {});
+        const spectralWhere = {};
+        const isApiKey = req.sisAuth?.type === 'API_KEY';
+        const keyLabs = req.sisAuth?.labs || [];
+        const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
+
+        if (isApiKey) {
+            if (!hasGlobalLab) {
+                if (keyLabs.length === 0) {
+                    spectralWhere.labId = '__denied__';
+                } else {
+                    spectralWhere.labId = { in: keyLabs };
+                }
+            }
+        } else if (!hasGlobalLab) {
+            const allowedLabs = keyLabs.length > 0 ? keyLabs : (req.sisAuth?.labId ? [req.sisAuth.labId] : []);
+            if (allowedLabs.length > 0) {
+                spectralWhere.labId = { in: allowedLabs };
+            } else {
+                spectralWhere.labId = '__denied__';
+            }
+        }
+
         const [totalSamples, completedSamples, totalResults, totalSpectra, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED' } }),
             prisma.result.count({ where: { sample: sampleWhere } }),
-            prisma.spectralData.count(),
+            prisma.spectralData.count({ where: spectralWhere }),
             prisma.lab.count()
         ]);
 
