@@ -79,11 +79,126 @@ const ANALYSIS_CONFIG = {
     }
 };
 
+const DYNAMIC_CONFIGS = {};
+
+/**
+ * Register or update an analysis configuration dynamically from the database catalogue.
+ */
+function registerAnalysisConfig(code, config) {
+    if (!code) return;
+    let prereqs = config.prerequisites || [];
+    if (typeof prereqs === 'string') {
+        try { prereqs = JSON.parse(prereqs); } catch (e) { prereqs = []; }
+    }
+    DYNAMIC_CONFIGS[code] = {
+        category: config.category || config.categoryId || WORK_ITEM_CATEGORIES.WET_CHEMISTRY,
+        order: config.order ?? config.executionOrder ?? 50,
+        prerequisites: Array.isArray(prereqs) ? prereqs : [],
+        displayName: config.displayName || config.name || code
+    };
+}
+
+/**
+ * Detects cycles in a dependency graph using DFS.
+ * @param {Object} graph - { [node]: string[] }
+ * @returns {{ hasCycle: boolean, cycle: string[] | null }}
+ */
+function detectCycle(graph) {
+    const visited = new Set();
+    const recursionStack = new Set();
+    let cyclePath = null;
+
+    function dfs(node, path) {
+        visited.add(node);
+        recursionStack.add(node);
+        path.push(node);
+
+        const neighbors = graph[node] || [];
+        for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+                if (dfs(neighbor, path)) return true;
+            } else if (recursionStack.has(neighbor)) {
+                const cycleStart = path.indexOf(neighbor);
+                cyclePath = [...path.slice(cycleStart), neighbor];
+                return true;
+            }
+        }
+
+        recursionStack.delete(node);
+        path.pop();
+        return false;
+    }
+
+    for (const node of Object.keys(graph)) {
+        if (!visited.has(node)) {
+            if (dfs(node, [])) {
+                return { hasCycle: true, cycle: cyclePath };
+            }
+        }
+    }
+
+    return { hasCycle: false, cycle: null };
+}
+
+/**
+ * Validates whether adding/updating an analysis with given prerequisites would introduce a cycle.
+ * @param {string} code - The analysis code
+ * @param {string[]|string} newPrerequisites - Array or JSON string of prerequisite analysis codes
+ * @param {Array<{code: string, prerequisites: any}>} existingAnalyses - All existing analyses
+ * @returns {{ valid: boolean, error?: string, cycle?: string[] }}
+ */
+function validatePrerequisites(code, newPrerequisites, existingAnalyses = []) {
+    let parsed = [];
+    if (Array.isArray(newPrerequisites)) {
+        parsed = newPrerequisites;
+    } else if (typeof newPrerequisites === 'string') {
+        try { parsed = JSON.parse(newPrerequisites); } catch (e) { parsed = []; }
+    }
+
+    // Direct self-dependency check
+    if (parsed.includes(code)) {
+        return {
+            valid: false,
+            error: `Self-referential prerequisite: ${code} cannot depend on itself.`,
+            cycle: [code, code]
+        };
+    }
+
+    // Build full graph from existing analyses + proposed change
+    const graph = {};
+    for (const a of existingAnalyses) {
+        if (a.code === code) continue; // Will be overwritten by newPrerequisites
+        let prereqs = [];
+        if (Array.isArray(a.prerequisites)) {
+            prereqs = a.prerequisites;
+        } else if (typeof a.prerequisites === 'string') {
+            try { prereqs = JSON.parse(a.prerequisites); } catch (e) { prereqs = []; }
+        }
+        graph[a.code] = prereqs;
+    }
+
+    graph[code] = parsed;
+
+    const { hasCycle, cycle } = detectCycle(graph);
+    if (hasCycle) {
+        return {
+            valid: false,
+            error: `Cyclic prerequisite dependency detected: ${cycle.join(' -> ')}`,
+            cycle
+        };
+    }
+
+    return { valid: true };
+}
+
 /**
  * Get the configuration for an analysis code.
- * Returns a default config if unknown (for extensibility).
+ * Checks dynamic catalogue cache first, then built-in defaults, then general fallback.
  */
 function getAnalysisConfig(analysisCode) {
+    if (DYNAMIC_CONFIGS[analysisCode]) {
+        return DYNAMIC_CONFIGS[analysisCode];
+    }
     return ANALYSIS_CONFIG[analysisCode] || {
         category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY,
         order: 50,
@@ -568,9 +683,13 @@ module.exports = {
     // Configuration
     WORK_ITEM_CATEGORIES,
     ANALYSIS_CONFIG,
+    DYNAMIC_CONFIGS,
     getAnalysisConfig,
+    registerAnalysisConfig,
 
-    // Dependency Checks
+    // Dependency Checks & DAG Cycle Validation
+    detectCycle,
+    validatePrerequisites,
     checkPrerequisites,
     canTransitionWorkItem,
 

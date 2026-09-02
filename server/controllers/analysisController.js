@@ -113,7 +113,7 @@ exports.getOperationalGates = async (req, res) => {
 // --- ANALYSES CRUD ---
 
 exports.createAnalysis = async (req, res) => {
-    const { code, name, description, categoryId, units, validation } = req.body;
+    const { code, name, description, categoryId, units, validation, executionOrder, prerequisites } = req.body;
     const user = req.user;
 
     if (!code || !name) return res.status(400).json({ error: 'Code and Name are required' });
@@ -121,6 +121,15 @@ exports.createAnalysis = async (req, res) => {
     try {
         const existing = await prisma.analysis.findUnique({ where: { code } });
         if (existing) return res.status(400).json({ error: 'Analysis code already exists' });
+
+        if (prerequisites) {
+            const workflowEngine = require('../utils/workflowEngine');
+            const allAnalyses = await prisma.analysis.findMany({ select: { code: true, prerequisites: true } });
+            const validationResult = workflowEngine.validatePrerequisites(code, prerequisites, allAnalyses);
+            if (!validationResult.valid) {
+                return res.status(400).json({ error: validationResult.error, cycle: validationResult.cycle });
+            }
+        }
 
         const newAnalysis = await prisma.analysis.create({
             data: {
@@ -130,10 +139,15 @@ exports.createAnalysis = async (req, res) => {
                 categoryId: categoryId || null,
                 units: units || null,
                 status: 'active',
+                executionOrder: executionOrder !== undefined ? parseInt(executionOrder) : 100,
+                prerequisites: prerequisites ? (typeof prerequisites === 'string' ? prerequisites : JSON.stringify(prerequisites)) : null,
                 validation: validation ? (typeof validation === 'string' ? validation : JSON.stringify(validation)) : null,
                 labId: user.role !== 'SUPER_ADMIN' ? user.labId : null
             }
         });
+
+        const workflowEngine = require('../utils/workflowEngine');
+        workflowEngine.registerAnalysisConfig(code, newAnalysis);
 
         await prisma.auditLog.create({
             data: {
@@ -174,10 +188,24 @@ exports.updateAnalysis = async (req, res) => {
 
         // Whitelist: only allow safe fields to be updated
         const data = {};
-        const ALLOWED_FIELDS = ['name', 'description', 'categoryId', 'units', 'validation', 'status'];
+        const ALLOWED_FIELDS = ['name', 'description', 'categoryId', 'units', 'validation', 'status', 'executionOrder', 'prerequisites'];
         for (const field of ALLOWED_FIELDS) {
             if (updates[field] !== undefined) {
                 data[field] = updates[field];
+            }
+        }
+        if (data.executionOrder !== undefined) {
+            data.executionOrder = parseInt(data.executionOrder);
+        }
+        if (data.prerequisites !== undefined) {
+            const workflowEngine = require('../utils/workflowEngine');
+            const allAnalyses = await prisma.analysis.findMany({ select: { code: true, prerequisites: true } });
+            const validationResult = workflowEngine.validatePrerequisites(code, data.prerequisites, allAnalyses);
+            if (!validationResult.valid) {
+                return res.status(400).json({ error: validationResult.error, cycle: validationResult.cycle });
+            }
+            if (typeof data.prerequisites !== 'string') {
+                data.prerequisites = JSON.stringify(data.prerequisites);
             }
         }
         if (data.validation && typeof data.validation !== 'string') {
@@ -188,6 +216,9 @@ exports.updateAnalysis = async (req, res) => {
             where: { code },
             data
         });
+
+        const workflowEngine = require('../utils/workflowEngine');
+        workflowEngine.registerAnalysisConfig(code, updated);
 
         await prisma.auditLog.create({
             data: {

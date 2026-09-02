@@ -691,6 +691,8 @@ model Analysis {
   matrix             String            @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
   module             String            @default("FERTILITY") // FERTILITY, HEALTH, ENVIRONMENTAL, QUALITY
   isGlobal           Boolean           @default(true)
+  executionOrder     Int?              @default(100)
+  prerequisites      String?           // JSON string: array of analysis codes
   status             String?           // active, inactive
   validation         String?           // JSON string: validation rules
   decimalPlaces      Int?              @default(2)

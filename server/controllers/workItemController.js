@@ -92,6 +92,15 @@ exports.generateWorkItemsForSample = async (sample) => {
 
         const uniqueAnalyses = [...new Set(expandedAnalyses)];
 
+        // WP-25: Drive workflow work item ordering from catalogue executionOrder
+        const catalogueRecords = await prisma.analysis.findMany({
+            where: { code: { in: uniqueAnalyses } },
+            select: { code: true, executionOrder: true }
+        });
+        const orderMap = {};
+        catalogueRecords.forEach(a => { orderMap[a.code] = a.executionOrder ?? 100; });
+        uniqueAnalyses.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
+
         for (const analysisCode of uniqueAnalyses) {
             const existing = await prisma.workItem.findFirst({
                 where: { sampleId: String(id), analysis: analysisCode }
