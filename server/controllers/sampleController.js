@@ -1657,8 +1657,9 @@ exports.updateSampleProject = async (req, res) => {
  */
 exports.updateSampleAnalyses = async (req, res) => {
     const { id } = req.params;
-    const { analyses, analysisGroupIds } = req.body;
+    const { analyses, analysisGroupIds, reason, waiverReason } = req.body;
     const user = req.user;
+    const effectiveReason = reason || waiverReason;
 
     try {
         if (!hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'APPROVE_RESULTS')) {
@@ -1670,6 +1671,18 @@ exports.updateSampleAnalyses = async (req, res) => {
 
         if (!(await userHasScopeForSample(user, sample))) {
             return res.status(403).json({ error: 'Sample is outside your scope' });
+        }
+
+        // SD-03: Three-way reconcile work items BEFORE mutating requiredAnalyses
+        const targetList = Array.isArray(analyses) ? analyses : (sample.requiredAnalyses ? JSON.parse(sample.requiredAnalyses) : []);
+        const reconcileResult = await workItemController.reconcileWorkItemsForSample(sample, targetList, user, effectiveReason);
+
+        if (reconcileResult.conflict) {
+            return res.status(reconcileResult.status || 409).json({
+                error: reconcileResult.error,
+                conflicts: reconcileResult.conflicts,
+                refused: reconcileResult.refused
+            });
         }
 
         const before = {
@@ -1697,28 +1710,29 @@ exports.updateSampleAnalyses = async (req, res) => {
             data: updates
         });
 
-        // Generate new work items (this is idempotent for existing ones)
-        const newItems = await workItemController.generateWorkItemsForSample(updated);
-
         await prisma.auditLog.create({
             data: {
                 id: `audit-analyses-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'ANALYSES_UPDATE',
-                details: `Updated required analyses. New items generated: ${newItems.length}`,
+                details: `Updated required analyses. Reconciled: ${reconcileResult.summary}`,
                 performedBy: user.username,
                 timestamp: new Date(),
                 sampleId: String(id),
                 before: JSON.stringify(before),
-                after: JSON.stringify(updates)
+                after: JSON.stringify({ ...updates, reconcile: reconcileResult })
             }
         });
 
         res.json({
             message: 'Analyses updated successfully',
             sample: updated,
-            newItemsCount: newItems.length
+            reconcile: reconcileResult,
+            added: reconcileResult.added,
+            waived: reconcileResult.waived,
+            removed: reconcileResult.removed,
+            summary: reconcileResult.summary
         });
     } catch (error) {
         console.error('[updateSampleAnalyses] Error:', error);

@@ -171,6 +171,238 @@ exports.generateWorkItemsForSample = async (sample) => {
     return workItems;
 };
 
+/**
+ * SD-03: Reconcile Work Items when sample analysis list changes
+ * Three-way reconcile:
+ * 1. NOT_ASSIGNED, no result -> Delete row, audit deletion
+ * 2. Assigned or in progress, no result -> Require reason; set WAIVED with reason and actor; audit
+ * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
+ */
+exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
+    const { id, labId } = sample;
+    const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
+
+    const COMPOUND_ANALYSIS_EXPANSION = {
+        'pSA': ['SAND', 'CLAY', 'SILT'],
+        'PSA': ['SAND', 'CLAY', 'SILT'],
+        'TEXTURE': ['SAND', 'CLAY', 'SILT'],
+        'Particle Size Analysis': ['SAND', 'CLAY', 'SILT'],
+        'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
+    };
+
+    const expandedTarget = [];
+    for (const code of targetList) {
+        if (COMPOUND_ANALYSIS_EXPANSION[code]) {
+            expandedTarget.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
+        } else {
+            expandedTarget.push(code);
+        }
+    }
+    const uniqueTarget = [...new Set(expandedTarget)];
+    const targetSet = new Set(uniqueTarget);
+
+    const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
+    const existingItems = await prisma.workItem.findMany({
+        where: {
+            sampleId: String(id),
+            analysis: { notIn: operationalGates }
+        }
+    });
+
+    const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
+
+    // 1. Check for recorded results on any items to be removed
+    const conflicts = [];
+    for (const item of itemsToRemove) {
+        let recordedResult = null;
+        if (item.result && String(item.result).trim() !== '') {
+            recordedResult = item.result;
+        } else {
+            const dbResult = await prisma.result.findFirst({
+                where: {
+                    sampleId: String(id),
+                    param: item.analysis
+                }
+            });
+            if (dbResult) {
+                recordedResult = dbResult.value || (dbResult.numericValue != null ? String(dbResult.numericValue) : 'Recorded');
+            }
+        }
+
+        if (recordedResult) {
+            conflicts.push({
+                analysis: item.analysis,
+                workItemId: item.id,
+                result: recordedResult
+            });
+        }
+    }
+
+    if (conflicts.length > 0) {
+        return {
+            conflict: true,
+            status: 409,
+            error: `Cannot remove analysis '${conflicts[0].analysis}': a result is already recorded (${conflicts[0].result})`,
+            conflicts,
+            refused: conflicts
+        };
+    }
+
+    // 2. Check for reason if any assigned / in-progress item is being removed
+    const assignedOrInProgress = itemsToRemove.filter(i => i.status !== workflow.WORK_ITEM_STATES.NOT_ASSIGNED);
+    if (assignedOrInProgress.length > 0 && (!reason || String(reason).trim() === '')) {
+        return {
+            conflict: true,
+            status: 400,
+            error: `A reason is required to remove or waive in-progress analysis '${assignedOrInProgress[0].analysis}'.`
+        };
+    }
+
+    const deletedItems = [];
+    const waivedItems = [];
+    const addedItems = [];
+
+    // 3. Process Removals and Waivers
+    for (const item of itemsToRemove) {
+        if (item.status === workflow.WORK_ITEM_STATES.NOT_ASSIGNED) {
+            await prisma.workItem.delete({ where: { id: item.id } });
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-wi-del-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    entity: 'WORKITEM',
+                    entityId: item.id,
+                    action: 'WORKITEM_DELETED',
+                    details: `${user?.username || 'User'} removed unstarted analysis ${item.analysis}`,
+                    performedBy: user?.username || 'SYSTEM',
+                    timestamp: new Date(),
+                    sampleId: String(id),
+                    analysisCode: item.analysis,
+                    labId: sample.assignedLab || sample.labId
+                }
+            });
+            deletedItems.push(item.analysis);
+        } else {
+            const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
+            history.push({
+                status: workflow.WORK_ITEM_STATES.WAIVED,
+                reason: String(reason).trim(),
+                waivedBy: user?.username || 'SYSTEM',
+                timestamp: new Date().toISOString()
+            });
+
+            await prisma.workItem.update({
+                where: { id: item.id },
+                data: {
+                    status: workflow.WORK_ITEM_STATES.WAIVED,
+                    reanalysisReason: String(reason).trim(),
+                    history: JSON.stringify(history)
+                }
+            });
+
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-wi-waive-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    entity: 'WORKITEM',
+                    entityId: item.id,
+                    action: 'WORKITEM_WAIVED',
+                    details: `${user?.username || 'User'} waived ${item.analysis}. Reason: ${String(reason).trim()}`,
+                    performedBy: user?.username || 'SYSTEM',
+                    timestamp: new Date(),
+                    sampleId: String(id),
+                    analysisCode: item.analysis,
+                    labId: sample.assignedLab || sample.labId,
+                    after: JSON.stringify({ status: 'WAIVED', reason: String(reason).trim() })
+                }
+            });
+            waivedItems.push({ analysis: item.analysis, reason: String(reason).trim() });
+        }
+    }
+
+    // 4. Process Additions
+    const existingCodeSet = new Set(existingItems.map(i => i.analysis));
+    const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
+
+    if (codesToAdd.length > 0) {
+        const catalogueRecords = await prisma.analysis.findMany({
+            where: { code: { in: codesToAdd } },
+            select: { code: true, executionOrder: true }
+        });
+        const orderMap = {};
+        catalogueRecords.forEach(a => { orderMap[a.code] = a.executionOrder ?? 100; });
+        codesToAdd.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
+
+        for (const analysisCode of codesToAdd) {
+            const name = await getAnalysisName(analysisCode);
+            const category = await getAnalysisCategory(analysisCode);
+            const wiId = `WI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const history = [{
+                status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
+                timestamp: new Date().toISOString(),
+                note: 'Work Item Generated'
+            }];
+
+            let defaultMethodId = null;
+            const targetLab = sample.assignedLab || sample.labId;
+            if (targetLab) {
+                const labDefault = await prisma.labMethodDefault.findFirst({
+                    where: { labId: targetLab, analysisCode }
+                });
+                if (labDefault) {
+                    defaultMethodId = labDefault.methodologyId;
+                }
+            }
+            if (!defaultMethodId) {
+                const globalDefault = await prisma.methodology.findFirst({
+                    where: { analysisCode, isDefault: true }
+                });
+                if (globalDefault) {
+                    defaultMethodId = globalDefault.id;
+                }
+            }
+
+            const wi = await prisma.workItem.create({
+                data: {
+                    id: wiId,
+                    sampleId: String(id),
+                    labId: labId,
+                    assignedLab: sample.assignedLab,
+                    analysis: analysisCode,
+                    category: category,
+                    status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
+                    assignedTo: null,
+                    priority: 'NORMAL',
+                    methodologyId: defaultMethodId,
+                    history: JSON.stringify(history)
+                }
+            });
+
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-wi-gen-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    entity: 'SAMPLE',
+                    entityId: String(id),
+                    action: 'WORKITEM_GENERATED',
+                    details: `System generated analysis: ${name}`,
+                    performedBy: user?.username || 'SYSTEM',
+                    timestamp: new Date(),
+                    analysisCode: analysisCode,
+                    labId: targetLab
+                }
+            });
+
+            addedItems.push(analysisCode);
+        }
+    }
+
+    return {
+        conflict: false,
+        added: addedItems,
+        waived: waivedItems,
+        removed: deletedItems,
+        summary: `${addedItems.length} added, ${waivedItems.length} waived, ${deletedItems.length} removed`
+    };
+};
+
 // --- API ENDPOINTS ---
 
 exports.getWorkItems = async (req, res) => {

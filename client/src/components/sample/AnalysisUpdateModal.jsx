@@ -13,6 +13,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
     // Form State
     const [selectedGroup, setSelectedGroup] = useState('');
     const [currentAnalyses, setCurrentAnalyses] = useState([]);
+    const [reason, setReason] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState(null);
 
@@ -21,6 +22,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
             fetchConfig();
             // Initialize from sample
             setCurrentAnalyses(sample.requiredAnalyses || []);
+            setReason('');
             // Try to match group if all analyses match a group
             // (Standard logic uses analysisGroupIds from sample)
             if (sample.analysisGroupIds && sample.analysisGroupIds.length > 0) {
@@ -68,7 +70,8 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
         try {
             await axios.put(`/api/samples/${sample.id}/analyses`, {
                 analyses: currentAnalyses,
-                analysisGroupIds: selectedGroup ? [selectedGroup] : []
+                analysisGroupIds: selectedGroup ? [selectedGroup] : [],
+                reason: reason.trim() || undefined
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -217,6 +220,23 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                             })}
                         </div>
                     </div>
+
+                    {/* Reason for Removal if items were dropped */}
+                    {Array.isArray(sample.requiredAnalyses) && sample.requiredAnalyses.some(c => !currentAnalyses.includes(c)) && (
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl space-y-1.5">
+                            <label className="block text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1">
+                                Reason for Removal / Waiver
+                                <InfoTooltip text="Required if any removed analysis is already assigned or in progress." />
+                            </label>
+                            <input
+                                type="text"
+                                value={reason}
+                                onChange={e => setReason(e.target.value)}
+                                placeholder="Specify reason for dropping or waiving analysis..."
+                                className="w-full p-2.5 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-700 rounded-lg text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
+                            />
+                        </div>
+                    )}
 
                     {['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status) && currentAnalyses.length > 0 && (
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex gap-3">
