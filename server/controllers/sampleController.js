@@ -615,23 +615,30 @@ exports.updatePhaseStatus = async (req, res) => {
             updates.preparationStatus = status;
         }
 
-        if (status === 'DONE') {
-            const gateItem = await prisma.workItem.findFirst({
-                where: {
-                    sampleId: String(id),
-                    analysis: phase
+        const gateItem = await prisma.workItem.findFirst({
+            where: {
+                sampleId: String(id),
+                analysis: phase
+            }
+        });
+        if (gateItem) {
+            let wiStatus = 'NOT_ASSIGNED';
+            let wiResult = null;
+            if (status === 'DONE') {
+                wiStatus = 'ACCEPTED';
+                wiResult = 'Gate Passed';
+            } else if (status === 'FAILED') {
+                wiStatus = 'ON_HOLD';
+                wiResult = `Gate Failed: ${reason || 'Failed'}`;
+            }
+            await prisma.workItem.update({
+                where: { id: gateItem.id },
+                data: {
+                    status: wiStatus,
+                    result: wiResult,
+                    completedAt: status === 'DONE' ? new Date() : null
                 }
             });
-            if (gateItem) {
-                await prisma.workItem.update({
-                    where: { id: gateItem.id },
-                    data: {
-                        status: 'ACCEPTED',
-                        result: 'Gate Passed',
-                        completedAt: new Date()
-                    }
-                });
-            }
         }
 
         const newDrying = updates.dryingStatus || sample.dryingStatus;
@@ -1001,15 +1008,6 @@ exports.getSampleDetail = async (req, res) => {
             catch (e) { return null; }
         };
 
-        const enrichedSample = {
-            ...sample,
-            metadata: parseJson(sample.metadata),
-            fieldMetadata: parseJson(sample.fieldMetadata),
-            requiredAnalyses: parseJson(sample.requiredAnalyses),
-            analysisGroupIds: parseJson(sample.analysisGroupIds),
-            receptionData: parseJson(sample.receptionData)
-        };
-
         // Parse JSON in Audit Log
         const parsedAuditLog = auditLog.map(a => ({
             ...a,
@@ -1059,9 +1057,32 @@ exports.getSampleDetail = async (req, res) => {
             wi.analysisName = meta?.name || null;
         });
 
+        // WP-26: Derive operational gate statuses directly from WorkItems (Single Source of Truth)
+        const dryingItem = parsedWorkItems.find(w => w.analysis === 'DRYING');
+        const prepItem = parsedWorkItems.find(w => w.analysis === 'PREPARATION');
+
+        const derivedDryingStatus = dryingItem
+            ? (['ACCEPTED', 'COMPLETED'].includes(dryingItem.status) ? 'DONE' : (dryingItem.status === 'ON_HOLD' ? 'FAILED' : 'PENDING'))
+            : (sample.dryingStatus || 'PENDING');
+
+        const derivedPrepStatus = prepItem
+            ? (['ACCEPTED', 'COMPLETED'].includes(prepItem.status) ? 'DONE' : 'PENDING')
+            : (sample.preparationStatus || 'PENDING');
+
+        const enrichedSample = {
+            ...sample,
+            dryingStatus: derivedDryingStatus,
+            preparationStatus: derivedPrepStatus,
+            metadata: parseJson(sample.metadata),
+            fieldMetadata: parseJson(sample.fieldMetadata),
+            requiredAnalyses: parseJson(sample.requiredAnalyses),
+            analysisGroupIds: parseJson(sample.analysisGroupIds),
+            receptionData: parseJson(sample.receptionData)
+        };
+
         // Calculate workflow summary using the Workflow Engine
         const workflowEngine = require('../utils/workflowEngine');
-        const workflowSummary = workflowEngine.getWorkflowSummary(sample, parsedWorkItems);
+        const workflowSummary = workflowEngine.getWorkflowSummary(enrichedSample, parsedWorkItems);
 
         // Check if this sample has a Kobo connection
         // Walk-in samples should NEVER show Kobo sync — they are manual by definition
