@@ -19,7 +19,9 @@ const usersDb = {
     create: (user) => {
         const id = user.id || uuidv4();
         const username = user.username;
-        const passwordHash = user.password ? bcrypt.hashSync(user.password, 10) : bcrypt.hashSync('password', 10);
+        const passwordHash = user.password 
+            ? (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') ? user.password : bcrypt.hashSync(user.password, 10)) 
+            : bcrypt.hashSync('password', 10);
         const role = user.role || 'LAB_TECHNICIAN';
         const labId = user.labId || null;
         const countries = user.countries ? JSON.stringify(user.countries) : '[]';
