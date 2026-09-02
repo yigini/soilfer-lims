@@ -58,9 +58,8 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
 
         const group = groups.find(g => g.id === groupId);
         if (group) {
-            // Merge bundle analyses with existing selections (preserves manual additions)
-            const merged = Array.from(new Set([...currentAnalyses, ...group.analyses]));
-            setCurrentAnalyses(merged);
+            // SD-04: A bundle replaces the selection, it does not merge into it
+            setCurrentAnalyses([...(group.analyses || [])]);
         }
     };
 
@@ -136,6 +135,12 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                 ))}
                             </select>
                         </div>
+                        {selectedGroup && groups.find(g => g.id === selectedGroup) && (
+                            <p className="mt-1.5 text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium">
+                                <Info size={14} className="shrink-0" />
+                                Replaces current selection with the {groups.find(g => g.id === selectedGroup)?.analyses?.length || 0} analyses in this bundle.
+                            </p>
+                        )}
                     </div>
 
                     {/* Individual Search */}
