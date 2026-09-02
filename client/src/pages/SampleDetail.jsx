@@ -77,13 +77,16 @@ const SampleDetail = () => {
 
     // Check for existing report
     const checkReport = useCallback(async () => {
+        if (!id) return;
         try {
-            const res = await axios.get(`/api/reports/sample/${id}`);
+            const res = await axios.get(`/api/reports/sample/${id}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
             setExistingReport(res.data || null);
         } catch {
             setExistingReport(null);
         }
-    }, [id]);
+    }, [id, token]);
 
     useEffect(() => {
         fetchData();
@@ -252,13 +255,17 @@ const SampleDetail = () => {
     };
 
     const handleGenerateReport = async () => {
-        requestConfirmation('Generate Report', 'Generate a soil analysis report for this sample? This will snapshot the current results.', async () => {
+        requestConfirmation('Generate Report', 'Generate an official soil analysis report for this sample? This will snapshot the current results.', async () => {
             try {
-                const res = await axios.post(`/api/reports/generate/${id}`);
+                const res = await axios.post(`/api/reports/generate/${id}`, {}, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
                 setExistingReport(res.data);
                 showInfo(t('common.success', 'Success'), 'Report generated successfully!');
                 // Auto-open the report
-                const full = await axios.get(`/api/reports/${res.data.id}`);
+                const full = await axios.get(`/api/reports/${res.data.id}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
                 setReportModal(full.data);
             } catch (e) {
                 showInfo(t('common.error', 'Error'), e.response?.data?.error || 'Failed to generate report');
@@ -270,7 +277,9 @@ const SampleDetail = () => {
         try {
             const reportId = existingReport?.id;
             if (!reportId) return;
-            const res = await axios.get(`/api/reports/${reportId}`);
+            const res = await axios.get(`/api/reports/${reportId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
             setReportModal(res.data);
         } catch (e) {
             showInfo(t('common.error', 'Error'), 'Failed to load report');
@@ -622,7 +631,7 @@ const SampleDetail = () => {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-gray-900">
-                            <ReportContent data={typeof reportModal.content === 'string' ? JSON.parse(reportModal.content) : reportModal.content} showActions />
+                            <ReportContent data={reportModal.content ? (typeof reportModal.content === 'string' ? JSON.parse(reportModal.content) : reportModal.content) : reportModal} showActions />
                         </div>
                     </div>
                 </div>

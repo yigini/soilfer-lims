@@ -139,6 +139,17 @@ function formatResultValue(val, decimals, param) {
     return num.toFixed(prec);
 }
 
+function toScalar(v, fallback = '—') {
+    if (v === null || v === undefined || v === '') return fallback;
+    if (typeof v === 'object') {
+        if ('value' in v) return toScalar(v.value, fallback);
+        if ('label' in v) return toScalar(v.label, fallback);
+        if ('name' in v) return toScalar(v.name, fallback);
+        return fallback;
+    }
+    return String(v);
+}
+
 // ─── Main Component ──────────────────────────────────────
 
 const ReportContent = ({ data }) => {
@@ -146,11 +157,17 @@ const ReportContent = ({ data }) => {
 
     const { sample, client, project, lab, labBranding, resultGroups, locationData, fieldMetadata, receptionData, signedBy, methodologies, generated, reportNumber } = data;
 
+    const safeGroups = Array.isArray(resultGroups)
+        ? resultGroups
+        : (resultGroups && typeof resultGroups === 'object')
+            ? Object.values(resultGroups)
+            : [];
+
     // Build interpretations for all results (unit-aware)
-    const allInterpreted = (resultGroups || []).flatMap(g =>
-        g.items.map(item => ({
+    const allInterpreted = safeGroups.flatMap(g =>
+        (g.items || []).map(item => ({
             ...item,
-            categoryName: g.categoryName,
+            categoryName: toScalar(g.categoryName, 'General Analyses'),
             interp: getInterpretation(item.param, item.value, item.unit)
         }))
     );
@@ -177,19 +194,19 @@ const ReportContent = ({ data }) => {
                         <img src={labBranding.logoUrl} alt="" className="report-logo" />
                     )}
                     <div>
-                        <h1 className="report-lab-name">{lab?.name || 'Soil Analysis Laboratory'}</h1>
+                        <h1 className="report-lab-name">{toScalar(lab?.name, 'Soil Analysis Laboratory')}</h1>
                         {lab?.address && (
-                            <p className="report-lab-detail">{[lab.address, lab.city, lab.country].filter(Boolean).join(', ')}</p>
+                            <p className="report-lab-detail">{[lab.address, lab.city, lab.country].filter(Boolean).map(x => toScalar(x)).join(', ')}</p>
                         )}
                         <p className="report-lab-detail">
-                            {[lab?.phone, lab?.email, lab?.website].filter(Boolean).join(' · ')}
+                            {[lab?.phone, lab?.email, lab?.website].filter(Boolean).map(x => toScalar(x)).join(' · ')}
                         </p>
                     </div>
                 </div>
                 <div className="report-header-right">
                     <div className="report-title-badge">SOIL ANALYSIS REPORT</div>
                     {reportNumber && (
-                        <div className="report-number">{reportNumber}</div>
+                        <div className="report-number">{toScalar(reportNumber)}</div>
                     )}
                 </div>
             </header>
@@ -201,21 +218,21 @@ const ReportContent = ({ data }) => {
                 <tbody>
                     <tr>
                         <td className="ref-label">Report No.</td>
-                        <td className="ref-value ref-mono">{reportNumber || '—'}</td>
+                        <td className="ref-value ref-mono">{toScalar(reportNumber)}</td>
                         <td className="ref-label">Report Date</td>
                         <td className="ref-value">{fmtDate(reportDate)}</td>
                     </tr>
                     <tr>
                         <td className="ref-label">Laboratory ID</td>
-                        <td className="ref-value ref-mono">{sample?.labId || sample?.originalId || '—'}</td>
+                        <td className="ref-value ref-mono">{toScalar(sample?.labId || sample?.originalId)}</td>
                         <td className="ref-label">Sample Received</td>
                         <td className="ref-value">{fmtDate(sample?.receptionDate)}</td>
                     </tr>
                     <tr>
                         <td className="ref-label">Project</td>
-                        <td className="ref-value">{project ? `${project.name} (${project.code})` : '—'}</td>
+                        <td className="ref-value">{project ? `${toScalar(project.name)} (${toScalar(project.code)})` : '—'}</td>
                         <td className="ref-label">Country</td>
-                        <td className="ref-value">{loc.country || sample?.countryName || '—'}</td>
+                        <td className="ref-value">{toScalar(loc.country || sample?.countryName)}</td>
                     </tr>
                 </tbody>
             </table>
@@ -229,20 +246,20 @@ const ReportContent = ({ data }) => {
                     <tbody>
                         <tr>
                             <td className="info-label">Name</td>
-                            <td className="info-value">{client?.fullName || '—'}</td>
+                            <td className="info-value">{toScalar(client?.fullName)}</td>
                             <td className="info-label">Phone</td>
-                            <td className="info-value">{client?.phone || '—'}</td>
+                            <td className="info-value">{toScalar(client?.phone)}</td>
                         </tr>
                         <tr>
                             <td className="info-label">Email</td>
-                            <td className="info-value">{client?.email || '—'}</td>
+                            <td className="info-value">{toScalar(client?.email)}</td>
                             <td className="info-label">Organization</td>
-                            <td className="info-value">{client?.organization || project?.client || '—'}</td>
+                            <td className="info-value">{toScalar(client?.organization || project?.client)}</td>
                         </tr>
                         {client?.address && (
                             <tr>
                                 <td className="info-label">Address</td>
-                                <td className="info-value" colSpan={3}>{client.address}</td>
+                                <td className="info-value" colSpan={3}>{toScalar(client.address)}</td>
                             </tr>
                         )}
                     </tbody>
@@ -258,32 +275,32 @@ const ReportContent = ({ data }) => {
                     <tbody>
                         <tr>
                             <td className="info-label">Land Use</td>
-                            <td className="info-value">{loc.landUse || fieldMetadata?.land_use || '—'}</td>
+                            <td className="info-value">{toScalar(loc.landUse || fieldMetadata?.land_use || fieldMetadata?.landUse)}</td>
                             <td className="info-label">Crop Type</td>
-                            <td className="info-value">{loc.cropType || fieldMetadata?.crop_type || '—'}</td>
+                            <td className="info-value">{toScalar(loc.cropType || fieldMetadata?.crop_type || fieldMetadata?.cropType)}</td>
                         </tr>
                         <tr>
                             <td className="info-label">Soil Depth</td>
-                            <td className="info-value">{loc.soilDepth || '—'}</td>
+                            <td className="info-value">{toScalar(loc.soilDepth || fieldMetadata?.soilDepth || fieldMetadata?.soil_depth)}</td>
                             <td className="info-label">Soil Texture</td>
-                            <td className="info-value">{loc.soilTexture || '—'}</td>
+                            <td className="info-value">{toScalar(loc.soilTexture || fieldMetadata?.soilTexture || fieldMetadata?.soil_texture)}</td>
                         </tr>
                         <tr>
                             <td className="info-label">GPS Coordinates</td>
                             <td className="info-value">
-                                {loc.gpsLat && loc.gpsLng
-                                    ? `${Number(loc.gpsLat).toFixed(5)}°, ${Number(loc.gpsLng).toFixed(5)}°${loc.altitude ? ` (${loc.altitude} m a.s.l.)` : ''}`
+                                {loc.gpsLat && loc.gpsLng && !isNaN(Number(loc.gpsLat)) && !isNaN(Number(loc.gpsLng))
+                                    ? `${Number(loc.gpsLat).toFixed(5)}°, ${Number(loc.gpsLng).toFixed(5)}°${loc.altitude ? ` (${toScalar(loc.altitude)} m a.s.l.)` : ''}`
                                     : '—'}
                             </td>
                             <td className="info-label">District / Region</td>
                             <td className="info-value">
-                                {[loc.district, loc.village, loc.region].filter(Boolean).join(', ') || '—'}
+                                {[loc.district, loc.village, loc.region].filter(Boolean).map(x => toScalar(x)).join(', ') || '—'}
                             </td>
                         </tr>
                         {loc.locationDescription && (
                             <tr>
                                 <td className="info-label">Location</td>
-                                <td className="info-value" colSpan={3}>{loc.locationDescription}</td>
+                                <td className="info-value" colSpan={3}>{toScalar(loc.locationDescription)}</td>
                             </tr>
                         )}
                     </tbody>
@@ -296,10 +313,10 @@ const ReportContent = ({ data }) => {
             <section className="report-section">
                 <h2 className="report-section-title">Analysis Results</h2>
 
-                {resultGroups && resultGroups.length > 0 ? (
-                    resultGroups.map((group, idx) => (
+                {safeGroups.length > 0 ? (
+                    safeGroups.map((group, idx) => (
                         <div key={idx} className="report-results-group">
-                            <h3 className="report-category-title">{group.categoryName}</h3>
+                            <h3 className="report-category-title">{toScalar(group.categoryName, 'Analytical Parameters')}</h3>
                             <table className="report-results-table">
                                 <thead>
                                     <tr>
@@ -312,7 +329,7 @@ const ReportContent = ({ data }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {group.items.map((item, i) => {
+                                    {(group.items || []).map((item, i) => {
                                         const interp = getInterpretation(item.param, item.value, item.unit);
                                         const indicator = interp ? LEVEL_INDICATOR[interp.level] : null;
                                         const isCritical = interp?.level === 'critical';
@@ -320,11 +337,11 @@ const ReportContent = ({ data }) => {
 
                                         return (
                                             <tr key={i} className={isCritical ? 'row-critical' : isLow ? 'row-attention' : ''}>
-                                                <td className="param-name">{item.name}</td>
+                                                <td className="param-name">{toScalar(item.name || item.param)}</td>
                                                 <td className="param-value">
                                                     {formatResultValue(item.value, item.decimalPlaces, item.param)}
                                                 </td>
-                                                <td className="param-unit">{item.unit || ''}</td>
+                                                <td className="param-unit">{toScalar(item.unit, '')}</td>
                                                 <td className="param-rating">
                                                     {interp ? (
                                                         <span className="rating-badge" style={{ color: indicator.color }}>
@@ -334,7 +351,7 @@ const ReportContent = ({ data }) => {
                                                 </td>
                                                 <td className="param-ref">{interp?.ref || '—'}</td>
                                                 {hasMethodColumn && (
-                                                    <td className="param-method">{item.standard || item.method || '—'}</td>
+                                                    <td className="param-method">{toScalar(item.standard || item.method, '—')}</td>
                                                 )}
                                             </tr>
                                         );

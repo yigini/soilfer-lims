@@ -261,6 +261,17 @@ async function assembleReport(sampleId, user) {
     return { content: reportContent, searchKeys };
 }
 
+function unwrapVal(v) {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'object') {
+        if ('value' in v) return unwrapVal(v.value);
+        if ('label' in v) return unwrapVal(v.label);
+        return null;
+    }
+    const str = String(v).trim();
+    return str.length > 0 ? str : null;
+}
+
 /**
  * Extract client/farmer info from various metadata sources.
  */
@@ -275,54 +286,22 @@ function extractClientInfo(metadata, fieldMeta, receptionData, sample) {
         organization: null
     };
 
-    // Try reception data first (walk-in intake often has client info)
-    if (receptionData.clientName || receptionData.farmerName) {
-        const name = receptionData.clientName || receptionData.farmerName || '';
-        const parts = name.trim().split(/\s+/);
+    const fm = fieldMeta || {};
+    const rd = receptionData || {};
+    const md = metadata || {};
+
+    const rawName = unwrapVal(rd.clientName || rd.farmerName || sample?.clientName || fm.submitterName || fm.farmer_name || fm.farmerName || fm.client_name || fm.clientName);
+    if (rawName) {
+        const parts = rawName.split(/\s+/);
         info.firstName = parts[0] || null;
         info.surname = parts.slice(1).join(' ') || null;
-        info.fullName = name.trim();
+        info.fullName = rawName;
     }
 
-    // Then try sample.clientName
-    if (!info.fullName && sample.clientName) {
-        const parts = sample.clientName.trim().split(/\s+/);
-        info.firstName = parts[0] || null;
-        info.surname = parts.slice(1).join(' ') || null;
-        info.fullName = sample.clientName.trim();
-    }
-
-    // Then try field metadata (Kobo submissions)
-    if (!info.fullName && fieldMeta) {
-        const farmerName = fieldMeta.farmer_name || fieldMeta.farmerName ||
-            fieldMeta.client_name || fieldMeta.clientName || '';
-        if (farmerName) {
-            const parts = farmerName.trim().split(/\s+/);
-            info.firstName = parts[0] || null;
-            info.surname = parts.slice(1).join(' ') || null;
-            info.fullName = farmerName.trim();
-        }
-    }
-
-    // Phone
-    info.phone = receptionData.phone || receptionData.clientPhone ||
-        fieldMeta?.phone || fieldMeta?.farmer_phone || fieldMeta?.farmerPhone ||
-        metadata?.phone || null;
-
-    // Email
-    info.email = receptionData.email || receptionData.clientEmail ||
-        fieldMeta?.email || fieldMeta?.farmer_email || fieldMeta?.farmerEmail ||
-        metadata?.email || null;
-
-    // Address
-    info.address = receptionData.address || receptionData.clientAddress ||
-        fieldMeta?.address || fieldMeta?.farmer_address ||
-        metadata?.address || null;
-
-    // Organization
-    info.organization = receptionData.organization || receptionData.company ||
-        fieldMeta?.organization || fieldMeta?.company ||
-        metadata?.organization || null;
+    info.phone = unwrapVal(rd.phone || rd.clientPhone || fm.contactPhone || fm.phone || fm.farmer_phone || fm.farmerPhone || md.phone);
+    info.email = unwrapVal(rd.email || rd.clientEmail || fm.contactEmail || fm.email || fm.farmer_email || fm.farmerEmail || md.email);
+    info.address = unwrapVal(rd.address || rd.clientAddress || fm.address || fm.farmer_address || md.address);
+    info.organization = unwrapVal(rd.organization || rd.company || fm.organization || fm.submitterOrganization || fm.company || md.organization);
 
     return info;
 }
@@ -331,19 +310,22 @@ function extractClientInfo(metadata, fieldMeta, receptionData, sample) {
  * Extract and structure location data from multiple sources.
  */
 function extractLocationData(fieldMeta, receptionData, sample) {
+    const fm = fieldMeta || {};
+    const rd = receptionData || {};
+
     return {
-        gpsLat: fieldMeta?.latitude || fieldMeta?.gps_lat || receptionData?.gpsLat || null,
-        gpsLng: fieldMeta?.longitude || fieldMeta?.gps_lng || receptionData?.gpsLng || null,
-        altitude: fieldMeta?.altitude || receptionData?.altitude || null,
-        landUse: fieldMeta?.land_use || fieldMeta?.landUse || receptionData?.landUse || null,
-        cropType: fieldMeta?.crop_type || fieldMeta?.cropType || receptionData?.cropType || null,
-        soilDepth: fieldMeta?.soil_depth || fieldMeta?.soilDepth || receptionData?.depth || receptionData?.soilDepth || null,
-        soilTexture: fieldMeta?.soil_texture || fieldMeta?.soilTexture || receptionData?.soilTexture || null,
-        district: fieldMeta?.district || receptionData?.district || null,
-        village: fieldMeta?.village || receptionData?.village || null,
-        region: fieldMeta?.region || fieldMeta?.province || receptionData?.region || receptionData?.province || null,
-        locationDescription: fieldMeta?.location_description || fieldMeta?.locationDescription || receptionData?.locationDescription || null,
-        country: sample?.countryName || sample?.country || fieldMeta?.country || null
+        gpsLat: unwrapVal(fm.latitude || fm.gps_lat || rd.gpsLat),
+        gpsLng: unwrapVal(fm.longitude || fm.gps_lng || rd.gpsLng),
+        altitude: unwrapVal(fm.altitude || rd.altitude),
+        landUse: unwrapVal(fm.landUse || fm.land_use || rd.landUse),
+        cropType: unwrapVal(fm.cropType || fm.crop_type || rd.cropType),
+        soilDepth: unwrapVal(fm.soilDepth || fm.soil_depth || rd.depth || rd.soilDepth),
+        soilTexture: unwrapVal(fm.soilTexture || fm.soil_texture || rd.soilTexture),
+        district: unwrapVal(fm.district || rd.district),
+        village: unwrapVal(fm.village || rd.village),
+        region: unwrapVal(fm.region || fm.province || rd.region || rd.province),
+        locationDescription: unwrapVal(fm.locationDescription || fm.location_description || rd.locationDescription),
+        country: unwrapVal(sample?.countryName || sample?.country || fm.country)
     };
 }
 

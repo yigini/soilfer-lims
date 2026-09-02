@@ -73,14 +73,14 @@ async function generateReport(req, res) {
         try {
             await prisma.auditLog.create({
                 data: {
+                    id: `audit-rpt-${Date.now()}`,
+                    entity: 'REPORT',
+                    entityId: report.id,
+                    sampleId,
                     action: 'REPORT_GENERATED',
-                    userId: req.user?.id || 'system',
-                    details: JSON.stringify({
-                        reportId: report.id,
-                        sampleId,
-                        version: report.version,
-                        labId: report.labId
-                    })
+                    performedBy: req.user?.id || 'system',
+                    performedByName: req.user?.name || req.user?.username || 'System',
+                    details: `Official Certificate of Analysis report version ${report.version} generated.`
                 }
             });
         } catch (e) { /* audit is best-effort */ }
@@ -123,7 +123,7 @@ async function getReport(req, res) {
 
         res.json({
             ...report,
-            content: report.content ? JSON.parse(report.content) : null
+            content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
         });
     } catch (err) {
         console.error('[Report] Get error:', err);
@@ -138,10 +138,17 @@ async function getReport(req, res) {
 async function getReportBySample(req, res) {
     try {
         const { sampleId } = req.params;
-        const report = await prisma.report.findFirst({
-            where: { sampleId, status: 'PUBLISHED' },
+        let report = await prisma.report.findFirst({
+            where: { sampleId, status: { in: ['PUBLISHED', 'APPROVED'] } },
             orderBy: { version: 'desc' }
         });
+
+        if (!report) {
+            report = await prisma.report.findFirst({
+                where: { sampleId },
+                orderBy: { version: 'desc' }
+            });
+        }
 
         if (!report) {
             return res.status(404).json({ error: 'No published report for this sample' });
@@ -149,7 +156,7 @@ async function getReportBySample(req, res) {
 
         res.json({
             ...report,
-            content: report.content ? JSON.parse(report.content) : null
+            content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
         });
     } catch (err) {
         console.error('[Report] Get by sample error:', err);
