@@ -20,8 +20,14 @@ exports.getResults = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
+        const EXCLUDED_GATE_CODES = ['DRYING', 'PREPARATION', 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION', 'ARCHIVING', 'DISPOSAL'];
+
         const results = await prisma.result.findMany({
-            where: { sampleId, isCurrent: true },
+            where: {
+                sampleId,
+                isCurrent: true,
+                param: { notIn: EXCLUDED_GATE_CODES }
+            },
             orderBy: { createdAt: 'asc' }
         });
 
