@@ -97,7 +97,10 @@ const LEGACY_SAMPLE_STATUSES = [
     'NON_CONFORMING',
     'COLLECTED',
     'REJECTED',   // Use transition back to EXPECTED instead
-    'ANALYSIS'
+    'REVERT_TO_EXPECTED',
+    'ANALYSIS',
+    'PARTIALLY_COMPLETE',
+    'COMPLETED'
 ];
 
 const LEGACY_WORK_ITEM_STATUSES = [
