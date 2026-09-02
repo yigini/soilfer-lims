@@ -19,3 +19,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+### Third-Party Materials & Standard Terminologies
+
+This software incorporates references to standard analytical procedures, units, and soil classifications established by international authorities:
+- **Food and Agriculture Organization of the United Nations (FAO)**: GLOSOLAN Standard Operating Procedures, FAO Soil Fertility (SoilFER) technical guidelines, and GloSIS ontology concepts (CC BY-NC-SA 3.0 IGO). GloSIS ontology structures and vocabularies referenced herein are © FAO and are referenced solely for scientific harmonization and semantic interoperability.
+- **International Organization for Standardization (ISO)**: Standard method numbers, ISO 10390, ISO 11265, ISO 14255, ISO 16072, ISO 14240, and related analytical specifications are referenced for laboratory compliance and provenance metadata.
+- **USDA Natural Resources Conservation Service (NRCS)**: Soil survey laboratory methods and taxonomic soil texture classifications.
+- **AOAC International**: Official methods of analysis for fertilizers and agricultural inputs.
+

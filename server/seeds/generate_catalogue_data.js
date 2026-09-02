@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-// Pull the exhaustive parameters list
-const glosisCatalog = require('../config/glosis_catalog.json');
+// Offline parameter list source (if present)
+const glosisCatalogPath = path.join(__dirname, '../config/glosis_catalog.json');
+const glosisCatalog = fs.existsSync(glosisCatalogPath) ? require(glosisCatalogPath) : [];
 
 // Base 10 categories
 const categories = [

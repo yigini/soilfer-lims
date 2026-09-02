@@ -223,4 +223,9 @@ docker compose up -d --build
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
+### Third-Party Materials & Standard Terminologies
+- **Food and Agriculture Organization of the United Nations (FAO)**: GLOSOLAN Standard Operating Procedures, SoilFER technical guidelines, and GloSIS ontology concepts (CC BY-NC-SA 3.0 IGO). GloSIS ontology structures and vocabularies referenced herein are © FAO and are referenced solely for scientific harmonization and semantic interoperability.
+- **International Organization for Standardization (ISO)**: Standard method references (ISO 10390, ISO 11265, ISO 14255, etc.) for laboratory compliance.
+- **USDA Natural Resources Conservation Service (NRCS)**: Soil survey laboratory methods and taxonomic classifications.
+
 Developed in support of the **Global Soil Partnership (GSP)**, **GLOSOLAN**, and **SoilFER Programme** for global soil health, agricultural resilience, and food security.
