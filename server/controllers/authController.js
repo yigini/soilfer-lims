@@ -45,7 +45,7 @@ exports.login = async (req, res) => {
 
         // Generate Token
         const token = jwt.sign(
-            { id: user.id, username: user.username, role: user.role },
+            { id: user.id, username: user.username, role: user.role, tokenVersion: user.tokenVersion || 0 },
             SECRET_KEY,
             { expiresIn: '24h' }
         );
@@ -100,17 +100,26 @@ exports.changePassword = async (req, res) => {
 
         // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const newVersion = (user.tokenVersion || 0) + 1;
 
-        // Update Password and Clear Flag
+        // Update Password, Clear Flag, and Increment tokenVersion
         await prisma.user.update({
             where: { id: String(userId) },
             data: {
                 password: hashedPassword,
-                mustChangePassword: false
+                mustChangePassword: false,
+                tokenVersion: newVersion
             }
         });
 
-        res.json({ message: 'Password updated successfully' });
+        // Issue freshly signed JWT with new tokenVersion
+        const newToken = jwt.sign(
+            { id: user.id, username: user.username, role: user.role, tokenVersion: newVersion },
+            SECRET_KEY,
+            { expiresIn: '24h' }
+        );
+
+        res.json({ message: 'Password updated successfully', token: newToken });
     } catch (error) {
         console.error('[AUTH] Change Password Error:', error);
         res.status(500).json({ error: 'Internal server error' });

@@ -37,6 +37,14 @@ const verifyToken = async (req, res, next) => {
             return res.status(401).json({ error: 'Account has been deactivated' });
         }
 
+        // Check session tokenVersion invalidation
+        const dbTokenVersion = user.tokenVersion || 0;
+        const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
+        if (jwtTokenVersion < dbTokenVersion) {
+            console.warn(`[AUTH] Token invalidated by password change for user ID: ${user.id}`);
+            return res.status(401).json({ error: 'SESSION_INVALIDATED', message: 'Token has been invalidated. Please log in again.' });
+        }
+
         // Sanitize and Parse JSON fields for SQLite
         const { password: _, ...safeUser } = user;
         req.user = {

@@ -23,6 +23,7 @@ model User {
   projects           String?    // JSON string: Array of project codes: ["SoilFER-USA"]
   isActive           Boolean    @default(true)
   mustChangePassword Boolean    @default(false)
+  tokenVersion       Int        @default(0)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
