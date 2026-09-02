@@ -239,6 +239,7 @@ app.use('/api/work', verifyToken, require('./routes/workRoutes'));
 app.use('/api/workbench', verifyToken, require('./routes/workbenchRoutes'));
 app.use('/api/labs', verifyToken, require('./routes/labRoutes'));
 app.use('/api/exports', verifyToken, require('./routes/exportRoutes'));
+app.use('/api/import', require('./routes/importRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes')); // auth handled internally (has public routes)
 app.use('/api/qc', verifyToken, require('./routes/qcRoutes'));
 app.use('/api/pt', require('./routes/ptRoutes'));
