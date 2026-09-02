@@ -248,7 +248,8 @@ app.use('/api/reviews', verifyToken, require('./routes/reviewRoutes'));
 app.use('/api/notifications', verifyToken, require('./routes/notificationRoutes'));
 app.use('/api/auth', require('./routes/authRoutes')); // auth handled internally (has login)
 app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
-app.use('/api/v1/sis', require('./routes/sisRoutes')); // Soil Information System Integration API
+app.use('/api/v1/data-exchange', require('./routes/sisRoutes')); // Neutral National Data Exchange API (v1)
+app.use('/api/v1/sis', require('./routes/sisRoutes')); // Legacy backward-compatible alias
 // Kobo media proxy — no JWT auth because <img> tags can't send headers.
 // Security: (1) only proxies to known Kobo hosts from active configs, (2) HTTPS only, (3) URL scheme validation.
 const koboController = require('./controllers/koboController');
