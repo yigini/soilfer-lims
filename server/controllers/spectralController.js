@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const { validateSpectra } = require('../services/spectralValidation');
+const { parseSpectralFile } = require('../services/spectralParser');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -344,56 +345,61 @@ exports.uploadBatch = async (req, res) => {
         for (const scanItem of scans) {
             console.log(`[DEBUG] Processing Scan: Name=${scanItem.filename}, LabID=${scanItem.labId}, Modality=${scanItem.modality}`);
 
-            // 1. Link to Sample
-            // If we have a context sample (from sample details page), use it as the primary match
-            // This ensures spectra uploaded from a sample page always link to that sample
-            let sample = null;
+            // SL-13 & SL-14: Server-Side Parsing of Raw Files (JCAMP-DX / CSV)
+            if (scanItem.rawContent && (!scanItem.wavelengths || scanItem.wavelengths.length === 0)) {
+                try {
+                    const parsed = parseSpectralFile(scanItem.rawContent, scanItem.filename || '');
+                    scanItem.wavelengths = parsed.wavelengths;
+                    scanItem.values = parsed.values;
+                    if (!scanItem.modality) scanItem.modality = parsed.modality;
+                    if (!scanItem.axisUnit) scanItem.axisUnit = parsed.axisUnit;
+                    if (!scanItem.quantity) scanItem.quantity = parsed.quantity;
+                    if (!scanItem.resolution && parsed.resolution) scanItem.resolution = parsed.resolution;
+                    if (!scanItem.instrument && parsed.instrument) scanItem.instrument = parsed.instrument;
+                    scanItem.sourceFormat = parsed.format;
+                    scanItem.sha256 = parsed.sha256;
+                } catch (parseErr) {
+                    results.failed++;
+                    results.errors.push({ filename: scanItem.filename, error: `Parse failure: ${parseErr.message}` });
+                    continue;
+                }
+            }
 
+            // 1. Link to Sample
+            let sample = null;
             if (contextSample) {
-                // Use context sample directly - user explicitly opened this sample's page
                 sample = contextSample;
                 console.log(`[SPECTRAL] Using context sample ${sample.id} (originalId=${sample.originalId}) for upload`);
             } else if (scanItem.labId) {
                 const inputLabId = scanItem.labId.trim();
-                const normalizedLabId = inputLabId.toUpperCase();
+                const userLabScope = user && user.role !== 'SUPER_ADMIN' && user.labId
+                    ? { OR: [{ assignedLab: user.labId }, { labId: user.labId }] }
+                    : {};
 
-                // Primary lookup: Lab ID (exact match)
+                // SL-15: Indexed lab-scoped lookup without take: 500 memory cap
                 sample = await prisma.sample.findFirst({
-                    where: { labId: inputLabId }
+                    where: {
+                        AND: [
+                            {
+                                OR: [
+                                    { labId: inputLabId },
+                                    { id: inputLabId },
+                                    { originalId: inputLabId }
+                                ]
+                            },
+                            userLabScope
+                        ]
+                    }
                 });
-
-                // If not found, try by sample ID field (some samples use id = labId)
-                if (!sample) {
-                    sample = await prisma.sample.findUnique({ where: { id: inputLabId } });
-                }
-
-                // If still not found, try case-insensitive search
-                if (!sample) {
-                    const candidates = await prisma.sample.findMany({
-                        take: 500
-                    });
-                    sample = candidates.find(s =>
-                        s.labId?.toUpperCase() === normalizedLabId ||
-                        s.id?.toUpperCase() === normalizedLabId ||
-                        s.originalId?.toUpperCase() === normalizedLabId
-                    );
-                }
             }
-            // Fallback: try internal sample ID (exact match from payload)
             if (!sample && scanItem.sampleId) {
                 sample = await prisma.sample.findUnique({ where: { id: scanItem.sampleId } });
             }
 
             // --- RBAC ISOLATION CHECK ---
-            // Allow upload if:
-            // 1. User is SUPER_ADMIN
-            // 2. User has no lab restriction (user.labId is null)
-            // 3. Sample is unassigned (assignedLab is null) - user's lab can claim it
-            // 4. Sample belongs to user's lab
             if (sample && user && user.role !== 'SUPER_ADMIN' && user.labId) {
-                const sampleLab = sample.assignedLab || null;
+                const sampleLab = sample.assignedLab || sample.labId || null;
 
-                // If sample has an assigned lab and it's NOT the user's lab, deny
                 if (sampleLab && sampleLab !== user.labId) {
                     console.warn(`[SECURITY] User ${user.username} tried to upload scan for Sample ${sample.labId} in Lab ${sampleLab}`);
                     results.failed++;
@@ -401,9 +407,7 @@ exports.uploadBatch = async (req, res) => {
                     continue;
                 }
 
-                // Auto-assign sample to user's lab if unassigned
-                if (!sampleLab && user.labId) {
-                    console.log(`[AUTO-ASSIGN] Assigning sample ${sample.labId} to lab ${user.labId}`);
+                if (!sample.assignedLab && user.labId) {
                     await prisma.sample.update({
                         where: { id: sample.id },
                         data: { assignedLab: user.labId }
@@ -412,7 +416,6 @@ exports.uploadBatch = async (req, res) => {
             }
 
             // --- STRICT MATCH: Reject unmatched spectra ---
-            // Only accept spectra that can be linked to an existing sample
             if (!sample) {
                 console.log(`[SPECTRAL] No matching sample for LabID=${scanItem.labId}. Skipping upload.`);
                 results.skipped++;
@@ -426,16 +429,22 @@ exports.uploadBatch = async (req, res) => {
                 continue;
             }
 
-            // 1.4 Validate Lab ID Match (only warn, don't block)
-            if (sample && scanItem.labId && sample.labId && scanItem.labId.toUpperCase() !== sample.labId.toUpperCase()) {
-                console.log(`[SPECTRAL] Lab ID mismatch: CSV has "${scanItem.labId}" but sample has "${sample.labId}". Proceeding with context sample.`);
-                results.errors.push({
-                    filename: scanItem.filename,
-                    error: `Warning: CSV Lab ID "${scanItem.labId}" differs from sample Lab ID "${sample.labId}". Linked to sample anyway.`
-                });
+            // SL-15: Refuse Lab ID mismatch instead of warning and linking anyway
+            if (sample && scanItem.labId && sample.labId) {
+                const normInput = scanItem.labId.trim().toUpperCase();
+                const normSampleLab = (sample.labId || '').trim().toUpperCase();
+                const normSampleOrig = (sample.originalId || '').trim().toUpperCase();
+                const normSampleId = (sample.id || '').trim().toUpperCase();
+                if (normInput !== normSampleLab && normInput !== normSampleOrig && normInput !== normSampleId) {
+                    results.failed++;
+                    results.errors.push({
+                        filename: scanItem.filename,
+                        error: `Laboratory ID mismatch: File specifies "${scanItem.labId}" but matched sample has "${sample.labId}". Upload refused.`
+                    });
+                    continue;
+                }
             }
 
-            // 1.5 Count existing scans for versioning (multi-scan: no overwrite)
             let scanVersion = 1;
             if (sample) {
                 const existingCount = await prisma.spectralData.count({
@@ -448,9 +457,9 @@ exports.uploadBatch = async (req, res) => {
                 scanVersion = existingCount + 1;
             }
 
-            // 1.6 Native Axis Ingest & Direction Detection (SL-02)
-            const wavelengths = scanItem.wavelengths;
-            const values = scanItem.values;
+            // Native Axis Ingest & Direction Detection
+            const wavelengths = scanItem.wavelengths || [];
+            const values = scanItem.values || [];
             let increasing = true;
             let decreasing = true;
             for (let i = 1; i < wavelengths.length; i++) {
@@ -510,11 +519,12 @@ exports.uploadBatch = async (req, res) => {
                 if (eq) equipmentId = eq.id;
             }
 
-            // SL-12: Supersession Model
+            // SL-12: Find prior active scan for supersession
+            let priorScan = null;
             let supersedesId = null;
             const replicateNo = scanItem.replicateNo ? parseInt(scanItem.replicateNo) : 1;
             if (sample) {
-                const priorScan = await prisma.spectralData.findFirst({
+                priorScan = await prisma.spectralData.findFirst({
                     where: {
                         sampleId: sample.id,
                         modality: scanItem.modality || 'NIR',
@@ -523,24 +533,12 @@ exports.uploadBatch = async (req, res) => {
                         status: { not: 'DELETED' }
                     }
                 });
-                if (priorScan) {
-                    await prisma.spectralData.update({
-                        where: { id: priorScan.id },
-                        data: {
-                            isCurrent: false,
-                            supersededBy: newScanId,
-                            supersededAt: new Date(),
-                            supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
-                        }
-                    });
-                    supersedesId = priorScan.id;
-                }
+                if (priorScan) supersedesId = priorScan.id;
             }
 
             // 2. Validate Data in native delivered order
             const validation = validateSpectra(wavelengths, values, scanItem.modality);
 
-            // Determine workflow status based on QC and autoApprove
             let workflowStatus;
             if (validation.qcStatus === 'FAIL') {
                 workflowStatus = 'PENDING';
@@ -555,66 +553,157 @@ exports.uploadBatch = async (req, res) => {
             const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
             const region = scanItem.region || scanItem.modality || 'NIR';
 
-            // 3. Create Record
-            const newScan = await prisma.spectralData.create({
-                data: {
-                    id: newScanId,
-                    sampleId: sample ? sample.id : null,
-                    labId: effectiveLabId,
-                    modality: scanItem.modality || 'NIR',
+            // SL-15 & SL-16: Atomic Database Transaction
+            let newScan;
+            let updatedWorkItemId = null;
+            try {
+                newScan = await prisma.$transaction(async (tx) => {
+                    // Update prior scan supersession
+                    if (priorScan) {
+                        await tx.spectralData.update({
+                            where: { id: priorScan.id },
+                            data: {
+                                isCurrent: false,
+                                supersededBy: newScanId,
+                                supersededAt: new Date(),
+                                supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
+                            }
+                        });
+                    }
+
+                    // Create new spectral record
+                    const createdScan = await tx.spectralData.create({
+                        data: {
+                            id: newScanId,
+                            sampleId: sample ? sample.id : null,
+                            labId: effectiveLabId,
+                            modality: scanItem.modality || 'NIR',
+                            filename: scanItem.filename,
+                            wavelengths: JSON.stringify(wavelengths),
+                            values: JSON.stringify(values),
+                            sourceFile: sourceFilePath,
+                            sourceFormat: scanItem.sourceFormat || 'CSV',
+                            sha256: sha256Hash,
+                            parserVersion: '1.0.0',
+                            quantity: quantity,
+                            axisUnit: axisUnit,
+                            axisDirection: axisDirection,
+                            region: region,
+                            isRaw: scanItem.isRaw !== undefined ? Boolean(scanItem.isRaw) : true,
+                            equipmentId: equipmentId,
+                            resolution: scanItem.resolution ? parseFloat(scanItem.resolution) : null,
+                            coAddedScans: scanItem.coAddedScans ? parseInt(scanItem.coAddedScans) : null,
+                            accessory: scanItem.accessory || null,
+                            backgroundRef: scanItem.backgroundRef || null,
+                            backgroundAt: scanItem.backgroundAt ? new Date(scanItem.backgroundAt) : null,
+                            detector: scanItem.detector || null,
+                            beamsplitter: scanItem.beamsplitter || null,
+                            preparation: scanItem.preparation || null,
+                            moistureState: scanItem.moistureState || 'AIR_DRY',
+                            windowMaterial: scanItem.windowMaterial || null,
+                            replicateNo: replicateNo,
+                            ambientTemp: scanItem.ambientTemp ? parseFloat(scanItem.ambientTemp) : null,
+                            ambientRh: scanItem.ambientRh ? parseFloat(scanItem.ambientRh) : null,
+                            isCurrent: true,
+                            supersedes: supersedesId,
+                            metadata: JSON.stringify({
+                                filename: scanItem.filename,
+                                instrument: scanItem.instrument || 'Unknown',
+                                operator: user ? user.username : 'system',
+                                scanDate: scanItem.scanDate || new Date().toISOString(),
+                                importBatchId: batchId,
+                                scanVersion: scanVersion,
+                                csvLabId: scanItem.labId,
+                                linkedSampleId: sample ? sample.id : null,
+                                autoApproved: canAutoApprove ? true : undefined,
+                                axisDirection: axisDirection,
+                                axisUnit: axisUnit,
+                                quantity: quantity,
+                                sha256: sha256Hash
+                            }),
+                            qcStatus: validation.qcStatus,
+                            qcFlags: JSON.stringify(validation.flags),
+                            status: workflowStatus,
+                            uploadedBy: user ? user.id : null,
+                            ...(canAutoApprove && validation.qcStatus !== 'FAIL' ? {
+                                reviewedBy: user.username || user.id,
+                                reviewedAt: new Date()
+                            } : {})
+                        }
+                    });
+
+                    // Create Audit Log
+                    await tx.auditLog.create({
+                        data: {
+                            id: `audit-spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                            entity: 'SPECTRA',
+                            entityId: createdScan.id,
+                            action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_UPLOAD',
+                            performedBy: user ? user.username : 'system',
+                            timestamp: new Date(),
+                            details: `Uploaded ${createdScan.modality} scan${sample ? ` for Sample ${sample.labId}` : ` (CSV ID: ${scanItem.labId})`}. Status: ${workflowStatus}`
+                        }
+                    });
+
+                    // SL-16: Route WorkItem Status via catalogue analysis match
+                    if (sample && validation.qcStatus !== 'FAIL') {
+                        const sModality = (scanItem.modality || 'NIR').toUpperCase();
+                        const openWorkItems = await tx.workItem.findMany({
+                            where: {
+                                sampleId: sample.id,
+                                status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
+                            }
+                        });
+
+                        const relatedItem = openWorkItems.find(w => {
+                            const wAnalysis = (w.analysis || '').toUpperCase();
+                            if (sModality === 'NIR') {
+                                return wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR' ||
+                                    wAnalysis.includes('NIR') || wAnalysis.includes('VIS-NIR') || wAnalysis.includes('SPECTRA');
+                            }
+                            if (sModality === 'MIR') {
+                                return wAnalysis === 'SPEC_MIR' || wAnalysis === 'SPEC_FTIR' ||
+                                    wAnalysis.includes('MIR') || wAnalysis.includes('FTIR');
+                            }
+                            return false;
+                        });
+
+                        if (relatedItem) {
+                            updatedWorkItemId = relatedItem.id;
+                            const history = typeof relatedItem.history === 'string'
+                                ? JSON.parse(relatedItem.history)
+                                : (relatedItem.history || []);
+
+                            history.push({
+                                status: 'COMPLETED',
+                                note: `Spectrum uploaded by ${user ? user.username : 'system'}. QC: ${validation.qcStatus}${canAutoApprove ? ' (Auto-Approved)' : ''}`,
+                                changedBy: user ? user.username : 'system',
+                                timestamp: new Date().toISOString()
+                            });
+
+                            await tx.workItem.update({
+                                where: { id: relatedItem.id },
+                                data: {
+                                    status: 'COMPLETED',
+                                    result: `Spectrum Uploaded (${validation.qcStatus})${canAutoApprove ? ' - Auto-Approved' : ''}`,
+                                    completedAt: new Date(),
+                                    history: JSON.stringify(history)
+                                }
+                            });
+                        }
+                    }
+
+                    return createdScan;
+                });
+            } catch (txErr) {
+                console.error('[SPECTRAL] Transaction error:', txErr.message);
+                results.failed++;
+                results.errors.push({
                     filename: scanItem.filename,
-                    wavelengths: JSON.stringify(wavelengths),
-                    values: JSON.stringify(values),
-                    sourceFile: sourceFilePath,
-                    sourceFormat: scanItem.sourceFormat || 'CSV',
-                    sha256: sha256Hash,
-                    parserVersion: '1.0.0',
-                    quantity: quantity,
-                    axisUnit: axisUnit,
-                    axisDirection: axisDirection,
-                    region: region,
-                    isRaw: scanItem.isRaw !== undefined ? Boolean(scanItem.isRaw) : true,
-                    equipmentId: equipmentId,
-                    resolution: scanItem.resolution ? parseFloat(scanItem.resolution) : null,
-                    coAddedScans: scanItem.coAddedScans ? parseInt(scanItem.coAddedScans) : null,
-                    accessory: scanItem.accessory || null,
-                    backgroundRef: scanItem.backgroundRef || null,
-                    backgroundAt: scanItem.backgroundAt ? new Date(scanItem.backgroundAt) : null,
-                    detector: scanItem.detector || null,
-                    beamsplitter: scanItem.beamsplitter || null,
-                    preparation: scanItem.preparation || null,
-                    moistureState: scanItem.moistureState || 'AIR_DRY',
-                    windowMaterial: scanItem.windowMaterial || null,
-                    replicateNo: replicateNo,
-                    ambientTemp: scanItem.ambientTemp ? parseFloat(scanItem.ambientTemp) : null,
-                    ambientRh: scanItem.ambientRh ? parseFloat(scanItem.ambientRh) : null,
-                    isCurrent: true,
-                    supersedes: supersedesId,
-                    metadata: JSON.stringify({
-                        filename: scanItem.filename,
-                        instrument: scanItem.instrument || 'Unknown',
-                        operator: user ? user.username : 'system',
-                        scanDate: scanItem.scanDate || new Date().toISOString(),
-                        importBatchId: batchId,
-                        scanVersion: scanVersion,
-                        csvLabId: scanItem.labId,
-                        linkedSampleId: sample ? sample.id : null,
-                        autoApproved: canAutoApprove ? true : undefined,
-                        axisDirection: axisDirection,
-                        axisUnit: axisUnit,
-                        quantity: quantity,
-                        sha256: sha256Hash
-                    }),
-                    qcStatus: validation.qcStatus,
-                    qcFlags: JSON.stringify(validation.flags),
-                    status: workflowStatus,
-                    uploadedBy: user ? user.id : null,
-                    ...(canAutoApprove && validation.qcStatus !== 'FAIL' ? {
-                        reviewedBy: user.username || user.id,
-                        reviewedAt: new Date()
-                    } : {})
-                }
-            });
+                    error: `Database transaction error: ${txErr.message}`
+                });
+                continue;
+            }
 
             if (validation.qcStatus === 'FAIL') {
                 results.success++;
@@ -626,9 +715,6 @@ exports.uploadBatch = async (req, res) => {
                 results.success++;
             }
 
-            // (unmatched spectra are rejected earlier — this point is only reached for matched samples)
-
-            // Track linked sample info for frontend display
             if (sample && !results.linkedToSample) {
                 results.linkedToSample = {
                     id: sample.id,
@@ -637,70 +723,13 @@ exports.uploadBatch = async (req, res) => {
                 };
             }
 
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                    entity: 'SPECTRA',
-                    entityId: newScan.id,
-                    action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_UPLOAD',
-                    performedBy: user ? user.username : 'system',
-                    timestamp: new Date(),
-                    details: `Uploaded ${newScan.modality} scan${sample ? ` for Sample ${sample.labId}` : ` (CSV ID: ${scanItem.labId})`}. Status: ${workflowStatus}`
-                }
-            });
-
-            // 6. Update WorkItem Status to COMPLETED
-            if (sample && validation.qcStatus !== 'FAIL') {
-                const sModality = (scanItem.modality || 'NIR').toUpperCase();
-
-                const openWorkItems = await prisma.workItem.findMany({
-                    where: {
-                        sampleId: sample.id,
-                        status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
-                    }
+            if (updatedWorkItemId && user) {
+                broadcastToLab(user.labId, 'WORKITEM_CHANGED', {
+                    sampleId: sample.id,
+                    workItemId: updatedWorkItemId,
+                    status: 'COMPLETED',
+                    source: 'spectral_upload'
                 });
-
-                const relatedItem = openWorkItems.find(w => {
-                    const wAnalysis = (w.analysis || '').toUpperCase();
-                    if (sModality === 'NIR') {
-                        return wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR' ||
-                            wAnalysis.includes('NIR') || wAnalysis.includes('VIS-NIR') || wAnalysis.includes('SPECTRA');
-                    }
-                    if (sModality === 'MIR') {
-                        return wAnalysis === 'SPEC_MIR' || wAnalysis.includes('MIR');
-                    }
-                    return false;
-                });
-
-                if (relatedItem) {
-                    const history = typeof relatedItem.history === 'string'
-                        ? JSON.parse(relatedItem.history)
-                        : (relatedItem.history || []);
-
-                    history.push({
-                        status: 'COMPLETED',
-                        note: `Spectrum uploaded by ${user ? user.username : 'system'}. QC: ${validation.qcStatus}${canAutoApprove ? ' (Auto-Approved)' : ''}`,
-                        changedBy: user ? user.username : 'system',
-                        timestamp: new Date().toISOString()
-                    });
-
-                    await prisma.workItem.update({
-                        where: { id: relatedItem.id },
-                        data: {
-                            status: 'COMPLETED',
-                            result: `Spectrum Uploaded (${validation.qcStatus})${canAutoApprove ? ' - Auto-Approved' : ''}`,
-                            completedAt: new Date(),
-                            history: JSON.stringify(history)
-                        }
-                    });
-                    // Broadcast work item change
-                    broadcastToLab(user.labId,'WORKITEM_CHANGED', {
-                        sampleId: sample.id,
-                        workItemId: relatedItem.id,
-                        status: 'COMPLETED',
-                        source: 'spectral_upload'
-                    });
-                }
             }
         }
 
