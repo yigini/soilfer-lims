@@ -115,11 +115,15 @@ const SampleSummary = ({
                     ) : null}
                     <button
                         onClick={() => setDrawerOpen(!drawerOpen)}
-                        className={`p-2.5 rounded-xl transition-all border shadow-sm ${drawerOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
-                            }`}
-                        title="Audit Log"
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border shadow-sm text-xs font-bold ${
+                            drawerOpen
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:text-emerald-700 dark:hover:text-emerald-300'
+                        }`}
+                        title="View Defensible Audit Log"
                     >
-                        <MoreHorizontal size={20} />
+                        <Clock size={16} className={drawerOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'} />
+                        <span className="hidden sm:inline">Audit Log</span>
                     </button>
                 </div>
             </div>
