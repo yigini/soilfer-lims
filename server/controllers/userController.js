@@ -74,21 +74,33 @@ exports.getUsers = async (req, res) => {
 
         const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
-        const [users, total] = await Promise.all([
-            prisma.user.findMany({
-                where,
-                skip,
-                take: limitNum,
-                orderBy: [
-                    { role: 'asc' },
-                    { username: 'asc' }
-                ]
-            }),
-            prisma.user.count({ where })
-        ]);
+        const allMatching = await prisma.user.findMany({
+            where
+        });
+
+        const roleOrder = {
+            'SUPER_ADMIN': 1,
+            'MASTER_USER': 2,
+            'PROJECT_MANAGER': 3,
+            'LAB_MANAGER': 4,
+            'SAMPLE_RECEPTION': 5,
+            'LAB_TECHNICIAN': 6,
+            'AUDIT_USER': 7,
+            'VIEWER': 8
+        };
+
+        allMatching.sort((a, b) => {
+            const rA = roleOrder[a.role] || 99;
+            const rB = roleOrder[b.role] || 99;
+            if (rA !== rB) return rA - rB;
+            return (a.username || '').localeCompare(b.username || '');
+        });
+
+        const total = allMatching.length;
+        const paged = allMatching.slice(skip, skip + limitNum);
 
         // Parse JSON fields and sanitize
-        const safeUsers = users.map(u => {
+        const safeUsers = paged.map(u => {
             const { password, ...rest } = u;
             return {
                 ...rest,
