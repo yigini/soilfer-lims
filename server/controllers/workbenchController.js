@@ -492,7 +492,13 @@ exports.batchSave = async (req, res) => {
                 const strVal = String(value).trim();
                 const isCensored = validation.isCensored || /^[<>]/.test(strVal);
                 const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
-                const numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+                let numericVal = null;
+                if (isCensored) {
+                    const cleanNum = strVal.replace(/^[<>=\s]+/, '').replace(',', '.');
+                    numericVal = isNaN(Number(cleanNum)) ? null : Number(cleanNum);
+                } else {
+                    numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+                }
 
                 const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
 
@@ -521,9 +527,9 @@ exports.batchSave = async (req, res) => {
                         flags: JSON.stringify(flagsData),
                         isValid: validation.valid,
                         censoring: censoringType,
-                        basis: 'AIR_DRY',
+                        basis: entry.basis || 'AIR_DRY',
                         methodologyId: method?.id || null,
-                        replicateNo: 1,
+                        replicateNo: entry.replicateNo || 1,
                         isCurrent: true,
                         enteredBy: user.username,
                         analysedAt: now,
