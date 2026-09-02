@@ -97,8 +97,8 @@ exports.saveResults = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        if (sample.status !== 'ANALYSIS' && sample.status !== 'PARTIALLY_COMPLETE') {
-            return res.status(400).json({ error: 'Sample is not in Analysis phase' });
+        if (!['PROCESSING', 'SUBMITTED_PARTIAL', 'ANALYSIS', 'PARTIALLY_COMPLETE'].includes(sample.status)) {
+            return res.status(400).json({ error: `Sample is not in Processing phase (current: ${sample.status})` });
         }
 
         // Validate
@@ -155,13 +155,6 @@ exports.saveResults = async (req, res) => {
             }));
         }
 
-        if (sample.status === 'ANALYSIS') {
-            operations.push(prisma.sample.update({
-                where: { id: sampleId },
-                data: { status: 'PARTIALLY_COMPLETE' }
-            }));
-        }
-
         operations.push(prisma.auditLog.create({
             data: {
                 id: `audit-res-up-${Date.now()}`,
@@ -175,6 +168,11 @@ exports.saveResults = async (req, res) => {
         }));
 
         await prisma.$transaction(operations);
+
+        if (sample.status === 'PROCESSING' || sample.status === 'ANALYSIS') {
+            const { transitionSample } = require('../services/sampleStateService');
+            await transitionSample(sampleId, 'SUBMITTED_PARTIAL', user, 'Partial results saved').catch(() => {});
+        }
 
         // Compute cross-parameter sample matrix diagnostics
         const allActiveResults = await prisma.result.findMany({
@@ -210,25 +208,19 @@ exports.submitForApproval = async (req, res) => {
         }
 
         const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
+        if (matrixDiagnostics.isBlocking) {
+            return res.status(422).json({
+                error: 'BLOCKING_MATRIX_DIAGNOSTICS',
+                message: 'Scientific matrix validation failed: ' + matrixDiagnostics.blockingErrors.map(b => b.message).join('; '),
+                blockingErrors: matrixDiagnostics.blockingErrors,
+                matrixDiagnostics
+            });
+        }
 
-        await prisma.sample.update({
-            where: { id: sampleId },
-            data: { status: 'COMPLETED' }
-        });
+        const { transitionSample } = require('../services/sampleStateService');
+        const updated = await transitionSample(sampleId, 'SUBMITTED_FULL', user, 'Results submitted for manager approval');
 
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-res-sub-${Date.now()}`,
-                entity: 'SAMPLE',
-                entityId: sampleId,
-                action: 'SUBMIT_FOR_APPROVAL',
-                performedBy: user ? user.username : 'SYSTEM',
-                timestamp: new Date(),
-                details: `Sample submitted for approval (Status: COMPLETED). Matrix Warnings: ${matrixDiagnostics.warnings.length}`
-            }
-        });
-
-        res.json({ success: true, status: 'COMPLETED', matrixDiagnostics });
+        res.json({ success: true, status: 'SUBMITTED_FULL', sample: updated, matrixDiagnostics });
     } catch (error) {
         console.error('[submitForApproval] Error:', error);
         res.status(500).json({ error: 'Failed to submit for approval' });

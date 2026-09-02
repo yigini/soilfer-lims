@@ -85,21 +85,30 @@ exports.validateSampleMatrix = (results) => {
         texture: null,
         cnRatio: null,
         basesAndCec: null,
-        warnings: []
+        warnings: [],
+        blockingErrors: [],
+        isBlocking: false
     };
 
-    // 1. Texture Check (Sand, Silt, Clay)
+    // 1. Texture Check (Sand, Silt, Clay) - BLOCKING
     const sand = resMap.SAND?.value;
     const silt = resMap.SILT?.value;
     const clay = resMap.CLAY?.value;
     if (sand !== undefined && silt !== undefined && clay !== undefined) {
         diagnostics.texture = calculateUsdaTexture(sand, silt, clay);
         if (!diagnostics.texture.isValid) {
-            diagnostics.warnings.push(`Texture closure failed: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ± 2.0%)`);
+            const msg = `Texture closure failed: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ± 2.0%)`;
+            diagnostics.warnings.push(msg);
+            diagnostics.blockingErrors.push({
+                check: 'TEXTURE_CLOSURE',
+                severity: 'BLOCKING',
+                message: msg
+            });
+            diagnostics.isBlocking = true;
         }
     }
 
-    // 2. C:N Ratio Check
+    // 2. C:N Ratio Check - ADVISORY
     const soc = resMap.SOC?.value ?? resMap.OC?.value ?? resMap.ORGANIC_CARBON?.value;
     const tn = resMap.TN?.value ?? resMap.TOTAL_N?.value ?? resMap.N_TOT?.value;
     const socUnit = resMap.SOC?.unit ?? resMap.OC?.unit ?? 'g/kg';
@@ -111,7 +120,7 @@ exports.validateSampleMatrix = (results) => {
         }
     }
 
-    // 3. Base Saturation & CEC Check
+    // 3. Base Saturation & CEC Check - ADVISORY
     const cec = resMap.CEC?.value;
     const ca = resMap.EXCH_CA?.value ?? resMap.CA_EXCH?.value;
     const mg = resMap.EXCH_MG?.value ?? resMap.MG_EXCH?.value;
