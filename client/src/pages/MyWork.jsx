@@ -49,7 +49,7 @@ const MyWork = () => {
             const items = workRes.data.data || workRes.data || [];
             setReanalysis(Array.isArray(reanalysisRes.data) ? reanalysisRes.data : []);
 
-            // Group by sample
+            // Group
             const groups = {};
             items.forEach(item => {
                 const key = item.sampleId;
@@ -60,28 +60,18 @@ const MyWork = () => {
                         items: [item],
                         analyses: [item.analysis],
                         status: item.status,
-                        hasActive: ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(item.status),
-                        hasCompleted: item.status === 'COMPLETED',
-                        hasReanalysis: item.status === 'REANALYSIS_REQUIRED',
                         priority: item.priority,
                         createdAt: item.createdAt,
-                        completedCount: item.status === 'COMPLETED' ? 1 : 0,
-                        totalCount: 1,
                     };
                 } else {
                     groups[key].items.push(item);
                     if (!groups[key].analyses.includes(item.analysis)) groups[key].analyses.push(item.analysis);
-                    groups[key].totalCount++;
-                    if (['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(item.status)) groups[key].hasActive = true;
-                    if (item.status === 'COMPLETED') { groups[key].hasCompleted = true; groups[key].completedCount++; }
-                    if (item.status === 'REANALYSIS_REQUIRED') groups[key].hasReanalysis = true;
                     if (item.priority === 'URGENT') groups[key].priority = 'URGENT';
                 }
             });
 
             const grouped = Object.values(groups);
             setWork(grouped);
-            // Recalculate meta from grouped cards (not raw items)
             setMeta({
                 total: grouped.length,
                 totalPages: Math.max(1, Math.ceil(grouped.length / 50))
@@ -116,16 +106,25 @@ const MyWork = () => {
         return () => clearInterval(interval);
     }, [lastUpdated]);
 
-    const activeWork = work.filter(g => g.hasActive || g.hasReanalysis);
-    const completedWork = work.filter(g => !g.hasActive && !g.hasReanalysis && g.hasCompleted);
-    const reanalysisCount = work.filter(g => g.hasReanalysis).length;
-    const currentList = activeTab === 'active' ? activeWork : completedWork;
+    // ─── 5 Canonical Lifecycle Buckets ───
+    const activeWork = work.filter(g => g.items.some(i => ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(i.status)));
+    const reviewWork = work.filter(g => g.items.some(i => ['SUBMITTED', 'SUBMITTED_FOR_REVIEW', 'UNDER_REVIEW'].includes(i.status)));
+    const redoWork = work.filter(g => g.items.some(i => ['REANALYSIS_REQUIRED', 'REJECTED', 'FAILED'].includes(i.status)));
+    const acceptedWork = work.filter(g => g.items.some(i => ['ACCEPTED', 'COMPLETED', 'APPROVED'].includes(i.status)));
+    const waivedWork = work.filter(g => g.items.some(i => ['WAIVED', 'CANCELLED'].includes(i.status)));
+
+    let currentList = activeWork;
+    if (activeTab === 'review') currentList = reviewWork;
+    else if (activeTab === 'redo') currentList = redoWork;
+    else if (activeTab === 'accepted') currentList = acceptedWork;
+    else if (activeTab === 'waived') currentList = waivedWork;
 
     // KPIs
     const totalActive = activeWork.reduce((sum, g) => sum + g.items.filter(i => ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(i.status)).length, 0);
-    const totalInProgress = activeWork.reduce((sum, g) => sum + g.items.filter(i => i.status === 'IN_PROGRESS').length, 0);
-    const totalCompleted = completedWork.reduce((sum, g) => sum + g.completedCount, 0);
-    const totalReanalysis = work.filter(g => g.hasReanalysis).reduce((sum, g) => sum + g.items.filter(i => i.status === 'REANALYSIS_REQUIRED').length, 0);
+    const totalReview = reviewWork.reduce((sum, g) => sum + g.items.filter(i => ['SUBMITTED', 'SUBMITTED_FOR_REVIEW', 'UNDER_REVIEW'].includes(i.status)).length, 0);
+    const totalRedo = redoWork.reduce((sum, g) => sum + g.items.filter(i => ['REANALYSIS_REQUIRED', 'REJECTED', 'FAILED'].includes(i.status)).length, 0);
+    const totalAccepted = acceptedWork.reduce((sum, g) => sum + g.items.filter(i => ['ACCEPTED', 'COMPLETED', 'APPROVED'].includes(i.status)).length, 0);
+    const totalWaived = waivedWork.reduce((sum, g) => sum + g.items.filter(i => ['WAIVED', 'CANCELLED'].includes(i.status)).length, 0);
 
     if (loading) {
         return (
@@ -153,51 +152,58 @@ const MyWork = () => {
             </div>
 
             {/* ─── Reanalysis Banner ─── */}
-            {totalReanalysis > 0 && (
+            {totalRedo > 0 && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
                     <Zap size={16} className="shrink-0 animate-pulse" />
-                    <span className="text-sm font-bold">{totalReanalysis} item(s) require reanalysis</span>
+                    <span className="text-sm font-bold">{totalRedo} item(s) require reanalysis / redo</span>
                     <span className="text-xs text-red-500">Needs immediate attention</span>
                 </div>
             )}
 
             {/* ─── KPI Row ─── */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div className="p-4 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Active Tasks</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Active</span>
                         <ClipboardList size={14} className="text-blue-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-blue-700 dark:text-blue-300">{totalActive}</span>
                 </div>
-                <div className="p-4 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800">
+                <div className="p-4 rounded-xl border bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">In Progress</span>
-                        <Activity size={14} className="text-orange-500 opacity-60" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Awaiting Review</span>
+                        <Clock size={14} className="text-purple-500 opacity-60" />
                     </div>
-                    <span className="text-2xl font-black text-orange-700 dark:text-orange-300">{totalInProgress}</span>
+                    <span className="text-2xl font-black text-purple-700 dark:text-purple-300">{totalReview}</span>
+                </div>
+                <div className={`p-4 rounded-xl border ${totalRedo > 0 ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${totalRedo > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>Needs Redo</span>
+                        <Zap size={14} className={`opacity-60 ${totalRedo > 0 ? 'text-red-500' : 'text-gray-400'}`} />
+                    </div>
+                    <span className={`text-2xl font-black ${totalRedo > 0 ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'}`}>{totalRedo}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Completed</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Accepted</span>
                         <CheckCircle size={14} className="text-emerald-500 opacity-60" />
                     </div>
-                    <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{totalCompleted}</span>
+                    <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{totalAccepted}</span>
                 </div>
-                <div className={`p-4 rounded-xl border ${totalReanalysis > 0 ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
+                <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-1">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${totalReanalysis > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>Reanalysis</span>
-                        <Zap size={14} className={`opacity-60 ${totalReanalysis > 0 ? 'text-red-500' : 'text-gray-400'}`} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Waived</span>
+                        <Filter size={14} className="text-gray-400 opacity-60" />
                     </div>
-                    <span className={`text-2xl font-black ${totalReanalysis > 0 ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'}`}>{totalReanalysis}</span>
+                    <span className="text-2xl font-black text-gray-600 dark:text-gray-400">{totalWaived}</span>
                 </div>
             </div>
 
-            {/* ─── Tabs ─── */}
-            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit">
+            {/* ─── 5 Canonical Tabs ─── */}
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('active')}
-                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'active'
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'active'
                         ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -205,13 +211,40 @@ const MyWork = () => {
                     Active ({activeWork.length})
                 </button>
                 <button
-                    onClick={() => setActiveTab('completed')}
-                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'completed'
+                    onClick={() => setActiveTab('review')}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'review'
                         ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    Completed ({completedWork.length})
+                    Awaiting Review ({reviewWork.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('redo')}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'redo'
+                        ? 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    Needs Redo ({redoWork.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('accepted')}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'accepted'
+                        ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    Accepted ({acceptedWork.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('waived')}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'waived'
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    Waived ({waivedWork.length})
                 </button>
             </div>
 
