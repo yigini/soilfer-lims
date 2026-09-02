@@ -19,7 +19,8 @@ import WorkflowProgressBar from '../components/sample/WorkflowProgressBar'; // P
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ReportContent from '../components/report/ReportContent';
-import { FileText, XCircle, Printer } from 'lucide-react';
+import SampleTimeline from '../components/SampleTimeline';
+import { FileText, XCircle, Printer, Clock } from 'lucide-react';
 
 const SampleDetail = () => {
     const { id } = useParams();
@@ -92,6 +93,36 @@ const SampleDetail = () => {
         fetchData();
         checkReport();
     }, [fetchData, checkReport]);
+
+    // WP-27: Assemble chronological timeline events from audit log and sample history
+    const timelineHistory = React.useMemo(() => {
+        const events = [];
+        const sampleHistory = Array.isArray(sample?.history)
+            ? sample.history
+            : (typeof sample?.history === 'string' ? JSON.parse(sample?.history || '[]') : []);
+
+        sampleHistory.forEach(h => {
+            events.push({
+                status: h.status,
+                performedBy: h.changedBy || h.user || 'System',
+                timestamp: h.timestamp,
+                reason: h.note || h.reason || ''
+            });
+        });
+
+        (history || []).forEach(a => {
+            if (a.action?.includes('STATUS') || a.action?.includes('SAMPLE_') || a.action?.includes('GATE') || a.action === 'UPDATE') {
+                events.push({
+                    status: a.after?.status || a.action,
+                    performedBy: a.performedByName || a.performedBy || 'System',
+                    timestamp: a.timestamp,
+                    reason: a.details || ''
+                });
+            }
+        });
+
+        return events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }, [sample, history]);
 
     // ─── Real-time: subscribe to WORKITEM_CHANGED events (draft + completion) ───
     useEffect(() => {
@@ -498,44 +529,79 @@ const SampleDetail = () => {
                     </div>
                 )}
 
-                {/* 6. ANALYTICAL WORKSPACE (Only if Approved/Accepted) */}
+                {/* 6. ANALYTICAL WORKSPACE / TIMELINE */}
                 {sample.status !== 'RECEIVED' && (
                     <div className="flex flex-col gap-6">
-                        {/* Warning Banner - Only show if totally blocked from initial analysis */}
-                        {!isDryingDone && sample.status !== 'RECEIVED' && (
-                            <div className="bg-orange-50 border border-orange-200 text-orange-800 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 mb-4">
-                                <span className="p-1 bg-orange-100 rounded-full">⚠️</span>
-                                <span>
-                                    {['EXPECTED', 'COLLECTED'].includes(sample.status)
-                                        ? t('workflow.analysisLockedReceive', 'ANALYSIS LOCKED: Sample should be RECEIVED first.')
-                                        : t('workflow.analysisLockedDrying', 'ANALYSIS LOCKED: Drying must be COMPLETED first.')
-                                    }
-                                </span>
-                            </div>
-                        )}
-
-
-                        {/* The Table */}
-                        <div ref={workspaceTableRef} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[400px]">
-                            <WorkItemsTable
-                                workItems={workItems}
-                                isGateOpen={isDryingDone}
-                                onUpdateStatus={handleUpdateStatus}
-                                onAssignmentSuccess={fetchData}
-                                onReview={handleReviewItem}
-                                onReviewBulk={handleReviewBulk}
-
-                            />
+                        {/* View Mode Switcher */}
+                        <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            <button
+                                onClick={() => setViewMode('WORKSPACE')}
+                                className={`px-4 py-2 font-bold text-sm rounded-lg transition-colors ${
+                                    viewMode === 'WORKSPACE'
+                                        ? 'bg-indigo-600 text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                {t('sampleDetail.workspace', 'Analytical Workspace')}
+                            </button>
+                            <button
+                                onClick={() => setViewMode('TIMELINE')}
+                                className={`px-4 py-2 font-bold text-sm rounded-lg flex items-center gap-2 transition-colors ${
+                                    viewMode === 'TIMELINE'
+                                        ? 'bg-indigo-600 text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                <Clock size={16} />
+                                {t('sampleDetail.timeline', 'Workflow Timeline')}
+                            </button>
                         </div>
 
-                        {/* Submission Panel */}
-                        <SubmissionPanel
-                            submissions={history.filter(h => h.entity === 'SUBMISSION')}
-                            workItems={workItems}
-                            onCreateSubmission={handleCreateSubmission}
-                            onReviewSubmission={handleReviewSubmission}
-                            onReviewItem={handleReviewItem}
-                        />
+                        {viewMode === 'TIMELINE' ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                <SampleTimeline
+                                    currentStatus={sample.status}
+                                    history={timelineHistory}
+                                    className="border-0 p-0"
+                                />
+                            </div>
+                        ) : (
+                            <>
+                                {/* Warning Banner - Only show if totally blocked from initial analysis */}
+                                {!isDryingDone && sample.status !== 'RECEIVED' && (
+                                    <div className="bg-orange-50 border border-orange-200 text-orange-800 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 mb-4">
+                                        <span className="p-1 bg-orange-100 rounded-full">⚠️</span>
+                                        <span>
+                                            {['EXPECTED', 'COLLECTED'].includes(sample.status)
+                                                ? t('workflow.analysisLockedReceive', 'ANALYSIS LOCKED: Sample should be RECEIVED first.')
+                                                : t('workflow.analysisLockedDrying', 'ANALYSIS LOCKED: Drying must be COMPLETED first.')
+                                            }
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* The Table */}
+                                <div ref={workspaceTableRef} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[400px]">
+                                    <WorkItemsTable
+                                        workItems={workItems}
+                                        isGateOpen={isDryingDone}
+                                        onUpdateStatus={handleUpdateStatus}
+                                        onAssignmentSuccess={fetchData}
+                                        onReview={handleReviewItem}
+                                        onReviewBulk={handleReviewBulk}
+                                    />
+                                </div>
+
+                                {/* Submission Panel */}
+                                <SubmissionPanel
+                                    submissions={history.filter(h => h.entity === 'SUBMISSION')}
+                                    workItems={workItems}
+                                    onCreateSubmission={handleCreateSubmission}
+                                    onReviewSubmission={handleReviewSubmission}
+                                    onReviewItem={handleReviewItem}
+                                />
+                            </>
+                        )}
                     </div>
                 )}
             </div>

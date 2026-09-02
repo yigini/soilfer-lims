@@ -5,42 +5,44 @@ import {
 } from 'lucide-react';
 
 const STEPS = [
-    { id: 'COLLECTED', label: 'Field Collection', role: 'Field Agent', group: 'Origin' },
+    { id: 'EXPECTED', label: 'Field Registration', role: 'Field Agent', group: 'Origin' },
     { id: 'RECEIVED', label: 'Lab Reception', role: 'Receptionist', group: 'Intake', isGate: true },
-    { id: 'LAB_ID_ASSIGNED', label: 'Lab ID Automation', role: 'Manager', group: 'Intake', auto: true },
-    { id: 'DRYING', label: 'Drying', role: 'Technician', group: 'Preparation' },
-    { id: 'PREPARED', label: 'Preparation', role: 'Technician', group: 'Preparation' },
-    { id: 'WET_CHEM_IN_PROGRESS', label: 'Wet Chemistry', role: 'Technician', group: 'Analysis' },
-    { id: 'WET_CHEM_COMPLETED', label: 'Wet Chem Done', role: 'Technician', group: 'Analysis' },
-    { id: 'SPECTRAL_IN_PROGRESS', label: 'Spectral Scan', role: 'Technician', group: 'Analysis' },
-    { id: 'SPECTRAL_COMPLETED', label: 'Spectral Done', role: 'Technician', group: 'Analysis' },
-    { id: 'QA_QC_IN_PROGRESS', label: 'QA/QC Review', role: 'Manager', group: 'Validation', isGate: true },
-    { id: 'ANALYSIS_COMPLETED', label: 'Analysis Finalized', role: 'Manager', group: 'Validation' },
-    { id: 'ACCEPTED', label: 'Certificate Issued', role: 'Manager', group: 'Reporting', isGate: true },
+    { id: 'ACCEPTED', label: 'Intake Accepted', role: 'Manager', group: 'Intake', isGate: true },
+    { id: 'PROCESSING', label: 'Preparation & Analysis', role: 'Technician', group: 'Analysis' },
+    { id: 'SUBMITTED_FULL', label: 'Results Submitted', role: 'Technician', group: 'Validation' },
+    { id: 'APPROVED', label: 'Manager Approval', role: 'Manager', group: 'Validation', isGate: true },
     { id: 'ARCHIVED', label: 'Sample Archived', role: 'Manager', group: 'Storage' },
     { id: 'DISPOSED', label: 'Sample Disposed', role: 'Manager', group: 'Storage' }
 ];
 
-const SampleTimeline = ({ currentStatus, history = [] }) => {
+const STATUS_ALIASES = {
+    'COLLECTED': 'EXPECTED',
+    'SUBMITTED_PARTIAL': 'SUBMITTED_FULL',
+    'ANALYZED': 'SUBMITTED_FULL'
+};
+
+const SampleTimeline = ({ currentStatus, history = [], className = '' }) => {
+    const normalizedCurrent = STATUS_ALIASES[currentStatus] || currentStatus;
 
     const getStepStatus = (stepId, index) => {
-        // Find if this step is in history
-        const entry = history.slice().reverse().find(h => h.status === stepId);
+        // Find if this step (or alias) is in history
+        const entry = history.slice().reverse().find(h => {
+            const hStatus = STATUS_ALIASES[h.status] || h.status;
+            return hStatus === stepId;
+        });
 
         // Is it the current active state?
-        const isCurrent = currentStatus === stepId;
+        const isCurrent = normalizedCurrent === stepId;
 
-        // Determining "Completed" is tricky with skips.
-        // We assume chronological order of STEPS. 
-        // If currentStatus index > step index, it's passed.
-        const currentIndex = STEPS.findIndex(s => s.id === currentStatus);
+        // Determining "Completed" in chronological order of STEPS. 
+        const currentIndex = STEPS.findIndex(s => s.id === normalizedCurrent);
         const isPassed = currentIndex > index;
 
         return { entry, isCurrent, isPassed };
     };
 
     return (
-        <div className="h-full border-r border-gray-200 bg-white p-6 overflow-y-auto w-80 flex-shrink-0">
+        <div className={`bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-y-auto ${className}`}>
             <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <Clock size={16} /> Workflow Timeline
             </h3>
