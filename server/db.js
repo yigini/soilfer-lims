@@ -10,10 +10,13 @@ try {
 }
 
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'prisma/dev.db');
-const db = new Database(dbPath);
+const db = new Database(dbPath, { timeout: 5000 });
 
-// Enable foreign keys
+// Enable foreign keys, WAL mode, busy_timeout, and synchronous NORMAL
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
 db.pragma('foreign_keys = ON');
+db.pragma('synchronous = NORMAL');
 
 const usersDb = {
     create: (user) => {
