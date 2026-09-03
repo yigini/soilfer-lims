@@ -296,8 +296,8 @@ async function syncLabSubmissions(config, performedBy) {
             // Build rich attachment data with categories (matches resync_kobo_data.js)
             const processedAttachments = (submission._attachments || []).map(a => ({
                 filename: a.filename?.split('/').pop() || a.filename,
-                category: exports.categorizePhoto(a.question_xpath),
-                categoryLabel: exports.photoLabel(exports.categorizePhoto(a.question_xpath)),
+                category: categorizePhoto(a.question_xpath),
+                categoryLabel: photoLabel(categorizePhoto(a.question_xpath)),
                 question: a.question_xpath,
                 download_url: a.download_url,
                 download_small: a.download_small_url,
@@ -436,6 +436,9 @@ function photoLabel(cat) {
     };
     return labels[cat] || cat;
 }
+
+exports.categorizePhoto = categorizePhoto;
+exports.photoLabel = photoLabel;
 
 /**
  * POST /api/kobo/sync-sample/:sampleId
