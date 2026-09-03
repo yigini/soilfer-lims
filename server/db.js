@@ -34,8 +34,8 @@ const usersDb = {
         const email = user.email || `${username}@soilfer.org`;
 
         const stmt = db.prepare(`
-            INSERT INTO User (id, username, password, role, labId, countries, projects, name, email, isActive, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            INSERT INTO User (id, username, password, role, labId, countries, projects, name, email, isActive, mustChangePassword, createdAt, updatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ON CONFLICT(username) DO UPDATE SET
                 role = excluded.role,
                 labId = excluded.labId,
