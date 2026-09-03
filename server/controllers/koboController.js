@@ -251,7 +251,7 @@ async function syncLabSubmissions(config, performedBy) {
     // Resolve lab and country info from database
     const lab = await prisma.lab.findFirst({
         where: { OR: [{ id: config.labId }, { code: config.labId }] },
-        include: { projects: { include: { project: true } } }
+        include: { projectLabs: { include: { project: true } } }
     });
     const labInfo = {
         iso: lab?.code?.split('-')[0] || lab?.country || 'GEN',
@@ -260,8 +260,8 @@ async function syncLabSubmissions(config, performedBy) {
 
     // Use config.projectCode if available, else derive from lab's assigned projects in database
     let projectCode = config.projectCode;
-    if (!projectCode && lab?.projects && lab.projects.length > 0) {
-        projectCode = lab.projects[0].project?.code || lab.projects[0].projectCode;
+    if (!projectCode && lab?.projectLabs && lab.projectLabs.length > 0) {
+        projectCode = lab.projectLabs[0].project?.code || lab.projectLabs[0].projectCode;
     }
 
     if (!projectCode) {
