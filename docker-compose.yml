@@ -10,6 +10,16 @@ services:
       - PORT=3000
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
     volumes:
       # Persistent database storage (only the prisma dir for DB file)
       - lims-data:/app/server/prisma
