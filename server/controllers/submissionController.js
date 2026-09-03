@@ -447,15 +447,22 @@ exports.getReanalysisRequests = async (req, res) => {
     const user = req.user;
 
     try {
-        if (user.role !== 'LAB_TECHNICIAN') {
-            return res.status(403).json({ error: 'Only technicians' });
+        const where = {
+            status: workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED
+        };
+
+        if (user.role === 'LAB_TECHNICIAN') {
+            where.assignedTo = user.username;
+        } else if (user.role === 'LAB_MANAGER' && user.labId) {
+            where.sample = { labId: user.labId };
+        } else if (user.role === 'SUPER_ADMIN') {
+            // Super Admin can view all reanalysis items
+        } else {
+            return res.status(403).json({ error: 'Access restricted to technicians, managers, and administrators' });
         }
 
         const items = await prisma.workItem.findMany({
-            where: {
-                assignedTo: user.username,
-                status: workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED
-            }
+            where
         });
 
         const enriched = items.map(i => {

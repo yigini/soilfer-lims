@@ -42,16 +42,36 @@ app.use(cors({
     credentials: true
 }));
 
-// Rate Limiter for Auth Routes
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit to 100 requests per windowMs
-    message: { error: 'Too many login attempts, please try again later.' }
-});
-app.use('/api/auth', authLimiter);
+// Rate Limiting
+if (process.env.NODE_ENV !== 'test') {
+    // Global Rate Limiter for API routes (DoS protection)
+    const apiLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 1000, // 1000 requests per 15 min per IP
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Too many requests from this IP, please try again later.' }
+    });
+    app.use('/api', apiLimiter);
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+    // Strict Rate Limiter for Auth Routes (brute force protection)
+    const authLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 30, // Limit to 30 attempts per windowMs
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Too many login attempts, please try again later.' }
+    });
+    app.use('/api/auth', authLimiter);
+}
+
+// Scoped body parser limits: 2mb default, 50mb for bulk import & spectral batches
+app.use('/api/import', express.json({ limit: '50mb' }));
+app.use('/api/import', express.urlencoded({ limit: '50mb', extended: true }));
+app.use('/api/spectral', express.json({ limit: '50mb' }));
+
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 // Global Localization & Response Standardization Middleware
 app.use(localeMiddleware);
@@ -702,5 +722,20 @@ if (process.env.NODE_ENV === 'production') {
         }
     });
 }
+
+// ─── Global Error Handler ───
+// Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
+app.use((err, req, res, next) => {
+    console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+    if (res.headersSent) {
+        return next(err);
+    }
+    const status = err.status || err.statusCode || 500;
+    res.status(status).json({
+        error: process.env.NODE_ENV === 'production'
+            ? (status === 404 ? 'Resource not found' : 'An internal server error occurred.')
+            : (err.message || 'An unexpected error occurred.')
+    });
+});
 
 module.exports = app;
