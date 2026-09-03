@@ -54,15 +54,16 @@ if (process.env.NODE_ENV !== 'test') {
     });
     app.use('/api', apiLimiter);
 
-    // Strict Rate Limiter for Auth Routes (brute force protection)
+    // Strict Rate Limiter for Login / Credential Endpoints (brute force protection)
     const authLimiter = rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 30, // Limit to 30 attempts per windowMs
+        max: 30, // Limit to 30 login attempts per windowMs
         standardHeaders: true,
         legacyHeaders: false,
         message: { error: 'Too many login attempts, please try again later.' }
     });
-    app.use('/api/auth', authLimiter);
+    app.use('/api/auth/login', authLimiter);
+    app.use('/api/auth/register', authLimiter);
 }
 
 // Scoped body parser limits: 2mb default, 50mb for bulk import & spectral batches
