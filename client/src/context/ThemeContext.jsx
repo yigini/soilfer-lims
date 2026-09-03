@@ -31,6 +31,12 @@ export const ThemeProvider = ({ children }) => {
     // Load branding settings from backend
     useEffect(() => {
         const loadSettings = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const res = await axios.get('/api/admin/settings');
                 const settings = res.data?.data || res.data;

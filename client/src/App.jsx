@@ -54,6 +54,7 @@ const TechStack = React.lazy(() => import('./pages/TechStack'));
 const SampleWorkflowMap = React.lazy(() => import('./pages/SampleWorkflowMap'));
 const LabMethods = React.lazy(() => import('./pages/admin/LabMethods'));
 const LegacyImport = React.lazy(() => import('./pages/admin/LegacyImport'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -305,10 +306,15 @@ function App() {
             <Route path="/reports" element={<Navigate to="/result-reports" replace />} />
             <Route path="/report/:token" element={<React.Suspense fallback={<LazyFallback />}><PublicReport /></React.Suspense>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            <Route path="/about" element={<RequireAuth><About /></RequireAuth>} />
-            <Route path="/techstack" element={<RequireAuth><TechStack /></RequireAuth>} />
-            <Route path="/tech-stack" element={<RequireAuth><TechStack /></RequireAuth>} />
-            <Route path="/credits" element={<RequireAuth><TechStack /></RequireAuth>} />
+
+            {/* Public Institutional & Technical Architecture Routes */}
+            <Route path="/about" element={<React.Suspense fallback={<LazyFallback />}><About /></React.Suspense>} />
+            <Route path="/techstack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+            <Route path="/tech-stack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+            <Route path="/credits" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+
+            {/* Catch-All 404 Route */}
+            <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />
         </Routes>
     );
 }
