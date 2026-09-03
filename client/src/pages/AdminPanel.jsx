@@ -6,6 +6,7 @@ import AuditLogs from './AuditLogs';
 import UsersComponent from './Users';
 import BrandingManager from '../components/admin/BrandingManager';
 import ApiKeyManager from '../components/admin/ApiKeyManager';
+import TranslationEditor from '../components/TranslationEditor';
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import { useAuth } from '../context/AuthContext';

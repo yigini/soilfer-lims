@@ -384,3 +384,5 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
         </div>
     );
 };
+
+export default TranslationEditor;
