@@ -8,6 +8,24 @@ const crypto = require('crypto');
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
 
+/**
+ * RC-07 & RC-20: Derive confidence from evidence
+ * Resists an unevidenced HIGH (e.g. manual desk pin or paste without device/field GPS)
+ */
+function deriveLocationConfidence(source, uncertaintyM) {
+    if (!source || source === 'TEXT_ONLY') return 'LOW';
+    if (source === 'FIELD_GPS' || source === 'DEVICE_GPS') {
+        return (uncertaintyM && uncertaintyM <= 20) ? 'HIGH' : 'MEDIUM';
+    }
+    if (source === 'DESK_PASTE' || source === 'MAP_PIN') {
+        if (uncertaintyM && uncertaintyM <= 50) return 'MEDIUM';
+        return 'LOW';
+    }
+    if (source === 'ADMIN_UNIT') return 'LOW';
+    return 'MEDIUM';
+}
+exports.deriveLocationConfidence = deriveLocationConfidence;
+
 exports.processIntake = async (req, res) => {
     const {
         originalId,
@@ -120,7 +138,7 @@ exports.processIntake = async (req, res) => {
         const now = new Date();
         const history = typeof sample.history === 'string' ? JSON.parse(sample.history) : (sample.history || []);
 
-        if (decision === 'REJECTED') {
+        if (decision === 'REJECTED' || decision === 'REJECT') {
             history.push({
                 status: 'RECEIVED_REJECTED',
                 changedBy: receivedBy,
@@ -373,74 +391,6 @@ exports.processIntake = async (req, res) => {
         if (submitterDetails) {
             Object.entries(submitterDetails).forEach(([k, v]) => mergeField(`submitter${k.charAt(0).toUpperCase() + k.slice(1)}`, v));
         }
-        if (samplingDetails) {
-            // Build canonical location object for structured access
-            const locationCanonical = {
-                siteName: samplingDetails.siteName || null,
-                locationDescription: samplingDetails.location || null,
-                admin1: samplingDetails.district || null,
-                admin2: samplingDetails.areaVillage || null,
-                landmark: samplingDetails.landmark || null,
-                latitude: samplingDetails.coordinates?.lat || null,
-                longitude: samplingDetails.coordinates?.lng || null,
-                gpsAccuracy: samplingDetails.coordinates?.accuracy || null,
-                locationCaptureMethod: samplingDetails.captureMethod || null,
-                locationConfidence: samplingDetails.locationConfidence || null,
-                locationUncertaintyReason: samplingDetails.locationUncertaintyReason || null
-            };
-            mergeField('locationCanonical', locationCanonical);
-
-            // Legacy key mapping (preserves backward compat)
-            Object.entries(samplingDetails).forEach(([k, v]) => {
-                if (k === 'coordinates' && v) {
-                    mergeField('latitude', v.lat);
-                    mergeField('longitude', v.lng);
-                    mergeField('gpsAccuracy', v.accuracy);
-                } else {
-                    mergeField(k, v);
-                }
-            });
-
-            // Also write new canonical keys individually for downstream queries
-            mergeField('siteName', samplingDetails.siteName);
-            mergeField('locationCaptureMethod', samplingDetails.captureMethod);
-            mergeField('locationConfidence', samplingDetails.locationConfidence);
-            mergeField('landmark', samplingDetails.landmark);
-            mergeField('admin1', samplingDetails.district);
-            mergeField('admin2', samplingDetails.areaVillage);
-        }
-
-        // NEW: Assign Lab ID immediately during intake
-        let assignedLabId;
-        const finalLabRef = user.labId || 'GEN';
-
-        if (isWalkIn && !projectId) {
-            // Generic Walk-ins keep their generated short ID as Lab ID
-            assignedLabId = sample.originalId;
-        } else {
-            // Project samples (Scheduled or Manual Type B) get a short sequential Lab ID
-            assignedLabId = await idGenerator.generateLabId(finalLabRef, 'S');
-        }
-
-        history.push({
-            status: 'RECEIVED',
-            changedBy: receivedBy,
-            timestamp: now,
-            note: `Intake process completed. Assigned Lab ID: ${assignedLabId}`
-        });
-
-        if (massDeficitInfo && massWarningAcknowledged) {
-            history.push({
-                status: 'MASS_DEFICIT_OVERRIDE',
-                changedBy: receivedBy,
-                timestamp: now,
-                note: `Accepted with mass deficit: received ${parsedMass}g vs required ${massDeficitInfo.totalRequiredMass}g (deficit: ${massDeficitInfo.deficit}g).`
-            });
-        }
-
-        const photosList = Array.isArray(intakePhotos)
-            ? intakePhotos
-            : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
         // Stage B: Location, Provenance & Depth Extraction
         let lat = null, lng = null, elev = null;
@@ -499,6 +449,84 @@ exports.processIntake = async (req, res) => {
         const admin2 = req.body.admin2 || samplingDetails?.areaVillage || undefined;
         const village = req.body.village || samplingDetails?.areaVillage || undefined;
         const siteName = req.body.siteName || samplingDetails?.siteName || undefined;
+
+        if (samplingDetails) {
+            // RC-07 & RC-20: Derive confidence from evidence and resist unevidenced HIGH
+            const captureMethod = samplingDetails.captureMethod || locationSource;
+            const maxConfidence = deriveLocationConfidence(captureMethod, uncertaintyM);
+            let finalConfidence = samplingDetails.locationConfidence || maxConfidence;
+            if (finalConfidence === 'HIGH' && maxConfidence !== 'HIGH') {
+                console.warn(`[INTAKE] Resisting unevidenced HIGH confidence for method ${captureMethod} (downgraded to ${maxConfidence})`);
+                finalConfidence = maxConfidence;
+            }
+
+            // Build canonical location object for structured access
+            const locationCanonical = {
+                siteName: samplingDetails.siteName || null,
+                locationDescription: samplingDetails.location || null,
+                admin1: samplingDetails.district || null,
+                admin2: samplingDetails.areaVillage || null,
+                landmark: samplingDetails.landmark || null,
+                latitude: samplingDetails.coordinates?.lat || null,
+                longitude: samplingDetails.coordinates?.lng || null,
+                gpsAccuracy: samplingDetails.coordinates?.accuracy || null,
+                locationCaptureMethod: captureMethod || null,
+                locationConfidence: finalConfidence,
+                locationUncertaintyReason: samplingDetails.locationUncertaintyReason || null
+            };
+            mergeField('locationCanonical', locationCanonical);
+
+            // Legacy key mapping (preserves backward compat)
+            Object.entries(samplingDetails).forEach(([k, v]) => {
+                if (k === 'coordinates' && v) {
+                    mergeField('latitude', v.lat);
+                    mergeField('longitude', v.lng);
+                    mergeField('gpsAccuracy', v.accuracy);
+                } else {
+                    mergeField(k, v);
+                }
+            });
+
+            // Also write new canonical keys individually for downstream queries
+            mergeField('siteName', samplingDetails.siteName);
+            mergeField('locationCaptureMethod', captureMethod);
+            mergeField('locationConfidence', finalConfidence);
+            mergeField('landmark', samplingDetails.landmark);
+            mergeField('admin1', samplingDetails.district);
+            mergeField('admin2', samplingDetails.areaVillage);
+        }
+
+        // NEW: Assign Lab ID immediately during intake
+        let assignedLabId;
+        const finalLabRef = user.labId || 'GEN';
+
+        if (isWalkIn && !projectId) {
+            // Generic Walk-ins keep their generated short ID as Lab ID
+            assignedLabId = sample.originalId;
+        } else {
+            // Project samples (Scheduled or Manual Type B) get a short sequential Lab ID
+            assignedLabId = await idGenerator.generateLabId(finalLabRef, 'S');
+        }
+
+        history.push({
+            status: 'RECEIVED',
+            changedBy: receivedBy,
+            timestamp: now,
+            note: `Intake process completed. Assigned Lab ID: ${assignedLabId}`
+        });
+
+        if (massDeficitInfo && massWarningAcknowledged) {
+            history.push({
+                status: 'MASS_DEFICIT_OVERRIDE',
+                changedBy: receivedBy,
+                timestamp: now,
+                note: `Accepted with mass deficit: received ${parsedMass}g vs required ${massDeficitInfo.totalRequiredMass}g (deficit: ${massDeficitInfo.deficit}g).`
+            });
+        }
+
+        const photosList = Array.isArray(intakePhotos)
+            ? intakePhotos
+            : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
         const updateData = {
             status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
