@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { MapPinOff, AlertTriangle } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -24,29 +25,40 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const ChangeView = ({ center }) => {
     const map = useMap();
     useEffect(() => {
-        if (center) {
+        if (center && center[0] && center[1]) {
             map.setView(center, 13);
         }
     }, [center, map]);
     return null;
 };
 
-const SampleMap = ({ coordinates, title }) => {
-    if (!coordinates || !coordinates.lat || !coordinates.lng) {
+const SampleMap = ({ coordinates, title, uncertaintyM }) => {
+    const hasCoords = Boolean(coordinates && coordinates.lat && coordinates.lng);
+
+    if (!hasCoords) {
         return (
-            <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                <div className="text-center">
-                    <p className="text-gray-400 font-medium">No GPS coordinates available</p>
+            <div className="h-64 bg-amber-50/50 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-amber-300 dark:border-amber-800/60 p-6 text-center">
+                <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full mb-2">
+                    <MapPinOff size={24} />
                 </div>
+                <h4 className="font-bold text-gray-800 dark:text-gray-200 text-sm">
+                    No coordinates recorded in the field
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1">
+                    This sample was logged without GPS coordinates. Contact the field survey team or check the delivery manifest.
+                </p>
             </div>
         );
     }
 
-    const position = [coordinates.lat, coordinates.lng];
+    const lat = parseFloat(coordinates.lat);
+    const lng = parseFloat(coordinates.lng);
+    const position = [lat, lng];
+    const uncertainty = uncertaintyM || coordinates.positionalUncertaintyM || coordinates.accuracy;
 
     return (
-        <div className="h-64 rounded-xl overflow-hidden shadow-inner border border-gray-200 z-0">
-            <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }}>
+        <div className="h-64 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700 z-0">
+            <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -54,10 +66,25 @@ const SampleMap = ({ coordinates, title }) => {
                 />
                 <Marker position={position}>
                     <Popup>
-                        <div className="text-sm font-bold">{title || 'Sample Location'}</div>
-                        <div className="text-xs text-gray-500">{coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}</div>
+                        <div className="text-xs font-mono">
+                            <div className="font-bold text-gray-900">{title || 'Sample Location'}</div>
+                            <div>{lat.toFixed(6)}, {lng.toFixed(6)}</div>
+                            {uncertainty && <div>Uncertainty: &plusmn;{uncertainty}m</div>}
+                        </div>
                     </Popup>
                 </Marker>
+                {uncertainty && uncertainty > 0 && (
+                    <Circle
+                        center={position}
+                        radius={parseFloat(uncertainty)}
+                        pathOptions={{
+                            color: '#2563eb',
+                            fillColor: '#3b82f6',
+                            fillOpacity: 0.15,
+                            weight: 1.5
+                        }}
+                    />
+                )}
             </MapContainer>
         </div>
     );

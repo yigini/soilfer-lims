@@ -121,6 +121,23 @@ model Sample {
   intakePhotos              String?   // JSON string: Array of uploaded photo URLs
   isResubmission            Boolean?  @default(false)
 
+  // Location, Provenance & Depth (Stage B: RC-05, RC-06, RC-07, RC-11)
+  latitude                  Float?
+  longitude                 Float?
+  elevation                 Float?
+  positionalUncertaintyM    Float?    // Positional uncertainty in metres
+  locationSource            String?   // FIELD_GPS, DEVICE_GPS, DESK_PIN, DESK_PASTE, ADMIN_UNIT, CLIENT_MANIFEST, TEXT_ONLY
+  locationCapturedAt        DateTime?
+  locationCapturedBy        String?
+  compositeRadiusM          Float?    // Radius in metres for composite samples
+  depthTopCm                Float?    // Explicit numeric depth interval top (cm)
+  depthBottomCm             Float?    // Explicit numeric depth interval bottom (cm)
+  admin1                    String?   // Department / Province
+  admin2                    String?   // Municipality / District
+  village                   String?   // Village / Community
+  siteName                  String?   // Farm or site identifier
+
+
   // Matrix & Module (WP-18)
   matrix            String     @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
   plantPart         String?    // LEAF, PETIOLE, WHOLE_PLANT, GRAIN, ROOT, FRUIT

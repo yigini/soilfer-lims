@@ -54,4 +54,21 @@ router.post('/mass-check', checkPermission('RECEIVE_SAMPLE'), receptionControlle
 // Upload sample condition or non-conformance photographic evidence (RC-03)
 router.post('/upload-photo', checkPermission('RECEIVE_SAMPLE'), upload.array('photos', 5), receptionController.uploadIntakePhoto);
 
+// GET /api/reception/admin-units
+// Administrative unit hierarchy picker (RC-05, RC-08)
+router.get('/admin-units', checkPermission('RECEIVE_SAMPLE'), receptionController.getAdminUnits);
+
+// POST /api/reception/parse-coordinates
+// Universal coordinate parsing for DD, DMS, UTM (RC-05)
+router.post('/parse-coordinates', checkPermission('RECEIVE_SAMPLE'), receptionController.parseCoordinatesEndpoint);
+
+// GET /api/reception/reverse-geocode
+// Server-side geocode proxy with caching & offline boundary fallback (RC-08)
+router.get('/reverse-geocode', checkPermission('RECEIVE_SAMPLE'), receptionController.reverseGeocode);
+
+// GET /api/reception/batch-geometry-check
+// Consignment/project spatial outlier detection (RC-10)
+router.get('/batch-geometry-check', checkPermission('RECEIVE_SAMPLE'), receptionController.batchGeometryCheck);
+
 module.exports = router;
+

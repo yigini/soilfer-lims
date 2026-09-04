@@ -1,6 +1,11 @@
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const idGenerator = require('../services/idGenerator');
+const { parseCoordinates } = require('../utils/coordParser');
+const adminBoundaries = require('../data/adminBoundaries.json');
+
+// In-memory cache for reverse geocoding (24hr TTL)
+const geocodeCache = new Map();
 
 exports.processIntake = async (req, res) => {
     const {
@@ -393,6 +398,64 @@ exports.processIntake = async (req, res) => {
             ? intakePhotos
             : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
+        // Stage B: Location, Provenance & Depth Extraction
+        let lat = null, lng = null, elev = null;
+        if (req.body.latitude !== undefined && req.body.latitude !== null && req.body.latitude !== '') {
+            lat = parseFloat(req.body.latitude);
+            lng = req.body.longitude !== undefined && req.body.longitude !== null ? parseFloat(req.body.longitude) : null;
+            elev = req.body.elevation !== undefined && req.body.elevation !== null ? parseFloat(req.body.elevation) : null;
+        } else if (samplingDetails?.coordinates) {
+            lat = parseFloat(samplingDetails.coordinates.lat);
+            lng = parseFloat(samplingDetails.coordinates.lng);
+            elev = parseFloat(samplingDetails.coordinates.elevation);
+        } else if (req.body.coordinates) {
+            lat = parseFloat(req.body.coordinates.lat);
+            lng = parseFloat(req.body.coordinates.lng);
+            elev = parseFloat(req.body.coordinates.elevation);
+        }
+
+        // Numeric depths
+        let depthTop = null, depthBottom = null;
+        if (req.body.depthTopCm !== undefined && req.body.depthTopCm !== null && req.body.depthTopCm !== '') {
+            depthTop = parseFloat(req.body.depthTopCm);
+        } else if (samplingDetails?.depthTopCm !== undefined && samplingDetails?.depthTopCm !== null && samplingDetails?.depthTopCm !== '') {
+            depthTop = parseFloat(samplingDetails.depthTopCm);
+        } else if (samplingDetails?.depthMin !== undefined && samplingDetails?.depthMin !== null && samplingDetails?.depthMin !== '') {
+            depthTop = parseFloat(samplingDetails.depthMin);
+        } else if (samplingDetails?.depthType && /^\d+-\d+$/.test(samplingDetails.depthType)) {
+            const [t, b] = samplingDetails.depthType.split('-').map(Number);
+            depthTop = t;
+            depthBottom = b;
+        }
+
+        if (req.body.depthBottomCm !== undefined && req.body.depthBottomCm !== null && req.body.depthBottomCm !== '') {
+            depthBottom = parseFloat(req.body.depthBottomCm);
+        } else if (samplingDetails?.depthBottomCm !== undefined && samplingDetails?.depthBottomCm !== null && samplingDetails?.depthBottomCm !== '') {
+            depthBottom = parseFloat(samplingDetails.depthBottomCm);
+        } else if (samplingDetails?.depthMax !== undefined && samplingDetails?.depthMax !== null && samplingDetails?.depthMax !== '') {
+            depthBottom = parseFloat(samplingDetails.depthMax);
+        }
+
+        const rawUncertainty = req.body.positionalUncertaintyM !== undefined && req.body.positionalUncertaintyM !== null && req.body.positionalUncertaintyM !== ''
+            ? req.body.positionalUncertaintyM
+            : samplingDetails?.positionalUncertaintyM;
+        const uncertaintyM = rawUncertainty !== undefined && rawUncertainty !== null && rawUncertainty !== ''
+            ? parseFloat(rawUncertainty)
+            : undefined;
+
+        const rawCompRadius = req.body.compositeRadiusM !== undefined && req.body.compositeRadiusM !== null && req.body.compositeRadiusM !== ''
+            ? req.body.compositeRadiusM
+            : samplingDetails?.compositeRadiusM;
+        const compRadius = rawCompRadius !== undefined && rawCompRadius !== null && rawCompRadius !== ''
+            ? parseFloat(rawCompRadius)
+            : undefined;
+
+        const locationSource = req.body.locationSource || samplingDetails?.locationSource || samplingDetails?.captureMethod || (lat && lng ? 'DESK_PIN' : 'TEXT_ONLY');
+        const admin1 = req.body.admin1 || samplingDetails?.district || undefined;
+        const admin2 = req.body.admin2 || samplingDetails?.areaVillage || undefined;
+        const village = req.body.village || samplingDetails?.areaVillage || undefined;
+        const siteName = req.body.siteName || samplingDetails?.siteName || undefined;
+
         const updateData = {
             status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
             labId: assignedLabId,
@@ -413,6 +476,23 @@ exports.processIntake = async (req, res) => {
             foreignMaterial: foreignMaterial ? (typeof foreignMaterial === 'string' ? foreignMaterial : JSON.stringify(foreignMaterial)) : undefined,
             intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : undefined,
             isResubmission: isResubmission !== undefined ? !!isResubmission : undefined,
+
+            // Stage B fields
+            latitude: !isNaN(lat) && lat !== null ? lat : undefined,
+            longitude: !isNaN(lng) && lng !== null ? lng : undefined,
+            elevation: !isNaN(elev) && elev !== null ? elev : undefined,
+            positionalUncertaintyM: !isNaN(uncertaintyM) && uncertaintyM !== undefined ? uncertaintyM : undefined,
+            locationSource: locationSource,
+            locationCapturedAt: (lat && lng) ? now : undefined,
+            locationCapturedBy: (lat && lng) ? receivedBy : undefined,
+            compositeRadiusM: !isNaN(compRadius) && compRadius !== undefined ? compRadius : undefined,
+            depthTopCm: !isNaN(depthTop) && depthTop !== null ? depthTop : undefined,
+            depthBottomCm: !isNaN(depthBottom) && depthBottom !== null ? depthBottom : undefined,
+            admin1,
+            admin2,
+            village,
+            siteName,
+
             receptionData: JSON.stringify({
                 checklist, notes, receivedBy, labLocation: labId, at: now,
                 coc: req.body.coc, photos: photosList,
@@ -423,7 +503,12 @@ exports.processIntake = async (req, res) => {
                 receivedMass: parsedMass,
                 moistureOnArrival,
                 foreignMaterial,
-                massDeficitInfo
+                massDeficitInfo,
+                positionalUncertaintyM: uncertaintyM,
+                locationSource: samplingDetails?.locationSource || samplingDetails?.captureMethod,
+                compositeRadiusM: compRadius,
+                depthTopCm: depthTop,
+                depthBottomCm: depthBottom
             })
         };
 
@@ -724,3 +809,229 @@ exports.uploadIntakePhoto = (req, res) => {
         return res.status(500).json({ error: 'Photo upload failed: ' + err.message });
     }
 };
+
+/**
+ * GET /api/reception/admin-units
+ * RC-05 & RC-08: Administrative hierarchy picker
+ */
+exports.getAdminUnits = (req, res) => {
+    try {
+        const { country } = req.query;
+        if (country) {
+            const data = adminBoundaries[country.toUpperCase()];
+            if (!data) return res.status(404).json({ error: `No administrative data for country: ${country}` });
+            return res.json({ success: true, country: country.toUpperCase(), ...data });
+        }
+        return res.json({ success: true, countries: adminBoundaries });
+    } catch (err) {
+        console.error('[getAdminUnits] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to fetch admin units: ' + err.message });
+    }
+};
+
+/**
+ * POST /api/reception/parse-coordinates
+ * RC-05: Parse any coordinate string (DD, DMS, UTM)
+ */
+exports.parseCoordinatesEndpoint = (req, res) => {
+    try {
+        const { coordinates } = req.body;
+        if (!coordinates) {
+            return res.status(400).json({ error: 'Coordinates string is required' });
+        }
+        const parsed = parseCoordinates(coordinates);
+        if (!parsed) {
+            return res.status(400).json({ error: 'Could not parse coordinates. Accepted formats: DD, DMS, UTM with Zone.' });
+        }
+        return res.json({ success: true, ...parsed });
+    } catch (err) {
+        console.error('[parseCoordinatesEndpoint] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to parse coordinates: ' + err.message });
+    }
+};
+
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function findNearestOfflineAdmin(lat, lng) {
+    let nearest = null;
+    let minDistance = Infinity;
+
+    for (const [countryCode, cData] of Object.entries(adminBoundaries)) {
+        for (const dept of cData.departments || []) {
+            for (const mun of dept.municipalities || []) {
+                const [cLat, cLng] = mun.center;
+                const d = haversineDistanceKm(lat, lng, cLat, cLng);
+                if (d < minDistance) {
+                    minDistance = d;
+                    nearest = {
+                        village: mun.name,
+                        municipality: mun.name,
+                        district: dept.name,
+                        country: cData.name,
+                        countryCode,
+                        displayName: `${mun.name}, ${dept.name}, ${cData.name}`,
+                        distanceKm: parseFloat(d.toFixed(1))
+                    };
+                }
+            }
+        }
+    }
+    return { nearest, minDistance };
+}
+
+/**
+ * GET /api/reception/reverse-geocode
+ * RC-08: Server-side geocoding proxy with caching & offline fallback
+ */
+exports.reverseGeocode = async (req, res) => {
+    try {
+        const lat = parseFloat(req.query.lat);
+        const lng = parseFloat(req.query.lng);
+
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            return res.status(400).json({ error: 'Valid lat and lng query parameters are required' });
+        }
+
+        const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+        if (geocodeCache.has(cacheKey)) {
+            const cached = geocodeCache.get(cacheKey);
+            return res.json({ success: true, ...cached, source: 'CACHE' });
+        }
+
+        const { nearest, minDistance } = findNearestOfflineAdmin(lat, lng);
+
+        let onlineResult = null;
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`;
+            const response = await fetch(url, {
+                headers: {
+                    'User-Agent': 'SoilFER-LIMS/1.0 (+https://soilfer.org; FAO Technical Cooperation Program)'
+                },
+                signal: AbortSignal.timeout(3500)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.address) {
+                    const addr = data.address;
+                    const town = addr.village || addr.town || addr.city || addr.suburb || addr.municipality || nearest?.municipality || '';
+                    const district = addr.county || addr.state_district || addr.state || nearest?.district || '';
+                    const country = addr.country || nearest?.country || '';
+                    const countryCode = (addr.country_code || nearest?.countryCode || '').toUpperCase();
+
+                    onlineResult = {
+                        village: town,
+                        municipality: town,
+                        district,
+                        country,
+                        countryCode,
+                        displayName: data.display_name || `${town}, ${district}, ${country}`
+                    };
+                }
+            }
+        } catch (osmErr) {
+            console.warn('[reverseGeocode] OSM Nominatim unavailable, falling back to catalog:', osmErr.message);
+        }
+
+        if (onlineResult) {
+            geocodeCache.set(cacheKey, onlineResult);
+            return res.json({ success: true, ...onlineResult, source: 'ONLINE' });
+        }
+
+        if (nearest && minDistance <= 80) {
+            geocodeCache.set(cacheKey, nearest);
+            return res.json({ success: true, ...nearest, source: 'OFFLINE_BOUNDARY' });
+        }
+
+        return res.json({
+            success: true,
+            village: '',
+            municipality: '',
+            district: '',
+            country: nearest?.country || '',
+            countryCode: nearest?.countryCode || '',
+            displayName: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            source: 'FALLBACK'
+        });
+    } catch (err) {
+        console.error('[reverseGeocode] ERROR:', err);
+        return res.status(500).json({ error: 'Reverse geocode failed: ' + err.message });
+    }
+};
+
+/**
+ * GET /api/reception/batch-geometry-check
+ * RC-10: Batch geometry outlier check
+ */
+exports.batchGeometryCheck = async (req, res) => {
+    try {
+        const { projectId, lat: latStr, lng: lngStr, sampleId } = req.query;
+        const candLat = parseFloat(latStr);
+        const candLng = parseFloat(lngStr);
+
+        if (isNaN(candLat) || isNaN(candLng)) {
+            return res.status(400).json({ error: 'Valid candidate lat and lng are required' });
+        }
+
+        if (!projectId) {
+            return res.json({ isOutlier: false, reason: 'No project specified' });
+        }
+
+        const projectSamples = await prisma.sample.findMany({
+            where: {
+                OR: [
+                    { projectId },
+                    { projectCode: projectId }
+                ],
+                latitude: { not: null },
+                longitude: { not: null },
+                ...(sampleId ? { id: { not: sampleId } } : {})
+            },
+            select: { id: true, originalId: true, latitude: true, longitude: true }
+        });
+
+        if (projectSamples.length < 2) {
+            return res.json({
+                isOutlier: false,
+                sampleCount: projectSamples.length,
+                reason: 'Insufficient existing sample points for cluster outlier calculation'
+            });
+        }
+
+        const count = projectSamples.length;
+        const avgLat = projectSamples.reduce((sum, s) => sum + s.latitude, 0) / count;
+        const avgLng = projectSamples.reduce((sum, s) => sum + s.longitude, 0) / count;
+
+        const distances = projectSamples.map(s => haversineDistanceKm(avgLat, avgLng, s.latitude, s.longitude));
+        distances.sort((a, b) => a - b);
+        const medianClusterRadiusKm = distances[Math.floor(distances.length / 2)];
+
+        const candDistToCentroid = haversineDistanceKm(avgLat, avgLng, candLat, candLng);
+        const isOutlier = candDistToCentroid > 40.0 || (candDistToCentroid > 20.0 && candDistToCentroid > 3 * medianClusterRadiusKm);
+
+        return res.json({
+            success: true,
+            isOutlier,
+            distanceKm: parseFloat(candDistToCentroid.toFixed(1)),
+            clusterMedianRadiusKm: parseFloat(medianClusterRadiusKm.toFixed(1)),
+            clusterCentroid: { lat: parseFloat(avgLat.toFixed(5)), lng: parseFloat(avgLng.toFixed(5)) },
+            sampleCount: count,
+            warning: isOutlier
+                ? `Spatial Outlier Warning: Coordinate is ${candDistToCentroid.toFixed(1)} km from project cluster centroid (median radius: ${medianClusterRadiusKm.toFixed(1)} km across ${count} samples). Verify against label transposition.`
+                : null
+        });
+    } catch (err) {
+        console.error('[batchGeometryCheck] ERROR:', err);
+        return res.status(500).json({ error: 'Batch geometry check failed: ' + err.message });
+    }
+};
+

@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
-import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw, MapPin } from 'lucide-react';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
+import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
 import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
+
 
 const Reception = () => {
     const { user, token } = useAuth();
@@ -45,6 +47,9 @@ const Reception = () => {
     const [isResubmission, setIsResubmission] = useState(false);
     const [duplicateWarning, setDuplicateWarning] = useState(null);
 
+    // Stage B: Location & Spatial Outlier
+    const [geometryOutlierWarning, setGeometryOutlierWarning] = useState(null);
+
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
     const [intakeNotes, setIntakeNotes] = useState('');
@@ -60,8 +65,15 @@ const Reception = () => {
         date: new Date().toISOString().split('T')[0],
         depth: '',
         depthType: '0-20',
+        depthMin: 0,
+        depthMax: 20,
+        depthTopCm: 0,
+        depthBottomCm: 20,
         location: '',
-        coordinates: null, // { lat, lng, accuracy }
+        coordinates: null, // { lat, lng, accuracy, elevation }
+        positionalUncertaintyM: null,
+        locationSource: null,
+        compositeRadiusM: null,
         landUse: '',
         crop: '',
         previousCrop: '',
@@ -78,6 +90,7 @@ const Reception = () => {
         subsamples: '',
         urgency: 'Normal'
     });
+
 
     // Analysis Selection State
     const [selectedGroup, setSelectedGroup] = useState('');
@@ -139,7 +152,66 @@ const Reception = () => {
         fetchData();
     }, []);
 
+    // Stage B: Resolve coordinates across project/walk-in formats (RC-09)
+    const resolvedCoordinates = useMemo(() => {
+        if (mode === 'WALK_IN' || sampleData?.isNew) {
+            return sampling.coordinates || null;
+        }
+        if (sampleData?.latitude && sampleData?.longitude) {
+            return {
+                lat: sampleData.latitude,
+                lng: sampleData.longitude,
+                accuracy: sampleData.positionalUncertaintyM
+            };
+        }
+        const meta = sampleData?.fieldMetadata || {};
+        if (meta.coordinates && typeof meta.coordinates === 'object') return meta.coordinates;
+        if (meta.latitude && meta.longitude) return { lat: meta.latitude, lng: meta.longitude, accuracy: meta.accuracy };
+        if (typeof meta.gps === 'string') {
+            const parts = meta.gps.trim().split(/\s+/);
+            if (parts.length >= 2) {
+                return {
+                    lat: parseFloat(parts[0]),
+                    lng: parseFloat(parts[1]),
+                    elevation: parts[2] ? parseFloat(parts[2]) : undefined,
+                    accuracy: parts[3] ? parseFloat(parts[3]) : undefined
+                };
+            }
+        }
+        return sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates || null;
+    }, [sampleData, sampling.coordinates, mode]);
+
+    // Stage B: Batch geometry outlier detection (RC-10)
+    useEffect(() => {
+        const checkOutlier = async () => {
+            const proj = sessionProject || sampleData?.projectCode || sampleData?.projectId;
+            if (!proj || !resolvedCoordinates?.lat || !resolvedCoordinates?.lng) {
+                setGeometryOutlierWarning(null);
+                return;
+            }
+            try {
+                const res = await axios.get('/api/reception/batch-geometry-check', {
+                    params: {
+                        projectId: proj,
+                        lat: resolvedCoordinates.lat,
+                        lng: resolvedCoordinates.lng,
+                        sampleId: sampleData?.id
+                    }
+                });
+                if (res.data?.isOutlier) {
+                    setGeometryOutlierWarning(res.data.warning);
+                } else {
+                    setGeometryOutlierWarning(null);
+                }
+            } catch (err) {
+                console.warn('Batch geometry check failed', err);
+            }
+        };
+        checkOutlier();
+    }, [resolvedCoordinates, sessionProject, sampleData]);
+
     const resetForm = () => {
+
         setScanCode('');
         setSampleData(null);
         setChecklistData({ items: {}, nonConformance: false, reason: '' });
@@ -158,14 +230,24 @@ const Reception = () => {
         setIsResubmission(false);
         setDuplicateWarning(null);
 
+        // Stage B
+        setGeometryOutlierWarning(null);
+
         if (mode === 'WALK_IN') {
             setSubmitter({ name: '', surname: '', phone: '', email: '', organization: '', contactMethod: 'Phone' });
             setSampling({
                 date: new Date().toISOString().split('T')[0],
                 depth: '',
                 depthType: '0-20',
+                depthMin: 0,
+                depthMax: 20,
+                depthTopCm: 0,
+                depthBottomCm: 20,
                 location: '',
                 coordinates: null,
+                positionalUncertaintyM: null,
+                locationSource: null,
+                compositeRadiusM: null,
                 captureMethod: 'MAP_PIN',
                 locationConfidence: null,
                 siteName: '',
@@ -800,7 +882,13 @@ const Reception = () => {
             moistureOnArrival: moistureOnArrival || null,
             foreignMaterial: foreignMaterial.length > 0 ? foreignMaterial : null,
             intakePhotos: intakePhotos,
-            isResubmission: !!isResubmission
+            isResubmission: !!isResubmission,
+
+            // Stage B: Location & Provenance
+            coordinates: sampling.coordinates || null,
+            positionalUncertaintyM: sampling.positionalUncertaintyM ? parseFloat(sampling.positionalUncertaintyM) : null,
+            locationSource: sampling.locationSource || sampling.captureMethod || null,
+            compositeRadiusM: sampling.compositeRadiusM ? parseFloat(sampling.compositeRadiusM) : null
         };
 
         try {
@@ -1196,18 +1284,39 @@ const Reception = () => {
 
                     {/* LEFT COLUMN: SAMPLE DATA */}
                     <div className="space-y-6">
-                        {/* Map View */}
-                        {(sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates) && (
+                        {/* Map View - Persistent for Project mode (RC-09) */}
+                        {mode !== 'WALK_IN' && !sampleData?.isNew && (
                             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm animate-in fade-in slide-in-from-top-2">
-                                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">📍 Location Preview</h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2 text-sm">
+                                        <MapPin size={16} /> Location Preview
+                                    </h3>
+                                    {resolvedCoordinates && (
+                                        <span className="text-[11px] font-mono text-gray-500">
+                                            {parseFloat(resolvedCoordinates.lat).toFixed(4)}&deg;, {parseFloat(resolvedCoordinates.lng).toFixed(4)}&deg;
+                                        </span>
+                                    )}
+                                </div>
                                 <SampleMap
-                                    coordinates={sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates}
+                                    coordinates={resolvedCoordinates}
                                     title={sampleData?.originalId || 'Sample Site'}
+                                    uncertaintyM={resolvedCoordinates?.accuracy || resolvedCoordinates?.positionalUncertaintyM}
                                 />
                             </div>
                         )}
 
-                        {/* Show Manual Form for Walk-ins OR New Unlisted Project Samples */}
+                        {/* Batch Geometry Outlier Warning Alert (RC-10) */}
+                        {geometryOutlierWarning && (
+                            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200 shadow-sm">
+                                <AlertTriangle size={18} className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <strong className="block font-bold mb-0.5">Spatial Outlier Detected (RC-10)</strong>
+                                    <p className="leading-relaxed">{geometryOutlierWarning}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Show Manual Form for Walk-ins OR Field Provenance Card for Project Samples (RC-09) */}
                         {(mode === 'WALK_IN' || sampleData?.isNew) ? (
                             <WalkInForm
                                 submitter={submitter} setSubmitter={setSubmitter}
@@ -1217,40 +1326,10 @@ const Reception = () => {
                                 errors={validationErrors}
                             />
                         ) : (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                                        <Layers size={20} /> Project Sample Metadata
-                                    </h3>
-                                    {isResubmission && (
-                                        <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
-                                            Re-submission
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div><label className="text-gray-500">Original ID</label><div className="font-mono font-bold">{sampleData.originalId}</div></div>
-                                        <div><label className="text-gray-500">Project Code</label><div className="font-mono">{sampleData.projectCode || sampleData.projectId || 'N/A'}</div></div>
-                                        <div><label className="text-gray-500">Status</label><div className="badge bg-yellow-100 text-yellow-800 px-2 rounded w-fit">{sampleData.status}</div></div>
-                                        <div><label className="text-gray-500">Collection Date</label><div>{(typeof sampleData.fieldMetadata?.collectionDate === 'object' ? sampleData.fieldMetadata?.collectionDate?.value : sampleData.fieldMetadata?.collectionDate) || 'N/A'}</div></div>
-                                    </div>
-
-                                    {sampleData.fieldMetadata && (
-                                        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border dark:border-gray-600 text-xs space-y-2">
-                                            {Object.entries(sampleData.fieldMetadata).slice(0, 6).map(([k, v]) => {
-                                                const displayVal = v && typeof v === 'object' ? (v.value ?? JSON.stringify(v)) : v;
-                                                return (
-                                                    <div key={k} className="flex justify-between border-b pb-1 last:border-0">
-                                                        <span className="font-semibold capitalize text-gray-600">{k.replace(/([A-Z])/g, ' $1')}</span>
-                                                        <span className="font-mono">{String(displayVal ?? '—')}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                            <FieldProvenanceCard
+                                sampleData={sampleData}
+                                coordinates={resolvedCoordinates}
+                            />
                         )}
 
                         {/* ANALYSIS SELECTION */}

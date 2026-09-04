@@ -230,13 +230,35 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                             </span>
                         </label>
                         {sampling.isComposite && (
-                            <input
-                                type="number"
-                                placeholder="Number of Sub-samples"
-                                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                                value={sampling.subsamples || ''}
-                                onChange={e => handleChange('sampling', 'subsamples', e.target.value)}
-                            />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    placeholder="Sub-samples count"
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-sm"
+                                    value={sampling.subsamples || ''}
+                                    onChange={e => handleChange('sampling', 'subsamples', e.target.value)}
+                                />
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        placeholder="Composite Radius"
+                                        className="w-full p-2 pr-8 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-sm"
+                                        value={sampling.compositeRadiusM || ''}
+                                        onChange={e => {
+                                            const r = parseFloat(e.target.value);
+                                            const rad = isNaN(r) ? '' : r;
+                                            handleChange('sampling', 'compositeRadiusM', rad);
+                                            if (rad && (!sampling.positionalUncertaintyM || sampling.positionalUncertaintyM < rad)) {
+                                                handleChange('sampling', 'positionalUncertaintyM', rad);
+                                            }
+                                        }}
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-xs text-gray-400 font-bold">&plusmn;m</span>
+                                </div>
+                            </div>
                         )}
                     </div>
                     <div className="md:col-span-2">
@@ -337,6 +359,10 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     onCaptureMethodChange={(method) => handleChange('sampling', 'captureMethod', method)}
                     confidence={sampling.locationConfidence}
                     onConfidenceChange={(level) => handleChange('sampling', 'locationConfidence', level)}
+                    positionalUncertaintyM={sampling.positionalUncertaintyM}
+                    onPositionalUncertaintyChange={(u) => handleChange('sampling', 'positionalUncertaintyM', u)}
+                    locationSource={sampling.locationSource}
+                    onLocationSourceChange={(s) => handleChange('sampling', 'locationSource', s)}
                     siteName={sampling.siteName}
                     onSiteNameChange={(v) => handleChange('sampling', 'siteName', v)}
                     areaVillage={sampling.areaVillage}
@@ -351,23 +377,23 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     onChange={async (val) => {
                         let locationDesc = val.description || sampling.location;
 
-                        // Auto-Reverse Geocode if coordinates changed and desc is empty or previous auto
+                        // Reverse Geocode using secure server proxy (RC-08)
                         if (val.lat && val.lng && (!locationDesc || locationDesc.startsWith('Near '))) {
                             try {
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${val.lat}&lon=${val.lng}&zoom=14`);
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`/api/reception/reverse-geocode?lat=${val.lat}&lng=${val.lng}`, {
+                                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                                });
                                 if (res.ok) {
                                     const data = await res.json();
-                                    const address = data.address;
-                                    const town = address.town || address.village || address.city || address.county || address.state;
-                                    if (town) {
-                                        locationDesc = `${town}, ${address.country_code?.toUpperCase()}`;
-                                    }
-                                    // Auto-fill structured fields from reverse geocode
-                                    if (!sampling.areaVillage && (address.village || address.town)) {
-                                        handleChange('sampling', 'areaVillage', address.village || address.town);
-                                    }
-                                    if (!sampling.district && (address.county || address.state)) {
-                                        handleChange('sampling', 'district', address.county || address.state);
+                                    if (data.displayName || data.village || data.municipality) {
+                                        locationDesc = data.displayName || `${data.village || data.municipality}, ${data.district}`;
+                                        if (!sampling.areaVillage && (data.village || data.municipality)) {
+                                            handleChange('sampling', 'areaVillage', data.village || data.municipality);
+                                        }
+                                        if (!sampling.district && data.district) {
+                                            handleChange('sampling', 'district', data.district);
+                                        }
                                     }
                                 }
                             } catch (e) {
