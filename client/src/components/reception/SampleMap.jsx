@@ -57,7 +57,7 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
     const uncertainty = uncertaintyM || coordinates.positionalUncertaintyM || coordinates.accuracy;
 
     return (
-        <div className="h-64 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700 z-0">
+        <div className="relative isolate min-h-[256px] h-64 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700 z-0">
             <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
                 <TileLayer

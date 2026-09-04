@@ -32,6 +32,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <input
+                        data-field-key="submitter.name"
                         placeholder={t('reception.firstName', 'First Name *')}
                         className={`p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.name')}`}
                         value={submitter.name}
@@ -45,6 +46,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     />
                     <div className="relative">
                         <input
+                            data-field-key="submitter.phone"
                             placeholder={t('reception.phoneReq', 'Phone (Required) *')}
                             className={`w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.phone')}`}
                             value={submitter.phone}
@@ -156,7 +158,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                 </div>
 
                 {/* Row 2: Sampling Depth — full width */}
-                <div className={`p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border ${hasErr('depth') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-100 dark:border-gray-700'}`}>
+                <div data-field-key="depth" className={`p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border ${hasErr('depth') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-100 dark:border-gray-700'}`}>
                     <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
                         Sampling Depth
                         <InfoTooltip text="Select the standard soil horizon or enter a custom depth range." />
@@ -343,7 +345,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             </div>
 
             {/* LOCATION PICKER */}
-            <div className={`bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm relative z-0 ${hasErr('location') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-200 dark:border-gray-700'}`}>
+            <div data-field-key="location" className={`bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm relative z-0 ${hasErr('location') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-200 dark:border-gray-700'}`}>
                 <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
                     <MapPin size={20} /> 3. Sampling Location
                 </h3>

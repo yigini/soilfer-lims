@@ -7,6 +7,8 @@ import {
 import axios from 'axios';
 import BatchExceptionModal from './BatchExceptionModal';
 import ManifestImportModal from './ManifestImportModal';
+import LabelPrintDialog from '../common/LabelPrintDialog';
+import { playSuccessChime, playErrorBuzz } from '../../utils/audioCues';
 
 const BatchIntake = ({ 
     user, 
@@ -58,6 +60,7 @@ const BatchIntake = ({
     const [editingSampleIdx, setEditingSampleIdx] = useState(null);
     const [isManifestModalOpen, setIsManifestModalOpen] = useState(false);
     const [submissionResult, setSubmissionResult] = useState(null);
+    const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
 
     const scanInputRef = useRef(null);
 
@@ -83,6 +86,7 @@ const BatchIntake = ({
 
         // Duplicate check within batch
         if (samples.some(s => s.originalId.toLowerCase() === cleanId.toLowerCase())) {
+            playErrorBuzz();
             alert(`Sample "${cleanId}" is already scanned in this consignment batch.`);
             setScanInput('');
             return;
@@ -126,6 +130,7 @@ const BatchIntake = ({
 
             setSamples(prev => [newSample, ...prev]);
             setScanInput('');
+            playSuccessChime();
         } finally {
             setIsScanning(false);
             scanInputRef.current?.focus();
@@ -191,10 +196,12 @@ const BatchIntake = ({
 
             const res = await axios.post('/api/reception/consignments', payload);
             if (res.data.success) {
+                playSuccessChime();
                 setSubmissionResult(res.data);
                 if (onSuccess) onSuccess(res.data);
             }
         } catch (err) {
+            playErrorBuzz();
             console.error('Batch submission failed:', err);
             alert('Consignment submission failed: ' + (err.response?.data?.error || err.message));
         } finally {
@@ -249,20 +256,36 @@ const BatchIntake = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-center gap-3">
+                    <div className="flex flex-wrap justify-center gap-3">
                         <button
+                            type="button"
                             onClick={() => window.print()}
                             className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                         >
                             <Printer size={16} /> Print Consignment Voucher
                         </button>
                         <button
+                            type="button"
+                            onClick={() => setIsLabelModalOpen(true)}
+                            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md flex items-center gap-2 transition-all active:scale-95"
+                        >
+                            <Printer size={16} /> Print Sample Labels ({csg.acceptedCount || samples.filter(s => s.status !== 'REJECTED').length})
+                        </button>
+                        <button
+                            type="button"
                             onClick={onBack}
                             className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all"
                         >
                             Complete & Return
                         </button>
                     </div>
+
+                    {/* Batch Label Print Dialog (RC-17) */}
+                    <LabelPrintDialog
+                        isOpen={isLabelModalOpen}
+                        onClose={() => setIsLabelModalOpen(false)}
+                        samples={submissionResult.samples || samples}
+                    />
                 </div>
             </div>
         );

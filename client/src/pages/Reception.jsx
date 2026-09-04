@@ -10,8 +10,12 @@ import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
 import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
 import BatchIntake from '../components/reception/BatchIntake';
+import WedgeModeBar from '../components/reception/WedgeModeBar';
+import KeyboardShortcutsModal from '../components/reception/KeyboardShortcutsModal';
+import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
+import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAudioEnabled } from '../utils/audioCues';
 
 
 const Reception = () => {
@@ -23,6 +27,15 @@ const Reception = () => {
     // --- MODE SELECTION ---
     const [mode, setMode] = useState(null); // 'PROJECT' | 'WALK_IN' | null
     const [sessionProject, setSessionProject] = useState(null);
+
+    // --- STAGE D: HARDWARE WEDGE SCANNER & DESK ERGONOMICS (RC-16, RC-17, RC-18) ---
+    const [isWedgeMode, setIsWedgeMode] = useState(() => localStorage.getItem('lims_wedge_mode') === 'true');
+    const [wedgeSuffix, setWedgeSuffix] = useState(() => localStorage.getItem('lims_wedge_suffix') || 'ENTER');
+    const [soundEnabled, setSoundEnabled] = useState(() => isAudioEnabled());
+    const [autoRefocus, setAutoRefocus] = useState(() => localStorage.getItem('lims_wedge_refocus') !== 'false');
+    const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+    const [isLabelPrintOpen, setIsLabelPrintOpen] = useState(false);
+    const scanInputRef = useRef(null);
 
     // --- DATA LOADING ---
     const [groups, setGroups] = useState([]);
@@ -211,13 +224,132 @@ const Reception = () => {
         checkOutlier();
     }, [resolvedCoordinates, sessionProject, sampleData]);
 
-    const resetForm = () => {
+    // --- STAGE D: HARDWARE WEDGE SCANNER & DESK ERGONOMICS (RC-16, RC-17, RC-18) ---
+    const handleToggleWedgeMode = (enabled) => {
+        setIsWedgeMode(enabled);
+        localStorage.setItem('lims_wedge_mode', String(enabled));
+        if (enabled && scanInputRef.current) {
+            scanInputRef.current.focus();
+        }
+    };
 
+    const handleChangeSuffix = (suffix) => {
+        setWedgeSuffix(suffix);
+        localStorage.setItem('lims_wedge_suffix', suffix);
+    };
+
+    const handleToggleSound = (enabled) => {
+        setSoundEnabled(enabled);
+        setAudioEnabled(enabled);
+    };
+
+    const handleToggleAutoRefocus = (enabled) => {
+        setAutoRefocus(enabled);
+        localStorage.setItem('lims_wedge_refocus', String(enabled));
+    };
+
+    // Stage D: Auto-refocus persistence in Wedge Fast Mode (RC-16)
+    useEffect(() => {
+        if (!isWedgeMode || !autoRefocus) return;
+
+        const handleBlur = () => {
+            setTimeout(() => {
+                const active = document.activeElement;
+                const isFormInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+                const isDialogOrModal = active && active.closest && (active.closest('.fixed') || active.closest('[role="dialog"]'));
+                if (!isFormInput && !isDialogOrModal && scanInputRef.current) {
+                    scanInputRef.current.focus();
+                }
+            }, 60);
+        };
+
+        window.addEventListener('focusout', handleBlur);
+        return () => window.removeEventListener('focusout', handleBlur);
+    }, [isWedgeMode, autoRefocus]);
+
+    // Stage D: Global Keyboard Navigation Shortcuts (RC-18)
+    useEffect(() => {
+        const handleGlobalKeyDown = (e) => {
+            // Escape: Close modals or clear warning
+            if (e.key === 'Escape') {
+                if (isShortcutsOpen) {
+                    setIsShortcutsOpen(false);
+                    return;
+                }
+                if (isLabelPrintOpen) {
+                    setIsLabelPrintOpen(false);
+                    return;
+                }
+                if (duplicateWarning) {
+                    setDuplicateWarning(null);
+                    return;
+                }
+            }
+
+            // Alt+1: Project Mode
+            if (e.altKey && e.key === '1') {
+                e.preventDefault();
+                setMode('PROJECT');
+                return;
+            }
+            // Alt+2: Walk-in Mode
+            if (e.altKey && e.key === '2') {
+                e.preventDefault();
+                setMode('WALK_IN');
+                setSessionProject(null);
+                const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                setScanCode(`EXT-${randomId}`);
+                setSampleData({ originalId: `EXT-${randomId}`, isNew: true });
+                return;
+            }
+            // Alt+3: Consignment Batch Mode
+            if (e.altKey && e.key === '3') {
+                e.preventDefault();
+                setMode('CONSIGNMENT');
+                return;
+            }
+            // Alt+W: Toggle Wedge Fast Mode
+            if (e.altKey && (e.key === 'w' || e.key === 'W')) {
+                e.preventDefault();
+                handleToggleWedgeMode(!isWedgeMode);
+                playNoticeChime();
+                return;
+            }
+            // Ctrl+Enter: Complete Intake
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                if (sampleData && !result && !loading) {
+                    e.preventDefault();
+                    handleSubmit('ACCEPTED');
+                    return;
+                }
+            }
+            // Ctrl+P: Print Label
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+                if (result?.success) {
+                    e.preventDefault();
+                    setIsLabelPrintOpen(true);
+                    return;
+                }
+            }
+            // ?: Open keyboard shortcuts help when not typing in text field
+            if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+                e.preventDefault();
+                setIsShortcutsOpen(prev => !prev);
+                return;
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, [isShortcutsOpen, isLabelPrintOpen, duplicateWarning, sampleData, result, loading, isWedgeMode]);
+
+    const resetForm = () => {
         setScanCode('');
         setSampleData(null);
         setChecklistData({ items: {}, nonConformance: false, reason: '' });
         setRemovals([]);
         setAdditions([]);
+        setTimeout(() => scanInputRef.current?.focus(), 50);
         setJustification('');
         setIntakeNotes('');
         setCocDeliveredBy('');
@@ -412,6 +544,7 @@ const Reception = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (dupRes.data?.isPriorReceipt) {
+                playNoticeChime();
                 setDuplicateWarning({
                     sample: dupRes.data.sample,
                     originalId: trimmedCode,
@@ -432,6 +565,7 @@ const Reception = () => {
                 const lockedStatuses = ['ACCEPTED', 'LAB_ID_ASSIGNED', 'PROCESSING', 'COMPLETED', 'APPROVED', 'ARCHIVED', 'DISPOSED'];
 
                 if (lockedStatuses.includes(found.status)) {
+                    playErrorBuzz();
                     showDialog({
                         type: 'error',
                         title: 'Intake Locked',
@@ -453,6 +587,7 @@ const Reception = () => {
                             : `Would you like to resume the draft for ${found.originalId}?`,
                         confirmText: 'Yes, Open',
                         onConfirm: () => {
+                            playSuccessChime();
                             // Detect walk-in: explicit flag OR no project link
                             const isWalkInDraft = found.receptionData?.isWalkIn || (!found.projectId && !found.projectCode);
                             setMode(isWalkInDraft ? 'WALK_IN' : 'PROJECT');
@@ -494,6 +629,7 @@ const Reception = () => {
                     });
                 } else if (currentMode === 'PROJECT' && currentProject) {
                     if (found.projectId && found.projectId !== currentProject && found.projectCode !== currentProject) {
+                        playErrorBuzz();
                         showDialog({
                             type: 'error',
                             title: 'Project Mismatch',
@@ -503,6 +639,7 @@ const Reception = () => {
                         setLoading(false);
                         return;
                     }
+                    playSuccessChime();
                     setSampleData(found);
                     populateDeskFacts(found);
 
@@ -513,6 +650,7 @@ const Reception = () => {
                         if (proj?.defaultAnalysisBundle) setSelectedGroup(proj.defaultAnalysisBundle);
                     }
                 } else {
+                    playSuccessChime();
                     setSampleData(found);
                     populateDeskFacts(found);
                     // Also auto-apply bundle for project samples caught in non-project mode
@@ -528,6 +666,7 @@ const Reception = () => {
                     const proj = availableProjects.find(p => p.id === currentProject);
                     if (proj && proj.projectType !== 'TEMPLATE_PREDEFINED_IDS') {
                         // Bypass manifest check for Open Intake projects
+                        playSuccessChime();
                         setSampleData({
                             originalId: trimmedCode,
                             isNew: true,
@@ -540,6 +679,7 @@ const Reception = () => {
                     // Try to check if it's an RBAC/Scope issue
                     try {
                         const globalCheck = await axios.get(`/api/samples`, { params: { search: trimmedCode, limit: 1, _checkScope: false } });
+                        playErrorBuzz();
                         if (globalCheck.data.data?.length > 0) {
                             const foreign = globalCheck.data.data[0];
                             showDialog({
@@ -555,6 +695,7 @@ const Reception = () => {
                             });
                         }
                     } catch (err) {
+                        playErrorBuzz();
                         showDialog({
                             type: 'error',
                             title: 'Lookup Error',
@@ -562,10 +703,12 @@ const Reception = () => {
                         });
                     }
                 } else {
+                    playSuccessChime();
                     setSampleData({ originalId: trimmedCode, isNew: true });
                 }
             }
         } catch (e) {
+            playErrorBuzz();
             console.error(e);
             showDialog({ type: 'error', title: 'Error', message: 'Lookup failed' });
         } finally {
@@ -614,9 +757,9 @@ const Reception = () => {
         }
     };
 
-    // Debounced search effect
+    // Debounced search effect (bypassed in Wedge Fast Mode to prevent race conditions with barcode scanners)
     useEffect(() => {
-        if (mode !== 'PROJECT' || !scanCode || scanCode.length < 2) {
+        if (mode !== 'PROJECT' || isWedgeMode || !scanCode || scanCode.length < 2) {
             setShowAutocomplete(false);
             return;
         }
@@ -626,7 +769,7 @@ const Reception = () => {
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [scanCode, mode, sessionProject]);
+    }, [scanCode, mode, sessionProject, isWedgeMode]);
 
     // Handle autocomplete selection
     const handleSelectAutocomplete = async (sample) => {
@@ -843,7 +986,14 @@ const Reception = () => {
         if (!isDraft) {
             const errors = validateForm();
             if (errors.length > 0) {
+                playErrorBuzz();
                 setValidationErrors(errors);
+                const firstErrorKey = errors[0].key;
+                const targetElement = document.querySelector(`[data-field-key="${firstErrorKey}"]`) || document.querySelector(`[name="${firstErrorKey}"]`);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetElement.focus?.();
+                }
                 showDialog({
                     type: 'error',
                     title: 'Missing Required Fields',
@@ -895,6 +1045,7 @@ const Reception = () => {
         try {
             const res = await axios.post('/api/reception/intake', payload);
             if (isDraft) {
+                playSuccessChime();
                 showDialog({
                     type: 'success',
                     title: 'Draft Saved',
@@ -903,10 +1054,13 @@ const Reception = () => {
                 setMode(null);
                 resetForm();
             } else {
+                playSuccessChime();
                 setResult(res.data);
+                setIsLabelPrintOpen(true);
                 localStorage.removeItem(AUTOSAVE_KEY);
             }
         } catch (err) {
+            playErrorBuzz();
             setResult({ success: false, message: err.response?.data?.message || 'Intake failed' });
         }
         setLoading(false);
@@ -934,7 +1088,19 @@ const Reception = () => {
 
     if (!mode) {
         return (
-            <div className="p-6 max-w-6xl mx-auto h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
+            <div className="p-6 max-w-6xl mx-auto min-h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
+                <WedgeModeBar
+                    isWedgeMode={isWedgeMode}
+                    onToggleWedgeMode={handleToggleWedgeMode}
+                    wedgeSuffix={wedgeSuffix}
+                    onChangeSuffix={handleChangeSuffix}
+                    soundEnabled={soundEnabled}
+                    onToggleSound={handleToggleSound}
+                    onOpenShortcuts={() => setIsShortcutsOpen(true)}
+                    autoRefocus={autoRefocus}
+                    onToggleAutoRefocus={handleToggleAutoRefocus}
+                />
+
                 <div className="text-center mb-6 md:mb-10">
                     <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Reception Console</h1>
                     <p className="text-gray-500">Select intake mode or resume a draft</p>
@@ -1003,10 +1169,6 @@ const Reception = () => {
                                 <div key={d.id} className="flex items-center justify-between p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl border border-transparent hover:border-blue-100 dark:hover:border-blue-800 transition-colors group cursor-pointer"
                                     onClick={() => {
                                         setScanCode(d.originalId);
-                                        // Trigger lookup manually or effect? 
-                                        // Since we are in render, we can't await here.
-                                        // Better to set ScanCode then call handleLookup via button or helper.
-                                        // We can modify handleLookup to accept an ID directly.
                                         handleLookup(d.originalId);
                                     }}
                                 >
@@ -1045,6 +1207,11 @@ const Reception = () => {
                         )}
                     </div>
                 </div>
+
+                <KeyboardShortcutsModal
+                    isOpen={isShortcutsOpen}
+                    onClose={() => setIsShortcutsOpen(false)}
+                />
             </div>
         );
     }
@@ -1106,6 +1273,19 @@ const Reception = () => {
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
+            {/* STAGE D: WEDGE SCANNER TOOLBAR (RC-16) */}
+            <WedgeModeBar
+                isWedgeMode={isWedgeMode}
+                onToggleWedgeMode={handleToggleWedgeMode}
+                wedgeSuffix={wedgeSuffix}
+                onChangeSuffix={handleChangeSuffix}
+                soundEnabled={soundEnabled}
+                onToggleSound={handleToggleSound}
+                onOpenShortcuts={() => setIsShortcutsOpen(true)}
+                autoRefocus={autoRefocus}
+                onToggleAutoRefocus={handleToggleAutoRefocus}
+            />
+
             {/* HEADER */}
             <div className="flex justify-between items-center mb-6 bg-slate-900 text-white p-4 rounded-xl shadow-lg">
                 <div className="flex items-center gap-4">
@@ -1142,6 +1322,7 @@ const Reception = () => {
                 <div className="flex gap-4">
                     <div className="flex-1 relative">
                         <input
+                            ref={scanInputRef}
                             value={scanCode}
                             onChange={(e) => setScanCode(e.target.value)}
                             placeholder={mode === 'PROJECT' ?
@@ -1149,18 +1330,29 @@ const Reception = () => {
                                     ? t('reception.searchManifest', 'Search manifest by Sample ID...')
                                     : t('reception.scanOrEnter', 'Scan or Enter Sample ID to add...'))
                                 : t('reception.enterSampleId', 'Enter Sample ID')}
-                            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-lg"
+                            className={`w-full p-3 border rounded-lg focus:ring-2 font-mono text-lg transition-all ${
+                                isWedgeMode 
+                                    ? 'border-amber-400 focus:ring-amber-500 bg-amber-50/20 dark:bg-amber-950/10' 
+                                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                            }`}
                             onKeyDown={e => {
-                                if (e.key === 'Enter') {
+                                const isEnterMatch = (wedgeSuffix === 'ENTER' || wedgeSuffix === 'BOTH') && e.key === 'Enter';
+                                const isTabMatch = (wedgeSuffix === 'TAB' || wedgeSuffix === 'BOTH') && e.key === 'Tab';
+
+                                if (isEnterMatch || isTabMatch) {
+                                    e.preventDefault();
                                     setShowAutocomplete(false);
                                     handleLookup();
+                                } else if (e.key === 'Escape') {
+                                    setShowAutocomplete(false);
                                 }
-                                if (e.key === 'Escape') setShowAutocomplete(false);
                             }}
                             onFocus={() => {
-                                const proj = availableProjects.find(p => p.id === sessionProject);
-                                if (scanCode.length >= 2 && mode === 'PROJECT' && proj?.projectType === 'TEMPLATE_PREDEFINED_IDS' && autocompleteResults.length > 0) {
-                                    setShowAutocomplete(true);
+                                if (!isWedgeMode) {
+                                    const proj = availableProjects.find(p => p.id === sessionProject);
+                                    if (scanCode.length >= 2 && mode === 'PROJECT' && proj?.projectType === 'TEMPLATE_PREDEFINED_IDS' && autocompleteResults.length > 0) {
+                                        setShowAutocomplete(true);
+                                    }
                                 }
                             }}
                         />
@@ -1466,6 +1658,7 @@ const Reception = () => {
                                 </div>
                                 <div className="relative">
                                     <input
+                                        data-field-key="receivedMass"
                                         type="number"
                                         min="0"
                                         step="0.1"
@@ -1789,15 +1982,17 @@ const Reception = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
-                                        onClick={() => window.print()}
+                                        type="button"
+                                        onClick={() => setIsLabelPrintOpen(true)}
                                         className="flex flex-col items-center justify-center gap-2 py-5 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl border-2 border-indigo-100 dark:border-indigo-800 hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-gray-600 transition-all active:scale-95 shadow-sm group"
                                     >
                                         <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
                                             <Printer size={24} />
                                         </div>
-                                        <span className="text-sm">{t('reception.printTag', 'Print Tag')}</span>
+                                        <span className="text-sm">{t('reception.printTag', 'Print Label')}</span>
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={resetForm}
                                         className="flex flex-col items-center justify-center gap-2 py-5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-900/20 group"
                                     >
@@ -1824,66 +2019,6 @@ const Reception = () => {
                 </div>
             )}
 
-            {/* PRINTABLE LABEL (Hidden unless printing) */}
-            {result?.success && (
-                <div className="print-only hidden">
-                    <div className="w-[101mm] h-[54mm] bg-white p-4 border border-black flex flex-col font-sans">
-                        <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2 mb-2">
-                            <div>
-                                <h1 className="text-xl font-black uppercase tracking-tight text-slate-900">
-                                    {branding?.title || 'SoilFER LIMS'}
-                                </h1>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase">
-                                    {branding?.organization || 'Reception Intake'}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-[9px] font-bold text-white bg-slate-900 px-1.5 py-0.5 rounded uppercase mb-1 inline-block">
-                                    Sample Label
-                                </div>
-                                <div className="text-[10px] font-mono font-bold text-slate-600">
-                                    {new Date().toLocaleDateString()}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-1 gap-4 items-center">
-                            {/* QR CODE - Now using Lab ID */}
-                            <div className="w-24 h-24 bg-white border border-gray-200 p-1 rounded shadow-sm">
-                                <img
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${result.labId}`}
-                                    alt="QR"
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                                <div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Lab ID</div>
-                                    <div className="text-2xl font-black font-mono leading-none text-slate-900">
-                                        {result.labId}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Sample ID (Original)</div>
-                                    <div className="text-[11px] font-bold text-slate-600 font-mono break-all">
-                                        {result.originalId || sampleData?.originalId}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-auto pt-2 border-t border-dashed border-gray-300 flex justify-between items-end">
-                            <div className="text-[8px] font-bold text-slate-400">
-                                Collected: {sampling.date || 'N/A'}
-                            </div>
-                            <div className="text-[8px] font-black text-slate-900 uppercase">
-                                {user.labId || 'Global Lab'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
             {/* SCANNER MODAL */}
             {showScanner && (
                 <QRScanner
@@ -1896,6 +2031,27 @@ const Reception = () => {
                     onClose={() => setShowScanner(false)}
                 />
             )}
+
+            {/* STAGE D: KEYBOARD SHORTCUTS MODAL (RC-18) */}
+            <KeyboardShortcutsModal
+                isOpen={isShortcutsOpen}
+                onClose={() => setIsShortcutsOpen(false)}
+            />
+
+            {/* STAGE D: IMMEDIATE OFFLINE LABEL PRINT DIALOG (RC-17) */}
+            <LabelPrintDialog
+                isOpen={isLabelPrintOpen}
+                onClose={() => setIsLabelPrintOpen(false)}
+                sample={result?.success ? {
+                    id: result.id,
+                    labId: result.labId,
+                    originalId: result.originalId || sampleData?.originalId,
+                    assignedLab: user?.labId,
+                    projectCode: sessionProject || sampleData?.projectCode,
+                    samplingDetails: sampling,
+                    status: 'ACCEPTED'
+                } : null}
+            />
         </div>
     );
 };
