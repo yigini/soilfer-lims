@@ -1,7 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const receptionController = require('../controllers/receptionController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
+
+// Storage configuration for intake & non-conformance photos
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dest = path.join(__dirname, '..', 'uploads', 'intake');
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+        cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname) || '.jpg';
+        const uniqueName = `intake_${Date.now()}_${Math.random().toString(36).substring(2, 9)}${ext}`;
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per photo
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed.'));
+        }
+    }
+});
 
 router.use(verifyToken);
 
@@ -12,5 +41,17 @@ router.post('/intake', checkPermission('RECEIVE_SAMPLE'), receptionController.pr
 // POST /api/reception/discard
 // Allows reception staff to discard their own DRAFT/RECEIVED samples
 router.post('/discard', checkPermission('RECEIVE_SAMPLE'), receptionController.discardDraft);
+
+// GET /api/reception/check-duplicate
+// Duplicate & re-submission detection across laboratories (RC-04)
+router.get('/check-duplicate', checkPermission('RECEIVE_SAMPLE'), receptionController.checkDuplicate);
+
+// POST /api/reception/mass-check
+// Calculate required analytical mass against test catalogue + retention (RC-01)
+router.post('/mass-check', checkPermission('RECEIVE_SAMPLE'), receptionController.calculateMassRequirement);
+
+// POST /api/reception/upload-photo
+// Upload sample condition or non-conformance photographic evidence (RC-03)
+router.post('/upload-photo', checkPermission('RECEIVE_SAMPLE'), upload.array('photos', 5), receptionController.uploadIntakePhoto);
 
 module.exports = router;

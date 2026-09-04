@@ -18,7 +18,14 @@ exports.processIntake = async (req, res) => {
         isWalkIn,
         submitterDetails,
         samplingDetails,
-        projectId
+        projectId,
+        // Stage A: Desk-Only Facts
+        receivedMass,
+        massWarningAcknowledged,
+        moistureOnArrival,
+        foreignMaterial,
+        intakePhotos,
+        isResubmission
     } = req.body;
 
     const user = req.user;
@@ -115,14 +122,20 @@ exports.processIntake = async (req, res) => {
                 reason: ncReason
             });
 
+            const photosList = Array.isArray(intakePhotos)
+                ? intakePhotos
+                : (Array.isArray(req.body.photos) ? req.body.photos : []);
+
             const { transitionSample } = require('../services/sampleStateService');
             const updated = await transitionSample(sample.id, 'EXPECTED', user, `Sample rejected during intake: ${ncReason}`, {
                 rejectionReason: ncReason,
+                intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : null,
                 metadata: JSON.stringify({
                     nonConformance: {
                         reason: ncReason,
                         checklist,
                         notes,
+                        photos: photosList,
                         rejectedBy: receivedBy,
                         at: now
                     }
@@ -160,18 +173,35 @@ exports.processIntake = async (req, res) => {
                 mergeField('collectionDate', samplingDetails.date);
             }
 
+            const photosList = Array.isArray(intakePhotos)
+                ? intakePhotos
+                : (Array.isArray(req.body.photos) ? req.body.photos : []);
+
+            const parsedMass = (receivedMass !== undefined && receivedMass !== null && receivedMass !== '')
+                ? parseFloat(receivedMass)
+                : null;
+
             const updateData = {
                 status: 'DRAFT',
                 history: JSON.stringify(history),
                 fieldMetadata: JSON.stringify(currentFieldMeta),
                 analysisGroupIds: JSON.stringify(analysisGroupIds || []),
+                receivedMass: parsedMass !== null && !isNaN(parsedMass) ? parsedMass : undefined,
+                massWarningAcknowledged: !!massWarningAcknowledged,
+                moistureOnArrival: moistureOnArrival || undefined,
+                foreignMaterial: foreignMaterial ? (typeof foreignMaterial === 'string' ? foreignMaterial : JSON.stringify(foreignMaterial)) : undefined,
+                intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : undefined,
+                isResubmission: isResubmission !== undefined ? !!isResubmission : undefined,
                 receptionData: JSON.stringify({
                     checklist, notes, receivedBy, labLocation: labId, at: now,
-                    coc: req.body.coc, photos: req.body.photos,
+                    coc: req.body.coc, photos: photosList,
                     analysisJustification: justification || null,
                     submitterDetails: submitterDetails || null,
                     samplingDetails: samplingDetails || null,
-                    isWalkIn: isWalkIn || false
+                    isWalkIn: isWalkIn || false,
+                    receivedMass: parsedMass,
+                    moistureOnArrival,
+                    foreignMaterial
                 })
             };
 
@@ -241,6 +271,49 @@ exports.processIntake = async (req, res) => {
             analysisRemovals.forEach(code => requiredAnalyses.delete(code));
         }
 
+        // RC-01: Analytical Mass Sufficiency Check
+        const parsedMass = (receivedMass !== undefined && receivedMass !== null && receivedMass !== '')
+            ? parseFloat(receivedMass)
+            : null;
+
+        let massDeficitInfo = null;
+        if (parsedMass !== null && !isNaN(parsedMass)) {
+            const requiredCodes = Array.from(requiredAnalyses);
+            const analysesFromDb = await prisma.analysis.findMany({
+                where: { code: { in: requiredCodes } },
+                select: { code: true, name: true, sampleMassRequired: true }
+            });
+
+            const totalAnalyticalMass = analysesFromDb.reduce((sum, a) => sum + (a.sampleMassRequired || 10.0), 0);
+            const retentionBuffer = 100.0; // 100g standard retention
+            const totalRequiredMass = totalAnalyticalMass + retentionBuffer;
+
+            if (parsedMass < totalRequiredMass) {
+                const deficit = Math.round((totalRequiredMass - parsedMass) * 10) / 10;
+                massDeficitInfo = {
+                    receivedMass: parsedMass,
+                    totalRequiredMass,
+                    totalAnalyticalMass,
+                    retentionBuffer,
+                    deficit,
+                    analysesAtRisk: analysesFromDb.map(a => ({
+                        code: a.code,
+                        name: a.name,
+                        massRequired: a.sampleMassRequired || 10.0
+                    }))
+                };
+
+                if (!massWarningAcknowledged && !req.body.isDraft) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'MASS_DEFICIT',
+                        message: `Received mass (${parsedMass}g) is insufficient for the ordered tests (${totalAnalyticalMass}g) plus archive retention (${retentionBuffer}g). Deficit: ${deficit}g.`,
+                        massDeficitInfo
+                    });
+                }
+            }
+        }
+
         const currentFieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
         const mergeField = (key, value) => {
             if (value !== undefined && value !== null && value !== '') {
@@ -307,6 +380,19 @@ exports.processIntake = async (req, res) => {
             note: `Intake process completed. Assigned Lab ID: ${assignedLabId}`
         });
 
+        if (massDeficitInfo && massWarningAcknowledged) {
+            history.push({
+                status: 'MASS_DEFICIT_OVERRIDE',
+                changedBy: receivedBy,
+                timestamp: now,
+                note: `Accepted with mass deficit: received ${parsedMass}g vs required ${massDeficitInfo.totalRequiredMass}g (deficit: ${massDeficitInfo.deficit}g).`
+            });
+        }
+
+        const photosList = Array.isArray(intakePhotos)
+            ? intakePhotos
+            : (Array.isArray(req.body.photos) ? req.body.photos : []);
+
         const updateData = {
             status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
             labId: assignedLabId,
@@ -321,13 +407,23 @@ exports.processIntake = async (req, res) => {
             fieldMetadata: JSON.stringify(currentFieldMeta),
             history: JSON.stringify(history),
             assignedLab: user.labId,
+            receivedMass: parsedMass !== null && !isNaN(parsedMass) ? parsedMass : undefined,
+            massWarningAcknowledged: !!massWarningAcknowledged,
+            moistureOnArrival: moistureOnArrival || undefined,
+            foreignMaterial: foreignMaterial ? (typeof foreignMaterial === 'string' ? foreignMaterial : JSON.stringify(foreignMaterial)) : undefined,
+            intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : undefined,
+            isResubmission: isResubmission !== undefined ? !!isResubmission : undefined,
             receptionData: JSON.stringify({
                 checklist, notes, receivedBy, labLocation: labId, at: now,
-                coc: req.body.coc, photos: req.body.photos,
+                coc: req.body.coc, photos: photosList,
                 analysisJustification: justification || null,
                 submitterDetails: submitterDetails || null,
                 samplingDetails: samplingDetails || null,
-                isWalkIn: isWalkIn || false
+                isWalkIn: isWalkIn || false,
+                receivedMass: parsedMass,
+                moistureOnArrival,
+                foreignMaterial,
+                massDeficitInfo
             })
         };
 
@@ -501,5 +597,130 @@ exports.discardDraft = async (req, res) => {
     } catch (error) {
         console.error('[discardDraft] ERROR:', error);
         res.status(500).json({ error: 'Failed to discard: ' + error.message });
+    }
+};
+
+/**
+ * GET /api/reception/check-duplicate?originalId=...&sampleId=...
+ * RC-04: Duplicate and Re-submission Detection
+ */
+exports.checkDuplicate = async (req, res) => {
+    const { originalId, sampleId } = req.query;
+    if (!originalId && !sampleId) {
+        return res.status(400).json({ error: 'Missing originalId or sampleId parameter' });
+    }
+
+    try {
+        const queryTerm = String(originalId || sampleId).trim();
+        const sample = await prisma.sample.findFirst({
+            where: {
+                OR: [
+                    { originalId: queryTerm },
+                    { id: queryTerm }
+                ]
+            },
+            select: {
+                id: true,
+                originalId: true,
+                labId: true,
+                status: true,
+                receptionDate: true,
+                receivedBy: true,
+                assignedLab: true,
+                projectCode: true,
+                receivedMass: true,
+                moistureOnArrival: true
+            }
+        });
+
+        if (!sample) {
+            return res.json({ exists: false });
+        }
+
+        const priorReceiptStatuses = [
+            'RECEIVED', 'ACCEPTED', 'PROCESSING', 'COMPLETED',
+            'APPROVED', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'IN_PROGRESS'
+        ];
+        const isPriorReceipt = priorReceiptStatuses.includes(sample.status);
+
+        return res.json({
+            exists: true,
+            isPriorReceipt,
+            sample
+        });
+    } catch (err) {
+        console.error('[checkDuplicate] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to check duplicate: ' + err.message });
+    }
+};
+
+/**
+ * POST /api/reception/mass-check
+ * RC-01: Analytical Mass Sufficiency Calculation
+ */
+exports.calculateMassRequirement = async (req, res) => {
+    const { analysisCodes = [], analysisGroupIds = [], retentionMass = 100 } = req.body;
+
+    try {
+        const codes = new Set(Array.isArray(analysisCodes) ? analysisCodes : []);
+
+        if (Array.isArray(analysisGroupIds) && analysisGroupIds.length > 0) {
+            const groups = await prisma.analysisGroup.findMany({
+                where: { id: { in: analysisGroupIds } }
+            });
+            groups.forEach(g => {
+                const arr = g.analyses ? JSON.parse(g.analyses) : [];
+                arr.forEach(c => codes.add(c));
+            });
+        }
+
+        const analysisList = await prisma.analysis.findMany({
+            where: { code: { in: Array.from(codes) } },
+            select: { code: true, name: true, sampleMassRequired: true }
+        });
+
+        const breakdown = analysisList.map(a => ({
+            code: a.code,
+            name: a.name,
+            massRequired: a.sampleMassRequired || 10.0
+        }));
+
+        const totalAnalyticalMass = breakdown.reduce((sum, item) => sum + item.massRequired, 0);
+        const retention = typeof retentionMass === 'number' ? retentionMass : 100.0;
+        const totalRequiredMass = totalAnalyticalMass + retention;
+
+        return res.json({
+            success: true,
+            totalRequiredMass,
+            totalAnalyticalMass,
+            retentionMass: retention,
+            breakdown
+        });
+    } catch (err) {
+        console.error('[calculateMassRequirement] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to calculate mass requirement: ' + err.message });
+    }
+};
+
+/**
+ * POST /api/reception/upload-photo
+ * RC-03: Upload Intake or Non-Conformance Photographs
+ */
+exports.uploadIntakePhoto = (req, res) => {
+    try {
+        const files = req.files || (req.file ? [req.file] : []);
+        if (files.length === 0) {
+            return res.status(400).json({ success: false, error: 'No image file uploaded' });
+        }
+
+        const urls = files.map(f => `/uploads/intake/${f.filename}`);
+        return res.json({
+            success: true,
+            urls,
+            url: urls[0]
+        });
+    } catch (err) {
+        console.error('[uploadIntakePhoto] ERROR:', err);
+        return res.status(500).json({ error: 'Photo upload failed: ' + err.message });
     }
 };

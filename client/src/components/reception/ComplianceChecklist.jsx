@@ -1,10 +1,19 @@
 
 import React from 'react';
-import { AlertCircle, Check, X, HelpCircle, ShieldCheck, Minus } from 'lucide-react';
+import { AlertCircle, Check, X, HelpCircle, ShieldCheck, Minus, Camera, Loader2 } from 'lucide-react';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
-const ComplianceChecklist = ({ value, onChange, onNonConformance, showIncomplete = false }) => {
+const ComplianceChecklist = ({
+    value,
+    onChange,
+    onNonConformance,
+    showIncomplete = false,
+    photos = [],
+    onUploadPhoto,
+    onRemovePhoto,
+    uploadingPhoto = false
+}) => {
     const { t } = useLanguage();
 
     const CHECKLIST_ITEMS = [
@@ -278,6 +287,51 @@ const ComplianceChecklist = ({ value, onChange, onNonConformance, showIncomplete
                             onChange={(e) => onChange({ ...value, reason: e.target.value })}
                             rows={3}
                         />
+
+                        {/* Photographic Evidence Attachment */}
+                        <div className="mt-3 pt-2 border-t border-red-100 dark:border-red-900/30">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Camera size={14} /> Photographic Evidence ({photos.length})
+                                </label>
+                                {onUploadPhoto && (
+                                    <label className="cursor-pointer bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-red-200 dark:hover:bg-red-900/60 flex items-center gap-1 transition-colors">
+                                        {uploadingPhoto ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                                        <span>{uploadingPhoto ? 'Uploading...' : 'Attach Photo'}</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            disabled={uploadingPhoto}
+                                            onChange={onUploadPhoto}
+                                        />
+                                    </label>
+                                )}
+                            </div>
+
+                            {photos.length > 0 ? (
+                                <div className="grid grid-cols-4 gap-2 pt-1">
+                                    {photos.map((url, idx) => (
+                                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-gray-100 dark:bg-gray-800 shadow-sm">
+                                            <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
+                                            {onRemovePhoto && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onRemovePhoto(idx)}
+                                                    className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                                                    title="Remove"
+                                                >
+                                                    <X size={10} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-[11px] text-gray-400 italic">No non-conformance photos attached yet.</p>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

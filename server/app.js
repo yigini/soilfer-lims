@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const prisma = require('./prisma');
@@ -708,6 +709,14 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
         res.status(500).json({ error: "Failed to fetch stats" });
     }
 });
+
+// ─── Uploads Static Directory (Persistent user/sample assets) ───
+const uploadsDir = path.join(__dirname, 'uploads');
+const intakeUploadsDir = path.join(uploadsDir, 'intake');
+if (!fs.existsSync(intakeUploadsDir)) {
+    fs.mkdirSync(intakeUploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // ─── Production: Serve React client ───
 if (process.env.NODE_ENV === 'production') {

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
-import { AlertTriangle, CheckCircle, XCircle, Droplet, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw } from 'lucide-react';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
@@ -34,6 +34,16 @@ const Reception = () => {
     // --- FORM DATA ---
     const [scanCode, setScanCode] = useState('');
     const [sampleData, setSampleData] = useState(null);
+
+    // Stage A: Desk-Only Facts
+    const [receivedMass, setReceivedMass] = useState('');
+    const [massWarningAcknowledged, setMassWarningAcknowledged] = useState(false);
+    const [moistureOnArrival, setMoistureOnArrival] = useState('MOIST');
+    const [foreignMaterial, setForeignMaterial] = useState([]);
+    const [intakePhotos, setIntakePhotos] = useState([]);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [isResubmission, setIsResubmission] = useState(false);
+    const [duplicateWarning, setDuplicateWarning] = useState(null);
 
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
@@ -139,6 +149,15 @@ const Reception = () => {
         setIntakeNotes('');
         setCocDeliveredBy('');
 
+        // Stage A
+        setReceivedMass('');
+        setMassWarningAcknowledged(false);
+        setMoistureOnArrival('MOIST');
+        setForeignMaterial([]);
+        setIntakePhotos([]);
+        setIsResubmission(false);
+        setDuplicateWarning(null);
+
         if (mode === 'WALK_IN') {
             setSubmitter({ name: '', surname: '', phone: '', email: '', organization: '', contactMethod: 'Phone' });
             setSampling({
@@ -177,7 +196,8 @@ const Reception = () => {
         const hasSampling = data.sampling && (data.sampling.location || data.sampling.coordinates || data.sampling.crop || data.sampling.purpose);
         const hasAnalyses = data.selectedGroup || (data.additions && data.additions.length > 0);
         const hasNotes = !!data.intakeNotes;
-        return hasSubmitter || hasSampling || hasAnalyses || hasNotes;
+        const hasDeskFacts = !!data.receivedMass || (data.intakePhotos && data.intakePhotos.length > 0);
+        return hasSubmitter || hasSampling || hasAnalyses || hasNotes || hasDeskFacts;
     };
 
     // Load from Autosave on Mount
@@ -207,6 +227,12 @@ const Reception = () => {
                         setRemovals(data.removals || []);
                         setChecklistData(data.checklistData || checklistData);
                         setIntakeNotes(data.intakeNotes || '');
+                        if (data.receivedMass) setReceivedMass(data.receivedMass);
+                        if (data.massWarningAcknowledged) setMassWarningAcknowledged(data.massWarningAcknowledged);
+                        if (data.moistureOnArrival) setMoistureOnArrival(data.moistureOnArrival);
+                        if (data.foreignMaterial) setForeignMaterial(data.foreignMaterial);
+                        if (data.intakePhotos) setIntakePhotos(data.intakePhotos);
+                        if (data.isResubmission) setIsResubmission(data.isResubmission);
                     },
                     onCancel: () => {
                         // If they cancel restoration, we assume they want to start fresh
@@ -232,13 +258,56 @@ const Reception = () => {
                 removals,
                 checklistData,
                 intakeNotes,
+                receivedMass,
+                massWarningAcknowledged,
+                moistureOnArrival,
+                foreignMaterial,
+                intakePhotos,
+                isResubmission,
                 timestamp: Date.now()
             };
             localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
         }, 10000);
 
         return () => clearInterval(timer);
-    }, [mode, submitter, sampling, selectedGroup, additions, removals, checklistData, intakeNotes, result]);
+    }, [mode, submitter, sampling, selectedGroup, additions, removals, checklistData, intakeNotes, receivedMass, massWarningAcknowledged, moistureOnArrival, foreignMaterial, intakePhotos, isResubmission, result]);
+
+    const populateDeskFacts = (targetSample) => {
+        if (!targetSample) return;
+        const recData = targetSample.receptionData ? (typeof targetSample.receptionData === 'string' ? JSON.parse(targetSample.receptionData) : targetSample.receptionData) : null;
+
+        const mass = targetSample.receivedMass ?? recData?.receivedMass;
+        if (mass != null) setReceivedMass(String(mass));
+
+        const massAck = targetSample.massWarningAcknowledged ?? recData?.massWarningAcknowledged;
+        if (massAck != null) setMassWarningAcknowledged(!!massAck);
+
+        const moisture = targetSample.moistureOnArrival || recData?.moistureOnArrival;
+        if (moisture) setMoistureOnArrival(moisture);
+
+        const fmRaw = targetSample.foreignMaterial || recData?.foreignMaterial;
+        if (fmRaw) {
+            try {
+                const parsedFm = typeof fmRaw === 'string' ? JSON.parse(fmRaw) : fmRaw;
+                setForeignMaterial(Array.isArray(parsedFm) ? parsedFm : [parsedFm]);
+            } catch {
+                setForeignMaterial([String(fmRaw)]);
+            }
+        }
+
+        const photosRaw = targetSample.intakePhotos || recData?.intakePhotos || recData?.photos;
+        if (photosRaw) {
+            try {
+                const parsedPhotos = typeof photosRaw === 'string' ? JSON.parse(photosRaw) : photosRaw;
+                setIntakePhotos(Array.isArray(parsedPhotos) ? parsedPhotos : [parsedPhotos]);
+            } catch {
+                setIntakePhotos([]);
+            }
+        }
+
+        const resub = targetSample.isResubmission ?? recData?.isResubmission;
+        if (resub != null) setIsResubmission(!!resub);
+    };
 
     const handleLookup = async (codeOverride, modeOverride, projectOverride) => {
         // Handle case where codeOverride might be a React Event object
@@ -252,6 +321,26 @@ const Reception = () => {
 
         setLoading(true);
         setResult(null);
+
+        // Check for duplicate / prior receipts (RC-04)
+        try {
+            const dupRes = await axios.get('/api/reception/check-duplicate', {
+                params: { originalId: trimmedCode },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (dupRes.data?.isPriorReceipt) {
+                setDuplicateWarning({
+                    sample: dupRes.data.sample,
+                    originalId: trimmedCode,
+                    isPriorReceipt: true
+                });
+            } else {
+                setDuplicateWarning(null);
+            }
+        } catch (err) {
+            console.warn('[handleLookup] Duplicate check error:', err);
+        }
+
         try {
             const res = await axios.get(`/api/samples`, { params: { originalId: trimmedCode, limit: 1 } });
             if (res.data.data && res.data.data.length > 0) {
@@ -315,6 +404,9 @@ const Reception = () => {
 
                             // Analysis
                             if (found.analysisGroupIds?.[0]) setSelectedGroup(found.analysisGroupIds[0]);
+
+                            // Stage A Desk Facts
+                            populateDeskFacts(found);
                         }
                     });
                 } else if (currentMode === 'PROJECT' && currentProject) {
@@ -329,6 +421,7 @@ const Reception = () => {
                         return;
                     }
                     setSampleData(found);
+                    populateDeskFacts(found);
 
                     // Auto-apply project bundle if none selected
                     if (!selectedGroup) {
@@ -338,6 +431,7 @@ const Reception = () => {
                     }
                 } else {
                     setSampleData(found);
+                    populateDeskFacts(found);
                     // Also auto-apply bundle for project samples caught in non-project mode
                     if (!selectedGroup && found.projectId) {
                         const proj = availableProjects.find(p => p.id === found.projectId || p.code === found.projectId);
@@ -497,6 +591,63 @@ const Reception = () => {
         return Array.from(set);
     })();
 
+    // --- RC-01: MASS SUFFICIENCY CALCULATION ---
+    const massRequirementBreakdown = effectiveList.map(code => {
+        const a = analyses.find(item => item.code === code);
+        return {
+            code,
+            name: a?.name || code,
+            massRequired: a?.sampleMassRequired != null ? a.sampleMassRequired : 10.0
+        };
+    });
+    const totalAnalyticalMass = massRequirementBreakdown.reduce((sum, item) => sum + item.massRequired, 0);
+    const retentionBuffer = 100.0;
+    const totalRequiredMass = effectiveList.length > 0 ? (totalAnalyticalMass + retentionBuffer) : 0;
+    const parsedReceivedMass = parseFloat(receivedMass) || 0;
+    const massDeficit = (parsedReceivedMass > 0 && totalRequiredMass > parsedReceivedMass)
+        ? Math.round((totalRequiredMass - parsedReceivedMass) * 10) / 10
+        : 0;
+    const isMassDeficient = parsedReceivedMass > 0 && massDeficit > 0;
+
+    // --- RC-03: PHOTO UPLOAD HANDLERS ---
+    const handlePhotoUpload = async (e) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('photos', files[i]);
+        }
+
+        setUploadingPhoto(true);
+        try {
+            const res = await axios.post('/api/reception/upload-photo', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.data?.urls) {
+                setIntakePhotos(prev => [...prev, ...res.data.urls]);
+            } else if (res.data?.url) {
+                setIntakePhotos(prev => [...prev, res.data.url]);
+            }
+        } catch (err) {
+            showDialog({
+                type: 'error',
+                title: 'Upload Failed',
+                message: err.response?.data?.error || err.message || 'Failed to upload photo.'
+            });
+        } finally {
+            setUploadingPhoto(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleRemovePhoto = (indexToRemove) => {
+        setIntakePhotos(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    };
+
     // --- PURPOSE → ANALYSIS SCROLL + HIGHLIGHT ---
     const handlePurposeSelect = (purposeVal, suggestedGroupId) => {
         // Auto-select the matching group if one was suggested
@@ -587,6 +738,14 @@ const Reception = () => {
         // Universal fields (both modes)
         if (effectiveList.length === 0) errors.push({ key: 'analyses', label: 'At least one analysis must be selected' });
 
+        // RC-01: Received Mass validation
+        const massNum = parseFloat(receivedMass);
+        if (!receivedMass || isNaN(massNum) || massNum <= 0) {
+            errors.push({ key: 'receivedMass', label: 'Received sample mass (grams) is required' });
+        } else if (isMassDeficient && !massWarningAcknowledged) {
+            errors.push({ key: 'massDeficit', label: `Mass deficit (${massDeficit}g) must be acknowledged` });
+        }
+
         const unanswered = CHECKLIST_KEYS.filter(k => !checklistData.items?.[k]?.status);
         if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
 
@@ -633,7 +792,15 @@ const Reception = () => {
             projectId: mode === 'WALK_IN' ? null : (sessionProject || null),
             submitterDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? submitter : null,
             samplingDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? sampling : null,
-            isDraft
+            isDraft,
+
+            // Stage A: Desk-Only Facts
+            receivedMass: receivedMass ? parseFloat(receivedMass) : null,
+            massWarningAcknowledged: !!massWarningAcknowledged,
+            moistureOnArrival: moistureOnArrival || null,
+            foreignMaterial: foreignMaterial.length > 0 ? foreignMaterial : null,
+            intakePhotos: intakePhotos,
+            isResubmission: !!isResubmission
         };
 
         try {
@@ -964,6 +1131,66 @@ const Reception = () => {
                 )}
             </div>
 
+            {/* DUPLICATE / RE-SUBMISSION DETECTION BANNER (RC-04) */}
+            {duplicateWarning && (
+                <div className="bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-400 dark:border-amber-600 rounded-xl p-4 mb-6 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                            <AlertTriangle className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" size={24} />
+                            <div>
+                                <h4 className="font-bold text-amber-900 dark:text-amber-200 text-base flex items-center gap-2">
+                                    <span>Prior Receipt Detected for {duplicateWarning.sample.originalId}</span>
+                                    {duplicateWarning.sample.labId && (
+                                        <span className="font-mono text-xs bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded">
+                                            Lab ID: {duplicateWarning.sample.labId}
+                                        </span>
+                                    )}
+                                </h4>
+                                <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
+                                    This sample ID was previously received on{' '}
+                                    <strong>{duplicateWarning.sample.receptionDate ? new Date(duplicateWarning.sample.receptionDate).toLocaleDateString() : 'a prior date'}</strong>
+                                    {' '}(Status: <span className="font-bold uppercase">{duplicateWarning.sample.status}</span>
+                                    {duplicateWarning.sample.assignedLab ? ` • Lab: ${duplicateWarning.sample.assignedLab}` : ''}).
+                                </p>
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                    If this is a physical re-submission for re-testing or supplementary analyses, confirm as a Re-submission.
+                                </p>
+                                <div className="mt-3 flex items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsResubmission(true);
+                                            setDuplicateWarning(null);
+                                        }}
+                                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                    >
+                                        ✓ Confirm as Re-submission
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setDuplicateWarning(null);
+                                            resetForm();
+                                        }}
+                                        className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-medium hover:bg-gray-50"
+                                    >
+                                        Cancel / Clear ID
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setDuplicateWarning(null)}
+                            className="text-amber-500 hover:text-amber-700"
+                            title="Dismiss"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {sampleData && !result && (
                 <div className="grid lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
 
@@ -991,7 +1218,16 @@ const Reception = () => {
                             />
                         ) : (
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2"><Layers size={20} /> Project Sample Metadata</h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                                        <Layers size={20} /> Project Sample Metadata
+                                    </h3>
+                                    {isResubmission && (
+                                        <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
+                                            Re-submission
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div><label className="text-gray-500">Original ID</label><div className="font-mono font-bold">{sampleData.originalId}</div></div>
@@ -1092,14 +1328,240 @@ const Reception = () => {
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN: COMPLIANCE & SUBMIT */}
+                    {/* RIGHT COLUMN: DESK FACTS, COMPLIANCE & SUBMIT */}
                     <div className="space-y-6">
+
+                        {/* PHYSICAL ARRIVAL STATE & DESK FACTS (RC-01, RC-02, RC-03) */}
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-5">
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+                                <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                                    <Scale size={20} className="text-indigo-600 dark:text-indigo-400" />
+                                    <span>Physical Arrival State & Desk Facts</span>
+                                    <InfoTooltip text="Desk-level observations recorded as the physical sample bag arrives at reception, prior to drying or grinding." />
+                                </h3>
+                                {isResubmission && (
+                                    <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
+                                        Re-submission
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* RC-01: Received Sample Mass & Live Sufficiency Meter */}
+                            <div>
+                                <div className="flex justify-between items-center mb-1.5">
+                                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1.5">
+                                        Received Sample Mass (g) *
+                                        <InfoTooltip text="Weigh physical bag on desk scale. System verifies sufficient material for ordered tests + 100g standard archive retention." />
+                                    </label>
+                                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                                        Req: {totalRequiredMass}g ({totalAnalyticalMass}g tests + {retentionBuffer}g archive)
+                                    </span>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.1"
+                                        value={receivedMass}
+                                        onChange={(e) => {
+                                            setReceivedMass(e.target.value);
+                                            setMassWarningAcknowledged(false);
+                                        }}
+                                        placeholder="e.g. 500.0"
+                                        className={`w-full p-2.5 pl-3 pr-10 border rounded-lg font-mono text-base outline-none transition-all ${
+                                            validationErrors.some(e => e.key === 'receivedMass')
+                                                ? 'border-red-400 ring-2 ring-red-200 bg-red-50/50 dark:bg-red-900/20'
+                                                : isMassDeficient
+                                                    ? 'border-amber-400 ring-1 ring-amber-200 bg-amber-50/30 dark:bg-amber-900/20'
+                                                    : parsedReceivedMass >= totalRequiredMass && totalRequiredMass > 0
+                                                        ? 'border-emerald-400 ring-1 ring-emerald-200 bg-emerald-50/30 dark:bg-emerald-900/20'
+                                                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                                        }`}
+                                    />
+                                    <span className="absolute right-3 top-2.5 font-bold text-gray-400 text-sm">g</span>
+                                </div>
+
+                                {/* Live Sufficiency Meter */}
+                                {parsedReceivedMass > 0 && totalRequiredMass > 0 && (
+                                    <div className="space-y-2 mt-2">
+                                        <div className="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
+                                            <div
+                                                className={`h-full transition-all duration-300 ${
+                                                    isMassDeficient ? 'bg-amber-500' : 'bg-emerald-500'
+                                                }`}
+                                                style={{ width: `${Math.min(100, Math.round((parsedReceivedMass / totalRequiredMass) * 100))}%` }}
+                                            />
+                                        </div>
+
+                                        {isMassDeficient ? (
+                                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 space-y-2">
+                                                <div className="flex items-start gap-2 text-amber-800 dark:text-amber-300 text-xs">
+                                                    <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                                                    <div>
+                                                        <span className="font-bold">Mass Deficit: {massDeficit}g deficit.</span>
+                                                        <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                                                            Required: {totalRequiredMass}g ({totalAnalyticalMass}g for {effectiveList.length} test{effectiveList.length === 1 ? '' : 's'} + {retentionBuffer}g retention buffer). Received: {parsedReceivedMass}g.
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-[11px] text-gray-600 dark:text-gray-400 border-t border-amber-200 dark:border-amber-800/50 pt-1.5 flex flex-wrap gap-1.5 items-center">
+                                                    <span className="font-semibold">Tests at risk:</span>
+                                                    {massRequirementBreakdown.map(b => (
+                                                        <span key={b.code} className="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 font-mono text-[10px]">
+                                                            {b.code}: {b.massRequired}g
+                                                        </span>
+                                                    ))}
+                                                </div>
+
+                                                <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={massWarningAcknowledged}
+                                                        onChange={(e) => setMassWarningAcknowledged(e.target.checked)}
+                                                        className="w-4 h-4 rounded text-amber-600 accent-amber-600"
+                                                    />
+                                                    <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                                        Acknowledge analytical mass deficit & proceed with intake at risk
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                                                <CheckCircle size={14} className="text-emerald-600" />
+                                                <span>Sufficient analytical mass ({parsedReceivedMass}g available, surplus of {Math.round((parsedReceivedMass - totalRequiredMass) * 10) / 10}g).</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* RC-02: Moisture State on Arrival */}
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5 flex items-center gap-1.5">
+                                    <Droplets size={16} className="text-blue-500" /> Moisture on Arrival
+                                    <InfoTooltip text="Desk assessment of raw sample moisture prior to lab drying protocol." />
+                                </label>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {[
+                                        { id: 'DRY', label: 'Dry', hint: 'Air-dry / Crumbles' },
+                                        { id: 'MOIST', label: 'Moist', hint: 'Damp to touch' },
+                                        { id: 'WET', label: 'Wet', hint: 'Sticky / Clumpy' },
+                                        { id: 'SATURATED', label: 'Saturated', hint: 'Slurry / Free water' }
+                                    ].map(m => {
+                                        const isSelected = moistureOnArrival === m.id;
+                                        return (
+                                            <button
+                                                key={m.id}
+                                                type="button"
+                                                onClick={() => setMoistureOnArrival(m.id)}
+                                                className={`p-2 rounded-lg border text-center transition-all ${
+                                                    isSelected
+                                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
+                                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-400'
+                                                }`}
+                                            >
+                                                <div className="text-xs font-semibold">{m.label}</div>
+                                                <div className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>{m.hint}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* RC-02: Foreign Material Inclusions */}
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5 flex items-center gap-1.5">
+                                    <Layers size={16} className="text-amber-500" /> Foreign Material Inclusions
+                                    <InfoTooltip text="Check any non-soil inclusions visible in the sample bag upon receipt." />
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        { id: 'stones', label: 'Stones / Gravel' },
+                                        { id: 'roots', label: 'Roots / Plant Debris' },
+                                        { id: 'plastic', label: 'Plastic / Synthetics' },
+                                        { id: 'other', label: 'Other Inclusions' },
+                                        { id: 'removed', label: 'Foreign Material Removed' }
+                                    ].map(item => {
+                                        const isChecked = foreignMaterial.includes(item.id);
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (isChecked) {
+                                                        setForeignMaterial(foreignMaterial.filter(f => f !== item.id));
+                                                    } else {
+                                                        setForeignMaterial([...foreignMaterial, item.id]);
+                                                    }
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                                    isChecked
+                                                        ? 'bg-slate-900 text-white border-slate-900 dark:bg-blue-600 dark:border-blue-600 shadow-sm'
+                                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-400'
+                                                }`}
+                                            >
+                                                <span>{isChecked ? '✓' : '+'}</span>
+                                                <span>{item.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* RC-03: Intake Photographs */}
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1.5">
+                                        <Camera size={16} className="text-purple-500" /> Intake Photographs ({intakePhotos.length})
+                                        <InfoTooltip text="Upload photos of bag condition, legible field labels, physical defects, or bag tags." />
+                                    </label>
+                                    <label className="cursor-pointer bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900/50 flex items-center gap-1.5 transition-colors">
+                                        {uploadingPhoto ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                                        <span>{uploadingPhoto ? 'Uploading...' : 'Add Photo'}</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            disabled={uploadingPhoto}
+                                            onChange={handlePhotoUpload}
+                                        />
+                                    </label>
+                                </div>
+
+                                {intakePhotos.length > 0 ? (
+                                    <div className="grid grid-cols-4 gap-2 pt-1">
+                                        {intakePhotos.map((url, idx) => (
+                                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 aspect-video bg-gray-100 dark:bg-gray-800 shadow-sm">
+                                                <img src={url} alt={`Intake ${idx + 1}`} className="w-full h-full object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemovePhoto(idx)}
+                                                    className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                                                    title="Remove"
+                                                >
+                                                    <X size={10} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 italic">No intake photos attached yet.</p>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
                                 onNonConformance={(checked) => setChecklistData({ ...checklistData, nonConformance: checked })}
                                 showIncomplete={validationErrors.some(e => e.key === 'compliance')}
+                                photos={intakePhotos}
+                                onUploadPhoto={handlePhotoUpload}
+                                onRemovePhoto={handleRemovePhoto}
+                                uploadingPhoto={uploadingPhoto}
                             />
                         </div>
 
@@ -1143,6 +1605,19 @@ const Reception = () => {
                                 >
                                     <FileText size={18} /> {t('reception.saveDraft', 'Save Draft')}
                                 </button>
+
+                                {checklistData.nonConformance && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSubmit('REJECTED')}
+                                        disabled={loading || !checklistData.reason}
+                                        className="py-3 px-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                        title="Reject sample due to non-conformance"
+                                    >
+                                        <AlertTriangle size={18} />
+                                        <span>Reject Sample</span>
+                                    </button>
+                                )}
 
                                 <button
                                     onClick={() => handleSubmit('ACCEPTED')}

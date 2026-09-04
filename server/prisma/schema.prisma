@@ -113,6 +113,14 @@ model Sample {
   history           String?    // JSON string: Audit trail for this sample
   rejectionReason   String?    // Detailed explanation when sample rejected during intake
 
+  // Physical Arrival & Desk Facts (Stage A: RC-01, RC-02, RC-03, RC-04)
+  receivedMass              Float?    // Received sample mass in grams
+  massWarningAcknowledged   Boolean?  @default(false)
+  moistureOnArrival         String?   // DRY, MOIST, WET, SATURATED
+  foreignMaterial           String?   // JSON string: { stones: bool, roots: bool, plastic: bool, other: string, removed: bool }
+  intakePhotos              String?   // JSON string: Array of uploaded photo URLs
+  isResubmission            Boolean?  @default(false)
+
   // Matrix & Module (WP-18)
   matrix            String     @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
   plantPart         String?    // LEAF, PETIOLE, WHOLE_PLANT, GRAIN, ROOT, FRUIT
@@ -796,6 +804,7 @@ model Analysis {
   methodLabel        String?           // Selected Method Label e.g. TotalN_kjeldahl
   methodDefinition   String?           // Procedure description
   methodCitation     String?           // Procedure scientific reference / standard
+  sampleMassRequired Float?            @default(10.0) // Sample mass required in grams (RC-01)
   methodologies      Methodology[]
 }
 

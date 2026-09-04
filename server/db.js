@@ -32,10 +32,11 @@ const usersDb = {
         const permissions = user.permissions ? JSON.stringify(user.permissions) : '[]';
         const name = user.name || username;
         const email = user.email || `${username}@soilfer.org`;
+        const mustChangePassword = user.mustChangePassword !== undefined ? (user.mustChangePassword ? 1 : 0) : 0;
 
         const stmt = db.prepare(`
             INSERT INTO User (id, username, password, role, labId, countries, projects, name, email, isActive, mustChangePassword, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ON CONFLICT(username) DO UPDATE SET
                 role = excluded.role,
                 labId = excluded.labId,
@@ -43,7 +44,7 @@ const usersDb = {
                 projects = excluded.projects,
                 updatedAt = CURRENT_TIMESTAMP
         `);
-        stmt.run(id, username, passwordHash, role, labId, countries, projects, name, email);
+        stmt.run(id, username, passwordHash, role, labId, countries, projects, name, email, mustChangePassword);
 
         return {
             id,
