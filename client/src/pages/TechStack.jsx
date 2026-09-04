@@ -83,6 +83,24 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.4.0',
+        date: 'September 2026',
+        tag: 'Sample Reception Rework & Chain of Custody (RC-01 - RC-20)',
+        badgeColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+        changes: [
+            'Received Mass & Analytical Sufficiency (RC-01): Live mass sufficiency gauge checking ordered tests plus 100g retention buffer with explicit shortfall override tracking (MASS_DEFICIT_OVERRIDE).',
+            'Arrival Conditions & Evidence (RC-02, RC-03): Moisture on arrival states (Dry/Moist/Wet/Saturated), foreign material inclusion chips, and photographic upload pipeline for non-conformance documentation.',
+            'Duplicate & Re-Submission Detection (RC-04): Prior receipt alerts on duplicate field IDs with explicit authorized re-submission confirmation.',
+            'Universal Geodesy & Offline Boundaries (RC-05, RC-08): Parsing Decimal Degrees, DMS, and UTM with Zone/Hemisphere; reverse geocoding proxy with offline boundary fallback.',
+            'Positional Uncertainty & Geometry (RC-06, RC-07, RC-10, RC-11): Evidence-derived location confidence resisting unevidenced HIGH claims; 40km spatial outlier detection; composite radius and numeric depth cm intervals.',
+            'Consignments & Batch Intake (RC-12 to RC-15): Consignment entity model with waybill tracking; per-sample exception modal (ACCEPTED vs REJECTED) with PARTIAL rollup; spreadsheet manifest import wizard (CSV/XLSX) with automatic column mapping.',
+            'Hardware Wedge Mode & Audio Cues (RC-16): Sub-millisecond scanner input handling, auto-refocus loop, and client-side synthesized Web Audio API sound feedback.',
+            'Offline Thermal Label Printing (RC-17): 100% offline client-side vector QR thermal label printing for sample bags (101x54mm) and cryovials (50x25mm) with continuous roll printing.',
+            'Distinct RECEIVED_REJECTED State & Custody (RC-19): Distinct non-conformance lifecycle state excluding rejected samples from expected backlog; immutable physical handover custody metadata with courier tracking and officer counter-signatures.',
+            'Comprehensive Contract Regression Suite (RC-20): 18-contract automated regression test suite ensuring full contract integrity across all reception criteria.'
+        ]
+    },
+    {
         version: 'v1.3.0',
         date: 'September 2026',
         tag: 'Operations Engine, Spectral Rebuild & Workflow Integrity',

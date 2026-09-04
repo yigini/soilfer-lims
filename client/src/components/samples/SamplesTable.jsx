@@ -5,7 +5,7 @@ import {
     CalendarClock, Inbox, ClipboardCheck, Beaker, FileUp, FileOutput, Library, AlertCircle, Archive, Trash, History, Hash,
     CheckCircle2, ShieldCheck, Printer, Droplets, FlaskConical, AlertTriangle, Clock, ExternalLink,
     X, Activity, Loader2, Send, RotateCcw, Microscope, ChevronDown, ChevronUp, Truck,
-    GitBranch
+    GitBranch, XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
