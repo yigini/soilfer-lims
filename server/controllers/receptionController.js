@@ -122,7 +122,7 @@ exports.processIntake = async (req, res) => {
 
         if (decision === 'REJECTED') {
             history.push({
-                status: 'REJECTED',
+                status: 'RECEIVED_REJECTED',
                 changedBy: receivedBy,
                 timestamp: now,
                 reason: ncReason
@@ -132,10 +132,31 @@ exports.processIntake = async (req, res) => {
                 ? intakePhotos
                 : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
+            // Chain of Custody extraction (Stage E: RC-19)
+            const coc = req.body.coc || {};
+            const custodyHandoverAt = req.body.custodyHandoverAt
+                ? new Date(req.body.custodyHandoverAt)
+                : (coc.handoverAt || coc.date ? new Date(coc.handoverAt || coc.date) : now);
+            const custodyCarrierName = req.body.custodyCarrierName || coc.deliveredBy || coc.carrierName || null;
+            const custodyTrackingNumber = req.body.custodyTrackingNumber || coc.trackingNumber || coc.waybillRef || null;
+            const custodySenderSignature = req.body.custodySenderSignature || coc.senderSignature || null;
+            const receivingOfficerId = user.id ? String(user.id) : null;
+            const receivingOfficerName = user.name || user.username || receivedBy;
+            const receivingOfficerSignature = req.body.receivingOfficerSignature || coc.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`;
+
             const { transitionSample } = require('../services/sampleStateService');
-            const updated = await transitionSample(sample.id, 'EXPECTED', user, `Sample rejected during intake: ${ncReason}`, {
+            const updated = await transitionSample(sample.id, workflow.SAMPLE_STATES.RECEIVED_REJECTED, user, `Sample rejected during intake: ${ncReason}`, {
                 rejectionReason: ncReason,
                 intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : null,
+                receptionDate: now,
+                receivedBy: receivedBy,
+                custodyHandoverAt,
+                custodyCarrierName,
+                custodyTrackingNumber,
+                custodySenderSignature,
+                receivingOfficerId,
+                receivingOfficerName,
+                receivingOfficerSignature,
                 metadata: JSON.stringify({
                     nonConformance: {
                         reason: ncReason,
@@ -149,9 +170,31 @@ exports.processIntake = async (req, res) => {
                 history: JSON.stringify(history)
             });
 
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-reject-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    entity: 'SAMPLE',
+                    entityId: String(sample.id),
+                    action: 'SAMPLE_REJECTED',
+                    details: `Sample intake rejected and non-conformance recorded: ${ncReason}`,
+                    performedBy: String(user.username),
+                    timestamp: now,
+                    sampleId: String(sample.id)
+                }
+            });
+
             return res.json({
                 success: true,
-                message: 'Sample rejected and reverted to EXPECTED with non-conformance recorded.',
+                rejected: true,
+                id: updated.id,
+                originalId: updated.originalId,
+                status: 'RECEIVED_REJECTED',
+                rejectionReason: ncReason,
+                custodyHandoverAt,
+                custodyCarrierName,
+                custodyTrackingNumber,
+                receivingOfficerName,
+                message: 'Sample intake non-conformance recorded. Status: RECEIVED_REJECTED.',
                 sample: updated
             });
         }
@@ -493,6 +536,17 @@ exports.processIntake = async (req, res) => {
             admin2,
             village,
             siteName,
+
+            // Stage E: Chain of Custody & Handover (RC-19)
+            custodyHandoverAt: req.body.custodyHandoverAt
+                ? new Date(req.body.custodyHandoverAt)
+                : (req.body.coc?.handoverAt || req.body.coc?.date ? new Date(req.body.coc.handoverAt || req.body.coc.date) : now),
+            custodyCarrierName: req.body.custodyCarrierName || req.body.coc?.deliveredBy || req.body.coc?.carrierName || null,
+            custodyTrackingNumber: req.body.custodyTrackingNumber || req.body.coc?.trackingNumber || req.body.coc?.waybillRef || null,
+            custodySenderSignature: req.body.custodySenderSignature || req.body.coc?.senderSignature || null,
+            receivingOfficerId: user.id ? String(user.id) : null,
+            receivingOfficerName: user.name || user.username || receivedBy,
+            receivingOfficerSignature: req.body.receivingOfficerSignature || req.body.coc?.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`,
 
             receptionData: JSON.stringify({
                 checklist, notes, receivedBy, labLocation: labId, at: now,
@@ -1102,6 +1156,16 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     acceptedCount,
                     rejectedCount,
                     status: consignmentStatus,
+
+                    // Stage E: Chain of Custody & Handover (RC-19)
+                    custodyHandoverAt: csgInput.custodyHandoverAt ? new Date(csgInput.custodyHandoverAt) : (csgInput.deliveredAt ? new Date(csgInput.deliveredAt) : now),
+                    custodyCarrierName: csgInput.custodyCarrierName || csgInput.deliveredBy || null,
+                    custodyTrackingNumber: csgInput.custodyTrackingNumber || csgInput.deliveryNoteRef || null,
+                    custodySenderSignature: csgInput.custodySenderSignature || null,
+                    receivingOfficerId: user?.id ? String(user.id) : null,
+                    receivingOfficerName: user?.name || user?.username || receivedBy,
+                    receivingOfficerSignature: csgInput.receivingOfficerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`,
+
                     notes: csgInput.notes || null,
                     metadata: csgInput.metadata ? JSON.stringify(csgInput.metadata) : null
                 }
@@ -1206,6 +1270,16 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     admin2: s.admin2 || defaults.admin2 || null,
                     village: s.village || defaults.village || null,
                     siteName: s.siteName || defaults.siteName || null,
+
+                    // Stage E: Chain of Custody & Handover (RC-19)
+                    custodyHandoverAt: s.custodyHandoverAt ? new Date(s.custodyHandoverAt) : (csgInput.custodyHandoverAt ? new Date(csgInput.custodyHandoverAt) : (csgInput.deliveredAt ? new Date(csgInput.deliveredAt) : now)),
+                    custodyCarrierName: s.custodyCarrierName || csgInput.custodyCarrierName || csgInput.deliveredBy || null,
+                    custodyTrackingNumber: s.custodyTrackingNumber || csgInput.custodyTrackingNumber || csgInput.deliveryNoteRef || null,
+                    custodySenderSignature: s.custodySenderSignature || csgInput.custodySenderSignature || null,
+                    receivingOfficerId: user?.id ? String(user.id) : null,
+                    receivingOfficerName: user?.name || user?.username || receivedBy,
+                    receivingOfficerSignature: s.receivingOfficerSignature || csgInput.receivingOfficerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`,
+
                     requiredAnalyses: JSON.stringify(reqAnalyses),
                     consignmentId: consignment.id,
                     receptionData: JSON.stringify({
@@ -1220,7 +1294,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
 
                 if (existing) {
                     const existingHist = typeof existing.history === 'string' ? JSON.parse(existing.history) : (existing.history || []);
-                    existingHist.push({ status: isRejected ? 'REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote });
+                    existingHist.push({ status: isRejected ? 'RECEIVED_REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote });
 
                     sampleRecord = await tx.sample.update({
                         where: { id: existing.id },
@@ -1230,7 +1304,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         }
                     });
                 } else {
-                    const newHist = [{ status: isRejected ? 'REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote }];
+                    const newHist = [{ status: isRejected ? 'RECEIVED_REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote }];
                     sampleRecord = await tx.sample.create({
                         data: {
                             id: crypto.randomUUID(),

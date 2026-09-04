@@ -73,11 +73,11 @@ exports.getExportData = async (req, res) => {
                 ];
             } else {
                 filterWhere.OR = [
-                    { clientRef: { contains: search, mode: 'insensitive' } },
-                    { projectCode: { contains: search, mode: 'insensitive' } },
-                    { originalId: { contains: search, mode: 'insensitive' } },
-                    { labId: { contains: search, mode: 'insensitive' } },
-                    { metadata: { contains: search, mode: 'insensitive' } }
+                    { clientRef: { contains: search } },
+                    { projectCode: { contains: search } },
+                    { originalId: { contains: search } },
+                    { labId: { contains: search } },
+                    { metadata: { contains: search } }
                 ];
             }
         }

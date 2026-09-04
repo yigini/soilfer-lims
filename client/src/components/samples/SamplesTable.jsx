@@ -28,7 +28,9 @@ const STATE_CONFIG = {
     'ON_HOLD': { icon: History, color: 'text-red-500', bg: 'bg-red-100', label: 'On Hold' },
     'LAB_ID_ASSIGNED': { icon: Hash, color: 'text-emerald-500', bg: 'bg-emerald-50', label: 'ID Assigned' },
     'Draft Intake': { icon: FileOutput, color: 'text-orange-400', bg: 'bg-orange-50', label: 'Draft Intake' },
-    'DRAFT': { icon: FileOutput, color: 'text-orange-400', bg: 'bg-orange-50', label: 'Draft Intake' }
+    'DRAFT': { icon: FileOutput, color: 'text-orange-400', bg: 'bg-orange-50', label: 'Draft Intake' },
+    'RECEIVED_REJECTED': { icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100 dark:bg-rose-950/40', label: 'Rejected (Non-Conformance)' },
+    'REJECTED': { icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100 dark:bg-rose-950/40', label: 'Rejected' }
 };
 
 const WI_STATUS_ICON = { 'NOT_ASSIGNED': '○', 'ASSIGNED': '◎', 'IN_PROGRESS': '◉', 'COMPLETED': '✓', 'ACCEPTED': '✓' };
@@ -62,7 +64,7 @@ const StatusIcon = ({ status, overrideText }) => {
 // Attention: returns null (N/A), [] (OK), or array of flags
 const computeAttention = (sample) => {
     const st = sample.status;
-    if (['EXPECTED', 'ARCHIVED', 'DISPOSED', 'APPROVED', 'SUBMITTED_FULL'].includes(st)) return null;
+    if (['EXPECTED', 'ARCHIVED', 'DISPOSED', 'APPROVED', 'SUBMITTED_FULL', 'RECEIVED_REJECTED', 'REJECTED'].includes(st)) return null;
     const flags = [];
     if (st === 'Draft Intake' || st === 'DRAFT')
         flags.push({ key: 'draft_intake', icon: AlertTriangle, color: 'text-orange-500', label: 'Info Only – Not yet accepted' });

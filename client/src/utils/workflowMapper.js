@@ -73,6 +73,7 @@ export const STATUS_COLORS = {
     SUBMITTED: { bg: '#e0e7ff', text: '#4f46e5', label: 'Submitted' },
     ACCEPTED: { bg: '#d1fae5', text: '#059669', label: 'Approved' },
     REANALYSIS_REQUIRED: { bg: '#fee2e2', text: '#dc2626', label: 'Redo' },
+    RECEIVED_REJECTED: { bg: '#fee2e2', text: '#dc2626', label: 'Rejected' },
     WAIVED: { bg: '#f1f5f9', text: '#64748b', label: 'Waived' },
     PENDING: { bg: '#f8fafc', text: '#94a3b8', label: 'Pending' },
 };
@@ -231,6 +232,16 @@ export function resolveSampleLocation(sample, workItems, auditLog) {
             reason: 'Sample received',
             nextAction: 'Pending intake acceptance',
             status: 'RECEIVED'
+        };
+    }
+
+    // 7b. RECEIVED_REJECTED → Reception Quarantine
+    if (sample && (sample.status === 'RECEIVED_REJECTED' || sample.status === 'REJECTED')) {
+        return {
+            currentRoom: ROOMS.RECEPTION,
+            reason: 'Sample rejected at intake (non-conformance)',
+            nextAction: 'Quarantined / Excluded from testing',
+            status: 'RECEIVED_REJECTED'
         };
     }
 

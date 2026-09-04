@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Search, SlidersHorizontal, X,
-    CalendarClock, Inbox, CheckCircle2, Clock, PackageCheck, Archive,
+    CalendarClock, Inbox, CheckCircle2, Clock, PackageCheck, Archive, AlertTriangle,
     ChevronLeft, ChevronRight
 } from 'lucide-react';
 
@@ -13,6 +13,7 @@ const QUICK_FILTERS = [
     { id: 'processing', label: 'In Progress', param: 'status', value: 'PROCESSING,SUBMITTED_PARTIAL', icon: Clock, color: 'text-amber-600', activeColor: 'text-white', activeBg: 'bg-amber-600', facetKey: 'ONGOING' },
     { id: 'completed', label: 'Completed', param: 'status', value: 'SUBMITTED_FULL,APPROVED', icon: PackageCheck, color: 'text-blue-600', activeColor: 'text-white', activeBg: 'bg-blue-600', facetKey: 'COMPLETED' },
     { id: 'archived', label: 'Archived', param: 'status', value: 'ARCHIVED,DISPOSED', icon: Archive, color: 'text-purple-600', activeColor: 'text-white', activeBg: 'bg-purple-600', facetKey: 'HISTORY' },
+    { id: 'rejected', label: 'Rejected', param: 'status', value: 'RECEIVED_REJECTED', icon: AlertTriangle, color: 'text-rose-600', activeColor: 'text-white', activeBg: 'bg-rose-600', facetKey: 'REJECTED' },
 ];
 
 const SamplesFilterBar = ({

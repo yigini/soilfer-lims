@@ -137,6 +137,15 @@ model Sample {
   village                   String?   // Village / Community
   siteName                  String?   // Farm or site identifier
 
+  // Chain of Custody & Handover (Stage E: RC-19)
+  custodyHandoverAt         DateTime?  // Actual physical handover timestamp
+  custodyCarrierName        String?    // Courier, driver, or extension agent name
+  custodyTrackingNumber     String?    // Waybill / delivery note / airway bill reference
+  custodySenderSignature    String?    // Sender/carrier signature confirmation
+  receivingOfficerId        String?    // User ID of receiving officer
+  receivingOfficerName      String?    // Full name or username of receiving officer
+  receivingOfficerSignature String?    // Digital counter-signature confirmation
+
 
   // Matrix & Module (WP-18)
   matrix            String     @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
@@ -188,6 +197,16 @@ model Consignment {
   acceptedCount   Int          @default(0)
   rejectedCount   Int          @default(0)
   status          String       @default("RECEIVED") // RECEIVED, PARTIAL, COMPLETED
+
+  // Chain of Custody & Handover (Stage E: RC-19)
+  custodyHandoverAt         DateTime?  // Actual physical handover timestamp
+  custodyCarrierName        String?    // Courier, driver, or extension agent name
+  custodyTrackingNumber     String?    // Waybill / delivery note / airway bill reference
+  custodySenderSignature    String?    // Sender/carrier signature confirmation
+  receivingOfficerId        String?    // User ID of receiving officer
+  receivingOfficerName      String?    // Full name or username of receiving officer
+  receivingOfficerSignature String?    // Digital counter-signature confirmation
+
   notes           String?
   metadata        String?      // JSON string: mapping profile, manifest metadata
   createdAt       DateTime     @default(now())

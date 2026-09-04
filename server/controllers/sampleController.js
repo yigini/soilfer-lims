@@ -168,8 +168,8 @@ exports.getSamples = async (req, res) => {
             if (!where.AND) where.AND = [];
             where.AND.push({
                 OR: [
-                    { originalId: { contains: term, mode: 'insensitive' } },
-                    { labId: { contains: term, mode: 'insensitive' } }
+                    { originalId: { contains: term } },
+                    { labId: { contains: term } }
                 ]
             });
         }
@@ -227,11 +227,12 @@ exports.getSamples = async (req, res) => {
         ]);
 
         // --- 3. BUILD FACETS ---
-        const lifecycle = { EXPECTED: 0, RECEIVED: 0, ACCEPTED: 0, ONGOING: 0, COMPLETED: 0, HISTORY: 0 };
+        const lifecycle = { EXPECTED: 0, RECEIVED: 0, ACCEPTED: 0, ONGOING: 0, COMPLETED: 0, HISTORY: 0, REJECTED: 0 };
         statusCounts.forEach(sc => {
             if (sc.status === 'EXPECTED') lifecycle.EXPECTED = sc._count;
             else if (sc.status === 'RECEIVED') lifecycle.RECEIVED = sc._count;
             else if (sc.status === 'ACCEPTED') lifecycle.ACCEPTED = sc._count;
+            else if (sc.status === 'RECEIVED_REJECTED' || sc.status === 'REJECTED') lifecycle.REJECTED = (lifecycle.REJECTED || 0) + sc._count;
             else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sc.status)) lifecycle.ONGOING += sc._count;
             else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) lifecycle.COMPLETED += sc._count;
             else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) lifecycle.HISTORY += sc._count;
@@ -290,7 +291,8 @@ exports.getSamples = async (req, res) => {
                     status: true, dryingStatus: true, preparationStatus: true,
                     depthTop: true, depthBottom: true, horizon: true,
                     receptionDate: true, createdAt: true, updatedAt: true,
-                    fieldMetadata: true, metadata: true,
+                    fieldMetadata: true, metadata: true, rejectionReason: true,
+                    custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
                     workItems: { select: { analysis: true, status: true, category: true } }
                 }
             }) : [];
@@ -307,7 +309,8 @@ exports.getSamples = async (req, res) => {
                     status: true, dryingStatus: true, preparationStatus: true,
                     depthTop: true, depthBottom: true, horizon: true,
                     receptionDate: true, createdAt: true, updatedAt: true,
-                    fieldMetadata: true, metadata: true,
+                    fieldMetadata: true, metadata: true, rejectionReason: true,
+                    custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
                     workItems: { select: { analysis: true, status: true, category: true } }
                 },
                 orderBy: { [safeSort]: safeOrder },

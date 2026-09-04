@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
-import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw, MapPin, PackageCheck } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw, MapPin, PackageCheck, ShieldCheck, Clock } from 'lucide-react';
+import QRCode from 'qrcode';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
@@ -67,11 +68,29 @@ const Reception = () => {
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
     const [intakeNotes, setIntakeNotes] = useState('');
-    const [cocDeliveredBy, setCocDeliveredBy] = useState('');
     const [branding, setBranding] = useState(null);
+
+    // Stage E: Structured Chain of Custody & Handover (RC-19)
+    const [custodyHandoverAt, setCustodyHandoverAt] = useState(() => new Date().toISOString().slice(0, 16));
+    const [custodyCarrierName, setCustodyCarrierName] = useState('');
+    const [custodyTrackingNumber, setCustodyTrackingNumber] = useState('');
+    const [custodySenderSignature, setCustodySenderSignature] = useState('');
+    const [custodyCounterSigned, setCustodyCounterSigned] = useState(true);
 
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
+    const [resultQrUrl, setResultQrUrl] = useState('');
+
+    // Offline QR Code generation when Lab ID is minted
+    useEffect(() => {
+        if (result?.labId) {
+            QRCode.toDataURL(String(result.labId), { width: 180, margin: 1 })
+                .then(url => setResultQrUrl(url))
+                .catch(() => setResultQrUrl(''));
+        } else {
+            setResultQrUrl('');
+        }
+    }, [result?.labId]);
 
     // Walk-in Specific Data
     const [submitter, setSubmitter] = useState({ name: '', surname: '', phone: '', email: '', organization: '', contactMethod: 'Phone' });
@@ -352,7 +371,12 @@ const Reception = () => {
         setTimeout(() => scanInputRef.current?.focus(), 50);
         setJustification('');
         setIntakeNotes('');
-        setCocDeliveredBy('');
+        setCustodyHandoverAt(new Date().toISOString().slice(0, 16));
+        setCustodyCarrierName('');
+        setCustodyTrackingNumber('');
+        setCustodySenderSignature('');
+        setCustodyCounterSigned(true);
+        setResultQrUrl('');
 
         // Stage A
         setReceivedMass('');
@@ -618,7 +642,13 @@ const Reception = () => {
 
                             if (found.receptionData?.checklist) setChecklistData(found.receptionData.checklist);
                             if (found.receptionData?.notes) setIntakeNotes(found.receptionData.notes);
-                            if (found.receptionData?.coc?.deliveredBy) setCocDeliveredBy(found.receptionData.coc.deliveredBy);
+                            if (found.custodyCarrierName || found.receptionData?.coc?.deliveredBy) setCustodyCarrierName(found.custodyCarrierName || found.receptionData.coc.deliveredBy);
+                            if (found.custodyTrackingNumber || found.receptionData?.coc?.trackingNumber) setCustodyTrackingNumber(found.custodyTrackingNumber || found.receptionData.coc.trackingNumber);
+                            if (found.custodySenderSignature || found.receptionData?.coc?.senderSignature) setCustodySenderSignature(found.custodySenderSignature || found.receptionData.coc.senderSignature);
+                            if (found.custodyHandoverAt || found.receptionData?.coc?.date) {
+                                const dt = new Date(found.custodyHandoverAt || found.receptionData.coc.date);
+                                if (!isNaN(dt.getTime())) setCustodyHandoverAt(dt.toISOString().slice(0, 16));
+                            }
 
                             // Analysis
                             if (found.analysisGroupIds?.[0]) setSelectedGroup(found.analysisGroupIds[0]);
@@ -1014,7 +1044,21 @@ const Reception = () => {
 
             receivedBy: user.username,
             labId: user.labId,
-            coc: { deliveredBy: cocDeliveredBy, receivedBy: user.username, date: new Date().toISOString() },
+
+            // Stage E: Chain of Custody (RC-19)
+            custodyHandoverAt: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : new Date().toISOString(),
+            custodyCarrierName: custodyCarrierName.trim() || null,
+            custodyTrackingNumber: custodyTrackingNumber.trim() || null,
+            custodySenderSignature: custodySenderSignature.trim() || null,
+            receivingOfficerSignature: custodyCounterSigned ? `CONFIRMED:${user.username}:${new Date().toISOString()}` : null,
+            coc: {
+                deliveredBy: custodyCarrierName.trim() || null,
+                receivedBy: user.username,
+                date: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : new Date().toISOString(),
+                trackingNumber: custodyTrackingNumber.trim() || null,
+                senderSignature: custodySenderSignature.trim() || null,
+                counterSigned: custodyCounterSigned
+            },
 
             analysisGroupIds: selectedGroup ? [selectedGroup] : [],
             analysisAdditions: additions,
@@ -1056,7 +1100,9 @@ const Reception = () => {
             } else {
                 playSuccessChime();
                 setResult(res.data);
-                setIsLabelPrintOpen(true);
+                if (!res.data.rejected) {
+                    setIsLabelPrintOpen(true);
+                }
                 localStorage.removeItem(AUTOSAVE_KEY);
             }
         } catch (err) {
@@ -1865,20 +1911,111 @@ const Reception = () => {
                             />
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2"><Camera size={20} /> Documentation & Notes</h3>
-                            <input
-                                value={cocDeliveredBy} onChange={e => setCocDeliveredBy(e.target.value)}
-                                placeholder="Chain of Custody: Delivered By"
-                                className="w-full mb-3 p-2 border rounded"
-                            />
-                            <textarea
-                                value={intakeNotes}
-                                onChange={e => setIntakeNotes(e.target.value)}
-                                placeholder="General Reception Notes..."
-                                className="w-full p-2 border rounded h-24 resize-none"
-                            />
+                        {/* STAGE E: CHAIN OF CUSTODY & VERIFICATION (RC-19) */}
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+                                <h3 className="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                                    <ShieldCheck size={20} className="text-indigo-600 dark:text-indigo-400" />
+                                    <span>Chain of Custody & Physical Handover</span>
+                                </h3>
+                                <span className="text-[10px] font-mono uppercase bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800 font-semibold">
+                                    RC-19 Immutable Handover
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1 flex items-center gap-1">
+                                        <Clock size={13} className="text-gray-400" />
+                                        <span>Handover Timestamp</span>
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={custodyHandoverAt}
+                                        onChange={e => setCustodyHandoverAt(e.target.value)}
+                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        title="Physical date and time the sample was physically handed over at desk"
+                                    />
+                                    <span className="text-[10px] text-gray-400 block mt-0.5">Physical custody handover (distinct from entry time)</span>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                        Carrier / Delivered By
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={custodyCarrierName}
+                                        onChange={e => setCustodyCarrierName(e.target.value)}
+                                        placeholder="Courier, driver, extension agent, or client"
+                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                        Waybill / Tracking / Delivery Note #
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={custodyTrackingNumber}
+                                        onChange={e => setCustodyTrackingNumber(e.target.value)}
+                                        placeholder="e.g. WB-992834, DN-2026-04"
+                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                        Deliverer / Submitter Signature Confirmation
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={custodySenderSignature}
+                                        onChange={e => setCustodySenderSignature(e.target.value)}
+                                        placeholder="Printed name or delivery signature token"
+                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Receiving Officer Counter-Signature */}
+                            <div className="bg-slate-50 dark:bg-gray-750 p-3 rounded-lg border border-slate-200 dark:border-gray-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
+                                        {user?.username ? user.username.slice(0, 2).toUpperCase() : 'RO'}
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-800 dark:text-gray-100">
+                                            Receiving Officer: <span className="text-indigo-600 dark:text-indigo-400">{user?.name || user?.username}</span> ({user?.labId || 'Desk'})
+                                        </div>
+                                        <div className="text-[11px] text-gray-500 dark:text-gray-400">Authenticated custody receiver counter-signature</div>
+                                    </div>
+                                </div>
+                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={custodyCounterSigned}
+                                        onChange={e => setCustodyCounterSigned(e.target.checked)}
+                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                                    />
+                                    <span>Officer Sign-Off Confirmed</span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                    General Reception & Sample Notes
+                                </label>
+                                <textarea
+                                    value={intakeNotes}
+                                    onChange={e => setIntakeNotes(e.target.value)}
+                                    placeholder="Enter physical observations, special handling notes, or delivery observations..."
+                                    className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 h-20 resize-none text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                />
+                            </div>
                         </div>
+
 
                         {validationErrors.length > 0 && (
                             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-2 animate-in fade-in slide-in-from-top-2">
@@ -1940,7 +2077,69 @@ const Reception = () => {
             {result && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300 no-print">
                     <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
-                        {result.success ? (
+                        {result.success && (result.rejected || result.status === 'RECEIVED_REJECTED') ? (
+                            <>
+                                <div className="mx-auto w-24 h-24 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
+                                    <div className="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-600/30">
+                                        <AlertTriangle size={32} className="text-white" />
+                                    </div>
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-gray-100 mb-1 tracking-tight uppercase">Non-Conformance Recorded</h2>
+                                <p className="text-rose-600 dark:text-rose-400 mb-6 font-semibold text-xs">
+                                    Sample rejected at reception desk and recorded as <span className="font-mono px-1.5 py-0.5 bg-rose-100 dark:bg-rose-900/50 rounded font-bold">RECEIVED_REJECTED</span>
+                                </p>
+
+                                <div className="space-y-3 bg-slate-50 dark:bg-gray-750 rounded-2xl p-4 border border-slate-200 dark:border-gray-600 mb-6 text-left text-xs shadow-inner">
+                                    <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+                                        <span className="text-gray-500 font-medium">Sample Identifier:</span>
+                                        <span className="font-mono font-bold text-gray-900 dark:text-white">{result.originalId}</span>
+                                    </div>
+                                    <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
+                                        <span className="text-gray-500 font-medium block mb-1">Rejection Reason:</span>
+                                        <div className="p-2 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 rounded border border-rose-200 dark:border-rose-900 font-semibold text-xs">
+                                            {result.rejectionReason || 'Sample non-conformance recorded during physical intake.'}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div>
+                                            <span className="text-gray-400 block">Carrier / Courier:</span>
+                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.custodyCarrierName || 'Direct Delivery'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400 block">Waybill / Tracking:</span>
+                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.custodyTrackingNumber || 'None'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400 block">Receiving Officer:</span>
+                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.receivingOfficerName || user.username}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400 block">Handover Time:</span>
+                                            <span className="font-semibold text-gray-700 dark:text-gray-200">
+                                                {result.custodyHandoverAt ? new Date(result.custodyHandoverAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recorded'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => window.print()}
+                                        className="py-3 px-4 bg-white dark:bg-gray-700 text-rose-700 dark:text-rose-300 font-bold rounded-xl border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-gray-600 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    >
+                                        <Printer size={16} /> Print Slip
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={resetForm}
+                                        className="py-3 px-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all flex items-center justify-center gap-2 active:scale-95 shadow-lg"
+                                    >
+                                        <Plus size={16} /> Next Sample
+                                    </button>
+                                </div>
+                            </>
+                        ) : result.success ? (
                             <>
                                 <div className="mx-auto w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
                                     <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -1954,11 +2153,17 @@ const Reception = () => {
                                     {/* Left: QR Code */}
                                     <div className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-200 dark:border-gray-600 shadow-sm">
                                         <div className="w-32 h-32 border border-slate-100 p-1 rounded-xl">
-                                            <img
-                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${result.labId}`}
-                                                alt="QR"
-                                                className="w-full h-full object-contain"
-                                            />
+                                            {resultQrUrl ? (
+                                                <img
+                                                    src={resultQrUrl}
+                                                    alt="QR"
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 font-mono">
+                                                    {result.labId}
+                                                </div>
+                                            )}
                                         </div>
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Encoded: {result.labId}</span>
                                     </div>
@@ -2003,6 +2208,7 @@ const Reception = () => {
                                     </button>
                                 </div>
                             </>
+
                         ) : (
                             <>
                                 <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
