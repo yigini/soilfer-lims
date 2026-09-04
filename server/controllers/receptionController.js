@@ -3,6 +3,7 @@ const workflow = require('../workflowContract');
 const idGenerator = require('../services/idGenerator');
 const { parseCoordinates } = require('../utils/coordParser');
 const adminBoundaries = require('../data/adminBoundaries.json');
+const crypto = require('crypto');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -1032,6 +1033,484 @@ exports.batchGeometryCheck = async (req, res) => {
     } catch (err) {
         console.error('[batchGeometryCheck] ERROR:', err);
         return res.status(500).json({ error: 'Batch geometry check failed: ' + err.message });
+    }
+};
+
+/**
+ * POST /api/reception/consignments
+ * RC-12: Consignment Record
+ * RC-13: High-Throughput Batch Receive
+ * RC-14: Per-Sample Exception Handling in Batch Intake
+ */
+exports.processBatchConsignmentIntake = async (req, res) => {
+    try {
+        const user = req.user;
+        const { consignment: csgInput = {}, defaults = {}, samples = [] } = req.body;
+
+        if (!Array.isArray(samples) || samples.length === 0) {
+            return res.status(400).json({ error: 'At least one sample is required for batch intake' });
+        }
+
+        const userLab = user?.labId || 'GEN';
+        const receivedBy = user?.username || 'reception_staff';
+        const now = new Date();
+
+        // 1. Generate unique sequential consignment code CSG-YYYYMMDD-XXX
+        const todayStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const csgPrefix = `CSG-${todayStr}-`;
+        const countToday = await prisma.consignment.count({
+            where: { code: { startsWith: csgPrefix } }
+        });
+        const consignmentCode = `${csgPrefix}${String(countToday + 1).padStart(3, '0')}`;
+
+        // 2. Count statuses
+        let acceptedCount = 0;
+        let rejectedCount = 0;
+        samples.forEach(s => {
+            if (s.status === 'REJECTED') rejectedCount++;
+            else acceptedCount++;
+        });
+
+        const consignmentStatus = rejectedCount === samples.length ? 'REJECTED' : (rejectedCount > 0 ? 'PARTIAL' : 'RECEIVED');
+
+        // 3. Preload all analyses for mass requirement calculation
+        const allAnalysesDb = await prisma.analysis.findMany({
+            select: { code: true, name: true, sampleMassRequired: true, category: true }
+        });
+        const analysisMap = new Map(allAnalysesDb.map(a => [a.code, a]));
+
+        // 4. Atomic transaction across consignment and all samples
+        const result = await prisma.$transaction(async (tx) => {
+            // A. Create Consignment Record (RC-12)
+            const consignment = await tx.consignment.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    code: consignmentCode,
+                    labId: userLab,
+                    projectCode: csgInput.projectCode || null,
+                    submitterName: csgInput.submitterName || csgInput.submitter?.name || null,
+                    submitterOrg: csgInput.submitterOrg || csgInput.submitter?.organization || null,
+                    submitterPhone: csgInput.submitterPhone || csgInput.submitter?.phone || null,
+                    submitterEmail: csgInput.submitterEmail || csgInput.submitter?.email || null,
+                    deliveredBy: csgInput.deliveredBy || null,
+                    deliveredAt: csgInput.deliveredAt ? new Date(csgInput.deliveredAt) : null,
+                    receivedBy,
+                    receivedAt: now,
+                    deliveryNoteRef: csgInput.deliveryNoteRef || null,
+                    expectedCount: parseInt(csgInput.expectedCount) || samples.length,
+                    sampleCount: samples.length,
+                    acceptedCount,
+                    rejectedCount,
+                    status: consignmentStatus,
+                    notes: csgInput.notes || null,
+                    metadata: csgInput.metadata ? JSON.stringify(csgInput.metadata) : null
+                }
+            });
+
+            // B. Process each sample
+            const processedSamples = [];
+
+            for (let i = 0; i < samples.length; i++) {
+                const s = samples[i];
+                const originalId = String(s.originalId || s.id || `SMP-${i + 1}`).trim();
+                const isRejected = s.status === 'REJECTED';
+                const status = isRejected ? 'RECEIVED_REJECTED' : workflow.SAMPLE_STATES.ACCEPTED;
+                const rejectionReason = isRejected ? (s.rejectionReason || 'Sample non-conformance recorded during batch reception') : null;
+
+                // Merge values with defaults
+                const rawMass = s.receivedMass !== undefined && s.receivedMass !== null && s.receivedMass !== '' ? s.receivedMass : defaults.receivedMass;
+                const parsedMass = rawMass !== undefined && rawMass !== null && rawMass !== '' ? parseFloat(rawMass) : null;
+                const moisture = s.moistureOnArrival || defaults.moistureOnArrival || 'MOIST';
+                const foreignMat = s.foreignMaterial || defaults.foreignMaterial || [];
+                const photos = s.intakePhotos || [];
+                const reqAnalyses = s.requiredAnalyses || defaults.requiredAnalyses || ['PH_H2O'];
+
+                // Geodesy / Location
+                let lat = null, lng = null, elev = null;
+                if (s.latitude !== undefined && s.latitude !== null && s.latitude !== '') {
+                    lat = parseFloat(s.latitude);
+                    lng = s.longitude !== undefined && s.longitude !== null ? parseFloat(s.longitude) : null;
+                    elev = s.elevation !== undefined && s.elevation !== null ? parseFloat(s.elevation) : null;
+                } else if (s.coordinates) {
+                    lat = parseFloat(s.coordinates.lat);
+                    lng = parseFloat(s.coordinates.lng);
+                    elev = parseFloat(s.coordinates.elevation);
+                }
+
+                const uncertaintyM = s.positionalUncertaintyM !== undefined && s.positionalUncertaintyM !== null && s.positionalUncertaintyM !== ''
+                    ? parseFloat(s.positionalUncertaintyM)
+                    : (lat && lng ? 10.0 : null);
+
+                const compRadius = s.compositeRadiusM !== undefined && s.compositeRadiusM !== null && s.compositeRadiusM !== ''
+                    ? parseFloat(s.compositeRadiusM)
+                    : (defaults.compositeRadiusM ? parseFloat(defaults.compositeRadiusM) : null);
+
+                const depthTop = s.depthTopCm !== undefined && s.depthTopCm !== null && s.depthTopCm !== ''
+                    ? parseFloat(s.depthTopCm)
+                    : (defaults.depthTopCm !== undefined && defaults.depthTopCm !== null ? parseFloat(defaults.depthTopCm) : null);
+
+                const depthBottom = s.depthBottomCm !== undefined && s.depthBottomCm !== null && s.depthBottomCm !== ''
+                    ? parseFloat(s.depthBottomCm)
+                    : (defaults.depthBottomCm !== undefined && defaults.depthBottomCm !== null ? parseFloat(defaults.depthBottomCm) : null);
+
+                const locSource = s.locationSource || (lat && lng ? 'DESK_PASTE' : 'TEXT_ONLY');
+
+                // Generate short sequential Lab ID (RC-13)
+                const labId = await idGenerator.generateLabId(userLab, 'S');
+
+                // Check if sample already exists (e.g. EXPECTED sample in Project)
+                const existing = await tx.sample.findFirst({
+                    where: {
+                        OR: [
+                            { originalId },
+                            { id: originalId }
+                        ]
+                    }
+                });
+
+                const historyNote = isRejected
+                    ? `Rejected during batch reception under Consignment ${consignment.code}. Reason: ${rejectionReason}`
+                    : `Batch accepted under Consignment ${consignment.code} (${consignment.deliveryNoteRef || 'no ref'}). Lab ID assigned: ${labId}`;
+
+                let sampleRecord;
+
+                const sampleDataCommon = {
+                    labId,
+                    status,
+                    assignedLab: userLab,
+                    projectCode: consignment.projectCode || (existing?.projectCode || null),
+                    projectId: consignment.projectCode || (existing?.projectId || null),
+                    receptionDate: now,
+                    receivedBy,
+                    acceptedBy: isRejected ? null : receivedBy,
+                    acceptedAt: isRejected ? null : now,
+                    dryingStatus: isRejected ? null : 'PENDING',
+                    preparationStatus: isRejected ? null : 'PENDING',
+                    receivedMass: parsedMass,
+                    massWarningAcknowledged: true,
+                    moistureOnArrival: moisture,
+                    foreignMaterial: typeof foreignMat === 'string' ? foreignMat : JSON.stringify(foreignMat),
+                    intakePhotos: JSON.stringify(photos),
+                    rejectionReason,
+                    latitude: lat,
+                    longitude: lng,
+                    elevation: elev,
+                    positionalUncertaintyM: uncertaintyM,
+                    locationSource: locSource,
+                    locationCapturedAt: (lat && lng) ? now : null,
+                    locationCapturedBy: (lat && lng) ? receivedBy : null,
+                    compositeRadiusM: compRadius,
+                    depthTopCm: depthTop,
+                    depthBottomCm: depthBottom,
+                    admin1: s.admin1 || defaults.admin1 || null,
+                    admin2: s.admin2 || defaults.admin2 || null,
+                    village: s.village || defaults.village || null,
+                    siteName: s.siteName || defaults.siteName || null,
+                    requiredAnalyses: JSON.stringify(reqAnalyses),
+                    consignmentId: consignment.id,
+                    receptionData: JSON.stringify({
+                        consignmentCode: consignment.code,
+                        deliveryNoteRef: consignment.deliveryNoteRef,
+                        deliveredBy: consignment.deliveredBy,
+                        batchIndex: i + 1,
+                        notes: s.notes || null,
+                        checklist: s.checklist || defaults.checklist || {}
+                    })
+                };
+
+                if (existing) {
+                    const existingHist = typeof existing.history === 'string' ? JSON.parse(existing.history) : (existing.history || []);
+                    existingHist.push({ status: isRejected ? 'REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote });
+
+                    sampleRecord = await tx.sample.update({
+                        where: { id: existing.id },
+                        data: {
+                            ...sampleDataCommon,
+                            history: JSON.stringify(existingHist)
+                        }
+                    });
+                } else {
+                    const newHist = [{ status: isRejected ? 'REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote }];
+                    sampleRecord = await tx.sample.create({
+                        data: {
+                            id: crypto.randomUUID(),
+                            originalId,
+                            ...sampleDataCommon,
+                            history: JSON.stringify(newHist)
+                        }
+                    });
+                }
+
+                // If sample accepted, create WorkItems for drying, preparation, and analyses
+                if (!isRejected) {
+                    const workItemsToCreate = [];
+                    workItemsToCreate.push({
+                        id: crypto.randomUUID(),
+                        sampleId: sampleRecord.id,
+                        labId: sampleRecord.labId,
+                        assignedLab: userLab,
+                        analysis: 'DRYING',
+                        category: 'Operational Gates',
+                        status: 'NOT_ASSIGNED'
+                    });
+                    workItemsToCreate.push({
+                        id: crypto.randomUUID(),
+                        sampleId: sampleRecord.id,
+                        labId: sampleRecord.labId,
+                        assignedLab: userLab,
+                        analysis: 'PREPARATION',
+                        category: 'Operational Gates',
+                        status: 'NOT_ASSIGNED'
+                    });
+
+                    for (const code of reqAnalyses) {
+                        const meta = analysisMap.get(code);
+                        const cat = typeof meta?.category === 'object'
+                            ? (meta?.category?.name || meta?.category?.id || 'General Chemistry')
+                            : (meta?.category || 'General Chemistry');
+                        workItemsToCreate.push({
+                            id: crypto.randomUUID(),
+                            sampleId: sampleRecord.id,
+                            labId: sampleRecord.labId,
+                            assignedLab: userLab,
+                            analysis: code,
+                            category: String(cat),
+                            status: 'NOT_ASSIGNED'
+                        });
+                    }
+
+                    await tx.workItem.createMany({
+                        data: workItemsToCreate
+                    });
+                }
+
+                processedSamples.push({
+                    id: sampleRecord.id,
+                    originalId: sampleRecord.originalId,
+                    labId: sampleRecord.labId,
+                    status: sampleRecord.status,
+                    rejectionReason: sampleRecord.rejectionReason,
+                    receivedMass: sampleRecord.receivedMass
+                });
+            }
+
+            // C. Audit log (RC-12, RC-13)
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-csg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    entity: 'CONSIGNMENT',
+                    entityId: consignment.id,
+                    action: 'CONSIGNMENT_BATCH_RECEIVED',
+                    details: `Consignment ${consignment.code} received with ${samples.length} samples (${acceptedCount} accepted, ${rejectedCount} rejected). Delivery Note: ${consignment.deliveryNoteRef || 'None'}.`,
+                    performedBy: receivedBy,
+                    timestamp: now
+                }
+            });
+
+            return { consignment, samples: processedSamples };
+        });
+
+        return res.status(201).json({
+            success: true,
+            consignment: result.consignment,
+            samples: result.samples,
+            message: `Batch received ${samples.length} samples under Consignment ${result.consignment.code}.`
+        });
+    } catch (err) {
+        console.error('[processBatchConsignmentIntake] ERROR:', err);
+        return res.status(500).json({ error: 'Batch consignment intake failed: ' + err.message });
+    }
+};
+
+/**
+ * GET /api/reception/consignments
+ * RC-12: List Consignment records
+ */
+exports.getConsignments = async (req, res) => {
+    try {
+        const { search, projectCode, status, page = 1, limit = 50 } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        const where = {};
+        if (projectCode) where.projectCode = projectCode;
+        if (status) where.status = status;
+        if (search) {
+            where.OR = [
+                { code: { contains: search } },
+                { deliveryNoteRef: { contains: search } },
+                { submitterName: { contains: search } },
+                { submitterOrg: { contains: search } },
+                { deliveredBy: { contains: search } }
+            ];
+        }
+
+        const [total, consignments] = await Promise.all([
+            prisma.consignment.count({ where }),
+            prisma.consignment.findMany({
+                where,
+                orderBy: { receivedAt: 'desc' },
+                skip,
+                take: limitNum,
+                include: {
+                    _count: {
+                        select: { samples: true }
+                    }
+                }
+            })
+        ]);
+
+        return res.json({
+            success: true,
+            data: consignments,
+            total,
+            page: pageNum,
+            limit: limitNum
+        });
+    } catch (err) {
+        console.error('[getConsignments] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to fetch consignments: ' + err.message });
+    }
+};
+
+/**
+ * GET /api/reception/consignments/:id
+ * RC-12: Consignment Detail
+ */
+exports.getConsignmentDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const consignment = await prisma.consignment.findFirst({
+            where: {
+                OR: [
+                    { id },
+                    { code: id }
+                ]
+            },
+            include: {
+                samples: {
+                    select: {
+                        id: true,
+                        originalId: true,
+                        labId: true,
+                        status: true,
+                        rejectionReason: true,
+                        receivedMass: true,
+                        moistureOnArrival: true,
+                        latitude: true,
+                        longitude: true,
+                        positionalUncertaintyM: true,
+                        depthTopCm: true,
+                        depthBottomCm: true,
+                        siteName: true,
+                        village: true,
+                        admin1: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+
+        if (!consignment) {
+            return res.status(404).json({ error: 'Consignment not found' });
+        }
+
+        return res.json({ success: true, consignment });
+    } catch (err) {
+        console.error('[getConsignmentDetail] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to fetch consignment detail: ' + err.message });
+    }
+};
+
+/**
+ * POST /api/reception/parse-manifest
+ * RC-15: Validate & Parse Client Manifest rows
+ */
+exports.parseManifestEndpoint = async (req, res) => {
+    try {
+        const { rows, mapping } = req.body;
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return res.status(400).json({ error: 'Array of manifest rows is required' });
+        }
+
+        const idCol = mapping?.sampleId || 'sample_id';
+        const latCol = mapping?.latitude || 'latitude';
+        const lngCol = mapping?.longitude || 'longitude';
+        const coordCol = mapping?.coordinates || 'coordinates';
+        const depthTopCol = mapping?.depthTop || 'depth_top';
+        const depthBottomCol = mapping?.depthBottom || 'depth_bottom';
+        const massCol = mapping?.receivedMass || 'mass';
+        const siteCol = mapping?.siteName || 'site';
+        const villageCol = mapping?.village || 'village';
+        const admin1Col = mapping?.admin1 || 'admin1';
+
+        const parsedRows = [];
+        const errors = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const raw = rows[i];
+            const sampleId = String(raw[idCol] || raw['id'] || raw['ID'] || raw['Sample ID'] || '').trim();
+            if (!sampleId) {
+                errors.push({ row: i + 1, error: 'Missing sample identifier' });
+                continue;
+            }
+
+            let lat = null, lng = null, uncertaintyM = null, format = null;
+
+            // Direct lat/lng
+            if (raw[latCol] !== undefined && raw[lngCol] !== undefined) {
+                const parsedLat = parseFloat(raw[latCol]);
+                const parsedLng = parseFloat(raw[lngCol]);
+                if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+                    lat = parsedLat;
+                    lng = parsedLng;
+                    uncertaintyM = 10;
+                    format = 'DD';
+                }
+            }
+
+            // Or unified coordinates string
+            if ((!lat || !lng) && (raw[coordCol] || raw['coords'] || raw['Coordinates'])) {
+                const cStr = String(raw[coordCol] || raw['coords'] || raw['Coordinates']);
+                const parsed = parseCoordinates(cStr);
+                if (parsed) {
+                    lat = parsed.lat;
+                    lng = parsed.lng;
+                    uncertaintyM = parsed.uncertaintyM;
+                    format = parsed.format;
+                }
+            }
+
+            parsedRows.push({
+                rowIndex: i + 1,
+                originalId: sampleId,
+                status: 'ACCEPTED',
+                latitude: lat,
+                longitude: lng,
+                positionalUncertaintyM: uncertaintyM,
+                coordFormat: format,
+                depthTopCm: raw[depthTopCol] !== undefined ? parseFloat(raw[depthTopCol]) : null,
+                depthBottomCm: raw[depthBottomCol] !== undefined ? parseFloat(raw[depthBottomCol]) : null,
+                receivedMass: raw[massCol] !== undefined ? parseFloat(raw[massCol]) : null,
+                siteName: raw[siteCol] || null,
+                village: raw[villageCol] || null,
+                admin1: raw[admin1Col] || null,
+                raw
+            });
+        }
+
+        return res.json({
+            success: true,
+            total: rows.length,
+            validCount: parsedRows.length,
+            errorCount: errors.length,
+            errors,
+            parsedRows
+        });
+    } catch (err) {
+        console.error('[parseManifestEndpoint] ERROR:', err);
+        return res.status(500).json({ error: 'Failed to parse manifest: ' + err.message });
     }
 };
 

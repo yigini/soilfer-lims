@@ -4,11 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
-import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw, MapPin } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, Plus, Camera, ArrowLeft, User, Info, FileText, Printer, HelpCircle, Loader2, X, RefreshCw, MapPin, PackageCheck } from 'lucide-react';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
 import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
+import BatchIntake from '../components/reception/BatchIntake';
 import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
 
@@ -939,17 +940,17 @@ const Reception = () => {
                     <p className="text-gray-500">Select intake mode or resume a draft</p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-8 md:mb-12">
-                    <button onClick={() => setMode('PROJECT')} className="p-6 md:p-10 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+                    <button onClick={() => setMode('PROJECT')} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Layers size={120} />
+                            <Layers size={100} />
                         </div>
                         <div className="relative z-10">
-                            <div className="bg-blue-100 dark:bg-blue-900/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                                <Layers size={32} />
+                            <div className="bg-blue-100 dark:bg-blue-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                                <Layers size={28} />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Project Sample</h2>
-                            <p className="text-gray-500 dark:text-gray-400">Scheduled samples (SoilFER, etc.)</p>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Project Sample</h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Scheduled samples (SoilFER campaigns)</p>
                         </div>
                     </button>
 
@@ -959,16 +960,29 @@ const Reception = () => {
                         const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                         setScanCode(`EXT-${randomId}`);
                         setSampleData({ originalId: `EXT-${randomId}`, isNew: true });
-                    }} className="p-6 md:p-10 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                    }} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <User size={120} />
+                            <User size={100} />
                         </div>
                         <div className="relative z-10">
-                            <div className="bg-purple-100 dark:bg-purple-900/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                                <User size={32} />
+                            <div className="bg-purple-100 dark:bg-purple-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                                <User size={28} />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Walk-in Sample</h2>
-                            <p className="text-gray-500 dark:text-gray-400">Farmers & Individual clients</p>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Walk-in Sample</h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Farmers & Individual walk-in clients</p>
+                        </div>
+                    </button>
+
+                    <button onClick={() => setMode('CONSIGNMENT')} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-emerald-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <PackageCheck size={100} />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="bg-emerald-100 dark:bg-emerald-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                                <PackageCheck size={28} />
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Consignment Batch</h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Couriers, manifests & bulk field campaigns</p>
                         </div>
                     </button>
                 </div>
@@ -1032,6 +1046,20 @@ const Reception = () => {
                     </div>
                 </div>
             </div>
+        );
+    }
+
+    if (mode === 'CONSIGNMENT') {
+        return (
+            <BatchIntake
+                user={user}
+                availableProjects={availableProjects}
+                analysisGroups={groups}
+                onBack={() => setMode(null)}
+                onSuccess={() => {
+                    fetchDrafts();
+                }}
+            />
         );
     }
 

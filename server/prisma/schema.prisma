@@ -157,9 +157,46 @@ model Sample {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
+  // Consignment Linkage (Stage C: RC-12)
+  consignmentId             String?
+  consignment               Consignment? @relation(fields: [consignmentId], references: [id])
+
   // Relations
   workItems         WorkItem[]
   results           Result[]
+
+  @@index([consignmentId])
+}
+
+// Stage C: RC-12 Consignment Entity
+model Consignment {
+  id              String       @id @default(uuid())
+  code            String       @unique // e.g. CSG-20260904-001
+  labId           String       // Receiving laboratory
+  projectCode     String?      // Project reference
+  submitterName   String?      // Submitter contact name
+  submitterOrg    String?      // Submitter organization
+  submitterPhone  String?
+  submitterEmail  String?
+  deliveredBy     String?      // Courier name, driver, extension agent
+  deliveredAt     DateTime?    // Courier delivery timestamp
+  receivedBy      String       // Receiving officer username
+  receivedAt      DateTime     @default(now())
+  deliveryNoteRef String?      // Waybill or delivery note number
+  expectedCount   Int          @default(0)
+  sampleCount     Int          @default(0)
+  acceptedCount   Int          @default(0)
+  rejectedCount   Int          @default(0)
+  status          String       @default("RECEIVED") // RECEIVED, PARTIAL, COMPLETED
+  notes           String?
+  metadata        String?      // JSON string: mapping profile, manifest metadata
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  samples         Sample[]
+
+  @@index([labId])
+  @@index([projectCode])
 }
 
 model WorkItem {

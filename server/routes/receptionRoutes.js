@@ -70,5 +70,21 @@ router.get('/reverse-geocode', checkPermission('RECEIVE_SAMPLE'), receptionContr
 // Consignment/project spatial outlier detection (RC-10)
 router.get('/batch-geometry-check', checkPermission('RECEIVE_SAMPLE'), receptionController.batchGeometryCheck);
 
+// POST /api/reception/consignments
+// High-throughput batch receive workflow with per-sample exception handling (RC-12, RC-13, RC-14)
+router.post('/consignments', checkPermission('RECEIVE_SAMPLE'), receptionController.processBatchConsignmentIntake);
+
+// GET /api/reception/consignments
+// List consignment delivery records (RC-12)
+router.get('/consignments', checkPermission('RECEIVE_SAMPLE'), receptionController.getConsignments);
+
+// GET /api/reception/consignments/:id
+// Get consignment detail and linked samples (RC-12)
+router.get('/consignments/:id', checkPermission('RECEIVE_SAMPLE'), receptionController.getConsignmentDetail);
+
+// POST /api/reception/parse-manifest
+// Institutional client spreadsheet manifest import & validation (RC-15)
+router.post('/parse-manifest', checkPermission('RECEIVE_SAMPLE'), receptionController.parseManifestEndpoint);
+
 module.exports = router;
 
