@@ -21,6 +21,13 @@ const DEFAULT_RULES = {
     }
 };
 
+const SEVERITY_LEVELS = { PASS: 0, WARN: 1, FAIL: 2 };
+function escalateQCStatus(current, target) {
+    const currentLvl = SEVERITY_LEVELS[current] || 0;
+    const targetLvl = SEVERITY_LEVELS[target] || 0;
+    return targetLvl > currentLvl ? target : current;
+}
+
 /**
  * Validates spectral data arrays with instrument-aware and physical-quantity-aware checks
  * @param {Array<number>} wavelengths - Array of numeric wavelengths/wavenumbers
@@ -61,7 +68,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
     }
     if (!increasing && !decreasing) {
         flags.push('NON_MONOTONIC_WAVELENGTHS');
-        qcStatus = 'FAIL';
+        qcStatus = escalateQCStatus(qcStatus, 'FAIL');
     }
 
     // 3. Instrument Range Checks (SL-17)
@@ -71,12 +78,12 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
     if (modality === 'NIR') {
         if (minW < limits.minWavelength || maxW > limits.maxWavelength) {
             flags.push('WAVELENGTH_OUT_OF_RANGE');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     } else if (modality === 'MIR') {
         if (minW < limits.minWavenumber || maxW > limits.maxWavenumber) {
             flags.push('WAVENUMBER_OUT_OF_RANGE');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     }
 
@@ -87,25 +94,25 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
     if (quantity === 'ABSORBANCE') {
         if (minVal < -0.1) {
             flags.push('NEGATIVE_VALUES_DETECTED');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
         if (maxVal > 4.0) {
             flags.push('ABSORBANCE_SATURATION');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     } else if (quantity === 'REFLECTANCE') {
         if (minVal < -0.05) {
             flags.push('NEGATIVE_VALUES_DETECTED');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
         if (maxVal > 1.2) {
             flags.push('HIGH_REFLECTANCE_VALUES');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     } else {
         if (minVal < -0.1) {
             flags.push('NEGATIVE_VALUES_DETECTED');
-            qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     }
 
@@ -113,7 +120,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
     // Entire spectrum flatline
     if (maxVal === minVal) {
         flags.push('FLAT_SIGNAL');
-        qcStatus = 'FAIL';
+        qcStatus = escalateQCStatus(qcStatus, 'FAIL');
     } else {
         // Run of >= 5 consecutive identical values
         let identicalRun = 1;
@@ -131,7 +138,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
         }
         if (saturated || (quantity === 'ABSORBANCE' && maxVal >= 3.99)) {
             flags.push('LOCAL_SATURATION');
-            qcStatus = 'FAIL';
+            qcStatus = escalateQCStatus(qcStatus, 'FAIL');
         }
     }
 
@@ -157,7 +164,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
             // Flag if CO2 doublet exceeds 0.08 AU or >4x baseline variance
             if (co2P2P > 0.08 || (baseP2P > 0 && co2P2P > 4 * baseP2P && co2P2P > 0.03)) {
                 flags.push('ATMOSPHERIC_CO2_RESIDUAL');
-                if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+                qcStatus = escalateQCStatus(qcStatus, 'WARN');
             }
         }
 
@@ -175,7 +182,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
             const avgSecondDiff = secondDiffSum / (wvIndices.length - 2);
             if (avgSecondDiff > 0.035) {
                 flags.push('WATER_VAPOR_RESIDUAL');
-                if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+                qcStatus = escalateQCStatus(qcStatus, 'WARN');
             }
         }
     }
@@ -193,7 +200,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
                     const step = Math.abs(values[i + 1] - values[i]);
                     if (step > spliceTol) {
                         flags.push('DETECTOR_SPLICE_STEP');
-                        if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+                        qcStatus = escalateQCStatus(qcStatus, 'WARN');
                         break;
                     }
                 }
@@ -210,10 +217,10 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
 
         if (quantity === 'ABSORBANCE' && (startVal < -0.1 || endVal < -0.1)) {
             flags.push('BASELINE_DRIFT_EXCESSIVE');
-            if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         } else if (baselineSpan > 2.8) {
             flags.push('BASELINE_DRIFT_EXCESSIVE');
-            if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+            qcStatus = escalateQCStatus(qcStatus, 'WARN');
         }
     }
 
@@ -247,7 +254,7 @@ exports.validateSpectra = (wavelengths, values, modality = 'NIR', options = {}) 
     const noiseThreshold = limits.maxNoise || (modality === 'MIR' ? 0.04 : 0.05);
     if (mad > noiseThreshold) {
         flags.push('HIGH_NOISE_LEVEL');
-        if (qcStatus !== 'FAIL') qcStatus = 'WARN';
+        qcStatus = escalateQCStatus(qcStatus, 'WARN');
     }
 
     // Determine Final Status
@@ -313,3 +320,5 @@ exports.evaluateReplicateAgreement = (w1, v1, w2, v2, options = {}) => {
         limit
     };
 };
+
+exports.escalateQCStatus = escalateQCStatus;

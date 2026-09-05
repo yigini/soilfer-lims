@@ -8,7 +8,7 @@ function calculateChecksum(str) {
  * Parse JCAMP-DX spectral files (SL-13 & SL-14)
  * Supports continuous (X++(Y..Y)) and table blocks.
  */
-function parseJcampDx(content) {
+function parseJcampDx(content, options = {}) {
     const lines = content.split(/\r?\n/);
     const headers = {};
     let inData = false;
@@ -70,8 +70,25 @@ function parseJcampDx(content) {
     // Determine axis unit and modality
     const xUnits = (headers['XUNITS'] || '').toUpperCase();
     const isWavenumber = xUnits.includes('1/CM') || xUnits.includes('CM-1') || xUnits.includes('WAVENUMBER');
-    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
-    const modality = isWavenumber ? 'MIR' : 'NIR';
+    const isWavelength = xUnits.includes('NM') || xUnits.includes('NANOMETER');
+    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : (isWavelength ? 'WAVELENGTH_NM' : 'UNVERIFIED');
+
+    const dataType = (headers['DATA TYPE'] || '').toUpperCase();
+    const targetModality = (options && (options.targetModality || options.expectedModality)) || null;
+    let modality = 'UNVERIFIED';
+    if (dataType.includes('NEAR INFRARED') || dataType.includes('NIR')) {
+        modality = 'NIR';
+    } else if (dataType.includes('MID INFRARED') || dataType.includes('MIR') || dataType.includes('FTIR') || dataType.includes('INFRARED')) {
+        modality = 'MIR';
+    } else if (axisUnit === 'WAVELENGTH_NM') {
+        modality = 'NIR';
+    } else if (targetModality) {
+        modality = targetModality;
+    }
+
+    if (targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM') {
+        throw new Error('INCOMPATIBLE_MODALITY_UNITS: File with wavelength units (nm) cannot be ingested into a Mid-Infrared (MIR) task context.');
+    }
 
     // Determine physical    // Quantity
     const yUnits = headers['YUNITS'] ? headers['YUNITS'].toUpperCase() : '';
@@ -103,7 +120,7 @@ function parseJcampDx(content) {
 /**
  * Parse Delimited CSV / TSV spectral files (SL-13)
  */
-function parseCsv(content) {
+function parseCsv(content, options = {}) {
     const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0 && !l.trim().startsWith('#'));
     if (lines.length === 0) {
         throw new Error('Empty CSV spectral content');
@@ -144,11 +161,21 @@ function parseCsv(content) {
         throw new Error('No numeric spectral coordinate pairs found in CSV');
     }
 
-    const isWavenumber = headerX.includes('WAVENUMBER') || headerX.includes('CM-1') ||
-        (wavelengths[0] > 2500 || wavelengths[wavelengths.length - 1] > 2500 || (wavelengths[0] >= 400 && wavelengths[0] <= 4000 && wavelengths[wavelengths.length - 1] <= 4000 && wavelengths[0] > wavelengths[wavelengths.length - 1]));
+    const isWavenumber = headerX.includes('WAVENUMBER') || headerX.includes('CM-1') || headerX.includes('1/CM');
+    const isWavelength = headerX.includes('NM') || headerX.includes('WAVELENGTH') || headerX.includes('NANOMETER');
+    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : (isWavelength ? 'WAVELENGTH_NM' : 'UNVERIFIED');
 
-    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
-    const modality = isWavenumber ? 'MIR' : 'NIR';
+    const targetModality = (options && (options.targetModality || options.expectedModality)) || null;
+    let modality = 'UNVERIFIED';
+    if (axisUnit === 'WAVELENGTH_NM') {
+        modality = 'NIR';
+    } else if (targetModality) {
+        modality = targetModality;
+    }
+
+    if (targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM') {
+        throw new Error('INCOMPATIBLE_MODALITY_UNITS: CSV file with wavelength units (nm) cannot be ingested into a Mid-Infrared (MIR) task context.');
+    }
 
     let quantity = 'UNVERIFIED';
     if (headerY.includes('REFLECTANCE') || headerY.includes('%R') || headerY.includes('//R')) quantity = 'REFLECTANCE';
@@ -206,7 +233,7 @@ function extractOpusParameters(buffer, blockOffset, byteLength, params) {
  * Parse Bruker OPUS Binary Format (SD-13)
  * Native FTIR/NIR binary output from Bruker Alpha, Alpha II, Tensor, MPA, Vertex.
  */
-function parseOpus(buffer) {
+function parseOpus(buffer, options = {}) {
     if (!Buffer.isBuffer(buffer) || buffer.length < 256) {
         throw new Error('Invalid OPUS file: file too small');
     }
@@ -247,12 +274,11 @@ function parseOpus(buffer) {
     }
 
     const npt = params.NPT || dataBlock.sizeWords;
-    let fxv = params.FXV;
-    let lxv = params.LXV;
+    const fxv = params.FXV;
+    const lxv = params.LXV;
 
     if (fxv === undefined || lxv === undefined) {
-        fxv = 4000.0;
-        lxv = 400.0;
+        throw new Error('MISSING_AXIS_CALIBRATION: OPUS file lacks FXV or LXV calibration parameters');
     }
 
     const step = npt > 1 ? (lxv - fxv) / (npt - 1) : 0;
@@ -268,14 +294,40 @@ function parseOpus(buffer) {
         }
     }
 
-    const instrument = params.INS || params.INSTRUMENT || 'Bruker Alpha FTIR';
-    const resolution = params.RES !== undefined ? parseFloat(params.RES) : 4.0;
-    const coAddedScans = params.NSS !== undefined ? parseInt(params.NSS, 10) : 32;
+    const instrument = params.INS || params.INSTRUMENT || null;
+    const resolution = params.RES !== undefined ? parseFloat(params.RES) : null;
+    const coAddedScans = params.NSS !== undefined ? parseInt(params.NSS, 10) : null;
     const backgroundRef = params.NSR ? `Background (${params.NSR} scans)` : (params.BKM || null);
 
-    const isWavenumber = (fxv >= 200 && fxv <= 15000) || (params.DXU && params.DXU.toUpperCase().includes('WN'));
-    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
-    const modality = (fxv >= 400 && fxv <= 4000) || isWavenumber ? 'MIR' : 'NIR';
+    let axisUnit = 'UNVERIFIED';
+    const dxu = params.DXU !== undefined ? String(params.DXU).trim().toUpperCase() : '';
+    if (dxu === 'WN' || dxu.includes('1/CM') || dxu.includes('CM-1') || dxu === '0') {
+        axisUnit = 'WAVENUMBER_CM1';
+    } else if (dxu === 'NM' || dxu.includes('NANOMETER') || dxu === '2') {
+        axisUnit = 'WAVELENGTH_NM';
+    } else if (dxu === 'MIC' || dxu === 'UM' || dxu === '1') {
+        axisUnit = 'MICROMETERS';
+    } else if (fxv !== undefined && (fxv >= 200 && fxv <= 15000)) {
+        axisUnit = 'WAVENUMBER_CM1';
+    }
+
+    let modality = 'UNVERIFIED';
+    const exp = (params.EXP || '').toUpperCase();
+    const targetModality = (options && (options.targetModality || options.expectedModality)) || null;
+    if (exp.includes('NIR') || ins.includes('MPA') || ins.includes('TANGO') || ins.includes('NIR')) {
+        modality = 'NIR';
+    } else if (exp.includes('MIR') || exp.includes('DRIFT') || ins.includes('ALPHA') || ins.includes('VERTEX') || ins.includes('TENSOR')) {
+        modality = 'MIR';
+    } else if (axisUnit === 'WAVELENGTH_NM') {
+        modality = 'NIR';
+    } else if (targetModality) {
+        modality = targetModality;
+    }
+
+    if (targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM') {
+        throw new Error('INCOMPATIBLE_MODALITY_UNITS: OPUS file with wavelength units (nm) cannot be ingested into a Mid-Infrared (MIR) task context.');
+    }
+
     const axisDirection = fxv > lxv ? 'DESCENDING' : 'ASCENDING';
 
     let quantity = 'UNVERIFIED';
@@ -334,7 +386,7 @@ function parseAsd(buffer) {
         format: 'ASD',
         instrument: 'ASD FieldSpec',
         resolution: wavelenStep,
-        coAddedScans: 10,
+        coAddedScans: null,
         wavelengths,
         values,
         modality: 'NIR',
@@ -348,7 +400,7 @@ function parseAsd(buffer) {
 /**
  * Parse Galactic / Thermo GRAMS .spc Binary Format (SD-13)
  */
-function parseSpc(buffer) {
+function parseSpc(buffer, options = {}) {
     if (!Buffer.isBuffer(buffer) || buffer.length < 512) {
         throw new Error('Invalid SPC file: buffer too small');
     }
@@ -363,9 +415,21 @@ function parseSpc(buffer) {
         throw new Error('Invalid SPC point count: ' + fnpts);
     }
 
-    const isWavenumber = fxtype === 1 || (ffirst >= 400 && ffirst <= 4000);
-    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM';
-    const modality = isWavenumber ? 'MIR' : 'NIR';
+    const isWavenumber = fxtype === 1;
+    const isWavelength = fxtype === 3;
+    const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : (isWavelength ? 'WAVELENGTH_NM' : 'UNVERIFIED');
+
+    let modality = 'UNVERIFIED';
+    if (axisUnit === 'WAVELENGTH_NM') {
+        modality = 'NIR';
+    } else if (options && options.targetModality) {
+        modality = options.targetModality;
+    }
+
+    if (options && options.targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM') {
+        throw new Error('INCOMPATIBLE_MODALITY_UNITS: SPC file with wavelength units (nm) cannot be ingested into a Mid-Infrared (MIR) task context.');
+    }
+
     const axisDirection = ffirst > flast ? 'DESCENDING' : 'ASCENDING';
 
     let quantity = 'UNVERIFIED';
@@ -431,7 +495,7 @@ function isSpcFormat(buffer, filename) {
 /**
  * Universal Spectral File Parser (Supports Buffer or string)
  */
-exports.parseSpectralFile = (rawInput, filename = '') => {
+exports.parseSpectralFile = (rawInput, filename = '', options = {}) => {
     let content;
     let buffer;
     if (Buffer.isBuffer(rawInput)) {
@@ -446,20 +510,20 @@ exports.parseSpectralFile = (rawInput, filename = '') => {
 
     // Binary format detection
     if (isOpusFormat(buffer, filename)) {
-        return parseOpus(buffer);
+        return parseOpus(buffer, options);
     }
     if (isAsdFormat(buffer, filename)) {
-        return parseAsd(buffer);
+        return parseAsd(buffer, options);
     }
     if (isSpcFormat(buffer, filename)) {
-        return parseSpc(buffer);
+        return parseSpc(buffer, options);
     }
 
     const trimmed = content.trim();
     const isJcamp = trimmed.startsWith('##TITLE') || trimmed.includes('##JCAMP-DX') ||
         filename.endsWith('.dx') || filename.endsWith('.jdx') || filename.endsWith('.jcamp');
 
-    const result = isJcamp ? parseJcampDx(content) : parseCsv(content);
+    const result = isJcamp ? parseJcampDx(content, options) : parseCsv(content, options);
     result.sha256 = crypto.createHash('sha256').update(buffer).digest('hex');
     return result;
 };

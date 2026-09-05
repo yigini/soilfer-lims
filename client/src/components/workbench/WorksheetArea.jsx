@@ -25,12 +25,13 @@ export default function WorksheetArea({
     onDiscardDraft,
     onResolveConflict,
     onReviewRecord,
+    onOpenSpectralIntake,
     isDiscarding = false
 }) {
     const items = activeGroup?.items || [];
     const [selectedItemId, setSelectedItemId] = useState(() => {
         if (initialSampleId && items.length > 0) {
-            const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId);
+            const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId || i.labId === initialSampleId || i.sampleDisplayId === initialSampleId);
             if (found) return found.workItemId;
         }
         return null;
@@ -41,21 +42,23 @@ export default function WorksheetArea({
 
     useEffect(() => {
         if (initialSampleId && items.length > 0) {
-            const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId);
+            const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId || i.labId === initialSampleId || i.sampleDisplayId === initialSampleId);
             if (found) setSelectedItemId(found.workItemId);
         }
     }, [initialSampleId, items]);
 
     const isTexture = activeGroup?.analysis === 'TEXTURE';
     const isOperationalGate = activeGroup?.category === 'Operational Gates';
-    const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR'].includes(activeGroup?.analysis);
+    const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'SPECTRAL');
 
     // Filter items by search
     const filteredItems = useMemo(() => {
         if (!searchQuery) return items;
         const q = searchQuery.toLowerCase();
         return items.filter(i =>
-            i.sampleId.toLowerCase().includes(q) ||
+            (i.sampleDisplayId && i.sampleDisplayId.toLowerCase().includes(q)) ||
+            (i.labId && i.labId.toLowerCase().includes(q)) ||
+            (i.sampleId && i.sampleId.toLowerCase().includes(q)) ||
             (i.originalId && i.originalId.toLowerCase().includes(q))
         );
     }, [items, searchQuery]);
@@ -124,14 +127,16 @@ export default function WorksheetArea({
                         </select>
                     </label>
 
-                    <button
-                        type="button"
-                        onClick={() => setIsPasteModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
-                    >
-                        <Clipboard size={13} />
-                        <span>Paste Values</span>
-                    </button>
+                    {!isSpectral && !isOperationalGate && (
+                        <button
+                            type="button"
+                            onClick={() => setIsPasteModalOpen(true)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                        >
+                            <Clipboard size={13} />
+                            <span>Paste Values</span>
+                        </button>
+                    )}
                 </div>
 
                 <div className="relative">
@@ -149,13 +154,17 @@ export default function WorksheetArea({
             {/* Method Banner */}
             <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                        {activeGroup?.analysisName || activeGroup?.analysis}
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <span>{activeGroup?.analysisName || activeGroup?.analysis}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            {activeGroup?.analysis}
+                        </span>
                     </h3>
                     <p className="text-slate-500 text-[11px] mt-0.5">
-                        {activeGroup?.category} · Method revision standard
+                        {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
                     </p>
                 </div>
+
                 <div className="flex items-center gap-2">
                     {activeGroup?.unit && (
                         <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
@@ -181,15 +190,19 @@ export default function WorksheetArea({
                                             type="checkbox"
                                             checked={allSelected}
                                             onChange={toggleSelectAll}
+                                            aria-label="Select all rows"
                                             className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                                         />
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold">Sample ID</th>
-                                    <th className="py-2.5 px-3 font-semibold">
-                                        {isTexture ? 'Fractions (Sand / Silt / Clay)' : isOperationalGate ? 'SOP Verification' : 'Determination Result'}
+                                    <th className="py-2.5 px-3 font-semibold min-w-[130px]">Sample</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[220px]">
+                                        {isTexture ? 'Fractions (Sand / Silt / Clay %)' :
+                                         isOperationalGate ? 'SOP Verification' :
+                                         isSpectral ? 'Spectra Acquisition Status' :
+                                         `Determination (${activeGroup?.unit || 'value'})`}
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold">Readiness & State</th>
-                                    <th className="py-2.5 px-3 font-semibold text-right">Details</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[120px]">Readiness & State</th>
+                                    <th className="py-2.5 px-3 font-semibold text-right w-20">Details</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -215,13 +228,21 @@ export default function WorksheetArea({
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => toggleRowSelect(item.workItemId)}
+                                                    aria-label={`Select ${item.sampleDisplayId || item.sampleId}`}
                                                     className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                                                 />
                                             </td>
 
                                             <td className="py-3 px-3">
-                                                <div className="font-mono font-bold text-slate-900 dark:text-slate-100">
-                                                    {item.sampleId}
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                                                        {item.sampleDisplayId || item.labId || item.sampleId}
+                                                    </span>
+                                                    {item.sampleDisplayId && item.sampleId && item.sampleDisplayId !== item.sampleId && (
+                                                        <span className="text-[10px] text-slate-400 font-mono hidden sm:inline" title={item.sampleId}>
+                                                            ({item.sampleId.slice(0, 8)}…)
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 {item.originalId && (
                                                     <div className="text-[11px] text-slate-400 font-mono">
@@ -250,13 +271,52 @@ export default function WorksheetArea({
                                                         onChange={(chk) => onDraftChange(item.workItemId, null, { checks: chk })}
                                                         sampleId={item.sampleId}
                                                     />
+                                                ) : isSpectral ? (
+                                                    <div className="flex items-center gap-2">
+                                                        {item.latestSpectralScan || item.hasSpectrum || isRecorded ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                                                    item.latestSpectralScan?.qcStatus === 'PASS' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
+                                                                    item.latestSpectralScan?.qcStatus === 'WARN' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
+                                                                    'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
+                                                                }`}>
+                                                                    ✓ {item.latestSpectralScan?.qcStatus ? `QC: ${item.latestSpectralScan.qcStatus}` : 'Scan Recorded'}
+                                                                </span>
+                                                                {item.latestSpectralScan?.id && (
+                                                                    <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                                                                        {item.latestSpectralScan.id}
+                                                                    </span>
+                                                                )}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
+                                                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-medium transition-colors"
+                                                                >
+                                                                    Inspect / Rescan
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded font-medium border border-amber-200 dark:border-amber-800">
+                                                                    Spectrum required
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
+                                                                    className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
+                                                                >
+                                                                    Upload spectra →
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <NumericEditor
                                                         value={draft?.value ?? item.currentResult ?? ''}
                                                         onChange={(val) => onDraftChange(item.workItemId, val)}
                                                         unit={activeGroup?.unit || ''}
                                                         placeholder="0.00"
-                                                        ariaLabel={`${item.sampleId} determination`}
+                                                        ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                     />
                                                 )}

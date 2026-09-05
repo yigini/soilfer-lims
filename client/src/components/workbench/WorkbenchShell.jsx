@@ -444,6 +444,10 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                         onDiscardDraft={handleDiscardDraft}
                         onResolveConflict={handleResolveConflict}
                         onReviewRecord={handleReviewRecord}
+                        onOpenSpectralIntake={(item) => {
+                            setSelectedSpectralItem(item);
+                            setIsSpectralModalOpen(true);
+                        }}
                     />
                 )}
 
@@ -484,6 +488,7 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                     fetchReceipts();
                 }}
                 assignedWorkItems={currentGroup?.items || []}
+                selectedItem={selectedSpectralItem}
                 modality={selectedSpectralItem?.analysis || 'SPEC_MIR'}
                 eligibleEquipment={currentGroup?.eligibleEquipment || []}
             />

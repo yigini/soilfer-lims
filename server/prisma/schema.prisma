@@ -269,6 +269,7 @@ model WorkItem {
 
   equipmentUsage WorkItemEquipmentUse[]
   draft          WorkItemDraft?
+  spectralScans  SpectralData[]
 }
 
 model WorkItemDraft {
@@ -685,6 +686,9 @@ model SpectralData {
   id             String   @id
   sampleId       String?   // Nullable: spectra can be uploaded without a sample link
   labId          String?
+  workItemId     String?
+  workItem       WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  attemptNo      Int       @default(1)
   modality       String   // NIR, MIR
   filename       String
   scanIp         String?  // Deprecated (SL-08), retained for backward compatibility
@@ -747,6 +751,7 @@ model SpectralData {
 
   @@index([labId, isCurrent])
   @@index([sampleId, isCurrent])
+  @@index([workItemId, isCurrent])
   @@index([sha256])
   @@index([equipmentId])
   @@index([equipmentId, scanType])

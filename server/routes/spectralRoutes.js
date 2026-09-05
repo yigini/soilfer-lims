@@ -27,6 +27,15 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 }
 });
 
+// Staged Ingestion Preview (Amendment 5)
+router.post('/preview', verifyToken, checkPermission('ENTER_RESULTS'), upload.array('files', 100), spectralController.previewBatch);
+
+// Batch Commit of Staged Manifest (Amendment 5)
+router.post('/batch/commit', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.commitBatch);
+
+// Link existing scan to WorkItem (Amendment 4)
+router.post('/link-task', verifyToken, checkPermission('ENTER_RESULTS'), spectralController.linkTask);
+
 // Batch Upload (Supports JSON scans array or multipart raw file uploads)
 router.post('/batch', verifyToken, checkPermission('ENTER_RESULTS'), upload.array('files', 100), spectralController.uploadBatch);
 

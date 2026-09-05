@@ -23,8 +23,11 @@ export default function WorkbenchQueue({
     const allItems = useMemo(() => {
         return groups.flatMap(g => g.items.map(i => ({
             ...i,
+            analysis: i.analysis || g.analysis,
+            analysisCode: i.analysisCode || g.analysis,
             analysisName: g.analysisName,
             groupCategory: g.category,
+            editorKind: i.editorKind || (['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(g.analysis) ? 'SPECTRAL' : (g.analysis === 'TEXTURE' ? 'TEXTURE' : (g.category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'))),
             eligibleEquipment: g.eligibleEquipment || []
         })));
     }, [groups]);
@@ -43,10 +46,12 @@ export default function WorkbenchQueue({
             // Text search
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
+                const matchDisplayId = item.sampleDisplayId?.toLowerCase().includes(q);
+                const matchLabId = item.labId?.toLowerCase().includes(q);
                 const matchId = item.sampleId?.toLowerCase().includes(q);
                 const matchOrig = item.originalId?.toLowerCase().includes(q);
                 const matchParam = item.analysis?.toLowerCase().includes(q) || item.analysisName?.toLowerCase().includes(q);
-                if (!matchId && !matchOrig && !matchParam) return false;
+                if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam) return false;
             }
 
             return true;
@@ -116,7 +121,7 @@ export default function WorkbenchQueue({
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {filteredItems.map((item) => {
-                            const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR'].includes(item.analysis);
+                            const isSpectral = item.editorKind === 'SPECTRAL' || ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
                             const hasDraft = !!item.draft;
                             const isRecorded = item.status === 'COMPLETED';
 
@@ -126,9 +131,16 @@ export default function WorkbenchQueue({
                                     className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                                 >
                                     <td className="py-3 px-4">
-                                        <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
-                                            {item.sampleId}
-                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                                                {item.sampleDisplayId || item.labId || item.sampleId}
+                                            </span>
+                                            {item.sampleDisplayId && item.sampleId && item.sampleDisplayId !== item.sampleId && (
+                                                <span className="text-[10px] text-slate-400 font-mono hidden sm:inline" title={item.sampleId}>
+                                                    ({item.sampleId.slice(0, 8)}…)
+                                                </span>
+                                            )}
+                                        </div>
                                         {item.originalId && (
                                             <div className="text-[11px] text-slate-400 font-mono">
                                                 {item.originalId}
@@ -207,7 +219,26 @@ export default function WorkbenchQueue({
                                     </td>
 
                                     <td className="py-3 px-4">
-                                        {isRecorded ? (
+                                        {isSpectral ? (
+                                            item.hasSpectrum || item.latestSpectralScan || isRecorded ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
+                                                    <span>✓ Scan recorded</span>
+                                                    {item.latestSpectralScan?.qcStatus && (
+                                                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                                            item.latestSpectralScan.qcStatus === 'PASS' ? 'bg-emerald-200 text-emerald-900' :
+                                                            item.latestSpectralScan.qcStatus === 'WARN' ? 'bg-amber-200 text-amber-900' :
+                                                            'bg-rose-200 text-rose-900'
+                                                        }`}>
+                                                            {item.latestSpectralScan.qcStatus}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300">
+                                                    <span>Scan required</span>
+                                                </span>
+                                            )
+                                        ) : isRecorded ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
                                                 <span>✓ Recorded</span>
                                                 {item.currentResult && <span className="font-mono font-bold">({item.currentResult})</span>}

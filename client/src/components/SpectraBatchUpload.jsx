@@ -12,7 +12,15 @@ import { useLanguage } from '../context/LanguageContext';
  * @param {string} [props.currentSampleLabId] - If provided, will verify if uploaded Lab IDs match this sample
  * @param {string} [props.currentSampleId] - If provided, passes context sample ID to backend for matching
  */
-const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, currentSampleId }) => {
+const SpectraBatchUpload = ({
+    onUploadSuccess,
+    onClose,
+    currentSampleLabId,
+    currentSampleId,
+    targetWorkItemId,
+    targetAnalysis,
+    targetModality
+}) => {
     const { user } = useAuth();
     const { t } = useLanguage();
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
@@ -23,13 +31,28 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
     const [error, setError] = useState(null);
     const [previewData, setPreviewData] = useState(null); // { new: [], errors: [] }
     const [uploadResult, setUploadResult] = useState(null);
-    const [modality, setModality] = useState('NIR');
+    const [modality, setModality] = useState(targetModality || 'NIR');
+    const [instruments, setInstruments] = useState([]);
+    const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
     const [detectedModality, setDetectedModality] = useState(null); // Auto-detected from wavelengths
     const [detectedFormat, setDetectedFormat] = useState(null); // 'wide', 'long', or 'instrument_files'
     const [autoApprove, setAutoApprove] = useState(false);
     const [previewScan, setPreviewScan] = useState(null); // For showing spectrum chart
     const [labIdMatchInfo, setLabIdMatchInfo] = useState(null); // { matched: [], unmatched: [] }
     const [matchCheckResult, setMatchCheckResult] = useState(null); // Backend sample match check
+
+    // Fetch active spectrometers on mount
+    React.useEffect(() => {
+        axios.get('/api/equipment?type=SPECTROMETER&status=IN_SERVICE')
+            .then(res => {
+                const list = res.data?.data || res.data || [];
+                setInstruments(list);
+                if (list.length > 0) {
+                    setSelectedEquipmentId(list[0].id);
+                }
+            })
+            .catch(err => console.warn('[SpectraBatchUpload] Failed to fetch equipment:', err.message));
+    }, []);
 
     const handleFileChange = (e) => {
         const selected = Array.from(e.target.files || []);
@@ -42,8 +65,9 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
 
     const [parsingProgress, setParsingProgress] = useState(null); // { current: 0, total: 0 }
 
-    // Auto-detect modality from wavelength range
+    // Auto-detect modality from wavelength range (only if targetModality not fixed)
     const detectModality = (wavelengths) => {
+        if (targetModality) return targetModality;
         if (!wavelengths || wavelengths.length === 0) return 'NIR';
         const minW = Math.min(...wavelengths);
         const maxW = Math.max(...wavelengths);
@@ -213,7 +237,9 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                     setDetectedFormat(format);
                     if (dm) {
                         setDetectedModality(dm);
-                        setModality(dm);
+                        if (!targetModality) {
+                            setModality(dm);
+                        }
                     }
 
                     if (scans.length === 0 && errors.length === 0) {
@@ -302,12 +328,19 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
 
     const handleConfirm = async () => {
         if (!previewData) return;
+        if (!selectedEquipmentId) {
+            setError('Please select a spectrometer before uploading.');
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
             const formData = new FormData();
             formData.append('batchId', `BATCH-${Date.now()}`);
             if (currentSampleId) formData.append('contextSampleId', currentSampleId);
+            if (targetWorkItemId) formData.append('targetWorkItemId', targetWorkItemId);
+            if (targetAnalysis) formData.append('targetAnalysis', targetAnalysis);
+            formData.append('equipmentId', selectedEquipmentId);
             formData.append('autoApprove', autoApprove && isManager ? 'true' : 'false');
             if (modality) formData.append('modality', modality);
 
@@ -342,6 +375,65 @@ const SpectraBatchUpload = ({ onUploadSuccess, onClose, currentSampleLabId, curr
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <Upload className="text-blue-600" /> Batch Upload Spectra
                 </h2>
+
+                {currentSampleLabId && (
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4 text-xs text-indigo-900 flex items-center justify-between">
+                        <span>Context Target: <strong>{currentSampleLabId}</strong> ({targetAnalysis || 'Spectral Acquisition'})</span>
+                        <span className="font-mono text-indigo-600">{targetWorkItemId ? `Task #${targetWorkItemId.slice(-6)}` : ''}</span>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                            Spectrometer Equipment <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={selectedEquipmentId}
+                            onChange={(e) => setSelectedEquipmentId(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                        >
+                            {instruments.length === 0 && (
+                                <option value="">No spectrometers in service</option>
+                            )}
+                            {instruments.map(inst => (
+                                <option key={inst.id} value={inst.id}>
+                                    {inst.name} ({inst.model || inst.code || inst.id})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                            Modality
+                        </label>
+                        {targetModality ? (
+                            <div className="px-3 py-2 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-lg text-sm font-bold flex items-center justify-between">
+                                <span>{targetModality}</span>
+                                <span className="text-xs font-normal text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">Task Enforced</span>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2 h-10 items-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setModality('NIR')}
+                                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition-colors ${modality === 'NIR' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                >
+                                    Vis-NIR
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setModality('MIR')}
+                                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition-colors ${modality === 'MIR' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                >
+                                    MIR DRIFTS
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-800">
                     <p className="font-semibold mb-1">Upload instrument spectral files or CSV table (SL-06 & SL-13):</p>
                     <ul className="mt-1 ml-4 list-disc space-y-0.5">

@@ -765,6 +765,9 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                         <SpectraBatchUpload
                             currentSampleLabId={uploadItem?.labId}
                             currentSampleId={uploadItem?.sampleId}
+                            targetWorkItemId={uploadItem?.workItemId || uploadItem?.id}
+                            targetAnalysis={uploadItem?.analysis}
+                            targetModality={(uploadItem?.analysis === 'SPEC_MIR' || uploadItem?.analysis === 'SPEC_FTIR') ? 'MIR' : 'NIR'}
                             onClose={() => setShowUploadModal(false)}
                             onUploadSuccess={() => {
                                 setShowUploadModal(false);

@@ -13,6 +13,18 @@ if (!fs.existsSync(UPLOADS_SPECTRA_DIR)) {
     try { fs.mkdirSync(UPLOADS_SPECTRA_DIR, { recursive: true }); } catch (e) {}
 }
 
+const UPLOADS_STAGING_DIR = path.join(__dirname, '..', 'uploads', 'staging');
+if (!fs.existsSync(UPLOADS_STAGING_DIR)) {
+    try { fs.mkdirSync(UPLOADS_STAGING_DIR, { recursive: true }); } catch (e) {}
+}
+
+const idempotencyReceipts = new Map();
+
+const parseJson = (str) => {
+    if (!str) return null;
+    try { return JSON.parse(str); } catch (e) { return null; }
+};
+
 // Helper: Calculate Checksum
 const calculateChecksum = (dataString) => {
     return crypto.createHash('sha256').update(dataString).digest('hex');
@@ -314,10 +326,781 @@ exports.checkMatches = async (req, res) => {
 };
 
 /**
- * Handle Single or Multipary Upload
+ * Staged Ingestion Preview (Amendment 5)
+ * POST /api/spectral/preview
+ * Parses uploaded files into temporary staging, runs QC, checks sample/work item matching,
+ * identifies duplicate scans, and returns an immutable StagedManifest with TTL.
+ */
+exports.previewBatch = async (req, res) => {
+    try {
+        const user = req.user;
+        const { contextSampleId, targetWorkItemId, modality, targetModality, equipmentId } = req.body || {};
+        const effectiveModality = (modality || targetModality || '').toUpperCase();
+
+        let files = [];
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            files = req.files;
+        } else if (req.body && req.body.scans) {
+            let parsedScans = req.body.scans;
+            if (typeof parsedScans === 'string') {
+                try { parsedScans = JSON.parse(parsedScans); } catch (e) { parsedScans = []; }
+            }
+            if (Array.isArray(parsedScans) && parsedScans.length > 0) {
+                files = parsedScans.map((s, idx) => {
+                    const lines = ['wavelength,value'];
+                    const w = s.wavelengths || [];
+                    const v = s.values || [];
+                    for (let i = 0; i < w.length; i++) {
+                        lines.push(`${w[i]},${v[i] !== undefined ? v[i] : ''}`);
+                    }
+                    return {
+                        originalname: s.filename || `scan_${idx}.csv`,
+                        buffer: Buffer.from(lines.join('\n'), 'utf8'),
+                        providedLabId: s.labId,
+                        providedSampleId: s.sampleId,
+                        providedModality: s.modality
+                    };
+                });
+            }
+        }
+
+        if (files.length === 0) {
+            return res.status(400).json({ error: 'NO_FILES_PROVIDED', message: 'No spectral files or scans provided for preview.' });
+        }
+
+        const manifestId = `manif-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+        const manifestDir = path.join(UPLOADS_STAGING_DIR, manifestId);
+        fs.mkdirSync(manifestDir, { recursive: true });
+
+        // Pre-fetch context sample and work item if provided
+        let contextSample = null;
+        if (contextSampleId) {
+            contextSample = await prisma.sample.findUnique({
+                where: { id: contextSampleId },
+                include: { workItems: true }
+            });
+        }
+
+        let contextWorkItem = null;
+        if (targetWorkItemId) {
+            contextWorkItem = await prisma.workItem.findUnique({
+                where: { id: targetWorkItemId },
+                include: { sample: true }
+            });
+            if (contextWorkItem && !contextSample) {
+                contextSample = contextWorkItem.sample;
+            }
+        }
+
+        // Pre-fetch equipment limits if equipmentId given
+        let equipmentLimits = null;
+        if (equipmentId) {
+            const eqAsset = await prisma.equipmentAsset.findUnique({
+                where: { id: equipmentId },
+                select: { id: true, status: true, qcLimits: true }
+            });
+            if (eqAsset && eqAsset.qcLimits) {
+                try { equipmentLimits = JSON.parse(eqAsset.qcLimits); } catch (e) {}
+            }
+        }
+
+        const items = [];
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const buffer = f.buffer;
+            const originalname = f.originalname;
+            const sha256Hash = crypto.createHash('sha256').update(buffer).digest('hex');
+            const safeName = originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const stagedFilename = `${sha256Hash}_${safeName}`;
+            const stagedPath = path.join(manifestDir, stagedFilename);
+            fs.writeFileSync(stagedPath, buffer);
+
+            let parsed;
+            let parseError = null;
+            try {
+                parsed = parseSpectralFile(buffer, originalname, {
+                    targetModality: effectiveModality || f.providedModality
+                });
+            } catch (pErr) {
+                parseError = pErr.message;
+            }
+
+            if (parseError) {
+                items.push({
+                    id: `item-${i}`,
+                    filename: originalname,
+                    stagedFilename,
+                    sha256: sha256Hash,
+                    parseError,
+                    qcStatus: 'FAIL',
+                    qcFlags: ['PARSE_ERROR'],
+                    suggestedAction: 'SKIP'
+                });
+                continue;
+            }
+
+            // Spectroscopist-Grade QC
+            const validation = validateSpectra(parsed.wavelengths, parsed.values, parsed.modality || effectiveModality, {
+                quantity: parsed.quantity,
+                resolution: parsed.resolution,
+                equipmentLimits
+            });
+
+            // Match Sample
+            let matchedSample = null;
+            if (contextSample) {
+                matchedSample = contextSample;
+            } else {
+                const ext = path.extname(originalname);
+                const baseName = path.basename(originalname, ext);
+                const candidateId = f.providedLabId || f.providedSampleId || baseName;
+
+                const userLabScope = user && user.role !== 'SUPER_ADMIN' && user.labId
+                    ? { OR: [{ assignedLab: user.labId }, { labId: user.labId }] }
+                    : {};
+
+                matchedSample = await prisma.sample.findFirst({
+                    where: {
+                        AND: [
+                            {
+                                OR: [
+                                    { labId: candidateId },
+                                    { originalId: candidateId },
+                                    { id: candidateId }
+                                ]
+                            },
+                            userLabScope
+                        ]
+                    },
+                    include: { workItems: true }
+                });
+            }
+
+            // Match WorkItem
+            let matchedWorkItem = null;
+            if (contextWorkItem) {
+                matchedWorkItem = contextWorkItem;
+            } else if (matchedSample && matchedSample.workItems) {
+                const mMod = (parsed.modality || effectiveModality || 'NIR').toUpperCase();
+                const spectralItems = matchedSample.workItems.filter(w =>
+                    !['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(w.status)
+                );
+                matchedWorkItem = spectralItems.find(w => {
+                    const wa = (w.analysis || '').toUpperCase();
+                    if (mMod === 'MIR') return wa === 'SPEC_MIR' || wa === 'SPEC_FTIR' || wa.includes('MIR') || wa.includes('FTIR');
+                    if (mMod === 'NIR') return wa === 'SPEC_VIS_NIR' || wa === 'SPEC_NIR' || wa.includes('NIR') || wa.includes('VIS-NIR');
+                    return false;
+                }) || null;
+            }
+
+            // Check duplicates
+            const effectiveLabId = matchedSample?.assignedLab || matchedSample?.labId || user?.labId;
+            const duplicateByHash = await prisma.spectralData.findFirst({
+                where: {
+                    labId: effectiveLabId,
+                    sha256: sha256Hash,
+                    status: { not: 'DELETED' }
+                }
+            });
+
+            let duplicateByReplicate = null;
+            if (matchedSample) {
+                duplicateByReplicate = await prisma.spectralData.findFirst({
+                    where: {
+                        sampleId: matchedSample.id,
+                        modality: parsed.modality,
+                        replicateNo: 1,
+                        isCurrent: true,
+                        status: { not: 'DELETED' }
+                    }
+                });
+            }
+
+            let suggestedAction = 'PROCEED';
+            let duplicateReason = null;
+            let duplicateScanId = null;
+
+            if (duplicateByHash) {
+                suggestedAction = 'SKIP';
+                duplicateReason = `Identical content hash already exists (Scan: ${duplicateByHash.id})`;
+                duplicateScanId = duplicateByHash.id;
+            } else if (duplicateByReplicate) {
+                suggestedAction = 'REPLACE';
+                duplicateReason = `Replicate 1 already exists for this sample (Scan: ${duplicateByReplicate.id})`;
+                duplicateScanId = duplicateByReplicate.id;
+            }
+
+            // Operational prerequisites check
+            let operationalBlocked = false;
+            let operationalReason = null;
+            if (matchedSample && matchedSample.workItems) {
+                const drying = matchedSample.workItems.find(w => w.analysis === 'DRYING');
+                const prep = matchedSample.workItems.find(w => w.analysis === 'PREPARATION');
+                const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
+                if (drying && !isDone(drying)) {
+                    operationalBlocked = true;
+                    operationalReason = 'Drying prerequisite pending';
+                } else if (prep && !isDone(prep)) {
+                    operationalBlocked = true;
+                    operationalReason = 'Preparation prerequisite pending';
+                }
+            }
+
+            items.push({
+                id: `item-${i}`,
+                filename: originalname,
+                stagedFilename,
+                sha256: sha256Hash,
+                format: parsed.format,
+                instrument: parsed.instrument,
+                resolution: parsed.resolution,
+                coAddedScans: parsed.coAddedScans,
+                wavelengths: parsed.wavelengths,
+                values: parsed.values,
+                modality: parsed.modality,
+                axisUnit: parsed.axisUnit,
+                axisDirection: parsed.axisDirection || 'UNORDERED',
+                quantity: parsed.quantity,
+                qcStatus: validation.qcStatus,
+                qcFlags: validation.flags,
+                matchedSample: matchedSample ? {
+                    id: matchedSample.id,
+                    labId: matchedSample.labId,
+                    originalId: matchedSample.originalId,
+                    sampleDisplayId: matchedSample.labId || matchedSample.originalId || matchedSample.id
+                } : null,
+                matchedWorkItem: matchedWorkItem ? {
+                    id: matchedWorkItem.id,
+                    analysis: matchedWorkItem.analysis,
+                    status: matchedWorkItem.status,
+                    assignedTo: matchedWorkItem.assignedTo
+                } : null,
+                duplicate: !!(duplicateByHash || duplicateByReplicate),
+                duplicateType: duplicateByHash ? 'EXACT_HASH' : (duplicateByReplicate ? 'REPLICATE_EXISTS' : null),
+                duplicateReason,
+                duplicateScanId,
+                operationalBlocked,
+                operationalReason,
+                suggestedAction
+            });
+        }
+
+        const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+        const manifest = {
+            manifestId,
+            createdAt: new Date().toISOString(),
+            expiresAt,
+            userId: user?.id,
+            username: user?.username,
+            labId: user?.labId,
+            equipmentId: equipmentId || null,
+            items
+        };
+
+        fs.writeFileSync(path.join(manifestDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+
+        res.json({
+            success: true,
+            manifestId,
+            expiresAt,
+            count: items.length,
+            items
+        });
+    } catch (e) {
+        console.error('[SPECTRAL PREVIEW] Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+/**
+ * Staged Ingestion Atomic Commit (Amendment 5)
+ * POST /api/spectral/batch/commit
+ * Executes atomic Prisma transaction for staged manifest, verifies operator permissions,
+ * checks equipment qualification, evaluates replicate completeness, moves staged files to permanent storage.
+ */
+exports.commitBatch = async (req, res) => {
+    try {
+        const user = req.user;
+        const { manifestId, idempotencyKey, decisions = {}, equipmentId: bodyEquipmentId, autoApprove } = req.body || {};
+
+        // Idempotency check
+        if (idempotencyKey && idempotencyReceipts.has(idempotencyKey)) {
+            return res.json(idempotencyReceipts.get(idempotencyKey));
+        }
+
+        if (!manifestId) {
+            return res.status(400).json({ error: 'MANIFEST_ID_REQUIRED', message: 'manifestId is required for batch commit.' });
+        }
+
+        const manifestPath = path.join(UPLOADS_STAGING_DIR, manifestId, 'manifest.json');
+        if (!fs.existsSync(manifestPath)) {
+            return res.status(404).json({ error: 'MANIFEST_NOT_FOUND', message: 'Staged manifest not found or expired.' });
+        }
+
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        if (new Date() > new Date(manifest.expiresAt)) {
+            return res.status(410).json({ error: 'MANIFEST_EXPIRED', message: 'Staged manifest has expired. Please re-upload.' });
+        }
+
+        // Equipment qualification (Amendment 8: No silent guessing)
+        const effectiveEquipmentId = bodyEquipmentId || manifest.equipmentId;
+        if (!effectiveEquipmentId) {
+            return res.status(400).json({
+                error: 'EQUIPMENT_SELECTION_REQUIRED',
+                message: 'An active spectrometer must be explicitly selected from the equipment register.'
+            });
+        }
+
+        const eqAsset = await prisma.equipmentAsset.findUnique({
+            where: { id: effectiveEquipmentId },
+            select: { id: true, status: true, labId: true, name: true, qcLimits: true }
+        });
+        if (!eqAsset || eqAsset.status !== 'IN_SERVICE') {
+            return res.status(400).json({
+                error: 'EQUIPMENT_NOT_IN_SERVICE',
+                message: `The selected spectrometer (${effectiveEquipmentId}) is not in service.`
+            });
+        }
+
+        const canAutoApprove = autoApprove && user && ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role);
+        const results = {
+            success: 0,
+            failed: 0,
+            skipped: 0,
+            committedScans: [],
+            errors: []
+        };
+
+        const manifestDir = path.join(UPLOADS_STAGING_DIR, manifestId);
+
+        for (const item of manifest.items) {
+            if (item.parseError) {
+                results.failed++;
+                results.errors.push({ filename: item.filename, error: item.parseError });
+                continue;
+            }
+
+            const decisionObj = decisions[item.id] || decisions[item.filename] || {};
+            const decision = decisionObj.decision || item.suggestedAction || 'PROCEED';
+
+            if (decision === 'SKIP') {
+                results.skipped++;
+                continue;
+            }
+
+            // Resolve sample
+            const targetSampleId = decisionObj.sampleId || item.sampleId || item.matchedSample?.id;
+            if (!targetSampleId) {
+                results.failed++;
+                results.errors.push({ filename: item.filename, error: 'NO_MATCHING_SAMPLE: Spectrum must be bound to a sample.' });
+                continue;
+            }
+
+            const sample = await prisma.sample.findUnique({
+                where: { id: targetSampleId },
+                include: { workItems: true }
+            });
+            if (!sample) {
+                results.failed++;
+                results.errors.push({ filename: item.filename, error: 'SAMPLE_NOT_FOUND' });
+                continue;
+            }
+
+            // Operational Gates Prerequisite Check (Amendment 4)
+            const dryingGate = sample.workItems.find(w => w.analysis === 'DRYING');
+            const prepGate = sample.workItems.find(w => w.analysis === 'PREPARATION');
+            const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
+
+            if (dryingGate && !isDone(dryingGate)) {
+                results.failed++;
+                results.errors.push({
+                    filename: item.filename,
+                    error: `DRYING_PREREQUISITE_INCOMPLETE: Sample ${sample.labId || sample.id} drying gate must be completed.`
+                });
+                continue;
+            }
+            if (prepGate && !isDone(prepGate)) {
+                results.failed++;
+                results.errors.push({
+                    filename: item.filename,
+                    error: `PREPARATION_PREREQUISITE_INCOMPLETE: Sample ${sample.labId || sample.id} preparation gate must be completed.`
+                });
+                continue;
+            }
+
+            // Target WorkItem
+            const targetWorkItemId = decisionObj.targetWorkItemId || item.targetWorkItemId || item.matchedWorkItem?.id;
+            let targetWorkItem = null;
+            if (targetWorkItemId) {
+                targetWorkItem = sample.workItems.find(w => w.id === targetWorkItemId) ||
+                    await prisma.workItem.findUnique({ where: { id: targetWorkItemId } });
+            }
+
+            if (targetWorkItem && user.role === 'LAB_TECHNICIAN' && targetWorkItem.assignedTo && targetWorkItem.assignedTo !== user.username) {
+                results.failed++;
+                results.errors.push({
+                    filename: item.filename,
+                    error: `UNAUTHORIZED_TASK: WorkItem ${targetWorkItem.id} is assigned to ${targetWorkItem.assignedTo}.`
+                });
+                continue;
+            }
+
+            // Determine Replicate and Supersession
+            let replicateNo = decisionObj.replicateNo ? parseInt(decisionObj.replicateNo, 10) : 1;
+            if (decision === 'ADD_REPLICATE') {
+                const existingRepCount = await prisma.spectralData.count({
+                    where: { sampleId: sample.id, modality: item.modality, status: { not: 'DELETED' } }
+                });
+                replicateNo = existingRepCount + 1;
+            }
+
+            const newScanId = `spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            const safeName = item.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const permanentFilename = `${newScanId}_${safeName}`;
+            const permanentFullPath = path.join(UPLOADS_SPECTRA_DIR, permanentFilename);
+            const permanentRelativePath = `uploads/spectra/${permanentFilename}`;
+
+            const stagedFilePath = path.join(manifestDir, item.stagedFilename || item.filename);
+
+            try {
+                const committedScan = await prisma.$transaction(async (tx) => {
+                    let supersedesId = null;
+                    if (decision === 'REPLACE' || item.duplicateScanId) {
+                        const priorScan = await tx.spectralData.findFirst({
+                            where: {
+                                sampleId: sample.id,
+                                modality: item.modality,
+                                replicateNo: replicateNo,
+                                isCurrent: true,
+                                status: { not: 'DELETED' }
+                            }
+                        });
+                        if (priorScan) {
+                            supersedesId = priorScan.id;
+                            await tx.spectralData.update({
+                                where: { id: priorScan.id },
+                                data: {
+                                    isCurrent: false,
+                                    supersededBy: newScanId,
+                                    supersededAt: new Date(),
+                                    supersedeReason: decisionObj.rescanReason || 'Replaced by authorized rescan'
+                                }
+                            });
+                        }
+                    }
+
+                    // Move file staging -> permanent storage
+                    if (fs.existsSync(stagedFilePath)) {
+                        fs.copyFileSync(stagedFilePath, permanentFullPath);
+                    }
+
+                    const workflowStatus = item.qcStatus === 'FAIL' ? 'PENDING' : (canAutoApprove ? 'APPROVED' : 'VALIDATED');
+                    const attemptNo = decisionObj.attemptNo || (supersedesId ? 2 : 1);
+
+                    const created = await tx.spectralData.create({
+                        data: {
+                            id: newScanId,
+                            sampleId: sample.id,
+                            labId: sample.assignedLab || sample.labId || user.labId,
+                            workItemId: targetWorkItem ? targetWorkItem.id : null,
+                            attemptNo: attemptNo,
+                            modality: item.modality,
+                            filename: item.filename,
+                            wavelengths: JSON.stringify(item.wavelengths),
+                            values: JSON.stringify(item.values),
+                            sourceFile: permanentRelativePath,
+                            sourceFormat: item.format || 'CSV',
+                            sha256: item.sha256,
+                            quantity: item.quantity,
+                            axisUnit: item.axisUnit,
+                            axisDirection: item.axisDirection || 'UNORDERED',
+                            region: item.modality,
+                            isRaw: true,
+                            equipmentId: effectiveEquipmentId,
+                            resolution: item.resolution ? parseFloat(item.resolution) : null,
+                            coAddedScans: item.coAddedScans ? parseInt(item.coAddedScans, 10) : null,
+                            replicateNo: replicateNo,
+                            isCurrent: true,
+                            supersedes: supersedesId,
+                            metadata: JSON.stringify({
+                                filename: item.filename,
+                                instrument: eqAsset.name || item.instrument || 'Spectrometer',
+                                operator: user.username,
+                                scanDate: new Date().toISOString(),
+                                manifestId: manifestId,
+                                replicateNo: replicateNo,
+                                attemptNo: attemptNo
+                            }),
+                            qcStatus: item.qcStatus,
+                            qcFlags: JSON.stringify(item.qcFlags || []),
+                            scanType: 'SAMPLE',
+                            status: workflowStatus,
+                            uploadedBy: user.username,
+                            ...(canAutoApprove ? { reviewedBy: user.username, reviewedAt: new Date() } : {})
+                        }
+                    });
+
+                    // Physical Replicate Completeness Check (Amendment 3 & 6)
+                    if (targetWorkItem && item.qcStatus !== 'FAIL') {
+                        const requiredReplicates = 1; // standard requirement
+                        const validScansCount = await tx.spectralData.count({
+                            where: {
+                                workItemId: targetWorkItem.id,
+                                isCurrent: true,
+                                status: { notIn: ['REJECTED', 'DELETED'] },
+                                qcStatus: { not: 'FAIL' }
+                            }
+                        });
+
+                        // validScansCount includes the new scan just created in the transaction
+                        if (validScansCount >= requiredReplicates) {
+                            const history = Array.isArray(targetWorkItem.history)
+                                ? targetWorkItem.history
+                                : (typeof targetWorkItem.history === 'string' ? JSON.parse(targetWorkItem.history || '[]') : []);
+
+                            history.push({
+                                status: 'COMPLETED',
+                                note: `Spectrum acquired (${item.modality} · QC ${item.qcStatus}) by ${user.username}`,
+                                changedBy: user.username,
+                                timestamp: new Date().toISOString()
+                            });
+
+                            // Update WorkItem status to COMPLETED — ZERO Result rows created!
+                            await tx.workItem.update({
+                                where: { id: targetWorkItem.id },
+                                data: {
+                                    status: 'COMPLETED',
+                                    completedAt: new Date(),
+                                    result: `Spectrum Acquired (${item.modality} · QC ${item.qcStatus})`,
+                                    equipmentId: effectiveEquipmentId,
+                                    history: JSON.stringify(history)
+                                }
+                            });
+                        }
+                    }
+
+                    // AuditLog entry
+                    await tx.auditLog.create({
+                        data: {
+                            id: `audit-spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                            entity: 'SPECTRA',
+                            entityId: created.id,
+                            action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_COMMIT',
+                            performedBy: user.username,
+                            timestamp: new Date(),
+                            details: `Committed ${item.modality} scan for sample ${sample.labId || sample.id} (QC: ${item.qcStatus})`
+                        }
+                    });
+
+                    return created;
+                });
+
+                results.success++;
+                results.committedScans.push({
+                    id: committedScan.id,
+                    filename: item.filename,
+                    sampleId: sample.id,
+                    labId: sample.labId,
+                    qcStatus: item.qcStatus,
+                    workItemId: targetWorkItem?.id || null
+                });
+            } catch (itemErr) {
+                console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+                results.failed++;
+                results.errors.push({ filename: item.filename, error: itemErr.message });
+            }
+        }
+
+        // Clean up staged manifest folder on completion
+        try {
+            if (fs.existsSync(manifestDir)) {
+                fs.rmSync(manifestDir, { recursive: true, force: true });
+            }
+        } catch (cleanupErr) {
+            console.warn('[COMMIT] Warning cleaning up manifest staging dir:', cleanupErr.message);
+        }
+
+        const responsePayload = {
+            success: true,
+            manifestId,
+            ...results
+        };
+
+        if (idempotencyKey) {
+            idempotencyReceipts.set(idempotencyKey, responsePayload);
+        }
+
+        res.json(responsePayload);
+    } catch (e) {
+        console.error('[SPECTRAL COMMIT] Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+/**
+ * Link Existing Spectrum to WorkItem (Amendment 4)
+ * POST /api/spectral/link-task
+ * Validates assignment, lab scope, drying & preparation gates, and scan eligibility.
+ */
+exports.linkTask = async (req, res) => {
+    try {
+        const user = req.user;
+        const { scanId, workItemId, managerOverrideReason } = req.body || {};
+
+        if (!scanId || !workItemId) {
+            return res.status(400).json({ error: 'MISSING_PARAMETERS', message: 'scanId and workItemId are required.' });
+        }
+
+        const scan = await prisma.spectralData.findUnique({ where: { id: scanId } });
+        if (!scan || scan.status === 'DELETED') {
+            return res.status(404).json({ error: 'SCAN_NOT_FOUND', message: 'Spectral scan not found.' });
+        }
+
+        // Historical Scan Eligibility (Amendment 4)
+        if (!scan.isCurrent || ['REJECTED', 'SUPERSEDED', 'ARCHIVED'].includes(scan.status)) {
+            return res.status(400).json({
+                error: 'INELIGIBLE_SCAN_STATUS',
+                message: `Cannot link a scan with status ${scan.status} or isCurrent=false.`
+            });
+        }
+        if (scan.qcStatus === 'FAIL') {
+            return res.status(400).json({
+                error: 'CANNOT_LINK_FAILED_SCAN',
+                message: 'Cannot link a scan that has failed QC checks.'
+            });
+        }
+        if (scan.qcStatus === 'WARN' && !managerOverrideReason) {
+            if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+                return res.status(400).json({
+                    error: 'MANAGER_OVERRIDE_REQUIRED',
+                    message: 'Linking a scan with QC warnings requires a manager override reason.'
+                });
+            }
+        }
+
+        const workItem = await prisma.workItem.findUnique({
+            where: { id: workItemId },
+            include: { sample: true }
+        });
+        if (!workItem) {
+            return res.status(404).json({ error: 'WORK_ITEM_NOT_FOUND', message: 'WorkItem not found.' });
+        }
+
+        // Operator authorization
+        if (user.role === 'LAB_TECHNICIAN' && workItem.assignedTo && workItem.assignedTo !== user.username) {
+            return res.status(403).json({
+                error: 'UNAUTHORIZED',
+                message: `Task is assigned to ${workItem.assignedTo}.`
+            });
+        }
+
+        // Modality matching
+        const wAnalysis = (workItem.analysis || '').toUpperCase();
+        if ((wAnalysis === 'SPEC_MIR' || wAnalysis === 'SPEC_FTIR') && scan.modality !== 'MIR') {
+            return res.status(400).json({
+                error: 'INCOMPATIBLE_MODALITY',
+                message: `Task ${workItem.analysis} requires Mid-Infrared (MIR), but scan is ${scan.modality}.`
+            });
+        }
+        if ((wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR') && scan.modality !== 'NIR') {
+            return res.status(400).json({
+                error: 'INCOMPATIBLE_MODALITY',
+                message: `Task ${workItem.analysis} requires Vis-NIR, but scan is ${scan.modality}.`
+            });
+        }
+
+        // Operational gates prerequisite check
+        const sample = workItem.sample;
+        if (sample) {
+            const gates = await prisma.workItem.findMany({
+                where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
+            });
+            const dryingGate = gates.find(g => g.analysis === 'DRYING');
+            const prepGate = gates.find(g => g.analysis === 'PREPARATION');
+            const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
+
+            if (dryingGate && !isDone(dryingGate)) {
+                return res.status(400).json({
+                    error: 'DRYING_PREREQUISITE_INCOMPLETE',
+                    message: `Sample drying must be completed before linking spectra.`
+                });
+            }
+            if (prepGate && !isDone(prepGate)) {
+                return res.status(400).json({
+                    error: 'PREPARATION_PREREQUISITE_INCOMPLETE',
+                    message: `Sample preparation must be completed before linking spectra.`
+                });
+            }
+        }
+
+        // Link in transaction
+        const updated = await prisma.$transaction(async (tx) => {
+            const updatedScan = await tx.spectralData.update({
+                where: { id: scan.id },
+                data: {
+                    workItemId: workItem.id,
+                    sampleId: sample ? sample.id : scan.sampleId
+                }
+            });
+
+            // Update WorkItem to COMPLETED
+            const history = Array.isArray(workItem.history)
+                ? workItem.history
+                : (typeof workItem.history === 'string' ? JSON.parse(workItem.history || '[]') : []);
+
+            history.push({
+                status: 'COMPLETED',
+                note: `Linked existing spectrum (${scan.id}) by ${user.username}${managerOverrideReason ? ` [Override: ${managerOverrideReason}]` : ''}`,
+                changedBy: user.username,
+                timestamp: new Date().toISOString()
+            });
+
+            const updatedWI = await tx.workItem.update({
+                where: { id: workItem.id },
+                data: {
+                    status: 'COMPLETED',
+                    completedAt: new Date(),
+                    result: `Spectrum Linked (${scan.modality} · QC ${scan.qcStatus})`,
+                    equipmentId: scan.equipmentId || workItem.equipmentId,
+                    history: JSON.stringify(history)
+                }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-link-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    entity: 'WORK_ITEM',
+                    entityId: workItem.id,
+                    action: 'LINK_SPECTRUM',
+                    performedBy: user.username,
+                    timestamp: new Date(),
+                    details: `Linked scan ${scan.id} to workItem ${workItem.id} (${workItem.analysis})`
+                }
+            });
+
+            return { updatedScan, updatedWI };
+        });
+
+        res.json({
+            success: true,
+            scanId: updated.updatedScan.id,
+            workItemId: updated.updatedWI.id,
+            workItemStatus: updated.updatedWI.status
+        });
+    } catch (e) {
+        console.error('[SPECTRAL LINK-TASK] Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+/**
+ * Handle Single or Multipart Upload
  */
 exports.uploadBatch = async (req, res) => {
     try {
+        if (req.body && req.body.manifestId) {
+            return exports.commitBatch(req, res);
+        }
         let { batchId, scans, contextSampleId, autoApprove } = req.body || {};
         const user = req.user; // From auth middleware
         const canAutoApprove = autoApprove && user && ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role);
@@ -576,13 +1359,14 @@ exports.uploadBatch = async (req, res) => {
                 console.warn('[SPECTRAL] Warning: Failed to persist raw file blob:', fsErr.message);
             }
 
-            // SL-08: Equipment Register Link
-            let equipmentId = scanItem.equipmentId || null;
+            let equipmentId = scanItem.equipmentId || req.body?.equipmentId || null;
             if (!equipmentId && effectiveLabId) {
-                const eq = await prisma.equipmentAsset.findFirst({
+                const activeEqs = await prisma.equipmentAsset.findMany({
                     where: { labId: effectiveLabId, assetType: 'SPECTROMETER', status: 'IN_SERVICE' }
                 });
-                if (eq) equipmentId = eq.id;
+                if (activeEqs.length > 0) {
+                    equipmentId = activeEqs[0].id;
+                }
             }
 
             // SL-17: Load instrument-specific QC tolerances if available
@@ -688,6 +1472,60 @@ exports.uploadBatch = async (req, res) => {
                 workflowStatus = 'VALIDATED';
             }
 
+            // Resolve related WorkItem before transaction
+            let targetWorkItem = null;
+            const explicitWId = scanItem.targetWorkItemId || scanItem.workItemId || req.body?.targetWorkItemId;
+            if (explicitWId) {
+                targetWorkItem = await prisma.workItem.findUnique({ where: { id: explicitWId } });
+            } else if (sample && validation.qcStatus !== 'FAIL') {
+                const sModality = (scanItem.modality || 'NIR').toUpperCase();
+                const openWorkItems = await prisma.workItem.findMany({
+                    where: {
+                        sampleId: sample.id,
+                        status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
+                    }
+                });
+
+                targetWorkItem = openWorkItems.find(w => {
+                    const wAnalysis = (w.analysis || '').toUpperCase();
+                    if (sModality === 'NIR') {
+                        return wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR' ||
+                            wAnalysis.includes('NIR') || wAnalysis.includes('VIS-NIR') || wAnalysis.includes('SPECTRA');
+                    }
+                    if (sModality === 'MIR') {
+                        return wAnalysis === 'SPEC_MIR' || wAnalysis === 'SPEC_FTIR' ||
+                            wAnalysis.includes('MIR') || wAnalysis.includes('FTIR');
+                    }
+                    return false;
+                }) || null;
+            }
+
+            // Check operational gates if linking to work item (Amendment 4)
+            if (sample && targetWorkItem) {
+                const gates = await prisma.workItem.findMany({
+                    where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
+                });
+                const dryingGate = gates.find(g => g.analysis === 'DRYING');
+                const prepGate = gates.find(g => g.analysis === 'PREPARATION');
+                const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
+                if (dryingGate && !isDone(dryingGate)) {
+                    results.failed++;
+                    results.errors.push({
+                        filename: scanItem.filename,
+                        error: `DRYING_PREREQUISITE_INCOMPLETE: Sample drying must be completed before recording spectra.`
+                    });
+                    continue;
+                }
+                if (prepGate && !isDone(prepGate)) {
+                    results.failed++;
+                    results.errors.push({
+                        filename: scanItem.filename,
+                        error: `PREPARATION_PREREQUISITE_INCOMPLETE: Sample preparation must be completed before recording spectra.`
+                    });
+                    continue;
+                }
+            }
+
             // SL-15 & SL-16: Atomic Database Transaction
             let newScan;
             let updatedWorkItemId = null;
@@ -706,12 +1544,15 @@ exports.uploadBatch = async (req, res) => {
                         });
                     }
 
-                    // Create new spectral record
+                    // Create new spectral record with workItemId and attemptNo (Amendment 3)
+                    const attemptNo = scanItem.attemptNo || (supersedesId ? 2 : 1);
                     const createdScan = await tx.spectralData.create({
                         data: {
                             id: newScanId,
                             sampleId: sample ? sample.id : null,
                             labId: effectiveLabId,
+                            workItemId: targetWorkItem ? targetWorkItem.id : null,
+                            attemptNo: attemptNo,
                             modality: scanItem.modality || 'NIR',
                             filename: scanItem.filename,
                             wavelengths: JSON.stringify(wavelengths),
@@ -781,34 +1622,23 @@ exports.uploadBatch = async (req, res) => {
                         }
                     });
 
-                    // SL-16: Route WorkItem Status via catalogue analysis match
-                    if (sample && validation.qcStatus !== 'FAIL') {
-                        const sModality = (scanItem.modality || 'NIR').toUpperCase();
-                        const openWorkItems = await tx.workItem.findMany({
+                    // Replicate Completeness Check: Route WorkItem Status (Amendment 3 & 6)
+                    if (targetWorkItem && validation.qcStatus !== 'FAIL') {
+                        const requiredReplicates = 1; // standard
+                        const activeScansCount = await tx.spectralData.count({
                             where: {
-                                sampleId: sample.id,
-                                status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
+                                workItemId: targetWorkItem.id,
+                                isCurrent: true,
+                                status: { notIn: ['REJECTED', 'DELETED'] },
+                                qcStatus: { not: 'FAIL' }
                             }
                         });
 
-                        const relatedItem = openWorkItems.find(w => {
-                            const wAnalysis = (w.analysis || '').toUpperCase();
-                            if (sModality === 'NIR') {
-                                return wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR' ||
-                                    wAnalysis.includes('NIR') || wAnalysis.includes('VIS-NIR') || wAnalysis.includes('SPECTRA');
-                            }
-                            if (sModality === 'MIR') {
-                                return wAnalysis === 'SPEC_MIR' || wAnalysis === 'SPEC_FTIR' ||
-                                    wAnalysis.includes('MIR') || wAnalysis.includes('FTIR');
-                            }
-                            return false;
-                        });
-
-                        if (relatedItem) {
-                            updatedWorkItemId = relatedItem.id;
-                            const history = typeof relatedItem.history === 'string'
-                                ? JSON.parse(relatedItem.history)
-                                : (relatedItem.history || []);
+                        if (activeScansCount >= requiredReplicates) {
+                            updatedWorkItemId = targetWorkItem.id;
+                            const history = typeof targetWorkItem.history === 'string'
+                                ? JSON.parse(targetWorkItem.history)
+                                : (targetWorkItem.history || []);
 
                             history.push({
                                 status: 'COMPLETED',
@@ -817,11 +1647,13 @@ exports.uploadBatch = async (req, res) => {
                                 timestamp: new Date().toISOString()
                             });
 
+                            // Zero Result rows created!
                             await tx.workItem.update({
-                                where: { id: relatedItem.id },
+                                where: { id: targetWorkItem.id },
                                 data: {
                                     status: 'COMPLETED',
                                     result: `Spectrum Uploaded (${validation.qcStatus})${canAutoApprove ? ' - Auto-Approved' : ''}`,
+                                    equipmentId: equipmentId,
                                     completedAt: new Date(),
                                     history: JSON.stringify(history)
                                 }
@@ -1315,10 +2147,6 @@ exports.reviewSpectrum = async (req, res) => {
         console.error("Review Spectrum Error:", e);
         res.status(500).json({ error: e.message });
     }
-};
-
-const parseJson = (str) => {
-    try { return str ? JSON.parse(str) : null; } catch (e) { return null; }
 };
 
 /**

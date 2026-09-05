@@ -103,6 +103,35 @@ exports.getQueue = async (req, res) => {
             resultMap[`${r.sampleId}::${r.param}`] = { value: r.value, unit: r.unit };
         });
 
+        // Prefetch active spectral scans for spectral analyses
+        const spectralScansList = await prisma.spectralData.findMany({
+            where: {
+                sampleId: { in: sampleIds },
+                isCurrent: true,
+                status: { not: 'DELETED' }
+            },
+            select: {
+                id: true,
+                sampleId: true,
+                labId: true,
+                modality: true,
+                replicateNo: true,
+                status: true,
+                qcStatus: true,
+                qcFlags: true,
+                sourceFormat: true,
+                filename: true,
+                equipmentId: true,
+                timestamp: true
+            }
+        });
+        const spectralMap = {};
+        spectralScansList.forEach(s => {
+            const key = `${s.sampleId}::${s.modality}`;
+            if (!spectralMap[key]) spectralMap[key] = [];
+            spectralMap[key].push(s);
+        });
+
         // ─── Fix 2: Prefetch equipment eligibility per analysis/lab ───
         const labIds = [...new Set(items.map(i => i.sample?.assignedLab || i.labId).filter(Boolean))];
         const equipReqs = await prisma.equipmentMethodEligibility.findMany({
@@ -184,12 +213,24 @@ exports.getQueue = async (req, res) => {
                 selectedEquipmentId: selectedEquipId
             });
 
+            const isSpectral = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(code);
+            const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
+            const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
+            const latestScan = scans.length > 0 ? scans[0] : null;
+
             groupsMap[code].items.push({
                 workItemId: item.id,
                 sampleId: item.sampleId,
+                sampleDisplayId: item.sample?.labId || item.labId || item.sampleId,
                 labId: item.sample?.labId || item.labId,
                 originalId: item.sample?.originalId || null,
+                laboratoryId: item.sample?.assignedLab || item.assignedLab || item.labId || null,
                 projectCode: item.sample?.projectCode || null,
+                analysis: code,
+                analysisCode: code,
+                editorKind: isSpectral
+                    ? 'SPECTRAL'
+                    : (code === 'TEXTURE' ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
                 status: item.status,
                 priority: item.priority,
                 currentResult: resultMap[resultKey]?.value || item.result || null,
@@ -202,7 +243,10 @@ exports.getQueue = async (req, res) => {
                 version: item.version,
                 category: groupsMap[code].category,
                 readiness,
-                draft: itemDraft
+                draft: itemDraft,
+                spectralScans: isSpectral ? scans : undefined,
+                hasSpectrum: scans.length > 0,
+                latestSpectralScan: latestScan
             });
         }
 
@@ -337,6 +381,26 @@ exports.batchSave = async (req, res) => {
             if (!sample) {
                 errors.push({ workItemId: entry.workItemId, error: 'Sample not found' });
                 continue;
+            }
+
+            // HARD BLOCK: Spectral acquisition tasks require spectrometer scans, never scalar values
+            const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
+            if (isSpectralAnalysis) {
+                if (!draft) {
+                    errors.push({
+                        workItemId: entry.workItemId,
+                        error: 'Spectral acquisition tasks require spectrometer scan upload or linked library spectrum. Scalar determinations are forbidden.',
+                        code: 'SPECTRAL_SCALAR_FORBIDDEN'
+                    });
+                    continue;
+                } else if (entry.value !== null && entry.value !== undefined && entry.value !== '') {
+                    errors.push({
+                        workItemId: entry.workItemId,
+                        error: 'Scalar numeric values cannot be saved for spectral acquisition tasks.',
+                        code: 'SPECTRAL_SCALAR_FORBIDDEN'
+                    });
+                    continue;
+                }
             }
 
             // Skip empty values for draft mode
@@ -1045,7 +1109,10 @@ exports.previewCompletion = async (req, res) => {
 
             // 2. Validation check
             let validation = { isValid: true, flags: [] };
-            if (item.analysis === 'TEXTURE' || (entry.values && Array.isArray(entry.values))) {
+            const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
+            if (isSpectralAnalysis) {
+                validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };
+            } else if (item.analysis === 'TEXTURE' || (entry.values && Array.isArray(entry.values))) {
                 const vals = entry.values || [];
                 validation = validationService.validateTextureFractions(vals[0], vals[1], vals[2]);
             } else if (item.category === 'Operational Gates') {
@@ -1063,6 +1130,11 @@ exports.previewCompletion = async (req, res) => {
 
             const blockers = [...readiness.blockers];
             const reasons = [...readiness.reasons];
+
+            if (isSpectralAnalysis) {
+                blockers.push('SPECTRAL_SCAN_REQUIRED');
+                reasons.push('Spectral acquisition tasks cannot be completed with scalar values. Use spectrum intake or library link.');
+            }
 
             if (versionMismatch) {
                 blockers.push('VERSION_CONFLICT');
@@ -1094,10 +1166,16 @@ exports.previewCompletion = async (req, res) => {
                 }
             }
 
+            const sampleDisplayId = item.sample?.labId || item.labId || item.sampleId;
+            const originalId = item.sample?.originalId || null;
+
             if (blockers.length > 0) {
                 excluded.push({
                     workItemId: item.id,
                     sampleId: item.sampleId,
+                    sampleDisplayId,
+                    labId: item.sample?.labId || item.labId,
+                    originalId,
                     analysis: item.analysis,
                     value: entry.value,
                     blockers,
@@ -1108,6 +1186,9 @@ exports.previewCompletion = async (req, res) => {
                 included.push({
                     workItemId: item.id,
                     sampleId: item.sampleId,
+                    sampleDisplayId,
+                    labId: item.sample?.labId || item.labId,
+                    originalId,
                     analysis: item.analysis,
                     value: entry.value,
                     values: entry.values,
