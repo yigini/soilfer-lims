@@ -173,6 +173,9 @@ model Sample {
   // Relations
   workItems         WorkItem[]
   results           Result[]
+  orderRevisions    SampleOrderRevision[]
+  amendments        SampleAmendment[]
+  reviewDecisions   ReviewDecision[]
 
   @@index([consignmentId])
 }
@@ -267,9 +270,11 @@ model WorkItem {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  equipmentUsage WorkItemEquipmentUse[]
-  draft          WorkItemDraft?
-  spectralScans  SpectralData[]
+  equipmentUsage  WorkItemEquipmentUse[]
+  draft           WorkItemDraft?
+  spectralScans   SpectralData[]
+  workAttempts    WorkAttempt[]
+  reviewDecisions ReviewDecision[]
 }
 
 model WorkItemDraft {
@@ -994,6 +999,7 @@ model Report {
 
   shareLinks    ReportShareLink[]
 
+  @@unique([sampleId, version])
   @@index([sampleId])
   @@index([labId])
   @@index([status])
@@ -1049,5 +1055,128 @@ model ApiKey {
 
   @@index([keyHash])
 }
+
+// --- PACKAGE P2: TRANSACTIONAL FOUNDATIONS & SAMPLE WORKSPACE ---
+
+model SampleOrderRevision {
+  id           String       @id @default(uuid())
+  sampleId     String
+  sample       Sample       @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  version      Int          @default(1)
+  status       String       @default("ACTIVE") // ACTIVE, SUPERSEDED, CANCELLED
+  reason       String?
+  requestedBy  String?
+  authorizedBy String?
+  authorizedAt DateTime?
+  lines        OrderLine[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([sampleId, version])
+  @@index([sampleId])
+}
+
+model OrderLine {
+  id                   String              @id @default(uuid())
+  revisionId           String
+  revision             SampleOrderRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  analysis             String              // Analysis code (e.g. PH_H2O, VIS_NIR, etc.)
+  methodologyId        String?
+  methodRevision       String?
+  isRequired           Boolean             @default(true)
+  status               String              @default("ACTIVE") // ACTIVE, CANCELLED, OMITTED
+  omissionReason       String?
+  omissionAuthorizedBy String?
+  omissionAuthorizedAt DateTime?
+  predecessorLineId    String?
+  attempts             WorkAttempt[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([revisionId])
+  @@index([analysis])
+}
+
+model WorkAttempt {
+  id                     String      @id @default(uuid())
+  workItemId             String
+  workItem               WorkItem    @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  orderLineId            String?
+  orderLine              OrderLine?  @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+  attemptNo              Int         @default(1)
+  executedMethodRevision String?
+  author                 String?
+  authorName             String?
+  materialAliquot        String?
+  instrumentId           String?
+  qcBatchId              String?
+  version                Int         @default(1)
+  status                 String      @default("RECORDED") // RECORDED, SUBMITTED, ACCEPTED, RETURNED, REJECTED
+  evidenceHash           String?
+  evidenceData           String?     // JSON snapshot of recorded evidence
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  @@index([workItemId])
+  @@index([orderLineId])
+}
+
+model ReviewDecision {
+  id               String    @id @default(uuid())
+  sampleId         String
+  sample           Sample    @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  workItemId       String?
+  workItem         WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  submissionItemId String?
+  attemptId        String?
+  decision         String    // ACCEPT, RETURN, REJECT, OMIT
+  reason           String?
+  evidenceVersion  Int?
+  evidenceHash     String?
+  reviewerId       String
+  reviewerName     String?
+  authorization    String?   // Role / capability
+  policyVersion    String?   @default("v1")
+  createdAt        DateTime  @default(now())
+
+  @@index([sampleId])
+  @@index([workItemId])
+}
+
+model SampleAmendment {
+  id                 String    @id @default(uuid())
+  sampleId           String
+  sample             Sample    @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  type               String    // CLERICAL, SCIENTIFIC, ORDER, REPORT
+  status             String    @default("PENDING") // PENDING, APPROVED, REJECTED, RESOLVED
+  reason             String
+  affectedOrderLines String?   // JSON array of order line IDs
+  affectedResults    String?   // JSON array of result IDs
+  affectedReports    String?   // JSON array of report IDs
+  impactAssessment   String?
+  authorizedBy       String?
+  authorizedAt       DateTime?
+  resolution         String?
+  createdBy          String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([sampleId])
+}
+
+model CommandReceipt {
+  id             String    @id @default(uuid())
+  idempotencyKey String    @unique
+  commandType    String
+  targetResource String    // e.g. "Sample:123"
+  actor          String
+  status         String    // SUCCESS, FAILED
+  outcome        String?   // JSON payload of result
+  createdAt      DateTime  @default(now())
+
+  @@index([idempotencyKey])
+  @@index([actor])
+}
+
 
 

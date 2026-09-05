@@ -33,7 +33,7 @@ const PERMISSIONS = {
     // System
     'MANAGE_ANALYSES': ['SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'],
     'MANAGE_EQUIPMENT': ['SUPER_ADMIN', 'LAB_MANAGER'],
-    'MANAGE_BRANDING': ['SUPER_ADMIN', 'LAB_MANAGER']
+    'MANAGE_BRANDING': ['SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER']
 };
 
 export const AuthProvider = ({ children }) => {

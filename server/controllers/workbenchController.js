@@ -1340,6 +1340,16 @@ exports.commitSubmissions = async (req, res) => {
     try {
         const now = new Date();
         const createdSubmissions = [];
+        const scopeGuard = require('../utils/scopeGuard');
+
+        // S19: Verify lab scope for all requested samples upfront
+        for (const sampleId of sampleIds) {
+            const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
+            if (!sample) continue;
+            if (!scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+                return res.status(403).json({ error: `Access denied: Sample ${sampleId} is outside your lab scope.` });
+            }
+        }
 
         for (const sampleId of sampleIds) {
             const items = await prisma.workItem.findMany({
@@ -1362,52 +1372,51 @@ exports.commitSubmissions = async (req, res) => {
             const isFull = allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
 
             const subId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-            await prisma.submission.create({
-                data: {
-                    id: subId,
-                    sampleId,
-                    labId: user.labId || sample?.labId || sample?.assignedLab,
-                    assignedLab: sample?.assignedLab || sample?.labId,
-                    type: isFull ? 'FULL' : 'PARTIAL',
-                    status: 'PENDING_REVIEW',
-                    note: note || null,
-                    submittedBy: user.username,
-                    submittedAt: now,
-                    workItemIds: JSON.stringify(itemIds),
-                    workItemCount: itemIds.length
-                }
-            });
+            // S19: Canonical status must be SUBMITTED_FULL (never legacy SUBMITTED)
+            const targetSampleStatus = isFull ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
 
-            // Update work items
-            await prisma.workItem.updateMany({
-                where: { id: { in: itemIds } },
-                data: {
-                    status: 'SUBMITTED',
-                    submissionId: subId,
-                    submittedAt: now
-                }
-            });
-
-            // Update sample status
-            const targetSampleStatus = isFull ? 'SUBMITTED' : 'SUBMITTED_PARTIAL';
-            await prisma.sample.update({
-                where: { id: sampleId },
-                data: { status: targetSampleStatus }
-            });
-
-            // Log audit
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-sub-${subId}-${Date.now()}`,
-                    entity: 'Submission',
-                    entityId: subId,
-                    sampleId,
-                    action: 'WORKBENCH_SUBMIT',
-                    performedBy: user.username,
-                    details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${isFull ? 'FULL' : 'PARTIAL'})`,
-                    timestamp: now
-                }
-            }).catch(() => {});
+            // Atomic transaction for submission, work items, sample status, and audit
+            await prisma.$transaction([
+                prisma.submission.create({
+                    data: {
+                        id: subId,
+                        sampleId,
+                        labId: user.labId || sample?.labId || sample?.assignedLab,
+                        assignedLab: sample?.assignedLab || sample?.labId,
+                        type: isFull ? 'FULL' : 'PARTIAL',
+                        status: 'PENDING_REVIEW',
+                        note: note || null,
+                        submittedBy: user.username,
+                        submittedAt: now,
+                        workItemIds: JSON.stringify(itemIds),
+                        workItemCount: itemIds.length
+                    }
+                }),
+                prisma.workItem.updateMany({
+                    where: { id: { in: itemIds } },
+                    data: {
+                        status: 'SUBMITTED',
+                        submissionId: subId,
+                        submittedAt: now
+                    }
+                }),
+                prisma.sample.update({
+                    where: { id: sampleId },
+                    data: { status: targetSampleStatus }
+                }),
+                prisma.auditLog.create({
+                    data: {
+                        id: `audit-sub-${subId}-${Date.now()}`,
+                        entity: 'Submission',
+                        entityId: subId,
+                        sampleId,
+                        action: 'WORKBENCH_SUBMIT',
+                        performedBy: user.username,
+                        details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${isFull ? 'FULL' : 'PARTIAL'})`,
+                        timestamp: now
+                    }
+                })
+            ]);
 
             createdSubmissions.push({
                 submissionId: subId,

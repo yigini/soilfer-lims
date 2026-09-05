@@ -76,8 +76,13 @@ const Layout = ({ children }) => {
     const location = useLocation();
     const { user } = useAuth();
     const { t } = useLanguage();
-    const { theme } = useTheme();
+    const { theme, darkMode } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+    // Determine site logo: custom lab logo or official SoilFER LIMS brand logo (light/dark)
+    const isCustomLogo = theme?.logoUrl && !theme.logoUrl.includes('/assets/img/soilfer-logo') && !theme.logoUrl.includes('/assets/img/logo') && !theme.logoUrl.endsWith('/logo.png') && !theme.logoUrl.includes('fao_logo');
+    const defaultSiteLogo = darkMode ? '/assets/img/logo-dark.png' : '/assets/img/logo-light.png';
+    const siteLogo = isCustomLogo ? theme.logoUrl : defaultSiteLogo;
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
         const saved = localStorage.getItem('sidebar-collapsed');
         if (saved !== null) return saved === 'true';
@@ -169,8 +174,19 @@ const Layout = ({ children }) => {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
-                    {!sidebarCollapsed && (
-                        <img src={theme?.logoUrl || '/assets/img/soilfer-logo.png'} alt="SoilFER LIMS" className="h-10 w-auto object-contain dark:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] dark:brightness-125" onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/soilfer-logo.png'; }} />
+                    {sidebarCollapsed ? (
+                        <img 
+                            src="/assets/img/soilfer-logo.png" 
+                            alt="SoilFER" 
+                            className="h-8 w-8 object-contain mx-auto" 
+                        />
+                    ) : (
+                        <img 
+                            src={siteLogo} 
+                            alt="SoilFER LIMS" 
+                            className="h-10 w-auto object-contain transition-all duration-200" 
+                            onError={(e) => { e.target.onerror = null; e.target.src = defaultSiteLogo; }} 
+                        />
                     )}
                     <button className="md:hidden p-2 text-gray-500" onClick={() => setIsSidebarOpen(false)}>
                         <X size={20} />

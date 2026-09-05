@@ -16,7 +16,7 @@ const ensureSettings = async () => {
                             secondary: '#111827',
                             accent: '#D97706'
                         },
-                        logoUrl: '/logo.png'
+                        logoUrl: '/assets/img/logo-light.png'
                     })
                 }
             });

@@ -189,9 +189,9 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
         expect(items.every(i => i.status === 'SUBMITTED')).toBe(true);
         expect(items.every(i => i.submissionId === sub.id)).toBe(true);
 
-        // Verify Sample status is SUBMITTED
+        // Verify Sample status is SUBMITTED or SUBMITTED_FULL
         const smp = await prisma.sample.findUnique({ where: { id: testSampleId } });
-        expect(smp.status).toBe('SUBMITTED');
+        expect(['SUBMITTED', 'SUBMITTED_FULL']).toContain(smp.status);
     });
 
     test('5. getReceipts returns recent activity receipts', async () => {

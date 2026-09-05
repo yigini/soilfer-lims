@@ -9,22 +9,31 @@ const IntakeRequestCard = ({ sample }) => {
     const ncReason = sample.receptionData?.checklist?.reason;
     const notes = sample.receptionData?.notes;
 
+    const checklistKeys = ['container', 'label', 'quantity', 'preservation', 'damage'];
+    const evaluatedCount = checklistKeys.filter(k => checklist[k] && checklist[k].status).length;
+    const hasFailures = Boolean(nonConformance) || checklistKeys.some(k => checklist[k]?.status === 'FAIL');
+    const isComplete = evaluatedCount === checklistKeys.length && !hasFailures;
+    const isNotAssessed = evaluatedCount === 0;
+
     // Helper for Checklist Item
     const ChecklistItem = ({ label, item }) => {
-        if (!item) return null;
-        const isPass = item.status === 'PASS';
-        const isNA = item.status === 'NA';
+        const status = item?.status || 'NOT_ASSESSED';
+        const isPass = status === 'PASS';
+        const isNA = status === 'NA';
+        const isUnassessed = status === 'NOT_ASSESSED';
         return (
             <div className="flex items-start justify-between py-2 border-b border-gray-50 last:border-0 text-sm">
                 <span className="text-gray-600">{label}</span>
                 <div className="text-right">
-                    <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${isPass ? 'bg-green-100 text-green-700' :
-                            isNA ? 'bg-gray-100 text-gray-500' :
-                                'bg-red-100 text-red-700'
-                        }`}>
-                        {item.status}
+                    <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                        isPass ? 'bg-green-100 text-green-700' :
+                        isNA ? 'bg-gray-100 text-gray-500' :
+                        isUnassessed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-red-100 text-red-700'
+                    }`}>
+                        {isUnassessed ? 'Not assessed' : status}
                     </span>
-                    {item.note && <div className="text-xs text-red-500 mt-1 italic">{item.note}</div>}
+                    {item?.note && <div className="text-xs text-red-500 mt-1 italic">{item.note}</div>}
                 </div>
             </div>
         );
@@ -76,13 +85,17 @@ const IntakeRequestCard = ({ sample }) => {
                         <ClipboardList size={16} className="text-gray-500" />
                         Intake Conditions
                     </h3>
-                    {nonConformance ? (
+                    {hasFailures ? (
                         <span className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
                             <AlertTriangle size={12} /> ISSUES FOUND
                         </span>
-                    ) : (
+                    ) : isComplete ? (
                         <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">
                             <CheckCircle size={12} /> CONFORMING
+                        </span>
+                    ) : (
+                        <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            <AlertTriangle size={12} /> {isNotAssessed ? 'NOT ASSESSED' : 'PARTIALLY ASSESSED'}
                         </span>
                     )}
                 </div>

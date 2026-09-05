@@ -33,41 +33,46 @@ async function generateReport(req, res) {
             return res.status(404).json({ error: 'Sample not found' });
         }
 
-        // Mark any existing reports for this sample as SUPERSEDED
-        const existingReports = await prisma.report.findMany({
-            where: { sampleId, status: 'PUBLISHED' }
-        });
-        const currentVersion = existingReports.length;
-
-        if (existingReports.length > 0) {
-            await prisma.report.updateMany({
-                where: { sampleId, status: 'PUBLISHED' },
-                data: { status: 'SUPERSEDED' }
-            });
+        // S06: Lab Scope Check
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
+
+        // S13: Find max historical version across ALL reports for this sample to ensure strictly monotonic versioning
+        const maxReport = await prisma.report.findFirst({
+            where: { sampleId },
+            orderBy: { version: 'desc' }
+        });
+        const version = (maxReport?.version || 0) + 1;
 
         // Assemble the report
         const { content, searchKeys } = await assembleReport(sampleId, req.user);
 
         // Append version to report number
-        const version = currentVersion + 1;
         if (content.reportNumber) {
             content.reportNumber = `${content.reportNumber}-v${version}`;
         }
 
-        // Create report record
-        const report = await prisma.report.create({
-            data: {
-                sampleId,
-                labId: sample.assignedLab || sample.labId || null,
-                version,
-                status: 'PUBLISHED',
-                content: JSON.stringify(content),
-                generatedBy: req.user?.username || 'system',
-                publishedAt: new Date(),
-                ...searchKeys
-            }
-        });
+        // S13: Supersede existing published reports and create new report atomically under transaction
+        const [_, report] = await prisma.$transaction([
+            prisma.report.updateMany({
+                where: { sampleId, status: 'PUBLISHED' },
+                data: { status: 'SUPERSEDED' }
+            }),
+            prisma.report.create({
+                data: {
+                    sampleId,
+                    labId: sample.assignedLab || sample.labId || null,
+                    version,
+                    status: 'PUBLISHED',
+                    content: JSON.stringify(content),
+                    generatedBy: req.user?.username || 'system',
+                    publishedAt: new Date(),
+                    ...searchKeys
+                }
+            })
+        ]);
 
         // Audit log
         try {
@@ -121,6 +126,13 @@ async function getReport(req, res) {
             return res.status(404).json({ error: 'Report not found' });
         }
 
+        // S24: Lab Scope Check
+        const scopeGuard = require('../utils/scopeGuard');
+        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
+        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        }
+
         res.json({
             ...report,
             content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
@@ -138,6 +150,18 @@ async function getReport(req, res) {
 async function getReportBySample(req, res) {
     try {
         const { sampleId } = req.params;
+
+        const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
+        if (!sample) {
+            return res.status(404).json({ error: 'Sample not found' });
+        }
+
+        // S24: Lab Scope Check
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
+        }
+
         let report = await prisma.report.findFirst({
             where: { sampleId, status: { in: ['PUBLISHED', 'APPROVED'] } },
             orderBy: { version: 'desc' }
@@ -151,7 +175,7 @@ async function getReportBySample(req, res) {
         }
 
         if (!report) {
-            return res.status(404).json({ error: 'No published report for this sample' });
+            return res.status(404).json({ error: 'No report found for this sample' });
         }
 
         res.json({

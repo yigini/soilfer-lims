@@ -51,3 +51,7 @@ server/prisma/dev.db-wal
 # ─── Deploy archives & Backups ───
 *.tar.gz
 server/backups/
+server/prisma/*.bak
+*.bak
+scratch/
+

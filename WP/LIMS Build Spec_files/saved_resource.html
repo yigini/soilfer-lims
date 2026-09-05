@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<!-- saved from url=(0255)https://b19212b6-3885-419e-aae4-74d5e7a0cbc9.frame.claudeusercontent.com/_f/1788359288-62e4/?__frame_t=sBYazedq7eVJCrtND-%2DBW4Lg.55b716fd-5c55-40d4-9e9f-dd031a6a9b25.83b78913-98b4-446a-9a1d-46f32572119d.1788362927&__frame_v=manifest.26cdaaf7382591bc.json -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!-- frame-runtime --><script>window.__FRAME_PREAMBLE={"v":1,"capabilities":{"artifact":"artifact.0kpk9vgi.js","assets":"assets.8Gk803W0.js","comments":"comments.vw5vQdGA.js","db":"db.h-3sndFg.js","downloads":"downloads.C3GSvEDP.js","embed":"embed.CxGAyc-v.js","mcp":"mcp.Bvma3qD7.js","network":"network.B5UA9Su4.js","notifications":"notifications.ssU4jy7G.js","permissions":"permissions.BNySkLV5.js","room":"room.VSdFwTE9.js","sample":"sample.BW2Uysoh.js","self":"artifact.0kpk9vgi.js","user":"user.BpKav-Rf.js"},"transforms":"_transforms.DSB5x63f.js","comments":"_comments.C6E0cR5g.js","translate":"_translate.5HCW4BJh.js"}</script><script>(function(){"use strict";var te=["light","dark","system"],re=/^[A-Za-z0-9_-]{1,64}$/,$=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,ne=new Set(["class","hidden","value","checked","style","title","alt","placeholder","lang","dir","role","tabindex","disabled","readonly","contenteditable","open","colspan","rowspan"]);function oe(e){const t=e.toLowerCase();return t.startsWith("data-")||t.startsWith("aria-")||ne.has(t)}var Be="http://www.w3.org/1999/xhtml",se="http://www.w3.org/2000/svg",ae=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),ie=new Set(["script","style"]);function ce(e){const t=e.localName.toLowerCase();return e.namespaceURI==="http://www.w3.org/1999/xhtml"?!ae.has(t):e.namespaceURI===se?!ie.has(t):!1}function M(e,t){return e===t||(e===160||e===32)&&(t===160||t===32)}function le(e,t){const r=e.length,n=t.length;let s=0;for(;s<r&&s<n&&M(e.charCodeAt(s),t.charCodeAt(s));)s++;let o=0;for(;o<r-s&&o<n-s&&M(e.charCodeAt(r-1-o),t.charCodeAt(n-1-o));)o++;return{p:s,s:o}}function ue(e,t){const r=e.firstChild;if(e.childNodes.length!==1||r===null||r.nodeType!==Node.TEXT_NODE){e.textContent=t;return}const n=r.data,s=n.length,o=t.length,{p:i,s:c}=le(n,t);i===s&&c===0&&s===o||r.replaceData(i,s-i-c,t.slice(i,o-c));const h=r.data,p=e.ownerDocument.getSelection?.()??null,w=p!==null&&p.rangeCount>0&&(p.anchorNode===r||p.focusNode===r)?{anchor:p.anchorNode,anchorOffset:p.anchorOffset,focus:p.focusNode,focusOffset:p.focusOffset}:null;let m=-1,g=-1;for(let f=0;f<h.length&&f<t.length;f++){const v=h.charCodeAt(f),b=t.charCodeAt(f);v!==b&&M(v,b)&&(m<0&&(m=f),g=f)}const a=m>=0;if(a&&r.replaceData(m,g-m+1,t.slice(m,g+1)),a&&w!==null&&w.anchor!==null&&w.focus!==null)try{p.setBaseAndExtent(w.anchor,w.anchorOffset,w.focus,w.focusOffset)}catch{}}var fe=new Set(["html","head","body","frameset"]);function de(e){return e.namespaceURI==="http://www.w3.org/1999/xhtml"&&fe.has(e.localName)}function pe(e){if(e===null||typeof e!="object")return!1;const t=e;if(typeof t.target!="string"||!re.test(t.target)||t.text!==void 0&&typeof t.text!="string")return!1;if(t.attrsSet!==void 0){if(t.attrsSet===null||typeof t.attrsSet!="object")return!1;for(const[r,n]of Object.entries(t.attrsSet))if(!$.test(r)||typeof n!="string")return!1}if(t.attrsRemoved!==void 0){if(!Array.isArray(t.attrsRemoved))return!1;for(const r of t.attrsRemoved)if(typeof r!="string"||!$.test(r))return!1}return!0}function me(e,t){if(e===null||typeof e!="object")return!1;const{seq:r,elements:n}=e;if(typeof r!="number"||!Number.isSafeInteger(r)||!Array.isArray(n)||n.length===0||n.length>64)return!1;for(let s=0;s<n.length;s++)if(!t(n[s]))return!1;return!0}function he(e){return e===null||typeof e!="object"?!1:me(e.__frame_patch,pe)}function _e(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_init;return t!==null&&typeof t=="object"}function ve(e){return e!==null&&typeof e=="object"&&e.__frame_size_poke===!0}function ye(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_theme;if(t===null||typeof t!="object")return!1;const r=t.theme;return typeof r=="string"&&te.includes(r)}var A=/^[\w.-]+\.js$/;function we(e,t,r){return r?"inert":typeof t=="string"&&A.test(t)?e?[t]:"inert":e?"inert":"framed"}function ge(){return{post(e,t){parent.postMessage(e,t)},on(e){const t=r=>{r.source===parent&&e(r.data,r.origin,r.isTrusted)};return addEventListener("message",t),()=>removeEventListener("message",t)}}}function be(){return{post:()=>{},on:()=>()=>{}}}var j="__frame_scroll",Ee=150,Ae=310,Se=160,Te=3e4;function ke(){let e=0,t=!1,r=!1,n=!1,s=0,o=null;const i=l=>{try{sessionStorage.setItem(j,JSON.stringify({y:l}))}catch{}},c=()=>{if(clearTimeout(e),o===null)return;const l=o;o=null,i(l)},h=()=>{if(t){t=!1;return}r=!0,o=scrollY,clearTimeout(e),e=setTimeout(c,Ee)};try{addEventListener("scroll",h,{passive:!0}),addEventListener("pagehide",c)}catch{}const p=()=>{let l;try{l=sessionStorage.getItem(j)}catch{return null}if(l===null)return null;let _;try{_=JSON.parse(l)}catch{_=null}const d=_?.y;if(!(typeof d=="number"&&Number.isFinite(d)&&d>=0)){try{sessionStorage.removeItem(j)}catch{}return null}return d};let w=!1;const m=l=>{try{const _=scrollY;scrollTo({top:l,left:0,behavior:"instant"}),s=l,n=!0,clearTimeout(e),o=null,i(l);const d=scrollY;d!==_&&(t=!0),d!==l&&!w&&(w=!0,addEventListener("load",()=>{try{if(scrollY===d){const T=p();m(T!==null?T:s)}}catch{}},{once:!0}))}catch{}},g=()=>{try{return!!location.hash}catch{return!0}};let a=!1;const f=()=>{try{if(a||innerWidth>Ae||innerHeight>Se)return;a=!0;const l=Date.now(),_=()=>{try{removeEventListener("resize",_)}catch{}if(Date.now()-l>Te||r||g())return;const d=p();m(d!==null?d:s)};addEventListener("resize",_)}catch{}};let v=!1,b=!1;return{restore(){if(v||(v=!0,g()))return;const l=p();l!==null&&(m(l),f())},promoted(){if(b||(b=!0,g()))return;const l=p();l!==null?(m(l),f()):n&&m(s)}}}function Re(e,t,r,n){let s=null;try{s=window.trustedTypes?.createPolicy("frame-runtime",{createScriptURL:h=>h})??null}catch{}const o=window.Worker,i=o?.prototype,c=Object.freeze({Worker:o,workerOn:i?.addEventListener,workerPost:i?.postMessage,workerTerminate:i?.terminate,fetch:window.fetch.bind(window),preventDefault:Event.prototype.preventDefault,policy:s,origins:t});r(e).then(h=>h?.bootTopLevel?h.bootTopLevel(c,n):n.settle()).catch(()=>n.settle())}var De="modulepreload",Ie=function(e){return"/"+e},Ue={},Le=function(t,r,n){let s=Promise.resolve();function o(i){const c=new Event("vite:preloadError",{cancelable:!0});if(c.payload=i,window.dispatchEvent(c),!c.defaultPrevented)throw i}return s.then(i=>{for(const c of i||[])c.status==="rejected"&&o(c.reason);return t().catch(o)})},Oe=window===top,q=Object.getOwnPropertyDescriptor(window,"claude"),k=we(Oe,window.__FRAME_PREAMBLE?.topLevel,q?.writable===!1),N=typeof k=="object"&&k[0],y=N?be():ge();(function(){const e=Object.defineProperty,t=globalThis,r=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let n=0;for(let s=0;s<r.length;s++){const o=r[s];try{e(t,o,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[o]}catch{}try{e(t,o,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[o]=="function"&&n++}if(n&&k==="framed")try{y.post({__frame_rtc_lockdown_failed:n},"*")}catch{}})();var Pe=1e4,Y=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function X(e){for(const t of Y)if(t.endsWith(":*"))try{const r=new URL(e);if(`${r.protocol}//${r.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}var R=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),B=window.__FRAME_PREAMBLE?.transforms,D=window.__FRAME_PREAMBLE?.comments,I=window.__FRAME_PREAMBLE?.translate;function S(e){return Le(()=>import("/_runtime/"+e),void 0)}function G(e,t){return{contract:e.contract,changes:new Set(e.changes??[]),flags:new Set(e.flags??[]),capabilities:e.capabilities??{},capBudgets:e.capBudgets??{},transforms:new Map,shellOrigin:t,mount:x,hooks:O,pipe:()=>({wrap:(r,n)=>(...s)=>{try{return n(...s)}catch(o){return Promise.reject(o)}}})}}var L=null,E=null;function V(e,t,r){try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var U=!1,O={editBefore:null,edit:null};function Ce(e,t,r=!1){const n=[];let s;if(r)try{O.editBefore?.(e)}catch{}for(const o of e.elements){const i=document.querySelector(`[data-id="${o.target}"]`);if(!i){s=o.target;break}if([...Object.keys(o.attrsSet??{}),...o.attrsRemoved??[]].some(c=>!oe(c))){s=o.target;break}if(o.text!==void 0&&(!ce(i)||de(i))){s=o.target;break}for(const[c,h]of Object.entries(o.attrsSet??{}))if(!J(i,c)){try{i.setAttribute(c,h)}catch{}Z(i,c,h)}for(const c of o.attrsRemoved??[])J(i,c)||(i.removeAttribute(c),Z(i,c,null));typeof o.text=="string"&&ue(i,o.text),n.push(o.target)}if(r)try{O.edit?.(e.seq,n,s)}catch{}if(s!==void 0){y.post({__frame_patch_miss:{seq:e.seq}},t);return}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:e.seq,targets:n}}))}catch{}}function Z(e,t,r){if(!(e instanceof HTMLInputElement))return;const n=t.toLowerCase();n==="checked"?e.checked=r!==null:n==="value"&&e.type!=="file"&&(e.value=r??"")}function J(e,t){const r=t.toLowerCase(),n=e;return r==="data-id"||(r==="value"||r==="checked")&&(n.__artifactSecret===!0||/^(password|hidden|file)$/.test(n.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${e.getAttribute("autocomplete")??""} ${n.autocomplete??""}`))}function Q(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,U=!0):U&&(delete t.dataset.theme,t.style.colorScheme="",U=!1)}var P=new Map;function Me(){let e;const t={u:new Promise(r=>{e=r}),r:r=>{t.done=!0,e(r)},done:!1,nulled:!1};return t}function F(){for(const e of P.values())e.done||(e.nulled=!0,e.r(null))}var je=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),x=(e,t)=>{const r=P.get(e);if(!r||r.done){r?.nulled&&E&&y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:e}},E);return}const n=typeof t=="function"?Object.setPrototypeOf(t,je):Object.assign(Object.create(null),t);typeof n.then=="function"&&delete n.then,r.r(Object.freeze(n))};function ee(){const e=q?.value??{};V(window,"claude",e);for(const t of Object.keys(R)){if(e[t]!==void 0){V(e,t,e[t]);continue}P.set(t,Me())}if(e.use===void 0){const t=r=>{if(typeof r!="string"||!Object.hasOwn(R,r))return Promise.resolve(null);const n=P.get(r);return n?n.u:Promise.resolve(e[r]??null)};try{Object.defineProperty(e,"use",{value:t,writable:!0,configurable:!0,enumerable:!1})}catch{}}}if(k==="framed"){const e=B&&A.test(B)?S(B).catch(()=>{}):Promise.resolve(void 0),t=a=>{if(a.type==="auxclick"&&a.button!==1)return;const f=a.target,v=f&&f.closest?f.closest("a[href],area[href]"):null;if(!v)return;const b=v.getAttribute("href");if(!b)return;let l;try{l=new URL(b,document.baseURI)}catch{return}if((l.protocol==="http:"||l.protocol==="https:")&&l.origin!==location.origin){a.preventDefault();const _=(v.getAttribute("target")??"").toLowerCase(),d=a.type==="auxclick"||a.metaKey||a.ctrlKey||a.shiftKey||a.altKey||!["","_self","_top","_parent"].includes(_);y.post({__frame_nav:!0,url:l.href,newTab:d},"*")}};addEventListener("click",t,!0),addEventListener("auxclick",t,!0);const r={},n=a=>{a.isTrusted&&(r.pointer=!0)},s=a=>{a.isTrusted&&(r.click=!0)};addEventListener("pointermove",n,{capture:!0,passive:!0}),addEventListener("click",s,{capture:!0,passive:!0}),e.then(a=>{a?.wireNav&&(a.wireNav(),removeEventListener("click",t,!0),removeEventListener("auxclick",t,!0),removeEventListener("pointermove",n,!0),removeEventListener("click",s,!0),a.wireEngagement?.(r))});let o=null;try{o=ke()}catch{}ee();let i=null,c=null,h=0;const p=y.on((a,f)=>{X(f)&&_e(a)&&(i=a.__frame_init,E=f,p(),clearTimeout(h),c?.())});y.post({__frame_connect:!0},"*");const w=new Promise(a=>{c=a,h=setTimeout(()=>{p(),a()},Pe)}),m=document.readyState==="loading"?new Promise(a=>document.addEventListener("DOMContentLoaded",()=>a(),{once:!0})):Promise.resolve();m.then(()=>{try{o?.restore()}catch{}});const g={cb:null};y.on((a,f)=>{if(X(f)&&ve(a)){try{o?.promoted()}catch{}g.cb?.()}}),w.then(async()=>{if(!i||!E){F();return}Q(i.theme);const a=E;let f=!1,v=!1;y.on((u,z,C)=>{if(z!==a)return;ye(u)&&Q(u.__frame_theme.theme),he(u)&&Ce(u.__frame_patch,a,C);const H=u?.__fc_mode;H&&typeof H=="object"&&!f&&D&&A.test(D)&&(f=!0,S(D).then(K=>K.install?.(a,H.on===!0)).catch(()=>{}));const W=u?.__ft_cmd;W&&typeof W=="object"&&!v&&I&&A.test(I)&&(v=!0,S(I).then(K=>K.install?.(a,W)).catch(()=>{}))});const b=Object.keys(i.capabilities??{}).filter(u=>Object.hasOwn(R,u)).map(u=>[u,R[u]]).filter(u=>typeof u[1]=="string"&&A.test(u[1])),l=await Promise.allSettled(b.map(([,u])=>S(u))),_=await e,d=E;if(_?.buildBoot||y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),_?.buildBoot)try{L=_.buildBoot(i,_.TRANSFORMS??{},{shellOrigin:d,mount:x,hooks:O},u=>y.post({__frame_cap_telemetry:u},d))}catch{y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),L=G(i,d)}else L=G(i,d);const T=u=>y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:u}},d),Ne=L;l.forEach((u,z)=>{const C=b[z][0];if(u.status!=="fulfilled"){T(C);return}try{u.value?.install?.(Ne)}catch{T(C)}}),F(),await m,y.post({__frame_ready:!0},E),e.then(u=>u?.installSizeReporter?.(d,g))})}else N&&(ee(),Re(N,Y,S,{settle:F,mount:x}))})();</script><!-- /frame-runtime --><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>LIMS Build Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link rel="stylesheet" href="./css2">
+<style>
+  :root{
+    --paper:#F2F3F1;--surface:#FAFBF9;--surface-2:#E6E8E3;--code:#EDEFEA;
+    --ink:#151814;--ink-2:#3E443B;--ink-3:#6B7267;
+    --rule:#D4D8D0;--rule-soft:#E3E6E0;
+    --accent:#3A6B2E;--accent-2:#8A5A18;
+    --p0:#9E2A1E;--p1:#A9610F;--p2:#6F6828;--p3:#2A5578;--done:#2A6048;
+    --w-p0:#F6E5E3;--w-p1:#F6EBDC;--w-p2:#EFEFDF;--w-p3:#E2EAF1;--w-done:#E1EDE6;
+    --measure:74ch;--frame:1120px;
+    --f-display:"Zilla Slab",Georgia,serif;
+    --f-body:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#101210;--surface:#171916;--surface-2:#1E211C;--code:#1B1E19;
+    --ink:#E4E7E1;--ink-2:#C0C5BB;--ink-3:#8C9387;
+    --rule:#2A2E27;--rule-soft:#212420;
+    --accent:#8FCF77;--accent-2:#D3A857;
+    --p0:#E8857A;--p1:#DFA05A;--p2:#C2BA6E;--p3:#85B4D8;--done:#6FBF9B;
+    --w-p0:#2C1A18;--w-p1:#2A2116;--w-p2:#23230F;--w-p3:#15222D;--w-done:#14251C;
+  }}
+  :root[data-theme="dark"]{
+    --paper:#101210;--surface:#171916;--surface-2:#1E211C;--code:#1B1E19;
+    --ink:#E4E7E1;--ink-2:#C0C5BB;--ink-3:#8C9387;
+    --rule:#2A2E27;--rule-soft:#212420;
+    --accent:#8FCF77;--accent-2:#D3A857;
+    --p0:#E8857A;--p1:#DFA05A;--p2:#C2BA6E;--p3:#85B4D8;--done:#6FBF9B;
+    --w-p0:#2C1A18;--w-p1:#2A2116;--w-p2:#23230F;--w-p3:#15222D;--w-done:#14251C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .frame{max-width:var(--frame);margin:0 auto;padding:0 28px 96px;}
+  p,li{max-width:var(--measure);}
+  code,.mono{font-family:var(--f-mono);font-size:0.86em;}
+  code{background:var(--code);padding:0.1em 0.36em;border-radius:2px;word-break:break-word;}
+
+  header{border-bottom:2px solid var(--ink);padding:52px 0 24px;margin-bottom:30px;}
+  .eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 16px;}
+  h1{font-family:var(--f-display);font-weight:600;font-size:clamp(32px,6vw,50px);line-height:1.05;letter-spacing:-0.015em;margin:0 0 18px;max-width:20ch;text-wrap:balance;}
+  .standfirst{font-size:18.5px;line-height:1.55;color:var(--ink-2);margin:0 0 28px;max-width:64ch;}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px 30px;border-top:1px solid var(--rule);padding-top:18px;}
+  .meta-grid dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.11em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;}
+  .meta-grid dd{margin:0;font-size:14px;color:var(--ink-2);}
+
+  section{margin-top:60px;}
+  h2{font-family:var(--f-display);font-weight:600;font-size:25px;letter-spacing:-0.008em;margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--rule);display:flex;align-items:baseline;gap:14px;}
+  h2 .num{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);letter-spacing:0.08em;}
+  .sec-intro{color:var(--ink-2);margin:16px 0 26px;}
+  h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:34px 0 8px;}
+
+  .brief{border-left:3px solid var(--accent);background:var(--surface);padding:20px 24px;margin:30px 0 0;}
+  .brief p{margin:0 0 12px;max-width:70ch;}
+  .brief p:last-child{margin-bottom:0;}
+
+  .stage{margin-top:44px;border-top:2px solid var(--rule);padding-top:22px;}
+  .stage-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:6px;}
+  .stage-tag{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);}
+  .stage-t{font-family:var(--f-display);font-size:22px;font-weight:600;margin:0;}
+  .stage-w{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap;}
+  .stage-g{color:var(--ink-2);margin:6px 0 18px;font-size:15px;}
+
+  .wp{border:1px solid var(--rule);background:var(--surface);margin-bottom:14px;}
+  .wp-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--rule);}
+  .wp-id{font-family:var(--f-mono);font-size:11.5px;font-weight:700;letter-spacing:0.05em;color:var(--pc,var(--ink));}
+  .wp-t{font-weight:600;font-size:15px;flex:1;min-width:220px;}
+  .wp-b{padding:14px 16px;}
+  .wp-b dl{margin:0;display:grid;grid-template-columns:88px 1fr;gap:7px 14px;}
+  .wp-b dt{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);padding-top:3px;}
+  .wp-b dd{margin:0;font-size:14px;max-width:none;}
+  .wp-b dd ul{margin:0;padding-left:17px;}
+  .wp-b dd li{margin-bottom:4px;max-width:none;}
+  .files{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);line-height:1.7;}
+
+  .pill{font-family:var(--f-mono);font-size:9px;letter-spacing:0.08em;padding:3px 7px;border-radius:2px;font-weight:700;text-transform:uppercase;white-space:nowrap;}
+  .P0{color:var(--p0);background:var(--w-p0);} .P1{color:var(--p1);background:var(--w-p1);}
+  .P2{color:var(--p2);background:var(--w-p2);} .P3{color:var(--p3);background:var(--w-p3);}
+  .DONE{color:var(--done);background:var(--w-done);}
+  .wp0{--pc:var(--p0);} .wp1{--pc:var(--p1);} .wp2{--pc:var(--p2);} .wp3{--pc:var(--p3);}
+
+  pre{font-family:var(--f-mono);font-size:12px;line-height:1.62;background:var(--code);padding:13px 15px;overflow-x:auto;margin:12px 0;border-left:2px solid var(--rule);}
+  pre.bad{border-left-color:var(--p0);} pre.good{border-left-color:var(--done);}
+  pre .c{color:var(--ink-3);}
+
+  .guard{border-left:3px solid var(--p0);background:var(--surface);padding:18px 22px;margin:22px 0;}
+  .guard h3{margin:0 0 10px;font-size:16px;}
+  .guard ul{margin:0;padding-left:18px;}
+  .guard li{margin-bottom:8px;font-size:14.5px;}
+
+  .table-wrap{overflow-x:auto;margin:18px 0 26px;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 13px 9px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+  th{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;border-bottom:1px solid var(--rule);white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.k{color:var(--ink-3);white-space:nowrap;padding-right:16px;font-family:var(--f-mono);font-size:12px;}
+
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--f-mono);font-size:11px;color:var(--ink-3);letter-spacing:0.03em;}
+  @media (max-width:640px){.frame{padding:0 16px 72px;}.wp-b dl{grid-template-columns:1fr;gap:3px;}.wp-b dt{padding-top:8px;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+<div class="frame">
+
+  <header>
+    <p class="eyebrow">Volume X · Agent-executable build specification</p>
+    <h1>LIMS Build Spec</h1>
+    <p class="standfirst">
+      Every open finding from Volumes I through IX, consolidated into 34 sequenced work packages with
+      exact file paths, acceptance criteria and dependencies. Written to be executed by a coding agent
+      rather than read as a strategy document.
+    </p>
+    <dl class="meta-grid">
+      <div><dt>Packages</dt><dd>34 · 6 stages</dd></div>
+      <div><dt>Baseline</dt><dd><span class="mono">416c201</span> + uncommitted tree</dd></div>
+      <div><dt>Estimate</dt><dd>~9 weeks single developer</dd></div>
+      <div><dt>Hard rule</dt><dd>Stage 0 before anything else</dd></div>
+    </dl>
+  </header>
+
+  <div class="brief">
+    <p><strong>Read this first.</strong> Four times in this codebase, correct code has been written and
+    never called: <span class="mono">checkScope</span>, <span class="mono">validateSampleMatrix</span>, a
+    "catalogue" that was a display-name lookup, and <span class="mono">workflowContract</span>'s validators.
+    Each was good work that reached nothing. The cause is that no test can run —
+    <span class="mono">server/tests/setup.js</span> does not exist, so eleven suites fail at import and CI
+    does not exist to notice.</p>
+    <p><strong>Therefore Stage 0 is not optional and not reorderable.</strong> An agent executing this spec
+    must complete WP-01 through WP-03 and see them pass before touching any other package. Every later
+    package specifies a test as part of its acceptance criteria, and those tests are the only thing
+    preventing a fifth instance of the pattern.</p>
+    <p><strong>Priorities:</strong> <span class="pill P0">P0</span> produces wrong output or lost work
+    today · <span class="pill P1">P1</span> integrity or compliance · <span class="pill P2">P2</span>
+    correctness and consistency · <span class="pill P3">P3</span> productisation and future obligations.</p>
+  </div>
+
+  <div class="guard">
+    <h3>Guardrails — constraints on the executing agent</h3>
+    <ul>
+      <li><strong>Do not run anything against production.</strong> All work is local. Deployment is a human
+      decision. <span class="mono">lims.yigini.net</span> is live with seven laboratories' data.</li>
+      <li><strong>Do not seed a catalogue over existing rows.</strong> Laboratories have hand-created
+      analyses with free-text units. WP-17 specifies a match-and-confirm migration, not an overwrite.</li>
+      <li><strong>Do not change interpretation band values.</strong> The thresholds in
+      <span class="mono">interpretationService.js</span> were verified correct in Volume VIII. Packages here
+      change unit handling and coverage, never the numbers.</li>
+      <li><strong>Do not delete the <span class="mono">glosis_*</span> columns until WP-32</strong>, which
+      migrates them to a side table first.</li>
+      <li><strong>Do not add Puppeteer.</strong> The working tree already chose <span class="mono">pdfkit</span>;
+      that decision stands.</li>
+      <li><strong>Commit per work package</strong>, referencing the WP id. Do not batch multiple packages
+      into one commit.</li>
+      <li><strong>If a package's acceptance criteria cannot be met, stop and report.</strong> Do not
+      substitute a partial implementation and mark it complete — that is precisely how the four dead-code
+      instances arose.</li>
+    </ul>
+  </div>
+
+  <!-- STAGE 0 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 0</span><h3 class="stage-t">Safety net</h3><span class="stage-w">2–3 days · blocks everything</span></div>
+      <p class="stage-g">Nothing else may start until all three pass. These exist so that the rest of the spec cannot silently fail.</p>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-01</span><span class="wp-t">Create the test harness</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/tests/setup.js (new) · server/jest.config.js (new) · server/package.json</dd>
+          <dt>Do</dt><dd>Create <span class="mono">tests/setup.js</span> exporting <span class="mono">getAuthToken(role)</span> and <span class="mono">generateToken(user)</span> — the two helpers all eleven existing suites import. Back it with a temporary SQLite file seeded per run, torn down after. Add a jest config pointing at <span class="mono">tests/</span> with <span class="mono">--runInBand</span>.</dd>
+          <dt>Accept</dt><dd><span class="mono">npm test</span> runs all 11 suites to completion. Failures are permitted and expected; import errors are not.</dd>
+          <dt>Depends</dt><dd>—</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-02</span><span class="wp-t">Continuous integration</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">.github/workflows/ci.yml (new)</dd>
+          <dt>Do</dt><dd>On push and pull request: install server and client, run <span class="mono">npm test</span>, build the client, build the Docker image. Fail the job on any step. Do not add deployment.</dd>
+          <dt>Accept</dt><dd>A deliberately broken test fails the build.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-03</span><span class="wp-t">Regression tests for the four dead-code instances</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/tests/security/wiring.test.js (new)</dd>
+          <dt>Do</dt><dd>Assert that each of these is reachable, not merely defined:
+            <ul>
+              <li><span class="mono">validateSampleMatrix</span> is called on result save and submission</li>
+              <li><span class="mono">workflowContract</span> validators are called by every status write (initially failing — WP-11 makes it pass)</li>
+              <li>every exported function in <span class="mono">utils/scopeGuard.js</span> has at least one call site</li>
+              <li>every permission key in <span class="mono">config/roles.js</span> is used by at least one route</li>
+            </ul>
+          </dd>
+          <dt>Accept</dt><dd>Suite runs. The two expected failures are documented as the targets of WP-11 and WP-22.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 1 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 1</span><h3 class="stage-t">Stop wrong output and lost work</h3><span class="stage-w">3–4 days</span></div>
+      <p class="stage-g">Small, independent, high-consequence. Each is hours rather than days.</p>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-04</span><span class="wp-t">Make the unit normaliser fail closed</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/interpretationService.js</dd>
+          <dt>Do</dt><dd>The final return of <span class="mono">normalizeUnit</span> currently relabels an unrecognised unit with the standard unit and returns the raw number. Replace with a refusal.</dd>
+          <dt>Detail</dt><dd><pre class="bad"><span class="c">// current — relabels, does not convert</span>
+return { normalizedValue: num, standardUnit: rule.standard, wasConverted: false, factor: 1 };</pre>
+          <pre class="good"><span class="c">// required</span>
+return { normalizedValue: null, standardUnit: rule.standard, wasConverted: false,
+         factor: 1, unrecognizedUnit: trimmedUnit };</pre>
+          Callers must render the value with no interpretation when <span class="mono">normalizedValue</span> is null.</dd>
+          <dt>Accept</dt><dd>Test: SOC of 10 with unit <span class="mono">g/100g</span> returns null, not 10 labelled g/kg. Report renders the value with no verdict.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-05</span><span class="wp-t">Add mg/kg to cmol(+)/kg conversions</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/interpretationService.js</dd>
+          <dt>Do</dt><dd>Add a <span class="mono">conversions</span> block to <span class="mono">EXCH_CA</span>, <span class="mono">EXCH_MG</span>, <span class="mono">EXCH_K</span>, <span class="mono">EXCH_NA</span>. Factors are atomic mass ÷ charge × 10.</dd>
+          <dt>Detail</dt><dd><pre class="good">'EXCH_K':  { conversions: { 'mg/kg': 1/391,   'ppm': 1/391 } }
+'EXCH_CA': { conversions: { 'mg/kg': 1/200.4, 'ppm': 1/200.4 } }
+'EXCH_MG': { conversions: { 'mg/kg': 1/121.6, 'ppm': 1/121.6 } }
+'EXCH_NA': { conversions: { 'mg/kg': 1/229.9, 'ppm': 1/229.9 } }</pre></dd>
+          <dt>Accept</dt><dd>Test: 200 mg/kg K normalises to 0.51 cmol(+)/kg and rates "Adequate", not "High". Same for 1600 mg/kg Ca → 7.98 → Optimal.</dd>
+          <dt>Depends</dt><dd>WP-01, WP-04</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-06</span><span class="wp-t">Give MyWork a bucket for every work-item state</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/MyWork.jsx</dd>
+          <dt>Do</dt><dd>Items in <span class="mono">SUBMITTED</span>, <span class="mono">ACCEPTED</span> and <span class="mono">WAIVED</span> currently set no flag and render nowhere. Replace the three-flag grouping with an explicit bucket per state: <em>Active</em> (ASSIGNED, IN_PROGRESS), <em>Awaiting review</em> (COMPLETED, SUBMITTED), <em>Needs redo</em> (REANALYSIS_REQUIRED), <em>Accepted</em> (ACCEPTED), <em>Waived</em> (WAIVED). Default the view to the last 30 days rather than to open work only. Remove the check for <span class="mono">'PENDING'</span>, which is a blacklisted legacy status.</dd>
+          <dt>Accept</dt><dd>Test: a work item in each of the eight states appears in exactly one bucket. No state renders nowhere.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-07</span><span class="wp-t">Notify the technician on review</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/workItemController.js</dd>
+          <dt>Do</dt><dd><span class="mono">reviewWorkItem</span> and <span class="mono">reviewWorkItemsBulk</span> write no notification. <span class="mono">broadcastToUser</span> is imported and unused. On both outcomes, create a Notification row addressed to <span class="mono">item.assignedTo</span> and broadcast it. Acceptance must notify as clearly as rejection does.</dd>
+          <dt>Accept</dt><dd>Test: accepting a work item creates a notification for its assignee. Rejecting does the same.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-08</span><span class="wp-t">Resolve the dispose / archive contract mismatch</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sampleController.js · client/src/pages/SampleDetail.jsx · client/src/components/sample/SampleSummary.jsx · client/src/components/sample/WorkItemsTable.jsx · client/src/components/samples/SamplesTable.jsx</dd>
+          <dt>Decision</dt><dd><strong>Requires a human decision before implementation.</strong> Two-step (create a DISPOSAL / ARCHIVING work item, leave the sample APPROVED until it is accepted) or one-step (manager disposes immediately). Two-step is correct for a laboratory that must account for sample destruction; one-step is a text change. <em>Recommended: two-step</em>, because <span class="mono">workflowEngine.js</span> already defines both work-item types and the assignment UI already supports them.</dd>
+          <dt>Do (2-step)</dt><dd><span class="mono">disposeSample</span> and <span class="mono">archiveSample</span> create the work item and leave sample status unchanged. Sample reaches DISPOSED / ARCHIVED only when that item is ACCEPTED.</dd>
+          <dt>Do (1-step)</dt><dd>Fix the dialog text in <span class="mono">SampleDetail.jsx:368</span> and <span class="mono">:345</span>; delete the "Assign Disposal" branch at <span class="mono">SampleSummary.jsx:301</span> and the dead logic at <span class="mono">WorkItemsTable.jsx:457–458</span> and <span class="mono">SamplesTable.jsx:419–420</span>.</dd>
+          <dt>Accept</dt><dd>Test: the message shown to the user matches what the server did. No unreachable UI branch remains.</dd>
+          <dt>Depends</dt><dd>WP-01 · human decision</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-09</span><span class="wp-t">Block terminal transitions while work is live</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sampleController.js</dd>
+          <dt>Do</dt><dd><span class="mono">disposeSample</span> and <span class="mono">archiveSample</span> check only that the sample is APPROVED. Add a check that every work item is terminal (ACCEPTED or WAIVED); refuse with 409 and list the offending item codes.</dd>
+          <dt>Accept</dt><dd>Test: disposal is refused when one work item is IN_PROGRESS, and the error names it.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-10</span><span class="wp-t">Close the small security items</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/routes/equipmentRoutes.js · server/prisma/schema.prisma · server/middleware/authMiddleware.js · server/controllers/authController.js · server/app.js</dd>
+          <dt>Do</dt><dd>
+            <ul>
+              <li>Gate every equipment route with <span class="mono">checkPermission('MANAGE_EQUIPMENT')</span> — the key exists in the registry and is already used by the client; the routes are authenticated-only.</li>
+              <li>Add <span class="mono">tokenVersion Int @default(0)</span> to User; include it in the JWT; compare in <span class="mono">verifyToken</span>; increment on password change and deactivation.</li>
+              <li>Split the auth limiter: keep 100/15 min for <span class="mono">/api/auth</span> generally, add 10/15 min keyed on IP + username for <span class="mono">/api/auth/login</span>, and write an audit row on failed login.</li>
+            </ul>
+          </dd>
+          <dt>Accept</dt><dd>Tests: a VIEWER cannot POST equipment; a token issued before a password change is rejected; the eleventh login attempt in a window is refused.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-11a</span><span class="wp-t">Operational: rotate the production admin credential</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">none — deployment action, human</dd>
+          <dt>Do</dt><dd>The seed sets <span class="mono">mustChangePassword: true</span> and <span class="mono">verifyToken</span> enforces it for all roles, so the code is correct. If <span class="mono">admin</span>/<span class="mono">password</span> currently authenticates on production with full access, the flag was cleared or the password reset. Rotate it, confirm the flag, and rotate <span class="mono">JWT_SECRET</span> and any SIS API keys at the same time.</dd>
+          <dt>Accept</dt><dd>Default credentials no longer authenticate on production.</dd>
+          <dt>Depends</dt><dd>—</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 2 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 2</span><h3 class="stage-t">One authority over state</h3><span class="stage-w">1 week</span></div>
+      <p class="stage-g">The change that stops this class of bug recurring. Expect existing behaviour to break here — each break is an illegal transition the system was performing silently.</p>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-11</span><span class="wp-t">Build the sample transition helper</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/sampleStateService.js (new) · server/workflowContract.js</dd>
+          <dt>Do</dt><dd>Create <span class="mono">transitionSample(sampleId, nextStatus, actor, reason)</span> that: rejects values in <span class="mono">LEGACY_SAMPLE_STATUSES</span> with 400; rejects values not in <span class="mono">SAMPLE_STATES</span> with 400; rejects transitions not permitted by <span class="mono">SAMPLE_TRANSITIONS</span> with 409 naming the current and attempted state; writes the audit row; performs the update — all in one transaction.</dd>
+          <dt>Accept</dt><dd>Unit tests for every edge of the transition map, including all legal paths and a representative set of illegal ones.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-12</span><span class="wp-t">Route all status writes through the helper</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sampleController.js · receptionController.js · resultsController.js · submissionController.js · koboController.js · workItemController.js</dd>
+          <dt>Do</dt><dd>Replace every direct <span class="mono">prisma.sample.update({ data: { status } })</span> with a call to <span class="mono">transitionSample</span>. There are eleven such writes. Where a transition is currently illegal, do not widen the map — fix the calling code or raise it as a question.</dd>
+          <dt>Accept</dt><dd>WP-03's contract-enforcement assertion passes. Grep finds no direct status write outside the service.</dd>
+          <dt>Depends</dt><dd>WP-11</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp0">
+        <div class="wp-h"><span class="wp-id">WP-13</span><span class="wp-t">Migrate the illegal statuses in the database</span><span class="pill P0">P0</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/migrations/ (new) · server/controllers/resultsController.js</dd>
+          <dt>Do</dt><dd>Count the rows first and report before changing anything. Then map: <span class="mono">ANALYSIS → PROCESSING</span>, <span class="mono">PARTIALLY_COMPLETE → SUBMITTED_PARTIAL</span>, <span class="mono">COMPLETED → SUBMITTED_FULL</span>, <span class="mono">COLLECTED → EXPECTED</span>. Then change the <span class="mono">saveResults</span> gate from <span class="mono">'ANALYSIS' / 'PARTIALLY_COMPLETE'</span> to <span class="mono">PROCESSING / SUBMITTED_PARTIAL</span>.</dd>
+          <dt>Accept</dt><dd>No sample row holds a status outside <span class="mono">SAMPLE_STATES</span>. Results can be saved against a sample in PROCESSING.</dd>
+          <dt>Depends</dt><dd>WP-11, WP-12</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-14</span><span class="wp-t">Replace status-as-reason with a reason field</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · receptionController.js · sampleController.js</dd>
+          <dt>Do</dt><dd><span class="mono">NON_CONFORMING</span> and <span class="mono">REVERT_TO_EXPECTED</span> are being written as statuses. The first is blacklisted; the second is an action name. Add <span class="mono">rejectionReason String?</span> to Sample; use the contract's <span class="mono">RECEIVED → EXPECTED</span> transition and record the reason as data.</dd>
+          <dt>Accept</dt><dd>Neither string appears as a status value anywhere. Rejection reason survives on the sample and shows in the timeline.</dd>
+          <dt>Depends</dt><dd>WP-12</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-15</span><span class="wp-t">Decide blocking versus advisory diagnostics</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/resultsController.js · server/controllers/validationController.js</dd>
+          <dt>Do</dt><dd><span class="mono">validateSampleMatrix</span> now runs but <span class="mono">submitForApproval</span> completes regardless. Mark each diagnostic <span class="mono">BLOCKING</span> or <span class="mono">ADVISORY</span>. Texture closure outside tolerance blocks; C:N implausibility and base saturation above 100 % warn. Refuse submission on any blocking failure with the failing check named.</dd>
+          <dt>Accept</dt><dd>Test: submission with sand+silt+clay = 87 % is refused; submission with C:N of 45 succeeds with a warning.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 3 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 3</span><h3 class="stage-t">Catalogue foundation</h3><span class="stage-w">3 weeks</span></div>
+      <p class="stage-g">The largest block, and the one that makes several already-completed fixes start functioning. Volumes III and VI hold the reference data.</p>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-16</span><span class="wp-t">Unit table and controlled vocabulary</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · server/seeds/units.js (new) · server/services/interpretationService.js</dd>
+          <dt>Do</dt><dd>Create <span class="mono">Unit { code, display, quantityKind, factorToBase, synonyms }</span>. Seed ~28 rows. Move <span class="mono">CONTROLLED_UNITS</span> out of JavaScript into these rows, including the conversions added in WP-05. Add <span class="mono">Analysis.unitCode</span> as a foreign key. Replace the free-text unit input with a picker.</dd>
+          <dt>Accept</dt><dd>Grep finds no <span class="mono">CONTROLLED_UNITS</span> constant. A unit cannot be typed anywhere in the UI.</dd>
+          <dt>Depends</dt><dd>WP-04, WP-05</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-17</span><span class="wp-t">Method reference library</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · server/seeds/references.js (new)</dd>
+          <dt>Do</dt><dd>Create <span class="mono">MethodReference { authority, citation, title, year, url, status }</span>. Seed the 28 GLOSOLAN SOPs, 24 ISO standards and the literature methods from Volume III §02. Mark the four GLOSOLAN SOPs still under publication with <span class="mono">status: UNDER_PUBLICATION</span>. Replace <span class="mono">Methodology.standard</span> free text with <span class="mono">referenceId</span>.</dd>
+          <dt>Accept</dt><dd>A standard number cannot be typed. Under-publication references are distinguishable.</dd>
+          <dt>Depends</dt><dd>WP-16</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-18</span><span class="wp-t">Sample matrix and module fields</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>Add <span class="mono">Analysis.matrix</span> (SOIL / PLANT / WATER / AMENDMENT / FERTILIZER / LIMING) and <span class="mono">Analysis.module</span> (FERTILITY / HEALTH / ENVIRONMENTAL / QUALITY). Add <span class="mono">Sample.matrix</span>, <span class="mono">Sample.plantPart</span>, <span class="mono">Sample.growthStage</span>. Key validation ranges and threshold sets on matrix. <strong>This must land before the plant analyses of WP-19</strong> — a tissue result cannot be interpreted without plant part and growth stage.</dd>
+          <dt>Accept</dt><dd>Test: total N of 30 g/kg rates High in SOIL and Adequate in PLANT.</dd>
+          <dt>Depends</dt><dd>WP-16</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-19</span><span class="wp-t">Seed the analysis catalogue</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/seeds/catalogue.js (new) · server/seeds/data/*.json (new)</dd>
+          <dt>Do</dt><dd>Seed 214 analyses and ~430 methodologies from Volume III §03 and Volume VI, each with unit, decimals, plausible range, matrix, module, reference, and the recommended default flagged. The environmental module ships disabled. <strong>Do not overwrite existing rows</strong> — match on code, present proposed pairings for a human to confirm, leave unmatched local analyses untouched with <span class="mono">isGlobal: false</span>. An unmapped unit must block interpretation rather than guess.</dd>
+          <dt>Accept</dt><dd>A clean database seeds 214 analyses. A database with hand-created analyses produces a match report and changes nothing without confirmation.</dd>
+          <dt>Depends</dt><dd>WP-16, WP-17, WP-18</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-20</span><span class="wp-t">Per-lab defaults and setup wizard</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · client/src/pages/admin/LabMethods.jsx (new) · client/src/components/setup/SetupWizard.jsx (new)</dd>
+          <dt>Do</dt><dd>Create <span class="mono">LabMethodDefault { labId, analysisCode, methodologyId }</span> falling back to the catalogue recommendation. Build the twelve-question onboarding wizard with GLOSOLAN answers pre-selected and skipping allowed. Build the manager's methods screen — one row per analysis, current default visible, one click to change, "add our own method" asking only for name, unit, precision and optional reference.</dd>
+          <dt>Accept</dt><dd>A technician never sees a method dropdown. A manager can change any default in one click.</dd>
+          <dt>Depends</dt><dd>WP-19</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-21</span><span class="wp-t">Single interpretation engine</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/report/ReportContent.jsx · server/services/reportAssembly.js</dd>
+          <dt>Do</dt><dd>Delete <span class="mono">THRESHOLDS</span> and <span class="mono">getInterpretation</span> from the client (lines 23 and 64). Have the server return the interpretation alongside each result; render what it sends. Two engines currently produce the on-screen report and the PDF.</dd>
+          <dt>Accept</dt><dd>Grep finds no threshold table in <span class="mono">client/</span>. On-screen and PDF verdicts are identical by construction.</dd>
+          <dt>Depends</dt><dd>WP-04</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-22</span><span class="wp-t">Normalise in the export paths</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sisController.js · exportController.js · dataResultsController.js</dd>
+          <dt>Do</dt><dd>None of the three normalises. Emit both the as-measured value with its unit and the normalised value with the controlled unit. An auditor needs the first; a consumer needs the second.</dd>
+          <dt>Accept</dt><dd>Test: a result stored in mg/kg exports with both representations.</dd>
+          <dt>Depends</dt><dd>WP-16</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-23</span><span class="wp-t">Extend interpretation coverage</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/interpretationService.js</dd>
+          <dt>Do</dt><dd>14 evaluators cover 54 units. Add bands for <span class="mono">PH_CACL2</span> (about 0.5 units below the water scale), <span class="mono">EC_E</span> (2 / 4 / 8 dS/m — the saturated-paste scale, currently absent while unqualified EC has one), <span class="mono">P_BRAY2</span> and <span class="mono">P_MEHLICH1</span>. Encode the extract ratio for pH and EC as WP-19 does for phosphorus. <strong>Do not alter existing band values.</strong></dd>
+          <dt>Accept</dt><dd>Every parameter with a threshold set names the method or ratio it was calibrated for.</dd>
+          <dt>Depends</dt><dd>WP-19</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 4 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 4</span><h3 class="stage-t">Workflow and role consistency</h3><span class="stage-w">1 week</span></div>
+      <p class="stage-g">Findings that are not breaking anything today but make the system feel arbitrary to its users.</p>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-24</span><span class="wp-t">Replace inline role arrays with the registry</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sampleController.js · server/config/roles.js · server/routes/sampleRoutes.js</dd>
+          <dt>Do</dt><dd>At least twelve inline role arrays exist at lines 548, 681, 723, 789, 888, 1197, 1293, 1303, 1412, 1413, 1882, 1937. Replace each with a permission key. Add <span class="mono">DISPOSE_SAMPLE</span> and <span class="mono">ARCHIVE_SAMPLE</span> to the registry. Settle whether MASTER_USER may approve and dispose — it currently can impersonate and manage users but not approve a sample. Delete the dead <span class="mono">'ADMIN'</span> branch at line 1413.</dd>
+          <dt>Accept</dt><dd>WP-03's permission-key assertion passes. Grep finds no <span class="mono">includes(user.role)</span> in the controller.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-25</span><span class="wp-t">Drive the workflow graph from the catalogue</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/utils/workflowEngine.js · server/prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>Twelve analysis codes with category, order and prerequisites are hard-coded, independent of the catalogue. Move those three attributes onto <span class="mono">Analysis</span>; have the engine read the catalogue; validate the graph for cycles on save.</dd>
+          <dt>Accept</dt><dd>Adding an analysis through the UI produces a work-item type with correct ordering. A cyclic prerequisite is refused.</dd>
+          <dt>Depends</dt><dd>WP-19</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-26</span><span class="wp-t">Single representation for operational gates</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · sampleController.js · workflowEngine.js</dd>
+          <dt>Do</dt><dd>Drying and preparation exist both as booleans on Sample and as work items in the engine. Keep the work items; derive the booleans, or drop them.</dd>
+          <dt>Accept</dt><dd>One source of truth for gate completion.</dd>
+          <dt>Depends</dt><dd>WP-25</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-27</span><span class="wp-t">Sample timeline view</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/sample/SampleTimeline.jsx (new) · server/controllers/sampleController.js</dd>
+          <dt>Do</dt><dd>One chronological view on the sample detail page, assembled from the audit log: every status change, assignment, result entry, review decision and QC event, with actor and timestamp. This is the single view that would have answered both reported bugs without investigation.</dd>
+          <dt>Accept</dt><dd>A manager can see, in one place, everything that happened to a sample and who did it.</dd>
+          <dt>Depends</dt><dd>WP-12</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-28</span><span class="wp-t">Remove the dead security middleware</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/middleware/authMiddleware.js · server/utils/scopeGuard.js</dd>
+          <dt>Do</dt><dd><span class="mono">checkScope</span> and <span class="mono">requireLabScope</span> have zero call sites and would fail open if wired (their conditions treat an empty array as permission). Delete both, or wire them and invert the conditions. Leaving dead security code reads as protection during review.</dd>
+          <dt>Accept</dt><dd>WP-03's scope-guard assertion passes.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 5 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 5</span><h3 class="stage-t">Quality system and compliance</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">What makes the laboratory defensible to an assessor and satisfies the project's reportable indicators.</p>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-29</span><span class="wp-t">Land and complete the QC service</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/qcService.js · server/controllers/qcController.js · server/prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>The uncommitted <span class="mono">qcService</span> already computes blank thresholds, duplicate RPD and control recovery — commit it with tests. Then move <span class="mono">Batch.qcResults</span> from a JSON string to typed rows, and make <span class="mono">checkBatchDisposition</span> actually flag the results of a failed batch through <span class="mono">Result.batchId</span>.</dd>
+          <dt>Accept</dt><dd>Test: a batch dispositioned QC_FAIL flags every result carrying its <span class="mono">batchId</span>.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-30</span><span class="wp-t">Proficiency testing model</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · server/controllers/ptController.js (new) · server/routes/ptRoutes.js (new)</dd>
+          <dt>Do</dt><dd>A PT round is a laboratory competence record, not a QC batch. Model <span class="mono">ProficiencyRound { provider, roundRef, analysisCode, assignedValue, uncertainty, labResult, zScore, outcome, date }</span>. This is a reportable indicator under the project's Activity 1.1, whose means of verification explicitly lists proficiency testing results — and it also covers the two committed FAO/IAEA ring trials.</dd>
+          <dt>Accept</dt><dd>A PT round can be recorded and its z-score computed; results are reportable per laboratory and per analysis.</dd>
+          <dt>Depends</dt><dd>WP-29</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-31</span><span class="wp-t">Result provenance</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · resultsController.js · workbenchController.js</dd>
+          <dt>Do</dt><dd>Add <span class="mono">Result.provenance</span> (MEASURED / PREDICTED / DERIVED / IMPORTED), defaulting to MEASURED. Derived values already written by <span class="mono">SYSTEM_CALC</span> become DERIVED. One field, needed by three future features: spectral prediction, legacy import and gamma spectrometry. <strong>Must exist before any chemometric prediction is introduced</strong>, or a predicted clay content becomes indistinguishable from a pipette determination.</dd>
+          <dt>Accept</dt><dd>Every result carries a provenance; the certificate distinguishes measured from derived.</dd>
+          <dt>Depends</dt><dd>WP-01</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-32</span><span class="wp-t">Legacy data import</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/importController.js (new) · client/src/pages/admin/LegacyImport.jsx (new)</dd>
+          <dt>Do</dt><dd>Import historical results with mandatory per-column method and unit mapping, writing <span class="mono">provenance: IMPORTED</span>. The project commits to five national legacy repositories and to harmonising that data — which is entirely a method-metadata problem.</dd>
+          <dt>Accept</dt><dd>A CSV cannot be imported without every column mapped to an analysis, a method and a controlled unit.</dd>
+          <dt>Depends</dt><dd>WP-19, WP-31</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp3">
+        <div class="wp-h"><span class="wp-id">WP-33</span><span class="wp-t">Widen the MIR spectral window</span><span class="pill P3">P3</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/spectralValidation.js</dd>
+          <dt>Do</dt><dd><span class="mono">minWavenumber: 600</span> excludes the 400–600 cm⁻¹ region, which carries Si–O and Al–O–Si lattice bands informative for clay mineralogy. Widen to 400, or make the window a per-instrument property on the equipment record.</dd>
+          <dt>Accept</dt><dd>A full-range KBr scan validates without being flagged.</dd>
+          <dt>Depends</dt><dd>—</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 6 -->
+  <section>
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage 6</span><h3 class="stage-t">Productisation and obligations</h3><span class="stage-w">2 weeks</span></div>
+      <p class="stage-g">What turns a deployment into a product, and what the project documents commit to. Do not start before Stage 3 is stable.</p>
+
+      <div class="wp wp1">
+        <div class="wp-h"><span class="wp-id">WP-34</span><span class="wp-t">Resolve the licence conflict</span><span class="pill P1">P1</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/config/glosis_catalog.json · LICENSE · README.md</dd>
+          <dt>Do</dt><dd>The GloSIS ontology and its codelists are CC BY-NC-SA 3.0 IGO — NonCommercial and ShareAlike. This repository is MIT, which cannot sublicense NC-SA content, and a 220 KB derived catalogue currently sits in it. Either remove the derived file from the MIT tree, or obtain written clarification from FAO on redistribution in an openly-licensed tool. <strong>Blocks any public release</strong>, and matters independently of the ontology decision.</dd>
+          <dt>Accept</dt><dd>No NC-SA-derived content in an MIT-licensed tree without written permission.</dd>
+          <dt>Depends</dt><dd>— · human decision</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-35</span><span class="wp-t">Un-bake the deployment constants</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/koboController.js · sampleController.js · seed.js</dd>
+          <dt>Do</dt><dd>Move to seeded rows: seven laboratory codes with country and project (<span class="mono">koboController.js:12–18</span>); eleven country-to-laboratory mappings (<span class="mono">sampleController.js:15–32</span>, including four countries in neither project). Remove the <span class="mono">'SOILFER-US'</span> fallback at <span class="mono">koboController.js:267</span> — fail loudly instead. Replace fixed default credentials with generated ones printed once.</dd>
+          <dt>Accept</dt><dd>Grep finds no country or project code in <span class="mono">server/controllers/</span>.</dd>
+          <dt>Depends</dt><dd>WP-19</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp2">
+        <div class="wp-h"><span class="wp-id">WP-36</span><span class="wp-t">Deployment profiles</span><span class="pill P2">P2</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">profiles/soilfer/*.json (new) · profiles/default/*.json (new) · server/seeds/profile.js (new)</dd>
+          <dt>Do</dt><dd>A profile is a folder of JSON seeded at install — labs, projects, branding, enabled catalogue and defaults, packages, thresholds, workflow, integrations, i18n overrides. Author two: <span class="mono">soilfer</span> reproducing today's deployment exactly, and <span class="mono">default</span> (one lab, no countries, <strong>no interpretation bands at all</strong>). <strong>A profile must never contain code.</strong></dd>
+          <dt>Accept</dt><dd>A clean database seeded from each profile produces the expected system. The SoilFER profile reproduces all seven laboratories.</dd>
+          <dt>Depends</dt><dd>WP-35</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp3">
+        <div class="wp-h"><span class="wp-id">WP-37</span><span class="wp-t">External mapping shelf</span><span class="pill P3">P3</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · client/src/components/admin/GlosisExplorer.jsx (delete)</dd>
+          <dt>Do</dt><dd>Create <span class="mono">ExternalMapping { entityType, entityKey, scheme, code, uri }</span> with no UI. Migrate the ten dormant <span class="mono">glosis_*</span> columns off Analysis and Methodology into it, then drop them. Remove the GloSIS explorer screen — it labels procedure groups as "soil properties" and teaches the wrong model. Keep the catalogue file as reference data only if WP-34 permits.</dd>
+          <dt>Accept</dt><dd>Analysis and Methodology contain only laboratory-meaningful fields. The mapping table exists and is empty.</dd>
+          <dt>Depends</dt><dd>WP-19, WP-34</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp3">
+        <div class="wp-h"><span class="wp-id">WP-38</span><span class="wp-t">NSIS exchange specification</span><span class="pill P3">P3</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">docs/nsis-exchange-v1.md (new) · server/routes/sisRoutes.js</dd>
+          <dt>Do</dt><dd>"At least 5 LIMS connected to NSIS" is a counted project indicator, and NSIS is built under a separate Letter of Agreement — so the format is a contract to negotiate, not a feature to invent. Publish a versioned specification; rename the API neutrally keeping <span class="mono">/api/v1/sis</span> as an alias so production does not break; validate against one country's real data before anyone reports "connected". FAO's OpenNSIS (<span class="mono">sis-database/owl2sql</span>) is the best available reference for what the far side expects.</dd>
+          <dt>Accept</dt><dd>A versioned spec exists and someone outside the team has consumed it.</dd>
+          <dt>Depends</dt><dd>WP-22 · external party</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp wp3">
+        <div class="wp-h"><span class="wp-id">WP-39</span><span class="wp-t">Release engineering</span><span class="pill P3">P3</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">Dockerfile · .github/workflows/ci.yml · CONTRIBUTING.md (new) · SECURITY.md (new) · docs/UPGRADING.md (new)</dd>
+          <dt>Do</dt><dd>Tagged image built in CI from a commit, deployed by pulling that tag, previous tag retained for rollback — replacing the <span class="mono">scp</span> and <span class="mono">docker cp</span> runbook. Add PostgreSQL support through the same Prisma schema, keeping SQLite as default. Add <span class="mono">prisma migrate deploy</span> as an explicit step. Write the contribution guide, security contact and upgrade path.</dd>
+          <dt>Accept</dt><dd>A deployment is one command against a tag; rollback is one command against the previous tag.</dd>
+          <dt>Depends</dt><dd>WP-02, WP-36</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERIFY -->
+  <section>
+    <h2><span class="num">V</span> Definition of done</h2>
+    <p class="sec-intro">Checkable assertions. If all are true, the system is ready for a pilot laboratory.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Assertion</th><th>How to check</th></tr></thead>
+        <tbody>
+          <tr><td>All test suites run and pass in CI</td><td class="k">npm test; CI green on main</td></tr>
+          <tr><td>No dead security or validation code</td><td class="k">WP-03 wiring suite passes</td></tr>
+          <tr><td>No sample status outside the contract</td><td class="k">select distinct status from Sample</td></tr>
+          <tr><td>Every status write goes through the helper</td><td class="k">grep -r "sample.update" | grep status</td></tr>
+          <tr><td>No unit or standard is free text</td><td class="k">grep for CONTROLLED_UNITS; inspect the UI inputs</td></tr>
+          <tr><td>An unrecognised unit produces no verdict</td><td class="k">WP-04 test</td></tr>
+          <tr><td>Every work-item state renders somewhere</td><td class="k">WP-06 test</td></tr>
+          <tr><td>A failed QC batch flags its results</td><td class="k">WP-29 test</td></tr>
+          <tr><td>Every result carries method, unit, analyst, date, basis, provenance, batch</td><td class="k">inspect the Result row</td></tr>
+          <tr><td>Nothing untrue appears on a certificate</td><td class="k">basis, method and precision all match what was done</td></tr>
+          <tr><td>No organisation name in the code</td><td class="k">grep for country codes, project codes, "SoilFER"</td></tr>
+          <tr><td>A clean install works unaided in five minutes</td><td class="k">default profile, empty database, no source edits</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guard" style="border-left-color:var(--accent)">
+      <h3>One instruction to carry through every package</h3>
+      <ul>
+        <li>Four times, correct code in this repository has been written and never called. Before marking
+        any package complete, verify by <em>behaviour</em> — a passing test that exercises the path — not
+        by the presence of the code. A commit message is not evidence.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    SoilFER-LIMS · Volume X · agent-executable build specification · 2 September 2026 · 34 packages · 6 stages · Stage 0 blocks all
+  </footer>
+
+</div>
+
+</body></html>

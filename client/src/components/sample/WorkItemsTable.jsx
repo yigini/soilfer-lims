@@ -144,41 +144,39 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                 modality = 'MIR';
             }
 
-            // 1. Find the scan for this sample
-            // Pass both sampleId and search to guarantee resolution
-            const searchParams = { modality };
-            if (item.sampleId) searchParams.sampleId = item.sampleId;
-            if (item.labId) searchParams.search = item.labId;
+            let scanId = null;
+            if (item.spectralScans && item.spectralScans.length > 0) {
+                const currentScan = item.spectralScans.find(s => s.isCurrent && !s.isDeleted) || item.spectralScans[0];
+                scanId = currentScan.id;
+            } else {
+                const searchParams = { modality };
+                if (item.id) searchParams.workItemId = item.id;
+                else {
+                    if (item.sampleId) searchParams.sampleId = item.sampleId;
+                    if (item.labId) searchParams.search = item.labId;
+                }
 
-            console.log('[ViewSpectra] Searching for:', searchParams);
-
-            const searchRes = await axios.get('/api/spectral', {
-                params: searchParams
-            });
-
-            const scans = searchRes.data.data;
-            console.log('[ViewSpectra] Found scans:', scans?.length || 0);
-
-            if (!scans || scans.length === 0) {
-                showDialog({ title: 'No Data', message: `No spectral data found for Lab ID: ${item.labId || item.sampleId} (${modality}). Please upload spectral data first.`, type: 'info' });
-                return;
+                console.log('[ViewSpectra] Searching for:', searchParams);
+                const searchRes = await axios.get('/api/spectral', { params: searchParams });
+                const scans = searchRes.data.data;
+                if (!scans || scans.length === 0) {
+                    showDialog({ title: 'No Data', message: `No spectral data found for ${item.analysisName || item.analysis} (${modality}). Please upload spectral data first.`, type: 'info' });
+                    return;
+                }
+                const exactScan = scans.find(s => s.workItemId === item.id) || scans[0];
+                scanId = exactScan.id;
             }
 
-            // Prefer the most recent approved scan, fallback to most recent overall
-            const approvedScan = scans.find(s => s.status === 'APPROVED');
-            const scanSummary = approvedScan || scans[0];
-
             // 2. Fetch full details (chart data)
-            const detailRes = await axios.get(`/api/spectral/${scanSummary.id}`);
+            const detailRes = await axios.get(`/api/spectral/${scanId}`);
 
-            // Transform for Chart
-            const chartData = detailRes.data.chartData || (detailRes.data.wavelengths ? detailRes.data.wavelengths.map((w, i) => ({
+            // Transform for Chart without fabricating zeros
+            const chartData = detailRes.data.chartData || (detailRes.data.wavelengths && detailRes.data.values ? detailRes.data.wavelengths.map((w, i) => ({
                 wavelength: w,
-                absorbance: detailRes.data.values ? detailRes.data.values[i] : 0
+                absorbance: detailRes.data.values[i] !== undefined && detailRes.data.values[i] !== null ? detailRes.data.values[i] : null
             })) : []);
 
             setSelectedScan({ ...detailRes.data, chartData });
-
         } catch (e) {
             console.error(e);
             showDialog({ title: 'Load Failed', message: 'Failed to load spectral data: ' + e.message, type: 'error' });
@@ -288,22 +286,51 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                             Cancel
                         </button>
                         <div className="w-px h-4 bg-gray-300 mx-2"></div>
-                        <button
-                            onClick={async () => {
-                                if (!confirm(`Approve ${selection.length} items?`)) return;
-                                if (onReviewBulk) {
-                                    await onReviewBulk(selection, 'ACCEPTED');
-                                } else {
-                                    for (const id of selection) {
-                                        await onReview(id, 'ACCEPTED');
-                                    }
-                                }
-                                setSelection([]);
-                            }}
-                            className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm"
-                        >
-                            Approve Selected
-                        </button>
+                        {(() => {
+                            const submittedItems = selection.filter(id => {
+                                const it = workItems.find(w => w.id === id);
+                                const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
+                                return it && (it.status === 'SUBMITTED' || it.status === 'COMPLETED' || isClosure);
+                            });
+                            const hasUnsubmitted = selection.some(id => {
+                                const it = workItems.find(w => w.id === id);
+                                const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
+                                return it && !isClosure && it.status !== 'SUBMITTED' && it.status !== 'COMPLETED';
+                            });
+
+                            return (
+                                <button
+                                    onClick={async () => {
+                                        if (hasUnsubmitted) {
+                                            showDialog({
+                                                title: 'Cannot Approve Uncompleted Analysis',
+                                                message: 'One or more selected analyses have not been completed and submitted by a technician. Only submitted analyses can be approved.',
+                                                type: 'alert'
+                                            });
+                                            return;
+                                        }
+                                        if (!confirm(`Approve ${submittedItems.length} submitted item(s)?`)) return;
+                                        if (onReviewBulk) {
+                                            await onReviewBulk(submittedItems, 'ACCEPTED');
+                                        } else {
+                                            for (const id of submittedItems) {
+                                                await onReview(id, 'ACCEPTED');
+                                            }
+                                        }
+                                        setSelection([]);
+                                    }}
+                                    disabled={submittedItems.length === 0 || hasUnsubmitted}
+                                    title={hasUnsubmitted ? 'Cannot approve: selected items include uncompleted/unsubmitted analyses' : `Approve ${submittedItems.length} submitted analyses`}
+                                    className={`text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm transition-colors ${
+                                        submittedItems.length === 0 || hasUnsubmitted
+                                            ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                            : 'bg-green-600 hover:bg-green-700'
+                                    }`}
+                                >
+                                    Approve Selected ({submittedItems.length})
+                                </button>
+                            );
+                        })()}
                     </div>
                 </div>
             )}

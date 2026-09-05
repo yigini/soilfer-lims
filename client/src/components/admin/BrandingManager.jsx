@@ -16,7 +16,7 @@ const BrandingManager = () => {
     const [formData, setFormData] = useState({
         title: 'SoilFER LIMS',
         colors: { primary: '#047857', secondary: '#111827', accent: '#D97706' },
-        logoUrl: '/assets/img/soilfer-logo.png', // Default
+        logoUrl: '/assets/img/logo-light.png', // Default
         tagline: 'Global & Local Laboratory Information Management System',
         organization: 'FAO Global Soil Partnership / SoilFER Programme',
         contactEmail: 'GLOSOLAN@fao.org',

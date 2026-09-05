@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<!-- saved from url=(0253)https://ff61d47b-9618-4a6b-acd7-7a7410f2e455.frame.claudeusercontent.com/_f/1788377004-a997/?__frame_t=7mA2LrO_anToOtQgXLhXQ4Nw.55b716fd-5c55-40d4-9e9f-dd031a6a9b25.83b78913-98b4-446a-9a1d-46f32572119d.1788380654&__frame_v=manifest.96bf2008ecfbaa4f.json -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!-- frame-runtime --><script>window.__FRAME_PREAMBLE={"v":1,"capabilities":{"artifact":"artifact.C12lZ9DL.js","assets":"assets.8Gk803W0.js","comments":"comments.vw5vQdGA.js","db":"db.h-3sndFg.js","downloads":"downloads.C3GSvEDP.js","embed":"embed.CxGAyc-v.js","endpoints":"endpoints.CfzSv5nM.js","mcp":"mcp.Bvma3qD7.js","network":"network.B5UA9Su4.js","permissions":"permissions.BNySkLV5.js","room":"room.VSdFwTE9.js","sample":"sample.BW2Uysoh.js","self":"artifact.C12lZ9DL.js","user":"user.BpKav-Rf.js"},"transforms":"_transforms.DSB5x63f.js","comments":"_comments.lsIZQbAK.js","translate":"_translate.5HCW4BJh.js"}</script><script>(function(){"use strict";var te=["light","dark","system"],re=/^[A-Za-z0-9_-]{1,64}$/,$=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,ne=new Set(["class","hidden","value","checked","style","title","alt","placeholder","lang","dir","role","tabindex","disabled","readonly","contenteditable","open","colspan","rowspan"]);function oe(e){const t=e.toLowerCase();return t.startsWith("data-")||t.startsWith("aria-")||ne.has(t)}var Be="http://www.w3.org/1999/xhtml",se="http://www.w3.org/2000/svg",ae=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),ie=new Set(["script","style"]);function ce(e){const t=e.localName.toLowerCase();return e.namespaceURI==="http://www.w3.org/1999/xhtml"?!ae.has(t):e.namespaceURI===se?!ie.has(t):!1}function M(e,t){return e===t||(e===160||e===32)&&(t===160||t===32)}function le(e,t){const r=e.length,n=t.length;let s=0;for(;s<r&&s<n&&M(e.charCodeAt(s),t.charCodeAt(s));)s++;let o=0;for(;o<r-s&&o<n-s&&M(e.charCodeAt(r-1-o),t.charCodeAt(n-1-o));)o++;return{p:s,s:o}}function ue(e,t){const r=e.firstChild;if(e.childNodes.length!==1||r===null||r.nodeType!==Node.TEXT_NODE){e.textContent=t;return}const n=r.data,s=n.length,o=t.length,{p:i,s:c}=le(n,t);i===s&&c===0&&s===o||r.replaceData(i,s-i-c,t.slice(i,o-c));const h=r.data,p=e.ownerDocument.getSelection?.()??null,w=p!==null&&p.rangeCount>0&&(p.anchorNode===r||p.focusNode===r)?{anchor:p.anchorNode,anchorOffset:p.anchorOffset,focus:p.focusNode,focusOffset:p.focusOffset}:null;let m=-1,g=-1;for(let f=0;f<h.length&&f<t.length;f++){const v=h.charCodeAt(f),b=t.charCodeAt(f);v!==b&&M(v,b)&&(m<0&&(m=f),g=f)}const a=m>=0;if(a&&r.replaceData(m,g-m+1,t.slice(m,g+1)),a&&w!==null&&w.anchor!==null&&w.focus!==null)try{p.setBaseAndExtent(w.anchor,w.anchorOffset,w.focus,w.focusOffset)}catch{}}var fe=new Set(["html","head","body","frameset"]);function de(e){return e.namespaceURI==="http://www.w3.org/1999/xhtml"&&fe.has(e.localName)}function pe(e){if(e===null||typeof e!="object")return!1;const t=e;if(typeof t.target!="string"||!re.test(t.target)||t.text!==void 0&&typeof t.text!="string")return!1;if(t.attrsSet!==void 0){if(t.attrsSet===null||typeof t.attrsSet!="object")return!1;for(const[r,n]of Object.entries(t.attrsSet))if(!$.test(r)||typeof n!="string")return!1}if(t.attrsRemoved!==void 0){if(!Array.isArray(t.attrsRemoved))return!1;for(const r of t.attrsRemoved)if(typeof r!="string"||!$.test(r))return!1}return!0}function me(e,t){if(e===null||typeof e!="object")return!1;const{seq:r,elements:n}=e;if(typeof r!="number"||!Number.isSafeInteger(r)||!Array.isArray(n)||n.length===0||n.length>64)return!1;for(let s=0;s<n.length;s++)if(!t(n[s]))return!1;return!0}function he(e){return e===null||typeof e!="object"?!1:me(e.__frame_patch,pe)}function _e(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_init;return t!==null&&typeof t=="object"}function ve(e){return e!==null&&typeof e=="object"&&e.__frame_size_poke===!0}function ye(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_theme;if(t===null||typeof t!="object")return!1;const r=t.theme;return typeof r=="string"&&te.includes(r)}var A=/^[\w.-]+\.js$/;function we(e,t,r){return r?"inert":typeof t=="string"&&A.test(t)?e?[t]:"inert":e?"inert":"framed"}function ge(){return{post(e,t){parent.postMessage(e,t)},on(e){const t=r=>{r.source===parent&&e(r.data,r.origin,r.isTrusted)};return addEventListener("message",t),()=>removeEventListener("message",t)}}}function be(){return{post:()=>{},on:()=>()=>{}}}var j="__frame_scroll",Ee=150,Ae=310,Se=160,Te=3e4;function ke(){let e=0,t=!1,r=!1,n=!1,s=0,o=null;const i=l=>{try{sessionStorage.setItem(j,JSON.stringify({y:l}))}catch{}},c=()=>{if(clearTimeout(e),o===null)return;const l=o;o=null,i(l)},h=()=>{if(t){t=!1;return}r=!0,o=scrollY,clearTimeout(e),e=setTimeout(c,Ee)};try{addEventListener("scroll",h,{passive:!0}),addEventListener("pagehide",c)}catch{}const p=()=>{let l;try{l=sessionStorage.getItem(j)}catch{return null}if(l===null)return null;let _;try{_=JSON.parse(l)}catch{_=null}const d=_?.y;if(!(typeof d=="number"&&Number.isFinite(d)&&d>=0)){try{sessionStorage.removeItem(j)}catch{}return null}return d};let w=!1;const m=l=>{try{const _=scrollY;scrollTo({top:l,left:0,behavior:"instant"}),s=l,n=!0,clearTimeout(e),o=null,i(l);const d=scrollY;d!==_&&(t=!0),d!==l&&!w&&(w=!0,addEventListener("load",()=>{try{if(scrollY===d){const T=p();m(T!==null?T:s)}}catch{}},{once:!0}))}catch{}},g=()=>{try{return!!location.hash}catch{return!0}};let a=!1;const f=()=>{try{if(a||innerWidth>Ae||innerHeight>Se)return;a=!0;const l=Date.now(),_=()=>{try{removeEventListener("resize",_)}catch{}if(Date.now()-l>Te||r||g())return;const d=p();m(d!==null?d:s)};addEventListener("resize",_)}catch{}};let v=!1,b=!1;return{restore(){if(v||(v=!0,g()))return;const l=p();l!==null&&(m(l),f())},promoted(){if(b||(b=!0,g()))return;const l=p();l!==null?(m(l),f()):n&&m(s)}}}function Re(e,t,r,n){let s=null;try{s=window.trustedTypes?.createPolicy("frame-runtime",{createScriptURL:h=>h})??null}catch{}const o=window.Worker,i=o?.prototype,c=Object.freeze({Worker:o,workerOn:i?.addEventListener,workerPost:i?.postMessage,workerTerminate:i?.terminate,fetch:window.fetch.bind(window),preventDefault:Event.prototype.preventDefault,policy:s,origins:t});r(e).then(h=>h?.bootTopLevel?h.bootTopLevel(c,n):n.settle()).catch(()=>n.settle())}var De="modulepreload",Ie=function(e){return"/"+e},Ue={},Le=function(t,r,n){let s=Promise.resolve();function o(i){const c=new Event("vite:preloadError",{cancelable:!0});if(c.payload=i,window.dispatchEvent(c),!c.defaultPrevented)throw i}return s.then(i=>{for(const c of i||[])c.status==="rejected"&&o(c.reason);return t().catch(o)})},Oe=window===top,q=Object.getOwnPropertyDescriptor(window,"claude"),k=we(Oe,window.__FRAME_PREAMBLE?.topLevel,q?.writable===!1),N=typeof k=="object"&&k[0],y=N?be():ge();(function(){const e=Object.defineProperty,t=globalThis,r=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let n=0;for(let s=0;s<r.length;s++){const o=r[s];try{e(t,o,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[o]}catch{}try{e(t,o,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[o]=="function"&&n++}if(n&&k==="framed")try{y.post({__frame_rtc_lockdown_failed:n},"*")}catch{}})();var Pe=1e4,Y=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function X(e){for(const t of Y)if(t.endsWith(":*"))try{const r=new URL(e);if(`${r.protocol}//${r.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}var R=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),B=window.__FRAME_PREAMBLE?.transforms,D=window.__FRAME_PREAMBLE?.comments,I=window.__FRAME_PREAMBLE?.translate;function S(e){return Le(()=>import("/_runtime/"+e),void 0)}function G(e,t){return{contract:e.contract,changes:new Set(e.changes??[]),flags:new Set(e.flags??[]),capabilities:e.capabilities??{},capBudgets:e.capBudgets??{},transforms:new Map,shellOrigin:t,mount:x,hooks:O,pipe:()=>({wrap:(r,n)=>(...s)=>{try{return n(...s)}catch(o){return Promise.reject(o)}}})}}var L=null,E=null;function V(e,t,r){try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var U=!1,O={editBefore:null,edit:null};function Ce(e,t,r=!1){const n=[];let s;if(r)try{O.editBefore?.(e)}catch{}for(const o of e.elements){const i=document.querySelector(`[data-id="${o.target}"]`);if(!i){s=o.target;break}if([...Object.keys(o.attrsSet??{}),...o.attrsRemoved??[]].some(c=>!oe(c))){s=o.target;break}if(o.text!==void 0&&(!ce(i)||de(i))){s=o.target;break}for(const[c,h]of Object.entries(o.attrsSet??{}))if(!J(i,c)){try{i.setAttribute(c,h)}catch{}Z(i,c,h)}for(const c of o.attrsRemoved??[])J(i,c)||(i.removeAttribute(c),Z(i,c,null));typeof o.text=="string"&&ue(i,o.text),n.push(o.target)}if(r)try{O.edit?.(e.seq,n,s)}catch{}if(s!==void 0){y.post({__frame_patch_miss:{seq:e.seq}},t);return}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:e.seq,targets:n}}))}catch{}}function Z(e,t,r){if(!(e instanceof HTMLInputElement))return;const n=t.toLowerCase();n==="checked"?e.checked=r!==null:n==="value"&&e.type!=="file"&&(e.value=r??"")}function J(e,t){const r=t.toLowerCase(),n=e;return r==="data-id"||(r==="value"||r==="checked")&&(n.__artifactSecret===!0||/^(password|hidden|file)$/.test(n.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${e.getAttribute("autocomplete")??""} ${n.autocomplete??""}`))}function Q(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,U=!0):U&&(delete t.dataset.theme,t.style.colorScheme="",U=!1)}var P=new Map;function Me(){let e;const t={u:new Promise(r=>{e=r}),r:r=>{t.done=!0,e(r)},done:!1,nulled:!1};return t}function F(){for(const e of P.values())e.done||(e.nulled=!0,e.r(null))}var je=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),x=(e,t)=>{const r=P.get(e);if(!r||r.done){r?.nulled&&E&&y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:e}},E);return}const n=typeof t=="function"?Object.setPrototypeOf(t,je):Object.assign(Object.create(null),t);typeof n.then=="function"&&delete n.then,r.r(Object.freeze(n))};function ee(){const e=q?.value??{};V(window,"claude",e);for(const t of Object.keys(R)){if(e[t]!==void 0){V(e,t,e[t]);continue}P.set(t,Me())}if(e.use===void 0){const t=r=>{if(typeof r!="string"||!Object.hasOwn(R,r))return Promise.resolve(null);const n=P.get(r);return n?n.u:Promise.resolve(e[r]??null)};try{Object.defineProperty(e,"use",{value:t,writable:!0,configurable:!0,enumerable:!1})}catch{}}}if(k==="framed"){const e=B&&A.test(B)?S(B).catch(()=>{}):Promise.resolve(void 0),t=a=>{if(a.type==="auxclick"&&a.button!==1)return;const f=a.target,v=f&&f.closest?f.closest("a[href],area[href]"):null;if(!v)return;const b=v.getAttribute("href");if(!b)return;let l;try{l=new URL(b,document.baseURI)}catch{return}if((l.protocol==="http:"||l.protocol==="https:")&&l.origin!==location.origin){a.preventDefault();const _=(v.getAttribute("target")??"").toLowerCase(),d=a.type==="auxclick"||a.metaKey||a.ctrlKey||a.shiftKey||a.altKey||!["","_self","_top","_parent"].includes(_);y.post({__frame_nav:!0,url:l.href,newTab:d},"*")}};addEventListener("click",t,!0),addEventListener("auxclick",t,!0);const r={},n=a=>{a.isTrusted&&(r.pointer=!0)},s=a=>{a.isTrusted&&(r.click=!0)};addEventListener("pointermove",n,{capture:!0,passive:!0}),addEventListener("click",s,{capture:!0,passive:!0}),e.then(a=>{a?.wireNav&&(a.wireNav(),removeEventListener("click",t,!0),removeEventListener("auxclick",t,!0),removeEventListener("pointermove",n,!0),removeEventListener("click",s,!0),a.wireEngagement?.(r))});let o=null;try{o=ke()}catch{}ee();let i=null,c=null,h=0;const p=y.on((a,f)=>{X(f)&&_e(a)&&(i=a.__frame_init,E=f,p(),clearTimeout(h),c?.())});y.post({__frame_connect:!0},"*");const w=new Promise(a=>{c=a,h=setTimeout(()=>{p(),a()},Pe)}),m=document.readyState==="loading"?new Promise(a=>document.addEventListener("DOMContentLoaded",()=>a(),{once:!0})):Promise.resolve();m.then(()=>{try{o?.restore()}catch{}});const g={cb:null};y.on((a,f)=>{if(X(f)&&ve(a)){try{o?.promoted()}catch{}g.cb?.()}}),w.then(async()=>{if(!i||!E){F();return}Q(i.theme);const a=E;let f=!1,v=!1;y.on((u,z,C)=>{if(z!==a)return;ye(u)&&Q(u.__frame_theme.theme),he(u)&&Ce(u.__frame_patch,a,C);const H=u?.__fc_mode;H&&typeof H=="object"&&!f&&D&&A.test(D)&&(f=!0,S(D).then(K=>K.install?.(a,H.on===!0)).catch(()=>{}));const W=u?.__ft_cmd;W&&typeof W=="object"&&!v&&I&&A.test(I)&&(v=!0,S(I).then(K=>K.install?.(a,W)).catch(()=>{}))});const b=Object.keys(i.capabilities??{}).filter(u=>Object.hasOwn(R,u)).map(u=>[u,R[u]]).filter(u=>typeof u[1]=="string"&&A.test(u[1])),l=await Promise.allSettled(b.map(([,u])=>S(u))),_=await e,d=E;if(_?.buildBoot||y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),_?.buildBoot)try{L=_.buildBoot(i,_.TRANSFORMS??{},{shellOrigin:d,mount:x,hooks:O},u=>y.post({__frame_cap_telemetry:u},d))}catch{y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),L=G(i,d)}else L=G(i,d);const T=u=>y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:u}},d),Ne=L;l.forEach((u,z)=>{const C=b[z][0];if(u.status!=="fulfilled"){T(C);return}try{u.value?.install?.(Ne)}catch{T(C)}}),F(),await m,y.post({__frame_ready:!0},E),e.then(u=>u?.installSizeReporter?.(d,g))})}else N&&(ee(),Re(N,Y,S,{settle:F,mount:x}))})();</script><!-- /frame-runtime --><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>The Operations Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link rel="stylesheet" href="./css2">
+<style>
+  :root{
+    --paper:#EFEFF3; --surface:#F9F9FC; --surface-2:#E4E4EC; --code:#E8E8F0;
+    --ink:#16161D; --ink-2:#3C3D4A; --ink-3:#6C6E7D;
+    --rule:#D2D3DD; --rule-soft:#E1E2EA;
+    --accent:#4A47B8; --accent-2:#B67509;
+    --crit:#A32B1E; --warn:#A9631A; --ok:#1F6B52; --idle:#5A6472; --live:#2C6E8F;
+    --w-crit:#F7E3E0; --w-warn:#F7EBDA; --w-ok:#DEEDE6; --w-idle:#E4E7EC; --w-live:#DEEAF1;
+    --hold:#C9A227;
+    --measure:71ch; --frame:1150px;
+    --f-display:"Bricolage Grotesque",Georgia,serif;
+    --f-body:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#0E0E13; --surface:#16161D; --surface-2:#1E1E28; --code:#1A1A23;
+    --ink:#E3E3EA; --ink-2:#B6B8C4; --ink-3:#828596;
+    --rule:#292A36; --rule-soft:#21222C;
+    --accent:#9E9BF0; --accent-2:#DDA94F;
+    --crit:#E58A7D; --warn:#DFA45C; --ok:#6FC2A2; --idle:#98A0AE; --live:#7FB6D4;
+    --w-crit:#2C1715; --w-warn:#2A2015; --w-ok:#13241E; --w-idle:#1D2029; --w-live:#152430;
+    --hold:#D9BC55;
+  }}
+  :root[data-theme="dark"]{
+    --paper:#0E0E13; --surface:#16161D; --surface-2:#1E1E28; --code:#1A1A23;
+    --ink:#E3E3EA; --ink-2:#B6B8C4; --ink-3:#828596;
+    --rule:#292A36; --rule-soft:#21222C;
+    --accent:#9E9BF0; --accent-2:#DDA94F;
+    --crit:#E58A7D; --warn:#DFA45C; --ok:#6FC2A2; --idle:#98A0AE; --live:#7FB6D4;
+    --w-crit:#2C1715; --w-warn:#2A2015; --w-ok:#13241E; --w-idle:#1D2029; --w-live:#152430;
+    --hold:#D9BC55;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .frame{max-width:var(--frame);margin:0 auto;padding:0 28px 96px;}
+  p,li{max-width:var(--measure);}
+  code,.mono{font-family:var(--f-mono);font-size:0.85em;}
+  code{background:var(--code);padding:0.1em 0.36em;border-radius:2px;word-break:break-word;}
+
+  header{padding:56px 0 26px;border-bottom:2px solid var(--ink);margin-bottom:6px;}
+  .eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin:0 0 18px;}
+  h1{font-family:var(--f-display);font-weight:700;font-size:clamp(36px,6.6vw,58px);line-height:0.98;letter-spacing:-0.028em;margin:0 0 20px;max-width:15ch;text-wrap:balance;}
+  .standfirst{font-size:18px;line-height:1.55;color:var(--ink-2);margin:0 0 30px;max-width:62ch;}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:16px 30px;border-top:1px solid var(--rule);padding-top:18px;}
+  .meta dt{font-family:var(--f-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;}
+  .meta dd{margin:0;font-size:14px;color:var(--ink-2);}
+
+  section{margin-top:64px;}
+  h2{font-family:var(--f-display);font-weight:600;font-size:28px;letter-spacing:-0.022em;margin:0 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);display:flex;align-items:baseline;gap:16px;}
+  h2 .tick{font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0.09em;white-space:nowrap;}
+  .lede{color:var(--ink-2);margin:16px 0 26px;}
+  h3{font-family:var(--f-display);font-weight:600;font-size:20px;margin:38px 0 8px;letter-spacing:-0.014em;}
+  h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--ink-3);font-weight:500;margin:26px 0 10px;}
+
+  .call{border-left:3px solid var(--crit);background:var(--surface);padding:22px 26px;margin:28px 0 0;}
+  .call h3{margin:0 0 12px;font-size:20px;}
+  .call p{margin:0 0 12px;max-width:68ch;} .call p:last-child{margin-bottom:0;}
+  .note{border-left:3px solid var(--accent);background:var(--surface);padding:20px 24px;margin:26px 0;}
+  .note p{margin:0 0 12px;max-width:68ch;} .note p:last-child{margin-bottom:0;}
+
+  pre{font-family:var(--f-mono);font-size:12px;line-height:1.6;background:var(--code);padding:13px 15px;overflow-x:auto;margin:12px 0;border-left:2px solid var(--rule);}
+  pre.bad{border-left-color:var(--crit);} pre.good{border-left-color:var(--ok);}
+  pre .c{color:var(--ink-3);}
+
+  .table-wrap{overflow-x:auto;margin:18px 0 28px;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px;}
+  th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+  th{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.11em;text-transform:uppercase;color:var(--ink-3);font-weight:500;border-bottom:1px solid var(--rule);white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.k{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap;padding-right:18px;}
+  td.n{font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  .pill{font-family:var(--f-mono);font-size:9px;letter-spacing:0.09em;padding:3px 7px;border-radius:2px;font-weight:600;text-transform:uppercase;white-space:nowrap;}
+  .CRIT{color:var(--crit);background:var(--w-crit);} .WARN{color:var(--warn);background:var(--w-warn);}
+  .OK{color:var(--ok);background:var(--w-ok);} .IDLE{color:var(--idle);background:var(--w-idle);}
+  .LIVE{color:var(--live);background:var(--w-live);}
+
+  .find{display:grid;grid-template-columns:72px 1fr;gap:0 18px;padding:16px 0;border-bottom:1px solid var(--rule-soft);}
+  .find:last-child{border-bottom:none;}
+  .find-id{font-family:var(--f-mono);font-size:11.5px;font-weight:600;color:var(--sc,var(--ink));padding-top:2px;}
+  .find-t{font-weight:600;font-size:15.5px;margin:0 0 6px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .find-t span.txt{flex:1;min-width:200px;}
+  .find-b{color:var(--ink-2);font-size:14.5px;}
+  .find-b p{margin:0 0 8px;max-width:70ch;} .find-b p:last-child{margin-bottom:0;}
+  .fc{--sc:var(--crit);} .fw{--sc:var(--warn);} .fi{--sc:var(--idle);}
+
+  .fig{border:1px solid var(--rule);background:var(--surface);padding:22px 24px 16px;margin:26px 0;}
+  .fig svg{display:block;width:100%;height:auto;}
+  .fig figcaption{font-size:13px;color:var(--ink-3);margin-top:16px;max-width:76ch;line-height:1.55;}
+  .scroll-x{overflow-x:auto;}
+
+  .views{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:20px;margin:24px 0 8px;}
+  .view{border:1px solid var(--rule);background:var(--surface);padding:18px 20px;}
+  .view .vh{font-family:var(--f-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin:0 0 8px;}
+  .view h3{margin:0 0 8px;font-size:18px;}
+  .view p{font-size:14.5px;color:var(--ink-2);margin:0 0 10px;max-width:none;}
+  .view p:last-child{margin-bottom:0;}
+  .view .q{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);border-top:1px solid var(--rule-soft);padding-top:10px;margin-top:12px;}
+
+  .wp{border:1px solid var(--rule);background:var(--surface);margin-bottom:12px;}
+  .wp-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 15px;background:var(--surface-2);border-bottom:1px solid var(--rule);}
+  .wp-id{font-family:var(--f-mono);font-size:11.5px;font-weight:700;letter-spacing:0.04em;color:var(--sc,var(--ink));}
+  .wp-t{font-weight:600;font-size:14.5px;flex:1;min-width:210px;}
+  .wp-b{padding:13px 15px;}
+  .wp-b dl{margin:0;display:grid;grid-template-columns:78px 1fr;gap:7px 14px;}
+  .wp-b dt{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);padding-top:3px;}
+  .wp-b dd{margin:0;font-size:14px;max-width:none;}
+  .files{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2);line-height:1.75;}
+
+  .stage{margin-top:40px;border-top:2px solid var(--rule);padding-top:20px;}
+  .stage-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:4px;}
+  .stage-tag{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--accent);}
+  .stage-t{font-family:var(--f-display);font-size:21px;font-weight:600;margin:0;letter-spacing:-0.015em;}
+  .stage-w{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-left:auto;white-space:nowrap;}
+  .stage-g{color:var(--ink-2);margin:6px 0 18px;font-size:14.5px;}
+
+  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--f-mono);font-size:11px;color:var(--ink-3);letter-spacing:0.03em;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media (max-width:720px){
+    .frame{padding:0 16px 72px;}
+    .wp-b dl{grid-template-columns:1fr;gap:3px;} .wp-b dt{padding-top:8px;}
+    .find{grid-template-columns:1fr;gap:6px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+<div class="frame">
+
+  <header>
+    <p class="eyebrow">Volume XII · Workflow map · audit and design</p>
+    <h1>The Operations Map</h1>
+    <p class="standfirst">
+      The map you have draws the right picture of the wrong thing. It shows a sample's position in a
+      fixed floor plan, which a technician already knows, and it never changes while you watch it. What a
+      laboratory needs from a map is time: where the days are going, and which one sample out of four
+      hundred needs someone today.
+    </p>
+    <dl class="meta">
+      <div><dt>Findings</dt><dd>9 · 2 critical</dd></div>
+      <div><dt>Views proposed</dt><dd>3, on one page</dd></div>
+      <div><dt>Packages</dt><dd>19 · 5 stages</dd></div>
+      <div><dt>Checked</dt><dd><span class="mono">998a9b0</span> · 2 Sep 2026</dd></div>
+    </dl>
+  </header>
+
+  <div class="call">
+    <h3>The red light is always red</h3>
+    <p>Your screenshot shows <span class="mono">SLA CRITICAL · 208d 5h elapsed</span>. That is not a
+      stale demo record — it is the model. <span class="mono">workflowEngine.buildMapState</span> computes
+      risk like this, for every sample, whatever was ordered on it:</p>
+    <pre class="bad">const hours = Math.floor((Date.now() - new Date(createdAt).getTime()) / 3600000);
+sla = { totalHours: hours,
+        severity: hours &gt; 72 ? 'CRITICAL' : hours &gt; 24 ? 'WARNING' : 'OK' };</pre>
+    <p>Seventy-two hours, globally. Air-drying alone takes 24 to 72 hours before anyone touches the sample.
+      Pipette sedimentation takes a day. Ammonium-acetate CEC is a multi-day procedure. <strong>Every sample
+      that has actually been analysed is CRITICAL by construction</strong>, so within a week the badge means
+      nothing, and staff stop reading it. An indicator that is always on is worse than no indicator: it
+      trains people to ignore the place where real alarms will appear.</p>
+    <p>There is a second problem in the same three lines. <span class="mono">createdAt</span> comes from
+      <span class="mono">auditLog.find(e =&gt; e.action === 'SAMPLE_CREATED' || e.action === 'STATUS_CHANGE')</span>
+      — the first match in whatever order the log arrived, so two loads of the same page can produce
+      different elapsed times.</p>
+  </div>
+
+  <!-- 01 -->
+  <section>
+    <h2><span class="tick">01</span> What is actually there</h2>
+    <p class="lede">More than it looks. The server already builds a proper map-state contract, the graph
+      renders with a real flow library, and a working realtime hook exists elsewhere in the app. The gaps
+      are specific.</p>
+
+    <div class="find fc">
+      <div class="find-id">MAP-A</div>
+      <div>
+        <p class="find-t"><span class="txt">The map is a snapshot, not a live view</span><span class="pill CRIT">Critical</span></p>
+        <div class="find-b">
+          <p><span class="mono">useSampleWorkflow.js</span> is 71 lines: two <span class="mono">axios.get</span>
+            calls on mount, no subscription, no polling. Meanwhile
+            <span class="mono">hooks/useRealtimeData.js</span> already implements WebSocket event
+            subscription and is used by <span class="mono">ManagerQueue</span> and
+            <span class="mono">TechWorkbench</span>. The server already broadcasts
+            <span class="mono">WORKITEM_CHANGED</span>, <span class="mono">WORKITEM_UPDATE</span> and
+            <span class="mono">SPECTRAL_UPDATE</span>.</p>
+          <p>So the one page in the product whose entire purpose is to show current state is the one page
+            that does not update. That is also why there is a refresh button in the toolbar.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fc">
+      <div class="find-id">MAP-B</div>
+      <div>
+        <p class="find-t"><span class="txt">Nine of the thirteen workflow components are never imported</span><span class="pill CRIT">Critical</span></p>
+        <div class="find-b">
+          <p>Roughly 64 KB of React with zero import sites: <span class="mono">WorkflowNode</span> (19.9 KB),
+            <span class="mono">LabFloorPlan</span>, <span class="mono">WorkflowTimeline</span>,
+            <span class="mono">WorkflowKPICards</span>, <span class="mono">WorkflowFilters</span>,
+            <span class="mono">WorkflowExport</span>, <span class="mono">WorkflowDetailPanel</span>,
+            <span class="mono">WorkflowEdge</span>, <span class="mono">WorkflowStageLane</span>.</p>
+          <p>They are dated 15 February; the four live ones were rewritten on 1 September. So a v1 map was
+            built, a v2 replaced it, and v1 was left in the tree. Several of them —
+            <span class="mono">WorkflowTimeline</span>, <span class="mono">WorkflowKPICards</span>,
+            <span class="mono">LabFloorPlan</span> — are the features being asked for now. Read them before
+            deleting them; delete them either way.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fw">
+      <div class="find-id">MAP-C</div>
+      <div>
+        <p class="find-t"><span class="txt">The seven stations are hardcoded pixel positions</span><span class="pill WARN">High</span></p>
+        <div class="find-b">
+          <p><span class="mono">SampleWorkflowMap.jsx:269–280</span> places Reception, Preparation, Physical
+            Testing, Chemical Analysis, Spectral Lab, QA Review and Archive at fixed coordinates in a
+            three-row grid, for every sample.</p>
+          <p>Your screenshot shows the consequence: <em>Physical Testing — Station on Standby</em> and
+            <em>Spectral Lab — Station on Standby</em>, drawn at full size, for a sample that has no
+            physical or spectral analyses ordered. Two of the seven cards are furniture. A map that shows
+            rooms this sample will never enter is teaching the floor plan, not the sample.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fw">
+      <div class="find-id">MAP-D</div>
+      <div>
+        <p class="find-t"><span class="txt">Room assignment falls through to Chemical Analysis</span><span class="pill WARN">High</span></p>
+        <div class="find-b">
+          <p><span class="mono">ROOM_MAP</span> in <span class="mono">workflowEngine.js:465</span> is a
+            hand-maintained table of about forty analysis codes, and
+            <span class="mono">resolveRoom</span> ends
+            <span class="mono">|| 'Chemical Analysis'</span>.</p>
+          <p>Every analysis not in that list — including all 214 the catalogue seeds — silently appears in
+            Chemical Analysis. No warning, no flag, and the map looks correct while being wrong. Same defect
+            as WP-25: the workflow graph is a second, divergent copy of the catalogue.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fw">
+      <div class="find-id">MAP-E</div>
+      <div>
+        <p class="find-t"><span class="txt">The same work is counted in two stations</span><span class="pill WARN">High</span></p>
+        <div class="find-b">
+          <p>Header says <span class="mono">PROGRESS 0/7</span>. Preparation shows 2 queued, Chemical shows
+            0/5 — that is the seven. QA Review then shows <em>5 Queued</em> and 0/5 as well. The five
+            chemical determinations are rendered at two stations, so the map implies twelve pieces of work
+            where there are seven.</p>
+          <p>Review is a <em>state</em> of a work item, not a room it moves to. Drawing it as a room forces
+            this double count.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fw">
+      <div class="find-id">MAP-F</div>
+      <div>
+        <p class="find-t"><span class="txt">There is no view above a single sample</span><span class="pill WARN">High</span></p>
+        <div class="find-b">
+          <p>The only route is <span class="mono">/samples/:id/map</span>. A laboratory manager's real
+            questions are "where is my bottleneck this morning" and "will the Guatemala batch make its
+            deadline" — neither is answerable one sample at a time, and a lab running 400 samples cannot
+            open 400 maps.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fi">
+      <div class="find-id">MAP-G</div>
+      <div>
+        <p class="find-t"><span class="txt">Blocked exists in the engine but not as a state anyone can set</span><span class="pill IDLE">Medium</span></p>
+        <div class="find-b">
+          <p><span class="mono">buildMapState</span> computes a <span class="mono">blockerGraph</span> from
+            analysis prerequisites — good, and more than most systems have. But there is no way for a
+            technician to say <em>waiting for reagent</em>, <em>instrument down</em>, or <em>awaiting client
+            authorisation</em>. Those are the delays a manager can actually act on, and they are invisible.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fi">
+      <div class="find-id">MAP-H</div>
+      <div>
+        <p class="find-t"><span class="txt">The sample sits at a station with no owner</span><span class="pill IDLE">Medium</span></p>
+        <div class="find-b">
+          <p><span class="mono">HANDLER · Unassigned</span> with <span class="mono">Next: Assign Drying
+            task</span>. The suggested next action is the best thing on the page — it should be the model
+            for the whole design. But nothing escalates: a sample can sit unassigned at a station
+            indefinitely and only appears on this map, which nobody is looking at.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="find fi">
+      <div class="find-id">MAP-I</div>
+      <div>
+        <p class="find-t"><span class="txt">Presentation details that read as unfinished</span><span class="pill IDLE">Medium</span></p>
+        <div class="find-b">
+          <p>The minimap renders as an empty grey placeholder. Connector handles are visible on every card
+            edge as decorative dots. The edges from Preparation to the three analytical stations are faint
+            dashed grey and read as disconnected. Roughly 60 % of the canvas is empty at default zoom.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section>
+    <h2><span class="tick">02</span> The idea: put time on the horizontal axis</h2>
+    <p class="lede">This single change turns the map from a diagram into an instrument. A floor plan
+      answers "which room" — which the technician standing in the room already knows. A time axis answers
+      "where did the days go", which nobody currently knows.</p>
+
+    <figure class="fig">
+      <div class="scroll-x">
+      <svg viewBox="0 0 900 322" role="img" style="min-width:620px" aria-label="A sample&#39;s journey drawn across six station lanes against a fourteen-day time axis. Reception takes under a day, preparation three days, chemical analysis seven days including a one-and-a-half day hold waiting for a reagent, spectral scanning one day in parallel, QA review one and a half days, and reporting half a day. The turnaround target at day ten is breached by two point four days, and the hold accounts for most of the overrun.">
+        <defs>
+          <pattern id="holdHatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="6" height="6" fill="var(--w-warn)"></rect>
+            <line x1="0" y1="0" x2="0" y2="6" stroke="var(--hold)" stroke-width="2"></line>
+          </pattern>
+        </defs>
+
+        <!-- day gridlines -->
+        <g>
+          <line x1="130" y1="34" x2="130" y2="252" stroke="var(--rule)" stroke-width="1"></line>
+          <line x1="235.7" y1="34" x2="235.7" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="341.4" y1="34" x2="341.4" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="447.1" y1="34" x2="447.1" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="552.9" y1="34" x2="552.9" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="658.6" y1="34" x2="658.6" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="764.3" y1="34" x2="764.3" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+          <line x1="870" y1="34" x2="870" y2="252" stroke="var(--rule-soft)" stroke-width="1"></line>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ink-3)" text-anchor="middle">
+          <text x="130" y="26">d0</text><text x="235.7" y="26">d2</text><text x="341.4" y="26">d4</text>
+          <text x="447.1" y="26">d6</text><text x="552.9" y="26">d8</text><text x="658.6" y="26">d10</text>
+          <text x="764.3" y="26">d12</text><text x="870" y="26">d14</text>
+        </g>
+
+        <!-- lane labels -->
+        <g font-family="Instrument Sans, sans-serif" font-size="12" fill="var(--ink-2)" text-anchor="end">
+          <text x="118" y="52">Reception</text>
+          <text x="118" y="86">Preparation</text>
+          <text x="118" y="120">Chemical</text>
+          <text x="118" y="154">Spectral</text>
+          <text x="118" y="188">QA review</text>
+          <text x="118" y="222">Report</text>
+        </g>
+
+        <!-- bars -->
+        <g>
+          <rect x="130" y="40" width="15.9" height="15" rx="2" fill="var(--ok)" opacity="0.85"></rect>
+          <rect x="145.9" y="74" width="153.3" height="15" rx="2" fill="var(--ok)" opacity="0.85"></rect>
+
+          <rect x="299.2" y="108" width="121.5" height="15" rx="2" fill="var(--accent)" opacity="0.85"></rect>
+          <rect x="420.7" y="108" width="79.3" height="15" rx="2" fill="url(#holdHatch)" stroke="var(--hold)" stroke-width="1"></rect>
+          <rect x="500" y="108" width="185" height="15" rx="2" fill="var(--accent)" opacity="0.85"></rect>
+
+          <rect x="299.2" y="142" width="63.4" height="15" rx="2" fill="var(--accent)" opacity="0.5"></rect>
+          <rect x="685" y="176" width="79.3" height="15" rx="2" fill="var(--accent-2)" opacity="0.8"></rect>
+          <rect x="764.3" y="210" width="21.1" height="15" rx="2" fill="var(--accent-2)" opacity="0.8"></rect>
+        </g>
+
+        <!-- hold label -->
+        <g font-family="JetBrains Mono, monospace" font-size="9" fill="var(--warn)">
+          <text x="460.3" y="103" text-anchor="middle">HOLD 1.5d · reagent</text>
+        </g>
+
+        <!-- target line -->
+        <line x1="658.6" y1="34" x2="658.6" y2="266" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3"></line>
+        <text x="654" y="278" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ok)">TARGET d10</text>
+
+        <!-- actual finish -->
+        <line x1="785.4" y1="34" x2="785.4" y2="266" stroke="var(--crit)" stroke-width="1.5"></line>
+        <text x="791" y="278" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--crit)">ACTUAL d12.4</text>
+
+        <!-- overrun bracket -->
+        <line x1="658.6" y1="296" x2="785.4" y2="296" stroke="var(--crit)" stroke-width="1"></line>
+        <line x1="658.6" y1="292" x2="658.6" y2="300" stroke="var(--crit)" stroke-width="1"></line>
+        <line x1="785.4" y1="292" x2="785.4" y2="300" stroke="var(--crit)" stroke-width="1"></line>
+        <text x="722" y="313" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--crit)">+2.4d over</text>
+
+        <text x="130" y="313" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ink-3)">S002 · SOILFER-US · 7 determinations</text>
+      </svg>
+      </div>
+      <figcaption>The same sample, drawn against time instead of against the floor plan. Preparation is not
+        a delay — drying takes three days and that is the method. The 1.5-day reagent hold in Chemical is
+        the delay, and it is most of the 2.4-day overrun. This is a picture a manager can act on: it names
+        the day that was lost and the reason. The current map, for the same sample, says
+        <span class="mono">CRITICAL · 208d</span>.</figcaption>
+    </figure>
+
+    <div class="note">
+      <p><strong>Keep the node graph — demote it.</strong> The station diagram is genuinely useful for one
+        thing: showing which determinations run in parallel and what blocks what. That is a route view, and
+        it belongs as a secondary tab beside the timeline, drawn only for the stations this sample actually
+        visits.</p>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section>
+    <h2><span class="tick">03</span> Three views, one page</h2>
+    <p class="lede">Not three pages. One map with a scope switch, because the three questions are the same
+      question at three zoom levels, and a manager moves between them constantly — floor, then batch, then
+      the one sample that is late.</p>
+
+    <div class="views">
+      <div class="view">
+        <p class="vh">Scope · Sample</p>
+        <h3>The journey</h3>
+        <p>Timeline as above, with the route graph as a second tab. Every determination, when it started,
+          who has it, how long it has been there, what it is waiting on, and the target it is measured
+          against.</p>
+        <p>Only the stations this sample visits. Review shown as a state, not a room.</p>
+        <p class="q">"Where did the days go, and what do I do about it?"</p>
+      </div>
+      <div class="view">
+        <p class="vh">Scope · Laboratory</p>
+        <h3>The floor, right now</h3>
+        <p>Every open sample, grouped by station. Queue depth, oldest item, work in progress against
+          capacity, and the technicians on shift. Stations sized by load so the bottleneck is the biggest
+          thing on screen.</p>
+        <p>This is the view that runs on a wall display and opens the morning huddle.</p>
+        <p class="q">"Where is the jam this morning?"</p>
+      </div>
+      <div class="view">
+        <p class="vh">Scope · Project or batch</p>
+        <h3>The cohort</h3>
+        <p>A project's samples as a cumulative flow: how many have cleared each station over time, the
+          spread of turnaround, and the projected completion date against the deadline.</p>
+        <p>The arrival-versus-completion gap is the honest measure of whether the laboratory is keeping up.</p>
+        <p class="q">"Will the Guatemala batch land on time?"</p>
+      </div>
+    </div>
+
+    <h4>Shared behaviour across all three</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Element</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Live</td><td>Updates arrive over the existing WebSocket. A changed node flashes once and settles — no re-layout, no scroll jump, no full refetch.</td></tr>
+        <tr><td class="k">Actionable</td><td>Every node offers what can be done to it from where you are: assign, reassign, waive, place on hold, print labels, open the bench.</td></tr>
+        <tr><td class="k">Selectable</td><td>Rubber-band or click-select many samples at a station, then act on all of them at once. Assigning thirty samples to one technician is the daily job.</td></tr>
+        <tr><td class="k">Filterable</td><td>Project, matrix, analysis, assignee, status, age, overdue-only. Filters belong to the scope and survive a reload.</td></tr>
+        <tr><td class="k">Addressable</td><td>Scope, filters and selection live in the URL, so a manager can paste "the overdue ones at Chemical" into a message.</td></tr>
+        <tr><td class="k">Legible from three metres</td><td>A kiosk mode with larger type and no chrome, for the wall screen. This is what makes it a fixture rather than a page people visit once.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 04 -->
+  <section>
+    <h2><span class="tick">04</span> Turnaround, modelled properly</h2>
+    <p class="lede">Everything above depends on one number being meaningful: how long this sample
+      <em>should</em> take. Until that exists, every view shows red and none of them helps.</p>
+
+    <h4>Where the target comes from</h4>
+    <p>Each analysis in the catalogue carries a working-day turnaround. The sample's target is the
+      critical path through its ordered analyses plus preparation and review — not a sum, because
+      determinations run in parallel, and not a constant, because a pH-only sample and a full fertility
+      package are different commitments.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Example</th><th>Typical working days</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Air-dry, mill, sieve</td><td class="n">2–3</td><td>Drying is the method, not a queue. It must not count as delay.</td></tr>
+        <tr><td>pH, EC</td><td class="n">1</td><td>Fast, high-throughput, usually batched.</td></tr>
+        <tr><td>Organic carbon, total N</td><td class="n">2–3</td><td>Combustion runs are batched; digestion adds a day.</td></tr>
+        <tr><td>Available P, exchangeable bases</td><td class="n">3–4</td><td>Extraction plus instrument time, batched.</td></tr>
+        <tr><td>CEC by ammonium acetate</td><td class="n">4–5</td><td>Saturation, washing and displacement over several days.</td></tr>
+        <tr><td>Particle size by pipette</td><td class="n">3–5</td><td>Dispersion and timed sedimentation cannot be hurried.</td></tr>
+        <tr><td>MIR or vis-NIR scan</td><td class="n">1</td><td>Minutes of instrument time; the queue is the constraint.</td></tr>
+        <tr><td>Review and certificate</td><td class="n">1–2</td><td>Manager review, QC disposition, report assembly.</td></tr>
+      </tbody>
+    </table></div>
+    <p style="font-size:13.5px;color:var(--ink-3)">Indicative, for shaping the model. Each laboratory sets
+      its own values during onboarding — the same per-lab defaults mechanism as WP-20.</p>
+
+    <h4>When the clock runs</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Rule</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td>Start at <span class="mono">ACCEPTED</span>, not at record creation</td><td>A sample logged in advance of arrival is not late before it exists — the current cause of much of the 208 days.</td></tr>
+        <tr><td>Count working days against the laboratory calendar</td><td>Weekends and public holidays are not overruns. Seven national laboratories, seven calendars.</td></tr>
+        <tr><td>Stop on hold</td><td>Awaiting client authorisation, awaiting reagent, instrument down, awaiting reference material. Held time is recorded and shown, but is not counted against the target.</td></tr>
+        <tr><td>Restart on reanalysis, and keep both</td><td>The customer-facing clock keeps running; a second internal clock records the rework. Hiding rework flatters the laboratory and teaches nothing.</td></tr>
+        <tr><td>Stop at the certificate</td><td>Not at archive or disposal. Disposal is housekeeping and must not colour the operations view red.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p><strong>Three states, and they must be earned.</strong> <span class="pill OK">On track</span>
+        comfortably inside target · <span class="pill WARN">At risk</span> projected to breach on current
+        pace · <span class="pill CRIT">Breached</span> past target with the clock stopped for holds. If more
+        than about one sample in ten is red on a normal day, the targets are wrong, not the laboratory —
+        and that is a signal worth surfacing to the manager during the first month.</p>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section>
+    <h2><span class="tick">05</span> What makes it feel alive</h2>
+    <p class="lede">"Realtime" is not a WebSocket connection. It is a set of guarantees about what the
+      viewer sees, and the current broadcast layer meets few of them.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Guarantee</th><th>Today</th><th>Needed</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Events carry enough to update without refetching</td>
+          <td><span class="mono">{ sampleIds, workItemId, status }</span> — the client must refetch or ignore</td>
+          <td>A typed patch: entity, id, changed fields, actor, server timestamp, monotonic version</td>
+        </tr>
+        <tr>
+          <td>Nothing is missed across a reconnect</td>
+          <td>No sequence number; a dropped socket loses every event in the gap silently</td>
+          <td>Per-connection cursor; on reconnect, replay since the last version seen</td>
+        </tr>
+        <tr>
+          <td>Late events cannot overwrite newer state</td>
+          <td>Last message wins</td>
+          <td>Version compare; drop anything older than what is rendered</td>
+        </tr>
+        <tr>
+          <td>Only relevant events arrive</td>
+          <td><span class="mono">broadcastToLab</span> sends every change to every user in the lab</td>
+          <td>Subscribe by scope — this sample, this station, this project — so a wall display is not parsing four hundred irrelevant messages</td>
+        </tr>
+        <tr>
+          <td>The viewer can tell live from stale</td>
+          <td>Nothing; a dead socket looks identical to a quiet laboratory</td>
+          <td>A connection state and a last-updated stamp, always visible</td>
+        </tr>
+        <tr>
+          <td>Actions feel immediate</td>
+          <td>Full refetch after every mutation</td>
+          <td>Optimistic apply, reconcile on the echoed event, roll back visibly on rejection</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p><strong>The unglamorous half of "wow".</strong> A map that animates beautifully and quietly drops
+        an event during a reconnect is worse than one that reloads honestly, because people will trust it and
+        be wrong. Sequence numbers and replay are what make the polish safe to enjoy.</p>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section>
+    <h2><span class="tick">06</span> Work packages</h2>
+    <p class="lede">Ordered so the current map stops misleading people in week one, becomes live in week
+      two, and grows the two new scopes after the foundation holds them.</p>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage A</span><h3 class="stage-t">Stop it misleading</h3><span class="stage-w">3–4 days</span></div>
+      <p class="stage-g">Cheap, visible, and each removes something actively false.</p>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">MAP-01</span><span class="wp-t">Replace the global 72-hour SLA</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/utils/workflowEngine.js · prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>Add <span class="mono">turnaroundDays</span> to Analysis. Compute the sample target as the critical path over its ordered analyses. Start the clock at <span class="mono">ACCEPTED</span> from the audit row, deterministically — not <span class="mono">find(SAMPLE_CREATED || STATUS_CHANGE)</span>. Until per-analysis values are seeded, fall back to a per-laboratory default rather than to 72 hours.</dd>
+          <dt>Accept</dt><dd>A sample two days into a three-day drying step reads <em>on track</em>. Two loads of the same sample report identical elapsed time.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-02</span><span class="wp-t">Draw only the stations this sample visits</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/SampleWorkflowMap.jsx</dd>
+          <dt>Do</dt><dd>Derive nodes from <span class="mono">mapState.stages</span> rather than from the hardcoded seven at lines 269–280. A station with no work items for this sample does not render.</dd>
+          <dt>Accept</dt><dd>A pH-only sample shows Reception, Preparation, Chemical, Review — four nodes, no standby furniture.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-03</span><span class="wp-t">Stop double-counting review</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/utils/workflowEngine.js · client map</dd>
+          <dt>Do</dt><dd>Review is a work-item state, not a room. Show awaiting-review counts as a band on the station that owns the work, and keep one QA node for the sample-level approval only.</dd>
+          <dt>Accept</dt><dd>Station counts sum to the header total. Seven means seven.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-04</span><span class="wp-t">Make the room fallback loud</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/utils/workflowEngine.js:465–495</dd>
+          <dt>Do</dt><dd>Move station assignment onto the Analysis record with WP-25. Until then, replace <span class="mono">|| 'Chemical Analysis'</span> with an <span class="mono">Unassigned station</span> bucket that renders visibly and logs the code.</dd>
+          <dt>Accept</dt><dd>An analysis with no station mapping is visible as unmapped rather than silently filed under chemistry.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-05</span><span class="wp-t">Clear the visual debt</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/SampleWorkflowMap.jsx · styles/workflow-map-v2.css</dd>
+          <dt>Do</dt><dd>Fix or remove the empty minimap. Hide connector handles unless editing. Make edges solid and directional with a dependency legend. Fit the graph to content on load instead of opening on empty canvas.</dd>
+          <dt>Accept</dt><dd>Nothing on the page is a placeholder or purely decorative.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">MAP-06</span><span class="wp-t">Delete the abandoned v1 components</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/workflow/ — nine files</dd>
+          <dt>Do</dt><dd>Read <span class="mono">WorkflowTimeline</span>, <span class="mono">WorkflowKPICards</span>, <span class="mono">LabFloorPlan</span>, <span class="mono">WorkflowFilters</span> and <span class="mono">WorkflowExport</span> first — they anticipate Stages C and D and may hold usable layout work. Then delete all nine. Do not revive <span class="mono">WorkflowNode</span>; it is superseded by <span class="mono">WorkflowStageNode</span>.</dd>
+          <dt>Accept</dt><dd>Every file under <span class="mono">components/workflow/</span> has an import site. WP-03's component-wiring assertion covers this directory.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage B</span><h3 class="stage-t">Make it live</h3><span class="stage-w">1 week</span></div>
+      <p class="stage-g">The realtime contract from section 05. Do this before the new scopes, or you build two more views that need retrofitting.</p>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">MAP-07</span><span class="wp-t">A typed, versioned event envelope</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/wsServer.js · all broadcasting controllers</dd>
+          <dt>Do</dt><dd>One envelope: <span class="mono">{ v, entity, id, op, fields, actor, at, scope }</span> with a monotonic <span class="mono">v</span> per laboratory. Every broadcast carries enough to patch client state without a refetch.</dd>
+          <dt>Accept</dt><dd>A work-item change updates the map with no HTTP request. Schema is documented and tested.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">MAP-08</span><span class="wp-t">Scoped subscriptions and reconnect replay</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/wsServer.js · client/src/hooks/useRealtimeData.js</dd>
+          <dt>Do</dt><dd>Clients subscribe to a scope — sample, station, project, laboratory. Server keeps a bounded event buffer per laboratory; on reconnect the client sends its last <span class="mono">v</span> and receives the gap, or a full-resync instruction if the gap is too old.</dd>
+          <dt>Accept</dt><dd>Kill the socket, change three work items, restore it: the map shows all three without a manual refresh.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-09</span><span class="wp-t">Move the map onto the realtime hook</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/hooks/useSampleWorkflow.js</dd>
+          <dt>Do</dt><dd>Subscribe through <span class="mono">useRealtimeData</span>, apply patches, drop stale versions. Show connection state and last-updated. Keep the manual refresh as a resync, not as the only mechanism.</dd>
+          <dt>Accept</dt><dd>Two browsers on one sample: an assignment in the first appears in the second within a second, with no reload.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-10</span><span class="wp-t">Optimistic actions from the map</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client map components</dd>
+          <dt>Do</dt><dd>Assign, reassign, waive, hold and open-bench directly on a node. Apply optimistically, reconcile on the echoed event, roll back with a visible message on rejection. The existing <em>Next: Assign Drying task</em> becomes a working button.</dd>
+          <dt>Accept</dt><dd>Assigning a technician from the map takes one click and no page change. A rejected action visibly reverts and says why.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage C</span><h3 class="stage-t">The floor view</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">The view a manager opens every morning, and the one that justifies a wall screen.</p>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-11</span><span class="wp-t">Hold as a first-class state</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">prisma/schema.prisma · workItemController.js · workflowContract.js</dd>
+          <dt>Do</dt><dd>Add <span class="mono">ON_HOLD</span> with a typed reason — awaiting client, awaiting reagent, instrument down, awaiting reference material, other with a note — plus who placed it and when. It stops the turnaround clock and appears on the timeline as a hatched band.</dd>
+          <dt>Accept</dt><dd>A technician can say why work stopped, and held time is excluded from the target while remaining visible.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-12</span><span class="wp-t">Station load endpoint</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/mapController.js (new)</dd>
+          <dt>Do</dt><dd>Per station for the caller's laboratory: queue depth, in-progress count, oldest item age, overdue count, assignees on shift, and throughput over the last seven days. One scoped query, cached briefly, invalidated by the same events.</dd>
+          <dt>Accept</dt><dd>Responds in under 300 ms with 5,000 open work items.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-13</span><span class="wp-t">The floor view itself</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/OperationsMap.jsx (new)</dd>
+          <dt>Do</dt><dd>Stations sized by load, coloured by oldest-item age, each listing its queue. The bottleneck is the largest, reddest thing on screen without anyone reading a number. Click a station to see its samples; click a sample for the journey view.</dd>
+          <dt>Accept</dt><dd>A manager identifies the busiest and the most overdue station in under five seconds, without clicking.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-14</span><span class="wp-t">Multi-select and batch actions</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/OperationsMap.jsx</dd>
+          <dt>Do</dt><dd>Select many samples at a station and assign, waive, hold or print for all of them in one action, with a single confirmation naming the count.</dd>
+          <dt>Accept</dt><dd>Assigning thirty drying tasks to one technician takes one action, not thirty.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-15</span><span class="wp-t">Kiosk mode</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/OperationsMap.jsx</dd>
+          <dt>Do</dt><dd>A URL parameter giving larger type, no navigation chrome, a rotating scope and an unmistakable connection indicator. Read-only.</dd>
+          <dt>Accept</dt><dd>Readable across a laboratory from three metres, and obviously stale if the connection drops.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage D</span><h3 class="stage-t">The journey and the cohort</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">The timeline in section 02, and the project answer.</p>
+
+      <div class="wp" style="--sc:var(--warn)">
+        <div class="wp-h"><span class="wp-id">MAP-16</span><span class="wp-t">The sample timeline</span><span class="pill WARN">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/workflow/JourneyTimeline.jsx (new)</dd>
+          <dt>Do</dt><dd>Station lanes against a time axis, assembled from the audit log: dwell per station, holds hatched, target and projection marked, the critical path emphasised. Becomes the default tab; the route graph moves to second. Feeds from the same source as WP-27's sample timeline — one history endpoint, two presentations.</dd>
+          <dt>Accept</dt><dd>The overrun is attributable to a station and a reason without opening anything else.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-17</span><span class="wp-t">Project and batch view</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/OperationsMap.jsx · mapController.js</dd>
+          <dt>Do</dt><dd>Cumulative flow for a project's samples: arrivals against completions per station over time, turnaround distribution rather than only the mean, and a projected completion date from current throughput against the deadline.</dd>
+          <dt>Accept</dt><dd>"Will this batch finish on time" is answered with a date and the assumption behind it.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-18</span><span class="wp-t">Shareable state and export</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/pages/OperationsMap.jsx</dd>
+          <dt>Do</dt><dd>Scope, filters and selection in the URL. Export the current view as PNG for a report and CSV for the underlying rows. The abandoned <span class="mono">WorkflowExport</span> may have usable groundwork.</dd>
+          <dt>Accept</dt><dd>A pasted link reproduces exactly what the sender was looking at.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--idle)">
+        <div class="wp-h"><span class="wp-id">MAP-19</span><span class="wp-t">Escalation, so nobody has to watch the map</span><span class="pill IDLE">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/escalationService.js (new)</dd>
+          <dt>Do</dt><dd>Rules on the same data: unassigned at a station beyond a threshold, in progress beyond twice the expected duration, on hold beyond its reason's limit, projected to breach. Each raises the existing notification, addressed to a role.</dd>
+          <dt>Accept</dt><dd>A sample unassigned for two days reaches the manager without anyone opening the map. The map becomes where you look after you are told, not instead of being told.</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section>
+    <h2><span class="tick">07</span> What not to build</h2>
+    <p class="lede">Each of these is tempting, demonstrates well, and costs more than it returns.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Not this</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>A scale drawing of the physical laboratory with benches and doors</td><td>Expensive per laboratory, wrong for seven different floor plans, and it answers "which room" — the question staff already know the answer to. <span class="mono">LabFloorPlan.jsx</span> is the abandoned attempt.</td></tr>
+        <tr><td>Animated samples travelling along the edges</td><td>Reads beautifully in a demo and adds nothing at 400 samples. Spend the motion budget on the one flash that says <em>this changed</em>.</td></tr>
+        <tr><td>A 3D or isometric view</td><td>Occlusion, no ordering, no measurable axis. Every serious operations board is flat for a reason.</td></tr>
+        <tr><td>Predicted completion by machine learning</td><td>A median of the last thirty samples through that station is nearly as good, explainable to an auditor, and available immediately.</td></tr>
+        <tr><td>A drag-and-drop workflow editor on the map</td><td>The route comes from the catalogue (WP-25). Two places to edit a workflow means neither is authoritative.</td></tr>
+        <tr><td>Free-panning infinite canvas as the default</td><td>Fit to content on load. An operations view should never open on empty space — as the current one does.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p><strong>One test for the whole feature.</strong> Put it on a screen in the laboratory for a week
+        and see whether anyone looks at it unprompted. If the answer is no, the problem is almost never the
+        visual design — it is that the turnaround model is not trusted, or the data is not live. Those are
+        Stages A and B, which is why they come first.</p>
+    </div>
+  </section>
+
+  <footer>
+    SoilFER-LIMS · Volume XII · operations map audit and design · 2 September 2026 · 9 findings · 19 packages · audit and design only, no changes made
+  </footer>
+</div>
+
+</body></html>

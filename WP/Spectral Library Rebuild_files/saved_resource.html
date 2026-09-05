@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<!-- saved from url=(0253)https://b2b29cd7-5927-4c1e-98a1-3544b368adcc.frame.claudeusercontent.com/_f/1788376122-f6d6/?__frame_t=9wXO6GVE3Sr4wmXd5Wjr0k6F.55b716fd-5c55-40d4-9e9f-dd031a6a9b25.83b78913-98b4-446a-9a1d-46f32572119d.1788379731&__frame_v=manifest.96bf2008ecfbaa4f.json -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!-- frame-runtime --><script>window.__FRAME_PREAMBLE={"v":1,"capabilities":{"artifact":"artifact.C12lZ9DL.js","assets":"assets.8Gk803W0.js","comments":"comments.vw5vQdGA.js","db":"db.h-3sndFg.js","downloads":"downloads.C3GSvEDP.js","embed":"embed.CxGAyc-v.js","endpoints":"endpoints.CfzSv5nM.js","mcp":"mcp.Bvma3qD7.js","network":"network.B5UA9Su4.js","permissions":"permissions.BNySkLV5.js","room":"room.VSdFwTE9.js","sample":"sample.BW2Uysoh.js","self":"artifact.C12lZ9DL.js","user":"user.BpKav-Rf.js"},"transforms":"_transforms.DSB5x63f.js","comments":"_comments.lsIZQbAK.js","translate":"_translate.5HCW4BJh.js"}</script><script>(function(){"use strict";var te=["light","dark","system"],re=/^[A-Za-z0-9_-]{1,64}$/,$=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,ne=new Set(["class","hidden","value","checked","style","title","alt","placeholder","lang","dir","role","tabindex","disabled","readonly","contenteditable","open","colspan","rowspan"]);function oe(e){const t=e.toLowerCase();return t.startsWith("data-")||t.startsWith("aria-")||ne.has(t)}var Be="http://www.w3.org/1999/xhtml",se="http://www.w3.org/2000/svg",ae=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),ie=new Set(["script","style"]);function ce(e){const t=e.localName.toLowerCase();return e.namespaceURI==="http://www.w3.org/1999/xhtml"?!ae.has(t):e.namespaceURI===se?!ie.has(t):!1}function M(e,t){return e===t||(e===160||e===32)&&(t===160||t===32)}function le(e,t){const r=e.length,n=t.length;let s=0;for(;s<r&&s<n&&M(e.charCodeAt(s),t.charCodeAt(s));)s++;let o=0;for(;o<r-s&&o<n-s&&M(e.charCodeAt(r-1-o),t.charCodeAt(n-1-o));)o++;return{p:s,s:o}}function ue(e,t){const r=e.firstChild;if(e.childNodes.length!==1||r===null||r.nodeType!==Node.TEXT_NODE){e.textContent=t;return}const n=r.data,s=n.length,o=t.length,{p:i,s:c}=le(n,t);i===s&&c===0&&s===o||r.replaceData(i,s-i-c,t.slice(i,o-c));const h=r.data,p=e.ownerDocument.getSelection?.()??null,w=p!==null&&p.rangeCount>0&&(p.anchorNode===r||p.focusNode===r)?{anchor:p.anchorNode,anchorOffset:p.anchorOffset,focus:p.focusNode,focusOffset:p.focusOffset}:null;let m=-1,g=-1;for(let f=0;f<h.length&&f<t.length;f++){const v=h.charCodeAt(f),b=t.charCodeAt(f);v!==b&&M(v,b)&&(m<0&&(m=f),g=f)}const a=m>=0;if(a&&r.replaceData(m,g-m+1,t.slice(m,g+1)),a&&w!==null&&w.anchor!==null&&w.focus!==null)try{p.setBaseAndExtent(w.anchor,w.anchorOffset,w.focus,w.focusOffset)}catch{}}var fe=new Set(["html","head","body","frameset"]);function de(e){return e.namespaceURI==="http://www.w3.org/1999/xhtml"&&fe.has(e.localName)}function pe(e){if(e===null||typeof e!="object")return!1;const t=e;if(typeof t.target!="string"||!re.test(t.target)||t.text!==void 0&&typeof t.text!="string")return!1;if(t.attrsSet!==void 0){if(t.attrsSet===null||typeof t.attrsSet!="object")return!1;for(const[r,n]of Object.entries(t.attrsSet))if(!$.test(r)||typeof n!="string")return!1}if(t.attrsRemoved!==void 0){if(!Array.isArray(t.attrsRemoved))return!1;for(const r of t.attrsRemoved)if(typeof r!="string"||!$.test(r))return!1}return!0}function me(e,t){if(e===null||typeof e!="object")return!1;const{seq:r,elements:n}=e;if(typeof r!="number"||!Number.isSafeInteger(r)||!Array.isArray(n)||n.length===0||n.length>64)return!1;for(let s=0;s<n.length;s++)if(!t(n[s]))return!1;return!0}function he(e){return e===null||typeof e!="object"?!1:me(e.__frame_patch,pe)}function _e(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_init;return t!==null&&typeof t=="object"}function ve(e){return e!==null&&typeof e=="object"&&e.__frame_size_poke===!0}function ye(e){if(e===null||typeof e!="object")return!1;const t=e.__frame_theme;if(t===null||typeof t!="object")return!1;const r=t.theme;return typeof r=="string"&&te.includes(r)}var A=/^[\w.-]+\.js$/;function we(e,t,r){return r?"inert":typeof t=="string"&&A.test(t)?e?[t]:"inert":e?"inert":"framed"}function ge(){return{post(e,t){parent.postMessage(e,t)},on(e){const t=r=>{r.source===parent&&e(r.data,r.origin,r.isTrusted)};return addEventListener("message",t),()=>removeEventListener("message",t)}}}function be(){return{post:()=>{},on:()=>()=>{}}}var j="__frame_scroll",Ee=150,Ae=310,Se=160,Te=3e4;function ke(){let e=0,t=!1,r=!1,n=!1,s=0,o=null;const i=l=>{try{sessionStorage.setItem(j,JSON.stringify({y:l}))}catch{}},c=()=>{if(clearTimeout(e),o===null)return;const l=o;o=null,i(l)},h=()=>{if(t){t=!1;return}r=!0,o=scrollY,clearTimeout(e),e=setTimeout(c,Ee)};try{addEventListener("scroll",h,{passive:!0}),addEventListener("pagehide",c)}catch{}const p=()=>{let l;try{l=sessionStorage.getItem(j)}catch{return null}if(l===null)return null;let _;try{_=JSON.parse(l)}catch{_=null}const d=_?.y;if(!(typeof d=="number"&&Number.isFinite(d)&&d>=0)){try{sessionStorage.removeItem(j)}catch{}return null}return d};let w=!1;const m=l=>{try{const _=scrollY;scrollTo({top:l,left:0,behavior:"instant"}),s=l,n=!0,clearTimeout(e),o=null,i(l);const d=scrollY;d!==_&&(t=!0),d!==l&&!w&&(w=!0,addEventListener("load",()=>{try{if(scrollY===d){const T=p();m(T!==null?T:s)}}catch{}},{once:!0}))}catch{}},g=()=>{try{return!!location.hash}catch{return!0}};let a=!1;const f=()=>{try{if(a||innerWidth>Ae||innerHeight>Se)return;a=!0;const l=Date.now(),_=()=>{try{removeEventListener("resize",_)}catch{}if(Date.now()-l>Te||r||g())return;const d=p();m(d!==null?d:s)};addEventListener("resize",_)}catch{}};let v=!1,b=!1;return{restore(){if(v||(v=!0,g()))return;const l=p();l!==null&&(m(l),f())},promoted(){if(b||(b=!0,g()))return;const l=p();l!==null?(m(l),f()):n&&m(s)}}}function Re(e,t,r,n){let s=null;try{s=window.trustedTypes?.createPolicy("frame-runtime",{createScriptURL:h=>h})??null}catch{}const o=window.Worker,i=o?.prototype,c=Object.freeze({Worker:o,workerOn:i?.addEventListener,workerPost:i?.postMessage,workerTerminate:i?.terminate,fetch:window.fetch.bind(window),preventDefault:Event.prototype.preventDefault,policy:s,origins:t});r(e).then(h=>h?.bootTopLevel?h.bootTopLevel(c,n):n.settle()).catch(()=>n.settle())}var De="modulepreload",Ie=function(e){return"/"+e},Ue={},Le=function(t,r,n){let s=Promise.resolve();function o(i){const c=new Event("vite:preloadError",{cancelable:!0});if(c.payload=i,window.dispatchEvent(c),!c.defaultPrevented)throw i}return s.then(i=>{for(const c of i||[])c.status==="rejected"&&o(c.reason);return t().catch(o)})},Oe=window===top,q=Object.getOwnPropertyDescriptor(window,"claude"),k=we(Oe,window.__FRAME_PREAMBLE?.topLevel,q?.writable===!1),N=typeof k=="object"&&k[0],y=N?be():ge();(function(){const e=Object.defineProperty,t=globalThis,r=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let n=0;for(let s=0;s<r.length;s++){const o=r[s];try{e(t,o,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[o]}catch{}try{e(t,o,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[o]=="function"&&n++}if(n&&k==="framed")try{y.post({__frame_rtc_lockdown_failed:n},"*")}catch{}})();var Pe=1e4,Y=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function X(e){for(const t of Y)if(t.endsWith(":*"))try{const r=new URL(e);if(`${r.protocol}//${r.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}var R=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),B=window.__FRAME_PREAMBLE?.transforms,D=window.__FRAME_PREAMBLE?.comments,I=window.__FRAME_PREAMBLE?.translate;function S(e){return Le(()=>import("/_runtime/"+e),void 0)}function G(e,t){return{contract:e.contract,changes:new Set(e.changes??[]),flags:new Set(e.flags??[]),capabilities:e.capabilities??{},capBudgets:e.capBudgets??{},transforms:new Map,shellOrigin:t,mount:x,hooks:O,pipe:()=>({wrap:(r,n)=>(...s)=>{try{return n(...s)}catch(o){return Promise.reject(o)}}})}}var L=null,E=null;function V(e,t,r){try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:r,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var U=!1,O={editBefore:null,edit:null};function Ce(e,t,r=!1){const n=[];let s;if(r)try{O.editBefore?.(e)}catch{}for(const o of e.elements){const i=document.querySelector(`[data-id="${o.target}"]`);if(!i){s=o.target;break}if([...Object.keys(o.attrsSet??{}),...o.attrsRemoved??[]].some(c=>!oe(c))){s=o.target;break}if(o.text!==void 0&&(!ce(i)||de(i))){s=o.target;break}for(const[c,h]of Object.entries(o.attrsSet??{}))if(!J(i,c)){try{i.setAttribute(c,h)}catch{}Z(i,c,h)}for(const c of o.attrsRemoved??[])J(i,c)||(i.removeAttribute(c),Z(i,c,null));typeof o.text=="string"&&ue(i,o.text),n.push(o.target)}if(r)try{O.edit?.(e.seq,n,s)}catch{}if(s!==void 0){y.post({__frame_patch_miss:{seq:e.seq}},t);return}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:e.seq,targets:n}}))}catch{}}function Z(e,t,r){if(!(e instanceof HTMLInputElement))return;const n=t.toLowerCase();n==="checked"?e.checked=r!==null:n==="value"&&e.type!=="file"&&(e.value=r??"")}function J(e,t){const r=t.toLowerCase(),n=e;return r==="data-id"||(r==="value"||r==="checked")&&(n.__artifactSecret===!0||/^(password|hidden|file)$/.test(n.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${e.getAttribute("autocomplete")??""} ${n.autocomplete??""}`))}function Q(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,U=!0):U&&(delete t.dataset.theme,t.style.colorScheme="",U=!1)}var P=new Map;function Me(){let e;const t={u:new Promise(r=>{e=r}),r:r=>{t.done=!0,e(r)},done:!1,nulled:!1};return t}function F(){for(const e of P.values())e.done||(e.nulled=!0,e.r(null))}var je=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),x=(e,t)=>{const r=P.get(e);if(!r||r.done){r?.nulled&&E&&y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:e}},E);return}const n=typeof t=="function"?Object.setPrototypeOf(t,je):Object.assign(Object.create(null),t);typeof n.then=="function"&&delete n.then,r.r(Object.freeze(n))};function ee(){const e=q?.value??{};V(window,"claude",e);for(const t of Object.keys(R)){if(e[t]!==void 0){V(e,t,e[t]);continue}P.set(t,Me())}if(e.use===void 0){const t=r=>{if(typeof r!="string"||!Object.hasOwn(R,r))return Promise.resolve(null);const n=P.get(r);return n?n.u:Promise.resolve(e[r]??null)};try{Object.defineProperty(e,"use",{value:t,writable:!0,configurable:!0,enumerable:!1})}catch{}}}if(k==="framed"){const e=B&&A.test(B)?S(B).catch(()=>{}):Promise.resolve(void 0),t=a=>{if(a.type==="auxclick"&&a.button!==1)return;const f=a.target,v=f&&f.closest?f.closest("a[href],area[href]"):null;if(!v)return;const b=v.getAttribute("href");if(!b)return;let l;try{l=new URL(b,document.baseURI)}catch{return}if((l.protocol==="http:"||l.protocol==="https:")&&l.origin!==location.origin){a.preventDefault();const _=(v.getAttribute("target")??"").toLowerCase(),d=a.type==="auxclick"||a.metaKey||a.ctrlKey||a.shiftKey||a.altKey||!["","_self","_top","_parent"].includes(_);y.post({__frame_nav:!0,url:l.href,newTab:d},"*")}};addEventListener("click",t,!0),addEventListener("auxclick",t,!0);const r={},n=a=>{a.isTrusted&&(r.pointer=!0)},s=a=>{a.isTrusted&&(r.click=!0)};addEventListener("pointermove",n,{capture:!0,passive:!0}),addEventListener("click",s,{capture:!0,passive:!0}),e.then(a=>{a?.wireNav&&(a.wireNav(),removeEventListener("click",t,!0),removeEventListener("auxclick",t,!0),removeEventListener("pointermove",n,!0),removeEventListener("click",s,!0),a.wireEngagement?.(r))});let o=null;try{o=ke()}catch{}ee();let i=null,c=null,h=0;const p=y.on((a,f)=>{X(f)&&_e(a)&&(i=a.__frame_init,E=f,p(),clearTimeout(h),c?.())});y.post({__frame_connect:!0},"*");const w=new Promise(a=>{c=a,h=setTimeout(()=>{p(),a()},Pe)}),m=document.readyState==="loading"?new Promise(a=>document.addEventListener("DOMContentLoaded",()=>a(),{once:!0})):Promise.resolve();m.then(()=>{try{o?.restore()}catch{}});const g={cb:null};y.on((a,f)=>{if(X(f)&&ve(a)){try{o?.promoted()}catch{}g.cb?.()}}),w.then(async()=>{if(!i||!E){F();return}Q(i.theme);const a=E;let f=!1,v=!1;y.on((u,z,C)=>{if(z!==a)return;ye(u)&&Q(u.__frame_theme.theme),he(u)&&Ce(u.__frame_patch,a,C);const H=u?.__fc_mode;H&&typeof H=="object"&&!f&&D&&A.test(D)&&(f=!0,S(D).then(K=>K.install?.(a,H.on===!0)).catch(()=>{}));const W=u?.__ft_cmd;W&&typeof W=="object"&&!v&&I&&A.test(I)&&(v=!0,S(I).then(K=>K.install?.(a,W)).catch(()=>{}))});const b=Object.keys(i.capabilities??{}).filter(u=>Object.hasOwn(R,u)).map(u=>[u,R[u]]).filter(u=>typeof u[1]=="string"&&A.test(u[1])),l=await Promise.allSettled(b.map(([,u])=>S(u))),_=await e,d=E;if(_?.buildBoot||y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),_?.buildBoot)try{L=_.buildBoot(i,_.TRANSFORMS??{},{shellOrigin:d,mount:x,hooks:O},u=>y.post({__frame_cap_telemetry:u},d))}catch{y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},d),L=G(i,d)}else L=G(i,d);const T=u=>y.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:u}},d),Ne=L;l.forEach((u,z)=>{const C=b[z][0];if(u.status!=="fulfilled"){T(C);return}try{u.value?.install?.(Ne)}catch{T(C)}}),F(),await m,y.post({__frame_ready:!0},E),e.then(u=>u?.installSizeReporter?.(d,g))})}else N&&(ee(),Re(N,Y,S,{settle:F,mount:x}))})();</script><!-- /frame-runtime --><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Spectral Library Rebuild</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link rel="stylesheet" href="./css2">
+<style>
+  :root{
+    --paper:#F0F2F5; --surface:#F8F9FB; --surface-2:#E4E8ED; --code:#E9EDF1;
+    --ink:#12161B; --ink-2:#39414B; --ink-3:#69747F;
+    --rule:#CDD4DC; --rule-soft:#DFE4EA;
+    --accent:#0F6F7A; --accent-2:#A9631A;
+    --crit:#A32B1E; --high:#A9631A; --med:#5D6B22; --low:#2F5E80; --ok:#1F6B52;
+    --w-crit:#F7E4E1; --w-high:#F7EBDC; --w-med:#EEF0DE; --w-low:#E2EAF2; --w-ok:#DFEDE7;
+    --trace:#0F6F7A; --trace-2:#A9631A;
+    --measure:72ch; --frame:1140px;
+    --f-display:"Spectral",Georgia,"Times New Roman",serif;
+    --f-body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#0C0E12; --surface:#13161B; --surface-2:#1B1F26; --code:#171B21;
+    --ink:#DFE4EA; --ink-2:#B3BBC4; --ink-3:#7E8894;
+    --rule:#262B33; --rule-soft:#1E232A;
+    --accent:#4FC3CE; --accent-2:#D9A45C;
+    --crit:#E4897C; --high:#DFA45C; --med:#B6BE72; --low:#82B2D6; --ok:#6FC2A2;
+    --w-crit:#2B1714; --w-high:#2A1F13; --w-med:#22240F; --w-low:#14212C; --w-ok:#12241D;
+    --trace:#4FC3CE; --trace-2:#D9A45C;
+  }}
+  :root[data-theme="dark"]{
+    --paper:#0C0E12; --surface:#13161B; --surface-2:#1B1F26; --code:#171B21;
+    --ink:#DFE4EA; --ink-2:#B3BBC4; --ink-3:#7E8894;
+    --rule:#262B33; --rule-soft:#1E232A;
+    --accent:#4FC3CE; --accent-2:#D9A45C;
+    --crit:#E4897C; --high:#DFA45C; --med:#B6BE72; --low:#82B2D6; --ok:#6FC2A2;
+    --w-crit:#2B1714; --w-high:#2A1F13; --w-med:#22240F; --w-low:#14212C; --w-ok:#12241D;
+    --trace:#4FC3CE; --trace-2:#D9A45C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .frame{max-width:var(--frame);margin:0 auto;padding:0 28px 96px;}
+  p,li{max-width:var(--measure);}
+  code,.mono{font-family:var(--f-mono);font-size:0.86em;}
+  code{background:var(--code);padding:0.1em 0.36em;border-radius:2px;word-break:break-word;}
+  a{color:var(--accent);}
+
+  header{padding:56px 0 26px;border-bottom:1px solid var(--ink);margin-bottom:8px;}
+  .eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin:0 0 18px;}
+  h1{font-family:var(--f-display);font-weight:600;font-size:clamp(34px,6.2vw,54px);line-height:1.02;letter-spacing:-0.02em;margin:0 0 20px;max-width:17ch;text-wrap:balance;}
+  .standfirst{font-size:18px;line-height:1.55;color:var(--ink-2);margin:0 0 30px;max-width:62ch;}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px 30px;border-top:1px solid var(--rule);padding-top:18px;}
+  .meta dt{font-family:var(--f-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;}
+  .meta dd{margin:0;font-size:14px;color:var(--ink-2);}
+
+  section{margin-top:62px;}
+  h2{font-family:var(--f-display);font-weight:600;font-size:27px;letter-spacing:-0.01em;margin:0 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);display:flex;align-items:baseline;gap:16px;}
+  h2 .tick{font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0.09em;white-space:nowrap;}
+  .lede{color:var(--ink-2);margin:16px 0 26px;}
+  h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:36px 0 8px;letter-spacing:-0.005em;}
+  h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--ink-3);font-weight:500;margin:26px 0 10px;}
+
+  .alarm{border-left:3px solid var(--crit);background:var(--surface);padding:22px 26px;margin:28px 0 0;}
+  .alarm h3{margin:0 0 12px;font-size:20px;}
+  .alarm p{margin:0 0 12px;max-width:68ch;}
+  .alarm p:last-child{margin-bottom:0;}
+  .note{border-left:3px solid var(--accent);background:var(--surface);padding:20px 24px;margin:26px 0;}
+  .note p{margin:0 0 12px;max-width:68ch;} .note p:last-child{margin-bottom:0;}
+
+  pre{font-family:var(--f-mono);font-size:12px;line-height:1.6;background:var(--code);padding:13px 15px;overflow-x:auto;margin:12px 0;border-left:2px solid var(--rule);}
+  pre.bad{border-left-color:var(--crit);} pre.good{border-left-color:var(--ok);}
+  pre .c{color:var(--ink-3);}
+
+  .table-wrap{overflow-x:auto;margin:18px 0 28px;}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:13.5px;}
+  th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+  th{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.11em;text-transform:uppercase;color:var(--ink-3);font-weight:500;border-bottom:1px solid var(--rule);white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.k{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap;padding-right:18px;}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  .pill{font-family:var(--f-mono);font-size:9px;letter-spacing:0.09em;padding:3px 7px;border-radius:2px;font-weight:600;text-transform:uppercase;white-space:nowrap;}
+  .CRIT{color:var(--crit);background:var(--w-crit);} .HIGH{color:var(--high);background:var(--w-high);}
+  .MED{color:var(--med);background:var(--w-med);} .LOW{color:var(--low);background:var(--w-low);}
+  .OK{color:var(--ok);background:var(--w-ok);}
+
+  .find{display:grid;grid-template-columns:74px 1fr;gap:0 18px;padding:16px 0;border-bottom:1px solid var(--rule-soft);}
+  .find:last-child{border-bottom:none;}
+  .find-id{font-family:var(--f-mono);font-size:11.5px;font-weight:600;color:var(--sc,var(--ink));padding-top:2px;}
+  .find-t{font-weight:600;font-size:15.5px;margin:0 0 6px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .find-t span.txt{flex:1;min-width:200px;}
+  .find-b{color:var(--ink-2);font-size:14.5px;}
+  .find-b p{margin:0 0 8px;max-width:70ch;} .find-b p:last-child{margin-bottom:0;}
+  .fc{--sc:var(--crit);} .fh{--sc:var(--high);} .fm{--sc:var(--med);} .fl{--sc:var(--low);}
+
+  .fig{border:1px solid var(--rule);background:var(--surface);padding:20px 22px 16px;margin:26px 0;}
+  .fig svg{display:block;width:100%;height:auto;}
+  .fig figcaption{font-size:13px;color:var(--ink-3);margin-top:14px;max-width:74ch;line-height:1.55;}
+  .fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;}
+  .panel-h{font-family:var(--f-mono);font-size:10px;letter-spacing:0.11em;text-transform:uppercase;margin:0 0 8px;}
+  .panel-h.ok{color:var(--ok);} .panel-h.bad{color:var(--crit);}
+
+  .wp{border:1px solid var(--rule);background:var(--surface);margin-bottom:12px;}
+  .wp-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 15px;background:var(--surface-2);border-bottom:1px solid var(--rule);}
+  .wp-id{font-family:var(--f-mono);font-size:11.5px;font-weight:700;letter-spacing:0.04em;color:var(--sc,var(--ink));}
+  .wp-t{font-weight:600;font-size:14.5px;flex:1;min-width:210px;}
+  .wp-b{padding:13px 15px;}
+  .wp-b dl{margin:0;display:grid;grid-template-columns:80px 1fr;gap:7px 14px;}
+  .wp-b dt{font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);padding-top:3px;}
+  .wp-b dd{margin:0;font-size:14px;max-width:none;}
+  .files{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2);line-height:1.75;}
+
+  .stage{margin-top:40px;border-top:2px solid var(--rule);padding-top:20px;}
+  .stage-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:4px;}
+  .stage-tag{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--accent);}
+  .stage-t{font-family:var(--f-display);font-size:21px;font-weight:600;margin:0;}
+  .stage-w{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-left:auto;white-space:nowrap;}
+  .stage-g{color:var(--ink-2);margin:6px 0 18px;font-size:14.5px;}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin:22px 0;}
+  .col h4{margin-top:0;}
+  .col ul{margin:0;padding-left:18px;} .col li{margin-bottom:7px;font-size:14.5px;}
+
+  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--f-mono);font-size:11px;color:var(--ink-3);letter-spacing:0.03em;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media (max-width:720px){
+    .frame{padding:0 16px 72px;}
+    .split{grid-template-columns:1fr;}
+    .wp-b dl{grid-template-columns:1fr;gap:3px;} .wp-b dt{padding-top:8px;}
+    .find{grid-template-columns:1fr;gap:6px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+<div class="frame">
+
+  <header>
+    <p class="eyebrow">Volume XI · Spectral library · audit and build plan</p>
+    <h1>Spectral Library Rebuild</h1>
+    <p class="standfirst">
+      The library page is returning 500 to every user, and has been since the scope guard was added.
+      Behind that one line sits a deeper question the fix should settle: what a soil laboratory owes a
+      spectrum, and where the laboratory's job ends and the estimation service's begins.
+    </p>
+    <dl class="meta">
+      <div><dt>Scope</dt><dd>Ingest → storage → QC → library → API</dd></div>
+      <div><dt>Findings</dt><dd>18 · 3 critical</dd></div>
+      <div><dt>Packages</dt><dd>26 · 6 stages</dd></div>
+      <div><dt>Checked</dt><dd><span class="mono">998a9b0</span> · 2 Sep 2026</dd></div>
+    </dl>
+  </header>
+
+  <div class="alarm">
+    <h3>The page is down, and the cause is one missing line</h3>
+    <p><span class="mono">spectralController.js:53</span> calls
+    <span class="mono">scopeGuard.buildScopedWhere(...)</span>. The module is never imported at the top of
+    the file — <span class="mono">getScan</span> and <span class="mono">checkMatches</span> each do their own
+    <span class="mono">require</span> inside the function body, and
+    <span class="mono">getLibrary</span> does not.</p>
+    <pre class="bad"><span class="c">// lines 1–4 — the whole import block</span>
+const prisma = require('../prisma');
+const { validateSpectra } = require('../services/spectralValidation');
+const crypto = require('crypto');
+const { broadcastToLab } = require('../wsServer');
+
+<span class="c">// line 53, inside getLibrary — scopeGuard is not defined here</span>
+where = scopeGuard.buildScopedWhere(user, where, { entityType: 'Spectral', labField: 'labId' });</pre>
+    <p>Every request to <span class="mono">GET /api/spectral</span> throws a
+    <span class="mono">ReferenceError</span>, the surrounding <span class="mono">try/catch</span> swallows it,
+    and the client receives <span class="mono">500 {"error":"scopeGuard is not defined"}</span>. The library
+    lists nothing for anyone, in any laboratory. One <span class="mono">require</span> at the top of the file
+    brings it back — but a page that has been dead this long is worth reopening properly, which is what the
+    rest of this document is for.</p>
+  </div>
+
+  <!-- 01 BOUNDARY -->
+  <section>
+    <h2><span class="tick">01</span> Where the laboratory stops</h2>
+    <p class="lede">You asked that the laboratory keep laboratory things only, with the estimation service
+      running as an independent platform. That is the right division, and it is worth stating precisely,
+      because the boundary determines the data model rather than the other way round.</p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 900 250" role="img" aria-label="Diagram: the laboratory holds acquisition, metadata, QC and curation; the API carries approved spectra with full metadata and reference chemistry; the estimation service holds preprocessing, calibration and prediction.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+          </marker>
+        </defs>
+        <g style="color:var(--ink-3)">
+          <rect x="8" y="30" width="290" height="196" rx="3" fill="var(--surface-2)" stroke="var(--rule)"></rect>
+          <rect x="602" y="30" width="290" height="196" rx="3" fill="var(--surface-2)" stroke="var(--rule)"></rect>
+          <rect x="330" y="72" width="240" height="112" rx="3" fill="none" stroke="var(--accent)" stroke-dasharray="4 3"></rect>
+        </g>
+        <text x="22" y="20" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--accent)">THE LABORATORY · LIMS</text>
+        <text x="616" y="20" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--accent-2)">ESTIMATION SERVICE · SEPARATE</text>
+        <text x="344" y="62" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.3" fill="var(--ink-3)">READ-ONLY API</text>
+
+        <g font-family="Archivo, sans-serif" font-size="13" fill="var(--ink-2)">
+          <text x="26" y="58">Acquisition on a named instrument</text>
+          <text x="26" y="82">The vendor file, kept unaltered</text>
+          <text x="26" y="106">Acquisition metadata and preparation</text>
+          <text x="26" y="130">Measurement QC and artefact checks</text>
+          <text x="26" y="154">Curation: approve, reject, supersede</text>
+          <text x="26" y="178">The link to reference chemistry</text>
+          <text x="26" y="202">Instrument drift and control scans</text>
+
+          <text x="620" y="58">Preprocessing: SNV, MSC, derivatives</text>
+          <text x="620" y="82">Outlier and leverage diagnostics</text>
+          <text x="620" y="106">Calibration: PLS, Cubist, MBL</text>
+          <text x="620" y="130">Calibration transfer between instruments</text>
+          <text x="620" y="154">Model registry and versioning</text>
+          <text x="620" y="178">Prediction with uncertainty</text>
+          <text x="620" y="202">Validation statistics and reporting</text>
+        </g>
+
+        <g style="color:var(--accent)" stroke="currentColor" stroke-width="1.4" fill="none">
+          <line x1="300" y1="128" x2="326" y2="128" marker-end="url(#ar)"></line>
+          <line x1="574" y1="128" x2="600" y2="128" marker-end="url(#ar)"></line>
+        </g>
+        <g font-family="Archivo, sans-serif" font-size="12" fill="var(--ink-2)" text-anchor="middle">
+          <text x="450" y="100">approved spectra</text>
+          <text x="450" y="120">+ full metadata</text>
+          <text x="450" y="140">+ reference values</text>
+          <text x="450" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink-3)">nothing returns</text>
+        </g>
+      </svg>
+      <figcaption>The arrow runs one way. Predictions do not come back into the LIMS as results — a
+        predicted clay content and a pipette determination must never share a column. If the laboratory
+        later wants to display predictions, they arrive as a separate, clearly-labelled record with
+        <span class="mono">provenance: PREDICTED</span>, which WP-31 already provides for.</figcaption>
+    </figure>
+
+    <div class="split">
+      <div class="col">
+        <h4>Two rules that follow</h4>
+        <ul>
+          <li><strong>The LIMS never stores a preprocessed spectrum.</strong> Every preprocessing choice —
+            SNV, MSC, a Savitzky–Golay window, a continuum removal — belongs to a specific model, is
+            irreversible, and will be revised. Store what the instrument produced; let the estimation
+            service transform its own copy.</li>
+          <li><strong>Everything the estimation service needs is metadata, not computation.</strong> That is
+            what makes the boundary cheap to hold. The laboratory does not need to know what a Kubelka–Munk
+            transform is; it needs to record whether the numbers are reflectance or absorbance.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>What that buys</h4>
+        <ul>
+          <li>The estimation team can rebuild every model from scratch at any time, because the raw file
+            and the acquisition conditions survive.</li>
+          <li>A model failure is diagnosable — you can ask whether the instrument drifted, whether the
+            background was stale, whether the samples were ground differently.</li>
+          <li>The library keeps its value when the estimation platform is replaced, which on a ten-year
+            horizon it will be.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 STATUS -->
+  <section>
+    <h2><span class="tick">02</span> Current status</h2>
+    <p class="lede">Eighteen findings, traced in source. The infrastructure is better than it looks in
+      places — there is an API-key mechanism, a scoped external endpoint, a delta-sync, a review workflow
+      and an audit trail. What is missing is almost entirely on the scientific side of the record.</p>
+
+    <div class="find fc">
+      <div class="find-id">SPEC-01</div>
+      <div>
+        <p class="find-t"><span class="txt">The library endpoint throws on every request</span><span class="pill CRIT">Critical</span></p>
+        <div class="find-b"><p><span class="mono">scopeGuard</span> is referenced at
+          <span class="mono">spectralController.js:53</span> and imported nowhere in scope. Caught, logged,
+          returned as 500. The whole page is dark.</p></div>
+      </div>
+    </div>
+
+    <div class="find fc">
+      <div class="find-id">SPEC-02</div>
+      <div>
+        <p class="find-t"><span class="txt">The instrument file is never kept</span><span class="pill CRIT">Critical</span></p>
+        <div class="find-b"><p>The client parses the CSV in the browser and posts two arrays of numbers. The
+          server stores those arrays and discards everything else. There is no copy of what the instrument
+          wrote.</p>
+          <p>This is the defect with the longest tail. A parsing bug found in a year cannot be corrected
+            retrospectively. An OPUS or JCAMP file carries resolution, apodization, co-added scans,
+            laser wavenumber, detector, beamsplitter and the background reference — all of it is thrown
+            away at the browser. And an assessor asking to see the primary record cannot be answered.</p></div>
+      </div>
+    </div>
+
+    <div class="find fc">
+      <div class="find-id">SPEC-03</div>
+      <div>
+        <p class="find-t"><span class="txt">Nothing records what the numbers are</span><span class="pill CRIT">Critical</span></p>
+        <div class="find-b"><p>There is no field anywhere for reflectance, absorbance, pseudo-absorbance
+          log(1/R), Kubelka–Munk or transmittance. <span class="mono">modality</span> holds
+          <span class="mono">NIR</span> or <span class="mono">MIR</span>, which is the spectral region, not
+          the quantity.</p>
+          <p>A consumer receiving <span class="mono">[0.412, 0.418, …]</span> cannot tell whether to apply
+            log(1/R). Guessing from magnitude works until it does not: a well-baselined DRIFT absorbance
+            spectrum of a sandy soil and a reflectance spectrum of a dark clay occupy the same numeric
+            range. This single field is the difference between a library and a pile of numbers.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-04</div>
+      <div>
+        <p class="find-t"><span class="txt">Every spectrum is force-sorted into ascending axis order</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p><span class="mono">spectralController.js:361–364</span> sorts the axis
+          ascending before validation and before storage. For NIR in nanometres that is correct and harmless.
+          For mid-infrared it inverts the convention every instrument, every journal and every technician
+          uses — see section 03.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-05</div>
+      <div>
+        <p class="find-t"><span class="txt">The instrument is a free-text string, usually "Unknown"</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p>Stored as <span class="mono">metadata.instrument</span> inside a JSON blob,
+          defaulting to <span class="mono">'Unknown'</span>. Meanwhile the schema already carries
+          <span class="mono">EquipmentAsset</span>, <span class="mono">EquipmentQualification</span>,
+          <span class="mono">EquipmentEvent</span> and <span class="mono">WorkItemEquipmentUse</span> — a
+          full instrument register with calibration history, unreferenced by any spectrum.</p>
+          <p>There is also a <span class="mono">scanIp</span> column on
+            <span class="mono">SpectralData</span>. A network address is not an instrument identity.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-06</div>
+      <div>
+        <p class="find-t"><span class="txt">CSV only, parsed in the browser</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p>Both upload components declare <span class="mono">accept=".csv"</span> and
+          reject anything else. No JCAMP-DX, no OPUS, no SPC, no ASD binary, no ENVI.</p>
+          <p>So every scan passes through a manual export in vendor software, where an operator chooses —
+            silently, per export — whether to write reflectance or absorbance, at what resolution, over what
+            range, with what interpolation. That export step is where the metadata dies, and it is also the
+            step no one records.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-07</div>
+      <div>
+        <p class="find-t"><span class="txt">No acquisition or preparation conditions</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p>Missing: spectral resolution, number of co-added scans, accessory
+          (DRIFT / ATR / integrating sphere), background reference and when it was collected, detector,
+          beamsplitter, aperture; and on the sample side, grinding fineness, sieve fraction, moisture state,
+          cup or window material, and which replicate this is.</p>
+          <p>Grinding alone moves mid-infrared band intensities by more than the difference between two
+            soils. A library that cannot separate "different soil" from "differently ground" cannot support
+            a transferable calibration.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-08</div>
+      <div>
+        <p class="find-t"><span class="txt">The external endpoint applies no laboratory scoping</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p><span class="mono">sisController.getSpectra</span> reads
+          <span class="mono">req.sisAuth?.labs</span>. <span class="mono">apiKeyAuth</span> sets
+          <span class="mono">type, name, role, countries, projects</span> — never
+          <span class="mono">labs</span>, and the <span class="mono">ApiKey</span> model has no such column.
+          So <span class="mono">keyLabs</span> is always <span class="mono">undefined</span>,
+          <span class="mono">hasGlobalLab</span> is always true, and the laboratory filter never
+          applies. Country scoping still bites when a key sets it; a key without countries reads every
+          laboratory's spectra.</p></div>
+      </div>
+    </div>
+
+    <div class="find fh">
+      <div class="find-id">SPEC-09</div>
+      <div>
+        <p class="find-t"><span class="txt">The external payload carries no metadata and no chemistry</span><span class="pill HIGH">High</span></p>
+        <div class="find-b"><p>The response is id, sampleId, labId, modality, filename, timestamp, qcStatus
+          and two arrays. No instrument, no resolution, no quantity, no preparation, no basis — and no
+          reference values.</p>
+          <p>The pairing of a spectrum with an approved wet-chemistry result is the entire asset. Today the
+            estimation team must call <span class="mono">/results</span> separately and join on a key whose
+            semantics are undocumented, with no indication of which method or unit produced each
+            reference number.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-10</div>
+      <div>
+        <p class="find-t"><span class="txt">The QC is array validation, not spectroscopy</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p><span class="mono">spectralValidation.js</span> checks length, monotonicity,
+          range, flatness, negatives and a mean successive difference. Those are worth having. But the
+          thresholds are blind to the quantity — <span class="mono">maxVal &gt; 1.2</span> flags any
+          honest absorbance spectrum — and <span class="mono">mad &gt; 0.05</span> is a constant compared
+          against a quantity that scales with spectral resolution and with whether the values are R or A.
+          A 2 cm⁻¹ scan and a 16 cm⁻¹ scan of the same soil get different verdicts.</p>
+          <p>What a spectroscopist looks for is absent: local saturation, atmospheric CO₂ and water-vapour
+            residuals, detector splice steps, baseline slope, replicate agreement, and distance from the
+            existing library. Section 05 sets these out.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-11</div>
+      <div>
+        <p class="find-t"><span class="txt">The instrument-range override is never passed</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p>WP-33 added an <span class="mono">options.instrumentRange</span> parameter so
+          a per-instrument window could override the global one. The only call site is
+          <span class="mono">validateSpectra(sortedWavelengths, sortedValues, scanItem.modality)</span> —
+          three arguments. The fourth is never supplied, so the feature has never run.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-12</div>
+      <div>
+        <p class="find-t"><span class="txt">The checksum helper is defined and never called</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p><span class="mono">calculateChecksum</span> sits at line 7 with zero call
+          sites. Consequences: the same file uploaded twice produces two records, nothing detects a
+          truncated or corrupted transfer, and there is no content identity to give the estimation service
+          for cache validation.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-13</div>
+      <div>
+        <p class="find-t"><span class="txt">Sample matching falls back to an unscoped 500-row scan</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p>When exact and by-id lookups fail, the controller runs
+          <span class="mono">prisma.sample.findMany({ take: 500 })</span> with no filter and no ordering,
+          then matches case-insensitively in JavaScript. Past 500 samples the match silently stops working,
+          and which 500 is undefined. A mismatched laboratory ID is only a warning — the scan is attached to
+          the sample anyway.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-14</div>
+      <div>
+        <p class="find-t"><span class="txt">Uploading a spectrum silently changes sample and workflow state</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p>The upload writes <span class="mono">sample.assignedLab</span> when it finds
+          an unassigned sample, and sets a work item to <span class="mono">COMPLETED</span> with a direct
+          <span class="mono">prisma.workItem.update</span> — neither through
+          <span class="mono">transitionSample</span>. The work item is chosen by fuzzy string match
+          (<span class="mono">wAnalysis.includes('NIR')</span>) rather than from the catalogue.</p>
+          <p>None of the per-scan writes share a transaction, so a failure mid-batch leaves a spectrum with
+            no audit row, or a completed work item with no spectrum.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-15</div>
+      <div>
+        <p class="find-t"><span class="txt">The comparison overlay matches wavelengths by float equality</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p><span class="mono">SpectraViewer.jsx:34</span> builds the union of all axis
+          values, then for each scan does <span class="mono">chartData.find(p =&gt; p.wavelength === w)</span>.
+          Exact equality across two instruments, or two exports at different resolutions, almost never
+          matches — the overlay renders as gaps. It is also quadratic: two 1750-point spectra cost about six
+          million comparisons.</p></div>
+      </div>
+    </div>
+
+    <div class="find fm">
+      <div class="find-id">SPEC-16</div>
+      <div>
+        <p class="find-t"><span class="txt">A manager can auto-approve their own upload</span><span class="pill MED">Medium</span></p>
+        <div class="find-b"><p><span class="mono">autoApprove</span> arrives in the request body and is
+          honoured for <span class="mono">LAB_MANAGER</span> and <span class="mono">SUPER_ADMIN</span>,
+          writing <span class="mono">reviewedBy = uploader</span>. For a reference library that will feed an
+          external calibration, self-review is a governance gap rather than a bug — but it should be a
+          conscious laboratory setting, not a request parameter.</p></div>
+      </div>
+    </div>
+
+    <div class="find fl">
+      <div class="find-id">SPEC-17</div>
+      <div>
+        <p class="find-t"><span class="txt">Spectra are stored as JSON text and the list is unpaginated</span><span class="pill LOW">Low</span></p>
+        <div class="find-b"><p>Two arrays serialised as JSON strings run roughly 80–120 KB per mid-infrared
+          scan, parsed in JavaScript on every read. <span class="mono">getLibrary</span> has no
+          <span class="mono">take</span> at all, and the page computes its statistics client-side over the
+          whole result. At a few hundred scans this is invisible; at ten thousand it is the page.</p></div>
+      </div>
+    </div>
+
+    <div class="find fl">
+      <div class="find-id">SPEC-18</div>
+      <div>
+        <p class="find-t"><span class="txt">The y-axis is labelled "absorbance" whatever it holds</span><span class="pill LOW">Low</span></p>
+        <div class="find-b"><p><span class="mono">getScan</span> maps every value into a field named
+          <span class="mono">absorbance</span> and the chart labels it so. External pagination is also
+          unstable: <span class="mono">orderBy: timestamp desc</span> with <span class="mono">skip/take</span>
+          and no tiebreaker means a concurrent upload shifts rows and the consumer silently misses records.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 AXIS -->
+  <section>
+    <h2><span class="tick">03</span> The axis, and why it matters more than it looks</h2>
+    <p class="lede">A sort that looks like tidying is the clearest example of the gap between handling
+      arrays and handling spectra.</p>
+
+    <figure class="fig">
+      <div class="fig-grid">
+        <div>
+          <p class="panel-h ok">Convention · 4000 → 400 cm⁻¹</p>
+          <svg id="fig-correct" viewBox="0 0 420 190" role="img" aria-label="A soil mid-infrared spectrum plotted with wavenumber decreasing left to right, showing the kaolinite hydroxyl band near 3620, the silicate stretch near 1030 and the quartz doublet near 795 and 778 reciprocal centimetres."><line x1="34" y1="160" x2="410" y2="160" stroke="var(--rule)" stroke-width="1"></line><line x1="34" y1="14" x2="34" y2="160" stroke="var(--rule)" stroke-width="1"></line><line x1="34.0" y1="160" x2="34.0" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="34.0" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">4000</text><line x1="138.4" y1="160" x2="138.4" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="138.4" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">3000</text><line x1="242.9" y1="160" x2="242.9" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="242.9" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">2000</text><line x1="347.3" y1="160" x2="347.3" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="347.3" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">1000</text><line x1="410.0" y1="160" x2="410.0" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="410.0" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">400</text><text x="410" y="187" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="0.6" fill="var(--ink-3)">WAVENUMBER / cm⁻¹</text><text x="6" y="22" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="0.6" fill="var(--ink-3)">ABS</text><polyline points="410.0,124.6 409.5,120.9 408.9,116.7 408.4,112.1 407.9,107.1 407.3,101.7 406.8,96.0 406.2,90.2 405.7,84.4 405.2,78.7 404.6,73.2 404.1,68.2 403.6,63.6 403.0,59.7 402.5,56.6 401.9,54.2 401.4,52.6 400.9,51.9 400.3,52.0 399.8,52.8 399.3,54.3 398.7,56.5 398.2,59.2 397.6,62.3 397.1,65.8 396.6,69.6 396.0,73.5 395.5,77.7 395.0,81.9 394.4,86.1 393.9,90.4 393.3,94.6 392.8,98.7 392.3,102.7 391.7,106.5 391.2,110.2 390.7,113.7 390.1,117.0 389.6,120.1 389.1,123.0 388.5,125.6 388.0,127.9 387.4,130.0 386.9,131.9 386.4,133.5 385.8,134.9 385.3,136.1 384.8,137.1 384.2,138.0 383.7,138.7 383.1,139.2 382.6,139.6 382.1,139.9 381.5,140.1 381.0,140.2 380.5,140.2 379.9,140.1 379.4,140.0 378.8,139.8 378.3,139.5 377.8,139.2 377.2,138.9 376.7,138.5 376.2,137.9 375.6,137.2 375.1,136.3 374.5,134.8 374.0,132.4 373.5,128.7 372.9,123.4 372.4,116.5 371.9,108.2 371.3,99.6 370.8,91.8 370.3,86.1 369.7,83.1 369.2,83.1 368.6,85.5 368.1,89.6 367.6,94.4 367.0,99.0 366.5,102.8 366.0,105.1 365.4,105.9 364.9,105.1 364.3,102.8 363.8,99.3 363.3,94.8 362.7,89.5 362.2,83.8 361.7,77.8 361.1,71.9 360.6,66.3 360.0,61.2 359.5,56.6 359.0,52.6 358.4,49.1 357.9,46.0 357.4,43.2 356.8,40.6 356.3,38.3 355.7,36.3 355.2,34.6 354.7,33.3 354.1,32.2 353.6,31.4 353.1,30.8 352.5,30.3 352.0,29.8 351.5,29.2 350.9,28.5 350.4,27.7 349.8,26.8 349.3,25.7 348.8,24.7 348.2,23.6 347.7,22.5 347.2,21.5 346.6,20.6 346.1,19.9 345.5,19.3 345.0,18.9 344.5,18.8 343.9,18.8 343.4,19.1 342.9,19.6 342.3,20.3 341.8,21.2 341.2,22.3 340.7,23.7 340.2,25.3 339.6,27.0 339.1,29.0 338.6,31.1 338.0,33.4 337.5,35.8 336.9,38.4 336.4,41.1 335.9,44.0 335.3,46.9 334.8,49.9 334.3,53.0 333.7,56.2 333.2,59.4 332.7,62.6 332.1,65.9 331.6,69.2 331.0,72.5 330.5,75.7 330.0,79.0 329.4,82.2 328.9,85.3 328.4,88.4 327.8,91.4 327.3,94.4 326.7,97.3 326.2,100.1 325.7,102.8 325.1,105.4 324.6,107.9 324.1,110.3 323.5,112.6 323.0,114.7 322.4,116.8 321.9,118.7 321.4,120.5 320.8,122.2 320.3,123.8 319.8,125.2 319.2,126.5 318.7,127.7 318.1,128.7 317.6,129.6 317.1,130.4 316.5,131.1 316.0,131.7 315.5,132.1 314.9,132.4 314.4,132.6 313.9,132.7 313.3,132.7 312.8,132.6 312.2,132.4 311.7,132.1 311.2,131.8 310.6,131.4 310.1,131.0 309.6,130.5 309.0,130.0 308.5,129.5 307.9,129.1 307.4,128.6 306.9,128.1 306.3,127.7 305.8,127.4 305.3,127.1 304.7,126.8 304.2,126.6 303.6,126.5 303.1,126.4 302.6,126.4 302.0,126.5 301.5,126.7 301.0,126.8 300.4,127.1 299.9,127.3 299.3,127.6 298.8,127.9 298.3,128.2 297.7,128.5 297.2,128.8 296.7,129.1 296.1,129.3 295.6,129.4 295.1,129.6 294.5,129.6 294.0,129.6 293.4,129.5 292.9,129.4 292.4,129.2 291.8,128.9 291.3,128.6 290.8,128.2 290.2,127.7 289.7,127.3 289.1,126.7 288.6,126.2 288.1,125.7 287.5,125.1 287.0,124.6 286.5,124.0 285.9,123.5 285.4,123.0 284.8,122.6 284.3,122.3 283.8,122.0 283.2,121.7 282.7,121.6 282.2,121.5 281.6,121.5 281.1,121.6 280.5,121.7 280.0,122.0 279.5,122.3 278.9,122.7 278.4,123.2 277.9,123.8 277.3,124.5 276.8,125.2 276.3,125.9 275.7,126.7 275.2,127.6 274.6,128.4 274.1,129.3 273.6,130.3 273.0,131.2 272.5,132.1 272.0,133.0 271.4,133.9 270.9,134.7 270.3,135.4 269.8,136.0 269.3,136.5 268.7,136.9 268.2,137.1 267.7,137.2 267.1,137.3 266.6,137.3 266.0,137.4 265.5,137.6 265.0,137.9 264.4,138.4 263.9,139.1 263.4,139.9 262.8,140.7 262.3,141.5 261.7,142.1 261.2,142.6 260.7,142.8 260.1,142.8 259.6,142.6 259.1,142.3 258.5,141.9 258.0,141.4 257.5,141.1 256.9,141.0 256.4,141.0 255.8,141.3 255.3,141.7 254.8,142.4 254.2,143.1 253.7,143.9 253.2,144.7 252.6,145.5 252.1,146.1 251.5,146.6 251.0,147.1 250.5,147.4 249.9,147.6 249.4,147.8 248.9,147.9 248.3,148.0 247.8,148.0 247.2,148.1 246.7,148.1 246.2,148.1 245.6,148.2 245.1,148.2 244.6,148.2 244.0,148.2 243.5,148.2 242.9,148.3 242.4,148.3 241.9,148.3 241.3,148.3 240.8,148.4 240.3,148.4 239.7,148.4 239.2,148.4 238.7,148.4 238.1,148.5 237.6,148.5 237.0,148.5 236.5,148.5 236.0,148.6 235.4,148.6 234.9,148.6 234.4,148.6 233.8,148.6 233.3,148.7 232.7,148.7 232.2,148.7 231.7,148.7 231.1,148.7 230.6,148.8 230.1,148.8 229.5,148.8 229.0,148.8 228.4,148.9 227.9,148.9 227.4,148.9 226.8,148.9 226.3,148.9 225.8,149.0 225.2,149.0 224.7,149.0 224.1,149.0 223.6,149.0 223.1,149.1 222.5,149.1 222.0,149.1 221.5,149.1 220.9,149.2 220.4,149.2 219.9,149.2 219.3,149.2 218.8,149.2 218.2,149.3 217.7,149.3 217.2,149.3 216.6,149.3 216.1,149.3 215.6,149.4 215.0,149.4 214.5,149.4 213.9,149.4 213.4,149.5 212.9,149.5 212.3,149.5 211.8,149.5 211.3,149.5 210.7,149.6 210.2,149.6 209.6,149.6 209.1,149.6 208.6,149.6 208.0,149.7 207.5,149.7 207.0,149.7 206.4,149.7 205.9,149.8 205.3,149.8 204.8,149.8 204.3,149.8 203.7,149.8 203.2,149.9 202.7,149.9 202.1,149.9 201.6,149.9 201.1,149.9 200.5,150.0 200.0,150.0 199.4,150.0 198.9,150.0 198.4,150.1 197.8,150.1 197.3,150.1 196.8,150.1 196.2,150.1 195.7,150.2 195.1,150.2 194.6,150.2 194.1,150.2 193.5,150.2 193.0,150.3 192.5,150.3 191.9,150.3 191.4,150.3 190.8,150.4 190.3,150.4 189.8,150.4 189.2,150.4 188.7,150.4 188.2,150.5 187.6,150.5 187.1,150.5 186.5,150.5 186.0,150.5 185.5,150.6 184.9,150.6 184.4,150.6 183.9,150.6 183.3,150.6 182.8,150.7 182.3,150.7 181.7,150.7 181.2,150.7 180.6,150.7 180.1,150.8 179.6,150.8 179.0,150.8 178.5,150.8 178.0,150.8 177.4,150.9 176.9,150.9 176.3,150.9 175.8,150.9 175.3,150.9 174.7,150.9 174.2,151.0 173.7,151.0 173.1,151.0 172.6,151.0 172.0,151.0 171.5,151.0 171.0,151.0 170.4,151.0 169.9,151.1 169.4,151.1 168.8,151.1 168.3,151.1 167.7,151.1 167.2,151.1 166.7,151.1 166.1,151.1 165.6,151.1 165.1,151.1 164.5,151.1 164.0,151.1 163.5,151.1 162.9,151.1 162.4,151.1 161.8,151.1 161.3,151.0 160.8,151.0 160.2,151.0 159.7,151.0 159.2,150.9 158.6,150.9 158.1,150.9 157.5,150.8 157.0,150.7 156.5,150.6 155.9,150.5 155.4,150.3 154.9,150.1 154.3,149.9 153.8,149.6 153.2,149.2 152.7,148.8 152.2,148.3 151.6,147.8 151.1,147.2 150.6,146.5 150.0,145.8 149.5,145.1 148.9,144.4 148.4,143.7 147.9,143.1 147.3,142.5 146.8,142.1 146.3,141.8 145.7,141.6 145.2,141.5 144.7,141.5 144.1,141.7 143.6,142.0 143.0,142.3 142.5,142.7 142.0,143.1 141.4,143.5 140.9,143.9 140.4,144.2 139.8,144.5 139.3,144.7 138.7,144.9 138.2,145.0 137.7,145.0 137.1,144.9 136.6,144.8 136.1,144.7 135.5,144.5 135.0,144.2 134.4,143.9 133.9,143.6 133.4,143.3 132.8,143.0 132.3,142.6 131.8,142.2 131.2,141.9 130.7,141.5 130.1,141.0 129.6,140.6 129.1,140.2 128.5,139.8 128.0,139.3 127.5,138.9 126.9,138.4 126.4,137.9 125.9,137.4 125.3,136.9 124.8,136.5 124.2,135.9 123.7,135.4 123.2,134.9 122.6,134.4 122.1,133.9 121.6,133.4 121.0,132.8 120.5,132.3 119.9,131.8 119.4,131.2 118.9,130.7 118.3,130.2 117.8,129.6 117.3,129.1 116.7,128.6 116.2,128.0 115.6,127.5 115.1,127.0 114.6,126.4 114.0,125.9 113.5,125.4 113.0,124.9 112.4,124.4 111.9,123.9 111.3,123.5 110.8,123.0 110.3,122.5 109.7,122.1 109.2,121.7 108.7,121.2 108.1,120.8 107.6,120.4 107.1,120.1 106.5,119.7 106.0,119.4 105.4,119.0 104.9,118.7 104.4,118.4 103.8,118.2 103.3,117.9 102.8,117.7 102.2,117.5 101.7,117.3 101.1,117.1 100.6,116.9 100.1,116.8 99.5,116.7 99.0,116.6 98.5,116.6 97.9,116.5 97.4,116.5 96.8,116.5 96.3,116.5 95.8,116.6 95.2,116.6 94.7,116.7 94.2,116.8 93.6,117.0 93.1,117.1 92.5,117.3 92.0,117.5 91.5,117.7 90.9,118.0 90.4,118.3 89.9,118.5 89.3,118.8 88.8,119.2 88.3,119.5 87.7,119.9 87.2,120.2 86.6,120.6 86.1,121.0 85.6,121.5 85.0,121.9 84.5,122.4 84.0,122.8 83.4,123.3 82.9,123.8 82.3,124.3 81.8,124.7 81.3,125.1 80.7,125.5 80.2,125.6 79.7,125.5 79.1,124.9 78.6,123.7 78.0,121.6 77.5,118.5 77.0,114.4 76.4,109.5 75.9,104.1 75.4,98.8 74.8,94.3 74.3,91.4 73.7,90.6 73.2,92.1 72.7,95.7 72.1,101.0 71.6,107.3 71.1,113.9 70.5,120.1 70.0,125.6 69.5,130.0 68.9,133.4 68.4,135.9 67.8,137.7 67.3,139.0 66.8,140.0 66.2,140.8 65.7,141.4 65.2,141.9 64.6,142.5 64.1,142.9 63.5,143.4 63.0,143.9 62.5,144.3 61.9,144.8 61.4,145.2 60.9,145.6 60.3,146.0 59.8,146.5 59.2,146.8 58.7,147.2 58.2,147.6 57.6,148.0 57.1,148.3 56.6,148.7 56.0,149.0 55.5,149.3 54.9,149.6 54.4,149.9 53.9,150.2 53.3,150.5 52.8,150.8 52.3,151.1 51.7,151.3 51.2,151.6 50.7,151.8 50.1,152.0 49.6,152.3 49.0,152.5 48.5,152.7 48.0,152.9 47.4,153.1 46.9,153.3 46.4,153.4 45.8,153.6 45.3,153.8 44.7,153.9 44.2,154.1 43.7,154.2 43.1,154.4 42.6,154.5 42.1,154.6 41.5,154.7 41.0,154.9 40.4,155.0 39.9,155.1 39.4,155.2 38.8,155.3 38.3,155.4 37.8,155.5 37.2,155.6 36.7,155.6 36.1,155.7 35.6,155.8 35.1,155.9 34.5,155.9 34.0,156.0" fill="none" stroke="var(--trace)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="73.7" cy="90.7" r="2" fill="var(--trace)"></circle><text x="73.7" y="84.7" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">3620</text><circle cx="303.5" cy="126.5" r="2" fill="var(--trace)"></circle><text x="303.5" y="120.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">1420</text><circle cx="344.2" cy="18.8" r="2" fill="var(--trace)"></circle><text x="344.2" y="12.8" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">1030</text><circle cx="368.7" cy="84.9" r="2" fill="var(--trace)"></circle><text x="368.7" y="78.9" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">795</text></svg>
+        </div>
+        <div>
+          <p class="panel-h bad">As stored and drawn today · 400 → 4000 cm⁻¹</p>
+          <svg id="fig-current" viewBox="0 0 420 190" role="img" aria-label="The same spectrum mirrored, plotted with wavenumber increasing left to right, which is the reverse of the infrared convention."><line x1="34" y1="160" x2="410" y2="160" stroke="var(--rule)" stroke-width="1"></line><line x1="34" y1="14" x2="34" y2="160" stroke="var(--rule)" stroke-width="1"></line><line x1="34.0" y1="160" x2="34.0" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="34.0" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">400</text><line x1="96.7" y1="160" x2="96.7" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="96.7" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">1000</text><line x1="201.1" y1="160" x2="201.1" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="201.1" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">2000</text><line x1="305.6" y1="160" x2="305.6" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="305.6" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">3000</text><line x1="410.0" y1="160" x2="410.0" y2="164" stroke="var(--rule)" stroke-width="1"></line><text x="410.0" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-3)">4000</text><text x="410" y="187" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="0.6" fill="var(--ink-3)">WAVENUMBER / cm⁻¹</text><text x="6" y="22" font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="0.6" fill="var(--ink-3)">ABS</text><polyline points="34.0,124.6 34.5,120.9 35.1,116.7 35.6,112.1 36.1,107.1 36.7,101.7 37.2,96.0 37.8,90.2 38.3,84.4 38.8,78.7 39.4,73.2 39.9,68.2 40.4,63.6 41.0,59.7 41.5,56.6 42.1,54.2 42.6,52.6 43.1,51.9 43.7,52.0 44.2,52.8 44.7,54.3 45.3,56.5 45.8,59.2 46.4,62.3 46.9,65.8 47.4,69.6 48.0,73.5 48.5,77.7 49.0,81.9 49.6,86.1 50.1,90.4 50.7,94.6 51.2,98.7 51.7,102.7 52.3,106.5 52.8,110.2 53.3,113.7 53.9,117.0 54.4,120.1 54.9,123.0 55.5,125.6 56.0,127.9 56.6,130.0 57.1,131.9 57.6,133.5 58.2,134.9 58.7,136.1 59.2,137.1 59.8,138.0 60.3,138.7 60.9,139.2 61.4,139.6 61.9,139.9 62.5,140.1 63.0,140.2 63.5,140.2 64.1,140.1 64.6,140.0 65.2,139.8 65.7,139.5 66.2,139.2 66.8,138.9 67.3,138.5 67.8,137.9 68.4,137.2 68.9,136.3 69.5,134.8 70.0,132.4 70.5,128.7 71.1,123.4 71.6,116.5 72.1,108.2 72.7,99.6 73.2,91.8 73.7,86.1 74.3,83.1 74.8,83.1 75.4,85.5 75.9,89.6 76.4,94.4 77.0,99.0 77.5,102.8 78.0,105.1 78.6,105.9 79.1,105.1 79.7,102.8 80.2,99.3 80.7,94.8 81.3,89.5 81.8,83.8 82.3,77.8 82.9,71.9 83.4,66.3 84.0,61.2 84.5,56.6 85.0,52.6 85.6,49.1 86.1,46.0 86.6,43.2 87.2,40.6 87.7,38.3 88.3,36.3 88.8,34.6 89.3,33.3 89.9,32.2 90.4,31.4 90.9,30.8 91.5,30.3 92.0,29.8 92.5,29.2 93.1,28.5 93.6,27.7 94.2,26.8 94.7,25.7 95.2,24.7 95.8,23.6 96.3,22.5 96.8,21.5 97.4,20.6 97.9,19.9 98.5,19.3 99.0,18.9 99.5,18.8 100.1,18.8 100.6,19.1 101.1,19.6 101.7,20.3 102.2,21.2 102.8,22.3 103.3,23.7 103.8,25.3 104.4,27.0 104.9,29.0 105.4,31.1 106.0,33.4 106.5,35.8 107.1,38.4 107.6,41.1 108.1,44.0 108.7,46.9 109.2,49.9 109.7,53.0 110.3,56.2 110.8,59.4 111.3,62.6 111.9,65.9 112.4,69.2 113.0,72.5 113.5,75.7 114.0,79.0 114.6,82.2 115.1,85.3 115.6,88.4 116.2,91.4 116.7,94.4 117.3,97.3 117.8,100.1 118.3,102.8 118.9,105.4 119.4,107.9 119.9,110.3 120.5,112.6 121.0,114.7 121.6,116.8 122.1,118.7 122.6,120.5 123.2,122.2 123.7,123.8 124.2,125.2 124.8,126.5 125.3,127.7 125.9,128.7 126.4,129.6 126.9,130.4 127.5,131.1 128.0,131.7 128.5,132.1 129.1,132.4 129.6,132.6 130.1,132.7 130.7,132.7 131.2,132.6 131.8,132.4 132.3,132.1 132.8,131.8 133.4,131.4 133.9,131.0 134.4,130.5 135.0,130.0 135.5,129.5 136.1,129.1 136.6,128.6 137.1,128.1 137.7,127.7 138.2,127.4 138.7,127.1 139.3,126.8 139.8,126.6 140.4,126.5 140.9,126.4 141.4,126.4 142.0,126.5 142.5,126.7 143.0,126.8 143.6,127.1 144.1,127.3 144.7,127.6 145.2,127.9 145.7,128.2 146.3,128.5 146.8,128.8 147.3,129.1 147.9,129.3 148.4,129.4 148.9,129.6 149.5,129.6 150.0,129.6 150.6,129.5 151.1,129.4 151.6,129.2 152.2,128.9 152.7,128.6 153.2,128.2 153.8,127.7 154.3,127.3 154.9,126.7 155.4,126.2 155.9,125.7 156.5,125.1 157.0,124.6 157.5,124.0 158.1,123.5 158.6,123.0 159.2,122.6 159.7,122.3 160.2,122.0 160.8,121.7 161.3,121.6 161.8,121.5 162.4,121.5 162.9,121.6 163.5,121.7 164.0,122.0 164.5,122.3 165.1,122.7 165.6,123.2 166.1,123.8 166.7,124.5 167.2,125.2 167.7,125.9 168.3,126.7 168.8,127.6 169.4,128.4 169.9,129.3 170.4,130.3 171.0,131.2 171.5,132.1 172.0,133.0 172.6,133.9 173.1,134.7 173.7,135.4 174.2,136.0 174.7,136.5 175.3,136.9 175.8,137.1 176.3,137.2 176.9,137.3 177.4,137.3 178.0,137.4 178.5,137.6 179.0,137.9 179.6,138.4 180.1,139.1 180.6,139.9 181.2,140.7 181.7,141.5 182.3,142.1 182.8,142.6 183.3,142.8 183.9,142.8 184.4,142.6 184.9,142.3 185.5,141.9 186.0,141.4 186.5,141.1 187.1,141.0 187.6,141.0 188.2,141.3 188.7,141.7 189.2,142.4 189.8,143.1 190.3,143.9 190.8,144.7 191.4,145.5 191.9,146.1 192.5,146.6 193.0,147.1 193.5,147.4 194.1,147.6 194.6,147.8 195.1,147.9 195.7,148.0 196.2,148.0 196.8,148.1 197.3,148.1 197.8,148.1 198.4,148.2 198.9,148.2 199.4,148.2 200.0,148.2 200.5,148.2 201.1,148.3 201.6,148.3 202.1,148.3 202.7,148.3 203.2,148.4 203.7,148.4 204.3,148.4 204.8,148.4 205.3,148.4 205.9,148.5 206.4,148.5 207.0,148.5 207.5,148.5 208.0,148.6 208.6,148.6 209.1,148.6 209.6,148.6 210.2,148.6 210.7,148.7 211.3,148.7 211.8,148.7 212.3,148.7 212.9,148.7 213.4,148.8 213.9,148.8 214.5,148.8 215.0,148.8 215.6,148.9 216.1,148.9 216.6,148.9 217.2,148.9 217.7,148.9 218.2,149.0 218.8,149.0 219.3,149.0 219.9,149.0 220.4,149.0 220.9,149.1 221.5,149.1 222.0,149.1 222.5,149.1 223.1,149.2 223.6,149.2 224.1,149.2 224.7,149.2 225.2,149.2 225.8,149.3 226.3,149.3 226.8,149.3 227.4,149.3 227.9,149.3 228.4,149.4 229.0,149.4 229.5,149.4 230.1,149.4 230.6,149.5 231.1,149.5 231.7,149.5 232.2,149.5 232.7,149.5 233.3,149.6 233.8,149.6 234.4,149.6 234.9,149.6 235.4,149.6 236.0,149.7 236.5,149.7 237.0,149.7 237.6,149.7 238.1,149.8 238.7,149.8 239.2,149.8 239.7,149.8 240.3,149.8 240.8,149.9 241.3,149.9 241.9,149.9 242.4,149.9 242.9,149.9 243.5,150.0 244.0,150.0 244.6,150.0 245.1,150.0 245.6,150.1 246.2,150.1 246.7,150.1 247.2,150.1 247.8,150.1 248.3,150.2 248.9,150.2 249.4,150.2 249.9,150.2 250.5,150.2 251.0,150.3 251.5,150.3 252.1,150.3 252.6,150.3 253.2,150.4 253.7,150.4 254.2,150.4 254.8,150.4 255.3,150.4 255.8,150.5 256.4,150.5 256.9,150.5 257.5,150.5 258.0,150.5 258.5,150.6 259.1,150.6 259.6,150.6 260.1,150.6 260.7,150.6 261.2,150.7 261.7,150.7 262.3,150.7 262.8,150.7 263.4,150.7 263.9,150.8 264.4,150.8 265.0,150.8 265.5,150.8 266.0,150.8 266.6,150.9 267.1,150.9 267.7,150.9 268.2,150.9 268.7,150.9 269.3,150.9 269.8,151.0 270.3,151.0 270.9,151.0 271.4,151.0 272.0,151.0 272.5,151.0 273.0,151.0 273.6,151.0 274.1,151.1 274.6,151.1 275.2,151.1 275.7,151.1 276.3,151.1 276.8,151.1 277.3,151.1 277.9,151.1 278.4,151.1 278.9,151.1 279.5,151.1 280.0,151.1 280.5,151.1 281.1,151.1 281.6,151.1 282.2,151.1 282.7,151.0 283.2,151.0 283.8,151.0 284.3,151.0 284.8,150.9 285.4,150.9 285.9,150.9 286.5,150.8 287.0,150.7 287.5,150.6 288.1,150.5 288.6,150.3 289.1,150.1 289.7,149.9 290.2,149.6 290.8,149.2 291.3,148.8 291.8,148.3 292.4,147.8 292.9,147.2 293.4,146.5 294.0,145.8 294.5,145.1 295.1,144.4 295.6,143.7 296.1,143.1 296.7,142.5 297.2,142.1 297.7,141.8 298.3,141.6 298.8,141.5 299.3,141.5 299.9,141.7 300.4,142.0 301.0,142.3 301.5,142.7 302.0,143.1 302.6,143.5 303.1,143.9 303.6,144.2 304.2,144.5 304.7,144.7 305.3,144.9 305.8,145.0 306.3,145.0 306.9,144.9 307.4,144.8 307.9,144.7 308.5,144.5 309.0,144.2 309.6,143.9 310.1,143.6 310.6,143.3 311.2,143.0 311.7,142.6 312.2,142.2 312.8,141.9 313.3,141.5 313.9,141.0 314.4,140.6 314.9,140.2 315.5,139.8 316.0,139.3 316.5,138.9 317.1,138.4 317.6,137.9 318.1,137.4 318.7,136.9 319.2,136.5 319.8,135.9 320.3,135.4 320.8,134.9 321.4,134.4 321.9,133.9 322.4,133.4 323.0,132.8 323.5,132.3 324.1,131.8 324.6,131.2 325.1,130.7 325.7,130.2 326.2,129.6 326.7,129.1 327.3,128.6 327.8,128.0 328.4,127.5 328.9,127.0 329.4,126.4 330.0,125.9 330.5,125.4 331.0,124.9 331.6,124.4 332.1,123.9 332.7,123.5 333.2,123.0 333.7,122.5 334.3,122.1 334.8,121.7 335.3,121.2 335.9,120.8 336.4,120.4 336.9,120.1 337.5,119.7 338.0,119.4 338.6,119.0 339.1,118.7 339.6,118.4 340.2,118.2 340.7,117.9 341.2,117.7 341.8,117.5 342.3,117.3 342.9,117.1 343.4,116.9 343.9,116.8 344.5,116.7 345.0,116.6 345.5,116.6 346.1,116.5 346.6,116.5 347.2,116.5 347.7,116.5 348.2,116.6 348.8,116.6 349.3,116.7 349.8,116.8 350.4,117.0 350.9,117.1 351.5,117.3 352.0,117.5 352.5,117.7 353.1,118.0 353.6,118.3 354.1,118.5 354.7,118.8 355.2,119.2 355.7,119.5 356.3,119.9 356.8,120.2 357.4,120.6 357.9,121.0 358.4,121.5 359.0,121.9 359.5,122.4 360.0,122.8 360.6,123.3 361.1,123.8 361.7,124.3 362.2,124.7 362.7,125.1 363.3,125.5 363.8,125.6 364.3,125.5 364.9,124.9 365.4,123.7 366.0,121.6 366.5,118.5 367.0,114.4 367.6,109.5 368.1,104.1 368.6,98.8 369.2,94.3 369.7,91.4 370.3,90.6 370.8,92.1 371.3,95.7 371.9,101.0 372.4,107.3 372.9,113.9 373.5,120.1 374.0,125.6 374.5,130.0 375.1,133.4 375.6,135.9 376.2,137.7 376.7,139.0 377.2,140.0 377.8,140.8 378.3,141.4 378.8,141.9 379.4,142.5 379.9,142.9 380.5,143.4 381.0,143.9 381.5,144.3 382.1,144.8 382.6,145.2 383.1,145.6 383.7,146.0 384.2,146.5 384.8,146.8 385.3,147.2 385.8,147.6 386.4,148.0 386.9,148.3 387.4,148.7 388.0,149.0 388.5,149.3 389.1,149.6 389.6,149.9 390.1,150.2 390.7,150.5 391.2,150.8 391.7,151.1 392.3,151.3 392.8,151.6 393.3,151.8 393.9,152.0 394.4,152.3 395.0,152.5 395.5,152.7 396.0,152.9 396.6,153.1 397.1,153.3 397.6,153.4 398.2,153.6 398.7,153.8 399.3,153.9 399.8,154.1 400.3,154.2 400.9,154.4 401.4,154.5 401.9,154.6 402.5,154.7 403.0,154.9 403.6,155.0 404.1,155.1 404.6,155.2 405.2,155.3 405.7,155.4 406.2,155.5 406.8,155.6 407.3,155.6 407.9,155.7 408.4,155.8 408.9,155.9 409.5,155.9 410.0,156.0" fill="none" stroke="var(--trace-2)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="370.3" cy="90.7" r="2" fill="var(--trace-2)"></circle><text x="370.3" y="84.7" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">3620</text><circle cx="140.5" cy="126.5" r="2" fill="var(--trace-2)"></circle><text x="140.5" y="120.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">1420</text><circle cx="99.8" cy="18.8" r="2" fill="var(--trace-2)"></circle><text x="99.8" y="12.8" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">1030</text><circle cx="75.3" cy="84.9" r="2" fill="var(--trace-2)"></circle><text x="75.3" y="78.9" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">795</text></svg>
+        </div>
+      </div>
+      <figcaption>The same soil, the same numbers. Infrared spectra are read right-to-left in wavenumber by
+        universal convention — every instrument exports that way, every textbook prints that way, and a
+        technician recognises the silicate stretch by where it sits. The ingest sort at
+        <span class="mono">spectralController.js:361</span> reverses the stored array, and
+        <span class="mono">SpectraViewer</span> has no <span class="mono">reversed</span> on its
+        <span class="mono">XAxis</span>, so the library draws every mid-infrared scan backwards. Since the
+        vendor file is not retained (SPEC-02) and no checksum is taken (SPEC-12), the stored array no longer
+        matches any file on disk and cannot be checked against one.</figcaption>
+    </figure>
+
+    <div class="note">
+      <p><strong>Fix the storage, not the plot.</strong> Keep the axis exactly as the instrument delivered
+        it and record its direction; let the viewer decide how to draw. Sorting at ingest to make a chart
+        library happy is how a data layer acquires a presentation bug permanently.</p>
+    </div>
+  </section>
+
+  <!-- 04 RECORD -->
+  <section>
+    <h2><span class="tick">04</span> What the record has to carry</h2>
+    <p class="lede">The target is not an elaborate model. It is the smallest set of fields that lets someone
+      else rebuild a calibration in five years without asking the technician who ran the scan. Fields marked
+      <em>required</em> should block approval when absent.</p>
+
+    <h4>Identity and provenance</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th>Why it exists</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="k">sourceFile</td><td>The vendor file as uploaded, stored intact and served on request</td><td><span class="pill CRIT">absent</span></td></tr>
+        <tr><td class="k">sourceFormat</td><td>OPUS, JCAMP-DX, SPC, ASD, CSV — determines how it was parsed</td><td><span class="pill CRIT">absent</span></td></tr>
+        <tr><td class="k">sha256</td><td>Content identity: deduplication, integrity, cache validation</td><td><span class="pill HIGH">helper unused</span></td></tr>
+        <tr><td class="k">parserVersion</td><td>Which parser produced the stored arrays, so a fix can be re-run</td><td><span class="pill CRIT">absent</span></td></tr>
+        <tr><td class="k">supersedes</td><td>A rescan replaces an earlier scan without deleting it</td><td><span class="pill HIGH">absent</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>Signal definition — what the numbers mean</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th>Values</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="k">quantity</td><td>REFLECTANCE · ABSORBANCE · LOG_1_R · KUBELKA_MUNK · TRANSMITTANCE</td><td><span class="pill CRIT">absent</span></td></tr>
+        <tr><td class="k">axisUnit</td><td>WAVENUMBER_CM1 · WAVELENGTH_NM</td><td><span class="pill HIGH">inferred from modality</span></td></tr>
+        <tr><td class="k">axisDirection</td><td>ASCENDING · DESCENDING, as delivered</td><td><span class="pill HIGH">destroyed at ingest</span></td></tr>
+        <tr><td class="k">region</td><td>VIS · VNIR · NIR · MIR · combined — not the same axis as modality</td><td><span class="pill MED">NIR/MIR only</span></td></tr>
+        <tr><td class="k">isRaw</td><td>True unless the instrument applied a transform; the LIMS never sets it false</td><td><span class="pill HIGH">absent</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>Acquisition</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th>Why a calibration needs it</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="k">equipmentId</td><td>Foreign key to <span class="mono">EquipmentAsset</span> — identity, serial, calibration history</td><td><span class="pill HIGH">free text</span></td></tr>
+        <tr><td class="k">resolution</td><td>cm⁻¹ or nm; sets the noise floor and every smoothing window downstream</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">coAddedScans</td><td>Signal-to-noise goes as √n; 16 and 64 are different measurements</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">accessory</td><td>DRIFT · ATR · integrating sphere · contact probe — changes band shape entirely</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">backgroundRef</td><td>Gold, KBr, Spectralon, or an internal 100 % line — and when it was taken</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">detector, beamsplitter</td><td>DTGS vs MCT sets the usable window and the noise character</td><td><span class="pill MED">absent</span></td></tr>
+        <tr><td class="k">scannedAt, operator</td><td>Drift attribution and traceability</td><td><span class="pill OK">present</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>Sample presentation</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th>Why it matters</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="k">preparation</td><td>Sieved &lt;2 mm, ball-milled, agate-ground &lt;100 µm — the largest controllable source of between-laboratory variance in MIR</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">moistureState</td><td>Air-dry, oven-dry, field-moist; water dominates 3400 and 1630 cm⁻¹ and 1400 and 1900 nm</td><td><span class="pill HIGH">absent</span></td></tr>
+        <tr><td class="k">replicateNo</td><td>Independent repacks, not repeated reads of one cup — the basis of the repeatability check</td><td><span class="pill HIGH">version in JSON</span></td></tr>
+        <tr><td class="k">windowMaterial</td><td>KBr, ZnSe, diamond — sets the low-wavenumber cut-off</td><td><span class="pill MED">absent</span></td></tr>
+        <tr><td class="k">ambientTemp, ambientRh</td><td>Explains water-band and baseline drift across a day</td><td><span class="pill LOW">absent</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p>Most of these are a dropdown that defaults to the laboratory's standing answer and is changed twice
+        a year. They are not a burden on the technician if they are set once per instrument and per method,
+        which is exactly what the method-defaults work in WP-20 already builds.</p>
+    </div>
+  </section>
+
+  <!-- 05 QC -->
+  <section>
+    <h2><span class="tick">05</span> Quality control a spectroscopist expects</h2>
+    <p class="lede">These are checks on the <em>measurement</em>, which is laboratory work. Chemometric
+      outlier detection against a calibration model is not — that stays on the other side of the boundary.
+      The one exception is distance from the library itself, which is curation.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Check</th><th>What it catches</th><th>How</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">Local saturation</td>
+          <td>Detector at full scale over a strong band — the current flat-signal check only fires if the <em>whole</em> spectrum is flat</td>
+          <td>Any run of ≥ 5 consecutive identical values, or values pinned at the instrument maximum</td>
+        </tr>
+        <tr>
+          <td class="k">Atmospheric residual</td>
+          <td>A stale or poor background: the commonest FTIR failure in a working laboratory</td>
+          <td>Sharp structure at 2350 cm⁻¹ (CO₂) and regular rotational fine structure in 3900–3500 and 1900–1300 cm⁻¹</td>
+        </tr>
+        <tr>
+          <td class="k">Detector splice</td>
+          <td>Step discontinuity where a vis-NIR instrument changes detector</td>
+          <td>Step at 1000 nm and 1830 nm exceeding local noise by a set factor — the commonest ASD defect</td>
+        </tr>
+        <tr>
+          <td class="k">Noise, properly</td>
+          <td>Poor packing, too few co-adds, a failing source</td>
+          <td>RMS of the residual after a Savitzky–Golay smooth, measured in a signal-free window (2200–1900 cm⁻¹ for MIR), scaled by resolution — not a fixed successive-difference constant</td>
+        </tr>
+        <tr>
+          <td class="k">Baseline slope and offset</td>
+          <td>Dirty window, poor DRIFT packing, specular reflection</td>
+          <td>Linear fit across the span; flag beyond a per-accessory tolerance</td>
+        </tr>
+        <tr>
+          <td class="k">Replicate agreement</td>
+          <td>Sample heterogeneity and packing error — the honest estimate of measurement uncertainty</td>
+          <td>RMS difference between independent repacks; flag above a per-instrument limit</td>
+        </tr>
+        <tr>
+          <td class="k">Distance from the library</td>
+          <td>Wrong sample, empty cup, the background scanned by mistake, a mislabelled file</td>
+          <td>Mahalanobis distance in the first few principal components of the approved library for that instrument and preparation</td>
+        </tr>
+        <tr>
+          <td class="k">Instrument stability</td>
+          <td>Drift between sessions — the thing that quietly invalidates a calibration</td>
+          <td>A control sample scanned each session, tracked on a chart with limits, as ASTM E1421 does for FTIR performance</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p><strong>Thresholds belong to the instrument, not to the code.</strong> Every number above differs
+        between a benchtop FTIR with a DRIFT accessory and a field spectroradiometer. They belong on the
+        <span class="mono">EquipmentAsset</span> record, set once during instrument commissioning —
+        which is also what finally gives <span class="mono">options.instrumentRange</span> (SPEC-11) a
+        caller.</p>
+    </div>
+  </section>
+
+  <!-- 06 API -->
+  <section>
+    <h2><span class="tick">06</span> The contract with the estimation service</h2>
+    <p class="lede">The foundation exists: <span class="mono">/api/v1/data-exchange/spectra</span>, API-key
+      authentication with hashed keys and expiry, country and project scoping, delta sync. Four things have
+      to change before another team can build on it.</p>
+
+    <h4>1 · Fix the scoping hole first</h4>
+    <p>Add <span class="mono">labs</span> to <span class="mono">ApiKey</span>, populate
+      <span class="mono">req.sisAuth.labs</span> in <span class="mono">apiKeyAuth</span>, and default to
+      <em>deny</em> rather than to global when the field is absent. Until then a key with no country
+      restriction reads every laboratory's spectra (SPEC-08).</p>
+
+    <h4>2 · Return the calibration pair, not the spectrum alone</h4>
+    <p>A spectrum without its reference value is not training data. The endpoint should offer both
+      representations from one call:</p>
+    <pre class="good"><span class="c">GET /api/v1/data-exchange/spectra?instrument=FTIR-GTM-01&amp;withReference=SOC,CLAY&amp;cursor=…</span>
+{
+  "meta": { "cursor": "…", "hasMore": true, "schema": "spectra/v1" },
+  "data": [{
+    "id": "spec-…", "sha256": "…", "sampleId": "…", "labId": "LAB-GTM",
+    "signal":      { "quantity": "ABSORBANCE", "axisUnit": "WAVENUMBER_CM1",
+                     "axisDirection": "DESCENDING", "isRaw": true, "nPoints": 1738 },
+    "acquisition": { "equipmentId": "eq-…", "model": "Bruker Alpha II",
+                     "accessory": "DRIFT", "resolution": 4, "coAddedScans": 32,
+                     "background": "GOLD", "scannedAt": "2026-08-14T09:12:00Z" },
+    "preparation": { "grinding": "AGATE_100UM", "moistureState": "AIR_DRY",
+                     "replicateNo": 1 },
+    "qc":          { "status": "PASS", "flags": [], "approvedAt": "…" },
+    "reference":   [{ "param": "SOC", "value": 18.4, "unit": "g/kg",
+                      "method": "GLOSOLAN-SOP-08 dry combustion",
+                      "basis": "OVEN_DRY", "provenance": "MEASURED",
+                      "resultId": "res-…" }],
+    "axis": [...], "values": [...]
+  }]
+}</pre>
+    <p>The <span class="mono">reference</span> block is what makes this a spectral <em>library</em> rather
+      than a file share. It should carry only <span class="mono">MEASURED</span> results in an
+      <span class="mono">APPROVED</span> state, with the method and unit that produced them.</p>
+
+    <h4>3 · Give it a bulk path</h4>
+    <p>Two hundred mid-infrared spectra as inline JSON is roughly 20 MB per page, re-serialised from stored
+      strings on every request. Model training pulls the whole library. Add a job-based export that writes
+      a columnar file — Parquet, or an axis matrix plus a metadata table — and returns a signed URL. Keep
+      the JSON endpoint for browsing and for incremental sync.</p>
+
+    <h4>4 · Make pagination stable and cacheable</h4>
+    <p>Replace <span class="mono">skip/take</span> over <span class="mono">timestamp desc</span> with a
+      cursor on <span class="mono">(timestamp, id)</span>, and expose <span class="mono">sha256</span> as an
+      ETag so a consumer can skip what it already holds. Then publish the whole thing in
+      <span class="mono">docs/</span> beside the NSIS specification, versioned — the estimation team is
+      building against a contract, and a contract that only exists in the controller is not one.</p>
+  </section>
+
+  <!-- 07 PACKAGES -->
+  <section>
+    <h2><span class="tick">07</span> Work packages</h2>
+    <p class="lede">Sequenced so the page is usable this week, the record is trustworthy before the library
+      grows, and the API is a contract before another team depends on it. Every package carries a test —
+      the library has already produced three pieces of code that were written and never called.</p>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage A</span><h3 class="stage-t">Make it work again</h3><span class="stage-w">2–3 days</span></div>
+      <p class="stage-g">Nothing here needs a schema change. All of it is visible to a user on day one.</p>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">SL-01</span><span class="wp-t">Import the scope guard</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js</dd>
+          <dt>Do</dt><dd>Add <span class="mono">const scopeGuard = require('../utils/scopeGuard');</span> at the top and remove the two in-function requires at lines 113 and 163 so there is one import.</dd>
+          <dt>Accept</dt><dd>Test: <span class="mono">GET /api/spectral</span> as a lab manager returns 200 and only that laboratory's scans. This test would have caught the outage; nothing in the suite covers this route today.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-02</span><span class="wp-t">Stop re-sorting the axis at ingest</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js:361–364 · services/spectralValidation.js</dd>
+          <dt>Do</dt><dd>Store the axis as delivered. Record <span class="mono">axisDirection</span>. Keep the monotonicity check, which already accepts either direction, and fail only on a genuinely unordered axis.</dd>
+          <dt>Accept</dt><dd>Test: a descending MIR file round-trips descending, byte-order preserved.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-03</span><span class="wp-t">Draw spectra the way spectroscopists read them</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/SpectraViewer.jsx</dd>
+          <dt>Do</dt><dd>Set <span class="mono">reversed</span> on the <span class="mono">XAxis</span> when the unit is cm⁻¹. Label the axes from the record: "Wavenumber (cm⁻¹)" or "Wavelength (nm)", and the y-axis from <span class="mono">quantity</span> rather than always "Absorbance". Add a band-position readout on hover.</dd>
+          <dt>Accept</dt><dd>A MIR scan renders 4000 → 400 left to right with a correctly named y-axis.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-04</span><span class="wp-t">Paginate the library and move the statistics server-side</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js · client/src/pages/SpectralLibrary.jsx</dd>
+          <dt>Do</dt><dd>Add <span class="mono">take</span>/cursor to <span class="mono">getLibrary</span> and a separate counts endpoint so the tiles do not depend on having every row loaded.</dd>
+          <dt>Accept</dt><dd>The page opens in under a second against 10,000 seeded scans.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-05</span><span class="wp-t">Fix the comparison overlay</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client/src/components/SpectraViewer.jsx</dd>
+          <dt>Do</dt><dd>Replace exact-float matching with interpolation onto a common display grid, computed once. This is for <em>display</em> only — the stored arrays keep their native axes.</dd>
+          <dt>Accept</dt><dd>Two scans acquired at different resolutions overlay as continuous traces.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage B</span><h3 class="stage-t">Make the record trustworthy</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">Do this before the library grows. Retrofitting metadata onto scans whose operators have moved on is the failure mode of every soil spectral library that has had to be rebuilt.</p>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">SL-06</span><span class="wp-t">Keep the instrument file</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · new storage path · spectralController.js</dd>
+          <dt>Do</dt><dd>Store the uploaded file unaltered with its <span class="mono">sha256</span>, format and parser version; serve it back on request. Blob on disk with the path on the record — not in SQLite.</dd>
+          <dt>Accept</dt><dd>The original file downloads back byte-identical, and its hash matches the record.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--crit)">
+        <div class="wp-h"><span class="wp-id">SL-07</span><span class="wp-t">Record what the numbers are</span><span class="pill CRIT">Critical</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · client upload components</dd>
+          <dt>Do</dt><dd>Add <span class="mono">quantity</span>, <span class="mono">axisUnit</span>, <span class="mono">axisDirection</span>, <span class="mono">region</span>, <span class="mono">isRaw</span>. Read them from the file where the format carries them; otherwise require them at upload. Backfill existing rows only where the instrument and export are known — mark the rest <span class="mono">UNVERIFIED</span> rather than guessing.</dd>
+          <dt>Accept</dt><dd>No approved scan lacks a quantity. Nothing is guessed from magnitude.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-08</span><span class="wp-t">Point spectra at the instrument register</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>Add <span class="mono">equipmentId</span> as a foreign key to <span class="mono">EquipmentAsset</span>, required for new scans. Drop <span class="mono">scanIp</span>. The register, its qualification records and its event history already exist.</dd>
+          <dt>Accept</dt><dd>"Show every scan from this instrument since its last service" is one query.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-09</span><span class="wp-t">Promote acquisition metadata out of the JSON blob</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma</dd>
+          <dt>Do</dt><dd>Typed columns for resolution, co-added scans, accessory, background reference and its timestamp, detector, beamsplitter. Defaults per instrument and per method, so the technician confirms rather than types.</dd>
+          <dt>Accept</dt><dd>Every field is filterable and appears in the export. A scan cannot be approved with any of them empty.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-10</span><span class="wp-t">Capture sample presentation</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · upload UI</dd>
+          <dt>Do</dt><dd>Grinding and sieve fraction, moisture state, window material, replicate number. Default from the sample's own preparation record where WP-40 captures it, so it is not asked twice.</dd>
+          <dt>Accept</dt><dd>Two scans of one sample at different grindings are distinguishable without reading a filename.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-11</span><span class="wp-t">Use the checksum that already exists</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js</dd>
+          <dt>Do</dt><dd>Call <span class="mono">calculateChecksum</span>, store it, and refuse or flag a duplicate hash within the same laboratory. It has sat unused at line 7 since the file was written.</dd>
+          <dt>Accept</dt><dd>Uploading the same file twice is reported as a duplicate, not stored twice.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-12</span><span class="wp-t">Supersede rather than accumulate</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · spectralController.js</dd>
+          <dt>Do</dt><dd>Add <span class="mono">supersedes</span> and <span class="mono">isCurrent</span>. A rescan marks the previous scan superseded with a reason; nothing is deleted. Replaces the <span class="mono">scanVersion</span> counter buried in metadata.</dd>
+          <dt>Accept</dt><dd>The API returns current scans by default and the full history on request.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage C</span><h3 class="stage-t">Take the instrument's own files</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">Every manual CSV export is a chance to lose the metadata Stage B just started collecting.</p>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-13</span><span class="wp-t">Move parsing to the server</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">client upload components · new server/services/spectralParser.js</dd>
+          <dt>Do</dt><dd>Upload the file itself as multipart; parse server-side. The browser currently reads the CSV and posts arrays, which is why binary formats are impossible and why a parser fix cannot be applied retrospectively.</dd>
+          <dt>Accept</dt><dd>The client posts a file. Re-parsing an existing stored file produces identical arrays.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-14</span><span class="wp-t">Support the formats instruments actually write</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/spectralParser.js</dd>
+          <dt>Do</dt><dd>JCAMP-DX first — it is text, well specified, carries metadata and nearly every FTIR exports it. Then Bruker OPUS, ASD binary, and SPC. Read instrument, resolution, co-added scans, quantity and background out of the file rather than asking the technician. Keep CSV with a mandatory column mapping.</dd>
+          <dt>Accept</dt><dd>A JCAMP file uploads with its acquisition fields already populated and no manual entry.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-15</span><span class="wp-t">Make batch upload atomic and bounded</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js</dd>
+          <dt>Do</dt><dd>One transaction per scan covering the record, the audit row and any work-item change. Replace the unscoped <span class="mono">findMany({ take: 500 })</span> match with an indexed, lab-scoped lookup. Refuse a laboratory-ID mismatch instead of warning and linking anyway.</dd>
+          <dt>Accept</dt><dd>A failure mid-batch leaves no partial record. Matching works past 500 samples.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-16</span><span class="wp-t">Route workflow side effects through the state authority</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/spectralController.js</dd>
+          <dt>Do</dt><dd>The upload writes <span class="mono">sample.assignedLab</span> and completes a work item directly. Route both through <span class="mono">transitionSample</span> and the work-item service, and select the work item from the catalogue rather than by <span class="mono">includes('NIR')</span>.</dd>
+          <dt>Accept</dt><dd>No direct status write remains in this controller.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage D</span><h3 class="stage-t">Quality control worth the name</h3><span class="stage-w">1.5 weeks</span></div>
+      <p class="stage-g">Section 05 in code. Each check is independent and separately testable against a synthetic defect.</p>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-17</span><span class="wp-t">Make the thresholds instrument-aware</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/spectralValidation.js · EquipmentAsset</dd>
+          <dt>Do</dt><dd>Move range, noise and baseline limits onto the instrument record and pass them as the fourth argument that already exists and has never been supplied (SPEC-11). Make the value checks conditional on <span class="mono">quantity</span> so an absorbance of 1.4 stops being flagged as impossible reflectance.</dd>
+          <dt>Accept</dt><dd>A valid absorbance spectrum passes. Grep shows the options argument is passed at every call site.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-18</span><span class="wp-t">Add the artefact checks</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/spectralValidation.js</dd>
+          <dt>Do</dt><dd>Local saturation; atmospheric CO₂ and water-vapour residual; vis-NIR detector splice at 1000 and 1830 nm; baseline slope and offset; a resolution-scaled noise estimate from a signal-free window rather than a fixed successive-difference constant.</dd>
+          <dt>Accept</dt><dd>A test fixture per defect — a clipped scan, a stale-background scan, a spliced scan — is flagged, and a clean scan is not.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-19</span><span class="wp-t">Replicate agreement</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/services/spectralValidation.js · qcService.js</dd>
+          <dt>Do</dt><dd>Where a sample has more than one replicate for the same instrument and preparation, compute the RMS difference and flag above a per-instrument limit. This is the laboratory's honest measurement-uncertainty figure and it belongs on the certificate.</dd>
+          <dt>Accept</dt><dd>Two disagreeing repacks raise a flag naming both scans.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-20</span><span class="wp-t">Library outlier screening</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">new server/services/spectralOutlier.js</dd>
+          <dt>Do</dt><dd>Mahalanobis distance in the first few principal components of the approved library for that instrument and preparation, recomputed on a schedule. This is curation, not calibration — it catches the empty cup and the mislabelled file, and it stays inside the laboratory.</dd>
+          <dt>Accept</dt><dd>A background scan submitted as a sample is flagged before a human sees it.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-21</span><span class="wp-t">Instrument control scans and a drift chart</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · qcController.js · a small dashboard panel</dd>
+          <dt>Do</dt><dd>A scan type of CONTROL, linked to no sample, recorded each session on a stable reference material, tracked on a chart with limits. ASTM E1421 is the reference for FTIR performance checks.</dd>
+          <dt>Accept</dt><dd>A manager can see whether an instrument has drifted this month before trusting a month of scans.</dd>
+        </dl></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-h"><span class="stage-tag">Stage E</span><h3 class="stage-t">Turn the endpoint into a contract</h3><span class="stage-w">1 week</span></div>
+      <p class="stage-g">Blocked on Stage B — an API contract that promises metadata the record does not hold cannot be honoured.</p>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-22</span><span class="wp-t">Close the API-key scoping hole</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/prisma/schema.prisma · middleware/apiKeyAuth.js · controllers/sisController.js</dd>
+          <dt>Do</dt><dd>Add <span class="mono">labs</span> to <span class="mono">ApiKey</span>, populate <span class="mono">req.sisAuth.labs</span>, and treat an absent scope as deny rather than as global. Extend WP-41's isolation suite to cover the API-key path, which it does not.</dd>
+          <dt>Accept</dt><dd>A key scoped to one laboratory cannot read another's spectra. The test fails if the scoping line is removed.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--high)">
+        <div class="wp-h"><span class="wp-id">SL-23</span><span class="wp-t">Return metadata and reference chemistry</span><span class="pill HIGH">High</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sisController.js</dd>
+          <dt>Do</dt><dd>The payload in section 06: signal, acquisition, preparation, qc, and an optional <span class="mono">reference</span> block of approved MEASURED results with method, unit and basis. Add <span class="mono">instrument</span> and <span class="mono">qcStatus</span> filters.</dd>
+          <dt>Accept</dt><dd>One call returns everything needed to fit a model. The estimation team confirms it before this is marked done.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-24</span><span class="wp-t">Cursor pagination and content validators</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">server/controllers/sisController.js</dd>
+          <dt>Do</dt><dd>Cursor on <span class="mono">(timestamp, id)</span> instead of <span class="mono">skip/take</span>; <span class="mono">sha256</span> as ETag; <span class="mono">If-Modified-Since</span> on the sync path.</dd>
+          <dt>Accept</dt><dd>Paging through the library while uploads are running returns every record exactly once.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-25</span><span class="wp-t">Bulk export for model training</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">new server/controllers/spectralExportController.js</dd>
+          <dt>Do</dt><dd>A job that writes a columnar dataset — Parquet, or an axis matrix plus a metadata table — and returns a signed URL. Scoped by the same key. Inline JSON stays for browsing and incremental sync.</dd>
+          <dt>Accept</dt><dd>Ten thousand spectra with metadata and reference values export in one file.</dd>
+        </dl></div>
+      </div>
+
+      <div class="wp" style="--sc:var(--med)">
+        <div class="wp-h"><span class="wp-id">SL-26</span><span class="wp-t">Publish the specification</span><span class="pill MED">Medium</span></div>
+        <div class="wp-b"><dl>
+          <dt>Files</dt><dd class="files">docs/spectral-exchange-v1.md (new)</dd>
+          <dt>Do</dt><dd>Versioned, beside the NSIS specification, with the field dictionary, the controlled vocabularies for quantity, accessory and preparation, the pagination rules, and worked examples. The spectra endpoint is not mentioned in any published document today.</dd>
+          <dt>Accept</dt><dd>The estimation team builds against the document without asking a question that the document should have answered.</dd>
+        </dl></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 OUT -->
+  <section>
+    <h2><span class="tick">08</span> What stays out of the LIMS</h2>
+    <p class="lede">Worth writing down, because each of these will be proposed at some point by someone
+      reasonable, and each would move the boundary.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Not in the LIMS</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Preprocessing pipelines — SNV, MSC, derivatives, continuum removal</td><td>Model-dependent, irreversible, and revised with every model. Store what the instrument produced.</td></tr>
+        <tr><td>Calibration models of any kind</td><td>A separate platform with its own lifecycle, versioning and validation regime. Duplicating it here means two model registries and no authority.</td></tr>
+        <tr><td>Predicted values written back as results</td><td>A prediction is not a determination. If they are ever displayed, they arrive as separate records marked <span class="mono">PREDICTED</span>, never merged into a certificate column.</td></tr>
+        <tr><td>Calibration transfer between instruments</td><td>Needs paired standardisation samples and model context. The laboratory's obligation is to scan the transfer set and store it like any other scan.</td></tr>
+        <tr><td>Resampling to a common axis grid at storage</td><td>Lossy and irreversible. Resample for display only; ship native axes to consumers.</td></tr>
+        <tr><td>A public spectral library portal</td><td>Different problem: licensing, consent, embargo and citation. Worth doing later, on top of a correct internal library, not instead of one.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <p><strong>One test to carry through.</strong> Before any package is marked complete, upload a real
+        instrument file, approve it, pull it back through the external API with a scoped key, and check that
+        every field needed to rebuild the measurement survived the round trip. The three pieces of code in
+        this subsystem that were written and never called —
+        <span class="mono">calculateChecksum</span>, the instrument-range override, and the scope-guard
+        import that was never added — all passed review. None of them would have survived that test.</p>
+    </div>
+  </section>
+
+  <footer>
+    SoilFER-LIMS · Volume XI · spectral library audit and build plan · 2 September 2026 · 18 findings · 26 packages · audit only, no changes made
+  </footer>
+</div>
+
+<script>
+(function () {
+  // Synthetic but band-accurate soil MIR trace: sum of Gaussians at real absorption positions.
+  var BANDS = [
+    { c: 3620, h: 0.34, w: 22 },   // kaolinite structural OH
+    { c: 3400, h: 0.30, w: 210 },  // adsorbed water, broad
+    { c: 2930, h: 0.06, w: 38 },   // aliphatic C-H
+    { c: 1870, h: 0.05, w: 26 },   // quartz overtone
+    { c: 1790, h: 0.04, w: 24 },   // quartz overtone
+    { c: 1630, h: 0.20, w: 85 },   // water bend / aromatic C=C
+    { c: 1420, h: 0.14, w: 68 },   // carbonate
+    { c: 1030, h: 1.00, w: 120 },  // Si-O stretch, dominant
+    { c: 915,  h: 0.19, w: 32 },   // Al-OH bend
+    { c: 875,  h: 0.11, w: 22 },   // carbonate out-of-plane
+    { c: 795,  h: 0.21, w: 18 },   // quartz doublet
+    { c: 778,  h: 0.19, w: 16 },   // quartz doublet
+    { c: 520,  h: 0.44, w: 55 },   // Si-O-Al
+    { c: 470,  h: 0.38, w: 42 }    // Si-O bend
+  ];
+
+  function absorbance(w) {
+    var a = 0.18 + 0.12 * ((4000 - w) / 3600);
+    for (var i = 0; i < BANDS.length; i++) {
+      var b = BANDS[i], d = (w - b.c) / b.w;
+      a += b.h * Math.exp(-0.5 * d * d);
+    }
+    return a;
+  }
+
+  var LABELS = [
+    { c: 3620, t: '3620' },
+    { c: 1420, t: '1420' },
+    { c: 1030, t: '1030' },
+    { c: 795,  t: '795' }
+  ];
+
+  var W = 420, H = 190, L = 34, R = 10, T = 14, B = 30;
+  var PW = W - L - R, PH = H - T - B;
+
+  function build(id, descending) {
+    var svg = document.getElementById(id);
+    if (!svg) return;
+    var pts = [], i, w, a;
+    var amin = Infinity, amax = -Infinity, vals = [];
+    for (i = 0; i <= 700; i++) {
+      w = 400 + (3600 * i / 700);
+      a = absorbance(w);
+      vals.push({ w: w, a: a });
+      if (a < amin) amin = a;
+      if (a > amax) amax = a;
+    }
+    var span = amax - amin || 1;
+
+    function px(wn) {
+      var f = (wn - 400) / 3600;            // 0 at 400, 1 at 4000
+      if (descending) f = 1 - f;             // 4000 on the left
+      return L + f * PW;
+    }
+    function py(av) { return T + PH - ((av - amin) / span) * PH * 0.94 - 4; }
+
+    for (i = 0; i < vals.length; i++) {
+      pts.push(px(vals[i].w).toFixed(1) + ',' + py(vals[i].a).toFixed(1));
+    }
+
+    var ticks = descending ? [4000, 3000, 2000, 1000, 400] : [400, 1000, 2000, 3000, 4000];
+    var out = '';
+
+    out += '<line x1="' + L + '" y1="' + (T + PH) + '" x2="' + (L + PW) + '" y2="' + (T + PH) +
+           '" stroke="var(--rule)" stroke-width="1"/>';
+    out += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + (T + PH) +
+           '" stroke="var(--rule)" stroke-width="1"/>';
+
+    for (i = 0; i < ticks.length; i++) {
+      var tx = px(ticks[i]);
+      out += '<line x1="' + tx.toFixed(1) + '" y1="' + (T + PH) + '" x2="' + tx.toFixed(1) +
+             '" y2="' + (T + PH + 4) + '" stroke="var(--rule)" stroke-width="1"/>';
+      out += '<text x="' + tx.toFixed(1) + '" y="' + (T + PH + 16) +
+             '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" ' +
+             'fill="var(--ink-3)">' + ticks[i] + '</text>';
+    }
+
+    out += '<text x="' + (L + PW) + '" y="' + (T + PH + 27) + '" text-anchor="end" ' +
+           'font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing="0.6" ' +
+           'fill="var(--ink-3)">WAVENUMBER / cm&#8315;&#185;</text>';
+    out += '<text x="6" y="' + (T + 8) + '" font-family="IBM Plex Mono, monospace" font-size="8.5" ' +
+           'letter-spacing="0.6" fill="var(--ink-3)">ABS</text>';
+
+    out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' +
+           (descending ? 'var(--trace)' : 'var(--trace-2)') + '" stroke-width="1.5" ' +
+           'stroke-linejoin="round" stroke-linecap="round"/>';
+
+    for (i = 0; i < LABELS.length; i++) {
+      var lb = LABELS[i], lx = px(lb.c), ly = py(absorbance(lb.c));
+      out += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="2" fill="' +
+             (descending ? 'var(--trace)' : 'var(--trace-2)') + '"/>';
+      out += '<text x="' + lx.toFixed(1) + '" y="' + (ly - 6).toFixed(1) + '" text-anchor="middle" ' +
+             'font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--ink-2)">' +
+             lb.t + '</text>';
+    }
+
+    svg.innerHTML = out;
+  }
+
+  build('fig-correct', true);
+  build('fig-current', false);
+})();
+</script>
+
+</body></html>

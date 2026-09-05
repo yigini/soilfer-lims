@@ -31,13 +31,15 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         return [];
     }, [sample, samples]);
 
+    const CANONICAL_ACCEPTED_STATES = ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED', 'ARCHIVED'];
+
     // Initialize selection when dialog opens or samples change
     useEffect(() => {
         if (isOpen && sampleList.length > 0) {
             fetchBranding();
 
             // Default: select all accepted samples, or all if none are explicitly accepted
-            const accepted = sampleList.filter(s => s.status !== 'REJECTED');
+            const accepted = sampleList.filter(s => CANONICAL_ACCEPTED_STATES.includes(s.status));
             const toSelect = accepted.length > 0 ? accepted : sampleList;
             setSelectedIds(new Set(toSelect.map(s => s.id || s.labId || s.originalId)));
         }
@@ -86,11 +88,21 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
 
     const fetchBranding = async () => {
         try {
+            // S26: Try public branding endpoint first so non-admin technicians can get branding
+            const res = await axios.get('/api/public/branding');
+            if (res.data?.branding) {
+                setBranding(res.data.branding);
+                return;
+            }
+        } catch {}
+
+        try {
             const res = await axios.get('/api/admin/settings');
             const settings = res.data?.data || res.data;
             if (settings?.branding) setBranding(settings.branding);
         } catch (e) {
-            console.warn("Failed to fetch branding", e);
+            console.warn("Using default branding fallback", e);
+            setBranding({ title: 'SoilFER LIMS', logoUrl: '/assets/img/logo-light.png' });
         }
     };
 
@@ -116,7 +128,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
     };
 
     const handleSelectAcceptedOnly = () => {
-        const accepted = sampleList.filter(s => s.status !== 'REJECTED');
+        const accepted = sampleList.filter(s => CANONICAL_ACCEPTED_STATES.includes(s.status));
         setSelectedIds(new Set(accepted.map(s => s.id || s.labId || s.originalId)));
     };
 

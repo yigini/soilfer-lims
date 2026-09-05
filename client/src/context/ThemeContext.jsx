@@ -12,7 +12,7 @@ export const ThemeProvider = ({ children }) => {
             accent: '#D97706'
         },
         title: 'SoilFER LIMS',
-        logoUrl: '/assets/img/soilfer-logo.png'
+        logoUrl: '/assets/img/logo-light.png'
     });
 
     // Dark mode state

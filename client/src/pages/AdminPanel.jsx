@@ -20,7 +20,7 @@ const AdminPanel = () => {
     const isMasterUser = user?.role === 'MASTER_USER';
     const isLabManager = user?.role === 'LAB_MANAGER';
 
-    const canManageBranding = isSuperAdmin || hasPermission('MANAGE_BRANDING');
+    const canManageBranding = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_BRANDING');
     const canManageAnalyses = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_ANALYSES');
     const canViewAudit = isSuperAdmin || isMasterUser || isLabManager || hasPermission('VIEW_AUDIT');
     const canManageApiKeys = isSuperAdmin || isMasterUser || isLabManager;

@@ -1931,6 +1931,17 @@ exports.deleteScan = async (req, res) => {
             return res.status(400).json({ error: 'Spectrum is already in trash.' });
         }
 
+        // C10: Do not allow trashing spectra linked to ACCEPTED or SUBMITTED work items
+        if (scan.workItemId) {
+            const linkedWi = await prisma.workItem.findUnique({ where: { id: scan.workItemId } });
+            if (linkedWi && ['ACCEPTED', 'SUBMITTED'].includes(linkedWi.status)) {
+                return res.status(400).json({
+                    error: `Cannot delete spectrum linked to a ${linkedWi.status} work item. An authorized amendment or return is required.`,
+                    code: 'LINKED_EVIDENCE_IMMUTABLE'
+                });
+            }
+        }
+
         const previousStatus = scan.status;
         const meta = parseJson(scan.metadata) || {};
         meta._deletedPreviousStatus = previousStatus;

@@ -4,6 +4,8 @@ const idGenerator = require('../services/idGenerator');
 const workflow = require('../workflowContract');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
+const sampleWorkspaceService = require('../services/sampleWorkspaceService');
+const commandReceiptService = require('../services/commandReceiptService');
 
 
 /**
@@ -425,11 +427,16 @@ exports.updateStatus = async (req, res) => {
             });
         }
 
-        // 1. Validate Transition
-        const isManagerOverride = hasPermission(user, 'APPROVE_RESULTS') &&
-            ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status);
+        // S03: Generic status update endpoint cannot directly transition to APPROVED, ARCHIVED, or DISPOSED
+        if (['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status)) {
+            return res.status(400).json({
+                error: `Direct transition to '${status}' via generic status update is prohibited. Approval requires analytical review / report release, and archiving/disposal must be recorded through custody operations.`,
+                code: 'DIRECT_TRANSITION_PROHIBITED'
+            });
+        }
 
-        if (!isManagerOverride && !workflow.isValidSampleTransition(sample.status, status)) {
+        // 1. Validate Transition
+        if (!workflow.isValidSampleTransition(sample.status, status)) {
             return res.status(400).json({
                 error: `Invalid transition from ${sample.status} to ${status}.`
             });
@@ -1722,6 +1729,28 @@ exports.updateSampleAnalyses = async (req, res) => {
             return res.status(403).json({ error: 'Sample is outside your scope' });
         }
 
+        // S08: Disposed material cannot have its analyses modified
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot modify analyses for disposed sample material. Disposed samples are physically immutable.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        // S08: Detect no-op saves (unchanged analyses list)
+        const currentList = sample.requiredAnalyses ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses) : [];
+        if (Array.isArray(analyses) && analyses.length === currentList.length && analyses.every(a => currentList.includes(a))) {
+            return res.json({
+                message: 'No changes detected in analyses list.',
+                sample,
+                noOp: true,
+                added: [],
+                waived: [],
+                removed: [],
+                summary: 'No changes'
+            });
+        }
+
         // SD-03: Three-way reconcile work items BEFORE mutating requiredAnalyses
         const targetList = Array.isArray(analyses) ? analyses : (sample.requiredAnalyses ? JSON.parse(sample.requiredAnalyses) : []);
         const reconcileResult = await workItemController.reconcileWorkItemsForSample(sample, targetList, user, effectiveReason);
@@ -1745,9 +1774,9 @@ exports.updateSampleAnalyses = async (req, res) => {
             analysisGroupIds: analysisGroupIds ? JSON.stringify(analysisGroupIds) : sample.analysisGroupIds
         };
 
-        // If sample was in a final/history state, and new analyses are added, 
-        // we move it back to PROCESSING status without fabricating preparation records.
-        if (['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status) && analyses && analyses.length > 0) {
+        // If sample was in APPROVED or ARCHIVED state, and new analyses are genuinely added, 
+        // move it back to PROCESSING status without fabricating preparation records.
+        if (['APPROVED', 'ARCHIVED'].includes(sample.status) && reconcileResult.added && reconcileResult.added.length > 0) {
             updates.status = 'PROCESSING';
             // SD-08: Leave dryingStatus and preparationStatus as whatever they were (including null if bypassed).
         }
@@ -1799,12 +1828,32 @@ exports.approveSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // Check if there are unapproved/pending work items
-        const workItems = await prisma.workItem.findMany({ where: { sampleId: String(id) } });
-        const unapprovedItems = workItems.filter(w => !['ACCEPTED', 'COMPLETED', 'CANCELLED'].includes(w.status));
+        // S04: Lab scope check
+        const scopeGuard = require('../utils/scopeGuard');
+        try {
+            scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
+        } catch (e) {
+            return res.status(403).json({ error: 'Access Denied: Sample not in your lab scope.', code: 'ACCESS_DENIED_LAB' });
+        }
+
+        // S04: Check analytical work items (must have items and all must be terminal/accepted)
+        const workItems = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] }
+            }
+        });
+        if (workItems.length === 0) {
+            return res.status(400).json({
+                error: 'Cannot approve sample with no ordered analytical work items.',
+                code: 'NO_WORK_ITEMS'
+            });
+        }
+        const unapprovedItems = workItems.filter(w => !['ACCEPTED', 'WAIVED', 'CANCELLED'].includes(w.status));
         if (unapprovedItems.length > 0) {
             return res.status(409).json({
                 error: 'Work items pending approval or completion',
+                code: 'UNAPPROVED_WORK_ITEMS',
                 blockers: unapprovedItems.map(w => ({ id: w.id, analysis: w.analysis, status: w.status }))
             });
         }
@@ -1829,18 +1878,8 @@ exports.approveSample = async (req, res) => {
             }
         });
 
-        // Also approve any pending/validated spectral records for this sample
-        await prisma.spectralData.updateMany({
-            where: {
-                sampleId: String(id),
-                status: { in: ['PENDING', 'VALIDATED'] }
-            },
-            data: {
-                status: 'APPROVED',
-                reviewedBy: req.user.username,
-                reviewedAt: now
-            }
-        });
+        // S05: Do not perform blanket spectralData approval cascade for entire sample.
+        // Spectral scans are approved per work item during work item review.
 
         res.json({ ...updated, success: true, status: 'APPROVED' });
     } catch (error) {
@@ -1865,8 +1904,20 @@ exports.undoApproval = async (req, res) => {
         }
 
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample || !['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status)) {
-            return res.status(400).json({ error: 'Sample not in a reversible state (must be Approved, Archived, or Disposed).' });
+        if (!sample) {
+            return res.status(404).json({ error: 'Sample not found' });
+        }
+
+        // S09: Disposed material cannot be reopened
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot reopen disposed sample material. Disposed samples are physically immutable.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        if (!['APPROVED', 'ARCHIVED'].includes(sample.status)) {
+            return res.status(400).json({ error: 'Sample not in a reversible state (must be Approved or Archived).' });
         }
 
         const previousStatus = sample.status;
@@ -2186,3 +2237,468 @@ exports.getSampleLocations = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch locations' });
     }
 };
+
+/**
+ * GET SAMPLE WORKSPACE PROJECTION
+ * GET /api/samples/:id/workspace
+ */
+exports.getSampleWorkspace = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const workspace = await sampleWorkspaceService.getWorkspace(id, user);
+        res.json(workspace);
+    } catch (err) {
+        if (err.statusCode) {
+            return res.status(err.statusCode).json({ error: err.message, code: err.code });
+        }
+        console.error('[getSampleWorkspace] Error:', err);
+        res.status(500).json({ error: 'Failed to fetch sample workspace' });
+    }
+};
+
+/**
+ * PREVIEW ORDER REVISION
+ * GET or POST /api/samples/:id/orders/preview
+ */
+exports.previewOrderRevision = async (req, res) => {
+    const { id } = req.params;
+    const { analyses, reason } = (req.method === 'POST' ? req.body : req.query) || {};
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: {
+                workItems: true
+            }
+        });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot modify analyses for disposed sample material.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        let currentList = [];
+        try {
+            if (sample.requiredAnalyses) currentList = JSON.parse(sample.requiredAnalyses);
+        } catch (e) {
+            currentList = [];
+        }
+
+        const targetList = Array.isArray(analyses) ? analyses : (typeof analyses === 'string' ? analyses.split(',') : currentList);
+        const added = targetList.filter(a => !currentList.includes(a));
+        const removed = currentList.filter(a => !targetList.includes(a));
+        const unchanged = currentList.filter(a => targetList.includes(a));
+
+        // Check for conflicts on removed items (e.g. recorded results or accepted work)
+        const conflicts = [];
+        for (const code of removed) {
+            const item = sample.workItems.find(w => w.analysis === code);
+            if (item) {
+                if (['ACCEPTED', 'SUBMITTED'].includes(item.status)) {
+                    conflicts.push({
+                        analysis: code,
+                        status: item.status,
+                        reason: `Analysis has status ${item.status} and cannot be removed without an authorized waiver/amendment.`
+                    });
+                }
+            }
+        }
+
+        const reportsCount = await prisma.report.count({
+            where: { sampleId: sample.id, status: 'PUBLISHED' }
+        });
+
+        const crypto = require('crypto');
+        const previewHash = crypto.createHash('sha256')
+            .update(sample.id + JSON.stringify(targetList) + Date.now().toString())
+            .digest('hex');
+
+        res.json({
+            sampleId: sample.id,
+            currentAnalyses: currentList,
+            proposedAnalyses: targetList,
+            added,
+            removed,
+            unchanged,
+            conflicts,
+            canApply: conflicts.length === 0,
+            affectedReportsCount: reportsCount,
+            previewHash,
+            requiresReportAmendment: reportsCount > 0
+        });
+    } catch (err) {
+        console.error('[previewOrderRevision] Error:', err);
+        res.status(500).json({ error: 'Failed to preview order revision' });
+    }
+};
+
+/**
+ * APPLY ORDER REVISION
+ * POST /api/samples/:id/orders
+ */
+exports.applyOrderRevision = async (req, res) => {
+    const { id } = req.params;
+    const { analyses, reason, idempotencyKey } = req.body;
+    const user = req.user;
+
+    const key = idempotencyKey || req.headers['x-idempotency-key'];
+    if (key) {
+        const check = await commandReceiptService.checkReceipt(key, 'APPLY_ORDER_REVISION', user.username, `Sample:${id}`);
+        if (check.isExisting) {
+            if (check.conflict) {
+                return res.status(409).json({ error: 'Idempotency key collision with differing command parameters' });
+            }
+            return res.json(check.receipt.parsedOutcome);
+        }
+    }
+
+    try {
+        if (!hasPermission(user, 'EDIT_ANALYSES')) {
+            return res.status(403).json({ error: 'Insufficient permissions to edit order.' });
+        }
+
+        const sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: {
+                orderRevisions: { orderBy: { version: 'desc' }, take: 1 }
+            }
+        });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot modify order for disposed sample material. Disposed samples are physically immutable.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        // Detect no-op
+        let currentList = [];
+        try {
+            if (sample.requiredAnalyses) currentList = JSON.parse(sample.requiredAnalyses);
+        } catch (e) {
+            currentList = [];
+        }
+
+        const targetList = Array.isArray(analyses) ? analyses : currentList;
+        if (targetList.length === currentList.length && targetList.every(a => currentList.includes(a))) {
+            const noOpOutcome = {
+                message: 'No changes detected in analyses list.',
+                noOp: true,
+                sample
+            };
+            if (key) {
+                await commandReceiptService.recordReceipt(null, {
+                    idempotencyKey: key,
+                    commandType: 'APPLY_ORDER_REVISION',
+                    targetResource: `Sample:${id}`,
+                    actor: user.username,
+                    status: 'SUCCESS',
+                    outcome: noOpOutcome
+                });
+            }
+            return res.json(noOpOutcome);
+        }
+
+        const workItemController = require('./workItemController');
+        const reconcileResult = await workItemController.reconcileWorkItemsForSample(sample, targetList, user, reason);
+
+        if (reconcileResult.conflict) {
+            return res.status(reconcileResult.status || 409).json({
+                error: reconcileResult.error,
+                conflicts: reconcileResult.conflicts,
+                refused: reconcileResult.refused
+            });
+        }
+
+        const nextVersion = (sample.orderRevisions && sample.orderRevisions.length > 0) ? (sample.orderRevisions[0].version + 1) : 1;
+
+        const outcome = await prisma.$transaction(async (tx) => {
+            // Create order revision record
+            const revision = await tx.sampleOrderRevision.create({
+                data: {
+                    sampleId: sample.id,
+                    version: nextVersion,
+                    status: 'ACTIVE',
+                    reason: reason || 'Order revision applied',
+                    requestedBy: user.username,
+                    authorizedBy: user.username,
+                    authorizedAt: new Date()
+                }
+            });
+
+            // Create OrderLine records
+            for (const code of targetList) {
+                await tx.orderLine.create({
+                    data: {
+                        revisionId: revision.id,
+                        analysis: code,
+                        isRequired: true,
+                        status: 'ACTIVE'
+                    }
+                });
+            }
+
+            const updates = {
+                requiredAnalyses: JSON.stringify(targetList)
+            };
+
+            if (['APPROVED', 'ARCHIVED'].includes(sample.status) && reconcileResult.added && reconcileResult.added.length > 0) {
+                updates.status = 'PROCESSING';
+            }
+
+            const updatedSample = await tx.sample.update({
+                where: { id: sample.id },
+                data: updates
+            });
+
+            const crypto = require('crypto');
+            await tx.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'SAMPLE',
+                    entityId: sample.id,
+                    action: 'ORDER_REVISION_APPLIED',
+                    details: `Applied order revision v${nextVersion}: added [${(reconcileResult.added || []).join(', ')}], waived/removed [${(reconcileResult.waived || []).join(', ')}]`,
+                    performedBy: user.username,
+                    sampleId: sample.id
+                }
+            });
+
+            const resultPayload = {
+                success: true,
+                revision,
+                sample: updatedSample,
+                added: reconcileResult.added || [],
+                waived: reconcileResult.waived || [],
+                removed: reconcileResult.removed || []
+            };
+
+            if (key) {
+                await commandReceiptService.recordReceipt(tx, {
+                    idempotencyKey: key,
+                    commandType: 'APPLY_ORDER_REVISION',
+                    targetResource: `Sample:${id}`,
+                    actor: user.username,
+                    status: 'SUCCESS',
+                    outcome: resultPayload
+                });
+            }
+
+            return resultPayload;
+        });
+
+        res.json(outcome);
+    } catch (err) {
+        console.error('[applyOrderRevision] Error:', err);
+        res.status(500).json({ error: 'Failed to apply order revision' });
+    }
+};
+
+/**
+ * CREATE AMENDMENT
+ * POST /api/samples/:id/amendments
+ */
+exports.createAmendment = async (req, res) => {
+    const { id } = req.params;
+    const { type, reason, affectedOrderLines, affectedResults, affectedReports, impactAssessment, idempotencyKey } = req.body;
+    const user = req.user;
+
+    const key = idempotencyKey || req.headers['x-idempotency-key'];
+    if (key) {
+        const check = await commandReceiptService.checkReceipt(key, 'CREATE_AMENDMENT', user.username, `Sample:${id}`);
+        if (check.isExisting) {
+            return res.json(check.receipt.parsedOutcome);
+        }
+    }
+
+    try {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
+            return res.status(403).json({ error: 'Insufficient permissions to create amendment.' });
+        }
+
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        // If sample is disposed, only clerical / metadata amendments allowed
+        if (sample.status === 'DISPOSED' && type !== 'CLERICAL') {
+            return res.status(400).json({
+                error: 'Disposed material only permits clerical/metadata amendments. Physical testing and status resurrection are prohibited.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        const outcome = await prisma.$transaction(async (tx) => {
+            const amendment = await tx.sampleAmendment.create({
+                data: {
+                    sampleId: sample.id,
+                    type: type || 'CLERICAL',
+                    status: 'APPROVED',
+                    reason: reason || 'Amendment recorded',
+                    affectedOrderLines: affectedOrderLines ? JSON.stringify(affectedOrderLines) : null,
+                    affectedResults: affectedResults ? JSON.stringify(affectedResults) : null,
+                    affectedReports: affectedReports ? JSON.stringify(affectedReports) : null,
+                    impactAssessment: impactAssessment || null,
+                    authorizedBy: user.username,
+                    authorizedAt: new Date(),
+                    createdBy: user.username
+                }
+            });
+
+            const crypto = require('crypto');
+            await tx.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'SAMPLE',
+                    entityId: sample.id,
+                    action: 'SAMPLE_AMENDMENT_CREATED',
+                    details: `Created amendment ${amendment.id} (${type}): ${reason}`,
+                    performedBy: user.username,
+                    sampleId: sample.id
+                }
+            });
+
+            const resultPayload = {
+                success: true,
+                amendment
+            };
+
+            if (key) {
+                await commandReceiptService.recordReceipt(tx, {
+                    idempotencyKey: key,
+                    commandType: 'CREATE_AMENDMENT',
+                    targetResource: `Sample:${id}`,
+                    actor: user.username,
+                    status: 'SUCCESS',
+                    outcome: resultPayload
+                });
+            }
+
+            return resultPayload;
+        });
+
+        res.json(outcome);
+    } catch (err) {
+        console.error('[createAmendment] Error:', err);
+        res.status(500).json({ error: 'Failed to create amendment' });
+    }
+};
+
+/**
+ * RECORD STORAGE MOVEMENT
+ * POST /api/samples/:id/custody/move
+ */
+exports.recordStorageMovement = async (req, res) => {
+    const { id } = req.params;
+    const { location, reason, containerId, quantityGrams } = req.body;
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot move disposed sample material.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        let meta = {};
+        try {
+            if (sample.metadata) meta = JSON.parse(sample.metadata);
+        } catch (e) {
+            meta = {};
+        }
+
+        const oldLocation = meta.archiveLocation || 'Not recorded';
+        meta.archiveLocation = location || oldLocation;
+        meta.lastMovementReason = reason || 'Storage movement';
+        meta.lastMovementAt = new Date().toISOString();
+        meta.lastMovementBy = user.username;
+
+        const updatedSample = await prisma.sample.update({
+            where: { id: sample.id },
+            data: {
+                metadata: JSON.stringify(meta)
+            }
+        });
+
+        const crypto = require('crypto');
+        await prisma.auditLog.create({
+            data: {
+                id: crypto.randomUUID(),
+                entity: 'SAMPLE',
+                entityId: sample.id,
+                action: 'STORAGE_MOVEMENT',
+                details: `Sample material moved from '${oldLocation}' to '${location}' (${reason || 'Storage movement'})`,
+                performedBy: user.username,
+                sampleId: sample.id
+            }
+        });
+
+        res.json({
+            success: true,
+            location,
+            oldLocation,
+            sample: updatedSample
+        });
+    } catch (err) {
+        console.error('[recordStorageMovement] Error:', err);
+        res.status(500).json({ error: 'Failed to record storage movement' });
+    }
+};
+
+/**
+ * REPAIR WORK ITEMS (Idempotent Regeneration)
+ * POST /api/samples/:id/repair-work-items
+ */
+exports.repairWorkItems = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        const workItemController = require('./workItemController');
+        const generated = await workItemController.generateWorkItemsForSample(sample);
+
+        res.json({
+            success: true,
+            message: `Generated ${generated.length} work items`,
+            workItems: generated
+        });
+    } catch (err) {
+        console.error('[repairWorkItems] Error:', err);
+        res.status(500).json({ error: 'Failed to repair work items' });
+    }
+};
+
+

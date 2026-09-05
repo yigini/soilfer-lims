@@ -151,7 +151,7 @@ const PERMISSIONS = {
 
     // System & Analyses Configuration
     'MANAGE_BRANDING': [
-        'SUPER_ADMIN'
+        'SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'
     ],
     'MANAGE_ANALYSES': [
         'SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'

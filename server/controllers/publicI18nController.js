@@ -52,3 +52,20 @@ exports.bootstrap = async (_req, res) => {
         res.status(500).json({ error: 'Failed to load i18n bootstrap' });
     }
 };
+
+exports.getPublicBranding = async (_req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findUnique({ where: { id: 'global' } });
+        let branding = {
+            title: 'SoilFER LIMS',
+            logoUrl: '/assets/img/logo-light.png'
+        };
+        if (settings?.branding) {
+            branding = typeof settings.branding === 'string' ? JSON.parse(settings.branding) : settings.branding;
+        }
+        res.json({ branding });
+    } catch (e) {
+        res.json({ branding: { title: 'SoilFER LIMS', logoUrl: '/assets/img/logo-light.png' } });
+    }
+};
+

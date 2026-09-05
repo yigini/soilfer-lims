@@ -168,6 +168,39 @@ exports.generateWorkItemsForSample = async (sample) => {
             });
         }
     }
+
+    // Ensure initial SampleOrderRevision exists
+    try {
+        const existingRev = await prisma.sampleOrderRevision.findFirst({
+            where: { sampleId: String(id) }
+        });
+        if (!existingRev && requiredAnalyses && requiredAnalyses.length > 0) {
+            const rev = await prisma.sampleOrderRevision.create({
+                data: {
+                    sampleId: String(id),
+                    version: 1,
+                    status: 'ACTIVE',
+                    reason: 'Initial order generated at intake',
+                    requestedBy: sample.receivedBy || 'RECEPTION',
+                    authorizedBy: 'SYSTEM',
+                    authorizedAt: new Date()
+                }
+            });
+            for (const code of requiredAnalyses) {
+                await prisma.orderLine.create({
+                    data: {
+                        revisionId: rev.id,
+                        analysis: code,
+                        isRequired: true,
+                        status: 'ACTIVE'
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('[generateWorkItemsForSample] Notice: Order revision creation skipped:', e.message);
+    }
+
     return workItems;
 };
 
@@ -1111,11 +1144,23 @@ exports.reviewWorkItem = async (req, res) => {
             }
         }
 
-        const item = await prisma.workItem.findUnique({ where: { id } });
+        const item = await prisma.workItem.findUnique({
+            where: { id },
+            include: { sample: true }
+        });
         if (!item) {
             return res.status(404).json({
                 error: `Work item not found (ID: ${id}). The task may have been deleted or reassigned. Please refresh the sample details page.`,
                 code: 'WORK_ITEM_NOT_FOUND'
+            });
+        }
+
+        // Lab scope check (S01/S02)
+        const scopeGuard = require('../utils/scopeGuard');
+        if (user.role !== 'SUPER_ADMIN' && user.role !== 'MASTER_USER' && !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({
+                error: 'Access denied: Work item outside your lab scope.',
+                code: 'ACCESS_DENIED_LAB'
             });
         }
 
@@ -1126,6 +1171,57 @@ exports.reviewWorkItem = async (req, res) => {
         ];
         if (!allowedReviewStatuses.includes(status)) {
             return res.status(400).json({ error: `Invalid review status. Use: ${allowedReviewStatuses.join(', ')}` });
+        }
+
+        const isClosureTask = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(item.analysis);
+        if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
+            if (!isClosureTask) {
+                // Canonical guard: must be in SUBMITTED state (COMPLETED is not SUBMITTED)
+                if (item.status !== workflow.WORK_ITEM_STATES.SUBMITTED) {
+                    return res.status(400).json({
+                        error: `Cannot approve work item in '${item.status}' state. Analyses must be completed and submitted by a technician before manager approval.`,
+                        code: 'INVALID_TRANSITION'
+                    });
+                }
+
+                // Evidence check: require valid result, linked scan, or Result row
+                const hasWorkItemResult = item.result !== null && item.result !== undefined && String(item.result).trim() !== '';
+                let hasEvidence = hasWorkItemResult;
+                if (!hasEvidence) {
+                    const linkedScan = await prisma.spectralData.findFirst({
+                        where: {
+                            OR: [
+                                { workItemId: item.id },
+                                { sampleId: String(item.sampleId), status: { in: ['SUBMITTED', 'VALIDATED', 'PENDING'] } }
+                            ]
+                        }
+                    });
+                    if (linkedScan) hasEvidence = true;
+                }
+                if (!hasEvidence) {
+                    const resultRow = await prisma.result.findFirst({
+                        where: { sampleId: String(item.sampleId), param: item.analysis, isCurrent: true }
+                    });
+                    if (resultRow) hasEvidence = true;
+                }
+                if (!hasEvidence) {
+                    return res.status(422).json({
+                        error: `Cannot approve work item '${item.id}' (${item.analysis}): No valid result or scan evidence recorded.`,
+                        code: 'MISSING_EVIDENCE'
+                    });
+                }
+
+                // Batch QC check
+                const qcController = require('./qcController');
+                const batchInfo = await qcController.checkItemBatchStatus(item.id);
+                if (batchInfo && batchInfo.status === 'QC_FAIL') {
+                    return res.status(409).json({
+                        error: `Cannot ACCEPT work item ${item.id} because it belongs to a FAILED QC Batch (${batchInfo.batchId}). You must WAIVE or REJECT it.`,
+                        code: 'QC_FAIL_BLOCKER',
+                        batchId: batchInfo.batchId
+                    });
+                }
+            }
         }
 
         const now = new Date();
@@ -1170,24 +1266,22 @@ exports.reviewWorkItem = async (req, res) => {
             }
 
             // Sync spectralData status to APPROVED when spectral work item is accepted
+            // S05: Only sync exact linked scan or exact attempt, never entire lab or sample
             if (isSpectralAnalysis) {
-                const sample = await prisma.sample.findUnique({
-                    where: { id: String(item.sampleId) },
-                    select: { labId: true }
-                });
-                if (sample?.labId) {
-                    operations.push(prisma.spectralData.updateMany({
-                        where: {
-                            labId: sample.labId,
-                            status: { in: ['PENDING', 'VALIDATED'] }
-                        },
-                        data: {
-                            status: 'APPROVED',
-                            reviewedBy: user.username,
-                            reviewedAt: now
-                        }
-                    }));
-                }
+                operations.push(prisma.spectralData.updateMany({
+                    where: {
+                        OR: [
+                            { workItemId: item.id },
+                            { sampleId: String(item.sampleId), modality: item.analysis }
+                        ],
+                        status: { in: ['PENDING', 'VALIDATED', 'SUBMITTED'] }
+                    },
+                    data: {
+                        status: 'APPROVED',
+                        reviewedBy: user.username,
+                        reviewedAt: now
+                    }
+                }));
             }
         } else if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
             if (item.analysis === 'DRYING') {
@@ -1203,25 +1297,23 @@ exports.reviewWorkItem = async (req, res) => {
             }
 
             // Sync spectralData status to REJECTED when spectral work is rejected
+            // S05: Only sync exact linked scan or exact attempt
             if (isSpectralAnalysis) {
-                const sample = await prisma.sample.findUnique({
-                    where: { id: String(item.sampleId) },
-                    select: { labId: true }
-                });
-                if (sample?.labId) {
-                    operations.push(prisma.spectralData.updateMany({
-                        where: {
-                            labId: sample.labId,
-                            status: { in: ['PENDING', 'VALIDATED'] }
-                        },
-                        data: {
-                            status: 'REJECTED',
-                            reviewedBy: user.username,
-                            reviewedAt: now,
-                            reviewNotes: note || 'Reanalysis required'
-                        }
-                    }));
-                }
+                operations.push(prisma.spectralData.updateMany({
+                    where: {
+                        OR: [
+                            { workItemId: item.id },
+                            { sampleId: String(item.sampleId), modality: item.analysis }
+                        ],
+                        status: { in: ['PENDING', 'VALIDATED', 'SUBMITTED'] }
+                    },
+                    data: {
+                        status: 'REJECTED',
+                        reviewedBy: user.username,
+                        reviewedAt: now,
+                        reviewNotes: effectiveReason || note || 'Reanalysis required'
+                    }
+                }));
             }
         }
 
@@ -1335,7 +1427,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
         }
 
@@ -1346,13 +1438,119 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             }
         }
 
+        const allowedReviewStatuses = [
+            workflow.WORK_ITEM_STATES.ACCEPTED,
+            workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED,
+            workflow.WORK_ITEM_STATES.WAIVED
+        ];
+        if (!allowedReviewStatuses.includes(status)) {
+            return res.status(400).json({ error: `Invalid review status. Use: ${allowedReviewStatuses.join(', ')}` });
+        }
+
         if (!workItemIds || !Array.isArray(workItemIds) || workItemIds.length === 0) {
             return res.status(400).json({ error: 'workItemIds array is required' });
         }
 
         const items = await prisma.workItem.findMany({
-            where: { id: { in: workItemIds } }
+            where: { id: { in: workItemIds } },
+            include: { sample: true }
         });
+
+        if (items.length !== workItemIds.length) {
+            const foundIds = new Set(items.map(i => i.id));
+            const missingIds = workItemIds.filter(id => !foundIds.has(id));
+            return res.status(404).json({
+                error: `Some work items were not found: ${missingIds.join(', ')}`,
+                code: 'WORK_ITEM_NOT_FOUND',
+                missingIds
+            });
+        }
+
+        // Lab scope check (S01/S02)
+        const scopeGuard = require('../utils/scopeGuard');
+        if (user.role !== 'SUPER_ADMIN' && user.role !== 'MASTER_USER') {
+            const outOfScopeItems = items.filter(item => !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' }));
+            if (outOfScopeItems.length > 0) {
+                return res.status(403).json({
+                    error: `Access denied: ${outOfScopeItems.length} work item(s) outside your lab scope.`,
+                    code: 'ACCESS_DENIED_LAB',
+                    outOfScopeIds: outOfScopeItems.map(i => i.id)
+                });
+            }
+        }
+
+        if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
+            // Reject closure tasks from bulk analytical review
+            const closureItems = items.filter(item => ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(item.analysis));
+            if (closureItems.length > 0) {
+                return res.status(400).json({
+                    error: `Bulk approval cannot include custody closure tasks (${closureItems.map(i => i.id).join(', ')}). Execute closure via custody operations.`,
+                    code: 'CLOSURE_TASK_NOT_REVIEWABLE',
+                    closureItemIds: closureItems.map(i => i.id)
+                });
+            }
+
+            // Reject unsubmitted items (strictly requires SUBMITTED)
+            const unsubmitted = items.filter(item => item.status !== workflow.WORK_ITEM_STATES.SUBMITTED);
+            if (unsubmitted.length > 0) {
+                return res.status(400).json({
+                    error: `Cannot approve ${unsubmitted.length} item(s) because they are not in SUBMITTED state. Analyses must be completed and submitted by a technician before manager approval.`,
+                    code: 'INVALID_TRANSITION',
+                    invalidItemIds: unsubmitted.map(i => i.id)
+                });
+            }
+
+            // Check evidence for each item
+            const missingEvidence = [];
+            for (const item of items) {
+                const hasWorkItemResult = item.result !== null && item.result !== undefined && String(item.result).trim() !== '';
+                let hasEvidence = hasWorkItemResult;
+                if (!hasEvidence) {
+                    const linkedScan = await prisma.spectralData.findFirst({
+                        where: {
+                            OR: [
+                                { workItemId: item.id },
+                                { sampleId: String(item.sampleId), status: { in: ['SUBMITTED', 'VALIDATED', 'PENDING'] } }
+                            ]
+                        }
+                    });
+                    if (linkedScan) hasEvidence = true;
+                }
+                if (!hasEvidence) {
+                    const resultRow = await prisma.result.findFirst({
+                        where: { sampleId: String(item.sampleId), param: item.analysis, isCurrent: true }
+                    });
+                    if (resultRow) hasEvidence = true;
+                }
+                if (!hasEvidence) {
+                    missingEvidence.push(item.id);
+                }
+            }
+            if (missingEvidence.length > 0) {
+                return res.status(422).json({
+                    error: `Cannot approve work items without valid result or scan evidence: ${missingEvidence.join(', ')}`,
+                    code: 'MISSING_EVIDENCE',
+                    missingEvidenceIds: missingEvidence
+                });
+            }
+
+            // Check QC status for each item
+            const qcController = require('./qcController');
+            const qcFailures = [];
+            for (const item of items) {
+                const batchInfo = await qcController.checkItemBatchStatus(item.id);
+                if (batchInfo && batchInfo.status === 'QC_FAIL') {
+                    qcFailures.push({ workItemId: item.id, batchId: batchInfo.batchId });
+                }
+            }
+            if (qcFailures.length > 0) {
+                return res.status(409).json({
+                    error: `Cannot approve work items belonging to failed QC batches: ${qcFailures.map(q => `${q.workItemId} (Batch: ${q.batchId})`).join(', ')}`,
+                    code: 'QC_FAIL_BLOCKER',
+                    qcFailures
+                });
+            }
+        }
 
         const now = new Date();
         const results = [];
@@ -1394,26 +1592,24 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
 
                 // Sync spectralData status when spectral work item is approved
+                // S05: Only sync exact linked scan or exact attempt
                 const bulkAnalysisUpper = (item.analysis || '').toUpperCase();
                 const bulkIsSpectral = ['NIR', 'MIR', 'SPECTRAL', 'VIS-NIR', 'VISNIR', 'SCAN'].some(k => bulkAnalysisUpper.includes(k));
                 if (bulkIsSpectral) {
-                    const sample = await prisma.sample.findUnique({
-                        where: { id: String(item.sampleId) },
-                        select: { labId: true }
-                    });
-                    if (sample?.labId) {
-                        operations.push(prisma.spectralData.updateMany({
-                            where: {
-                                labId: sample.labId,
-                                status: { in: ['PENDING', 'VALIDATED'] }
-                            },
-                            data: {
-                                status: 'APPROVED',
-                                reviewedBy: user.username,
-                                reviewedAt: now
-                            }
-                        }));
-                    }
+                    operations.push(prisma.spectralData.updateMany({
+                        where: {
+                            OR: [
+                                { workItemId: item.id },
+                                { sampleId: String(item.sampleId), modality: item.analysis }
+                            ],
+                            status: { in: ['PENDING', 'VALIDATED', 'SUBMITTED'] }
+                        },
+                        data: {
+                            status: 'APPROVED',
+                            reviewedBy: user.username,
+                            reviewedAt: now
+                        }
+                    }));
                 }
             }
 

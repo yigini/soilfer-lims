@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { X, Droplet, CheckCircle, AlertTriangle, Plus, Search, Trash2, Info } from 'lucide-react';
+import { X, Droplet, CheckCircle, AlertTriangle, Plus, Search, Trash2, Info, Layers } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import InfoTooltip from '../common/InfoTooltip';
 
@@ -16,20 +16,48 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
     const [reason, setReason] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState(null);
+    const [orderPreview, setOrderPreview] = useState(null);
+    const initializedSampleIdRef = useRef(null);
 
+    // S28: Reset on sample identity change, not on background poll/update
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && sample?.id && initializedSampleIdRef.current !== sample.id) {
+            initializedSampleIdRef.current = sample.id;
             fetchConfig();
-            // Initialize from sample
-            setCurrentAnalyses(sample.requiredAnalyses || []);
+            const initialList = Array.isArray(sample.requiredAnalyses)
+                ? sample.requiredAnalyses
+                : (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses || '[]') : []);
+            setCurrentAnalyses(initialList);
             setReason('');
-            // Try to match group if all analyses match a group
-            // (Standard logic uses analysisGroupIds from sample)
+            setError(null);
             if (sample.analysisGroupIds && sample.analysisGroupIds.length > 0) {
                 setSelectedGroup(sample.analysisGroupIds[0]);
+            } else {
+                setSelectedGroup('');
             }
         }
-    }, [isOpen, sample]);
+        if (!isOpen) {
+            initializedSampleIdRef.current = null;
+            setOrderPreview(null);
+        }
+    }, [isOpen, sample?.id]);
+
+    // Live order impact preview
+    useEffect(() => {
+        if (!isOpen || !sample?.id) return;
+        const fetchPreview = async () => {
+            try {
+                const res = await axios.post(`/api/samples/${sample.id}/orders/preview`, {
+                    analyses: currentAnalyses
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setOrderPreview(res.data);
+            } catch (err) {}
+        };
+        const timer = setTimeout(fetchPreview, 250);
+        return () => clearTimeout(timer);
+    }, [currentAnalyses, isOpen, sample?.id, token]);
 
     const fetchConfig = async () => {
         try {
@@ -52,14 +80,23 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
         }
     };
 
-    const handleApplyBundle = (groupId) => {
+    // S28: Distinguish Merge Bundle from Replace Selection
+    const handleMergeBundle = (groupId) => {
         setSelectedGroup(groupId);
         if (!groupId) return;
-
         const group = groups.find(g => g.id === groupId);
-        if (group) {
-            // SD-04: A bundle replaces the selection, it does not merge into it
-            setCurrentAnalyses([...(group.analyses || [])]);
+        if (group && Array.isArray(group.analyses)) {
+            const merged = [...new Set([...currentAnalyses, ...group.analyses])];
+            setCurrentAnalyses(merged);
+        }
+    };
+
+    const handleReplaceBundle = (groupId) => {
+        setSelectedGroup(groupId);
+        if (!groupId) return;
+        const group = groups.find(g => g.id === groupId);
+        if (group && Array.isArray(group.analyses)) {
+            setCurrentAnalyses([...group.analyses]);
         }
     };
 
@@ -121,27 +158,70 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                     <div>
                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                             Analysis Bundle
-                            <InfoTooltip text="Select a predefined group of tests to quickly populate the list." />
+                            <InfoTooltip text="Select a predefined group of tests to merge or replace." />
                         </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <select
                                 value={selectedGroup}
-                                onChange={e => handleApplyBundle(e.target.value)}
-                                className="w-full p-3 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl text-blue-900 dark:text-blue-100 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                onChange={e => setSelectedGroup(e.target.value)}
+                                className="flex-1 p-3 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl text-blue-900 dark:text-blue-100 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                             >
-                                <option value="">-- No Bundle --</option>
+                                <option value="">-- Choose Bundle --</option>
                                 {groups.map(g => (
-                                    <option key={g.id} value={g.id}>{g.name}</option>
+                                    <option key={g.id} value={g.id}>{g.name} ({g.analyses?.length || 0} tests)</option>
                                 ))}
                             </select>
+                            {selectedGroup && (
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleMergeBundle(selectedGroup)}
+                                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
+                                        title="Add bundle analyses to current selection without removing existing tests"
+                                    >
+                                        Add Bundle
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleReplaceBundle(selectedGroup)}
+                                        className="px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-200 rounded-xl text-xs font-bold transition"
+                                        title="Replace current selection with bundle tests"
+                                    >
+                                        Replace All
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                        {selectedGroup && groups.find(g => g.id === selectedGroup) && (
-                            <p className="mt-1.5 text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium">
-                                <Info size={14} className="shrink-0" />
-                                Replaces current selection with the {groups.find(g => g.id === selectedGroup)?.analyses?.length || 0} analyses in this bundle.
-                            </p>
-                        )}
                     </div>
+
+                    {/* Order Impact Preview (S28 / P3) */}
+                    {orderPreview && (orderPreview.added?.length > 0 || orderPreview.removed?.length > 0 || orderPreview.conflicts?.length > 0) && (
+                        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl text-xs space-y-2">
+                            <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 text-sm">
+                                <Layers size={16} /> Order Revision Impact Preview
+                            </div>
+                            {orderPreview.added?.length > 0 && (
+                                <div className="text-emerald-700 dark:text-emerald-300 font-medium">
+                                    + Tests to add ({orderPreview.added.length}): {orderPreview.added.join(', ')}
+                                </div>
+                            )}
+                            {orderPreview.removed?.length > 0 && (
+                                <div className="text-red-700 dark:text-red-300 font-medium">
+                                    − Tests to remove ({orderPreview.removed.length}): {orderPreview.removed.join(', ')}
+                                </div>
+                            )}
+                            {orderPreview.conflicts?.length > 0 && (
+                                <div className="text-red-700 dark:text-red-400 font-bold bg-red-100/60 dark:bg-red-900/40 p-2 rounded-lg">
+                                    ⚠️ Conflicts: {orderPreview.conflicts.map(c => `${c.analysis} (${c.status})`).join(', ')} — Cannot be silently removed. A waiver reason is required.
+                                </div>
+                            )}
+                            {orderPreview.requiresReportAmendment && (
+                                <div className="text-blue-700 dark:text-blue-300 italic">
+                                    ℹ️ Sample has released reports. New testing will create a supplemental order.
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Individual Search */}
                     <div>

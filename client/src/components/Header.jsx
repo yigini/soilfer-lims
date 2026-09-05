@@ -12,9 +12,13 @@ import { useNotifications } from '../context/NotificationContext';
 // ...
 
 export const Header = ({ onMenuClick }) => {
-    const { theme } = useTheme();
+    const { theme, darkMode } = useTheme();
     const { unreadCount, toggleDrawer } = useNotifications();
     const { t } = useLanguage();
+
+    const isCustomLogo = theme?.logoUrl && !theme.logoUrl.includes('/assets/img/soilfer-logo') && !theme.logoUrl.includes('/assets/img/logo') && !theme.logoUrl.endsWith('/logo.png') && !theme.logoUrl.includes('fao_logo');
+    const defaultSiteLogo = darkMode ? '/assets/img/logo-dark.png' : '/assets/img/logo-light.png';
+    const siteLogo = isCustomLogo ? theme.logoUrl : defaultSiteLogo;
 
     return (
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 right-0 left-0 z-30 transition-colors duration-300">
@@ -28,9 +32,13 @@ export const Header = ({ onMenuClick }) => {
                     >
                         <Menu size={20} />
                     </button>
-                    <div className="md:hidden flex items-center gap-1.5">
-                        <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-7 w-auto object-contain" />
-                        <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">LIMS</span>
+                    <div className="md:hidden flex items-center">
+                        <img 
+                            src={siteLogo} 
+                            alt="SoilFER LIMS" 
+                            className="h-8 w-auto max-w-[150px] object-contain" 
+                            onError={(e) => { e.target.onerror = null; e.target.src = defaultSiteLogo; }}
+                        />
                     </div>
                     <div className="hidden md:block"></div>
                 </div>

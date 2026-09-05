@@ -46,8 +46,13 @@ const SampleSummary = ({
                     <div className="flex flex-col">
                         <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-2">
                             <span className="px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/40 rounded border border-indigo-100 dark:border-indigo-800">
-                                Sample ID: {sample.labId || sample.originalId}
+                                Lab sample code: {sample.labId || 'Not assigned'}
                             </span>
+                            {sample.assignedLab && (
+                                <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-600">
+                                    Lab: {sample.assignedLab}
+                                </span>
+                            )}
                         </div>
                         <div className="flex items-center gap-3 mb-1">
                             <h1 className="font-mono font-black text-3xl text-gray-900 dark:text-white tracking-tight leading-none">
@@ -63,11 +68,11 @@ const SampleSummary = ({
                             </span>
                             {isApproved && <CheckCircle size={20} className="text-green-600 drop-shadow-sm" />}
                         </div>
-                        {sample.labId && sample.labId !== sample.originalId && (
-                            <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-black">
-                                {sample.originalId}
+                        <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs text-gray-500 dark:text-gray-400 font-bold">
+                                Field ID: {sample.originalId}
                             </span>
-                        )}
+                        </div>
                     </div>
                 </div>
 
@@ -151,8 +156,13 @@ const SampleSummary = ({
                     </div>
                     <div className="text-base font-black text-gray-800 dark:text-gray-100">
                         {sample.receptionDate ? new Date(sample.receptionDate).toLocaleDateString('en-GB') :
-                            (sample.createdAt ? new Date(sample.createdAt).toLocaleDateString('en-GB') : 'N/A')}
+                            (sample.status === 'EXPECTED' ? 'Not yet received' : (sample.createdAt ? new Date(sample.createdAt).toLocaleDateString('en-GB') : 'Not recorded'))}
                     </div>
+                    {sample.createdAt && (
+                        <div className="text-[10px] text-gray-400 dark:text-gray-500">
+                            Created: {new Date(sample.createdAt).toLocaleDateString('en-GB')}
+                        </div>
+                    )}
                 </div>
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">

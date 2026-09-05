@@ -97,6 +97,12 @@ exports.saveResults = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
+        // Lab Isolation Check (S07)
+        const scopeGuard = require('../utils/scopeGuard');
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
+        }
+
         if (!['PROCESSING', 'SUBMITTED_PARTIAL', 'ANALYSIS', 'PARTIALLY_COMPLETE'].includes(sample.status)) {
             return res.status(400).json({ error: `Sample is not in Processing phase (current: ${sample.status})` });
         }
@@ -210,6 +216,12 @@ exports.submitForApproval = async (req, res) => {
     try {
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // Lab Isolation Check (S07)
+        const scopeGuard = require('../utils/scopeGuard');
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
+        }
 
         // Check if results exist
         const allActiveResults = await prisma.result.findMany({ where: { sampleId, isCurrent: true } });
