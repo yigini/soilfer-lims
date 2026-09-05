@@ -320,11 +320,6 @@ function calculateSampleStatus(sample, workItems) {
     // Flag to lock editing if in a final state
     const isLocked = FINAL_SAMPLE_STATES.includes(sample.status);
 
-    // Not yet processing? Keep current.
-    if (['EXPECTED', 'RECEIVED', 'ACCEPTED'].includes(sample.status)) {
-        return { status: sample.status, eligibility: { isLocked: false } };
-    }
-
     // Categorize work items
     const nonPostItems = workItems.filter(wi =>
         getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.POST_ANALYTICAL
@@ -332,18 +327,25 @@ function calculateSampleStatus(sample, workItems) {
     const analyticalItems = nonPostItems.filter(wi =>
         getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.OPERATIONAL_GATES
     );
+    const gateItems = nonPostItems.filter(wi =>
+        getAnalysisConfig(wi.analysis).category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES
+    );
 
-    // Check submission eligibility
+    // Check operational gates (Drying, Preparation)
+    const gatesComplete = gateItems.length > 0 && gateItems.every(wi =>
+        ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
+    );
+
+    // Check submission & approval eligibility
     const submittedCount = analyticalItems.filter(wi =>
         ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
     ).length;
     const acceptedCount = analyticalItems.filter(wi =>
         ['ACCEPTED', 'WAIVED'].includes(wi.status)
     ).length;
-
-    const gatesComplete = nonPostItems
-        .filter(wi => getAnalysisConfig(wi.analysis).category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES)
-        .every(wi => ['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(wi.status));
+    const completedExecutionCount = analyticalItems.filter(wi =>
+        ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
+    ).length;
 
     const isPartiallySubmitted = submittedCount > 0 && submittedCount < analyticalItems.length;
     const isFullySubmitted = submittedCount === analyticalItems.length && analyticalItems.length > 0;
@@ -352,16 +354,18 @@ function calculateSampleStatus(sample, workItems) {
     // Determine status
     let status = sample.status;
 
-    // Only auto-update status if NOT in a final state
-    if (!isLocked) {
+    // Auto-advance status if not in locked or intake state
+    if (!isLocked && !['EXPECTED', 'RECEIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
         if (isFullyApproved) {
             status = SAMPLE_STATES.APPROVED;
         } else if (isFullySubmitted) {
             status = SAMPLE_STATES.SUBMITTED_FULL;
         } else if (isPartiallySubmitted) {
             status = SAMPLE_STATES.SUBMITTED_PARTIAL;
-        } else if (gatesComplete) {
+        } else if (gatesComplete || sample.status === 'PROCESSING') {
             status = SAMPLE_STATES.PROCESSING;
+        } else if (sample.status === 'ACCEPTED') {
+            status = SAMPLE_STATES.ACCEPTED;
         }
 
         // Post-Analytical Overrides
@@ -381,7 +385,9 @@ function calculateSampleStatus(sample, workItems) {
             gatesComplete,
             submittedCount,
             acceptedCount,
+            completedExecutionCount,
             totalAnalyses: analyticalItems.length,
+            totalGates: gateItems.length,
             isPartiallySubmitted,
             isFullySubmitted,
             isFullyApproved,
@@ -393,10 +399,11 @@ function calculateSampleStatus(sample, workItems) {
 
 /**
  * Get a summary of the sample's workflow state for UI display.
+ * Derives actionable guidance strictly from executable work-item conditions.
  * 
  * @param {Object} sample - The sample object.
  * @param {Array} workItems - All work items for the sample.
- * @returns {Object} - { phase, progress, nextActions }
+ * @returns {Object} - { phase, progress, nextActions, nextEligibleAction, eligibility }
  */
 function getWorkflowSummary(sample, workItems) {
     const { eligibility } = calculateSampleStatus(sample, workItems);
@@ -407,50 +414,157 @@ function getWorkflowSummary(sample, workItems) {
     let phase = 'Unknown';
     let progress = 0;
     const nextActions = [];
+    let nextEligibleAction = null;
 
     if (['EXPECTED', 'RECEIVED'].includes(sample.status)) {
         phase = 'Intake';
         progress = 10;
         nextActions.push('Receive sample at lab');
-    } else if (sample.status === 'ACCEPTED') {
-        phase = 'Ready for Processing';
-        progress = 20;
-        if (!dryingItem || dryingItem.status === 'NOT_ASSIGNED') {
-            nextActions.push('Assign Drying task');
-        } else {
-            nextActions.push('Complete Drying');
-        }
-    } else if (!eligibility.gatesComplete) {
-        phase = 'Preparation';
-        progress = 40;
-        if (dryingItem && !['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(dryingItem.status)) {
-            nextActions.push('Complete Drying');
-        }
-        if (prepItem && !['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(prepItem.status)) {
-            nextActions.push('Complete Preparation');
-        }
-    } else if (!eligibility.isFullySubmitted) {
-        phase = 'Analysis';
-        progress = 60;
-        nextActions.push(`Submit remaining analyses (${eligibility.submittedCount}/${eligibility.totalAnalyses})`);
-    } else if (!eligibility.isFullyApproved) {
-        phase = 'Review';
-        progress = 80;
-        nextActions.push(`Approve analyses (${eligibility.acceptedCount}/${eligibility.totalAnalyses})`);
-    } else {
-        const isArchived = sample.status === 'ARCHIVED';
-        const isDisposed = sample.status === 'DISPOSED';
-
-        phase = (isArchived || isDisposed) ? 'Arrived' : 'Complete';
+        nextEligibleAction = {
+            title: 'Sample received at intake',
+            action: 'Receive sample at desk',
+            assignee: 'Reception Desk',
+            role: 'SAMPLE_RECEPTION',
+            reason: 'Sample must be inspected and accepted or rejected at reception',
+            destination: '/reception'
+        };
+    } else if (sample.status === 'RECEIVED_REJECTED') {
+        phase = 'Rejected';
         progress = 100;
-        if (!isArchived && !isDisposed) {
-            nextActions.push('Ready for archiving or disposal');
+        nextActions.push('Sample rejected at intake');
+        nextEligibleAction = {
+            title: 'Sample rejected at reception',
+            action: 'View rejection voucher',
+            assignee: sample.receivingOfficerName || 'Reception Officer',
+            role: 'SAMPLE_RECEPTION',
+            reason: 'Sample failed intake criteria and is quarantined for disposal or supervisor override',
+            destination: '/reception'
+        };
+    } else {
+        // Evaluate Operational Gates
+        const dryingDone = !dryingItem || ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(dryingItem.status);
+        const prepDone = !prepItem || ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(prepItem.status);
+
+        if (!dryingDone) {
+            phase = 'Preparation (Drying)';
+            progress = 25;
+            const isAssigned = dryingItem && dryingItem.status !== 'NOT_ASSIGNED';
+            const actionText = isAssigned ? 'Complete Drying' : 'Assign Drying task';
+            nextActions.push(actionText);
+            nextEligibleAction = {
+                title: isAssigned ? 'Drying in progress' : 'Drying awaiting assignment',
+                action: actionText,
+                assignee: dryingItem?.assignedTo || 'Unassigned',
+                role: 'LAB_TECHNICIAN',
+                reason: 'Drying must be completed before milling and sieving can proceed',
+                destination: `/workbench?sampleId=${sample.id}&room=Preparation%20Room`
+            };
+        } else if (!prepDone) {
+            phase = 'Preparation (Milling & Sieving)';
+            progress = 40;
+            const isAssigned = prepItem && prepItem.status !== 'NOT_ASSIGNED';
+            const actionText = isAssigned ? 'Complete Preparation' : 'Assign Preparation task';
+            nextActions.push(actionText);
+            nextEligibleAction = {
+                title: isAssigned ? 'Preparation in progress' : 'Preparation awaiting assignment',
+                action: actionText,
+                assignee: prepItem?.assignedTo || 'Unassigned',
+                role: 'LAB_TECHNICIAN',
+                reason: 'Milling & sieving must be completed before analytical testing can begin',
+                destination: `/workbench?sampleId=${sample.id}&room=Preparation%20Room`
+            };
+        } else if (!eligibility.isFullySubmitted) {
+            phase = 'Analysis';
+            progress = 60;
+
+            const nonPost = workItems.filter(wi =>
+                getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.POST_ANALYTICAL &&
+                getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.OPERATIONAL_GATES
+            );
+            const inProgressAnalysis = nonPost.find(wi => wi.status === 'IN_PROGRESS');
+            const readyAnalysis = nonPost.find(wi => ['NOT_ASSIGNED', 'ASSIGNED'].includes(wi.status));
+
+            if (inProgressAnalysis) {
+                const config = getAnalysisConfig(inProgressAnalysis.analysis);
+                const title = `${config.displayName || inProgressAnalysis.analysis} analysis in progress`;
+                nextActions.push(title);
+                nextEligibleAction = {
+                    title,
+                    action: `Complete ${config.displayName || inProgressAnalysis.analysis}`,
+                    assignee: inProgressAnalysis.assignedTo || 'Unassigned',
+                    role: 'LAB_TECHNICIAN',
+                    reason: 'Analytical test in progress at station',
+                    destination: `/workbench?sampleId=${sample.id}&room=${encodeURIComponent(resolveRoom(inProgressAnalysis.analysis))}`
+                };
+            } else if (readyAnalysis) {
+                const config = getAnalysisConfig(readyAnalysis.analysis);
+                const title = `Start ${config.displayName || readyAnalysis.analysis} analysis`;
+                nextActions.push(title);
+                nextEligibleAction = {
+                    title,
+                    action: title,
+                    assignee: readyAnalysis.assignedTo || 'Unassigned',
+                    role: 'LAB_TECHNICIAN',
+                    reason: 'Preparation complete; analytical test is ready to execute',
+                    destination: `/workbench?sampleId=${sample.id}&room=${encodeURIComponent(resolveRoom(readyAnalysis.analysis))}`
+                };
+            } else {
+                const title = `Submit remaining analyses (${eligibility.submittedCount}/${eligibility.totalAnalyses})`;
+                nextActions.push(title);
+                nextEligibleAction = {
+                    title,
+                    action: 'Submit results for QA review',
+                    assignee: 'Technician',
+                    role: 'LAB_TECHNICIAN',
+                    reason: 'Analytical determinations finished; submit batch for review',
+                    destination: `/workbench?sampleId=${sample.id}`
+                };
+            }
+        } else if (!eligibility.isFullyApproved) {
+            phase = 'Quality Review';
+            progress = 80;
+            const title = `Approve analyses (${eligibility.acceptedCount}/${eligibility.totalAnalyses} cleared)`;
+            nextActions.push(title);
+            nextEligibleAction = {
+                title: 'Review submitted results',
+                action: 'Review results in Manager Queue',
+                assignee: 'Authorized reviewer',
+                role: 'LAB_MANAGER',
+                reason: 'Submissions awaiting quality verification and final decision',
+                destination: `/manager-queue?sampleId=${sample.id}`
+            };
         } else {
-            nextActions.push(isArchived ? 'Sample stored in archive' : 'Sample disposed of');
+            const isArchived = sample.status === 'ARCHIVED';
+            const isDisposed = sample.status === 'DISPOSED';
+
+            phase = (isArchived || isDisposed) ? 'Terminal' : 'Approved';
+            progress = 100;
+            if (!isArchived && !isDisposed) {
+                nextActions.push('Ready for archiving or disposal');
+                nextEligibleAction = {
+                    title: 'Sample approved',
+                    action: 'Archive or dispose sample',
+                    assignee: 'Lab Manager',
+                    role: 'LAB_MANAGER',
+                    reason: 'All analyses approved; sample is eligible for archive storage or disposal',
+                    destination: `/samples/${sample.id}`
+                };
+            } else {
+                const title = isArchived ? 'Sample stored in archive' : 'Sample disposed of';
+                nextActions.push(title);
+                nextEligibleAction = {
+                    title,
+                    action: 'Sample lifecycle concluded',
+                    assignee: 'Archive / Disposal',
+                    role: 'SYSTEM',
+                    reason: 'Terminal lifecycle reached',
+                    destination: `/samples/${sample.id}`
+                };
+            }
         }
     }
 
-    return { phase, progress, nextActions, eligibility };
+    return { phase, progress, nextActions, nextEligibleAction, eligibility };
 }
 
 // =============================================================================
@@ -533,11 +647,39 @@ function buildMapState(sample, workItems, auditLog = []) {
     }
 
     // ── Per-stage summaries (grouped by room) ──
+    // ── Blocker graph (computed FIRST so stage blockers are populated) ──
+    const blockerGraph = [];
+    const stageBlockerMap = {};
+    for (const wi of workItems) {
+        if (['ACCEPTED', 'WAIVED', 'COMPLETED', 'SUBMITTED'].includes(wi.status)) continue;
+        const prereq = checkPrerequisites(wi, workItems);
+        if (!prereq.canStart) {
+            const room = resolveRoom(wi.analysis);
+            blockerGraph.push({
+                workItemId: wi.id,
+                analysis: wi.analysis,
+                displayName: getAnalysisConfig(wi.analysis).displayName,
+                room,
+                blockedBy: prereq.blockedBy,
+                reason: prereq.reason,
+            });
+            if (!stageBlockerMap[room]) stageBlockerMap[room] = [];
+            stageBlockerMap[room].push({ analysis: wi.analysis, reason: prereq.reason });
+        }
+    }
+
+    // ── Per-stage summaries (grouped by room) ──
     const stageMap = {};
     for (const wi of workItems) {
         const room = resolveRoom(wi.analysis);
         if (!stageMap[room]) {
-            stageMap[room] = { room, items: [], done: 0, total: 0, blockers: [] };
+            stageMap[room] = {
+                room,
+                items: [],
+                done: 0,
+                total: 0,
+                blockers: stageBlockerMap[room] || []
+            };
         }
         stageMap[room].items.push({
             id: wi.id,
@@ -566,29 +708,209 @@ function buildMapState(sample, workItems, auditLog = []) {
         };
     });
 
-    // ── Blocker graph ──
-    const blockerGraph = [];
-    for (const wi of workItems) {
-        if (['ACCEPTED', 'WAIVED', 'COMPLETED', 'SUBMITTED'].includes(wi.status)) continue;
-        const prereq = checkPrerequisites(wi, workItems);
-        if (!prereq.canStart) {
-            blockerGraph.push({
-                workItemId: wi.id,
-                analysis: wi.analysis,
-                displayName: getAnalysisConfig(wi.analysis).displayName,
-                room: resolveRoom(wi.analysis),
-                blockedBy: prereq.blockedBy,
-                reason: prereq.reason,
-            });
-            // Also add to stage blockers
-            const room = resolveRoom(wi.analysis);
-            const stage = stageMap[room];
-            if (stage) stage.blockers.push({ analysis: wi.analysis, reason: prereq.reason });
-        }
+    // ── Isolated Counters ──
+    const prepItems = workItems.filter(wi =>
+        getAnalysisConfig(wi.analysis).category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES
+    );
+    const analyticalItems = workItems.filter(wi =>
+        getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.OPERATIONAL_GATES &&
+        getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.POST_ANALYTICAL
+    );
+
+    const prepDone = prepItems.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(wi.status)).length;
+    const prepTotal = prepItems.length;
+
+    const testsDone = analyticalItems.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(wi.status)).length;
+    const testsActive = analyticalItems.filter(wi => wi.status === 'IN_PROGRESS').length;
+    const testsTotal = analyticalItems.length;
+
+    const reviewsCleared = analyticalItems.filter(wi => ['ACCEPTED', 'WAIVED'].includes(wi.status)).length;
+    const reviewsTotal = analyticalItems.length;
+
+    const counters = {
+        prep: { done: prepDone, total: prepTotal },
+        tests: { done: testsDone, active: testsActive, total: testsTotal },
+        reviews: { cleared: reviewsCleared, total: reviewsTotal },
+        tasksCompleted: `${prepDone + testsDone} / ${prepTotal + testsTotal}`,
+        resultsCleared: `${reviewsCleared} / ${reviewsTotal}`
+    };
+
+    // ── Dynamic High-level Stage Graph (Overview) ──
+    const stageNodes = [];
+    const stageEdges = [];
+
+    // Stage: Reception
+    const receptionDone = !['EXPECTED', 'RECEIVED'].includes(sample.status);
+    const receptionTone = sample.status === 'RECEIVED_REJECTED' ? 'warn' : (receptionDone ? 'done' : 'active');
+    stageNodes.push({
+        id: 'reception',
+        title: 'Reception',
+        category: 'Intake',
+        status: sample.status === 'RECEIVED_REJECTED' ? 'Rejected' : (receptionDone ? 'Accepted' : 'Pending intake'),
+        tone: receptionTone,
+        sub: `Sample ${sample.originalId || sample.id}`,
+        desc: sample.status === 'RECEIVED_REJECTED'
+            ? 'The sample was rejected at reception due to non-conformance.'
+            : (receptionDone ? 'The sample has been accepted into the laboratory workflow.' : 'Awaiting physical reception at the desk.'),
+        owner: sample.receivingOfficerName || 'Reception Officer',
+        checks: receptionDone ? ['Sample accepted at desk'] : []
+    });
+
+    // Stage: Preparation (if prepItems exist)
+    if (prepTotal > 0) {
+        const prepAllDone = prepDone === prepTotal;
+        const prepActive = prepItems.some(wi => ['IN_PROGRESS', 'ASSIGNED'].includes(wi.status));
+        stageNodes.push({
+            id: 'prep',
+            title: 'Preparation',
+            category: 'Prepare',
+            status: `${prepDone} / ${prepTotal} done`,
+            tone: prepAllDone ? 'done' : (prepActive ? 'active' : 'pending'),
+            sub: prepItems.map(wi => getAnalysisConfig(wi.analysis).displayName).join(' · '),
+            desc: prepAllDone ? 'Physical preparation tasks are completed.' : 'Drying, milling or sieving underway.',
+            owner: prepItems.find(wi => wi.assignedTo)?.assignedTo || 'Preparation Desk',
+            checks: prepAllDone ? ['Drying completed', 'Preparation completed'] : (prepDone > 0 ? ['Drying completed'] : [])
+        });
+        stageEdges.push({
+            from: 'reception',
+            to: 'prep',
+            type: 'prerequisite',
+            tone: receptionDone ? 'ready' : 'pending'
+        });
     }
 
+    // Analytical Stage Nodes (only for rooms that have items!)
+    const analyticalRooms = [...new Set(analyticalItems.map(wi => resolveRoom(wi.analysis)))];
+    analyticalRooms.forEach(room => {
+        const items = analyticalItems.filter(wi => resolveRoom(wi.analysis) === room);
+        const done = items.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(wi.status)).length;
+        const active = items.some(wi => wi.status === 'IN_PROGRESS');
+        const hasWarn = items.some(wi => wi.status === 'COMPLETED' && (wi.metadata?.warning || wi.notes?.includes('WARN')));
+        const roomId = room.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const isAllDone = done === items.length;
+
+        stageNodes.push({
+            id: roomId,
+            title: room,
+            category: 'Analyze',
+            status: isAllDone ? `${done} / ${items.length} done` : (active ? `${done} done · ${items.filter(i => i.status === 'IN_PROGRESS').length} active` : `0 / ${items.length} started`),
+            tone: hasWarn ? 'warn' : (isAllDone ? 'done' : (active ? 'active' : 'pending')),
+            sub: items.map(wi => getAnalysisConfig(wi.analysis).displayName).join(' · '),
+            desc: `${room} analytical testing for assigned determinations.`,
+            owner: items.find(wi => wi.assignedTo)?.assignedTo || 'Unassigned',
+            checks: prepTotal > 0 && prepDone === prepTotal ? ['Preparation completed'] : []
+        });
+
+        // Edge from Prep (or Reception) to Analytical Room
+        stageEdges.push({
+            from: prepTotal > 0 ? 'prep' : 'reception',
+            to: roomId,
+            type: 'prerequisite',
+            tone: (prepTotal === 0 || prepDone === prepTotal) ? 'ready' : 'pending'
+        });
+
+        // Edge from Analytical Room to QA Review
+        stageEdges.push({
+            from: roomId,
+            to: 'review',
+            type: 'handoff',
+            tone: isAllDone ? 'ready' : 'pending'
+        });
+    });
+
+    // Stage: QA Review
+    const allAnalysesDone = testsTotal > 0 && testsDone === testsTotal;
+    const isFullyApproved = eligibility.isFullyApproved;
+    stageNodes.push({
+        id: 'review',
+        title: 'Quality Review',
+        category: 'Review',
+        status: `${reviewsCleared} / ${reviewsTotal} cleared`,
+        tone: isFullyApproved ? 'done' : (allAnalysesDone ? 'active' : 'pending'),
+        sub: 'Accepted or waived',
+        desc: isFullyApproved ? 'All results approved by QA manager.' : 'Submissions evaluated against QA acceptance criteria.',
+        owner: 'Authorized Reviewer',
+        checks: isFullyApproved ? ['All analytical results approved'] : []
+    });
+
+    // Stage: Archive & Disposal
+    const isClosed = ['ARCHIVED', 'DISPOSED'].includes(lifecycle);
+    stageNodes.push({
+        id: 'closure',
+        title: 'Archive or Dispose',
+        category: 'Close',
+        status: isClosed ? lifecycle : (isFullyApproved ? 'Ready for closure' : 'Not reached'),
+        tone: isClosed ? 'done' : (isFullyApproved ? 'active' : 'pending'),
+        sub: isClosed ? (lifecycle === 'ARCHIVED' ? 'Archived' : 'Disposed') : 'One closure route',
+        desc: 'Sample approval allows archiving to sample bank or controlled disposal.',
+        owner: 'Authorized Operator',
+        checks: isFullyApproved ? ['Quality review approved'] : []
+    });
+    stageEdges.push({
+        from: 'review',
+        to: 'closure',
+        type: 'handoff',
+        tone: isFullyApproved ? 'ready' : 'pending'
+    });
+
+    const stageGraph = { nodes: stageNodes, edges: stageEdges };
+
+    // ── Item-Level Dependency Graph ──
+    const depNodes = [];
+    const depEdges = [];
+
+    // Helper to get status pill tone
+    const getItemTone = (wi) => {
+        if (['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(wi.status)) {
+            if (wi.metadata?.warning || wi.notes?.includes('WARN')) return 'warn';
+            return 'done';
+        }
+        if (wi.status === 'IN_PROGRESS') return 'active';
+        const prereq = checkPrerequisites(wi, workItems);
+        if (!prereq.canStart) return 'blocked';
+        return 'pending';
+    };
+
+    workItems.forEach(wi => {
+        const config = getAnalysisConfig(wi.analysis);
+        const tone = getItemTone(wi);
+        const nodeId = `wi_${wi.id}`;
+        const prereq = checkPrerequisites(wi, workItems);
+
+        depNodes.push({
+            id: nodeId,
+            workItemId: wi.id,
+            analysis: wi.analysis,
+            title: config.displayName || wi.analysis,
+            category: config.category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES ? 'Prepare' : (config.category === WORK_ITEM_CATEGORIES.POST_ANALYTICAL ? 'Close' : 'Analyze'),
+            status: wi.status === 'IN_PROGRESS' ? 'In progress' : (wi.status === 'COMPLETED' ? (tone === 'warn' ? 'Completed · warn' : 'Completed') : (wi.status === 'ACCEPTED' ? 'Accepted' : (prereq.canStart ? 'Ready' : 'Blocked'))),
+            tone,
+            sub: wi.assignedTo ? `${wi.assignedTo} · ${resolveRoom(wi.analysis)}` : resolveRoom(wi.analysis),
+            desc: `${config.displayName || wi.analysis} determination for sample ${sample.originalId || sample.id}.`,
+            owner: wi.assignedTo || 'Unassigned',
+            checks: prereq.canStart ? ['Prerequisites satisfied'] : [prereq.reason],
+            after: config.category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES ? 'Downstream analytical testing' : 'Submission and quality review',
+            room: resolveRoom(wi.analysis)
+        });
+
+        // Prerequisite edges
+        config.prerequisites.forEach(prereqCode => {
+            const parent = workItems.find(w => w.analysis === prereqCode);
+            if (parent) {
+                const parentDone = ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(parent.status);
+                depEdges.push({
+                    from: `wi_${parent.id}`,
+                    to: nodeId,
+                    type: 'prerequisite',
+                    tone: parentDone ? 'ready' : 'pending'
+                });
+            }
+        });
+    });
+
+    const dependencyGraph = { nodes: depNodes, edges: depEdges };
+
     // ── SLA / Risk ──
-    // Terminal samples have no risk — they're done
     let sla = { totalHours: 0, severity: 'OK' };
     let risk = 'OK';
     if (!isTerminal) {
@@ -628,12 +950,16 @@ function buildMapState(sample, workItems, auditLog = []) {
         currentRooms,
         activeStages,
         blockerGraph,
+        counters,
+        stageGraph,
+        dependencyGraph,
         owner,
         risk,
         sla,
         phase: summary.phase,
         progress: summary.progress,
         nextActions,
+        nextEligibleAction: summary.nextEligibleAction,
         isTerminal,
         closureType,
         eligibility,

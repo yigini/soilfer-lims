@@ -1192,7 +1192,21 @@ exports.getMapState = async (req, res) => {
         const workflowEngine = require('../utils/workflowEngine');
         const mapState = workflowEngine.buildMapState(sample, workItems, auditLog);
 
-        res.json(mapState);
+        res.json({
+            snapshot: {
+                version: '2.0',
+                generatedAt: new Date().toISOString(),
+            },
+            sample: {
+                id: sample.id,
+                originalId: sample.originalId || sample.id,
+                labId: sample.labId || sample.assignedLab,
+                projectCode: sample.projectCode || '—',
+                sampleType: sample.sampleType || 'SOIL',
+                status: sample.status,
+            },
+            ...mapState
+        });
     } catch (error) {
         console.error('[getMapState] Error:', error);
         res.status(500).json({ error: 'Failed to build map state' });

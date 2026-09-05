@@ -1,333 +1,208 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    ReactFlow,
-    MiniMap,
-    Controls,
-    Background,
-    useNodesState,
-    useEdgesState,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import {
-    deriveStageSummaries,
-    derivePath,
-    deriveLocationSummary,
-} from '../utils/workflowMapper';
 import { useSampleWorkflow } from '../hooks/useSampleWorkflow';
-import WorkflowTopStrip from '../components/workflow/WorkflowTopStrip';
-import WorkflowStageNode from '../components/workflow/WorkflowStageNode';
-import WorkflowDetailDrawer from '../components/workflow/WorkflowDetailDrawer';
-import { AlertTriangle } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import WorkflowHeader from '../components/workflow/WorkflowHeader';
+import WorkflowOverviewGraph from '../components/workflow/WorkflowOverviewGraph';
+import WorkflowDependencyGraph from '../components/workflow/WorkflowDependencyGraph';
+import WorkflowAnalysisList from '../components/workflow/WorkflowAnalysisList';
+import WorkflowInspector from '../components/workflow/WorkflowInspector';
+import { AlertTriangle, ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import '../styles/workflow-map-v2.css';
 
-const nodeTypes = { workflowStage: WorkflowStageNode };
-
-const defaultEdgeOptions = {
-    type: 'smoothstep',
-    style: { strokeWidth: 2 },
-};
-
 /**
- * V3: Workflow Intelligence Map with ReactFlow canvas
- * Pan, zoom, minimap, animated transitions, manager-first layout.
+ * SampleWorkflowMap Redesign
+ * Operational workflow map featuring 3 synchronized views:
+ *   - Overview: High-level stage progression for relevant stations
+ *   - Dependencies: Item-level DAG with prerequisites and review gates
+ *   - Analysis list: Complete sortable task list for keyboard & screen readers
+ * Docked inspector panel at wide screens, stacked on tablet/mobile.
  */
 export default function SampleWorkflowMap() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { t } = useLanguage();
 
-    // Data
-    const { sample, workItems, auditLog, mapState, loading, error, fetchData } = useSampleWorkflow(id);
+    const {
+        sample,
+        workItems,
+        mapState,
+        loading,
+        refreshing,
+        error,
+        lastUpdated,
+        fetchData,
+        refresh
+    } = useSampleWorkflow(id);
 
-    // Use backend mapState as primary truth, client-side derivation as fallback
-    const locationSummary = useMemo(() => {
-        if (mapState) {
-            return {
-                currentRoom: mapState.currentRooms?.[0] || '—',
-                activeRooms: mapState.currentRooms || [],
-                owner: mapState.owner,
-                status: mapState.lifecycle,
-                risk: mapState.risk,
-                nextAction: mapState.nextActions?.[0]?.action || '—',
-                sla: mapState.sla,
-                phase: mapState.phase,
-                progress: mapState.progress,
-            };
+    // Initial view: list on mobile, overview on desktop
+    const [activeView, setActiveView] = useState(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 540) {
+            return 'list';
         }
-        return deriveLocationSummary(sample, workItems, auditLog);
-    }, [mapState, sample, workItems, auditLog]);
+        return 'overview';
+    });
 
-    const stageSummaries = useMemo(() => {
-        // Always fall back to client-side derivation which includes ALL rooms
-        const fullStages = deriveStageSummaries(sample, workItems);
+    const [selectedItem, setSelectedItem] = useState(null);
 
-        if (mapState?.activeStages?.length > 0) {
-            // Build lookup from backend stages
-            const backendMap = {};
-            mapState.activeStages.forEach(s => { backendMap[s.room] = s; });
-
-            // Merge: use backend data where available, keep client-side for missing rooms
-            return fullStages.map(stage => {
-                const bs = backendMap[stage.room];
-                if (bs) {
-                    return {
-                        ...stage,
-                        items: bs.items,
-                        done: bs.progress.done,
-                        total: bs.progress.total,
-                        status: bs.status,
-                        blockers: bs.blockers || [],
-                    };
-                }
-                return stage;
-            });
-        }
-        return fullStages;
-    }, [mapState, sample, workItems]);
-
-    const path = useMemo(
-        () => derivePath(locationSummary, stageSummaries),
-        [locationSummary, stageSummaries]
-    );
-
-    // Build ReactFlow graph from stage summaries
-    const graph = useMemo(() => {
-        if (!stageSummaries || stageSummaries.length === 0) return { nodes: [], edges: [] };
-        return buildStageGraph(stageSummaries, path, locationSummary);
-    }, [stageSummaries, path, locationSummary]);
-
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
+    // Auto-select initial focal item once mapState loads
     useEffect(() => {
-        setNodes(graph.nodes);
-        setEdges(graph.edges);
-    }, [graph, setNodes, setEdges]);
+        if (!mapState) return;
 
-    // Fullscreen
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const toggleFullscreen = useCallback(() => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => { });
-            setIsFullscreen(true);
-        } else {
-            document.exitFullscreen();
-            setIsFullscreen(false);
+        // If nothing is selected, prioritize selecting active work item
+        if (!selectedItem) {
+            const activeNode = mapState.dependencyGraph?.nodes?.find(n => n.tone === 'active') ||
+                mapState.stageGraph?.nodes?.find(n => n.tone === 'active') ||
+                mapState.stageGraph?.nodes?.[0];
+            if (activeNode) {
+                setSelectedItem(activeNode);
+            }
         }
-    }, []);
+    }, [mapState, selectedItem]);
 
+    // Keyboard shortcuts (1: Overview, 2: Dependencies, 3: List)
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === 'f' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT') toggleFullscreen();
-            if (e.key === 'Escape' && isFullscreen) {
-                document.exitFullscreen().catch(() => { });
-                setIsFullscreen(false);
-            }
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === '1') setActiveView('overview');
+            if (e.key === '2') setActiveView('dependencies');
+            if (e.key === '3') setActiveView('list');
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isFullscreen, toggleFullscreen]);
-
-    // Detail Drawer
-    const [selectedRoom, setSelectedRoom] = useState(null);
-    const handleNodeClick = useCallback((_, node) => {
-        setSelectedRoom(node.data.room);
     }, []);
 
-    // ─── Loading state ───
-    if (loading) {
+    // Selection handler with cross-view synchronization
+    const handleSelect = useCallback((item) => {
+        setSelectedItem(item);
+    }, []);
+
+    // "Inspect next work" button handler from banner
+    const handleInspectNext = useCallback(() => {
+        if (!mapState) return;
+        const activeDep = mapState.dependencyGraph?.nodes?.find(n => n.tone === 'active') ||
+            mapState.dependencyGraph?.nodes?.find(n => n.status.toLowerCase().includes('progress')) ||
+            mapState.dependencyGraph?.nodes?.[0];
+
+        setActiveView('dependencies');
+        if (activeDep) {
+            setSelectedItem(activeDep);
+        }
+    }, [mapState]);
+
+    // "Trace dependencies" button handler from inspector
+    const handleTraceDependencies = useCallback(() => {
+        setActiveView('dependencies');
+        if (selectedItem && mapState) {
+            // Find matching item in dependency graph
+            const depMatch = mapState.dependencyGraph?.nodes?.find(n =>
+                n.analysis === selectedItem.analysis ||
+                n.room === selectedItem.title ||
+                n.id === selectedItem.id
+            );
+            if (depMatch) {
+                setSelectedItem(depMatch);
+            }
+        }
+    }, [selectedItem, mapState]);
+
+    // Loading State
+    if (loading && !mapState) {
         return (
-            <div className="wf-v2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div className="wf-loading-spinner" />
-                    <p style={{ fontSize: 13, color: '#94a3b8', fontWeight: 500, marginTop: 16 }}>{t('sampleDetail.loading', 'Loading workflow data...')}</p>
+            <div className="flex flex-col items-center justify-center min-h-[460px] p-8 text-center">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+                <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Loading Workflow Map</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Retrieving verified sample stage graph and prerequisite state...</p>
+            </div>
+        );
+    }
+
+    // Error State
+    if (error && !mapState) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[460px] p-8 text-center">
+                <div className="p-4 rounded-full bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 mb-4">
+                    <AlertTriangle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Workflow Unavailable</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6">
+                    {error}
+                </p>
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/samples')}
+                        className="px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        Return to Samples
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => fetchData(false)}
+                        className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
                 </div>
             </div>
         );
     }
 
-    // ─── Error state ───
-    if (error) {
-        return (
-            <div className="wf-v2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="wf-error-card">
-                    <AlertTriangle size={36} style={{ color: '#f59e0b', margin: '0 auto 12px' }} />
-                    <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>
-                        {t('workflow.errorLoading', 'Error loading workflow')}
-                    </h3>
-                    <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>{error}</p>
-                    <button onClick={() => navigate(-1)} className="wf-error-btn">{t('common.back', 'Go Back')}</button>
-                </div>
-            </div>
-        );
-    }
+    const selectedId = selectedItem?.id || selectedItem?.workItemId;
 
     return (
-        <div className="wf-v2" role="application" aria-label={`Workflow map for sample ${id}`}>
-            {/* Sticky Top Strip */}
-            <WorkflowTopStrip
-                locationSummary={locationSummary}
-                mapState={mapState}
+        <div className="sf-concept" id="soilfer-workflow-redesign">
+            {/* Header / Summary / View Switcher */}
+            <WorkflowHeader
                 sample={sample}
-                workItems={workItems}
-                isFullscreen={isFullscreen}
-                onBack={() => navigate(`/samples/${id}`)}
-                onRefresh={fetchData}
-                onFullscreen={toggleFullscreen}
+                mapState={mapState}
+                activeView={activeView}
+                onViewChange={setActiveView}
+                onInspectNext={handleInspectNext}
+                lastUpdated={lastUpdated}
+                refreshing={refreshing}
+                onRefresh={refresh}
             />
 
-            {/* ReactFlow Canvas */}
-            <div className="wf-canvas">
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onNodeClick={handleNodeClick}
-                    nodeTypes={nodeTypes}
-                    defaultEdgeOptions={defaultEdgeOptions}
-                    fitView
-                    fitViewOptions={{ padding: 0.18 }}
-                    minZoom={0.25}
-                    maxZoom={2}
-                    nodesDraggable={false}
-                    nodesConnectable={false}
-                    proOptions={{ hideAttribution: true }}
-                >
-                    <Background variant="dots" gap={24} size={1} className="wf-canvas-dots" />
-                    <MiniMap
-                        nodeStrokeWidth={3}
-                        pannable
-                        zoomable
-                        className="wf-minimap"
-                        maskColor="rgba(99, 102, 241, 0.12)"
+            {/* Main Interactive Workspace (Canvas + Docked Inspector) */}
+            <div className="sf-workspace">
+                {activeView === 'overview' && (
+                    <WorkflowOverviewGraph
+                        stageGraph={mapState?.stageGraph}
+                        selectedId={selectedId}
+                        onSelect={handleSelect}
                     />
-                    <Controls
-                        showInteractive={false}
-                        className="wf-canvas-controls"
+                )}
+
+                {activeView === 'dependencies' && (
+                    <WorkflowDependencyGraph
+                        dependencyGraph={mapState?.dependencyGraph}
+                        workItems={workItems}
+                        selectedId={selectedId}
+                        onSelect={handleSelect}
                     />
-                </ReactFlow>
+                )}
+
+                {activeView === 'list' && (
+                    <WorkflowAnalysisList
+                        dependencyGraph={mapState?.dependencyGraph}
+                        selectedId={selectedId}
+                        onSelect={handleSelect}
+                    />
+                )}
+
+                {/* Docked Inspector Panel */}
+                <WorkflowInspector
+                    selectedItem={selectedItem}
+                    activeView={activeView}
+                    onTraceDependencies={handleTraceDependencies}
+                    sampleId={sample?.id}
+                />
             </div>
 
-            {/* Detail Drawer */}
-            {selectedRoom && (
-                <WorkflowDetailDrawer
-                    selectedRoom={selectedRoom}
-                    stageSummary={stageSummaries.find(s => s.room === selectedRoom)}
-                    blockerGraph={mapState?.blockerGraph || []}
-                    workItems={workItems}
-                    auditLog={auditLog}
-                    sample={sample}
-                    onClose={() => setSelectedRoom(null)}
-                />
-            )}
+            {/* Footnote */}
+            <div className="sf-top text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800">
+                <span>Path shown reflects assigned determinations for this sample. Keyboard shortcuts: [1] Overview, [2] Dependencies, [3] Analysis list.</span>
+                <span>SoilFER LIMS v1.4.0</span>
+            </div>
         </div>
     );
-}
-
-/**
- * Build ReactFlow nodes/edges from stage summaries.
- * Layout: 3 clean balanced rows
- *   Row 1:  Reception → Preparation Room
- *   Row 2:  Physical Testing | Chemical Analysis | Spectral Lab  (Parallel Analytical Core)
- *   Row 3:  QA Review → Archive & Storage
- */
-function buildStageGraph(stageSummaries, path) {
-    const { completedRooms, currentRoom } = path || {};
-    const nodes = [];
-    const edges = [];
-
-    const CARD_W = 260;
-    const H_GAP = 90;
-    const V_GAP = 70;
-
-    const stageMap = {};
-    stageSummaries.forEach(s => { stageMap[s.room] = s; });
-
-    const getPhase = (room) =>
-        room === currentRoom ? 'current'
-            : completedRooms?.includes(room) ? 'completed'
-                : 'future';
-
-    const addNode = (id, room, x, y) => {
-        const stage = stageMap[room];
-        if (!stage) return;
-        nodes.push({
-            id, type: 'workflowStage',
-            position: { x, y },
-            data: { ...stage, phase: getPhase(room), room },
-            draggable: false,
-        });
-    };
-
-    // ─── Row 1: Intake & Physical Gate ───
-    const row1Y = 0;
-    const row1OffsetX = (3 * CARD_W + 2 * H_GAP - (2 * CARD_W + H_GAP)) / 2;
-    addNode('reception', 'Reception', row1OffsetX, row1Y);
-    addNode('prep', 'Preparation Room', row1OffsetX + CARD_W + H_GAP, row1Y);
-
-    // ─── Row 2: Parallel Analytical Core (3 Labs) ───
-    const row2Y = row1Y + V_GAP + 260;
-    addNode('physical', 'Physical Testing', 0 * (CARD_W + H_GAP), row2Y);
-    addNode('chemical', 'Chemical Analysis', 1 * (CARD_W + H_GAP), row2Y);
-    addNode('spectral', 'Spectral Lab', 2 * (CARD_W + H_GAP), row2Y);
-
-    // ─── Row 3: QA Review & Archive Sample Bank ───
-    const row3Y = row2Y + V_GAP + 260;
-    const row3OffsetX = row1OffsetX;
-    addNode('qa', 'QA Review', row3OffsetX, row3Y);
-    addNode('archive', 'Archive & Disposal', row3OffsetX + CARD_W + H_GAP, row3Y);
-
-    // ─── Edges ───
-    const addEdge = (src, tgt, srcHandle, tgtHandle) => {
-        const srcRoom = nodes.find(n => n.id === src)?.data?.room;
-        const tgtRoom = nodes.find(n => n.id === tgt)?.data?.room;
-        const srcPhase = getPhase(srcRoom);
-        const tgtPhase = getPhase(tgtRoom);
-
-        const tgtStage = stageMap[tgtRoom];
-        const tgtHasActiveWork = tgtStage && tgtStage.total > 0 && tgtStage.done < tgtStage.total;
-        const isCurrentlyActive = tgtPhase === 'current' || (srcPhase === 'completed' && tgtHasActiveWork);
-        const isCompletedStep = srcPhase === 'completed' && tgtPhase === 'completed';
-
-        edges.push({
-            id: `e-${src}-${tgt}`,
-            source: src,
-            target: tgt,
-            sourceHandle: srcHandle,
-            targetHandle: tgtHandle,
-            type: 'smoothstep',
-            animated: isCurrentlyActive,
-            style: {
-                stroke: isCurrentlyActive
-                    ? '#6366f1' // Active glowing indigo
-                    : isCompletedStep
-                    ? '#10b981' // Verified emerald
-                    : 'var(--wf-edge-inactive, #cbd5e1)',
-                strokeWidth: isCurrentlyActive ? 3 : isCompletedStep ? 2.5 : 1.5,
-                opacity: isCurrentlyActive || isCompletedStep ? 1 : 0.45,
-                strokeDasharray: isCompletedStep || isCurrentlyActive ? undefined : '5 4',
-            },
-        });
-    };
-
-    // Row 1 connections
-    addEdge('reception', 'prep', 'right', 'left');
-
-    // Row 1 -> Row 2 (Prep to 3 testing stations)
-    addEdge('prep', 'physical', 'bottom', 'top');
-    addEdge('prep', 'chemical', 'bottom', 'top');
-    addEdge('prep', 'spectral', 'bottom', 'top');
-
-    // Row 2 -> Row 3 (3 testing stations to QA)
-    addEdge('physical', 'qa', 'bottom', 'top');
-    addEdge('chemical', 'qa', 'bottom', 'top');
-    addEdge('spectral', 'qa', 'bottom', 'top');
-
-    // Row 3 connections (QA to Archive)
-    addEdge('qa', 'archive', 'right', 'left');
-
-    return { nodes, edges };
 }
