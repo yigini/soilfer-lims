@@ -725,7 +725,7 @@ if (process.env.NODE_ENV === 'production') {
 
     // SPA fallback: all non-API routes serve index.html
     app.use((req, res, next) => {
-        if (!req.path.startsWith('/api') && req.method === 'GET') {
+        if (!req.path.startsWith('/api') && (req.method === 'GET' || req.method === 'HEAD')) {
             res.sendFile(path.join(clientDist, 'index.html'));
         } else {
             next();
