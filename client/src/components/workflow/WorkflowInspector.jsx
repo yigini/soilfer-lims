@@ -12,7 +12,8 @@ export default function WorkflowInspector({
     selectedItem,
     activeView,
     onTraceDependencies,
-    sampleId
+    sampleId,
+    auditLog = []
 }) {
     const navigate = useNavigate();
 
@@ -138,6 +139,31 @@ export default function WorkflowInspector({
                     </button>
                 )}
             </div>
+
+            {/* Recent Activity / Audit Events */}
+            {auditLog && auditLog.length > 0 && (
+                <div className="sf-inspect-section">
+                    <div className="sf-eyebrow">Recent Activity</div>
+                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto pr-1">
+                        {auditLog.slice(0, 5).map((log, idx) => (
+                            <div key={log.id || idx} className="text-xs border-b border-slate-100 dark:border-slate-800/80 pb-2 last:border-0 last:pb-0">
+                                <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
+                                    <span className="font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">{log.action || 'Event'}</span>
+                                    <span>{log.timestamp ? new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                </div>
+                                <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-snug line-clamp-2">
+                                    {log.details || 'Workflow event recorded'}
+                                </p>
+                                {log.username && (
+                                    <div className="text-[10px] text-slate-400 mt-0.5">
+                                        by <span className="text-slate-500 dark:text-slate-400 font-medium">{log.username}</span>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </aside>
     );
 }

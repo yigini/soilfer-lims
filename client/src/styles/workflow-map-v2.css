@@ -839,3 +839,70 @@
         padding: 16px 14px;
     }
 }
+
+/* ── Print Summary Stylesheet (Package D) ── */
+@media print {
+    nav, aside.sidebar, header.navbar, .sf-crumb button, .sf-top button, .sf-view-tabs, .sf-inspect-button, button {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .sf-concept {
+        border: 1px solid #cccccc !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+
+    .sf-workspace {
+        display: block !important;
+        border-top: 1px solid #cccccc !important;
+    }
+
+    .sf-map-area {
+        background-image: none !important;
+        padding: 12px !important;
+    }
+
+    .sf-inspector {
+        display: block !important;
+        border-left: none !important;
+        border-top: 1px dashed #cccccc !important;
+        margin-top: 16px !important;
+        padding: 12px !important;
+        page-break-inside: avoid;
+    }
+
+    .sf-card, .sf-node {
+        page-break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #aaaaaa !important;
+        background: #ffffff !important;
+    }
+
+    .sf-wires {
+        display: none !important;
+    }
+
+    .sf-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .sf-list table {
+        page-break-inside: auto;
+    }
+
+    .sf-list tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}

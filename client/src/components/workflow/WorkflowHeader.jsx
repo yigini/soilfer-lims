@@ -1,11 +1,11 @@
 import React from 'react';
-import { ArrowLeft, RefreshCw, Activity, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Activity, CheckCircle2, AlertTriangle, Clock, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 /**
  * WorkflowHeader
  * Breadcrumb, identity, isolated denominators (prep vs tests vs reviews),
- * next eligible action banner, view switcher, and quiet freshness indicator.
+ * next eligible action banner, view switcher, quiet freshness indicator, and print trigger.
  */
 export default function WorkflowHeader({
     sample,
@@ -83,6 +83,14 @@ export default function WorkflowHeader({
                         title="Refresh workflow state"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => window.print()}
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        title="Print workflow summary"
+                    >
+                        <Printer className="w-3.5 h-3.5" />
                     </button>
                 </div>
             </div>

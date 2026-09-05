@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import axios from 'axios';
+import { NotificationContext } from '../context/NotificationContext';
 
 /**
  * useSampleWorkflow hook
  * Fetches sample details, workflow items, audit history, and the unified map-state contract.
- * Guarantees zero fabricated data on API errors and supports silent background refreshing.
+ * Guarantees zero fabricated data on API errors, supports silent background refreshing,
+ * and subscribes to real-time WebSocket push events for instant UI synchronization.
  */
 export function useSampleWorkflow(sampleId) {
     const [sample, setSample] = useState(null);
@@ -17,6 +19,8 @@ export function useSampleWorkflow(sampleId) {
     const [lastUpdated, setLastUpdated] = useState(null);
 
     const isMounted = useRef(true);
+    const notifContext = useContext(NotificationContext);
+    const subscribeToEvent = notifContext?.subscribeToEvent;
 
     useEffect(() => {
         isMounted.current = true;
@@ -69,6 +73,37 @@ export function useSampleWorkflow(sampleId) {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    // WebSocket real-time subscription: silently refresh when work items change
+    useEffect(() => {
+        if (!subscribeToEvent || !sampleId) return;
+
+        let debounceTimer = null;
+        const handleUpdate = (data) => {
+            const sId = String(sampleId);
+            const matchesSample = !data?.sampleIds ||
+                (Array.isArray(data.sampleIds) && (
+                    data.sampleIds.some(id => String(id) === sId) ||
+                    (sample?.id && data.sampleIds.some(id => String(id) === String(sample.id)))
+                ));
+
+            if (matchesSample) {
+                if (debounceTimer) clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetchData(true);
+                }, 350);
+            }
+        };
+
+        const unsub1 = subscribeToEvent('WORKITEM_UPDATE', handleUpdate);
+        const unsub2 = subscribeToEvent('WORKITEM_CHANGED', handleUpdate);
+
+        return () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            if (typeof unsub1 === 'function') unsub1();
+            if (typeof unsub2 === 'function') unsub2();
+        };
+    }, [subscribeToEvent, sampleId, sample?.id, fetchData]);
 
     return {
         sample,

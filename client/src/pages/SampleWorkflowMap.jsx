@@ -24,6 +24,7 @@ export default function SampleWorkflowMap() {
     const {
         sample,
         workItems,
+        auditLog,
         mapState,
         loading,
         refreshing,
@@ -195,6 +196,7 @@ export default function SampleWorkflowMap() {
                     activeView={activeView}
                     onTraceDependencies={handleTraceDependencies}
                     sampleId={sample?.id}
+                    auditLog={auditLog}
                 />
             </div>
 
