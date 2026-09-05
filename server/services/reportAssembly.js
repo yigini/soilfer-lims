@@ -14,7 +14,9 @@ async function assembleReport(sampleId, user) {
     const sample = await prisma.sample.findUnique({
         where: { id: sampleId },
         include: {
-            results: true,
+            results: {
+                where: { isCurrent: true }
+            },
             workItems: {
                 orderBy: { createdAt: 'asc' }
             },
@@ -82,9 +84,17 @@ async function assembleReport(sampleId, user) {
     } catch (e) { /* methodologies table may be empty */ }
     const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
 
+    const EXCLUDED_GATE_CODES = ['DRYING', 'PREPARATION', 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION', 'ARCHIVING', 'DISPOSAL'];
+
     // 7. Group results by category and apply controlled units & agronomic interpretation
     const groupedResults = {};
-    for (const result of sample.results) {
+    const reportableResults = (sample.results || []).filter(r =>
+        r.isCurrent === true &&
+        r.isValid !== false &&
+        !EXCLUDED_GATE_CODES.includes(r.param)
+    );
+
+    for (const result of reportableResults) {
         const analysis = analysisMap.get(result.param);
         const category = analysis?.categoryId || 'Other';
         if (!groupedResults[category]) {

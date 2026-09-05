@@ -268,6 +268,33 @@ model WorkItem {
   updatedAt      DateTime  @updatedAt
 
   equipmentUsage WorkItemEquipmentUse[]
+  draft          WorkItemDraft?
+}
+
+model WorkItemDraft {
+  id            String    @id @default(uuid())
+  workItemId    String    @unique
+  workItem      WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  sampleId      String
+  userId        String    // Author / technician username
+  labId         String?
+  analysis      String
+  value         String?   // Raw input string (e.g. "6,42", "<0.5")
+  values        String?   // JSON array of strings (e.g. texture: ["40", "40", "20"])
+  checks        String?   // JSON array of booleans (operational task checklists)
+  basis         String?   @default("AIR_DRY")
+  replicateNo   Int       @default(1)
+  instrumentId  String?
+  methodologyId String?
+  notes         String?
+  baseVersion   Int       @default(0)
+  draftVersion  Int       @default(1)
+  conflictValue String?   // Server value snapshot for conflict compare
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, labId])
+  @@index([sampleId, analysis])
 }
 
 model Batch {

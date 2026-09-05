@@ -227,6 +227,13 @@ function evaluateCecAndBases(cec, ca, mg, k, na = 0, ph = null) {
     };
 }
 
+export {
+    calculateUsdaTexture,
+    calculateTernaryCoordinates,
+    evaluateCnRatio,
+    evaluateCecAndBases
+};
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         calculateUsdaTexture,

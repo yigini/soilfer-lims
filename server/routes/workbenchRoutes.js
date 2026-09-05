@@ -17,4 +17,17 @@ router.get('/drafts', checkPermission('ENTER_RESULTS'), workbenchController.getD
 // Clear drafts for an analysis
 router.delete('/drafts/:analysis', checkPermission('ENTER_RESULTS'), workbenchController.clearDrafts);
 
+// Discard single draft
+router.delete('/drafts/item/:workItemId', checkPermission('ENTER_RESULTS'), workbenchController.discardDraft);
+
+// Resolve draft conflict
+router.post('/drafts/item/:workItemId/resolve-conflict', checkPermission('ENTER_RESULTS'), workbenchController.resolveConflict);
+
+// V2 Two-Step Record & Submit Pipeline
+router.post('/v2/completion/preview', checkPermission('ENTER_RESULTS'), workbenchController.previewCompletion);
+router.post('/v2/completion/commit', checkPermission('ENTER_RESULTS'), workbenchController.commitCompletion);
+router.post('/v2/submissions/preview', checkPermission('ENTER_RESULTS'), workbenchController.previewSubmissions);
+router.post('/v2/submissions/commit', checkPermission('ENTER_RESULTS'), workbenchController.commitSubmissions);
+router.get('/v2/receipts', checkPermission('ENTER_RESULTS'), workbenchController.getReceipts);
+
 module.exports = router;

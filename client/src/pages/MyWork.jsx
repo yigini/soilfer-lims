@@ -70,7 +70,26 @@ const MyWork = () => {
                 }
             });
 
-            const grouped = Object.values(groups);
+            const completedStatuses = ['ACCEPTED', 'COMPLETED', 'APPROVED', 'SUBMITTED', 'SUBMITTED_FOR_REVIEW', 'UNDER_REVIEW'];
+            const reanalysisStatuses = ['REANALYSIS_REQUIRED', 'REJECTED', 'FAILED'];
+            const activeStatuses = ['ASSIGNED', 'PENDING', 'IN_PROGRESS'];
+
+            const grouped = Object.values(groups).map(g => {
+                const totalCount = g.items.length;
+                const completedCount = g.items.filter(i => completedStatuses.includes(i.status)).length;
+                const hasReanalysis = g.items.some(i => reanalysisStatuses.includes(i.status));
+                const hasActive = g.items.some(i => activeStatuses.includes(i.status));
+                const hasRecorded = g.items.some(i => i.status === 'COMPLETED');
+                return {
+                    ...g,
+                    totalCount,
+                    completedCount,
+                    hasReanalysis,
+                    hasActive,
+                    hasRecorded
+                };
+            });
+
             setWork(grouped);
             setMeta({
                 total: grouped.length,
@@ -106,24 +125,27 @@ const MyWork = () => {
         return () => clearInterval(interval);
     }, [lastUpdated]);
 
-    // ─── 5 Canonical Lifecycle Buckets ───
+    // ─── 6 Canonical Lifecycle Buckets ───
     const activeWork = work.filter(g => g.items.some(i => ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(i.status)));
+    const recordedWork = work.filter(g => g.items.some(i => i.status === 'COMPLETED'));
     const reviewWork = work.filter(g => g.items.some(i => ['SUBMITTED', 'SUBMITTED_FOR_REVIEW', 'UNDER_REVIEW'].includes(i.status)));
     const redoWork = work.filter(g => g.items.some(i => ['REANALYSIS_REQUIRED', 'REJECTED', 'FAILED'].includes(i.status)));
-    const acceptedWork = work.filter(g => g.items.some(i => ['ACCEPTED', 'COMPLETED', 'APPROVED'].includes(i.status)));
+    const acceptedWork = work.filter(g => g.items.some(i => ['ACCEPTED', 'APPROVED'].includes(i.status)));
     const waivedWork = work.filter(g => g.items.some(i => ['WAIVED', 'CANCELLED'].includes(i.status)));
 
     let currentList = activeWork;
-    if (activeTab === 'review') currentList = reviewWork;
+    if (activeTab === 'recorded') currentList = recordedWork;
+    else if (activeTab === 'review') currentList = reviewWork;
     else if (activeTab === 'redo') currentList = redoWork;
     else if (activeTab === 'accepted') currentList = acceptedWork;
     else if (activeTab === 'waived') currentList = waivedWork;
 
     // KPIs
     const totalActive = activeWork.reduce((sum, g) => sum + g.items.filter(i => ['ASSIGNED', 'PENDING', 'IN_PROGRESS'].includes(i.status)).length, 0);
+    const totalRecorded = recordedWork.reduce((sum, g) => sum + g.items.filter(i => i.status === 'COMPLETED').length, 0);
     const totalReview = reviewWork.reduce((sum, g) => sum + g.items.filter(i => ['SUBMITTED', 'SUBMITTED_FOR_REVIEW', 'UNDER_REVIEW'].includes(i.status)).length, 0);
     const totalRedo = redoWork.reduce((sum, g) => sum + g.items.filter(i => ['REANALYSIS_REQUIRED', 'REJECTED', 'FAILED'].includes(i.status)).length, 0);
-    const totalAccepted = acceptedWork.reduce((sum, g) => sum + g.items.filter(i => ['ACCEPTED', 'COMPLETED', 'APPROVED'].includes(i.status)).length, 0);
+    const totalAccepted = acceptedWork.reduce((sum, g) => sum + g.items.filter(i => ['ACCEPTED', 'APPROVED'].includes(i.status)).length, 0);
     const totalWaived = waivedWork.reduce((sum, g) => sum + g.items.filter(i => ['WAIVED', 'CANCELLED'].includes(i.status)).length, 0);
 
     if (loading) {
@@ -161,13 +183,20 @@ const MyWork = () => {
             )}
 
             {/* ─── KPI Row ─── */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div className="p-4 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Active</span>
                         <ClipboardList size={14} className="text-blue-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-blue-700 dark:text-blue-300">{totalActive}</span>
+                </div>
+                <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Recorded</span>
+                        <CheckCircle size={14} className="text-amber-500 opacity-60" />
+                    </div>
+                    <span className="text-2xl font-black text-amber-700 dark:text-amber-300">{totalRecorded}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                     <div className="flex items-center justify-between mb-1">
@@ -199,7 +228,7 @@ const MyWork = () => {
                 </div>
             </div>
 
-            {/* ─── 5 Canonical Tabs ─── */}
+            {/* ─── Canonical Tabs ─── */}
             <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('active')}
@@ -209,6 +238,15 @@ const MyWork = () => {
                         }`}
                 >
                     Active ({activeWork.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('recorded')}
+                    className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'recorded'
+                        ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    Ready to Submit ({recordedWork.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('review')}
@@ -261,10 +299,16 @@ const MyWork = () => {
                     }).map(group => {
                         const progress = group.totalCount > 0 ? Math.round((group.completedCount / group.totalCount) * 100) : 0;
                         return (
-                            <button
+                            <div
                                 key={group.sampleId}
-                                onClick={() => navigate(`/samples/${group.sampleId}`)}
-                                className="w-full flex items-center justify-between p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all text-left group"
+                                onClick={() => {
+                                    if (['active', 'recorded', 'redo'].includes(activeTab) || group.hasActive || group.hasReanalysis || group.hasRecorded) {
+                                        navigate(`/workbench?sampleId=${encodeURIComponent(group.sampleId)}&analysis=${encodeURIComponent(group.analyses[0] || '')}`);
+                                    } else {
+                                        navigate(`/samples/${group.sampleId}`);
+                                    }
+                                }}
+                                className="w-full flex items-center justify-between p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all text-left group cursor-pointer"
                             >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                     {/* Priority/Status indicator */}
@@ -275,6 +319,8 @@ const MyWork = () => {
                                             <Zap size={14} className="text-red-500" />
                                         ) : group.hasActive ? (
                                             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 block" />
+                                        ) : group.hasRecorded ? (
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 block" />
                                         ) : (
                                             <CheckCircle size={14} className="text-emerald-500" />
                                         )}
@@ -282,8 +328,21 @@ const MyWork = () => {
 
                                     {/* Sample info */}
                                     <div className="min-w-0 flex-1">
-                                        <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
-                                            {group.labId || group.sampleId.substring(0, 12)}
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
+                                                {group.labId || group.sampleId.substring(0, 12)}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/samples/${group.sampleId}`);
+                                                }}
+                                                className="text-[10px] text-blue-500 hover:underline shrink-0"
+                                                title="View sample record"
+                                            >
+                                                Details
+                                            </button>
                                         </div>
                                         <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
                                             {group.analyses?.map(a => getAnalysisDisplayName(a)).join(', ')}
@@ -308,6 +367,9 @@ const MyWork = () => {
                                     </div>
 
                                     {/* Status badges */}
+                                    {group.hasRecorded && (
+                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Recorded</span>
+                                    )}
                                     {group.hasReanalysis && (
                                         <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Redo</span>
                                     )}
@@ -315,9 +377,14 @@ const MyWork = () => {
                                         <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-500 text-white">Urgent</span>
                                     )}
 
-                                    <ArrowRight size={14} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                                    <div className="flex items-center gap-1 text-xs font-semibold text-gray-400 group-hover:text-blue-500 transition-colors">
+                                        <span className="hidden sm:inline text-[11px]">
+                                            {['active', 'recorded', 'redo'].includes(activeTab) || group.hasActive || group.hasReanalysis || group.hasRecorded ? 'Workbench' : 'View'}
+                                        </span>
+                                        <ArrowRight size={14} />
+                                    </div>
                                 </div>
-                            </button>
+                            </div>
                         );
                     })
                 ) : (

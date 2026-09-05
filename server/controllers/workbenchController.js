@@ -2,6 +2,9 @@ const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const validationController = require('./validationController');
+const draftService = require('../services/draftService');
+const validationService = require('../services/workbenchValidationService');
+const readinessService = require('../services/workbenchReadinessService');
 const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
 
@@ -15,13 +18,12 @@ exports.getQueue = async (req, res) => {
     const user = req.user;
 
     try {
-        // Fetch all work items assigned to this technician that are actionable
+        // Fetch all work items assigned to this technician that are actionable (including spectroscopy)
         const actionableStatuses = ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'];
         const items = await prisma.workItem.findMany({
             where: {
                 assignedTo: user.username,
-                status: { in: actionableStatuses },
-                NOT: { analysis: { in: ['SPEC_VIS_NIR', 'SPEC_MIR'] } }
+                status: { in: actionableStatuses }
             },
             include: {
                 sample: {
@@ -41,6 +43,27 @@ exports.getQueue = async (req, res) => {
                 { priority: 'desc' },
                 { createdAt: 'asc' }
             ]
+        });
+
+        // Fetch user's active drafts
+        const userDrafts = await prisma.workItemDraft.findMany({
+            where: { userId: user.username }
+        });
+        const draftMap = {};
+        userDrafts.forEach(d => {
+            draftMap[d.workItemId] = {
+                id: d.id,
+                value: d.value,
+                values: d.values ? JSON.parse(d.values) : null,
+                checks: d.checks ? JSON.parse(d.checks) : null,
+                basis: d.basis,
+                replicateNo: d.replicateNo,
+                instrumentId: d.instrumentId,
+                baseVersion: d.baseVersion,
+                draftVersion: d.draftVersion,
+                conflictValue: d.conflictValue,
+                updatedAt: d.updatedAt
+            };
         });
 
         // Fetch all analysis definitions for enrichment
@@ -153,6 +176,13 @@ exports.getQueue = async (req, res) => {
             }
 
             const resultKey = `${item.sampleId}::${code}`;
+            const itemDraft = draftMap[item.id] || null;
+            const selectedEquipId = item.equipmentId || itemDraft?.instrumentId || null;
+            const readiness = readinessService.evaluateItemReadiness(item, user, {
+                equipReq: equipReqMap[equipKey],
+                asset: assetMap[selectedEquipId],
+                selectedEquipmentId: selectedEquipId
+            });
 
             groupsMap[code].items.push({
                 workItemId: item.id,
@@ -170,7 +200,9 @@ exports.getQueue = async (req, res) => {
                 preparationStatus: item.sample?.preparationStatus || 'PENDING',
                 sampleStatus: item.sample?.status || null,
                 version: item.version,
-                category: groupsMap[code].category
+                category: groupsMap[code].category,
+                readiness,
+                draft: itemDraft
             });
         }
 
@@ -186,6 +218,7 @@ exports.getQueue = async (req, res) => {
             totalPending: items.filter(i => i.status === 'ASSIGNED').length,
             totalInProgress: items.filter(i => i.status === 'IN_PROGRESS').length,
             totalReanalysis: items.filter(i => i.status === 'REANALYSIS_REQUIRED').length,
+            totalDrafts: userDrafts.length,
             totalGroups: groups.length,
             totalItems: items.length
         };
@@ -350,6 +383,36 @@ exports.batchSave = async (req, res) => {
                             ? 'This item must be reassigned before results can be entered.'
                             : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
                 });
+                continue;
+            }
+
+            // Dedicated draft branch: save strictly to WorkItemDraft without creating Result or completing WorkItem
+            if (draft) {
+                try {
+                    const savedDraft = await draftService.saveDraft(user, {
+                        workItemId: item.id,
+                        sampleId: item.sampleId,
+                        analysis: item.analysis,
+                        value: value !== undefined && value !== null ? String(value) : null,
+                        values: entry.values || null,
+                        checks: entry.checks || null,
+                        basis: entry.basis || 'AIR_DRY',
+                        replicateNo: entry.replicateNo || 1,
+                        instrumentId: entry.equipmentId || item.equipmentId || null,
+                        methodologyId: methodMap[item.analysis]?.id || null,
+                        notes: entry.notes || null,
+                        baseVersion: entry.version !== undefined ? entry.version : item.version
+                    });
+                    results.push({
+                        workItemId: entry.workItemId,
+                        status: 'drafted',
+                        validation,
+                        draftId: savedDraft.id,
+                        newVersion: item.version
+                    });
+                } catch (draftErr) {
+                    errors.push({ workItemId: entry.workItemId, error: draftErr.message });
+                }
                 continue;
             }
 
@@ -544,6 +607,11 @@ exports.batchSave = async (req, res) => {
                         updatedAt: now
                     }
                 }));
+
+                // Purge draft from WorkItemDraft upon successful record
+                ops.push(prisma.workItemDraft.deleteMany({
+                    where: { workItemId: item.id }
+                }));
             }
 
             // Handle operational gate side-effects (non-draft only)
@@ -737,10 +805,21 @@ exports.batchSave = async (req, res) => {
             }
         }
 
+        const receipt = !draft && results.length > 0 ? {
+            receiptId: `REC-REC-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+            type: 'RECORD',
+            action: 'RECORD_RESULTS',
+            count: results.length,
+            recordedAt: now.toISOString(),
+            recordedBy: user.username,
+            items: results
+        } : null;
+
         res.json({
             success: true,
             draft,
             saved: results.length,
+            receipt,
             errors: errors.length > 0 ? errors : undefined,
             results
         });
@@ -752,40 +831,34 @@ exports.batchSave = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/drafts
-// Returns work items that are IN_PROGRESS with results (server-side drafts)
+// Returns dedicated drafts from WorkItemDraft
 // ─────────────────────────────────────────────────────────────────────────────
 exports.getDrafts = async (req, res) => {
     const user = req.user;
 
     try {
-        const items = await prisma.workItem.findMany({
-            where: {
-                assignedTo: user.username,
-                status: 'IN_PROGRESS',
-                result: { not: null }
-            },
-            select: {
-                id: true,
-                analysis: true,
-                sampleId: true,
-                result: true,
-                equipmentId: true
-            }
-        });
+        const drafts = await draftService.getDrafts(user);
 
-        // Group by analysis
-        const drafts = {};
-        items.forEach(item => {
-            if (!drafts[item.analysis]) drafts[item.analysis] = [];
-            drafts[item.analysis].push({
-                workItemId: item.id,
-                sampleId: item.sampleId,
-                value: item.result,
-                equipmentId: item.equipmentId
+        // Group by analysis for client convenience
+        const grouped = {};
+        drafts.forEach(d => {
+            if (!grouped[d.analysis]) grouped[d.analysis] = [];
+            grouped[d.analysis].push({
+                workItemId: d.workItemId,
+                sampleId: d.sampleId,
+                value: d.value,
+                values: d.values,
+                checks: d.checks,
+                basis: d.basis,
+                replicateNo: d.replicateNo,
+                instrumentId: d.instrumentId,
+                baseVersion: d.baseVersion,
+                draftVersion: d.draftVersion,
+                conflictValue: d.conflictValue
             });
         });
 
-        res.json({ drafts });
+        res.json({ drafts: grouped, items: drafts });
     } catch (error) {
         console.error('[workbench.getDrafts] Error:', error);
         res.status(500).json({ error: 'Failed to fetch drafts' });
@@ -794,29 +867,538 @@ exports.getDrafts = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DELETE /api/workbench/drafts/:analysis
-// Clears draft values for a specific analysis group
+// Clears draft values for a specific analysis group without leaving zombie Results
 // ─────────────────────────────────────────────────────────────────────────────
 exports.clearDrafts = async (req, res) => {
     const { analysis } = req.params;
     const user = req.user;
 
     try {
-        await prisma.workItem.updateMany({
+        const userDrafts = await prisma.workItemDraft.findMany({
             where: {
-                assignedTo: user.username,
-                analysis: analysis,
-                status: 'IN_PROGRESS'
-            },
-            data: {
-                result: null,
-                status: 'ASSIGNED'
+                userId: user.username,
+                ...(analysis && analysis !== 'all' ? { analysis } : {})
             }
         });
 
-        res.json({ success: true, message: `Drafts cleared for ${analysis}` });
+        const workItemIds = userDrafts.map(d => d.workItemId);
+
+        // Delete from WorkItemDraft
+        await prisma.workItemDraft.deleteMany({
+            where: {
+                id: { in: userDrafts.map(d => d.id) }
+            }
+        });
+
+        // Revert work items if in progress and uncompleted
+        if (workItemIds.length > 0) {
+            await prisma.workItem.updateMany({
+                where: {
+                    id: { in: workItemIds },
+                    status: 'IN_PROGRESS',
+                    completedAt: null
+                },
+                data: {
+                    status: 'ASSIGNED'
+                }
+            });
+        }
+
+        // Log audit event
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-clear-drafts-${user.username}-${Date.now()}`,
+                entity: 'WorkItemDraft',
+                action: 'DRAFT_DISCARDED',
+                performedBy: user.username,
+                details: `Cleared ${userDrafts.length} drafts for ${analysis}`,
+                timestamp: new Date()
+            }
+        }).catch(() => {});
+
+        res.json({ success: true, message: `Drafts cleared for ${analysis}`, count: userDrafts.length });
     } catch (error) {
         console.error('[workbench.clearDrafts] Error:', error);
         res.status(500).json({ error: 'Failed to clear drafts' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE /api/workbench/drafts/item/:workItemId
+// Discard a single draft determination with receipt
+// ─────────────────────────────────────────────────────────────────────────────
+exports.discardDraft = async (req, res) => {
+    const { workItemId } = req.params;
+    const user = req.user;
+
+    try {
+        const result = await draftService.discardDraft(user, workItemId);
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/drafts/item/:workItemId/resolve-conflict
+// Resolve a concurrency conflict on a draft
+// ─────────────────────────────────────────────────────────────────────────────
+exports.resolveConflict = async (req, res) => {
+    const { workItemId } = req.params;
+    const { resolution, reason } = req.body;
+    const user = req.user;
+
+    try {
+        const result = await draftService.resolveConflict(user, workItemId, { resolution, reason });
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/v2/completion/preview
+// Preflight check of items to record: separates into included vs excluded with reasons
+// ─────────────────────────────────────────────────────────────────────────────
+exports.previewCompletion = async (req, res) => {
+    const { entries } = req.body;
+    const user = req.user;
+
+    if (!entries || !Array.isArray(entries) || entries.length === 0) {
+        return res.status(400).json({ error: 'entries array is required and must not be empty' });
+    }
+
+    try {
+        const workItemIds = entries.map(e => e.workItemId);
+        const workItems = await prisma.workItem.findMany({
+            where: { id: { in: workItemIds } },
+            include: { sample: true }
+        });
+        const itemMap = {};
+        workItems.forEach(wi => itemMap[wi.id] = wi);
+
+        const methods = await analysisService.loadAnalyses();
+        const methodMap = {};
+        methods.forEach(m => methodMap[m.code] = m);
+
+        const labCodes = [...new Set(workItems.map(wi => wi.sample?.assignedLab || wi.sample?.labId).filter(Boolean))];
+        const analysisCodes = [...new Set(workItems.map(wi => wi.analysis))];
+        const equipMappings = await prisma.equipmentMethodEligibility.findMany({
+            where: { labId: { in: labCodes }, analysisCode: { in: analysisCodes } }
+        });
+        const equipReqMap = {};
+        equipMappings.forEach(e => {
+            equipReqMap[`${e.labId}::${e.analysisCode}`] = {
+                isRequired: e.isRequired,
+                eligibleIds: e.eligibleEquipmentIds ? JSON.parse(e.eligibleEquipmentIds) : []
+            };
+        });
+
+        const allEquipIds = [
+            ...new Set([
+                ...Object.values(equipReqMap).flatMap(e => e.eligibleIds),
+                ...entries.map(e => e.equipmentId).filter(Boolean)
+            ])
+        ];
+        let assetMap = {};
+        if (allEquipIds.length > 0) {
+            const assets = await prisma.equipmentAsset.findMany({
+                where: { id: { in: allEquipIds } },
+                select: {
+                    id: true, name: true, status: true,
+                    qualification: { select: { calibrationStatus: true } }
+                }
+            });
+            assets.forEach(a => assetMap[a.id] = {
+                id: a.id,
+                name: a.name,
+                status: a.status,
+                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED'
+            });
+        }
+
+        const included = [];
+        const excluded = [];
+
+        for (const entry of entries) {
+            const item = itemMap[entry.workItemId];
+            if (!item) {
+                excluded.push({
+                    workItemId: entry.workItemId,
+                    reasons: ['Work item not found'],
+                    blockers: ['NOT_FOUND']
+                });
+                continue;
+            }
+
+            const labId = item.sample?.assignedLab || item.sample?.labId || item.labId;
+            const equipKey = `${labId}::${item.analysis}`;
+            const equipReq = equipReqMap[equipKey];
+            const asset = assetMap[entry.equipmentId || item.equipmentId];
+
+            // 1. Readiness check
+            const readiness = readinessService.evaluateItemReadiness(item, user, {
+                equipReq,
+                asset,
+                selectedEquipmentId: entry.equipmentId || item.equipmentId
+            });
+
+            // 2. Validation check
+            let validation = { isValid: true, flags: [] };
+            if (item.analysis === 'TEXTURE' || (entry.values && Array.isArray(entry.values))) {
+                const vals = entry.values || [];
+                validation = validationService.validateTextureFractions(vals[0], vals[1], vals[2]);
+            } else if (item.category === 'Operational Gates') {
+                validation = validationService.validateOperationalTask(entry.checks || [true], 1);
+            } else {
+                const method = methodMap[item.analysis];
+                validation = validationService.validateNumericMethod(entry.value, method?.validation);
+            }
+
+            // Version check
+            let versionMismatch = false;
+            if (entry.version !== undefined && entry.version !== item.version) {
+                versionMismatch = true;
+            }
+
+            const blockers = [...readiness.blockers];
+            const reasons = [...readiness.reasons];
+
+            if (versionMismatch) {
+                blockers.push('VERSION_CONFLICT');
+                reasons.push('Item was updated on server. Refresh before recording.');
+            }
+
+            if (!validation.isValid) {
+                if (validation.flags?.includes('INVALID_FORMAT')) {
+                    blockers.push('INVALID_FORMAT');
+                    reasons.push('Value format is invalid');
+                }
+                if (validation.flags?.includes('BELOW_MIN') || validation.flags?.includes('ABOVE_MAX')) {
+                    if (!entry.overrideReason) {
+                        blockers.push('OUT_OF_RANGE');
+                        reasons.push(`Value out of range (${validation.flags.join(', ')}). Override reason required.`);
+                    }
+                }
+                if (validation.flags?.includes('TEXTURE_CLOSURE_FAILED')) {
+                    blockers.push('TEXTURE_CLOSURE_FAILED');
+                    reasons.push(validation.error || 'Texture closure failed (100% ± 2.0%)');
+                }
+                if (validation.flags?.includes('SOP_STEPS_INCOMPLETE')) {
+                    blockers.push('SOP_STEPS_INCOMPLETE');
+                    reasons.push('All SOP checklist steps must be verified');
+                }
+                if (validation.flags?.includes('VALUE_REQUIRED')) {
+                    blockers.push('VALUE_REQUIRED');
+                    reasons.push('Result value is required');
+                }
+            }
+
+            if (blockers.length > 0) {
+                excluded.push({
+                    workItemId: item.id,
+                    sampleId: item.sampleId,
+                    analysis: item.analysis,
+                    value: entry.value,
+                    blockers,
+                    reasons,
+                    warnings: readiness.warnings
+                });
+            } else {
+                included.push({
+                    workItemId: item.id,
+                    sampleId: item.sampleId,
+                    analysis: item.analysis,
+                    value: entry.value,
+                    values: entry.values,
+                    checks: entry.checks,
+                    basis: entry.basis || 'AIR_DRY',
+                    replicateNo: entry.replicateNo || 1,
+                    equipmentId: entry.equipmentId || item.equipmentId,
+                    version: item.version,
+                    validation,
+                    warnings: readiness.warnings
+                });
+            }
+        }
+
+        res.json({
+            eligibleCount: included.length,
+            blockedCount: excluded.length,
+            included,
+            excluded
+        });
+    } catch (err) {
+        console.error('[workbench.previewCompletion] Error:', err);
+        res.status(500).json({ error: 'Failed to generate completion preview' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/v2/completion/commit
+// Atomically records valid determinations and completes work items with receipt
+// ─────────────────────────────────────────────────────────────────────────────
+exports.commitCompletion = async (req, res) => {
+    req.body.draft = false;
+    return exports.batchSave(req, res);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/v2/submissions/preview
+// Previews completed items ready to be bundled into sample submissions for review
+// ─────────────────────────────────────────────────────────────────────────────
+exports.previewSubmissions = async (req, res) => {
+    const { sampleIds, workItemIds } = req.body;
+    const user = req.user;
+
+    try {
+        const whereClause = {
+            status: 'COMPLETED',
+            submissionId: null
+        };
+        if (user.role === 'LAB_TECHNICIAN') {
+            whereClause.assignedTo = user.username;
+        }
+        if (sampleIds && Array.isArray(sampleIds) && sampleIds.length > 0) {
+            whereClause.sampleId = { in: sampleIds };
+        }
+        if (workItemIds && Array.isArray(workItemIds) && workItemIds.length > 0) {
+            whereClause.id = { in: workItemIds };
+        }
+
+        const completedItems = await prisma.workItem.findMany({
+            where: whereClause,
+            include: {
+                sample: {
+                    select: {
+                        id: true,
+                        originalId: true,
+                        labId: true,
+                        assignedLab: true,
+                        projectCode: true,
+                        status: true
+                    }
+                }
+            }
+        });
+
+        // Group by sample
+        const sampleGroupMap = {};
+        for (const item of completedItems) {
+            const sId = item.sampleId;
+            if (!sampleGroupMap[sId]) {
+                sampleGroupMap[sId] = {
+                    sampleId: sId,
+                    sample: item.sample,
+                    completedItems: []
+                };
+            }
+            sampleGroupMap[sId].completedItems.push({
+                workItemId: item.id,
+                analysis: item.analysis,
+                result: item.result,
+                completedAt: item.completedAt
+            });
+        }
+
+        const targetSampleIds = Object.keys(sampleGroupMap);
+        let allItemsBySample = {};
+        if (targetSampleIds.length > 0) {
+            const allSampleItems = await prisma.workItem.findMany({
+                where: { sampleId: { in: targetSampleIds } },
+                select: { id: true, sampleId: true, status: true, analysis: true }
+            });
+            allSampleItems.forEach(wi => {
+                if (!allItemsBySample[wi.sampleId]) allItemsBySample[wi.sampleId] = [];
+                allItemsBySample[wi.sampleId].push(wi);
+            });
+        }
+
+        const eligibleSamples = [];
+        for (const sId of targetSampleIds) {
+            const group = sampleGroupMap[sId];
+            const allItems = allItemsBySample[sId] || [];
+            const completedCount = group.completedItems.length;
+            const totalCount = allItems.length;
+            const isFull = allItems.every(i => i.status === 'COMPLETED' || group.completedItems.some(ci => ci.workItemId === i.id));
+
+            eligibleSamples.push({
+                sampleId: sId,
+                originalId: group.sample?.originalId || null,
+                projectCode: group.sample?.projectCode || null,
+                submissionType: isFull ? 'FULL' : 'PARTIAL',
+                completedCount,
+                totalCount,
+                items: group.completedItems
+            });
+        }
+
+        res.json({
+            eligibleSamples,
+            totalEligibleSamples: eligibleSamples.length,
+            totalCompletedItems: completedItems.length
+        });
+    } catch (err) {
+        console.error('[workbench.previewSubmissions] Error:', err);
+        res.status(500).json({ error: 'Failed to preview submissions' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/v2/submissions/commit
+// Creates sample-scoped Submission records and transitions items to SUBMITTED
+// ─────────────────────────────────────────────────────────────────────────────
+exports.commitSubmissions = async (req, res) => {
+    const { sampleIds, note } = req.body;
+    const user = req.user;
+
+    if (!sampleIds || !Array.isArray(sampleIds) || sampleIds.length === 0) {
+        return res.status(400).json({ error: 'sampleIds array is required and must not be empty' });
+    }
+
+    try {
+        const now = new Date();
+        const createdSubmissions = [];
+
+        for (const sampleId of sampleIds) {
+            const items = await prisma.workItem.findMany({
+                where: {
+                    sampleId,
+                    status: 'COMPLETED',
+                    submissionId: null,
+                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {})
+                },
+                include: { sample: true }
+            });
+
+            if (items.length === 0) continue;
+
+            const sample = items[0].sample;
+            const allSampleItems = await prisma.workItem.findMany({
+                where: { sampleId }
+            });
+            const itemIds = items.map(i => i.id);
+            const isFull = allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
+
+            const subId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+            await prisma.submission.create({
+                data: {
+                    id: subId,
+                    sampleId,
+                    labId: user.labId || sample?.labId || sample?.assignedLab,
+                    assignedLab: sample?.assignedLab || sample?.labId,
+                    type: isFull ? 'FULL' : 'PARTIAL',
+                    status: 'PENDING_REVIEW',
+                    note: note || null,
+                    submittedBy: user.username,
+                    submittedAt: now,
+                    workItemIds: JSON.stringify(itemIds),
+                    workItemCount: itemIds.length
+                }
+            });
+
+            // Update work items
+            await prisma.workItem.updateMany({
+                where: { id: { in: itemIds } },
+                data: {
+                    status: 'SUBMITTED',
+                    submissionId: subId,
+                    submittedAt: now
+                }
+            });
+
+            // Update sample status
+            const targetSampleStatus = isFull ? 'SUBMITTED' : 'SUBMITTED_PARTIAL';
+            await prisma.sample.update({
+                where: { id: sampleId },
+                data: { status: targetSampleStatus }
+            });
+
+            // Log audit
+            await prisma.auditLog.create({
+                data: {
+                    id: `audit-sub-${subId}-${Date.now()}`,
+                    entity: 'Submission',
+                    entityId: subId,
+                    sampleId,
+                    action: 'WORKBENCH_SUBMIT',
+                    performedBy: user.username,
+                    details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${isFull ? 'FULL' : 'PARTIAL'})`,
+                    timestamp: now
+                }
+            }).catch(() => {});
+
+            createdSubmissions.push({
+                submissionId: subId,
+                sampleId,
+                type: isFull ? 'FULL' : 'PARTIAL',
+                itemCount: itemIds.length
+            });
+        }
+
+        // Broadcast to lab
+        if (createdSubmissions.length > 0) {
+            try {
+                broadcastToLab(user.labId, 'SUBMISSION_CREATED', {
+                    sampleIds,
+                    submissions: createdSubmissions,
+                    submittedBy: user.username,
+                    submittedAt: now.toISOString()
+                });
+            } catch (wsErr) {
+                console.error('[WS] Failed to broadcast SUBMISSION_CREATED:', wsErr);
+            }
+        }
+
+        res.json({
+            success: true,
+            receipt: {
+                receiptId: `REC-SUB-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+                type: 'SUBMISSION',
+                action: 'SUBMIT_FOR_REVIEW',
+                submittedAt: now.toISOString(),
+                submittedBy: user.username,
+                sampleCount: createdSubmissions.length,
+                submissions: createdSubmissions
+            }
+        });
+    } catch (err) {
+        console.error('[workbench.commitSubmissions] Error:', err);
+        res.status(500).json({ error: 'Failed to commit submissions' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/workbench/v2/receipts
+// Returns durable activity receipts for the current user
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getReceipts = async (req, res) => {
+    const user = req.user;
+
+    try {
+        const logs = await prisma.auditLog.findMany({
+            where: {
+                performedBy: user.username,
+                action: { in: ['WORKBENCH_COMPLETE', 'WORKBENCH_SUBMIT', 'DRAFT_DISCARDED', 'DRAFT_CONFLICT_RESOLVED', 'SPECTRAL_IMPORT'] }
+            },
+            orderBy: { timestamp: 'desc' },
+            take: 50
+        });
+
+        const receipts = logs.map(l => ({
+            id: l.id,
+            action: l.action,
+            entity: l.entity,
+            entityId: l.entityId,
+            sampleId: l.sampleId,
+            details: l.details,
+            timestamp: l.timestamp
+        }));
+
+        res.json({ receipts });
+    } catch (err) {
+        console.error('[workbench.getReceipts] Error:', err);
+        res.status(500).json({ error: 'Failed to fetch receipts' });
     }
 };
 
