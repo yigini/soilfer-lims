@@ -34,6 +34,8 @@ export default function WorkbenchInspector({
     const {
         workItemId,
         sampleId,
+        sampleDisplayId,
+        labId,
         originalId,
         projectCode,
         analysis,
@@ -62,7 +64,7 @@ export default function WorkbenchInspector({
                     Selected Sample
                 </span>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
-                    {sampleId}
+                    {sampleDisplayId || labId || originalId || 'Sample'}
                 </h3>
                 {originalId && (
                     <p className="text-[11px] text-slate-500 truncate">Field ID: {originalId}</p>

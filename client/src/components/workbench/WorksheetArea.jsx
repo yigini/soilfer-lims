@@ -236,17 +236,12 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
-                                                        {item.sampleDisplayId || item.labId || item.sampleId}
+                                                        {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
                                                     </span>
-                                                    {item.sampleDisplayId && item.sampleId && item.sampleDisplayId !== item.sampleId && (
-                                                        <span className="text-[10px] text-slate-400 font-mono hidden sm:inline" title={item.sampleId}>
-                                                            ({item.sampleId.slice(0, 8)}…)
-                                                        </span>
-                                                    )}
                                                 </div>
                                                 {item.originalId && (
                                                     <div className="text-[11px] text-slate-400 font-mono">
-                                                        {item.originalId}
+                                                        Field: {item.originalId}
                                                     </div>
                                                 )}
                                                 {item.projectCode && (

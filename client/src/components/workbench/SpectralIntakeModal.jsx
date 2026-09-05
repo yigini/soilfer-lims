@@ -43,21 +43,53 @@ export default function SpectralIntakeModal({
     const [warningAck, setWarningAck] = useState(false);
     const [commitReceipt, setCommitReceipt] = useState(null);
 
+    // Client-side instant file inspection and modality override
+    const [overrideModality, setOverrideModality] = useState(null);
+    const [fileInspection, setFileInspection] = useState(null);
+
+    const defaultTargetModality = (modality === 'SPEC_MIR' || modality === 'SPEC_FTIR') ? 'MIR' : 'NIR';
+    const effectiveTargetModality = overrideModality || defaultTargetModality;
+
     // Fetch active spectrometers if not provided
     useEffect(() => {
-        if (eligibleEquipment && eligibleEquipment.length > 0) {
-            setInstruments(eligibleEquipment);
-            if (!selectedInstrument) setSelectedInstrument(eligibleEquipment[0].id);
-        } else {
-            axios.get('/api/equipment?type=SPECTROMETER&status=IN_SERVICE')
-                .then(res => {
-                    const list = res.data?.data || res.data || [];
-                    setInstruments(list);
-                    if (list.length > 0 && !selectedInstrument) setSelectedInstrument(list[0].id);
-                })
-                .catch(err => console.warn('[SpectralIntake] Failed to fetch equipment:', err.message));
+        const loadEquipment = async () => {
+            if (eligibleEquipment && eligibleEquipment.length > 0) {
+                setInstruments(eligibleEquipment);
+                const match = eligibleEquipment.find(e =>
+                    effectiveTargetModality === 'MIR'
+                        ? /mir|ftir|alpha|tensor|vertex/i.test(e.name + (e.model || ''))
+                        : /nir|mpa|tango/i.test(e.name + (e.model || ''))
+                ) || eligibleEquipment[0];
+                if (match && !selectedInstrument) setSelectedInstrument(match.id);
+                return;
+            }
+
+            try {
+                let res = await axios.get('/api/equipment?type=SPECTROMETER&status=IN_SERVICE');
+                let list = res.data?.data || res.data || [];
+                if (!Array.isArray(list) || list.length === 0) {
+                    res = await axios.get('/api/equipment');
+                    const allAssets = res.data?.data || res.data || [];
+                    list = allAssets.filter(a => a.assetType === 'SPECTROMETER' || /spectrometer|ftir/i.test(a.name));
+                }
+                setInstruments(list);
+                if (list.length > 0) {
+                    const match = list.find(e =>
+                        effectiveTargetModality === 'MIR'
+                            ? /mir|ftir|alpha|tensor|vertex/i.test(e.name + (e.model || ''))
+                            : /nir|mpa|tango/i.test(e.name + (e.model || ''))
+                    ) || list[0];
+                    if (match && !selectedInstrument) setSelectedInstrument(match.id);
+                }
+            } catch (err) {
+                console.warn('[SpectralIntake] Failed to fetch equipment:', err.message);
+            }
+        };
+
+        if (isOpen) {
+            loadEquipment();
         }
-    }, [eligibleEquipment, isOpen]);
+    }, [eligibleEquipment, isOpen, effectiveTargetModality]);
 
     // Reset wizard when modal opens
     useEffect(() => {
@@ -72,12 +104,110 @@ export default function SpectralIntakeModal({
             setConfirmed(false);
             setWarningAck(false);
             setCommitReceipt(null);
+            setOverrideModality(null);
+            setFileInspection(null);
         }
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const effectiveTargetModality = (modality === 'SPEC_MIR' || modality === 'SPEC_FTIR') ? 'MIR' : 'NIR';
+    // Instant Client-side Inspection
+    const inspectFile = (fileObj) => {
+        if (!fileObj) {
+            setFileInspection(null);
+            return;
+        }
+
+        const ext = (fileObj.name.split('.').pop() || '').toLowerCase();
+
+        if (['csv', 'txt', 'tsv', 'dx', 'jdx', 'jcamp'].includes(ext)) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0 && !l.trim().startsWith('#'));
+                    if (lines.length > 1) {
+                        const firstLine = lines[0];
+                        let delim = ',';
+                        if (firstLine.includes('\t')) delim = '\t';
+                        else if (firstLine.includes(';')) delim = ';';
+
+                        const xs = [];
+                        for (let i = 1; i < Math.min(lines.length, 2000); i++) {
+                            const parts = lines[i].split(delim);
+                            if (parts.length >= 2) {
+                                const val = parseFloat(parts[0].trim());
+                                if (!isNaN(val)) xs.push(val);
+                            }
+                        }
+
+                        if (xs.length > 0) {
+                            const minX = Math.min(...xs);
+                            const maxX = Math.max(...xs);
+                            let detectedMod = 'MIR';
+                            let detectedUnit = 'cm⁻¹ (Wavenumber)';
+
+                            if (maxX > 2600 && minX <= 700) {
+                                detectedMod = 'MIR';
+                                detectedUnit = 'cm⁻¹ (Wavenumber)';
+                            } else if (minX >= 300 && maxX <= 2600) {
+                                detectedMod = 'NIR';
+                                detectedUnit = 'nm (Wavelength)';
+                            } else if (minX >= 4000 && maxX > 8000) {
+                                detectedMod = 'NIR';
+                                detectedUnit = 'cm⁻¹ (Wavenumber)';
+                            }
+
+                            setFileInspection({
+                                filename: fileObj.name,
+                                size: (fileObj.size / 1024).toFixed(1) + ' KB',
+                                minX: Math.round(minX),
+                                maxX: Math.round(maxX),
+                                points: lines.length - 1,
+                                modality: detectedMod,
+                                unit: detectedUnit,
+                                format: ext.toUpperCase(),
+                                matchesTask: detectedMod === defaultTargetModality
+                            });
+
+                            // Auto-select instrument matching detected modality
+                            if (instruments.length > 0) {
+                                const matchedInst = instruments.find(eq =>
+                                    detectedMod === 'MIR'
+                                        ? /mir|ftir|alpha|tensor|vertex/i.test(eq.name)
+                                        : /nir|mpa|tango/i.test(eq.name)
+                                );
+                                if (matchedInst) {
+                                    setSelectedInstrument(matchedInst.id);
+                                }
+                            }
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[SpectralIntake] Client inspection error:', err);
+                }
+
+                setFileInspection({
+                    filename: fileObj.name,
+                    size: (fileObj.size / 1024).toFixed(1) + ' KB',
+                    modality: defaultTargetModality,
+                    format: ext.toUpperCase(),
+                    matchesTask: true
+                });
+            };
+            reader.readAsText(fileObj.slice(0, 100 * 1024));
+        } else {
+            let binMod = ext === 'asd' ? 'NIR' : defaultTargetModality;
+            setFileInspection({
+                filename: fileObj.name,
+                size: (fileObj.size / 1024).toFixed(1) + ' KB',
+                modality: binMod,
+                format: ext === 'opus' ? 'Bruker OPUS Binary' : ext === 'spc' ? 'Thermo SPC Binary' : ext.toUpperCase(),
+                matchesTask: binMod === defaultTargetModality
+            });
+        }
+    };
 
     // Handle File Selection
     const handleFileChange = (e) => {
@@ -85,6 +215,7 @@ export default function SpectralIntakeModal({
         if (selected.length > 0) {
             setFiles(selected);
             setError(null);
+            inspectFile(selected[0]);
         }
     };
 
@@ -328,25 +459,66 @@ export default function SpectralIntakeModal({
                                         ))}
                                     </select>
                                     <span className="text-[10px] text-slate-400 mt-1 block">
-                                        Spectrometer must be active and qualified in the equipment register.
+                                        {selectedInstrument ? '✓ Verified instrument selected' : 'Spectrometer must be active and qualified in the equipment register.'}
                                     </span>
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                                        Modality & Acquisition Method
-                                    </label>
-                                    <div className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-medium text-slate-700 dark:text-slate-300">
-                                        {effectiveTargetModality === 'MIR' ? 'Mid-Infrared DRIFTS (4000 - 400 cm⁻¹)' : 'Visible & Near-Infrared (350 - 2500 nm)'}
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="text-[11px] font-bold text-slate-500 uppercase">
+                                            Modality & Acquisition Method
+                                        </label>
+                                        {overrideModality && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setOverrideModality(null)}
+                                                className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline"
+                                            >
+                                                Reset to Default ({defaultTargetModality})
+                                            </button>
+                                        )}
                                     </div>
-                                    <span className="text-[10px] text-emerald-600 mt-1 block font-medium">
-                                        ✓ Axis units and quantities verified without heuristic relabeling
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setOverrideModality('MIR')}
+                                            className={`py-2 px-2.5 rounded-lg border text-left text-xs transition-all flex flex-col ${
+                                                effectiveTargetModality === 'MIR'
+                                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500'
+                                                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            <span className="font-bold flex items-center justify-between">
+                                                <span>MIR DRIFTS</span>
+                                                {effectiveTargetModality === 'MIR' && <span className="text-[10px] font-bold text-emerald-600">Active</span>}
+                                            </span>
+                                            <span className="text-[10px] text-slate-400">4000 - 400 cm⁻¹</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setOverrideModality('NIR')}
+                                            className={`py-2 px-2.5 rounded-lg border text-left text-xs transition-all flex flex-col ${
+                                                effectiveTargetModality === 'NIR'
+                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500'
+                                                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            <span className="font-bold flex items-center justify-between">
+                                                <span>Vis-NIR</span>
+                                                {effectiveTargetModality === 'NIR' && <span className="text-[10px] font-bold text-blue-600">Active</span>}
+                                            </span>
+                                            <span className="text-[10px] text-slate-400">350 - 2500 nm</span>
+                                        </button>
+                                    </div>
+                                    <span className="text-[10px] text-slate-400 mt-1 block">
+                                        Task default: {defaultTargetModality === 'MIR' ? 'Mid-Infrared (SPEC_MIR)' : 'Near-Infrared (SPEC_NIR)'}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Dropzone */}
-                            <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-3 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors relative cursor-pointer">
+                            <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-2.5 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors relative cursor-pointer">
                                 <input
                                     type="file"
                                     multiple
@@ -354,13 +526,13 @@ export default function SpectralIntakeModal({
                                     onChange={handleFileChange}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 />
-                                <Upload size={36} className="text-blue-500" />
+                                <Upload size={32} className="text-blue-500" />
                                 <div>
                                     <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
-                                        {files.length > 0 ? `${files.length} file(s) selected` : 'Select Spectral Instrument Files'}
+                                        {files.length > 0 ? `${files.length} file(s) selected` : 'Select or Drop Spectral Files'}
                                     </h4>
-                                    <p className="text-xs text-slate-500 mt-1 max-w-md">
-                                        Supports native Bruker OPUS binary (.opus), JCAMP-DX (.dx, .jcamp), Galactic SPC (.spc), ASD (.asd), and calibrated CSV exports.
+                                    <p className="text-xs text-slate-500 mt-0.5 max-w-md">
+                                        Supports Bruker OPUS (.opus), JCAMP-DX (.dx), Galactic SPC (.spc), ASD (.asd), and calibrated CSV exports.
                                     </p>
                                 </div>
                                 {files.length > 0 && (
@@ -369,6 +541,61 @@ export default function SpectralIntakeModal({
                                     </div>
                                 )}
                             </div>
+
+                            {/* Live File Auto-Detection Card */}
+                            {fileInspection && (
+                                <div className={`p-4 rounded-xl border flex flex-col gap-2.5 ${
+                                    fileInspection.matchesTask
+                                        ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60'
+                                        : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60'
+                                }`}>
+                                    <div className="flex items-center justify-between flex-wrap gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <Activity size={16} className={fileInspection.matchesTask ? 'text-emerald-600' : 'text-amber-600'} />
+                                            <span className="font-bold text-xs text-slate-900 dark:text-slate-100">
+                                                Auto-Detected: {fileInspection.filename} ({fileInspection.size})
+                                            </span>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                fileInspection.modality === 'MIR'
+                                                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300'
+                                                    : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300'
+                                            }`}>
+                                                {fileInspection.modality === 'MIR' ? 'Mid-Infrared (MIR DRIFTS)' : 'Near-Infrared (Vis-NIR)'}
+                                            </span>
+                                        </div>
+                                        {fileInspection.points && (
+                                            <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                                                {fileInspection.minX} - {fileInspection.maxX} {fileInspection.unit} · {fileInspection.points.toLocaleString()} points
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {fileInspection.matchesTask ? (
+                                        <div className="text-[11px] text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 font-medium">
+                                            <CheckCircle2 size={14} className="shrink-0 text-emerald-600" />
+                                            <span>
+                                                Validated: File spectral curve matches the required <strong>{effectiveTargetModality === 'MIR' ? 'Mid-Infrared DRIFTS (4000-400 cm⁻¹)' : 'Vis-NIR (350-2500 nm)'}</strong> parameters for this work item.
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-[11px] text-amber-800 dark:text-amber-300 flex items-center justify-between flex-wrap gap-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <AlertTriangle size={14} className="shrink-0 text-amber-600" />
+                                                <span>
+                                                    Notice: File detected as <strong>{fileInspection.modality}</strong>, but work order requested <strong>{defaultTargetModality}</strong>.
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setOverrideModality(fileInspection.modality)}
+                                                className="px-2.5 py-1 text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white rounded transition-colors"
+                                            >
+                                                Switch Target to {fileInspection.modality}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
 

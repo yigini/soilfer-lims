@@ -68,9 +68,23 @@ function parseJcampDx(content, options = {}) {
     }
 
     // Determine axis unit and modality
-    const xUnits = (headers['XUNITS'] || '').toUpperCase();
-    const isWavenumber = xUnits.includes('1/CM') || xUnits.includes('CM-1') || xUnits.includes('WAVENUMBER');
-    const isWavelength = xUnits.includes('NM') || xUnits.includes('NANOMETER');
+    let xUnits = (headers['XUNITS'] || '').toUpperCase();
+    let isWavenumber = xUnits.includes('1/CM') || xUnits.includes('CM-1') || xUnits.includes('WAVENUMBER');
+    let isWavelength = xUnits.includes('NM') || xUnits.includes('NANOMETER');
+
+    const minW = wavelengths.length > 0 ? Math.min(...wavelengths) : 0;
+    const maxW = wavelengths.length > 0 ? Math.max(...wavelengths) : 0;
+
+    if (!isWavenumber && !isWavelength && wavelengths.length > 0) {
+        if (maxW > 2600 && minW <= 700) {
+            isWavenumber = true;
+        } else if (minW >= 300 && maxW <= 2600) {
+            isWavelength = true;
+        } else if (minW >= 4000 && maxW > 8000) {
+            isWavenumber = true;
+        }
+    }
+
     const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : (isWavelength ? 'WAVELENGTH_NM' : 'UNVERIFIED');
 
     const dataType = (headers['DATA TYPE'] || '').toUpperCase();
@@ -82,6 +96,8 @@ function parseJcampDx(content, options = {}) {
         modality = 'MIR';
     } else if (axisUnit === 'WAVELENGTH_NM') {
         modality = 'NIR';
+    } else if (axisUnit === 'WAVENUMBER_CM1' && maxW <= 5500 && minW >= 300) {
+        modality = 'MIR';
     } else if (targetModality) {
         modality = targetModality;
     }
@@ -161,19 +177,42 @@ function parseCsv(content, options = {}) {
         throw new Error('No numeric spectral coordinate pairs found in CSV');
     }
 
-    const isWavenumber = headerX.includes('WAVENUMBER') || headerX.includes('CM-1') || headerX.includes('1/CM');
-    const isWavelength = headerX.includes('NM') || headerX.includes('WAVELENGTH') || headerX.includes('NANOMETER');
+    const minW = Math.min(...wavelengths);
+    const maxW = Math.max(...wavelengths);
+
+    let isWavenumber = headerX.includes('WAVENUMBER') || headerX.includes('CM-1') || headerX.includes('1/CM');
+    let isWavelength = headerX.includes('NM') || headerX.includes('NANOMETER');
+
+    // Physical coordinate range auto-detection
+    if (!isWavenumber && !isWavelength) {
+        if (maxW > 2600 && minW <= 700) {
+            isWavenumber = true;
+        } else if (minW >= 300 && maxW <= 2600 && !headerX.includes('WAVENUMBER') && !headerX.includes('CM-1')) {
+            isWavelength = true;
+        } else if (minW >= 4000 && maxW > 8000) {
+            isWavenumber = true;
+        }
+    } else if (isWavelength && (headerX.includes('WAVELENGTH') && !headerX.includes('NM')) && maxW > 2600 && minW <= 700) {
+        // Generic column label "wavelength" with FTIR 4000-400 cm⁻¹ values
+        isWavenumber = true;
+        isWavelength = false;
+    }
+
     const axisUnit = isWavenumber ? 'WAVENUMBER_CM1' : (isWavelength ? 'WAVELENGTH_NM' : 'UNVERIFIED');
 
     const targetModality = (options && (options.targetModality || options.expectedModality)) || null;
     let modality = 'UNVERIFIED';
-    if (axisUnit === 'WAVELENGTH_NM') {
+    if (isWavenumber && maxW <= 5500 && minW >= 300) {
+        modality = 'MIR';
+    } else if (isWavenumber && minW >= 3500) {
+        modality = 'NIR';
+    } else if (axisUnit === 'WAVELENGTH_NM') {
         modality = 'NIR';
     } else if (targetModality) {
         modality = targetModality;
     }
 
-    if (targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM') {
+    if (targetModality === 'MIR' && axisUnit === 'WAVELENGTH_NM' && maxW <= 2600) {
         throw new Error('INCOMPATIBLE_MODALITY_UNITS: CSV file with wavelength units (nm) cannot be ingested into a Mid-Infrared (MIR) task context.');
     }
 
@@ -295,6 +334,7 @@ function parseOpus(buffer, options = {}) {
     }
 
     const instrument = params.INS || params.INSTRUMENT || null;
+    const ins = (instrument || '').toUpperCase();
     const resolution = params.RES !== undefined ? parseFloat(params.RES) : null;
     const coAddedScans = params.NSS !== undefined ? parseInt(params.NSS, 10) : null;
     const backgroundRef = params.NSR ? `Background (${params.NSR} scans)` : (params.BKM || null);
@@ -320,6 +360,8 @@ function parseOpus(buffer, options = {}) {
         modality = 'MIR';
     } else if (axisUnit === 'WAVELENGTH_NM') {
         modality = 'NIR';
+    } else if (axisUnit === 'WAVENUMBER_CM1' && (fxv <= 5500 || lxv <= 5500)) {
+        modality = 'MIR';
     } else if (targetModality) {
         modality = targetModality;
     }

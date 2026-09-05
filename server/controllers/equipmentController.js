@@ -22,7 +22,16 @@ const getReadiness = (asset) => {
 exports.getEquipment = async (req, res) => {
     try {
         const { labId, role } = req.user;
-        const query = (role === 'SUPER_ADMIN') ? {} : { labId };
+        const query = (role === 'SUPER_ADMIN' && !labId) ? {} : (labId ? { labId } : {});
+
+        // Support type / assetType and status filtering
+        const typeParam = req.query.type || req.query.assetType;
+        if (typeParam) {
+            query.assetType = typeParam.toUpperCase();
+        }
+        if (req.query.status) {
+            query.status = req.query.status.toUpperCase();
+        }
 
         const assets = await prisma.equipmentAsset.findMany({
             where: query,
