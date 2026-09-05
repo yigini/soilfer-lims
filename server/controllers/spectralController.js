@@ -32,7 +32,7 @@ const calculateChecksum = (dataString) => {
 
 exports.getLibrary = async (req, res) => {
     try {
-        const { status, modality, qcStatus, search, page, limit, includeSuperseded } = req.query;
+        const { status, modality, qcStatus, search, sampleId, page, limit, includeSuperseded } = req.query;
         const user = req.user;
 
         // Build the query conditions
@@ -61,15 +61,55 @@ exports.getLibrary = async (req, res) => {
             andConditions.push({ qcStatus: qcStatus });
         }
 
-        // Add search filter
-        if (search) {
-            andConditions.push({
-                OR: [
-                    { sampleId: search },
-                    { labId: search },
-                    { filename: { contains: search } }
-                ]
+        // Direct sampleId filter (handles sample UUID, labId, or originalId)
+        if (sampleId) {
+            const matchedSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: sampleId },
+                        { labId: sampleId },
+                        { originalId: sampleId }
+                    ]
+                },
+                select: { id: true }
             });
+            const sIds = matchedSamples.map(s => s.id);
+            if (!sIds.includes(sampleId)) sIds.push(sampleId);
+            andConditions.push({ sampleId: { in: sIds } });
+        }
+
+        // Add search filter (resolves sample labId / originalId to sampleId, in addition to direct field matches)
+        if (search) {
+            const searchTrimmed = String(search).trim();
+            const searchUpper = searchTrimmed.toUpperCase();
+            const searchLower = searchTrimmed.toLowerCase();
+            const matchedSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: searchTrimmed },
+                        { labId: searchTrimmed },
+                        { labId: searchUpper },
+                        { labId: searchLower },
+                        { labId: { contains: searchTrimmed } },
+                        { originalId: searchTrimmed },
+                        { originalId: searchUpper },
+                        { originalId: searchLower },
+                        { originalId: { contains: searchTrimmed } }
+                    ]
+                },
+                select: { id: true }
+            });
+            const matchedSampleIds = matchedSamples.map(s => s.id);
+
+            const searchConditions = [
+                { sampleId: searchTrimmed },
+                { labId: searchTrimmed },
+                { filename: { contains: searchTrimmed } }
+            ];
+            if (matchedSampleIds.length > 0) {
+                searchConditions.push({ sampleId: { in: matchedSampleIds } });
+            }
+            andConditions.push({ OR: searchConditions });
         }
 
         if (andConditions.length > 0) {

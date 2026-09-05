@@ -40,7 +40,7 @@ const DataResults = () => {
             }
 
             const searchRes = await axios.get('/api/spectral', {
-                params: { search: sampleId, modality }
+                params: { sampleId, search: sampleId, modality }
             });
 
             const scans = searchRes.data.data;

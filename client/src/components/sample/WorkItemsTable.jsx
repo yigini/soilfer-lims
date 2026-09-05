@@ -144,35 +144,38 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                 modality = 'MIR';
             }
 
-            // 1. Find the scan for this sample by LAB ID (not internal sampleId)
-            // The work item has labId which matches what was used in the CSV upload
-            const searchTerm = item.labId || item.sampleId; // Prefer labId, fallback to sampleId
+            // 1. Find the scan for this sample
+            // Pass both sampleId and search to guarantee resolution
+            const searchParams = { modality };
+            if (item.sampleId) searchParams.sampleId = item.sampleId;
+            if (item.labId) searchParams.search = item.labId;
 
-            console.log('[ViewSpectra] Searching for:', searchTerm, 'modality:', modality);
+            console.log('[ViewSpectra] Searching for:', searchParams);
 
             const searchRes = await axios.get('/api/spectral', {
-                params: { search: searchTerm, modality }
+                params: searchParams
             });
 
             const scans = searchRes.data.data;
             console.log('[ViewSpectra] Found scans:', scans?.length || 0);
 
             if (!scans || scans.length === 0) {
-                showDialog({ title: 'No Data', message: `No spectral data found for Lab ID: ${searchTerm} (${modality}). Please upload spectral data first.`, type: 'info' });
+                showDialog({ title: 'No Data', message: `No spectral data found for Lab ID: ${item.labId || item.sampleId} (${modality}). Please upload spectral data first.`, type: 'info' });
                 return;
             }
 
-            // Take the most recent one
-            const scanSummary = scans[0];
+            // Prefer the most recent approved scan, fallback to most recent overall
+            const approvedScan = scans.find(s => s.status === 'APPROVED');
+            const scanSummary = approvedScan || scans[0];
 
             // 2. Fetch full details (chart data)
             const detailRes = await axios.get(`/api/spectral/${scanSummary.id}`);
 
             // Transform for Chart
-            const chartData = detailRes.data.wavelengths.map((w, i) => ({
+            const chartData = detailRes.data.chartData || (detailRes.data.wavelengths ? detailRes.data.wavelengths.map((w, i) => ({
                 wavelength: w,
                 absorbance: detailRes.data.values ? detailRes.data.values[i] : 0
-            }));
+            })) : []);
 
             setSelectedScan({ ...detailRes.data, chartData });
 
@@ -715,19 +718,19 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                     <div className="space-y-4 text-sm">
                                         <div>
                                             <label className="text-xs text-gray-400 uppercase">Instrument</label>
-                                            <div className="font-medium">{selectedScan.metadata.instrument}</div>
+                                            <div className="font-medium">{selectedScan.metadata?.instrument || 'N/A'}</div>
                                         </div>
                                         <div>
                                             <label className="text-xs text-gray-400 uppercase">Scan Date</label>
-                                            <div className="font-medium">{new Date(selectedScan.metadata.scanDate).toLocaleString()}</div>
+                                            <div className="font-medium">{selectedScan.metadata?.scanDate ? new Date(selectedScan.metadata.scanDate).toLocaleString() : (selectedScan.timestamp ? new Date(selectedScan.timestamp).toLocaleString() : 'N/A')}</div>
                                         </div>
                                         <div>
                                             <label className="text-xs text-gray-400 uppercase">Operator</label>
-                                            <div className="font-medium">{selectedScan.metadata.operator}</div>
+                                            <div className="font-medium">{selectedScan.metadata?.operator || selectedScan.uploadedBy || 'N/A'}</div>
                                         </div>
                                         <div>
                                             <label className="text-xs text-gray-400 uppercase">Filename</label>
-                                            <div className="break-all text-xs text-gray-600">{selectedScan.metadata.filename}</div>
+                                            <div className="break-all text-xs text-gray-600">{selectedScan.metadata?.filename || selectedScan.filename || 'N/A'}</div>
                                         </div>
 
                                         <hr className="border-gray-200 dark:border-gray-600" />
