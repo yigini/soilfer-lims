@@ -1,13 +1,13 @@
-# LIMS Release v2.2.0 - "Soil Lab Readiness & ISO/IEC 17025 Compliance"
+# LIMS Release v2.2.0 - "Soil Lab Readiness & ISO/IEC 17025 Quality Records"
 
 ## 🚀 Release Overview
-This release addresses all findings from the FAO SoilFER Analytical Audit (Volume VII · GO / NO-GO) and implements full ISO/IEC 17025 quality controls, pure JS PDF report generation, controlled unit vocabulary with agronomic interpretations, and real-time cross-parameter matrix validation.
+This release addresses findings from the FAO SoilFER Analytical Audit and implements quality records aligned with ISO/IEC 17025, server-side PDF report generation with PDFKit, controlled unit vocabulary with agronomic interpretations, and real-time cross-parameter matrix validation.
 
 ## ✨ Key Capabilities
-- **Publication-Grade Pure JS PDF Engine (`pdfGenerator.js`)**: Fast, container-friendly PDFKit generator with FAO SoilFER branding, 2-column provenance metadata, pre-analytical gates badge, digital signatures, and public verification token endpoints.
+- **Server-Side PDF Engine (`pdfGenerator.js`)**: Fast, container-friendly PDFKit generator with laboratory branding, 2-column provenance metadata, pre-analytical gates badge, electronic approval records, and public verification token endpoints.
 - **Controlled Unit Vocabulary & FAO 5-Tier Agronomic Engine (`interpretationService.js`)**: Automatic unit conversions and ratings (`VERY_LOW` to `VERY_HIGH`) with practical fertilizer management recommendations.
 - **Holistic Multi-Parameter Soil Metrology**: USDA 12-class textural derivation with closure validation ($\pm 2.0\%$), C:N organic matter stoichiometry, Base Saturation %, and SAR/ESP sodicity risks.
-- **ISO/IEC 17025 Typed Quality Control (`qcService.js`)**: Method Blanks, Analytical Duplicates with RPD %, Certified Reference Materials (CRMs) with Recovery %, automated batch pass/fail, and managerial disposition overrides (`PROCEED_WITH_WARNING`).
+- **Quality Assurance & Batch Control (`qcService.js`)**: Method Blanks, Analytical Duplicates with RPD %, Certified Reference Materials (CRMs) with Recovery %, automated batch pass/fail, and managerial disposition overrides (`PROCEED_WITH_WARNING`).
 - **Cross-Parameter Matrix Diagnostics**: Real-time matrix validation during results entry (`saveResults`) and submission approval (`submitForApproval`).
 
 ## 🧪 Verification & Test Suite

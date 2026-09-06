@@ -1410,7 +1410,7 @@ const SampleDetail = () => {
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Undo Final Approval</h3>
-                        <p className="text-xs text-gray-500 mb-4">Reverting approval will return the sample to PROCESSING. Under ISO 17025 compliance, a mandatory reason is required.</p>
+                        <p className="text-xs text-gray-500 mb-4">Reverting approval will return the sample to PROCESSING. To maintain defensible audit traceability, a mandatory reason is required.</p>
                         <textarea
                             value={undoApprovalModal.reason}
                             onChange={(e) => setUndoApprovalModal(prev => ({ ...prev, reason: e.target.value }))}

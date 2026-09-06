@@ -33,8 +33,8 @@ function generateReportPdfBuffer(reportContent) {
                 info: {
                     Title: `SoilFER Analytical Report - ${reportContent.sample?.labId || reportContent.sample?.id || 'Report'}`,
                     Author: reportContent.lab?.name || 'FAO SoilFER Laboratory',
-                    Subject: 'Certificate of Soil Analysis (ISO/IEC 17025 Format)',
-                    Keywords: 'SoilFER, FAO, Soil Analysis, LIMS, Certificate of Analysis'
+                    Subject: 'Certificate of Soil Analysis',
+                    Keywords: 'SoilFER, Soil Analysis, LIMS, Certificate of Analysis'
                 }
             });
 
@@ -101,7 +101,7 @@ function generateReportPdfBuffer(reportContent) {
             doc.font('Helvetica-Oblique')
                 .fontSize(8)
                 .fillColor(cGray)
-                .text('Standards-compliant Analytical Report according to FAO GLOSOLAN protocols & ISO/IEC 17025 guidelines.', startX, currentY + 18);
+                .text('Analytical report based on laboratory SOPs and harmonized soil testing guidelines.', startX, currentY + 18);
 
             currentY += 34;
 
@@ -130,8 +130,8 @@ function generateReportPdfBuffer(reportContent) {
                 .text(`Lab Code: ${lab.code || sample?.assignedLab || 'LAB-GTM'}`, startX + 8, currentY + 40)
                 .text(`Address: ${lab.address || 'Central Research Station'}, ${lab.city || ''}`, startX + 8, currentY + 52)
                 .text(`Email: ${lab.email || 'lab@soilfer.org'} | Tel: ${lab.phone || '+502 2300-0000'}`, startX + 8, currentY + 64)
-                .text(`Accreditation: FAO-GLOSOLAN Tier-2 Registered`, startX + 8, currentY + 76)
-                .text(`Quality Scope: ISO/IEC 17025 Standard Compliant`, startX + 8, currentY + 88);
+                .text(`Registration: GLOSOLAN Registered Laboratory`, startX + 8, currentY + 76)
+                .text(`Quality System: ISO/IEC 17025 Aligned Quality Records`, startX + 8, currentY + 88);
 
             // --- Right Box: Sample Identification & Provenance ---
             const rightX = startX + colWidth + 12;
@@ -320,17 +320,17 @@ function generateReportPdfBuffer(reportContent) {
 
             // Left side: QA Statement
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
-                .text('QUALITY ASSURANCE & DATA INTEGRITY COMPLIANCE', startX + 10, currentY + 8);
+                .text('QUALITY ASSURANCE & DATA INTEGRITY', startX + 10, currentY + 8);
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text('• All batch Quality Control checks (Method Blanks, Duplicate RPD < 10%, and Certified Reference Materials recovery 90-110%) met ISO/IEC 17025 acceptance criteria.', startX + 10, currentY + 22, { width: 320 })
-                .text('• Metrological traceability: Calibrated instruments and analytical grade reagents certified against NIST/GLOSOLAN reference standards.', startX + 10, currentY + 44, { width: 320 })
+                .text('• All batch Quality Control checks (Method Blanks, Duplicate RPD, and Certified Reference Materials recovery) met laboratory-approved acceptance limits.', startX + 10, currentY + 22, { width: 320 })
+                .text('• Metrological traceability: Calibrated instruments and analytical grade reagents referenced against recognized calibration standards.', startX + 10, currentY + 44, { width: 320 })
                 .text('• Disclaimer: This certificate relates solely to the sample as received and tested.', startX + 10, currentY + 66, { width: 320 });
 
             // Right side: Authorization / Signature
             const sigX = startX + 340;
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
-                .text('AUTHORIZED ENDORSEMENT', sigX, currentY + 8);
+                .text('ELECTRONIC APPROVAL RECORD', sigX, currentY + 8);
 
             const signedBy = reportContent.signedBy || {};
             doc.font('Helvetica-Bold').fontSize(9).fillColor(cDark)
@@ -339,7 +339,7 @@ function generateReportPdfBuffer(reportContent) {
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                 .text(signedBy.title || 'Laboratory Quality Manager', sigX, currentY + 36)
                 .text(`Signed: ${signedBy.date ? String(signedBy.date).split('T')[0] : new Date().toISOString().split('T')[0]}`, sigX, currentY + 48)
-                .text(`Digital Seal: VERIFIED / SHA-256`, sigX, currentY + 60, { width: 140 });
+                .text(`Approval Record: RECORDED IN AUDIT LOG`, sigX, currentY + 60, { width: 140 });
 
             currentY += endorseHeight + 14;
 
