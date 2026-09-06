@@ -103,7 +103,7 @@ async function validateSelection(codes, { labId = null, existing = [], db = pris
         if (!a || (a.labId && a.labId !== labId)) return [{ code, reason: 'Parameter is unavailable to this laboratory.' }];
         const reasons = configurationIssues(a);
         if (defaults.get(code)?.error) reasons.push(defaults.get(code).error);
-        if (a.status !== 'active') reasons.unshift('Parameter is inactive for new orders.');
+        if (a.status && a.status !== 'active') reasons.unshift('Parameter is inactive for new orders.');
         return reasons.map(reason => ({ code, name: a.name, reason }));
     });
     return { valid: issues.length === 0, issues, error: issues.length ? issues.map(i => `${i.name || 'Unavailable parameter'}: ${i.reason}`).join(' ') : null };

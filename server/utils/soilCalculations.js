@@ -6,37 +6,94 @@
 
 /**
  * Classify soil texture into the 12 standard USDA texture classes.
- * @param {number} sand - Sand fraction (0-100%)
- * @param {number} silt - Silt fraction (0-100%)
- * @param {number} clay - Clay fraction (0-100%)
- * @param {number} [tolerance=2.0] - Allowed closure error in %
- * @returns {{ className: string, code: string, closureError: number, isValid: boolean, normalized: { sand: number, silt: number, clay: number } }}
+ * Follows USDA Soil Survey Manual (Chapter 3, pp. 123-125).
+ * 
+ * Enforces method-specific closure policy, non-negative finite bounds [0, 100],
+ * full precision retention, and rejects silent normalization or unevidenced classifications.
+ * 
+ * @param {number|string} sand - Sand fraction (0-100%)
+ * @param {number|string} silt - Silt fraction (0-100%)
+ * @param {number|string} clay - Clay fraction (0-100%)
+ * @param {number|object} [options=1.0] - Allowed closure tolerance in % or options object { tolerance, byDifference, strict }
+ * @returns {{ className: string, code: string, closureError: number|null, isValid: boolean, scheme: string, fractions: { sand: number, silt: number, clay: number }, normalized?: { sand: number, silt: number, clay: number }, error?: string }}
  */
-function calculateUsdaTexture(sand, silt, clay, tolerance = 2.0) {
-    const s = Number(sand) || 0;
-    const si = Number(silt) || 0;
-    const c = Number(clay) || 0;
-    const total = s + si + c;
-    const closureError = Math.abs(100 - total);
-
-    if (total <= 0 || closureError > tolerance) {
+function calculateUsdaTexture(sand, silt, clay, options = 1.0) {
+    // 1. Strict fraction extraction and validation
+    // Blanks, nulls, undefined, or empty strings must be explicitly rejected
+    if (sand === null || sand === undefined || sand === '' ||
+        silt === null || silt === undefined || silt === '' ||
+        clay === null || clay === undefined || clay === '') {
         return {
-            className: 'Invalid Texture (Closure Failed)',
-            code: 'INVALID',
-            closureError: Number(closureError.toFixed(2)),
+            className: 'Unavailable',
+            code: 'UNAVAILABLE',
+            closureError: null,
             isValid: false,
-            normalized: { sand: s, silt: si, clay: c }
+            scheme: 'USDA_12_CLASS',
+            fractions: { sand: null, silt: null, clay: null },
+            error: 'All three fractions (sand, silt, clay) must be explicitly provided.'
         };
     }
 
-    // Normalize to exact 100%
-    const normSand = (s / total) * 100;
-    const normSilt = (si / total) * 100;
-    const normClay = (c / total) * 100;
+    const parseVal = (v) => {
+        if (typeof v === 'string') {
+            const cleaned = v.trim().replace(',', '.');
+            if (cleaned === '' || /^[<>]/.test(cleaned)) return NaN;
+            return Number(cleaned);
+        }
+        return Number(v);
+    };
+
+    const s = parseVal(sand);
+    const si = parseVal(silt);
+    const c = parseVal(clay);
+
+    if (!Number.isFinite(s) || !Number.isFinite(si) || !Number.isFinite(c) ||
+        s < 0 || s > 100 || si < 0 || si > 100 || c < 0 || c > 100) {
+        return {
+            className: 'Unavailable',
+            code: 'UNAVAILABLE',
+            closureError: null,
+            isValid: false,
+            scheme: 'USDA_12_CLASS',
+            fractions: { sand: s, silt: si, clay: c },
+            error: 'Fractions must be finite non-negative numbers between 0 and 100%.'
+        };
+    }
+
+    // 2. Closure policy check
+    const total = s + si + c;
+    const closureError = Math.abs(100 - total);
+
+    let tolerance = 1.0;
+    if (typeof options === 'number') {
+        tolerance = options;
+    } else if (options && typeof options.tolerance === 'number') {
+        tolerance = options.tolerance;
+    } else if (options?.strict) {
+        tolerance = 1e-4;
+    }
+
+    if (closureError > tolerance) {
+        return {
+            className: 'Unavailable',
+            code: 'UNAVAILABLE',
+            closureError: Number(closureError.toFixed(4)),
+            isValid: false,
+            scheme: 'USDA_12_CLASS',
+            fractions: { sand: s, silt: si, clay: c },
+            error: `Closure check failed: sum is ${Number(total.toFixed(4))}% (closure error ${Number(closureError.toFixed(4))}% exceeds allowed limit of ${tolerance}%).`
+        };
+    }
+
+    // Retain full precision for calculation; boundary geometry operates on fine-earth 100% projection
+    const normSand = total === 100 ? s : (s / total) * 100;
+    const normSilt = total === 100 ? si : (si / total) * 100;
+    const normClay = total === 100 ? c : (c / total) * 100;
 
     let className = 'Loam';
     let code = 'L';
 
+    // USDA 12-class definitions per USDA Soil Survey Manual (Chapter 3, pp. 123-125):
     // 1. Clay: >= 40% clay, <= 45% sand, < 40% silt
     if (normClay >= 40 && normSand <= 45 && normSilt < 40) {
         className = 'Clay';
@@ -47,23 +104,23 @@ function calculateUsdaTexture(sand, silt, clay, tolerance = 2.0) {
         className = 'Silty Clay';
         code = 'SiC';
     }
-    // 3. Sandy Clay: >= 35% clay, >= 45% sand
-    else if (normClay >= 35 && normSand >= 45) {
+    // 3. Sandy Clay: >= 35% clay, > 45% sand
+    else if (normClay >= 35 && normSand > 45) {
         className = 'Sandy Clay';
         code = 'SC';
     }
-    // 4. Clay Loam: 27-40% clay, 20-45% sand, < 53% silt
-    else if (normClay >= 27 && normClay < 40 && normSand >= 20 && normSand <= 45 && normSilt < 53) {
+    // 4. Clay Loam: 27-40% clay, 20 < sand <= 45%, silt < 53%
+    else if (normClay >= 27 && normClay < 40 && normSand > 20 && normSand <= 45 && normSilt < 53) {
         className = 'Clay Loam';
         code = 'CL';
     }
-    // 5. Silty Clay Loam: 27-40% clay, < 20% sand
-    else if (normClay >= 27 && normClay < 40 && normSand < 20) {
+    // 5. Silty Clay Loam: 27-40% clay, sand <= 20%
+    else if (normClay >= 27 && normClay < 40 && normSand <= 20) {
         className = 'Silty Clay Loam';
         code = 'SiCL';
     }
-    // 6. Sandy Clay Loam: 20-35% clay, < 28% silt, >= 45% sand
-    else if (normClay >= 20 && normClay < 35 && normSilt < 28 && normSand >= 45) {
+    // 6. Sandy Clay Loam: 20-35% clay, < 28% silt, sand > 45%
+    else if (normClay >= 20 && normClay < 35 && normSilt < 28 && normSand > 45) {
         className = 'Sandy Clay Loam';
         code = 'SCL';
     }
@@ -77,10 +134,9 @@ function calculateUsdaTexture(sand, silt, clay, tolerance = 2.0) {
         className = 'Loamy Sand';
         code = 'LS';
     }
-    // 9. Sandy Loam: (clay < 20% and sand > 52% and (silt + 2*clay >= 30%)) OR (7 <= clay < 20% and sand >= 43% and sand <= 52% and silt < 50%)
+    // 9. Sandy Loam: (clay < 20% and sand > 52% and (silt + 2*clay >= 30%)) OR (clay < 7% and silt < 50% and sand >= 43% and sand <= 52%)
     else if ((normClay < 20 && normSand > 52 && (normSilt + 2 * normClay >= 30)) ||
-             (normClay >= 7 && normClay < 20 && normSand >= 43 && normSand <= 52 && normSilt < 50) ||
-             (normClay < 7 && normSand >= 43 && normSand < 52 && normSilt < 50)) {
+             (normClay < 7 && normSilt < 50 && normSand >= 43 && normSand <= 52)) {
         className = 'Sandy Loam';
         code = 'SL';
     }
@@ -94,8 +150,8 @@ function calculateUsdaTexture(sand, silt, clay, tolerance = 2.0) {
         className = 'Silt Loam';
         code = 'SiL';
     }
-    // 12. Loam: 7-27% clay, 28-50% silt, < 52% sand
-    else if (normClay >= 7 && normClay < 27 && normSilt >= 28 && normSilt < 50 && normSand < 52) {
+    // 12. Loam: 7-27% clay, 28-50% silt, sand <= 52%
+    else if (normClay >= 7 && normClay < 27 && normSilt >= 28 && normSilt < 50 && normSand <= 52) {
         className = 'Loam';
         code = 'L';
     }
@@ -103,12 +159,18 @@ function calculateUsdaTexture(sand, silt, clay, tolerance = 2.0) {
     return {
         className,
         code,
-        closureError: Number(closureError.toFixed(2)),
+        closureError: Number(closureError.toFixed(4)),
         isValid: true,
+        scheme: 'USDA_12_CLASS',
+        fractions: {
+            sand: s,
+            silt: si,
+            clay: c
+        },
         normalized: {
-            sand: Number(normSand.toFixed(1)),
-            silt: Number(normSilt.toFixed(1)),
-            clay: Number(normClay.toFixed(1))
+            sand: Number(normSand.toFixed(2)),
+            silt: Number(normSilt.toFixed(2)),
+            clay: Number(normClay.toFixed(2))
         }
     };
 }

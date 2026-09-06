@@ -1,0 +1,29 @@
+{
+  "archive": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\antigravity-safe-handoff-2026-09-06.zip",
+  "sha256": "4c3c608c40cdd547b0a52b0b56d78fc630b710b68fb71e0006556bf4d5c44892",
+  "baselineHead": "33b138b835094fb72d8fda69e541879e47540182",
+  "changedFiles": 68,
+  "archiveFilesVerified": 115,
+  "createdAt": "2026-09-06T10:07:33.7912349Z",
+  "excludes": [
+    "credentials",
+    "environment files",
+    "Git internals",
+    "databases",
+    "uploads/spectra",
+    "dependencies",
+    "build output"
+  ],
+  "delivery": {
+    "sentAtObserved": "2026-09-06T10:14:47.0625588Z",
+    "app": "Antigravity",
+    "project": "LIMSI",
+    "conversation": "LIMS Dev",
+    "modelObserved": "Gemini 3.8 Flash High",
+    "messageVisibleInConversation": true,
+    "agentStartedReadingAndVerification": true,
+    "checkpointObserved": "8747b8a",
+    "branchObserved": "codex/catalogue-foundation-and-lab-operations-v3",
+    "productionDeploymentVerifiedByCodex": false
+  }
+}

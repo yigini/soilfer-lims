@@ -71,18 +71,26 @@ async function assembleReport(sampleId, user) {
     const analyses = await prisma.analysis.findMany();
     const analysisMap = new Map(analyses.map(a => [a.code, a]));
 
-    // Fetch default methodologies for all analysis codes in results
+    // Fetch default methodologies for all analysis codes in results, and exact methodologies where assigned
     const resultParams = sample.results.map(r => r.param);
+    const resultMethodIds = [...new Set(sample.results.map(r => r.methodologyId).filter(Boolean))];
     let methodologies = [];
+    let specificMethodologies = [];
     try {
-        methodologies = await prisma.methodology.findMany({
-            where: {
-                analysisCode: { in: resultParams },
-                isDefault: true
-            }
-        });
+        [methodologies, specificMethodologies] = await Promise.all([
+            prisma.methodology.findMany({
+                where: {
+                    analysisCode: { in: resultParams },
+                    isDefault: true
+                }
+            }),
+            resultMethodIds.length > 0 ? prisma.methodology.findMany({
+                where: { id: { in: resultMethodIds } }
+            }) : []
+        ]);
     } catch (e) { /* methodologies table may be empty */ }
     const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
+    const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
 
     const EXCLUDED_GATE_CODES = ['DRYING', 'PREPARATION', 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION', 'ARCHIVING', 'DISPOSAL'];
 
@@ -105,7 +113,7 @@ async function assembleReport(sampleId, user) {
         }
 
         const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
-        const methodology = methodMap.get(result.param);
+        const methodology = (result.methodologyId && specificMethodMap.get(result.methodologyId)) || methodMap.get(result.param);
         const rawUnit = result.unit || analysis?.units || '';
         const interp = interpretParameter(result.param, result.value, rawUnit);
 

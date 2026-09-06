@@ -264,8 +264,13 @@ exports.evaluateBatch = async (req, res) => {
 exports.addItemsToBatch = async (req, res) => {
     const { id } = req.params;
     const { workItemIds } = req.body;
+    const user = req.user;
 
     try {
+        if (!workItemIds || !Array.isArray(workItemIds) || workItemIds.length === 0) {
+            return res.status(400).json({ error: 'workItemIds must be a non-empty array' });
+        }
+
         const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
@@ -273,8 +278,48 @@ exports.addItemsToBatch = async (req, res) => {
             return res.status(400).json({ error: 'Batch is not OPEN' });
         }
 
+        const scopeGuard = require('../utils/scopeGuard');
+        if (user && batch.labId && user.labId && batch.labId !== user.labId && user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
         const currentIdsArray = typeof batch.workItemIds === 'string' ? JSON.parse(batch.workItemIds) : (batch.workItemIds || []);
         const currentIds = new Set(currentIdsArray);
+
+        // Enforce max batch size 40
+        const newIdsToAdd = workItemIds.filter(wid => !currentIds.has(wid));
+        if (currentIds.size + newIdsToAdd.length > 40) {
+            return res.status(400).json({ error: `Adding ${newIdsToAdd.length} items exceeds maximum batch capacity of 40 (current: ${currentIds.size})` });
+        }
+
+        // Validate work items
+        const items = await prisma.workItem.findMany({
+            where: { id: { in: workItemIds } },
+            include: { sample: true }
+        });
+
+        if (items.length !== workItemIds.length) {
+            return res.status(404).json({ error: 'One or more work items not found' });
+        }
+
+        const TEXTURE_ALIASES = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'];
+        const isTextureBatch = TEXTURE_ALIASES.includes(batch.analysis);
+
+        for (const item of items) {
+            if (item.sample && user && !scopeGuard.canAccessEntity(user, item.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+                return res.status(403).json({ error: `Item ${item.id} is outside your laboratory scope.` });
+            }
+            const isMatch = isTextureBatch
+                ? TEXTURE_ALIASES.includes(item.analysis)
+                : item.analysis === batch.analysis;
+            if (!isMatch) {
+                return res.status(400).json({ error: `Item ${item.id} analysis (${item.analysis}) does not match batch analysis (${batch.analysis})` });
+            }
+            if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) {
+                return res.status(400).json({ error: `Item ${item.id} is already sealed (${item.status})` });
+            }
+        }
+
         workItemIds.forEach(wid => currentIds.add(wid));
 
         await prisma.$transaction([

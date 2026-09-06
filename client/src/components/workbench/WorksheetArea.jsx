@@ -49,7 +49,7 @@ export default function WorksheetArea({
         }
     }, [initialSampleId, items]);
 
-    const isTexture = activeGroup?.analysis === 'TEXTURE';
+    const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'TEXTURE');
     const isOperationalGate = activeGroup?.category === 'Operational Gates';
     const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'SPECTRAL');
 
@@ -255,6 +255,7 @@ export default function WorksheetArea({
                                                     <TextureEditor
                                                         disabled={!item.readiness?.isReady || isRecorded}
                                                         values={draft?.values || []}
+                                                        tolerance={activeGroup?.validation?.tolerance ?? 1.0}
                                                         onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
                                                         sampleId={item.sampleId}
                                                         onEnterNext={() => handleEnterNext(idx)}

@@ -53,7 +53,10 @@ server/prisma/dev.db-wal
 
 # ─── Deploy archives & Backups ───
 *.tar.gz
+*.zip
 server/backups/
 server/prisma/*.bak
 *.bak
+*pre_reconciliation_bak*
+server/prisma/*pre_reconciliation_bak*
 scratch/

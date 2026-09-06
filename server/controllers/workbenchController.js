@@ -231,7 +231,7 @@ exports.getQueue = async (req, res) => {
                 analysisCode: code,
                 editorKind: isSpectral
                     ? 'SPECTRAL'
-                    : (code === 'TEXTURE' ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
+                    : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code) ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
                 status: item.status,
                 priority: item.priority,
                 currentResult: resultMap[resultKey]?.value || item.result || null,
@@ -429,17 +429,96 @@ exports.batchSave = async (req, res) => {
                 }
             }
 
+            const isTextureTask = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis);
+
+            let textureFractions = null;
+            if (isTextureTask) {
+                if (Array.isArray(entry.values)) {
+                    textureFractions = { sand: entry.values[0], silt: entry.values[1], clay: entry.values[2] };
+                } else if (entry.values && typeof entry.values === 'object') {
+                    textureFractions = {
+                        sand: entry.values.sand ?? entry.values.SAND ?? entry.values.Sand ?? null,
+                        silt: entry.values.silt ?? entry.values.SILT ?? entry.values.Silt ?? null,
+                        clay: entry.values.clay ?? entry.values.CLAY ?? entry.values.Clay ?? null
+                    };
+                }
+            }
+
+            const hasTextureDraft = isTextureTask && textureFractions && (
+                (textureFractions.sand !== null && textureFractions.sand !== undefined && String(textureFractions.sand).trim() !== '') ||
+                (textureFractions.silt !== null && textureFractions.silt !== undefined && String(textureFractions.silt).trim() !== '') ||
+                (textureFractions.clay !== null && textureFractions.clay !== undefined && String(textureFractions.clay).trim() !== '')
+            );
+            const hasScalarDraft = !isOperationalTask && !isTextureTask && (entry.value !== null && entry.value !== undefined && String(entry.value).trim() !== '');
+            const hasChecksDraft = isOperationalTask && Array.isArray(entry.checks);
+
             // Skip empty values for draft mode
-            if (draft && !isOperationalTask && (entry.value === null || entry.value === undefined || entry.value === '')) {
+            if (draft && !hasChecksDraft && !hasTextureDraft && !hasScalarDraft) {
                 results.push({ workItemId: entry.workItemId, status: 'skipped', validation: { valid: true, flags: [] } });
                 continue;
             }
 
             // Validation
             let validation = { valid: true, flags: [] };
-            const value = isOperationalTask && !draft ? JSON.stringify({ revision: checklist.revision, steps: checklist.steps, checks: entry.checks, recordedBy: user.username, recordedAt: now.toISOString() }) : entry.value;
+            let value = entry.value;
+            let textureClassification = null;
 
-            if (!isOperationalTask && value !== null && value !== undefined && value !== '') {
+            if (isOperationalTask) {
+                value = !draft ? JSON.stringify({ revision: checklist.revision, steps: checklist.steps, checks: entry.checks, recordedBy: user.username, recordedAt: now.toISOString() }) : null;
+            } else if (isTextureTask) {
+                const method = methodMap[item.analysis];
+                const methodTolerance = method?.validation?.tolerance ?? 1.0;
+                if (!draft) {
+                    if (!textureFractions ||
+                        textureFractions.sand === null || textureFractions.sand === undefined || String(textureFractions.sand).trim() === '' ||
+                        textureFractions.silt === null || textureFractions.silt === undefined || String(textureFractions.silt).trim() === '' ||
+                        textureFractions.clay === null || textureFractions.clay === undefined || String(textureFractions.clay).trim() === '') {
+                        errors.push({
+                            workItemId: entry.workItemId,
+                            error: 'All three fractions (Sand, Silt, Clay) are required to complete texture determination.',
+                            code: 'INCOMPLETE_FRACTIONS'
+                        });
+                        continue;
+                    }
+                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance);
+                    if (!textVal.isValid) {
+                        if (textVal.flags?.includes('INVALID_FORMAT') || textVal.flags?.includes('BELOW_MIN')) {
+                            errors.push({
+                                workItemId: entry.workItemId,
+                                error: 'Invalid fraction format: fractions must be numbers between 0 and 100%',
+                                code: 'INVALID_FORMAT'
+                            });
+                            continue;
+                        }
+                        if (!entry.overrideReason || entry.overrideReason.trim() === '') {
+                            errors.push({
+                                workItemId: entry.workItemId,
+                                error: textVal.error || `Texture closure check failed. Override reason required.`,
+                                code: 'TEXTURE_CLOSURE_FAILED',
+                                closureError: textVal.closureError
+                            });
+                            continue;
+                        }
+                        if (user.role === 'LAB_TECHNICIAN') {
+                            errors.push({
+                                workItemId: entry.workItemId,
+                                error: 'Texture closure failure requires manager approval. Save as draft and notify your supervisor.',
+                                code: 'MANAGER_OVERRIDE_REQUIRED'
+                            });
+                            continue;
+                        }
+                        validation.overrideReason = entry.overrideReason.trim();
+                        validation.overriddenBy = user.username;
+                        validation.flags = ['TEXTURE_CLOSURE_OVERRIDE', 'MANAGER_OVERRIDE'];
+                    }
+                    textureClassification = textVal;
+                    value = textVal.className || 'Loam';
+                    validation = { ...validation, valid: textVal.isValid || !!validation.overrideReason, className: textVal.className, code: textVal.code, closureError: textVal.closureError };
+                } else if (hasTextureDraft) {
+                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance);
+                    validation = { valid: textVal.isValid, flags: textVal.flags || [], className: textVal.className, code: textVal.code, closureError: textVal.closureError };
+                }
+            } else if (!isOperationalTask && value !== null && value !== undefined && value !== '') {
                 const checked = validationService.validateNumericMethod(value, methodMap[item.analysis]?.validation);
                 validation = { ...checked, valid: checked.isValid };
             }
@@ -453,15 +532,28 @@ exports.batchSave = async (req, res) => {
             // For completion from ASSIGNED, we allow the jump (implicit IN_PROGRESS step)
             const isCompletionFromAssigned = !draft && item.status === 'ASSIGNED';
 
-            if (!isCompletionFromAssigned && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
-                errors.push({
-                    workItemId: entry.workItemId,
-                    error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
-                        (item.status === 'REANALYSIS_REQUIRED'
-                            ? 'This item must be reassigned before results can be entered.'
-                            : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
-                });
-                continue;
+            if (!draft) {
+                if (!isCompletionFromAssigned && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
+                    errors.push({
+                        workItemId: entry.workItemId,
+                        error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
+                            (item.status === 'REANALYSIS_REQUIRED'
+                                ? 'This item must be reassigned before results can be entered.'
+                                : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
+                    });
+                    continue;
+                }
+            } else if (item.status !== targetStatus) {
+                if (!workflow.isValidWorkItemTransition(item.status, targetStatus)) {
+                    errors.push({
+                        workItemId: entry.workItemId,
+                        error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
+                            (item.status === 'REANALYSIS_REQUIRED'
+                                ? 'This item must be reassigned before results can be entered.'
+                                : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
+                    });
+                    continue;
+                }
             }
 
             // Dedicated draft branch: save strictly to WorkItemDraft without creating Result or completing WorkItem
@@ -631,68 +723,231 @@ exports.batchSave = async (req, res) => {
 
             // Create/update Result record (Append-Only with Replicate & History)
             if (!isOperationalTask && value !== undefined && value !== null && value !== '') {
-                const method = methodMap[item.analysis];
-                const flagsData = validation.flags || [];
-                if (validation.overrideReason) {
-                    flagsData.push('MANAGER_OVERRIDE');
-                }
-
-                const strVal = String(value).trim();
-                const isCensored = validation.isCensored || /^[<>]/.test(strVal);
-                const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
-                let numericVal = null;
-                if (isCensored) {
-                    const cleanNum = strVal.replace(/^[<>=\s]+/, '').replace(',', '.');
-                    numericVal = isNaN(Number(cleanNum)) ? null : Number(cleanNum);
-                } else {
-                    numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
-                }
-
-                const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-
                 const repNo = (entry.replicateNo !== undefined && entry.replicateNo !== null) ? Number(entry.replicateNo) : 1;
                 const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(entry.basis) ? entry.basis : 'AIR_DRY';
 
-                // Supersede prior active result for this sample & parameter ONLY for the same replicateNo
-                ops.push(prisma.result.updateMany({
-                    where: {
-                        sampleId: item.sampleId,
-                        param: item.analysis,
-                        replicateNo: repNo,
-                        isCurrent: true
-                    },
-                    data: {
-                        isCurrent: false,
-                        supersededBy: newResultId
-                    }
-                }));
+                if (isTextureTask && textureClassification && !draft) {
+                    const sandNum = Number(String(textureFractions.sand).replace(',', '.'));
+                    const siltNum = Number(String(textureFractions.silt).replace(',', '.'));
+                    const clayNum = Number(String(textureFractions.clay).replace(',', '.'));
 
-                // Append new defensible Result row
-                ops.push(prisma.result.create({
-                    data: {
-                        id: newResultId,
-                        sampleId: item.sampleId,
-                        param: item.analysis,
-                        value: strVal,
-                        numericValue: numericVal,
-                        unit: method?.unit || null,
-                        flags: JSON.stringify(flagsData),
-                        isValid: validation.valid,
-                        censoring: censoringType,
-                        basis: validBasis,
-                        provenance: entry.provenance || 'MEASURED',
-                        methodologyId: item.methodologyId || null,
-                        replicateNo: repNo,
-                        isCurrent: true,
-                        enteredBy: user.username,
-                        analysedAt: now,
-                        equipmentId: entry.equipmentId || item.equipmentId || null,
-                        batchId: item.batchId || null,
-                        createdAt: now,
-                        updatedAt: now
-                    }
-                }));
+                    const sandResId = `res-${Date.now()}-sand-${Math.random().toString(36).substr(2, 5)}`;
+                    const siltResId = `res-${Date.now()}-silt-${Math.random().toString(36).substr(2, 5)}`;
+                    const clayResId = `res-${Date.now()}-clay-${Math.random().toString(36).substr(2, 5)}`;
+                    const textResId = `res-${Date.now()}-text-${Math.random().toString(36).substr(2, 5)}`;
 
+                    // Supersede prior active result for SAND, SILT, CLAY, and TEXTURE
+                    ops.push(prisma.result.updateMany({
+                        where: {
+                            sampleId: item.sampleId,
+                            param: { in: ['SAND', 'SILT', 'CLAY', 'TEXTURE', item.analysis] },
+                            replicateNo: repNo,
+                            isCurrent: true
+                        },
+                        data: {
+                            isCurrent: false,
+                            supersededBy: textResId
+                        }
+                    }));
+
+                    const flagsData = [...(validation.flags || [])];
+                    if (validation.overrideReason) flagsData.push('MANAGER_OVERRIDE');
+
+                    // Sand
+                    ops.push(prisma.result.create({
+                        data: {
+                            id: sandResId,
+                            sampleId: item.sampleId,
+                            param: 'SAND',
+                            value: String(sandNum),
+                            numericValue: sandNum,
+                            unit: '%',
+                            flags: JSON.stringify(flagsData),
+                            isValid: true,
+                            censoring: 'NONE',
+                            basis: validBasis,
+                            provenance: 'MEASURED',
+                            methodologyId: item.methodologyId || null,
+                            replicateNo: repNo,
+                            isCurrent: true,
+                            enteredBy: user.username,
+                            analysedAt: now,
+                            equipmentId: entry.equipmentId || item.equipmentId || null,
+                            batchId: item.batchId || null,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+
+                    // Silt
+                    ops.push(prisma.result.create({
+                        data: {
+                            id: siltResId,
+                            sampleId: item.sampleId,
+                            param: 'SILT',
+                            value: String(siltNum),
+                            numericValue: siltNum,
+                            unit: '%',
+                            flags: JSON.stringify(flagsData),
+                            isValid: true,
+                            censoring: 'NONE',
+                            basis: validBasis,
+                            provenance: 'MEASURED',
+                            methodologyId: item.methodologyId || null,
+                            replicateNo: repNo,
+                            isCurrent: true,
+                            enteredBy: user.username,
+                            analysedAt: now,
+                            equipmentId: entry.equipmentId || item.equipmentId || null,
+                            batchId: item.batchId || null,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+
+                    // Clay
+                    ops.push(prisma.result.create({
+                        data: {
+                            id: clayResId,
+                            sampleId: item.sampleId,
+                            param: 'CLAY',
+                            value: String(clayNum),
+                            numericValue: clayNum,
+                            unit: '%',
+                            flags: JSON.stringify(flagsData),
+                            isValid: true,
+                            censoring: 'NONE',
+                            basis: validBasis,
+                            provenance: 'MEASURED',
+                            methodologyId: item.methodologyId || null,
+                            replicateNo: repNo,
+                            isCurrent: true,
+                            enteredBy: user.username,
+                            analysedAt: now,
+                            equipmentId: entry.equipmentId || item.equipmentId || null,
+                            batchId: item.batchId || null,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+
+                    // Derived Texture Class
+                    const textFlags = [
+                        'DERIVED_USDA_12_CLASS',
+                        `SOURCE_SAND_${sandResId}`,
+                        `SOURCE_SILT_${siltResId}`,
+                        `SOURCE_CLAY_${clayResId}`,
+                        `CLOSURE_ERROR_${textureClassification.closureError ?? 0}`,
+                        ...flagsData
+                    ];
+                    ops.push(prisma.result.create({
+                        data: {
+                            id: textResId,
+                            sampleId: item.sampleId,
+                            param: 'TEXTURE',
+                            value: textureClassification.className,
+                            numericValue: null,
+                            unit: 'USDA_12_CLASS',
+                            flags: JSON.stringify(textFlags),
+                            isValid: textureClassification.isValid || !!validation.overrideReason,
+                            censoring: 'NONE',
+                            basis: validBasis,
+                            provenance: 'DERIVED',
+                            methodologyId: item.methodologyId || null,
+                            replicateNo: repNo,
+                            isCurrent: true,
+                            enteredBy: user.username,
+                            analysedAt: now,
+                            equipmentId: entry.equipmentId || item.equipmentId || null,
+                            batchId: item.batchId || null,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+
+                    // WorkAttempt for defensible metrology
+                    ops.push(prisma.workAttempt.create({
+                        data: {
+                            id: `att-${item.id}-${Date.now()}`,
+                            workItemId: item.id,
+                            attemptNo: 1,
+                            author: user.username,
+                            authorName: user.name || user.username,
+                            materialAliquot: 'FINE_EARTH_2MM',
+                            instrumentId: entry.equipmentId || item.equipmentId || null,
+                            qcBatchId: item.batchId || null,
+                            version: expectedVersion + 1,
+                            status: 'RECORDED',
+                            evidenceData: JSON.stringify({
+                                fractions: { sand: sandNum, silt: siltNum, clay: clayNum },
+                                className: textureClassification.className,
+                                closureError: textureClassification.closureError,
+                                sourceResultIds: [sandResId, siltResId, clayResId, textResId]
+                            }),
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+                } else {
+                    const method = methodMap[item.analysis];
+                    const flagsData = validation.flags || [];
+                    if (validation.overrideReason) {
+                        flagsData.push('MANAGER_OVERRIDE');
+                    }
+
+                    const strVal = String(value).trim();
+                    const isCensored = validation.isCensored || /^[<>]/.test(strVal);
+                    const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
+                    let numericVal = null;
+                    if (isCensored) {
+                        const cleanNum = strVal.replace(/^[<>=\s]+/, '').replace(',', '.');
+                        numericVal = isNaN(Number(cleanNum)) ? null : Number(cleanNum);
+                    } else {
+                        numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+                    }
+
+                    const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+                    // Supersede prior active result for this sample & parameter ONLY for the same replicateNo
+                    ops.push(prisma.result.updateMany({
+                        where: {
+                            sampleId: item.sampleId,
+                            param: item.analysis,
+                            replicateNo: repNo,
+                            isCurrent: true
+                        },
+                        data: {
+                            isCurrent: false,
+                            supersededBy: newResultId
+                        }
+                    }));
+
+                    // Append new defensible Result row
+                    ops.push(prisma.result.create({
+                        data: {
+                            id: newResultId,
+                            sampleId: item.sampleId,
+                            param: item.analysis,
+                            value: strVal,
+                            numericValue: numericVal,
+                            unit: method?.unit || null,
+                            flags: JSON.stringify(flagsData),
+                            isValid: validation.valid,
+                            censoring: censoringType,
+                            basis: validBasis,
+                            provenance: entry.provenance || 'MEASURED',
+                            methodologyId: item.methodologyId || null,
+                            replicateNo: repNo,
+                            isCurrent: true,
+                            enteredBy: user.username,
+                            analysedAt: now,
+                            equipmentId: entry.equipmentId || item.equipmentId || null,
+                            batchId: item.batchId || null,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    }));
+                }
             }
 
             // Both analytical results and operational evidence replace their working draft.
@@ -1103,6 +1358,17 @@ exports.previewCompletion = async (req, res) => {
                 continue;
             }
 
+            const scopeGuard = require('../utils/scopeGuard');
+            if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+                excluded.push({
+                    workItemId: item.id,
+                    sampleId: item.sampleId,
+                    blockers: ['OUT_OF_SCOPE'],
+                    reasons: ['Work is outside your laboratory scope']
+                });
+                continue;
+            }
+
             const labId = item.sample?.assignedLab || item.sample?.labId || item.labId;
             const equipKey = `${labId}::${item.analysis}`;
             const equipReq = equipReqMap[equipKey];
@@ -1118,11 +1384,13 @@ exports.previewCompletion = async (req, res) => {
             // 2. Validation check
             let validation = { isValid: true, flags: [] };
             const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
+            const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) || (entry.values != null);
             if (isSpectralAnalysis) {
                 validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };
-            } else if (item.analysis === 'TEXTURE' || (entry.values && Array.isArray(entry.values))) {
-                const vals = entry.values || [];
-                validation = validationService.validateTextureFractions(vals[0], vals[1], vals[2]);
+            } else if (isTextureAnalysis) {
+                const method = methodMap[item.analysis];
+                const tolerance = method?.validation?.tolerance ?? 1.0;
+                validation = validationService.validateTextureFractions(entry.values, tolerance);
             } else if (item.category === 'Operational Gates') {
                 validation = validationService.validateOperationalTask(entry.checks, operationalChecklists[item.analysis]?.steps.length || 3);
             } else {
@@ -1160,9 +1428,15 @@ exports.previewCompletion = async (req, res) => {
                         reasons.push(`Value out of range (${validation.flags.join(', ')}). Override reason required.`);
                     }
                 }
+                if (validation.flags?.includes('INCOMPLETE_FRACTIONS')) {
+                    blockers.push('INCOMPLETE_FRACTIONS');
+                    reasons.push(validation.error || 'All three fractions (Sand, Silt, Clay) are required');
+                }
                 if (validation.flags?.includes('TEXTURE_CLOSURE_FAILED')) {
-                    blockers.push('TEXTURE_CLOSURE_FAILED');
-                    reasons.push(validation.error || 'Texture closure failed (100% ± 2.0%)');
+                    if (!entry.overrideReason) {
+                        blockers.push('TEXTURE_CLOSURE_FAILED');
+                        reasons.push(validation.error || 'Texture closure failed');
+                    }
                 }
                 if (validation.flags?.includes('SOP_STEPS_INCOMPLETE')) {
                     blockers.push('SOP_STEPS_INCOMPLETE');

@@ -296,7 +296,7 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
 
             // Work items - Scoped via Scope Guard
             const [unassignedTasks, allWork] = await Promise.all([
-                prisma.workItem.count({ where: { ...workWhere, status: 'PENDING', assignedTo: null } }),
+                prisma.workItem.count({ where: { ...workWhere, status: { in: ['NOT_ASSIGNED', 'PENDING'] }, assignedTo: null } }),
                 prisma.workItem.findMany({ where: workWhere, orderBy: { createdAt: 'desc' }, take: 500 }),
             ]);
 
@@ -304,12 +304,22 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             let awaitingReview = 0;
             let reviewQueue = [];
             try {
-                const submissions = await prisma.submission.findMany({
-                    where: { status: 'PENDING_REVIEW' },
-                    orderBy: { submittedAt: 'desc' },
-                    take: 20,
-                });
-                awaitingReview = submissions.length;
+                const subWhere = { status: 'PENDING_REVIEW' };
+                if (user.role !== 'SUPER_ADMIN' && user.labId) {
+                    subWhere.OR = [
+                        { assignedLab: user.labId },
+                        { labId: user.labId }
+                    ];
+                }
+                const [subCount, submissions] = await Promise.all([
+                    prisma.submission.count({ where: subWhere }),
+                    prisma.submission.findMany({
+                        where: subWhere,
+                        orderBy: { submittedAt: 'desc' },
+                        take: 20,
+                    })
+                ]);
+                awaitingReview = subCount;
                 // Aggregate by sample
                 const reviewGroups = {};
                 submissions.forEach(sub => {

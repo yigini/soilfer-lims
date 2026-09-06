@@ -27,6 +27,66 @@ function deriveLocationConfidence(source, uncertaintyM) {
 }
 exports.deriveLocationConfidence = deriveLocationConfidence;
 
+/**
+ * Resolves requested package/group ID against available laboratory analysis groups.
+ * Multi-tier exact-first resolution strategy:
+ * 1. Validates requestedId is a non-empty string.
+ * 2. Checks exact case-sensitive ID match.
+ * 3. Checks exact case-insensitive match (rejects if multiple candidates exist).
+ * 4. Checks normalized punctuation-stripped match (rejects if ambiguous).
+ * Returns { group, canonicalId } or { error, code, message }.
+ */
+function resolveAnalysisGroup(requestedId, analysisGroups) {
+    if (typeof requestedId !== 'string' || !requestedId.trim()) {
+        return {
+            error: 'INVALID_PACKAGE_ID',
+            code: 'INVALID_PACKAGE_ID',
+            message: 'Package ID must be a non-empty string.'
+        };
+    }
+    const cleanId = requestedId.trim();
+
+    // 1. Exact case-sensitive match
+    const exactMatch = analysisGroups.find(g => g.id === cleanId);
+    if (exactMatch) {
+        return { group: exactMatch, canonicalId: exactMatch.id };
+    }
+
+    // 2. Exact case-insensitive match
+    const lower = cleanId.toLowerCase();
+    const caseInsensitiveMatches = analysisGroups.filter(g => g.id.toLowerCase() === lower);
+    if (caseInsensitiveMatches.length === 1) {
+        return { group: caseInsensitiveMatches[0], canonicalId: caseInsensitiveMatches[0].id };
+    } else if (caseInsensitiveMatches.length > 1) {
+        return {
+            error: 'AMBIGUOUS_PACKAGE_ID',
+            code: 'AMBIGUOUS_PACKAGE_ID',
+            message: `Ambiguous package ID '${cleanId}': multiple packages match case-insensitively.`
+        };
+    }
+
+    // 3. Punctuation-stripped normalized match (e.g. routine-soil vs ROUTINE_SOIL)
+    const normalize = s => s.toLowerCase().replace(/[-_\s]/g, '');
+    const norm = normalize(cleanId);
+    const normMatches = analysisGroups.filter(g => normalize(g.id) === norm);
+    if (normMatches.length === 1) {
+        return { group: normMatches[0], canonicalId: normMatches[0].id };
+    } else if (normMatches.length > 1) {
+        return {
+            error: 'AMBIGUOUS_PACKAGE_ID',
+            code: 'AMBIGUOUS_PACKAGE_ID',
+            message: `Ambiguous package ID '${cleanId}': matches multiple distinct packages.`
+        };
+    }
+
+    return {
+        error: 'PACKAGE_NOT_FOUND',
+        code: 'PACKAGE_NOT_FOUND',
+        message: `An analysis package is unavailable to this laboratory: '${cleanId}'.`
+    };
+}
+exports.resolveAnalysisGroup = resolveAnalysisGroup;
+
 exports.processIntake = async (req, res) => {
     const {
         originalId,
@@ -318,14 +378,27 @@ exports.processIntake = async (req, res) => {
             analyses: g.analyses ? JSON.parse(g.analyses) : []
         }));
 
-        if (Array.isArray(analysisGroupIds) && analysisGroupIds.some(id => !analysisGroups.some(g => g.id === id))) return res.status(400).json({ success: false, message: 'An analysis package is unavailable to this laboratory.' });
-        if (Array.isArray(analysisGroupIds)) {
-            analysisGroupIds.forEach(gid => {
-                const group = analysisGroups.find(g => g.id === gid);
-                if (group) {
-                    group.analyses.forEach(code => requiredAnalyses.add(code));
+        const canonicalGroupIds = [];
+        if (analysisGroupIds !== undefined && analysisGroupIds !== null) {
+            if (!Array.isArray(analysisGroupIds)) {
+                return res.status(400).json({
+                    success: false,
+                    code: 'INVALID_PACKAGE_ID',
+                    message: 'analysisGroupIds must be an array of package ID strings.'
+                });
+            }
+            for (const gid of analysisGroupIds) {
+                const resolved = resolveAnalysisGroup(gid, analysisGroups);
+                if (resolved.error) {
+                    return res.status(400).json({
+                        success: false,
+                        code: resolved.code,
+                        message: resolved.message
+                    });
                 }
-            });
+                canonicalGroupIds.push(resolved.canonicalId);
+                resolved.group.analyses.forEach(code => requiredAnalyses.add(code));
+            }
         }
 
         if (Array.isArray(req.body.requiredAnalyses)) {
@@ -543,7 +616,7 @@ exports.processIntake = async (req, res) => {
             dryingStatus: assignedLabId ? 'PENDING' : null,
             preparationStatus: assignedLabId ? 'PENDING' : null,
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
-            analysisGroupIds: JSON.stringify(analysisGroupIds || []),
+            analysisGroupIds: JSON.stringify([...new Set(canonicalGroupIds)]),
             fieldMetadata: JSON.stringify(currentFieldMeta),
             history: JSON.stringify(history),
             assignedLab: user.labId,

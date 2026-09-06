@@ -29,7 +29,7 @@ export default function WorkbenchQueue({
             analysisCode: i.analysisCode || g.analysis,
             analysisName: g.analysisName,
             groupCategory: g.category,
-            editorKind: i.editorKind || (['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(g.analysis) ? 'SPECTRAL' : (g.analysis === 'TEXTURE' ? 'TEXTURE' : (g.category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'))),
+            editorKind: i.editorKind || (['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(g.analysis) ? 'SPECTRAL' : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(g.analysis) ? 'TEXTURE' : (g.category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'))),
             eligibleEquipment: g.eligibleEquipment || []
         })));
     }, [groups]);

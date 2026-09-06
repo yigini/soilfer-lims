@@ -155,11 +155,23 @@ function evaluateBatchQc(qcData = {}) {
  */
 function checkBatchDisposition(batch, options = {}) {
     if (!batch) {
-        return { allowed: true, status: 'N/A' };
+        return { allowed: false, status: 'NO_BATCH', error: 'No batch associated with this determination.' };
     }
 
-    if (batch.status === 'QC_PASS' || batch.status === 'OPEN' || batch.status === 'CLOSED') {
-        return { allowed: true, status: batch.status };
+    if (batch.status === 'QC_PASS') {
+        return { allowed: true, status: 'QC_PASS' };
+    }
+
+    if (batch.status === 'CLOSED') {
+        return { allowed: true, status: 'CLOSED' };
+    }
+
+    if (batch.status === 'OPEN' || batch.status === 'RUNNING') {
+        return {
+            allowed: false,
+            status: batch.status,
+            error: `Batch ${batch.id || ''} QC is still ${batch.status} — not sufficient evidence for a QC-required method.`
+        };
     }
 
     if (batch.status === 'QC_FAIL') {
@@ -179,11 +191,11 @@ function checkBatchDisposition(batch, options = {}) {
         return {
             allowed: false,
             status: 'QC_FAIL',
-            error: `Batch ${batch.id} is in FAILED QC status without manager override disposition.`
+            error: `Batch ${batch.id || ''} is in FAILED QC status without manager override disposition.`
         };
     }
 
-    return { allowed: true, status: batch.status };
+    return { allowed: false, status: batch.status || 'UNKNOWN', error: `Batch status '${batch.status}' unrecognized or unevidenced.` };
 }
 
 /**

@@ -43,6 +43,11 @@ async function saveDraft(user, {
         throw new Error('Access denied: You are not assigned to this work item');
     }
 
+    const scopeGuard = require('../utils/scopeGuard');
+    if (workItem.sample && !scopeGuard.canAccessEntity(user, workItem.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+        throw new Error('Access denied: Work item is outside your laboratory scope');
+    }
+
     const sId = sampleId || workItem.sampleId;
     const labId = workItem.sample?.assignedLab || workItem.sample?.labId || workItem.labId || user.labId;
     const analysisCode = analysis || workItem.analysis;
@@ -54,9 +59,13 @@ async function saveDraft(user, {
         conflictValue = workItem.result || null;
     }
 
-    // Stringify JSON fields safely
-    const valuesStr = Array.isArray(values) ? JSON.stringify(values) : (typeof values === 'string' ? values : null);
-    const checksStr = Array.isArray(checks) ? JSON.stringify(checks) : (typeof checks === 'string' ? checks : null);
+    // Stringify JSON fields safely (supports array or named object for texture)
+    const valuesStr = (typeof values === 'object' && values !== null)
+        ? JSON.stringify(values)
+        : (typeof values === 'string' ? values : null);
+    const checksStr = Array.isArray(checks)
+        ? JSON.stringify(checks)
+        : (typeof checks === 'string' ? checks : null);
     const rawValue = value !== null && value !== undefined ? String(value) : null;
 
     // 3. Upsert WorkItemDraft

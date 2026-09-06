@@ -1,10 +1,40 @@
 const COMPOUND_ANALYSIS_EXPANSION = {
-        'pSA': ['SAND', 'CLAY', 'SILT'],
-        'PSA': ['SAND', 'CLAY', 'SILT'],
-        'TEXTURE': ['SAND', 'CLAY', 'SILT'],
-        'Particle Size Analysis': ['SAND', 'CLAY', 'SILT'],
-        'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
-    };
+    'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
+};
+
+const TEXTURE_ALIASES = new Set([
+    'TEXTURE',
+    'SOIL_PSD_TEXTURE',
+    'SOIL_TEXTURE',
+    'PSA',
+    'pSA',
+    'Particle Size Analysis'
+]);
+
+function normalizeAnalysisCodes(codes) {
+    if (!Array.isArray(codes)) return [];
+    const normalized = [];
+    let hasTexture = false;
+    for (const raw of codes) {
+        if (!raw || typeof raw !== 'string') continue;
+        const trimmed = raw.trim();
+        if (TEXTURE_ALIASES.has(trimmed)) {
+            if (!hasTexture) {
+                normalized.push('TEXTURE');
+                hasTexture = true;
+            }
+        } else if (COMPOUND_ANALYSIS_EXPANSION[trimmed]) {
+            normalized.push(...COMPOUND_ANALYSIS_EXPANSION[trimmed]);
+        } else {
+            normalized.push(trimmed);
+        }
+    }
+    const unique = [...new Set(normalized)];
+    if (hasTexture) {
+        return unique.filter(c => !['SAND', 'SILT', 'CLAY'].includes(c) || c === 'TEXTURE');
+    }
+    return unique;
+}
 
 const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
@@ -37,7 +67,7 @@ exports.generateWorkItemsForSample = async (sample) => {
     const { id, labId } = sample;
     const requiredAnalyses = getEffectiveAnalyses(sample);
     const workItems = [];
-    const expandedCodes = [...new Set((requiredAnalyses || []).flatMap(code => COMPOUND_ANALYSIS_EXPANSION[code] || [code]))];
+    const expandedCodes = normalizeAnalysisCodes(requiredAnalyses);
     const alreadyCreated = await prisma.workItem.findMany({ where: { sampleId: String(id) }, select: { analysis: true } });
     const defaultMethods = await preflightDefaults(expandedCodes, sample, alreadyCreated.map(i => i.analysis));
 
@@ -95,17 +125,7 @@ exports.generateWorkItemsForSample = async (sample) => {
 
 
     if (requiredAnalyses && Array.isArray(requiredAnalyses)) {
-        // Flatten any compound analyses into discrete physical/chemical determinations
-        const expandedAnalyses = [];
-        for (const code of requiredAnalyses) {
-            if (COMPOUND_ANALYSIS_EXPANSION[code]) {
-                expandedAnalyses.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
-            } else {
-                expandedAnalyses.push(code);
-            }
-        }
-
-        const uniqueAnalyses = [...new Set(expandedAnalyses)];
+        const uniqueAnalyses = normalizeAnalysisCodes(requiredAnalyses);
 
         // WP-25: Drive workflow work item ordering from catalogue executionOrder
         const catalogueRecords = await prisma.analysis.findMany({
@@ -215,15 +235,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
 
 
-    const expandedTarget = [];
-    for (const code of targetList) {
-        if (COMPOUND_ANALYSIS_EXPANSION[code]) {
-            expandedTarget.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
-        } else {
-            expandedTarget.push(code);
-        }
-    }
-    const uniqueTarget = [...new Set(expandedTarget)];
+    const uniqueTarget = normalizeAnalysisCodes(targetList);
     const targetSet = new Set(uniqueTarget);
 
     const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
@@ -396,7 +408,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                     performedBy: user?.username || 'SYSTEM',
                     timestamp: new Date(),
                     analysisCode: analysisCode,
-                    labId: targetLab
+                    labId: sample.assignedLab || labId
                 }
             });
 
@@ -1686,5 +1698,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         res.status(500).json({ error: 'Failed to review work items' });
     }
 };
+
+exports.normalizeAnalysisCodes = normalizeAnalysisCodes;
 
 module.exports = exports;
