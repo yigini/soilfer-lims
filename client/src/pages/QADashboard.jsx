@@ -46,7 +46,9 @@ export default function QADashboard() {
             setAmendmentRows(amends);
             setAuditRows(audits);
 
-            const failedCount = qcs.filter(q => String(q.status || '').toLowerCase().includes('fail')).length;
+            const failedCount = (qcRes.status === 'fulfilled' && qcRes.value.data.qcFailedCount !== undefined)
+                ? qcRes.value.data.qcFailedCount
+                : qcs.filter(q => String(q.status || '').toLowerCase().includes('fail')).length;
 
             setStats({
                 qcTotal: qcRes.status === 'fulfilled' ? (qcRes.value.data.total || qcs.length) : 0,

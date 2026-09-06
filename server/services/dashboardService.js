@@ -19,14 +19,14 @@ const { canFinalApprove, GATE_ANALYSES } = require('./workEligibility');
 const ALLOWED_ROLE_QUEUES = {
     SAMPLE_RECEPTION: ['reception.attention', 'reception.drafts', 'reception.expected', 'reception.receivedToday'],
     LAB_TECHNICIAN: ['bench.returned', 'bench.continue', 'bench.ready', 'bench.toSubmit', 'bench.waiting', 'bench.submittedToday'],
-    LAB_MANAGER: ['manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake'],
-    MASTER_USER: ['master.exceptions', 'master.active', 'master.released'],
+    LAB_MANAGER: ['manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake', 'audit.exceptions', 'audit.qc', 'audit.history'],
+    MASTER_USER: ['master.exceptions', 'master.active', 'master.released', 'audit.exceptions', 'audit.qc', 'audit.history'],
     PROJECT_MANAGER: ['project.attention', 'project.active', 'project.expected', 'project.released'],
     AUDIT_USER: ['audit.exceptions', 'audit.qc', 'audit.history'],
     SURVEYOR: ['surveyor.incomplete', 'surveyor.expected', 'surveyor.received'],
     EXTERNAL_VIEWER: ['external.released'],
     VIEWER: ['viewer.active', 'viewer.expected', 'viewer.released'],
-    SUPER_ADMIN: ['admin.configuration', 'admin.labs', 'admin.activity', 'manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake']
+    SUPER_ADMIN: ['admin.configuration', 'admin.labs', 'admin.activity', 'manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake', 'audit.exceptions', 'audit.qc', 'audit.history']
 };
 
 /**
@@ -1416,6 +1416,195 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             page,
             pageSize,
             hasMore: skip + events.length < total
+        };
+    }
+
+    // ─── AUDIT & QUALITY ASSURANCE QUEUES ───
+    if (queueKey === 'audit.qc') {
+        const batchWhere = {};
+        if (actorScope.activeLabId) {
+            batchWhere.OR = [
+                { labId: actorScope.activeLabId },
+                { labId: null }
+            ];
+        }
+        if (search && search.trim()) {
+            const q = search.trim();
+            const searchClause = {
+                OR: [
+                    { id: { contains: q } },
+                    { analysis: { contains: q } },
+                    { instrument: { contains: q } },
+                    { notes: { contains: q } },
+                    { status: { contains: q } }
+                ]
+            };
+            if (batchWhere.OR) {
+                batchWhere.AND = [searchClause];
+            } else {
+                Object.assign(batchWhere, searchClause);
+            }
+        }
+
+        const [total, qcFailedCount, batches] = await Promise.all([
+            prisma.batch.count({ where: batchWhere }),
+            prisma.batch.count({
+                where: {
+                    ...batchWhere,
+                    status: { in: ['QC_FAIL', 'FAILED'] }
+                }
+            }),
+            prisma.batch.findMany({
+                where: batchWhere,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: pageSize,
+                include: {
+                    _count: {
+                        select: { workItems: true, qcItems: true }
+                    }
+                }
+            })
+        ]);
+
+        return {
+            queueKey,
+            unit: 'batches',
+            qcFailedCount,
+            rows: batches.map(b => {
+                const analysisName = catMap[b.analysis]?.name || b.analysis;
+                const isFailed = String(b.status || '').toUpperCase().includes('FAIL');
+                return {
+                    key: b.id,
+                    title: b.id,
+                    context: `${analysisName} · ${b.labId || 'Global'} · ${b.instrument || 'Bench Run'}`,
+                    status: b.status || 'OPEN',
+                    count: b._count?.workItems || 0,
+                    unit: 'samples',
+                    action: 'Inspect batch',
+                    route: `/manager-queue?batchId=${b.id}`,
+                    note: b.notes || (isFailed ? 'Batch failed QC thresholds; review required.' : 'Batch within acceptable tolerances.'),
+                    tone: isFailed ? 'problem' : ''
+                };
+            }),
+            total,
+            page,
+            pageSize,
+            hasMore: skip + batches.length < total
+        };
+    }
+
+    if (queueKey === 'audit.history') {
+        const amendWhere = {};
+        if (actorScope.activeLabId) {
+            amendWhere.sample = { assignedLab: actorScope.activeLabId };
+        }
+        if (search && search.trim()) {
+            const q = search.trim();
+            const searchClause = {
+                OR: [
+                    { sampleId: { contains: q } },
+                    { reason: { contains: q } },
+                    { type: { contains: q } },
+                    { status: { contains: q } },
+                    { createdBy: { contains: q } }
+                ]
+            };
+            if (amendWhere.sample) {
+                amendWhere.AND = [searchClause];
+            } else {
+                Object.assign(amendWhere, searchClause);
+            }
+        }
+
+        const [total, amendments] = await Promise.all([
+            prisma.sampleAmendment.count({ where: amendWhere }),
+            prisma.sampleAmendment.findMany({
+                where: amendWhere,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: pageSize,
+                include: {
+                    sample: {
+                        select: { id: true, assignedLab: true, matrix: true }
+                    }
+                }
+            })
+        ]);
+
+        return {
+            queueKey,
+            unit: 'amendments',
+            rows: amendments.map(a => ({
+                key: a.id,
+                title: `${a.sampleId} · ${a.type || 'AMENDMENT'}`,
+                context: `${a.reason || 'No justification provided'} · by ${a.createdBy || 'System'}`,
+                status: a.status || 'RECORDED',
+                count: 1,
+                unit: 'amendment',
+                action: 'View dossier',
+                route: `/samples/${a.sampleId}`,
+                note: a.impactAssessment || `Amendment recorded at ${new Date(a.createdAt).toLocaleString()}`,
+                tone: a.status === 'PENDING' ? 'waiting' : ''
+            })),
+            total,
+            page,
+            pageSize,
+            hasMore: skip + amendments.length < total
+        };
+    }
+
+    if (queueKey === 'audit.exceptions') {
+        const excWhere = scopedWhere(sampleWhere, { status: 'APPROVED', results: { none: {} } });
+        if (search && search.trim()) {
+            const q = search.trim();
+            excWhere.AND = [
+                {
+                    OR: [
+                        { id: { contains: q } },
+                        { originalId: { contains: q } },
+                        { matrix: { contains: q } }
+                    ]
+                }
+            ];
+        }
+
+        const [total, samples] = await Promise.all([
+            prisma.sample.count({ where: excWhere }),
+            prisma.sample.findMany({
+                where: excWhere,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: pageSize,
+                select: {
+                    id: true,
+                    originalId: true,
+                    matrix: true,
+                    assignedLab: true,
+                    createdAt: true
+                }
+            })
+        ]);
+
+        return {
+            queueKey,
+            unit: 'samples',
+            rows: samples.map(s => ({
+                key: s.id,
+                title: s.id,
+                context: `${s.assignedLab || 'Unassigned'} · ${s.matrix || 'SOIL'} · Approved with zero analytical results`,
+                status: 'Missing Results',
+                count: 1,
+                unit: 'sample',
+                action: 'Inspect sample',
+                route: `/samples/${s.id}`,
+                note: 'Sample was approved without recorded test measurements.',
+                tone: 'problem'
+            })),
+            total,
+            page,
+            pageSize,
+            hasMore: skip + samples.length < total
         };
     }
 
