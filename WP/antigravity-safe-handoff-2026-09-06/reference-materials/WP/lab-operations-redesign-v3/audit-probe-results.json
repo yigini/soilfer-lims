@@ -1,0 +1,140 @@
+{
+  "baseline": "bee0b6e",
+  "scope": "Pure source probes; no production write-path tests",
+  "cases": [
+    {
+      "id": "texture-loam",
+      "input": [
+        50,
+        35,
+        15
+      ],
+      "expected": "Loam",
+      "actual": {
+        "className": "Sandy Loam",
+        "code": "SL",
+        "closureError": 0,
+        "isValid": true,
+        "normalized": {
+          "sand": 50,
+          "silt": 35,
+          "clay": 15
+        }
+      }
+    },
+    {
+      "id": "texture-boundary-silty-clay-loam",
+      "input": [
+        20,
+        50,
+        30
+      ],
+      "expected": "Silty Clay Loam",
+      "actual": {
+        "className": "Clay Loam",
+        "code": "CL",
+        "closureError": 0,
+        "isValid": true,
+        "normalized": {
+          "sand": 20,
+          "silt": 50,
+          "clay": 30
+        }
+      }
+    },
+    {
+      "id": "texture-boundary-clay-loam",
+      "input": [
+        45,
+        20,
+        35
+      ],
+      "expected": "Clay Loam",
+      "actual": {
+        "className": "Sandy Clay",
+        "code": "SC",
+        "closureError": 0,
+        "isValid": true,
+        "normalized": {
+          "sand": 45,
+          "silt": 20,
+          "clay": 35
+        }
+      }
+    },
+    {
+      "id": "negative-fraction",
+      "input": [
+        -5,
+        55,
+        50
+      ],
+      "expected": "invalid",
+      "actual": {
+        "className": "Silty Clay",
+        "code": "SiC",
+        "closureError": 0,
+        "isValid": true,
+        "normalized": {
+          "sand": -5,
+          "silt": 55,
+          "clay": 50
+        }
+      }
+    },
+    {
+      "id": "missing-fraction",
+      "input": [
+        "",
+        50,
+        50
+      ],
+      "expected": "invalid",
+      "actual": {
+        "className": "Silty Clay",
+        "code": "SiC",
+        "closureError": 0,
+        "isValid": true,
+        "normalized": {
+          "sand": 0,
+          "silt": 50,
+          "clay": 50
+        }
+      }
+    },
+    {
+      "id": "implicit-one-check",
+      "expected": "cannot demonstrate required three-step procedure",
+      "actual": {
+        "isValid": true,
+        "completedSteps": 1,
+        "totalSteps": 1,
+        "flags": []
+      }
+    },
+    {
+      "id": "open-qc-batch",
+      "expected": "not sufficient evidence for a QC-required method",
+      "actual": {
+        "allowed": true,
+        "status": "OPEN"
+      }
+    },
+    {
+      "id": "pre-drying-ph",
+      "expected": "not ready",
+      "actual": {
+        "isReady": false,
+        "blockers": [
+          "DRYING_PREREQUISITE_BLOCKED",
+          "PREPARATION_PREREQUISITE_BLOCKED"
+        ],
+        "warnings": [],
+        "reasons": [
+          "Drying must be completed before analysis (current: PENDING)",
+          "Sample preparation must be completed before analysis (current: PENDING)"
+        ]
+      }
+    }
+  ]
+}

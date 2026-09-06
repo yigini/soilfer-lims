@@ -1,0 +1,238 @@
+{
+  "scope": "Local demonstration only; not production acceptance",
+  "checks": [
+    {
+      "name": "Batch renders ten of forty positions",
+      "passed": true
+    },
+    {
+      "name": "Pending QC blocks submission",
+      "passed": true
+    },
+    {
+      "name": "Failed QC blocks submission",
+      "passed": true
+    },
+    {
+      "name": "Passing QC enables recorded batch",
+      "passed": true
+    },
+    {
+      "name": "Stable second page positions",
+      "passed": true
+    },
+    {
+      "name": "Submission has demo receipt",
+      "passed": true
+    },
+    {
+      "name": "50/35/15 preview is Loam",
+      "passed": true
+    },
+    {
+      "name": "Negative fraction blocks record",
+      "passed": true
+    },
+    {
+      "name": "Blank fraction remains incomplete",
+      "passed": true
+    },
+    {
+      "name": "Projection contains class and version",
+      "passed": true
+    },
+    {
+      "name": "Correction has new version",
+      "passed": true
+    },
+    {
+      "name": "Pre-preparation values remain disabled",
+      "passed": true
+    },
+    {
+      "name": "Missing evidence blocks phase 0",
+      "passed": true
+    },
+    {
+      "name": "Missing evidence blocks phase 1",
+      "passed": true
+    },
+    {
+      "name": "Preparation unlocks method membership count",
+      "passed": true
+    },
+    {
+      "name": "Texture adds one task",
+      "passed": true
+    },
+    {
+      "name": "Manager defaults to review",
+      "passed": true
+    },
+    {
+      "name": "Role view LAB_TECHNICIAN",
+      "passed": true
+    },
+    {
+      "name": "Role view SAMPLE_RECEPTION",
+      "passed": true
+    },
+    {
+      "name": "Role view MASTER_USER",
+      "passed": true
+    },
+    {
+      "name": "Role view PROJECT_MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Role view AUDIT_USER",
+      "passed": true
+    },
+    {
+      "name": "Role view EXTERNAL_VIEWER",
+      "passed": true
+    },
+    {
+      "name": "Role view VIEWER",
+      "passed": true
+    },
+    {
+      "name": "Role view SURVEYOR",
+      "passed": true
+    },
+    {
+      "name": "Role view SUPER_ADMIN",
+      "passed": true
+    },
+    {
+      "name": "Role view LAB_MANAGER",
+      "passed": true
+    },
+    {
+      "name": "bench 1024px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 1024px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 1024px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 1024px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 1024px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "bench 1024px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 1024px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 1024px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 1024px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 1024px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "bench 736px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 736px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 736px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 736px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 736px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "bench 736px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 736px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 736px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 736px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 736px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "bench 360px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 360px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 360px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 360px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 360px light outer overflow",
+      "passed": true
+    },
+    {
+      "name": "bench 360px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "prep 360px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "texture 360px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "orders 360px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "dashboard 360px dark outer overflow",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

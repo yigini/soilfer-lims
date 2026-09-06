@@ -239,7 +239,7 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
         flags.push('TEXTURE_CLOSURE_FAILED');
     }
 
-    const tolDisplay = typeof tol === 'object' ? (tol.tolerance ?? 1.0) : tol;
+    const tolDisplay = (tol && typeof tol === 'object') ? tol.tolerance : tol;
 
     return {
         isValid: textureResult.isValid,

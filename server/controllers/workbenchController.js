@@ -448,7 +448,8 @@ exports.batchSave = async (req, res) => {
             let textureFractions = null;
             if (isTextureTask) {
                 if (Array.isArray(entry.values)) {
-                    textureFractions = { sand: entry.values[0], silt: entry.values[1], clay: entry.values[2] };
+                    // Do not convert positional arrays; preserve array so validationService catches INVALID_FORMAT
+                    textureFractions = entry.values;
                 } else if (entry.values && typeof entry.values === 'object') {
                     textureFractions = {
                         sand: entry.values.sand ?? entry.values.SAND ?? entry.values.Sand ?? null,
@@ -459,9 +460,11 @@ exports.batchSave = async (req, res) => {
             }
 
             const hasTextureDraft = isTextureTask && textureFractions && (
-                (textureFractions.sand !== null && textureFractions.sand !== undefined && String(textureFractions.sand).trim() !== '') ||
-                (textureFractions.silt !== null && textureFractions.silt !== undefined && String(textureFractions.silt).trim() !== '') ||
-                (textureFractions.clay !== null && textureFractions.clay !== undefined && String(textureFractions.clay).trim() !== '')
+                Array.isArray(textureFractions) ? textureFractions.length > 0 : (
+                    (textureFractions.sand !== null && textureFractions.sand !== undefined && String(textureFractions.sand).trim() !== '') ||
+                    (textureFractions.silt !== null && textureFractions.silt !== undefined && String(textureFractions.silt).trim() !== '') ||
+                    (textureFractions.clay !== null && textureFractions.clay !== undefined && String(textureFractions.clay).trim() !== '')
+                )
             );
             const hasScalarDraft = !isOperationalTask && !isTextureTask && (entry.value !== null && entry.value !== undefined && String(entry.value).trim() !== '');
             const hasChecksDraft = isOperationalTask && Array.isArray(entry.checks);
@@ -481,7 +484,7 @@ exports.batchSave = async (req, res) => {
                 value = !draft ? JSON.stringify({ revision: checklist.revision, steps: checklist.steps, checks: entry.checks, recordedBy: user.username, recordedAt: now.toISOString() }) : null;
             } else if (isTextureTask) {
                 const method = methodMap[item.analysis];
-                const methodTolerance = method?.validation?.tolerance ?? 1.0;
+                const methodTolerance = (method?.validation && typeof method.validation.tolerance === 'number') ? method.validation.tolerance : null;
                 if (!draft) {
                     if (!textureFractions ||
                         textureFractions.sand === null || textureFractions.sand === undefined || String(textureFractions.sand).trim() === '' ||
@@ -1403,7 +1406,7 @@ exports.previewCompletion = async (req, res) => {
                 validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };
             } else if (isTextureAnalysis) {
                 const method = methodMap[item.analysis];
-                const tolerance = method?.validation?.tolerance ?? 1.0;
+                const tolerance = (method?.validation && typeof method.validation.tolerance === 'number') ? method.validation.tolerance : null;
                 validation = validationService.validateTextureFractions(entry.values, tolerance);
             } else if (item.category === 'Operational Gates') {
                 validation = validationService.validateOperationalTask(entry.checks, operationalChecklists[item.analysis]?.steps.length || 3);
@@ -1628,6 +1631,7 @@ exports.previewSubmissions = async (req, res) => {
 exports.commitSubmissions = async (req, res) => {
     const { sampleIds, note } = req.body;
     const user = req.user;
+    console.log(`[commitSubmissions] Invoked by ${user?.username} with ${sampleIds?.length || 0} samples:`, sampleIds?.slice(0, 5));
 
     if (!sampleIds || !Array.isArray(sampleIds) || sampleIds.length === 0) {
         return res.status(400).json({ error: 'sampleIds array is required and must not be empty' });

@@ -275,35 +275,109 @@ exports.updateBatch = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
         }
 
-        // Restrict updates to explicitly allowed fields
-        const allowedFields = ['notes', 'instrument', 'qcResults', 'workItemIds', 'status', 'disposition', 'blanks', 'duplicates', 'controls'];
-        const data = {};
-        for (const field of allowedFields) {
-            if (updates[field] !== undefined) {
-                data[field] = updates[field];
-            }
+        if (batch.status === BATCH_STATES.CLOSED) {
+            return res.status(400).json({ error: 'Batch is CLOSED and cannot be modified.' });
         }
 
-        if (updates.disposition && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-            return res.status(403).json({ error: 'Only lab managers can modify batch disposition' });
-        }
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+
+        // Restrict updates to explicitly allowed fields; membership & disposition are managed via dedicated routes
+        const data = {};
+        if (updates.notes !== undefined) data.notes = updates.notes;
+        if (updates.instrument !== undefined) data.instrument = updates.instrument;
 
         let evaluated = null;
 
         // Auto-evaluate QC data if provided
-        if (updates.qcResults || updates.blanks || updates.duplicates || updates.controls) {
+        const hasQcPayload = !!(updates.qcResults || updates.blanks || updates.duplicates || updates.controls);
+        if (hasQcPayload) {
             const qcPayload = updates.qcResults || {
                 blanks: updates.blanks,
                 duplicates: updates.duplicates,
                 controls: updates.controls
             };
-            evaluated = evaluateBatchQc(qcPayload);
+            evaluated = evaluateBatchQc(qcPayload, { runProfile });
             data.qcResults = JSON.stringify(evaluated);
-            if (!updates.status && evaluated.overallStatus !== 'OPEN') {
+            if (evaluated.overallStatus === 'OPEN') {
+                // QC evidence was cleared or empty: safely invalidate acceptance and stale dispositions
+                data.status = BATCH_STATES.OPEN;
+                data.disposition = null;
+            } else if (!updates.status) {
                 data.status = evaluated.overallStatus;
+                data.disposition = null; // Clear stale disposition on new measurement evaluation
             }
-        } else if (updates.qcResults && typeof updates.qcResults === 'object') {
-            data.qcResults = JSON.stringify(updates.qcResults);
+        }
+
+        // Validate status transition
+        if (updates.status !== undefined) {
+            const requestedStatus = updates.status;
+            if (!Object.values(BATCH_STATES).includes(requestedStatus)) {
+                return res.status(400).json({ error: `Invalid batch status: '${requestedStatus}'. Allowed: ${Object.values(BATCH_STATES).join(', ')}` });
+            }
+
+            // Status transitions to QC_PASS or QC_FAIL require evaluated QC evidence or authorized disposition
+            if (requestedStatus === BATCH_STATES.QC_PASS || requestedStatus === BATCH_STATES.QC_FAIL) {
+                if (evaluated) {
+                    if (requestedStatus === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.QC_FAIL) {
+                        return res.status(400).json({
+                            error: 'Cannot set status to QC_PASS: evaluated QC data failed acceptance criteria.'
+                        });
+                    }
+                    data.status = evaluated.overallStatus;
+                } else {
+                    // No QC payload in this request; check existing batch QC results
+                    let existingQc = null;
+                    try {
+                        existingQc = typeof batch.qcResults === 'string' ? JSON.parse(batch.qcResults) : batch.qcResults;
+                    } catch (e) {}
+
+                    const hasEvaluatedEvidence = existingQc && (
+                        (Array.isArray(existingQc.blanks) && existingQc.blanks.length > 0) ||
+                        (Array.isArray(existingQc.controls) && existingQc.controls.length > 0) ||
+                        (Array.isArray(existingQc.duplicates) && existingQc.duplicates.length > 0)
+                    );
+
+                    if (!hasEvaluatedEvidence) {
+                        return res.status(400).json({
+                            error: `Cannot set status to '${requestedStatus}' without evaluated QC evidence or authorized disposition.`
+                        });
+                    }
+
+                    if (requestedStatus === BATCH_STATES.QC_PASS && existingQc.overallStatus === BATCH_STATES.QC_FAIL) {
+                        // Only allowed if manager disposition exists with PROCEED_WITH_WARNING
+                        let disposition = null;
+                        try {
+                            disposition = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+                        } catch (e) {}
+
+                        if (!disposition || disposition.decision !== 'PROCEED_WITH_WARNING' || !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+                            return res.status(400).json({
+                                error: 'Cannot set status to QC_PASS: existing QC results are failed and no manager disposition override exists.'
+                            });
+                        }
+                    }
+                    data.status = requestedStatus;
+                }
+            } else if (requestedStatus === BATCH_STATES.CLOSED) {
+                if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+                    return res.status(403).json({ error: 'Only lab managers can close batches.' });
+                }
+                let disposition = null;
+                try {
+                    disposition = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+                } catch (e) {}
+                const canClose = batch.status === BATCH_STATES.QC_PASS ||
+                    (batch.status === BATCH_STATES.QC_FAIL && disposition?.decision === 'PROCEED_WITH_WARNING');
+                if (!canClose) {
+                    return res.status(400).json({
+                        error: 'Cannot close batch: QC must be passed or approved with manager disposition before closing.'
+                    });
+                }
+                data.status = BATCH_STATES.CLOSED;
+            } else if (requestedStatus === BATCH_STATES.OPEN || requestedStatus === BATCH_STATES.RUNNING) {
+                // Technician or manager can move between OPEN and RUNNING
+                data.status = requestedStatus;
+            }
         }
 
         if (data.status && data.status !== batch.status) {
@@ -316,9 +390,6 @@ exports.updateBatch = async (req, res) => {
             data.history = JSON.stringify(history);
         }
 
-        if (updates.workItemIds) data.workItemIds = typeof updates.workItemIds === 'string' ? updates.workItemIds : JSON.stringify(updates.workItemIds);
-        if (updates.disposition) data.disposition = typeof updates.disposition === 'string' ? updates.disposition : JSON.stringify(updates.disposition);
-
         const updatedBatch = await prisma.batch.update({
             where: { id },
             data,
@@ -329,7 +400,9 @@ exports.updateBatch = async (req, res) => {
         if (evaluated) {
             await syncTypedQcItems(id, evaluated);
         }
-        await flagBatchResults(prisma, id, updatedBatch.status, updatedBatch.disposition);
+        if (data.status) {
+            await flagBatchResults(prisma, id, updatedBatch.status, updatedBatch.disposition);
+        }
 
         res.json({
             success: true,
@@ -356,8 +429,13 @@ exports.evaluateBatch = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
         }
 
-        const evaluated = evaluateBatchQc({ blanks, duplicates, controls });
-        const newStatus = evaluated.overallStatus !== 'OPEN' ? evaluated.overallStatus : batch.status;
+        if (batch.status === BATCH_STATES.CLOSED) {
+            return res.status(400).json({ error: 'Batch is CLOSED and cannot be evaluated or modified.' });
+        }
+
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const evaluated = evaluateBatchQc({ blanks, duplicates, controls }, { runProfile });
+        const newStatus = evaluated.overallStatus; // 'QC_PASS', 'QC_FAIL', or 'OPEN' (when empty, invalidates QC_PASS)
 
         const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
         if (newStatus !== batch.status) {
@@ -373,14 +451,15 @@ exports.evaluateBatch = async (req, res) => {
             data: {
                 qcResults: JSON.stringify(evaluated),
                 status: newStatus,
-                history: JSON.stringify(history)
+                history: JSON.stringify(history),
+                disposition: null // Clear stale disposition on new evaluation
             },
             include: { qcItems: true }
         });
 
         // WP-29: Sync typed rows and flag results
         await syncTypedQcItems(id, evaluated);
-        await flagBatchResults(prisma, id, newStatus, updatedBatch.disposition);
+        await flagBatchResults(prisma, id, newStatus, null);
 
         res.json({
             success: true,

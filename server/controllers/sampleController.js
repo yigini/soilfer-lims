@@ -2557,6 +2557,10 @@ exports.createAmendment = async (req, res) => {
             return res.status(403).json({ error: 'Sample is outside your authorized scope' });
         }
 
+        if (!reason || typeof reason !== 'string' || reason.trim() === '') {
+            return res.status(400).json({ error: 'Amendment reason is required and cannot be blank.' });
+        }
+
         // If sample is disposed, only clerical / metadata amendments allowed
         if (sample.status === 'DISPOSED' && type !== 'CLERICAL') {
             return res.status(400).json({

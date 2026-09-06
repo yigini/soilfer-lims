@@ -189,6 +189,7 @@ exports.updateAnalysis = async (req, res) => {
                 data.unitCode = unit?.code || null;
                 data.qudtUnit = null; // Do not keep an external unit mapping for a different quantity.
             }
+            data.version = (existing.version || 1) + 1;
             const a = await tx.analysis.update({ where: { code }, data });
             await tx.auditLog.create({ data: { ...auditData(req, 'ANALYSIS', code, 'UPDATE', 'Updated parameter: ' + a.name), before: JSON.stringify(existing), after: JSON.stringify(a) } });
             return a;
@@ -407,6 +408,7 @@ exports.updateMethodology = async (req, res) => {
             const usage = await require('../services/methodResolution').methodologyUsage(id, tx);
             if ((usage.workItems || usage.results || usage.orderLines) && ['name', 'standard'].some(k => k in data && data[k] !== existing[k])) return { blocked: true, usage };
             if (data.isDefault) await tx.methodology.updateMany({ where: { analysisCode: existing.analysisCode, labId: existing.labId, isDefault: true, id: { not: id } }, data: { isDefault: false } });
+            data.version = (existing.version || 1) + 1;
             const m = await tx.methodology.update({ where: { id }, data });
             await tx.auditLog.create({ data: { ...auditData(req, 'METHODOLOGY', id, 'UPDATE', 'Updated method: ' + m.name), before: JSON.stringify(existing), after: JSON.stringify(m) } });
             return m;

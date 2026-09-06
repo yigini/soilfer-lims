@@ -1,0 +1,127 @@
+<div id="soilfer-workflow-concept" aria-label="SoilFER workflow redesign concept">
+  <style>
+    #soilfer-workflow-concept{--sf-bg:light-dark(#f5f7f8,#101923);--sf-surface:light-dark(#ffffff,#18232f);--sf-subtle:light-dark(#f0f4f5,#1d2b39);--sf-text:light-dark(#18323a,#e6edf2);--sf-muted:light-dark(#526a74,#afbfca);--sf-line:light-dark(#d6e0e3,#344656);--sf-green:light-dark(#13735b,#79d6b7);--sf-green-bg:light-dark(#e5f4ed,#173e38);--sf-blue:light-dark(#2359b4,#98baff);--sf-blue-bg:light-dark(#eaf0ff,#213856);--sf-amber:light-dark(#805507,#ebc97b);--sf-amber-bg:light-dark(#fff5da,#423920);--sf-purple:light-dark(#7252b2,#c6a8f1);font-family:Inter,"Segoe UI",sans-serif;color:var(--sf-text);background:var(--sf-bg);border:1px solid var(--sf-line);border-radius:14px;overflow:hidden;font-size:14px;line-height:1.45;color-scheme:light dark}
+    #soilfer-workflow-concept *{box-sizing:border-box}
+    #soilfer-workflow-concept button{font:inherit;color:inherit;cursor:pointer}
+    #soilfer-workflow-concept .sf-shell{display:grid;grid-template-columns:54px minmax(0,1fr)}
+    #soilfer-workflow-concept .sf-rail{background:var(--sf-surface);border-right:1px solid var(--sf-line);display:flex;align-items:center;flex-direction:column;gap:24px;padding:18px 8px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-logo{font-weight:500;color:var(--sf-green);font-size:22px}
+    #soilfer-workflow-concept .sf-rail i{display:block;width:18px;height:18px}
+    #soilfer-workflow-concept .sf-rail .sf-current{background:var(--sf-green-bg);color:var(--sf-green);padding:10px;border-radius:9px}
+    #soilfer-workflow-concept .sf-top{min-height:48px;padding:11px 23px;border-bottom:1px solid var(--sf-line);display:flex;justify-content:space-between;gap:14px;align-items:center;background:var(--sf-surface);font-size:12px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-crumb{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    #soilfer-workflow-concept .sf-concept{border:1px solid var(--sf-line);padding:3px 8px;border-radius:5px;white-space:nowrap}
+    #soilfer-workflow-concept .sf-heading{padding:22px 23px 17px;display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--sf-surface)}
+    #soilfer-workflow-concept h2{margin:0;font-size:24px;font-weight:500;line-height:1.25;letter-spacing:-.7px}
+    #soilfer-workflow-concept .sf-subtitle{color:var(--sf-muted);font-size:12px;margin-top:7px;display:flex;gap:10px;flex-wrap:wrap}
+    #soilfer-workflow-concept .sf-pill{display:inline-flex;gap:5px;align-items:center;font-size:11px;font-weight:500;border-radius:5px;padding:3px 7px;background:var(--sf-subtle);color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-pill.sf-done{background:var(--sf-green-bg);color:var(--sf-green)}
+    #soilfer-workflow-concept .sf-pill.sf-active{background:var(--sf-blue-bg);color:var(--sf-blue)}
+    #soilfer-workflow-concept .sf-pill.sf-warn{background:var(--sf-amber-bg);color:var(--sf-amber)}
+    #soilfer-workflow-concept .sf-facts{text-align:right;font-size:12px;color:var(--sf-muted);display:grid;gap:5px}
+    #soilfer-workflow-concept .sf-facts b{font-weight:500;color:var(--sf-text)}
+    #soilfer-workflow-concept .sf-next{margin:0 23px 18px;padding:11px 13px;border-radius:8px;background:var(--sf-blue-bg);display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--sf-blue)}
+    #soilfer-workflow-concept .sf-next strong{font-weight:500}
+    #soilfer-workflow-concept .sf-next button{margin-left:auto;background:var(--sf-surface);border:1px solid var(--sf-line);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--sf-text)}
+    #soilfer-workflow-concept .sf-toolbar{padding:0 23px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    #soilfer-workflow-concept .sf-views{display:flex;gap:3px;background:var(--sf-subtle);padding:3px;border-radius:8px;flex-wrap:wrap}
+    #soilfer-workflow-concept .sf-views button{border:0;background:transparent;padding:7px 11px;border-radius:6px;font-size:12px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-views button[aria-pressed=true]{background:var(--sf-surface);color:var(--sf-text);box-shadow:0 1px 3px #00000010}
+    #soilfer-workflow-concept .sf-asof{font-size:11px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-workspace{display:grid;grid-template-columns:minmax(0,1fr) 248px;border-top:1px solid var(--sf-line);align-items:stretch}
+    #soilfer-workflow-concept .sf-map-area{padding:19px 20px 14px;min-width:0;background-image:radial-gradient(var(--sf-line) .65px,transparent .65px);background-size:16px 16px}
+    #soilfer-workflow-concept .sf-map-title{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px;font-size:11px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-map-title strong{font-weight:500;color:var(--sf-text)}
+    #soilfer-workflow-concept .sf-grid{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(106px,auto));column-gap:28px;row-gap:25px;min-height:376px;align-items:center}
+    #soilfer-workflow-concept .sf-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+    #soilfer-workflow-concept .sf-wires path{fill:none;stroke:var(--sf-line);stroke-width:1.5}
+    #soilfer-workflow-concept .sf-wires path.sf-ready{stroke:var(--sf-green)}
+    #soilfer-workflow-concept .sf-wires path.sf-pending{stroke:var(--sf-muted);stroke-dasharray:4 4}
+    #soilfer-workflow-concept .sf-node{z-index:1;width:100%;min-height:105px;text-align:left;border:1px solid var(--sf-line);border-radius:9px;background:var(--sf-surface);padding:11px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;box-shadow:0 2px 4px #00000006;overflow-wrap:anywhere}
+    #soilfer-workflow-concept .sf-node[aria-pressed=true]{border-color:var(--sf-blue);box-shadow:0 0 0 2px var(--sf-blue-bg)}
+    #soilfer-workflow-concept .sf-node .sf-node-title{font-size:13px;font-weight:500;line-height:1.35}
+    #soilfer-workflow-concept .sf-node small{font-size:11px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-node .sf-node-label{font-size:11px;letter-spacing:.9px;color:var(--sf-muted);text-transform:uppercase}
+    #soilfer-workflow-concept .sf-legend{display:flex;gap:17px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--sf-line);margin-top:17px;padding-top:12px;font-size:11px;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-legend span{display:flex;gap:6px;align-items:center}
+    #soilfer-workflow-concept .sf-stroke{width:22px;border-top:2px solid var(--sf-green)}
+    #soilfer-workflow-concept .sf-stroke.sf-dashed{border-top:1px dashed var(--sf-muted)}
+    #soilfer-workflow-concept .sf-inspector{padding:19px 18px;background:var(--sf-surface);border-left:1px solid var(--sf-line);min-width:0}
+    #soilfer-workflow-concept .sf-eyebrow{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--sf-muted);margin:0 0 9px}
+    #soilfer-workflow-concept h3{font-size:18px;font-weight:500;line-height:1.3;margin:0 0 12px;letter-spacing:-.3px}
+    #soilfer-workflow-concept .sf-inspector p{font-size:12px;color:var(--sf-muted);line-height:1.6;margin:11px 0}
+    #soilfer-workflow-concept .sf-inspect-section{border-top:1px solid var(--sf-line);padding-top:16px;margin-top:18px}
+    #soilfer-workflow-concept .sf-detail-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin:9px 0;color:var(--sf-muted)}
+    #soilfer-workflow-concept .sf-detail-row b{font-weight:500;color:var(--sf-text)}
+    #soilfer-workflow-concept .sf-check{font-size:12px;padding:7px 0;display:flex;align-items:center;gap:8px}
+    #soilfer-workflow-concept .sf-check span{color:var(--sf-green)}
+    #soilfer-workflow-concept .sf-inspector .sf-inspect-button{width:100%;padding:9px 10px;border:1px solid var(--sf-line);background:var(--sf-subtle);border-radius:6px;font-size:12px;margin-top:10px}
+    #soilfer-workflow-concept .sf-note{font-size:11px;color:var(--sf-muted);padding:12px 23px;border-top:1px solid var(--sf-line);background:var(--sf-surface)}
+    #soilfer-workflow-concept .sf-list{display:grid;gap:10px;min-height:376px;align-content:start}
+    #soilfer-workflow-concept .sf-list button{width:100%;border:1px solid var(--sf-line);background:var(--sf-surface);border-radius:8px;padding:13px;display:flex;justify-content:space-between;gap:12px;text-align:left;align-items:center;font-size:12px}
+    #soilfer-workflow-concept .sf-list small{display:block;margin-top:5px;color:var(--sf-muted);font-size:11px}
+    #soilfer-workflow-concept .sf-list button[aria-pressed=true]{border-color:var(--sf-blue)}
+    #soilfer-workflow-concept [hidden]{display:none!important}
+    #soilfer-workflow-concept[data-compact=true] .sf-node{min-height:91px;padding:9px;gap:5px}
+    @media(max-width:880px){#soilfer-workflow-concept .sf-workspace{grid-template-columns:minmax(0,1fr)}#soilfer-workflow-concept .sf-inspector{border-left:0;border-top:1px solid var(--sf-line);display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#soilfer-workflow-concept .sf-inspect-section{margin-top:0}#soilfer-workflow-concept .sf-grid{min-height:366px}#soilfer-workflow-concept .sf-facts{min-width:150px}}
+    @media(max-width:520px){#soilfer-workflow-concept .sf-shell{grid-template-columns:minmax(0,1fr)}#soilfer-workflow-concept .sf-rail{display:none}#soilfer-workflow-concept .sf-top,#soilfer-workflow-concept .sf-heading{padding:14px}#soilfer-workflow-concept .sf-heading{align-items:flex-start;flex-direction:column}#soilfer-workflow-concept .sf-facts{text-align:left;display:flex;gap:13px;flex-wrap:wrap}#soilfer-workflow-concept .sf-next{margin:0 14px 14px}#soilfer-workflow-concept .sf-toolbar{padding:0 14px 14px}#soilfer-workflow-concept .sf-map-area{padding:14px}#soilfer-workflow-concept .sf-grid{display:flex;flex-direction:column;gap:18px;min-height:0}#soilfer-workflow-concept .sf-node{min-height:88px}#soilfer-workflow-concept .sf-wires{display:none}#soilfer-workflow-concept .sf-inspector{display:block;padding:18px 14px}#soilfer-workflow-concept .sf-inspect-section{margin-top:18px}#soilfer-workflow-concept .sf-top{flex-wrap:wrap}#soilfer-workflow-concept .sf-node .sf-node-label{font-size:11px}#soilfer-workflow-concept .sf-eyebrow{font-size:11px}#soilfer-workflow-concept .sf-next button{margin-left:0}#soilfer-workflow-concept .sf-legend{gap:10px}#soilfer-workflow-concept .sf-note{padding:12px 14px}}
+    #soilfer-workflow-concept .sf-mobile-relation{display:none}
+    @media(max-width:520px){#soilfer-workflow-concept .sf-mobile-relation{display:block;font-size:11px;color:var(--sf-blue)}}
+    @media(pointer:coarse){#soilfer-workflow-concept button{min-height:44px}}
+  </style>
+  <div class="sf-shell">
+    <aside class="sf-rail" aria-label="Application navigation sketch"><span class="sf-logo">S</span><i data-lucide="layout-dashboard" aria-hidden="true"></i><span class="sf-current"><i data-lucide="flask-conical" aria-hidden="true"></i></span><i data-lucide="list-checks" aria-hidden="true"></i><i data-lucide="activity" aria-hidden="true"></i><i data-lucide="file-chart-column" aria-hidden="true"></i></aside>
+    <main>
+      <div class="sf-top"><div class="sf-crumb">SoilFER LIMS <span>›</span> Samples <span>›</span> S002 <span>›</span> Workflow</div><span class="sf-concept">Design concept · read only</span></div>
+      <div class="sf-heading"><div><h2>S002 <span style="color:var(--sf-muted)">/</span> Workflow</h2><div class="sf-subtitle"><span>SOILFER-US</span><span>Soil sample</span><span>Lifecycle: Accepted</span></div></div><div class="sf-facts"><span><b>3 / 4</b> tasks completed</span><span><b>0 / 2</b> results accepted / waived</span></div></div>
+      <div class="sf-next"><i data-lucide="activity" aria-hidden="true"></i><strong>MIR analysis in progress</strong><span>Assigned to marco</span><button type="button" data-inspect-mir>Inspect next work →</button></div>
+      <div class="sf-toolbar"><div class="sf-views" aria-label="Workflow view"><button type="button" data-view="overview" aria-pressed="true">Overview</button><button type="button" data-view="dependencies" aria-pressed="false">Dependencies</button><button type="button" data-view="list" aria-pressed="false">Analysis list</button></div><span class="sf-asof">Illustrated from 5 Sep review · not live</span></div>
+      <div class="sf-workspace">
+        <section class="sf-map-area" aria-label="Workflow map">
+          <div class="sf-map-title"><strong data-map-heading>Sample pathway</strong><span data-map-caption>Only relevant stations</span></div>
+          <div class="sf-grid" data-map></div>
+          <div class="sf-list" data-list hidden></div>
+          <div class="sf-legend"><span><b class="sf-stroke"></b>Prerequisite satisfied →</span><span><b class="sf-stroke sf-dashed"></b>Future handoff →</span></div>
+        </section>
+        <aside class="sf-inspector" aria-label="Selected workflow item" aria-live="polite" data-inspector></aside>
+      </div>
+      <div class="sf-note">Path shown: this sample's assigned work. Reporting and resource evidence remain related records in the proposed full implementation.</div>
+    </main>
+  </div>
+  <script>
+  (()=>{
+    const root=document.getElementById('soilfer-workflow-concept');
+    const map=root.querySelector('[data-map]'), list=root.querySelector('[data-list]'), inspector=root.querySelector('[data-inspector]');
+    const state={view:window.matchMedia('(max-width:520px)').matches?'list':'overview',selected:'spectral',compact:false};
+    const items={
+      reception:{title:'Reception',category:'Intake',status:'Accepted',tone:'done',sub:'Sample S002 received',col:1,row:1,desc:'The sample has been accepted into the laboratory workflow.',owner:'Reception',checks:['Sample accepted'],after:'Preparation tasks',caption:'Administrative lifecycle'},
+      prep:{title:'Preparation',category:'Prepare',status:'2 / 2 done',tone:'done',sub:'Drying · milling & sieving',col:1,row:2,desc:'Both preparation tasks are complete. Spectral analysis can continue through the applicable instrument and method checks.',owner:'marco',checks:['Drying completed','Milling & sieving completed'],after:'MIR and Vis-NIR analysis',caption:'Physical preparation'},
+      spectral:{title:'Spectral analysis',category:'Analyze',status:'1 active · 1 done',tone:'active',sub:'MIR · Vis-NIR',col:2,row:2,desc:'MIR is in progress. Vis-NIR has a completed upload with a warning that remains visible for review.',owner:'marco',checks:['Drying completed','Milling & sieving completed'],after:'Submit eligible results for review',caption:'Two parallel analyses'},
+      review:{title:'Quality review',category:'Review',status:'0 / 2 cleared',tone:'',sub:'Accepted or waived',col:3,row:2,desc:'Neither analytical result is accepted or waived in this snapshot. Eligible partial submissions can be reviewed while other analysis continues.',owner:'Authorized reviewer',checks:[],after:'All required work accepted or waived, then sample approval',caption:'Submission and QC decisions'},
+      closure:{title:'Archive or dispose',category:'Close',status:'Not reached',tone:'',sub:'One closure route',col:3,row:3,desc:'Closure requires sample approval and all applicable non-closure work items accepted or waived. Archive and disposal are alternative routes; completing the closure task makes the sample terminal.',owner:'Authorized operator',checks:[],after:'Terminal sample state',caption:'Approval gate'},
+      drying:{title:'Drying',category:'Prepare',status:'Completed',tone:'done',sub:'Station 01',col:1,row:1,desc:'Drying is complete for this sample. Completion satisfies the drying prerequisite for preparation.',owner:'marco',checks:['Intake accepted'],after:'Milling & sieving',caption:'Preparation prerequisite'},
+      milling:{title:'Milling & sieving',category:'Prepare',status:'Completed',tone:'done',sub:'Station 02',col:1,row:2,desc:'Preparation is complete. The two spectral analyses can proceed independently once their applicable requirements are met.',owner:'marco',checks:['Drying completed'],after:'MIR and Vis-NIR can run in parallel',caption:'Shared prerequisite'},
+      mir:{title:'MIR DRIFTS',category:'Analyze',status:'In progress',tone:'active',sub:'marco · spectral analysis',col:2,row:1,desc:'MIR is the remaining active task. Preparation is complete. Instrument readiness is unavailable in this snapshot.',owner:'marco',checks:['Drying completed','Milling & sieving completed'],after:'Complete, then submit for review',caption:'Mid-infrared spectroscopy'},
+      vis:{title:'Vis-NIR',category:'Analyze',status:'Completed · warn',tone:'warn',sub:'Spectrum uploaded',col:2,row:3,desc:'The spectrum upload is complete and carries a warning. Batch QC evidence and a final decision are not shown in this snapshot.',owner:'marco',checks:['Milling & sieving completed'],after:'Submission and quality review',caption:'Visible & near-infrared spectroscopy'},
+      mirreview:{title:'Review MIR',category:'Review',status:'Decision pending',tone:'',sub:'After eligible submission',col:3,row:1,desc:'MIR must reach an eligible submission state before its result can be reviewed. Review decisions are tracked per work item.',owner:'Authorized reviewer',checks:[],after:'Accept, request reanalysis, or waive',caption:'Result decision'},
+      visreview:{title:'Review Vis-NIR',category:'Review',status:'Decision pending',tone:'',sub:'After eligible submission',col:3,row:3,desc:'Vis-NIR review may proceed through an eligible partial submission. It must not wait for MIR solely because both share a sample.',owner:'Authorized reviewer',checks:[],after:'Decision with QC evidence and reason',caption:'Independent result review'}
+    };
+    const graphs={overview:{ids:['reception','prep','spectral','review','closure'],edges:[['reception','prep','ready'],['prep','spectral','ready'],['spectral','review','pending'],['review','closure','pending']]},dependencies:{ids:['drying','milling','mir','vis','mirreview','visreview'],edges:[['drying','milling','ready'],['milling','mir','ready'],['milling','vis','ready'],['mir','mirreview','pending'],['vis','visreview','pending']]}};
+    function badge(v){return '<span class="sf-pill sf-'+v.tone+'">'+(v.tone==='done'?'✓ ':v.tone==='active'?'● ':v.tone==='warn'?'△ ':'')+v.status+'</span>';}
+    function draw(){
+      const old=map.querySelector('svg');if(old)old.remove();if(state.view==='list'||map.clientWidth<280)return;
+      const rect=map.getBoundingClientRect(), ns='http://www.w3.org/2000/svg';
+      const svg=document.createElementNS(ns,'svg');svg.setAttribute('class','sf-wires');svg.setAttribute('aria-hidden','true');svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);
+      const defs=document.createElementNS(ns,'defs');['ready','pending'].forEach(t=>{const marker=document.createElementNS(ns,'marker');marker.setAttribute('id','sf-arrow-'+t);marker.setAttribute('viewBox','0 0 8 8');marker.setAttribute('refX','7');marker.setAttribute('refY','4');marker.setAttribute('markerWidth','5');marker.setAttribute('markerHeight','5');marker.setAttribute('orient','auto-start-reverse');const shape=document.createElementNS(ns,'polygon');shape.setAttribute('points','0,0 8,4 0,8');shape.setAttribute('fill',t==='ready'?'var(--sf-green)':'var(--sf-muted)');marker.appendChild(shape);defs.appendChild(marker);});svg.appendChild(defs);
+      graphs[state.view].edges.forEach(([from,to,tone])=>{const a=map.querySelector('[data-node="'+from+'"]'),b=map.querySelector('[data-node="'+to+'"]');if(!a||!b)return;const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();let d;if(items[from].col===items[to].col){let x=ar.left+ar.width/2-rect.left,y=ar.bottom-rect.top,y2=br.top-rect.top;d='M '+x+' '+y+' V '+(y2-3);}else{let x=ar.right-rect.left,y=ar.top+ar.height/2-rect.top,x2=br.left-rect.left,y2=br.top+br.height/2-rect.top,m=(x+x2)/2;d='M '+x+' '+y+' H '+m+' V '+y2+' H '+(x2-3);}const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('class','sf-'+tone);p.setAttribute('marker-end','url(#sf-arrow-'+tone+')');svg.appendChild(p);});map.prepend(svg);
+    }
+    function select(id){state.selected=id;const groups={spectral:['mir','vis'],prep:['drying','milling'],review:['mirreview','visreview']};root.querySelectorAll('[data-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.node===id||(groups[b.dataset.node]||[]).includes(id)||(groups[id]||[]).includes(b.dataset.node))));const v=items[id];inspector.innerHTML='<div><div class="sf-eyebrow">Selected '+v.category.toLowerCase()+' step</div><h3>'+v.title+'</h3>'+badge(v)+'<p>'+v.desc+'</p><div class="sf-detail-row"><span>Responsible</span><b>'+v.owner+'</b></div></div><div><div class="sf-inspect-section"><div class="sf-eyebrow">'+(v.checks.length?'Prerequisites':'Readiness')+'</div>'+ (v.checks.length?v.checks.map(s=>'<div class="sf-check"><span>✓</span>'+s+'</div>').join(''):'<p>Submission, QC and sample approval must be verified before the relevant next step.</p>')+'</div><div class="sf-inspect-section"><div class="sf-eyebrow">What follows</div><p>'+v.after+'</p><button type="button" class="sf-inspect-button" data-show-deps>Trace dependencies →</button></div></div>';inspector.querySelector('[data-show-deps]').onclick=()=>{state.view='dependencies';render();};if(id==='closure'||id==='reception'){inspector.querySelector('[data-show-deps]').hidden=true;}}
+    function render(){root.dataset.compact=String(state.compact);root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===state.view)));map.hidden=state.view==='list';list.hidden=state.view!=='list';root.querySelector('[data-map-heading]').textContent=state.view==='overview'?'Sample pathway':state.view==='dependencies'?'Prerequisites & result handoffs':'All assigned work';root.querySelector('[data-map-caption]').textContent=state.view==='overview'?'Only relevant stations':state.view==='dependencies'?'Parallel work stays parallel':'4 tasks · completion ≠ approval';
+      if(state.view==='list'){list.innerHTML=['drying','milling','mir','vis'].map(id=>{const v=items[id];return '<button type="button" data-node="'+id+'" aria-pressed="false"><span>'+v.title+'<small>'+v.sub+'</small></span>'+badge(v)+'</button>';}).join('');}else{map.innerHTML=graphs[state.view].ids.map(id=>{const v=items[id];return '<button type="button" class="sf-node" data-node="'+id+'" aria-pressed="false" style="grid-column:'+v.col+';grid-row:'+v.row+'"><span class="sf-node-label">'+v.category+'</span><span class="sf-node-title">'+v.title+'</span>'+badge(v)+'<small>'+v.sub+'</small><small class="sf-mobile-relation">'+({reception:'Entry to sample pathway',prep:'Requires accepted intake and drying',spectral:'Parallel assigned analytical work',review:'Per eligible submitted result',closure:'After sample approval',drying:'Before milling & sieving',milling:'Requires drying complete',mir:'Parallel branch - after preparation',vis:'Parallel branch - after preparation',mirreview:'Requires eligible MIR submission',visreview:'Requires eligible Vis-NIR submission'}[id]||'')+'</small></button>';}).join('');}
+      root.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>select(b.dataset.node));const visible=state.view==='list'?['drying','milling','mir','vis']:graphs[state.view].ids;select(state.selected);root.querySelector('.sf-legend').hidden=state.view==='list';draw();
+    }
+    root.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;render();});root.querySelector('[data-inspect-mir]').onclick=()=>{state.view='dependencies';state.selected='mir';render();};render();new ResizeObserver(draw).observe(map);
+    if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:render});tweak.addToggle(state,'compact',{label:'Compact card spacing'});tweak.addSelect(state,'view',{label:'Starting view',options:[{label:'Overview',value:'overview'},{label:'Dependencies',value:'dependencies'},{label:'Analysis list',value:'list'}]});}
+  })();
+  </script>
+</div>

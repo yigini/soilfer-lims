@@ -666,6 +666,10 @@ function runMigration({ dryRun, apply, dbPath }) {
             ensureColumn('Analysis', 'matrix', "TEXT DEFAULT 'SOIL'");
             ensureColumn('Analysis', 'module', "TEXT DEFAULT 'FERTILITY'");
             ensureColumn('Analysis', 'isGlobal', 'BOOLEAN DEFAULT 1');
+            ensureColumn('Analysis', 'version', 'INTEGER DEFAULT 1');
+
+            // Columns on Methodology
+            ensureColumn('Methodology', 'version', 'INTEGER DEFAULT 1');
 
             // Columns on Result
             ensureColumn('Result', 'provenance', 'TEXT');
@@ -901,21 +905,23 @@ function runMigration({ dryRun, apply, dbPath }) {
                 SELECT r.id, r.sampleId, r.param, r.value, r.replicateNo, r.basis, r.methodologyId, r.enteredBy, r.createdAt
                 FROM "Result" r
                 WHERE r.param IN ('SAND', 'SILT', 'CLAY')
+                  AND (r.isCurrent IS NULL OR r.isCurrent = 1)
             `).all();
 
-            // Group strictly by sampleId + replicateNo + basis
+            // Group strictly by sampleId + replicateNo + basis + methodologyId
             const sampleFractionGroups = {};
             for (const r of fractionResults) {
                 const rep = r.replicateNo != null ? r.replicateNo : 1;
                 const basis = (r.basis || 'AIR_DRY').toUpperCase();
-                const key = `${r.sampleId}::${rep}::${basis}`;
+                const meth = r.methodologyId || 'UNKNOWN_METHOD';
+                const key = `${r.sampleId}::${rep}::${basis}::${meth}`;
                 if (!sampleFractionGroups[key]) sampleFractionGroups[key] = [];
                 sampleFractionGroups[key].push(r);
             }
 
             let reconciledAttempts = 0;
             for (const [groupKey, resList] of Object.entries(sampleFractionGroups)) {
-                const [sampleId, repStr, basis] = groupKey.split('::');
+                const [sampleId, repStr, basis, methodId] = groupKey.split('::');
                 const repNo = parseInt(repStr, 10) || 1;
 
                 const fractionsByParam = {};
@@ -932,7 +938,8 @@ function runMigration({ dryRun, apply, dbPath }) {
                         sampleId,
                         replicateNo: repNo,
                         basis,
-                        reason: 'Incomplete fractions: requires all 3 fractions (SAND, SILT, CLAY) with matching replicate and basis.',
+                        methodologyId: methodId !== 'UNKNOWN_METHOD' ? methodId : null,
+                        reason: 'Incomplete fractions: requires all 3 fractions (SAND, SILT, CLAY) with matching replicate, basis, and methodology.',
                         resultIds: resList.map(r => r.id)
                     });
                     continue;
@@ -947,21 +954,48 @@ function runMigration({ dryRun, apply, dbPath }) {
                         sampleId,
                         replicateNo: repNo,
                         basis,
+                        methodologyId: methodId !== 'UNKNOWN_METHOD' ? methodId : null,
                         reason: 'Invalid fraction numerical values.',
                         resultIds: resList.map(r => r.id)
                     });
                     continue;
                 }
 
-                // Closure check within standard metrological tolerance (2.0%)
+                // Check method closure tolerance
+                let configuredTolerance = null;
+                if (methodId && methodId !== 'UNKNOWN_METHOD') {
+                    const mRow = db.prepare('SELECT validation FROM "Methodology" WHERE id = ?').get(methodId);
+                    if (mRow && mRow.validation) {
+                        try {
+                            const parsed = JSON.parse(mRow.validation);
+                            if (typeof parsed.tolerance === 'number') configuredTolerance = parsed.tolerance;
+                        } catch (e) {}
+                    }
+                }
+
                 const total = sandVal + siltVal + clayVal;
                 const closureError = Math.abs(100 - total);
-                if (closureError > 2.0) {
+
+                // If tolerance is configured on method, enforce it. If not configured, require exact closure (closureError == 0) or preserve as unresolved.
+                if (configuredTolerance !== null) {
+                    if (closureError > configuredTolerance) {
+                        auditTrail.unresolvedLegacyFractions.push({
+                            sampleId,
+                            replicateNo: repNo,
+                            basis,
+                            methodologyId: methodId !== 'UNKNOWN_METHOD' ? methodId : null,
+                            reason: `Closure check failed: sum is ${total}% (closure error ${closureError.toFixed(2)}% > configured tolerance ${configuredTolerance}%).`,
+                            resultIds: resList.map(r => r.id)
+                        });
+                        continue;
+                    }
+                } else if (closureError > 0) {
                     auditTrail.unresolvedLegacyFractions.push({
                         sampleId,
                         replicateNo: repNo,
                         basis,
-                        reason: `Closure check failed: sum is ${total}% (closure error ${closureError.toFixed(2)}% > 2.0%).`,
+                        methodologyId: methodId !== 'UNKNOWN_METHOD' ? methodId : null,
+                        reason: `Unresolved closure policy: sum is ${total}% (closure error ${closureError.toFixed(2)}%), but method ${methodId} has no configured tolerance.`,
                         resultIds: resList.map(r => r.id)
                     });
                     continue;
@@ -997,20 +1031,26 @@ function runMigration({ dryRun, apply, dbPath }) {
                                 id, workItemId, attemptNo, executedMethodRevision, author,
                                 version, status, evidenceData, createdAt, updatedAt
                             )
-                            VALUES (?, ?, ?, 'LEGACY_FRACTIONS', ?, 1, 'RECORDED', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                            VALUES (?, ?, ?, ?, ?, 1, 'RECORDED', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                         `).run(
                             attemptId,
                             wi.id,
                             repNo,
+                            methodId !== 'UNKNOWN_METHOD' ? methodId : 'LEGACY_FRACTIONS',
                             resList[0]?.enteredBy || 'legacy_migration',
                             JSON.stringify({
                                 legacyReconciliation: true,
                                 replicateNo: repNo,
                                 basis,
+                                methodologyId: methodId !== 'UNKNOWN_METHOD' ? methodId : null,
                                 fractions: fracObj,
                                 total,
                                 closureError: Number(closureError.toFixed(2)),
-                                sourceResultIds: resList.map(r => r.id)
+                                sourceResultIds: {
+                                    sand: fractionsByParam['SAND'].id,
+                                    silt: fractionsByParam['SILT'].id,
+                                    clay: fractionsByParam['CLAY'].id
+                                }
                             })
                         );
                         reconciledAttempts++;
@@ -1058,15 +1098,17 @@ function runMigration({ dryRun, apply, dbPath }) {
             // STEP 8 (A97): Historical texture classification discrepancy audit
             console.log('STEP 8 (A97): Auditing historical texture classifications against authoritative USDA algorithm...');
             const textureResults = db.prepare(`
-                SELECT r.id, r.sampleId, r.value, r.provenance, r.replicateNo, r.basis, s.labId as sampleCode
+                SELECT r.id, r.sampleId, r.value, r.provenance, r.replicateNo, r.basis, r.methodologyId, s.labId as sampleCode
                 FROM "Result" r
                 LEFT JOIN "Sample" s ON r.sampleId = s.id
                 WHERE r.param IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
+                  AND (r.isCurrent IS NULL OR r.isCurrent = 1)
             `).all();
 
             const misclassifiedRecords = [];
             for (const res of textureResults) {
                 let sand = null, silt = null, clay = null;
+                let usedTolerance = 2.0;
                 if (res.provenance) {
                     try {
                         const prov = typeof res.provenance === 'string' ? JSON.parse(res.provenance) : res.provenance;
@@ -1074,20 +1116,25 @@ function runMigration({ dryRun, apply, dbPath }) {
                             sand = prov.fractions.sand;
                             silt = prov.fractions.silt;
                             clay = prov.fractions.clay;
+                            if (typeof prov.tolerance === 'number') {
+                                usedTolerance = prov.tolerance;
+                            }
                         }
                     } catch (e) {}
                 }
                 if (sand === null) {
                     const siblings = db.prepare(`
-                        SELECT param, value, replicateNo, basis FROM "Result"
+                        SELECT param, value, replicateNo, basis, methodologyId FROM "Result"
                         WHERE sampleId = ? AND param IN ('SAND', 'SILT', 'CLAY')
+                          AND (isCurrent IS NULL OR isCurrent = 1)
                     `).all(res.sampleId);
 
                     const sibGroups = {};
                     for (const sib of siblings) {
                         const rep = sib.replicateNo != null ? sib.replicateNo : 1;
                         const bas = (sib.basis || 'AIR_DRY').toUpperCase();
-                        const k = `${rep}::${bas}`;
+                        const methodId = sib.methodologyId || 'UNKNOWN_METHOD';
+                        const k = `${rep}::${bas}::${methodId}`;
                         if (!sibGroups[k]) sibGroups[k] = {};
                         const num = parseFloat(sib.value);
                         if (!isNaN(num)) {
@@ -1097,19 +1144,34 @@ function runMigration({ dryRun, apply, dbPath }) {
 
                     for (const [k, group] of Object.entries(sibGroups)) {
                         if (group.SAND !== undefined && group.SILT !== undefined && group.CLAY !== undefined) {
-                            const [repStr, bas] = k.split('::');
+                            const [repStr, bas, methodId] = k.split('::');
                             const repVal = parseInt(repStr, 10);
                             if (res.replicateNo != null && res.replicateNo !== repVal) continue;
                             if (res.basis && res.basis.toUpperCase() !== bas) continue;
+                            if (res.methodologyId && methodId !== 'UNKNOWN_METHOD' && res.methodologyId !== methodId) continue;
 
                             const sVal = group.SAND;
                             const siVal = group.SILT;
                             const cVal = group.CLAY;
                             const closureErr = Math.abs(100 - (sVal + siVal + cVal));
-                            if (closureErr <= 2.0) {
+
+                            let configuredTolerance = null;
+                            if (methodId && methodId !== 'UNKNOWN_METHOD') {
+                                const mRow = db.prepare('SELECT validation FROM "Methodology" WHERE id = ?').get(methodId);
+                                if (mRow && mRow.validation) {
+                                    try {
+                                        const parsed = JSON.parse(mRow.validation);
+                                        if (typeof parsed.tolerance === 'number') configuredTolerance = parsed.tolerance;
+                                    } catch (e) {}
+                                }
+                            }
+
+                            const maxTol = configuredTolerance !== null ? configuredTolerance : 0.0;
+                            if (closureErr <= maxTol) {
                                 sand = sVal;
                                 silt = siVal;
                                 clay = cVal;
+                                usedTolerance = maxTol > 0 ? maxTol : 2.0;
                                 break;
                             }
                         }
@@ -1117,7 +1179,7 @@ function runMigration({ dryRun, apply, dbPath }) {
                 }
 
                 if (sand !== null && silt !== null && clay !== null) {
-                    const usda = calculateUsdaTexture(sand, silt, clay, 2.0);
+                    const usda = calculateUsdaTexture(sand, silt, clay, usedTolerance);
                     if (usda.isValid && usda.className) {
                         const recordedClass = (res.value || '').trim();
                         if (recordedClass && recordedClass.toLowerCase() !== usda.className.toLowerCase() && recordedClass !== usda.code) {

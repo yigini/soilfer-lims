@@ -1,26 +1,18 @@
 const request = require('supertest');
 const app = require('../../app');
-const { generateToken } = require('../setup');
+const { getAuthToken } = require('../setup');
 const prisma = require('../../prisma');
 
 describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)', () => {
     let techToken;
     let foreignToken;
+    let mgrToken;
     let labId = 'TUN-LAB1';
 
     beforeAll(async () => {
-        techToken = generateToken({
-            id: 'user-tech-tun-1',
-            username: 'tech_tun_1',
-            role: 'LAB_TECHNICIAN',
-            labId: 'TUN-LAB1'
-        });
-        foreignToken = generateToken({
-            id: 'user-mgr-gtm',
-            username: 'mgr_gtm',
-            role: 'LAB_MANAGER',
-            labId: 'GTM-LAB1'
-        });
+        techToken = await getAuthToken('LAB_TECHNICIAN', 'TUN-LAB1');
+        mgrToken = await getAuthToken('LAB_MANAGER', 'TUN-LAB1');
+        foreignToken = await getAuthToken('LAB_MANAGER', 'GTM-LAB1');
     });
 
     let batchId;
@@ -478,5 +470,221 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             expect(checkWi.batchId).toBeNull();
             expect(checkWi.rackPosition).toBeNull();
         });
+
+    describe('State Machine & QC General-Update Bypass Hardening (Review 4)', () => {
+        test('Rejects technician direct write of QC_PASS without QC evidence (400)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            const updateRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ status: 'QC_PASS' });
+
+            expect(updateRes.statusCode).toBe(400);
+            expect(updateRes.body.error).toContain('without evaluated QC evidence');
+        });
+
+        test('Rejects direct write of QC_PASS when supplied QC measurements fail (400)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            const updateRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    status: 'QC_PASS',
+                    blanks: [{ value: 99.0 }] // High blank fails threshold
+                });
+
+            expect(updateRes.statusCode).toBe(400);
+            expect(updateRes.body.error).toContain('failed acceptance criteria');
+        });
+
+        test('Allows valid evaluated QC to update status to QC_PASS (200)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            const updateRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    blanks: [{ value: 0.01 }],
+                    controls: [{ expected: 7.0, measured: 7.05 }],
+                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                });
+
+            expect(updateRes.statusCode).toBe(200);
+            expect(updateRes.body.status).toBe('QC_PASS');
+        });
+
+        test('Rejects technician closing a batch (403) and manager closing an unpassed batch (400)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            // Technician attempt
+            const techClose = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ status: 'CLOSED' });
+            expect(techClose.statusCode).toBe(403);
+
+            // Manager attempt on OPEN batch
+            const mgrClose = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ status: 'CLOSED' });
+            expect(mgrClose.statusCode).toBe(400);
+            expect(mgrClose.body.error).toContain('QC must be passed');
+        });
+
+        test('Seals CLOSED batch: rejects further modifications (400)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            // Pass QC
+            await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    blanks: [{ value: 0.01 }],
+                    controls: [{ expected: 7.0, measured: 7.05 }],
+                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                });
+
+            // Manager closes batch
+            const closeRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ status: 'CLOSED' });
+            expect(closeRes.statusCode).toBe(200);
+
+            // Attempt to update closed batch
+            const editRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ notes: 'Trying to update closed batch' });
+            expect(editRes.statusCode).toBe(400);
+            expect(editRes.body.error).toContain('Batch is CLOSED and cannot be modified');
+        });
     });
+
+    describe('Review 5 Shared QC Evaluation & State Integrity Regressions', () => {
+        test('Null blank does not coerce to zero and missing required profile QC results in QC_FAIL', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            const res = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    qcResults: {
+                        blanks: [{ value: null }],
+                        duplicates: [],
+                        controls: []
+                    }
+                });
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.status).toBe('QC_FAIL');
+            const batch = await prisma.batch.findUnique({ where: { id: batchId } });
+            expect(batch.status).toBe('QC_FAIL');
+            const parsed = JSON.parse(batch.qcResults);
+            expect(parsed.blanks[0].value).toBeNull();
+            expect(parsed.blanks[0].status).toBe('FAIL');
+            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining(['CONTROL', 'DUPLICATE']));
+        });
+
+        test('Dedicated evaluate route rejects mutating a CLOSED batch (400)', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            // Pass QC and close
+            await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    blanks: [{ value: 0.01 }],
+                    controls: [{ expected: 7.0, measured: 7.05 }],
+                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                });
+
+            await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ status: 'CLOSED' });
+
+            // Call POST evaluate on closed batch
+            const evalRes = await request(app)
+                .post(`/api/qc/batches/${batchId}/evaluate`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ blanks: [{ value: 1.0, maxAllowed: 0.05 }] });
+
+            expect(evalRes.statusCode).toBe(400);
+            expect(evalRes.body.error).toContain('CLOSED');
+
+            const batch = await prisma.batch.findUnique({ where: { id: batchId } });
+            expect(batch.status).toBe('CLOSED');
+        });
+
+        test('Clearing QC evidence reverts QC_PASS to OPEN and invalidates stale dispositions', async () => {
+            const batchRes = await request(app)
+                .post('/api/qc/batches')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
+            batchId = batchRes.body.id;
+
+            // Pass QC
+            await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    blanks: [{ value: 0.01 }],
+                    controls: [{ expected: 7.0, measured: 7.05 }],
+                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                });
+
+            const passedBatch = await prisma.batch.findUnique({ where: { id: batchId } });
+            expect(passedBatch.status).toBe('QC_PASS');
+
+            // Clear QC measurements
+            const clearRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    qcResults: { blanks: [], duplicates: [], controls: [] }
+                });
+
+            expect(clearRes.statusCode).toBe(200);
+            expect(clearRes.body.status).toBe('OPEN');
+
+            const batch = await prisma.batch.findUnique({ where: { id: batchId } });
+            expect(batch.status).toBe('OPEN');
+            const parsed = JSON.parse(batch.qcResults);
+            expect(parsed.overallStatus).toBe('OPEN');
+            expect(parsed.summary.totalQcSamples).toBe(0);
+        });
+    });
+});
 });

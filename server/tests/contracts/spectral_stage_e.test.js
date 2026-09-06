@@ -260,4 +260,13 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         expect(resExport.body.data.some(s => s.id === scanGtmId)).toBe(true);
         expect(resExport.body.data.some(s => s.id === scanMozId)).toBe(false);
     });
+
+    afterAll(async () => {
+        try {
+            await prisma.spectralData.deleteMany({ where: { id: { in: [scanGtmId, scanMozId] } } });
+            await prisma.result.deleteMany({ where: { id: resultId } });
+            await prisma.sample.deleteMany({ where: { id: sampleGtmId } });
+            await prisma.apiKey.deleteMany({ where: { id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] } } });
+        } catch (e) {}
+    });
 });
