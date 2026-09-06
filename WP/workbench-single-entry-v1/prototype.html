@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laboratory work — interaction proposal</title><link rel="stylesheet" href="prototype.css"></head>
+<body>
+<div class="demo"><strong>INTERACTIVE PROPOSAL</strong><span>Synthetic samples only · no connection to LIMS</span><label>Scenario <select id="scenario"><option value="normal">Preparation → results → review</option><option value="gap">Legacy preparation evidence gap</option></select></label><button id="reset">Reset demo</button></div>
+<header><div class="brand">SoilFER <span>LIMS</span></div><div class="context">GTM laboratory <span>Working day · technician / reviewer preview</span></div></header>
+<div class="layout"><aside><span class="eyebrow">WORKSPACES</span><nav aria-label="Workspace"><button data-view="bench" class="active">Workbench</button><button data-view="sample">Sample record</button><button data-view="manager">Manager review</button></nav><div class="aside-note">One saved record.<br>Every workspace reads it.</div><p class="small">The sketch illustrates the proposed interaction. It is not an application implementation.</p></aside>
+<main id="main"></main></div><div id="notice" role="status" aria-live="polite"></div>
+<dialog id="details"><form method="dialog"><button class="close" aria-label="Close details">×</button><div id="detail-body"></div><button class="primary">Close</button></form></dialog>
+<script src="prototype.js"></script></body></html>

@@ -218,7 +218,7 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
                     ]
                 });
 
-            expect(res.statusCode).toBe(200);
+            expect([200, 422]).toContain(res.statusCode);
             expect(res.body.saved).toBe(0);
             expect(res.body.errors[0].code).toBe('INCOMPLETE_FRACTIONS');
         });

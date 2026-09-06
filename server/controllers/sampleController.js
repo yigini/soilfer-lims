@@ -522,6 +522,8 @@ exports.updateStatus = async (req, res) => {
 exports.updatePhaseStatus = async (req, res) => {
     const { id } = req.params;
     const { phase, status, reason } = req.body;
+    const normPhase = (phase || '').toUpperCase();
+    const normStatus = (status || '').toUpperCase();
     const user = req.user;
 
     try {
@@ -543,30 +545,73 @@ exports.updatePhaseStatus = async (req, res) => {
         const beforeDrying = sample.dryingStatus;
         const beforePrep = sample.preparationStatus;
 
-        if (!['DRYING', 'PREPARATION'].includes(phase)) {
+        if (!['DRYING', 'PREPARATION'].includes(normPhase)) {
             return res.status(400).json({ error: 'Invalid phase. Must be DRYING or PREPARATION' });
         }
 
-        if (phase === 'DRYING') {
-            if (!workflow.isValidDryingStatus(status)) {
+        if (normPhase === 'DRYING') {
+            if (!workflow.isValidDryingStatus(normStatus)) {
                 return res.status(400).json({ error: `Invalid drying status '${status}'.` });
             }
-            if (status === 'FAILED' && !reason) {
+            if (normStatus === 'FAILED' && !reason) {
                 return res.status(400).json({ error: 'Reason required for FAILED drying status' });
             }
-        } else if (phase === 'PREPARATION') {
-            if (status === 'FAILED') {
+        } else if (normPhase === 'PREPARATION') {
+            if (normStatus === 'FAILED') {
                 return res.status(400).json({ error: "preparationStatus=FAILED is not allowed." });
             }
-            if (!workflow.isValidPreparationStatus(status)) {
+            if (!workflow.isValidPreparationStatus(normStatus)) {
                 return res.status(400).json({ error: `Invalid preparation status '${status}'.` });
             }
         }
 
+        if (normStatus === 'DONE') {
+            const checklist = req.body.checklist;
+            if (!checklist || !Array.isArray(checklist) || checklist.length !== 3 || !checklist.every(Boolean)) {
+                return res.status(422).json({
+                    error: `Operational gate '${normPhase}' requires checklist confirmation with all procedural steps verified. Use Workbench to complete drying or preparation.`,
+                    code: 'CHECKLIST_REQUIRED',
+                    destination: '/workbench'
+                });
+            }
+
+            if (normPhase === 'PREPARATION' && sample.dryingStatus !== 'DONE') {
+                return res.status(400).json({
+                    error: `Cannot complete PREPARATION. Drying must be DONE first.`
+                });
+            }
+
+            const OperationalConfirmationService = require('../services/operationalConfirmationService');
+            const gateItem = await prisma.workItem.findFirst({
+                where: { sampleId: String(id), analysis: normPhase }
+            });
+            if (!gateItem) {
+                return res.status(404).json({ error: `Gate work item for ${normPhase} not found` });
+            }
+
+            try {
+                const outcome = await OperationalConfirmationService.confirmOperation({
+                    actor: user,
+                    workItemId: gateItem.id,
+                    checklist,
+                    observations: req.body.observations,
+                    idempotencyKey: req.body.idempotencyKey
+                });
+                return res.json({
+                    message: `${normPhase} status updated to DONE via verified operational checklist`,
+                    sample: outcome.sample,
+                    workItem: outcome.workItem,
+                    receipt: outcome.receipt
+                });
+            } catch (opErr) {
+                return res.status(opErr.status || 400).json({ error: opErr.message, code: opErr.code });
+            }
+        }
+
         const updates = {};
-        if (phase === 'DRYING') {
-            updates.dryingStatus = status;
-            if (status === 'FAILED') {
+        if (normPhase === 'DRYING') {
+            updates.dryingStatus = normStatus;
+            if (normStatus === 'FAILED') {
                 const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
                 meta.dryingFailedReason = reason;
                 updates.metadata = JSON.stringify(meta);
@@ -584,13 +629,8 @@ exports.updatePhaseStatus = async (req, res) => {
                     }
                 });
             }
-        } else if (phase === 'PREPARATION') {
-            if (status === 'DONE' && sample.dryingStatus !== 'DONE') {
-                return res.status(400).json({
-                    error: `Cannot complete PREPARATION. Drying must be DONE first.`
-                });
-            }
-            updates.preparationStatus = status;
+        } else if (normPhase === 'PREPARATION') {
+            updates.preparationStatus = normStatus;
         }
 
         const gateItem = await prisma.workItem.findFirst({
@@ -602,10 +642,7 @@ exports.updatePhaseStatus = async (req, res) => {
         if (gateItem) {
             let wiStatus = 'NOT_ASSIGNED';
             let wiResult = null;
-            if (status === 'DONE') {
-                wiStatus = 'ACCEPTED';
-                wiResult = 'Gate Passed';
-            } else if (status === 'FAILED') {
+            if (status === 'FAILED') {
                 wiStatus = 'ON_HOLD';
                 wiResult = `Gate Failed: ${reason || 'Failed'}`;
             }
@@ -613,8 +650,7 @@ exports.updatePhaseStatus = async (req, res) => {
                 where: { id: gateItem.id },
                 data: {
                     status: wiStatus,
-                    result: wiResult,
-                    completedAt: status === 'DONE' ? new Date() : null
+                    result: wiResult
                 }
             });
         }
@@ -1785,10 +1821,46 @@ exports.updateSampleAnalyses = async (req, res) => {
             // SD-08: Leave dryingStatus and preparationStatus as whatever they were (including null if bypassed).
         }
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: updates
+        // Reconcile and snapshot SampleOrderRevision v(N+1) so active order matches requiredAnalyses & work items
+        const latestRevision = await prisma.sampleOrderRevision.findFirst({
+            where: { sampleId: String(id) },
+            orderBy: { version: 'desc' }
         });
+        const newVersion = (latestRevision?.version || 0) + 1;
+        const newRevisionId = `sor-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+
+        const orderLinesData = targetList.map(code => ({
+            id: `ol-${Date.now()}-${Math.random().toString(36).substr(2, 4)}-${code}`,
+            analysis: code,
+            isRequired: true,
+            status: 'ACTIVE'
+        }));
+
+        const [supersededRevs, newRevision, updated] = await prisma.$transaction([
+            prisma.sampleOrderRevision.updateMany({
+                where: { sampleId: String(id), status: 'ACTIVE' },
+                data: { status: 'SUPERSEDED' }
+            }),
+            prisma.sampleOrderRevision.create({
+                data: {
+                    id: newRevisionId,
+                    sampleId: String(id),
+                    version: newVersion,
+                    status: 'ACTIVE',
+                    reason: effectiveReason || 'Updated required analyses',
+                    authorizedBy: user.username,
+                    authorizedAt: new Date(),
+                    lines: {
+                        create: orderLinesData
+                    }
+                },
+                include: { lines: true }
+            }),
+            prisma.sample.update({
+                where: { id: String(id) },
+                data: updates
+            })
+        ]);
 
         await prisma.auditLog.create({
             data: {
@@ -1796,7 +1868,7 @@ exports.updateSampleAnalyses = async (req, res) => {
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'ANALYSES_UPDATE',
-                details: `Updated required analyses. Reconciled: ${reconcileResult.summary}`,
+                details: `Updated required analyses (Order Revision v${newVersion}). Reconciled: ${reconcileResult.summary}`,
                 performedBy: user.username,
                 timestamp: new Date(),
                 sampleId: String(id),
@@ -1806,6 +1878,7 @@ exports.updateSampleAnalyses = async (req, res) => {
         });
 
         res.json({
+            success: true,
             message: 'Analyses updated successfully',
             sample: updated,
             reconcile: reconcileResult,
@@ -2019,16 +2092,25 @@ exports.archiveSample = async (req, res) => {
         const activeWork = await prisma.workItem.findMany({
             where: {
                 sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
             },
             select: { id: true, analysis: true, status: true }
         });
-        if (activeWork.length > 0) {
-            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+        const uncompletedGates = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DRYING', 'PREPARATION'] },
+                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0 || uncompletedGates.length > 0) {
+            const allUnfinished = [...activeWork, ...uncompletedGates];
+            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
             return res.status(409).json({
                 error: `Cannot archive sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: activeWork
+                activeWorkItems: allUnfinished
             });
         }
 
@@ -2126,16 +2208,25 @@ exports.disposeSample = async (req, res) => {
         const activeWork = await prisma.workItem.findMany({
             where: {
                 sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
             },
             select: { id: true, analysis: true, status: true }
         });
-        if (activeWork.length > 0) {
-            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+        const uncompletedGates = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DRYING', 'PREPARATION'] },
+                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0 || uncompletedGates.length > 0) {
+            const allUnfinished = [...activeWork, ...uncompletedGates];
+            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
             return res.status(409).json({
                 error: `Cannot dispose sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: activeWork
+                activeWorkItems: allUnfinished
             });
         }
 

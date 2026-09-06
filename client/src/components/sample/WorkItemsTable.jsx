@@ -1,6 +1,7 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import { workItemEvidenceText } from '../../utils/workItemEvidence';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Save, CheckCircle, AlertTriangle, FileText, Upload, UserPlus, XCircle, Download, ShieldAlert, HelpCircle } from 'lucide-react';
 import SpectraViewer from '../SpectraViewer';
@@ -10,6 +11,7 @@ import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
 
 const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssignmentSuccess, onReview, onReviewBulk }) => {
+    const navigate = useNavigate();
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const { showDialog } = useDialog();
@@ -531,101 +533,78 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
-                                                {/* CUSTOM: Spectral Handling (Decoupled from generic canEdit) */}
-                                                {['SPEC_VIS_NIR', 'SPEC_MIR', 'Vis-NIR Soil Spectra', 'MIR Soil Spectra'].includes(item.analysis) ? (
-                                                    <div className="relative">
-                                                        {/* VIEW BUTTON (Visible if data exists, regardless of permissions) */}
-                                                        {['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) && (
-                                                            <div className="flex items-center gap-2">
+                                                {isOpsGate ? (
+                                                    (() => {
+                                                        if (['COMPLETED', 'ACCEPTED'].includes(item.status)) {
+                                                            let parsed = null;
+                                                            try {
+                                                                parsed = typeof item.result === 'string' ? JSON.parse(item.result) : item.result;
+                                                            } catch (e) {}
+
+                                                            if (parsed && (parsed.kind === 'operational-checklist-v1' || parsed.receiptId || Array.isArray(parsed.checklist))) {
+                                                                return (
+                                                                    <div className="flex flex-col">
+                                                                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                                                                            <CheckCircle size={13} /> Checklist verified
+                                                                        </span>
+                                                                        <span className="text-[10px] text-gray-400 font-mono">
+                                                                            {parsed.receiptId || 'operational-checklist-v1'}
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <div className="flex flex-col">
+                                                                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                                                                            <AlertTriangle size={13} /> Legacy "Done" — Evidence gap
+                                                                        </span>
+                                                                        <span className="text-[10px] text-amber-600 dark:text-amber-500">
+                                                                            Verification required
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        }
+                                                        return (
+                                                            <span className="text-xs text-gray-400 italic">
+                                                                {item.status === 'AWAITING_VERIFICATION' ? 'Awaiting verification' : 'Pending gate confirmation'}
+                                                            </span>
+                                                        );
+                                                    })()
+                                                ) : ['SPEC_VIS_NIR', 'SPEC_MIR', 'Vis-NIR Soil Spectra', 'MIR Soil Spectra'].includes(item.analysis) ? (
+                                                    <div className="flex items-center gap-2">
+                                                        {['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) ? (
+                                                            <>
+                                                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                                                                    <CheckCircle size={13} /> Spectra recorded
+                                                                </span>
                                                                 <button
+                                                                    type="button"
                                                                     onClick={() => handleViewSpectra(item)}
-                                                                    className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded border transition-colors bg-green-50 text-green-700 border-green-200 hover:bg-green-100`}
+                                                                    className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
                                                                 >
-                                                                    <FileText size={12} /> View in Library
+                                                                    <FileText size={11} /> View
                                                                 </button>
-                                                            </div>
-                                                        )}
-
-                                                        {/* UPLOAD BUTTON (Visible only if editable and needed) */}
-                                                        {canEdit && ['ASSIGNED', 'PENDING', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'].includes(item.status) && (
-                                                            <div className="flex items-center gap-2">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setUploadItem(item);
-                                                                        setShowUploadModal(true);
-                                                                    }}
-                                                                    className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded border transition-colors bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100`}
-                                                                >
-                                                                    <Upload size={12} /> Upload Spectrum
-                                                                </button>
-                                                            </div>
-                                                        )}
-
-                                                        {/* If not editable and not finalized (e.g. assigned to someone else pending upload) */}
-                                                        {!canEdit && ['ASSIGNED', 'PENDING', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'].includes(item.status) && (
-                                                            <span className="font-mono text-sm font-bold text-gray-400 italic">
-                                                                Pending Upload
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 italic">
+                                                                Pending spectra upload
                                                             </span>
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    /* STANDARD INPUTS (Requires canEdit) */
-                                                    canEdit ? (
-                                                        <div className="relative">
-                                                            {isOpsGate ? (
-                                                                isManager && !item.assignedTo ? (
-                                                                    <div className="text-[9px] text-orange-600 font-bold uppercase">Please assign a tech</div>
-                                                                ) : (
-                                                                    <div className="text-xs text-gray-400 italic">Toggle Status →</div>
-                                                                )
-                                                            ) : (
-                                                                <div className="flex flex-col gap-1">
-                                                                    <div className="flex items-center gap-1">
-                                                                        <input
-                                                                            type="text"
-                                                                            disabled={effectiveBlocked || loading}
-                                                                            value={getDisplayValue(item)}
-                                                                            onChange={(e) => handleInputChange(item.id, e.target.value)}
-                                                                            placeholder={item.analysis === 'ARCHIVING' ? "Shelf X, Drawer Y..." : (effectiveBlocked ? "Locked" : "-")}
-                                                                            className={`
-                                                                            flex-1 bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded px-2 py-1 text-sm font-mono transition-colors
-                                                                            ${effectiveBlocked ? 'cursor-not-allowed opacity-50' : ''}
-                                                                            ${item.analysis === 'ARCHIVING' ? 'border-amber-200' : ''}
-                                                                        `}
-                                                                        />
-                                                                        {item.unit && (
-                                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium whitespace-nowrap">{item.unit}</span>
-                                                                        )}
-                                                                    </div>
-
-                                                                    {item.analysis === 'ARCHIVING' && (
-                                                                        <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tighter">Archive Address</span>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            {item.status === 'IN_PROGRESS' && !isOpsGate && (
-                                                                <button
-                                                                    onClick={() => onUpdateStatus(item.id, 'COMPLETED', getDisplayValue(item))}
-                                                                    className="absolute right-1 top-1.5 text-gray-300 hover:text-green-600 transition-colors"
-                                                                    title="Save & Complete"
-                                                                >
-                                                                    <CheckCircle size={14} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex flex-col">
-                                                            <span className="font-mono text-sm font-bold text-gray-700 dark:text-gray-300">
+                                                    <div className="flex flex-col">
+                                                        {item.result ? (
+                                                            <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
                                                                 {workItemEvidenceText(item)}
-                                                                {item.unit && item.result && <span className="text-[10px] text-gray-400 dark:text-gray-500 font-normal ml-1">{item.unit}</span>}
+                                                                {item.unit && <span className="text-[10px] text-gray-400 font-normal ml-1">{item.unit}</span>}
                                                             </span>
-                                                            {isManager && !item.assignedTo && !isSealed && (
-                                                                <span className="text-[9px] text-orange-600 font-bold uppercase mt-1">
-                                                                    Please assign a tech
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 italic">
+                                                                {item.status === 'IN_PROGRESS' ? 'In progress in Workbench' : 'Pending result entry'}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800 hidden md:table-cell">
@@ -642,57 +621,51 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 ) : <span className="text-[10px] text-gray-300">-</span>}
                                             </td>
                                             <td className="px-4 py-3 text-right border-b border-gray-50 dark:border-gray-800">
-                                                {canEdit && !effectiveBlocked && !isCompleted && !isSealed && (
+                                                <div className="flex items-center gap-2 justify-end">
                                                     <button
-                                                        onClick={() => {
-                                                            if (isOpsGate) onUpdateStatus(item.id, 'COMPLETED', 'Done');
-                                                            else onUpdateStatus(item.id, 'IN_PROGRESS');
-                                                        }}
-                                                        className="text-white bg-blue-600 hover:bg-blue-700 text-xs font-bold px-3 py-1 rounded shadow-sm transition-transform active:scale-95"
+                                                        type="button"
+                                                        onClick={() => navigate(`/workbench?workItemId=${item.id}&sampleId=${item.sampleId}`)}
+                                                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline"
+                                                        title="Open task in Technician Workbench"
                                                     >
-                                                        {isOpsGate ? 'Mark Done' : 'Start'}
+                                                        <span>Open in Workbench →</span>
                                                     </button>
-                                                )}
-                                                {/* MANAGER APPROVAL ACTIONS */}
-                                                {isManager && (['SUBMITTED', 'COMPLETED', 'REANALYSIS_REQUIRED', 'ASSIGNED', 'IN_PROGRESS'].includes(item.status)) && (
-                                                    <div className="flex items-center gap-1 justify-end">
-                                                        {(() => {
-                                                            const isGate = item.category === 'Operational Gates';
-                                                            const hasResult = !!item.result || (isGate && ((Array.isArray(item.history) && item.history.some(h => h.action === 'COMPLETED')) || item.status === 'COMPLETED'));
-                                                            const isReadyForReview = item.status === 'SUBMITTED' || (isGate && item.status === 'COMPLETED') || (isManager && hasResult);
-                                                            const disabledClass = !isReadyForReview ? "text-gray-300 cursor-not-allowed" : "";
 
-                                                            const reasonTitle = isReadyForReview
-                                                                ? "Approve"
-                                                                : (isGate ? "Gate not completed" : "No results recorded yet");
+                                                    {/* MANAGER APPROVAL ACTIONS (Strictly SUBMITTED scientific determinations or AWAITING_VERIFICATION gates) */}
+                                                    {isManager && (
+                                                        <div className="flex items-center gap-1 ml-1 border-l border-gray-200 dark:border-gray-700 pl-2">
+                                                            {(() => {
+                                                                const isGate = item.category === 'Operational Gates';
+                                                                const isReadyForReview = item.status === 'SUBMITTED' || (isGate && item.status === 'AWAITING_VERIFICATION');
+                                                                if (!isReadyForReview) return null;
 
-                                                            return (
-                                                                <>
-                                                                    <button
-                                                                        onClick={() => isReadyForReview && onReview && onReview(item.id, 'ACCEPTED')}
-                                                                        title={reasonTitle}
-                                                                        className={`p-1 rounded border border-transparent ${isReadyForReview ? 'text-green-600 hover:bg-green-50 hover:border-green-200' : disabledClass}`}
-                                                                        disabled={!isReadyForReview}
-                                                                    >
-                                                                        <CheckCircle size={16} />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            if (!isReadyForReview) return;
-                                                                            const reason = prompt("Reason for rejection?");
-                                                                            if (reason) onReview && onReview(item.id, 'REANALYSIS_REQUIRED', reason);
-                                                                        }}
-                                                                        title={isReadyForReview ? "Reject (Request Reanalysis)" : reasonTitle}
-                                                                        className={`p-1 rounded border border-transparent ${isReadyForReview ? 'text-red-600 hover:bg-red-50 hover:border-red-200' : disabledClass}`}
-                                                                        disabled={!isReadyForReview}
-                                                                    >
-                                                                        <AlertTriangle size={16} />
-                                                                    </button>
-                                                                </>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                )}
+                                                                return (
+                                                                    <>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => onReview && onReview(item.id, 'ACCEPTED')}
+                                                                            title="Approve submitted result"
+                                                                            className="p-1 rounded text-green-600 hover:bg-green-50 hover:border-green-200 transition-colors"
+                                                                        >
+                                                                            <CheckCircle size={15} />
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const reason = prompt("Reason for rejection?");
+                                                                                if (reason) onReview && onReview(item.id, 'REANALYSIS_REQUIRED', reason);
+                                                                            }}
+                                                                            title="Reject (Request Reanalysis)"
+                                                                            className="p-1 rounded text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
+                                                                        >
+                                                                            <AlertTriangle size={15} />
+                                                                        </button>
+                                                                    </>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );

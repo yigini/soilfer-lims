@@ -95,8 +95,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const sampleId = receiveRes.body.id;
 
         // 2. Gates
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE' });
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
 
         // 3. Assign
         const itemsRes = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId });
@@ -176,8 +176,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const sampleId = intakeRes.body.id;
 
         // 2. Gates -> Assign -> Complete -> Submit -> Approve
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrSilverToken}`).send({ phase: 'DRYING', status: 'DONE' });
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrSilverToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrSilverToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrSilverToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
 
         const items = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrSilverToken}`).query({ sampleId });
         const phItem = items.body.data.find(i => i.analysis === 'PH_H2O');
@@ -234,7 +234,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const prepRes = await request(app)
             .put(`/api/samples/${sampleId}/phase`)
             .set('Authorization', `Bearer ${mgrRedToken}`)
-            .send({ phase: 'PREPARATION', status: 'DONE' });
+            .send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
         expect(prepRes.status).toBe(400);
 
         // 3. Verify Analysis completion blocked
@@ -265,8 +265,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             });
         const sampleId = intakeRes.body.id;
 
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrBlueToken}`).send({ phase: 'DRYING', status: 'DONE' });
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrBlueToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrBlueToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrBlueToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
 
         const items = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrBlueToken}`).query({ sampleId });
         const phItem = items.body.data.find(i => i.analysis === 'PH_H2O');
@@ -317,8 +317,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const sampleId = receiveRes.body.id;
 
         // 2. Complete prerequisite gates
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE' });
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
 
         // 3. Assign to technician
         const itemsRes = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId });

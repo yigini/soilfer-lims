@@ -530,6 +530,15 @@ const SampleDetail = () => {
                                 </button>
                             )}
 
+                            {/* Open in Workbench Shortcut */}
+                            <button
+                                onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
+                                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors"
+                                title="Open sample tasks in Technician Workbench"
+                            >
+                                <span>Open in Workbench →</span>
+                            </button>
+
                             {/* Final Approve Sample Button */}
                             {isManager && identity.status !== 'APPROVED' && (
                                 <button
@@ -637,7 +646,32 @@ const SampleDetail = () => {
                     </div>
                 </header>
 
-                {/* ─── 3. HISTORICAL EVIDENCE GAP ALERT (Finding S003) ─── */}
+                {/* ─── 3. ORDER INTEGRITY WARNING (W001: Order Revision vs Tasks Mismatch) ─── */}
+                {(workspace?.orderIntegrityWarning || workspace?.order?.warning) && (
+                    <div className="p-4 sm:p-5 bg-rose-50 dark:bg-rose-950/40 border-l-4 border-rose-500 rounded-xl shadow-sm text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 font-bold text-rose-900 dark:text-rose-200">
+                                    <AlertTriangle size={18} className="text-rose-600 flex-shrink-0" />
+                                    <span>Order & Analysis Discrepancy Detected</span>
+                                </div>
+                                <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
+                                    {(workspace?.orderIntegrityWarning || workspace?.order?.warning)?.message}
+                                </p>
+                            </div>
+                            {isManager && (
+                                <button
+                                    onClick={() => setIsAnalysisModalOpen(true)}
+                                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow transition-colors flex-shrink-0"
+                                >
+                                    Reconcile analyses
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── 3B. HISTORICAL EVIDENCE GAP ALERT (Finding S003) ─── */}
                 {integrity.hasHistoricalGap && (
                     <div className="p-4 sm:p-5 bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 rounded-xl shadow-sm text-left">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -778,12 +812,22 @@ const SampleDetail = () => {
                     <div className="space-y-6">
                         {/* Preparation Gates Card */}
                         <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Preparation Prerequisites</h3>
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Preparation Prerequisites</h3>
+                                <button
+                                    onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
+                                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                >
+                                    <span>Execute in Workbench →</span>
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Air Drying (40°C)</div>
-                                        <div className="text-xs text-gray-500 mt-0.5">SOP-PREP rev 2 • Constant weight</div>
+                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Air Drying</div>
+                                        <div className="text-xs text-gray-500 mt-0.5">
+                                            {workspace?.operationalGates?.drying?.receipt?.schemaVersion || 'operational-checklist-v1'} · Constant weight
+                                        </div>
                                     </div>
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                                         workspace?.operationalGates?.drying?.isDone || sample?.dryingStatus === 'DONE'
@@ -796,16 +840,35 @@ const SampleDetail = () => {
 
                                 <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Sieving / Milling (2mm)</div>
-                                        <div className="text-xs text-gray-500 mt-0.5">SOP-PREP rev 2 • Homogenized fraction</div>
+                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Sample Preparation</div>
+                                        <div className="text-xs text-gray-500 mt-0.5">
+                                            {workspace?.operationalGates?.preparation?.receipt?.schemaVersion || 'operational-checklist-v1'} · Homogenized fraction
+                                        </div>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                                        workspace?.operationalGates?.preparation?.isDone || sample?.preparationStatus === 'DONE'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                                    }`}>
-                                        {workspace?.operationalGates?.preparation?.isDone || sample?.preparationStatus === 'DONE' ? 'Completed' : 'Pending'}
-                                    </span>
+                                    {(() => {
+                                        const isPrepDone = workspace?.operationalGates?.preparation?.isDone || sample?.preparationStatus === 'DONE';
+                                        const hasReceipt = !!workspace?.operationalGates?.preparation?.receipt?.receiptId;
+                                        const isGap = isPrepDone && !hasReceipt;
+
+                                        if (isGap) {
+                                            return (
+                                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-1">
+                                                    <AlertTriangle size={12} />
+                                                    Evidence needs verification
+                                                </span>
+                                            );
+                                        }
+
+                                        return (
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                                                isPrepDone
+                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                            }`}>
+                                                {isPrepDone ? 'Completed' : 'Pending'}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>

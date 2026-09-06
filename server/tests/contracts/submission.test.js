@@ -52,11 +52,11 @@ describe('8.1 Section D: Submission Rules', () => {
             .send({ workItemIds: [phItemId, condItemId], assignee: techUsername });
 
         // Gates
-        const dRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE' });
+        const dRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
         if (dRes.status !== 200) console.log('DEBUG Drying Gate Failure:', dRes.body);
         expect(dRes.status).toBe(200);
 
-        const pRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        const pRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
         if (pRes.status !== 200) console.log('DEBUG Prep Gate Failure:', pRes.body);
         expect(pRes.status).toBe(200);
     });

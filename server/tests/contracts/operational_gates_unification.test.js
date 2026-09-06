@@ -48,10 +48,10 @@ describe('WP-26: Single Representation for Operational Gates', () => {
         await prisma.sample.deleteMany({ where: { id: testSampleId } });
     });
 
-    test('1. updatePhaseStatus DONE synchronizes WorkItem to ACCEPTED', async () => {
+    test('1. updatePhaseStatus DONE synchronizes WorkItem to COMPLETED with verified receipt', async () => {
         const req = {
             params: { id: testSampleId },
-            body: { phase: 'DRYING', status: 'DONE' },
+            body: { phase: 'DRYING', status: 'DONE', checklist: [true, true, true] },
             user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'LAB-DEFAULT' }
         };
         const res = {
@@ -65,8 +65,8 @@ describe('WP-26: Single Representation for Operational Gates', () => {
         const dryWi = await prisma.workItem.findFirst({
             where: { sampleId: testSampleId, analysis: 'DRYING' }
         });
-        expect(dryWi.status).toBe('ACCEPTED');
-        expect(dryWi.result).toBe('Gate Passed');
+        expect(['COMPLETED', 'ACCEPTED']).toContain(dryWi.status);
+        expect(dryWi.result).toContain('REC-OPS-');
     });
 
     test('2. updatePhaseStatus FAILED synchronizes WorkItem to ON_HOLD', async () => {

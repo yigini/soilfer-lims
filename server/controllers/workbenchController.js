@@ -17,15 +17,28 @@ const { broadcastToLab } = require('../wsServer');
 // ─────────────────────────────────────────────────────────────────────────────
 exports.getQueue = async (req, res) => {
     const user = req.user;
+    const { view } = req.query || {}; // 'my_work' | 'ready_to_submit' | 'submitted' | 'completed'
 
     try {
-        // Fetch all work items assigned to this technician that are actionable (including spectroscopy)
-        const actionableStatuses = ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'];
+        let whereClause = {
+            assignedTo: user.username
+        };
+
+        if (view === 'ready_to_submit') {
+            whereClause.status = 'COMPLETED';
+            whereClause.submissionId = null;
+            whereClause.analysis = { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] };
+        } else if (view === 'submitted') {
+            whereClause.status = 'SUBMITTED';
+        } else if (view === 'completed') {
+            whereClause.status = { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] };
+        } else {
+            // Default: 'my_work'
+            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] };
+        }
+
         const items = await prisma.workItem.findMany({
-            where: {
-                assignedTo: user.username,
-                status: { in: actionableStatuses }
-            },
+            where: whereClause,
             include: {
                 sample: {
                     select: {
@@ -220,6 +233,7 @@ exports.getQueue = async (req, res) => {
             const latestScan = scans.length > 0 ? scans[0] : null;
 
             groupsMap[code].items.push({
+                id: item.id,
                 workItemId: item.id,
                 sampleId: item.sampleId,
                 sampleDisplayId: item.sample?.labId || item.labId || item.sampleId,
@@ -229,6 +243,9 @@ exports.getQueue = async (req, res) => {
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
                 analysisCode: code,
+                analysisName: groupsMap[code].analysisName,
+                methodologyId: item.methodologyId || null,
+                methodRevision: item.methodRevision || 'rev1',
                 editorKind: isSpectral
                     ? 'SPECTRAL'
                     : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code) ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
@@ -272,6 +289,14 @@ exports.getQueue = async (req, res) => {
             return a.analysisName.localeCompare(b.analysisName);
         });
 
+        // Compute multi-view counts for tabs
+        const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
+            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { assignedTo: user.username, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
+            prisma.workItem.count({ where: { assignedTo: user.username, status: 'SUBMITTED' } }),
+            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
+        ]);
+
         // Stats
         const stats = {
             totalPending: items.filter(i => i.status === 'ASSIGNED').length,
@@ -279,7 +304,11 @@ exports.getQueue = async (req, res) => {
             totalReanalysis: items.filter(i => i.status === 'REANALYSIS_REQUIRED').length,
             totalDrafts: userDrafts.length,
             totalGroups: groups.length,
-            totalItems: items.length
+            totalItems: items.length,
+            myWorkCount,
+            readyToSubmitCount,
+            submittedCount,
+            completedCount
         };
 
         res.json({ groups, stats });
@@ -1159,12 +1188,28 @@ exports.batchSave = async (req, res) => {
             items: results
         } : null;
 
-        res.json({
-            success: true,
+        const totalSaved = results.length;
+        const totalErrors = errors.length;
+
+        if (totalSaved === 0 && totalErrors > 0) {
+            return res.status(422).json({
+                success: false,
+                draft,
+                saved: 0,
+                receipt: null,
+                errors,
+                results: []
+            });
+        }
+
+        const isPartial = totalSaved > 0 && totalErrors > 0;
+        res.status(200).json({
+            success: !isPartial,
+            partial: isPartial,
             draft,
-            saved: results.length,
+            saved: totalSaved,
             receipt,
-            errors: errors.length > 0 ? errors : undefined,
+            errors: totalErrors > 0 ? errors : undefined,
             results
         });
     } catch (error) {
@@ -1534,7 +1579,8 @@ exports.previewSubmissions = async (req, res) => {
     try {
         const whereClause = {
             status: 'COMPLETED',
-            submissionId: null
+            submissionId: null,
+            analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
         };
         if (user.role === 'LAB_TECHNICIAN') {
             whereClause.assignedTo = user.username;
@@ -1562,9 +1608,42 @@ exports.previewSubmissions = async (req, res) => {
             }
         });
 
+        // Filter items: exclude bare legacy "Done" or missing scientific evidence
+        const validCompletedItems = [];
+        const excludedItems = [];
+
+        for (const item of completedItems) {
+            const rawRes = item.result;
+            const hasValidValue = rawRes !== null && rawRes !== undefined && String(rawRes).trim() !== '' && String(rawRes).trim() !== 'Done';
+            let hasScan = false;
+            const isSpectral = ['NIR', 'MIR', 'SPECTRAL', 'VIS-NIR', 'VISNIR', 'SCAN'].some(k => (item.analysis || '').toUpperCase().includes(k));
+            if (isSpectral) {
+                const scan = await prisma.spectralData.findFirst({
+                    where: {
+                        OR: [
+                            { workItemId: item.id },
+                            { sampleId: String(item.sampleId), modality: item.analysis }
+                        ]
+                    }
+                });
+                if (scan) hasScan = true;
+            }
+
+            if (hasValidValue || hasScan) {
+                validCompletedItems.push(item);
+            } else {
+                excludedItems.push({
+                    workItemId: item.id,
+                    sampleId: item.sampleId,
+                    analysis: item.analysis,
+                    reason: 'Missing valid scientific measurement or scan (bare Done or unrecorded)'
+                });
+            }
+        }
+
         // Group by sample
         const sampleGroupMap = {};
-        for (const item of completedItems) {
+        for (const item of validCompletedItems) {
             const sId = item.sampleId;
             if (!sampleGroupMap[sId]) {
                 sampleGroupMap[sId] = {
@@ -1585,7 +1664,10 @@ exports.previewSubmissions = async (req, res) => {
         let allItemsBySample = {};
         if (targetSampleIds.length > 0) {
             const allSampleItems = await prisma.workItem.findMany({
-                where: { sampleId: { in: targetSampleIds } },
+                where: {
+                    sampleId: { in: targetSampleIds },
+                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
+                },
                 select: { id: true, sampleId: true, status: true, analysis: true }
             });
             allSampleItems.forEach(wi => {
@@ -1600,7 +1682,7 @@ exports.previewSubmissions = async (req, res) => {
             const allItems = allItemsBySample[sId] || [];
             const completedCount = group.completedItems.length;
             const totalCount = allItems.length;
-            const isFull = allItems.every(i => i.status === 'COMPLETED' || group.completedItems.some(ci => ci.workItemId === i.id));
+            const isFull = allItems.length > 0 && allItems.every(i => i.status === 'COMPLETED' || group.completedItems.some(ci => ci.workItemId === i.id));
 
             eligibleSamples.push({
                 sampleId: sId,
@@ -1616,7 +1698,8 @@ exports.previewSubmissions = async (req, res) => {
         res.json({
             eligibleSamples,
             totalEligibleSamples: eligibleSamples.length,
-            totalCompletedItems: completedItems.length
+            totalCompletedItems: validCompletedItems.length,
+            excludedItems: excludedItems.length > 0 ? excludedItems : undefined
         });
     } catch (err) {
         console.error('[workbench.previewSubmissions] Error:', err);
@@ -1629,7 +1712,7 @@ exports.previewSubmissions = async (req, res) => {
 // Creates sample-scoped Submission records and transitions items to SUBMITTED
 // ─────────────────────────────────────────────────────────────────────────────
 exports.commitSubmissions = async (req, res) => {
-    const { sampleIds, note } = req.body;
+    const { sampleIds, workItemIds, note } = req.body;
     const user = req.user;
     console.log(`[commitSubmissions] Invoked by ${user?.username} with ${sampleIds?.length || 0} samples:`, sampleIds?.slice(0, 5));
 
@@ -1652,24 +1735,39 @@ exports.commitSubmissions = async (req, res) => {
         }
 
         for (const sampleId of sampleIds) {
-            const items = await prisma.workItem.findMany({
-                where: {
-                    sampleId,
-                    status: 'COMPLETED',
-                    submissionId: null,
-                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {})
-                },
+            const itemWhere = {
+                sampleId,
+                status: 'COMPLETED',
+                submissionId: null,
+                analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] },
+                ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {})
+            };
+            if (workItemIds && Array.isArray(workItemIds) && workItemIds.length > 0) {
+                itemWhere.id = { in: workItemIds };
+            }
+
+            const rawItems = await prisma.workItem.findMany({
+                where: itemWhere,
                 include: { sample: true }
+            });
+
+            // Ensure items have valid scientific evidence (exclude bare "Done")
+            const items = rawItems.filter(i => {
+                const resVal = i.result;
+                return resVal !== null && resVal !== undefined && String(resVal).trim() !== '' && String(resVal).trim() !== 'Done';
             });
 
             if (items.length === 0) continue;
 
             const sample = items[0].sample;
             const allSampleItems = await prisma.workItem.findMany({
-                where: { sampleId }
+                where: {
+                    sampleId,
+                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
+                }
             });
             const itemIds = items.map(i => i.id);
-            const isFull = allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
+            const isFull = allSampleItems.length > 0 && allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
 
             const subId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
             // S19: Canonical status must be SUBMITTED_FULL (never legacy SUBMITTED)
@@ -1789,6 +1887,64 @@ exports.getReceipts = async (req, res) => {
     } catch (err) {
         console.error('[workbench.getReceipts] Error:', err);
         res.status(500).json({ error: 'Failed to fetch receipts' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/operations/confirm
+// Confirms an operational gate task (DRYING / PREPARATION) via checklist
+// ─────────────────────────────────────────────────────────────────────────────
+exports.confirmOperation = async (req, res) => {
+    const { workItemId, checklist, observations, idempotencyKey, runId, verificationRequired } = req.body;
+    const user = req.user;
+
+    try {
+        const OperationalConfirmationService = require('../services/operationalConfirmationService');
+        const outcome = await OperationalConfirmationService.confirmOperation({
+            actor: user,
+            workItemId,
+            checklist,
+            observations,
+            idempotencyKey,
+            runId,
+            verificationRequired
+        });
+
+        res.json(outcome);
+    } catch (err) {
+        console.error('[workbench.confirmOperation] Error:', err);
+        res.status(err.status || 500).json({
+            error: err.message || 'Failed to confirm operational procedure',
+            code: err.code || 'OPERATION_CONFIRM_FAILED'
+        });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/workbench/operations/verify
+// Manager verifies an operational gate task (when verification was required)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.verifyOperation = async (req, res) => {
+    const { workItemId, decision, note, idempotencyKey } = req.body;
+    const user = req.user;
+
+    try {
+        const OperationalConfirmationService = require('../services/operationalConfirmationService');
+        const outcome = await OperationalConfirmationService.verifyOperation({
+            actor: user,
+            workItemId,
+            decision,
+            note,
+            idempotencyKey
+        });
+
+        res.json(outcome);
+    } catch (err) {
+        console.error('[workbench.verifyOperation] Error:', err);
+        res.status(err.status || 500).json({
+            error: err.message || 'Failed to verify operational procedure',
+            code: err.code || 'OPERATION_VERIFY_FAILED'
+        });
     }
 };
 

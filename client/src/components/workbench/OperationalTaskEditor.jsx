@@ -1,35 +1,92 @@
 import checklists from '../../../../server/data/operationalChecklists.json';
 import React from 'react';
-import { CheckSquare, Square, CheckCircle2 } from 'lucide-react';
+import { CheckSquare, Square, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 /**
  * OperationalTaskEditor
  * SOP verification checklist editor for operational tasks (Drying & Preparation).
  * Guarantees that operational completion uses verifiable checklist evidence rather
- * than invented numeric results.
+ * than invented numeric results. Displays durable receipts and flags evidence gaps.
  */
 export default function OperationalTaskEditor({
     analysis,
     checks = [false, false, false],
     onChange,
     disabled = false,
-    sampleId = ''
+    sampleId = '',
+    savedReceipt = null,
+    isEvidenceGap = false,
+    onConfirm = null
 }) {
     const rawChecks = Array.isArray(checks) ? checks : [false, false, false];
 
-    const sopSteps = checklists[analysis]?.steps || [];
+    const fallbackSteps = analysis === 'DRYING' ? [
+        'Sample container inspected and sample identity verified against intake record',
+        'Sample spread evenly on clean drying tray and placed in drying facility (<= 40°C)',
+        'Drying completed to constant weight and recorded in preparation log'
+    ] : [
+        'Sample identity and completed drying record verified',
+        'Required preparation steps completed according to the applicable laboratory procedure',
+        'Prepared material and retained portions labelled for their intended analyses'
+    ];
+
+    const sopSteps = checklists[analysis]?.steps || fallbackSteps;
 
     const toggleCheck = (index) => {
-        if (disabled) return;
+        if (disabled || savedReceipt) return;
         const next = [...rawChecks];
         while (next.length < sopSteps.length) next.push(false);
         next[index] = !next[index];
-        onChange(next);
+        if (onChange) onChange(next);
     };
 
     const completedCount = rawChecks.filter(c => c === true).length;
     const isAllComplete = sopSteps.length > 0 && completedCount === sopSteps.length;
 
+    // 1. Evidence Gap State (Legacy "Done" with no checklist)
+    if (isEvidenceGap) {
+        return (
+            <div className="flex flex-col gap-2 p-2.5 rounded-lg border border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/30 text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
+                    <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                    <span>Legacy Completion — Evidence Gap</span>
+                </div>
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-tight">
+                    Recorded as “Done” without procedural checklist evidence. Dependent result entry requires documented verification or an authorized new preparation attempt.
+                </p>
+            </div>
+        );
+    }
+
+    // 2. Verified Saved Receipt State
+    if (savedReceipt) {
+        return (
+            <div className="flex flex-col gap-2 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs">
+                <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 font-bold text-emerald-900 dark:text-emerald-200">
+                        <CheckCircle2 size={14} className="text-emerald-600" />
+                        <span>Checklist Verified</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
+                        {savedReceipt.receiptId}
+                    </span>
+                </div>
+                <div className="space-y-1 mt-0.5">
+                    {sopSteps.map((step, idx) => (
+                        <div key={idx} className="flex items-start gap-1.5 text-[11px] text-emerald-950 dark:text-emerald-100">
+                            <CheckSquare size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{step}</span>
+                        </div>
+                    ))}
+                </div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 border-t border-emerald-200/60 dark:border-emerald-800/40 pt-1">
+                    Confirmed by {savedReceipt.recordedBy || 'Technician'} · {savedReceipt.recordedAt ? new Date(savedReceipt.recordedAt).toLocaleString() : 'Recorded'}
+                </div>
+            </div>
+        );
+    }
+
+    // 3. Active Technician Checklist Execution
     return (
         <div className="flex flex-col gap-2 py-1">
             <div className="flex flex-col gap-1.5">
@@ -58,7 +115,7 @@ export default function OperationalTaskEditor({
                 })}
             </div>
 
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center justify-between gap-2 mt-1">
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium
                     ${isAllComplete
                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300'
@@ -74,6 +131,16 @@ export default function OperationalTaskEditor({
                         <span>Checklist: {completedCount}/{sopSteps.length} confirmed</span>
                     )}
                 </span>
+
+                {isAllComplete && onConfirm && !disabled && (
+                    <button
+                        type="button"
+                        onClick={onConfirm}
+                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-sm transition-colors"
+                    >
+                        Confirm Complete
+                    </button>
+                )}
             </div>
         </div>
     );

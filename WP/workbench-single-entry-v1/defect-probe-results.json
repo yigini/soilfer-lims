@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-09-06T16:28:34.192Z",
+  "mode": "actual-controller-functions-with-in-memory-mocks",
+  "productionWrites": false,
+  "findings": [
+    {
+      "id": "P1",
+      "confirmed": true,
+      "description": "Legacy status writer completes preparation without checklist; later auto-accept mutation is not persisted.",
+      "storedStatus": "COMPLETED",
+      "storedResult": "Done",
+      "gateFlag": "DONE"
+    },
+    {
+      "id": "P2",
+      "confirmed": true,
+      "description": "Manager cannot approve this completed gate; review requires SUBMITTED.",
+      "httpStatus": 400,
+      "error": "INVALID_TRANSITION"
+    },
+    {
+      "id": "P3",
+      "confirmed": true,
+      "description": "Submission preview considers bare legacy Done eligible; merely restoring the submit button would submit missing evidence."
+    },
+    {
+      "id": "P4",
+      "confirmed": true,
+      "description": "Rejected sealed draft returns HTTP 200 and success:true with saved:0 plus an error; client currently treats HTTP success as saved.",
+      "response": {
+        "success": true,
+        "draft": true,
+        "saved": 0,
+        "receipt": null,
+        "errors": [
+          {
+            "workItemId": "SYNTHETIC-PREP",
+            "error": "Item is sealed (ACCEPTED)"
+          }
+        ],
+        "results": []
+      }
+    }
+  ],
+  "limitations": [
+    "Mocked persistence does not prove database isolation, actual race timing, full RBAC or browser behaviour.",
+    "These probes intentionally confirm defects in the audited source. Replace with desired-behaviour integration tests in implementation."
+  ]
+}

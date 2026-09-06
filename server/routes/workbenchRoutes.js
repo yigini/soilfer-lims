@@ -23,6 +23,10 @@ router.delete('/drafts/item/:workItemId', checkPermission('ENTER_RESULTS'), work
 // Resolve draft conflict
 router.post('/drafts/item/:workItemId/resolve-conflict', checkPermission('ENTER_RESULTS'), workbenchController.resolveConflict);
 
+// Operational Gates Confirmation & Verification
+router.post('/operations/confirm', checkPermission('ENTER_RESULTS'), workbenchController.confirmOperation);
+router.post('/operations/verify', checkPermission('APPROVE_RESULTS'), workbenchController.verifyOperation);
+
 // V2 Two-Step Record & Submit Pipeline
 router.post('/v2/completion/preview', checkPermission('ENTER_RESULTS'), workbenchController.previewCompletion);
 router.post('/v2/completion/commit', checkPermission('ENTER_RESULTS'), workbenchController.commitCompletion);

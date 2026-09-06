@@ -20,6 +20,10 @@ class SampleWorkspaceService {
      * @param {object} user - Authenticated user context
      * @returns {Promise<object>} Unified workspace view
      */
+    static async getWorkspaceData(sampleId, user) {
+        return this.getWorkspace(sampleId, user);
+    }
+
     static async getWorkspace(sampleId, user) {
         // 1. Fetch sample with all relations
         const sample = await prisma.sample.findFirst({
@@ -279,7 +283,24 @@ class SampleWorkspaceService {
         }
 
         // 8. Order Lines and Revisions
-        const activeRevision = sample.orderRevisions && sample.orderRevisions.length > 0 ? sample.orderRevisions[0] : null;
+        // 8. Order Lines and Revisions
+        const allRevisions = sample.orderRevisions || [];
+        const activeRevisions = allRevisions.filter(r => r.status === 'ACTIVE');
+        const activeRevision = activeRevisions.length > 0 ? activeRevisions[0] : null;
+
+        let orderIntegrityWarning = null;
+        if (activeRevisions.length > 1) {
+            orderIntegrityWarning = {
+                code: 'MULTIPLE_ACTIVE_REVISIONS',
+                message: `Multiple active order revisions (${activeRevisions.map(r => 'v' + r.version).join(', ')}) detected. Manager review required.`
+            };
+        } else if (allRevisions.length > 0 && !activeRevision) {
+            orderIntegrityWarning = {
+                code: 'NO_ACTIVE_REVISION',
+                message: `No active order revision found. Latest revision v${allRevisions[0].version} is ${allRevisions[0].status}.`
+            };
+        }
+
         let orderLines = [];
         if (activeRevision && activeRevision.lines && activeRevision.lines.length > 0) {
             orderLines = activeRevision.lines.map(line => {
@@ -298,6 +319,25 @@ class SampleWorkspaceService {
                     workItemStatus: linkedItem ? linkedItem.status : null
                 };
             });
+
+            // Detect mismatch between active order lines and active analytical work items
+            const orderAnalyses = activeRevision.lines.map(l => l.analysis).sort();
+            const analyticalTasks = enrichedWorkItems
+                .filter(w => !['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(w.analysis))
+                .map(w => w.analysis)
+                .sort();
+
+            const hasMismatch = orderAnalyses.length !== analyticalTasks.length ||
+                orderAnalyses.some((a, i) => a !== analyticalTasks[i]);
+
+            if (hasMismatch && !orderIntegrityWarning) {
+                orderIntegrityWarning = {
+                    code: 'ORDER_TASK_MISMATCH',
+                    message: `Active Order Revision v${activeRevision.version} specifies ${orderAnalyses.length} analyses (${orderAnalyses.slice(0, 3).join(', ')}...) but ${analyticalTasks.length} laboratory tasks are active (${analyticalTasks.slice(0, 3).join(', ')}...). Lab manager reconciliation required.`,
+                    orderAnalyses,
+                    analyticalTasks
+                };
+            }
         } else {
             // Synthesize order lines from sample.requiredAnalyses or workItems
             let requiredList = [];
@@ -529,6 +569,8 @@ class SampleWorkspaceService {
             operationalGates: gates,
             order: {
                 revisionNumber: activeRevision ? activeRevision.version : 1,
+                revisionStatus: activeRevision ? activeRevision.status : 'ACTIVE',
+                warning: orderIntegrityWarning,
                 lines: orderLines
             },
             workItems: enrichedWorkItems,
@@ -570,9 +612,11 @@ class SampleWorkspaceService {
             integrity: {
                 hasHistoricalGap,
                 historicalGapCount,
-                warning: hasHistoricalGap ? 'Historical approval — evidence needs verification' : null,
+                orderIntegrityWarning,
+                warning: hasHistoricalGap ? 'Historical approval — evidence needs verification' : (orderIntegrityWarning ? orderIntegrityWarning.message : null),
                 issues: integrityIssues
             },
+            orderIntegrityWarning,
             capabilities,
             nextAction,
             history: parsedHistory

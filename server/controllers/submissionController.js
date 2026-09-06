@@ -35,9 +35,12 @@ const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => 
     items.forEach(item => {
         // Use Workflow Engine to get category configuration
         const config = workflowEngine.getAnalysisConfig(item.analysis);
+        const code = (item.analysis || '').toUpperCase();
 
-        // Skip Post-Analytical items for full submission eligibility
-        if (config.category === workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL) return;
+        // Skip Post-Analytical and Operational Gate items for full submission eligibility
+        if (config.category === workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL ||
+            config.category === workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES ||
+            ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code)) return;
 
         // An item is eligible for FULL closure if it's already accepted/waived OR included in this submission
         if (['ACCEPTED', 'WAIVED'].includes(item.status) || (currentSubmissionItemIds.includes(item.id) && item.status === 'COMPLETED')) {
@@ -53,15 +56,19 @@ const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => 
         }
     });
 
-    const nonPostItems = items.filter(i =>
-        workflowEngine.getAnalysisConfig(i.analysis).category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL
-    );
+    const analyticalItems = items.filter(i => {
+        const cfg = workflowEngine.getAnalysisConfig(i.analysis);
+        const code = (i.analysis || '').toUpperCase();
+        return cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL &&
+               cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES &&
+               !['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code);
+    });
 
     return {
-        isEligible: blocking.length === 0 && nonPostItems.length > 0,
+        isEligible: blocking.length === 0 && analyticalItems.length > 0,
         blocking,
         eligible,
-        totalRequired: nonPostItems.length
+        totalRequired: analyticalItems.length
     };
 };
 
@@ -430,6 +437,22 @@ exports.reviewSubmission = async (req, res) => {
                     performedBy: user.username,
                     timestamp: now,
                     sampleId: String(submission.sampleId)
+                }
+            }));
+
+            operations.push(prisma.reviewDecision.create({
+                data: {
+                    id: `rd-sub-${workItemId}-${Date.now()}`,
+                    sampleId: String(submission.sampleId),
+                    workItemId,
+                    submissionItemId: submission.id,
+                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'WAIVE'),
+                    reason: reason || null,
+                    reviewerId: user.id || user.username,
+                    reviewerName: user.username,
+                    authorization: user.role,
+                    policyVersion: 'v1',
+                    createdAt: now
                 }
             }));
 

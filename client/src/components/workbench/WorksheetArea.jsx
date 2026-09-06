@@ -27,6 +27,7 @@ export default function WorksheetArea({
     onDiscardDraft,
     onResolveConflict,
     onReviewRecord,
+    onConfirmOperation = null,
     onOpenSpectralIntake,
     onBatchUpdated,
     isDiscarding = false
@@ -237,6 +238,21 @@ export default function WorksheetArea({
                                     const hasConflict = !!draft?.conflictValue;
                                     const isRecorded = item.status === 'COMPLETED';
 
+                                    let savedChecks = null;
+                                    let savedReceipt = null;
+                                    if (item.currentResult) {
+                                        try {
+                                            const parsed = typeof item.currentResult === 'string' ? JSON.parse(item.currentResult) : item.currentResult;
+                                            if (parsed && Array.isArray(parsed.checklist)) {
+                                                savedChecks = parsed.checklist;
+                                                savedReceipt = parsed;
+                                            }
+                                        } catch (e) {
+                                            // Non-JSON string, e.g. legacy bare "Done"
+                                        }
+                                    }
+                                    const isEvidenceGap = isOperationalGate && isRecorded && !savedReceipt;
+
                                     return (
                                         <tr
                                             key={item.workItemId}
@@ -298,9 +314,12 @@ export default function WorksheetArea({
                                                     <OperationalTaskEditor
                                                         disabled={!item.readiness?.isReady || isRecorded}
                                                         analysis={item.analysis}
-                                                        checks={draft?.checks || [false, false, false]}
+                                                        checks={draft?.checks || savedChecks || [false, false, false]}
+                                                        savedReceipt={savedReceipt}
+                                                        isEvidenceGap={isEvidenceGap}
                                                         onChange={(chk) => onDraftChange(item.workItemId, null, { checks: chk })}
                                                         sampleId={item.sampleId}
+                                                        onConfirm={() => onConfirmOperation && onConfirmOperation(item.workItemId, draft?.checks || [true, true, true])}
                                                     />
                                                 ) : isSpectral ? (
                                                     <div className="flex items-center gap-2">
@@ -425,15 +444,35 @@ export default function WorksheetArea({
                             <strong>{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">Enter</kbd> to advance to next row
                         </span>
 
-                        <button
-                            type="button"
-                            onClick={() => onReviewRecord(Array.from(selectedRows))}
-                            disabled={selectedRows.size === 0}
-                            className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
-                        >
-                            <span>Review Completion ({selectedRows.size})</span>
-                            <ArrowRight size={13} />
-                        </button>
+                        {isOperationalGate ? (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    selectedRows.forEach(wiId => {
+                                        const target = items.find(i => i.workItemId === wiId);
+                                        const checksToConfirm = target?.draft?.checks || [true, true, true];
+                                        if (onConfirmOperation) {
+                                            onConfirmOperation(wiId, checksToConfirm);
+                                        }
+                                    });
+                                }}
+                                disabled={selectedRows.size === 0}
+                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                            >
+                                <CheckCircle2 size={13} />
+                                <span>Confirm {activeGroup?.analysisName || 'Preparation'} Complete ({selectedRows.size})</span>
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => onReviewRecord(Array.from(selectedRows))}
+                                disabled={selectedRows.size === 0}
+                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                            >
+                                <span>Review Completion ({selectedRows.size})</span>
+                                <ArrowRight size={13} />
+                            </button>
+                        )}
                     </div>
                 </div>
 

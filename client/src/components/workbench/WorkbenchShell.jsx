@@ -38,6 +38,11 @@ export default function WorkbenchShell({
         setTimeout(() => setToast(null), 4000);
     }, []);
 
+    const [queueView, setQueueView] = useState(() => {
+        if (initialQueue === 'bench.toSubmit') return 'ready_to_submit';
+        return 'my_work';
+    });
+
     const [activeTab, setActiveTab] = useState(() => {
         if (initialQueue === 'bench.toSubmit') return 'review';
         if (initialAnalysis || initialSampleId || initialRunId || initialWorkItemId) return 'worksheet';
@@ -66,18 +71,21 @@ export default function WorkbenchShell({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const debounceTimers = useRef({});
+    const hasResolvedDeepLink = useRef(false);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Queue & Draft Fetching
     // ─────────────────────────────────────────────────────────────────────────
-    const fetchQueue = useCallback(async () => {
+    const fetchQueue = useCallback(async (viewToFetch = queueView) => {
         try {
-            const res = await axios.get('/api/workbench/queue');
+            const res = await axios.get('/api/workbench/queue', {
+                params: { view: viewToFetch }
+            });
             const fetchedGroups = res.data.groups || [];
             setGroups(fetchedGroups);
             setStats(res.data.stats || {});
 
-            // Set active analysis default
+            // Set active analysis default if not set
             if (!activeAnalysis && fetchedGroups.length > 0) {
                 setActiveAnalysis(fetchedGroups[0].analysis);
             }
@@ -101,7 +109,7 @@ export default function WorkbenchShell({
         } finally {
             setIsLoading(false);
         }
-    }, [activeAnalysis]);
+    }, [activeAnalysis, queueView]);
 
     const fetchReceipts = useCallback(async () => {
         try {
@@ -113,15 +121,25 @@ export default function WorkbenchShell({
     }, []);
 
     useEffect(() => {
-        fetchQueue();
+        fetchQueue(queueView);
         fetchReceipts();
-    }, [fetchQueue, fetchReceipts]);
+    }, [fetchQueue, fetchReceipts, queueView]);
 
-    // Deep link navigation
+    // Open submission review independently on bench.toSubmit
     useEffect(() => {
+        if (initialQueue === 'bench.toSubmit') {
+            handleOpenSubmissionReview();
+        }
+    }, [initialQueue]);
+
+    // Deep link navigation - executed once per navigation intent change
+    useEffect(() => {
+        if (hasResolvedDeepLink.current || isLoading) return;
+
         if (initialQueue === 'bench.toSubmit') {
             setActiveTab('review');
             setReviewSubView('submission');
+            hasResolvedDeepLink.current = true;
             return;
         }
 
@@ -130,19 +148,28 @@ export default function WorkbenchShell({
             if (runGroup) {
                 setActiveAnalysis(runGroup.analysis);
                 setActiveTab('worksheet');
+                hasResolvedDeepLink.current = true;
                 return;
             }
         }
 
         if (initialWorkItemId && groups.length > 0) {
+            let found = false;
             for (const g of groups) {
-                const targetItem = g.items?.find(i => i.id === initialWorkItemId);
+                const targetItem = g.items?.find(i => i.id === initialWorkItemId || i.workItemId === initialWorkItemId);
                 if (targetItem) {
                     setActiveAnalysis(g.analysis);
                     setActiveSampleId(targetItem.sampleId);
                     setActiveTab('worksheet');
+                    hasResolvedDeepLink.current = true;
+                    found = true;
                     return;
                 }
+            }
+            if (!found) {
+                addToast(`Work item ${initialWorkItemId} is not in current active queue (may be completed or in another view)`, 'info');
+                hasResolvedDeepLink.current = true;
+                return;
             }
         }
 
@@ -151,6 +178,7 @@ export default function WorkbenchShell({
             if (methGroup) {
                 setActiveAnalysis(methGroup.analysis);
                 setActiveTab('worksheet');
+                hasResolvedDeepLink.current = true;
                 return;
             }
         }
@@ -159,15 +187,17 @@ export default function WorkbenchShell({
             setActiveAnalysis(initialAnalysis);
             if (initialSampleId) setActiveSampleId(initialSampleId);
             setActiveTab('worksheet');
+            hasResolvedDeepLink.current = true;
         } else if (initialSampleId && groups.length > 0) {
             const foundGroup = groups.find(g => g.items?.some(i => i.sampleId === initialSampleId || i.originalId === initialSampleId));
             if (foundGroup) {
                 setActiveAnalysis(foundGroup.analysis);
                 setActiveSampleId(initialSampleId);
                 setActiveTab('worksheet');
+                hasResolvedDeepLink.current = true;
             }
         }
-    }, [initialAnalysis, initialMethodologyId, initialRevision, initialSampleId, initialWorkItemId, initialRunId, initialQueue, groups]);
+    }, [initialAnalysis, initialMethodologyId, initialRevision, initialSampleId, initialWorkItemId, initialRunId, initialQueue, groups, isLoading, addToast]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Debounced Draft Persistence
@@ -252,14 +282,44 @@ export default function WorkbenchShell({
     // Discard Single Draft
     // ─────────────────────────────────────────────────────────────────────────
     const handleDiscardDraft = async (workItemId) => {
+        if (debounceTimers.current[workItemId]) {
+            clearTimeout(debounceTimers.current[workItemId]);
+            delete debounceTimers.current[workItemId];
+        }
         try {
             await axios.delete(`/api/workbench/drafts/item/${workItemId}`);
             addToast('Draft discarded successfully', 'info');
-            fetchQueue();
+            fetchQueue(queueView);
             fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to discard draft:', err);
             addToast(err.response?.data?.error || 'Failed to discard draft', 'error');
+        }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Confirm Operational Gate Checklist (Drying / Preparation)
+    // ─────────────────────────────────────────────────────────────────────────
+    const handleConfirmOperation = async (workItemId, checklist, observations = null) => {
+        if (debounceTimers.current[workItemId]) {
+            clearTimeout(debounceTimers.current[workItemId]);
+            delete debounceTimers.current[workItemId];
+        }
+        try {
+            setIsLoading(true);
+            const res = await axios.post('/api/workbench/operations/confirm', {
+                workItemId,
+                checklist,
+                observations
+            });
+            addToast(`Operation confirmed successfully (${res.data.receipt?.receiptId || 'Verified'})`, 'success');
+            await fetchQueue(queueView);
+            await fetchReceipts();
+        } catch (err) {
+            console.error('[workbench] Failed to confirm operation:', err);
+            addToast(err.response?.data?.error || err.response?.data?.message || 'Failed to confirm operational checklist', 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -273,7 +333,7 @@ export default function WorkbenchShell({
                 reason
             });
             addToast(`Conflict resolved (${resolution})`, 'success');
-            fetchQueue();
+            fetchQueue(queueView);
             fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to resolve conflict:', err);
@@ -286,6 +346,14 @@ export default function WorkbenchShell({
     // ─────────────────────────────────────────────────────────────────────────
     const handleReviewRecord = async (selectedWorkItemIds) => {
         if (!selectedWorkItemIds || selectedWorkItemIds.length === 0) return;
+
+        // Drain any pending debounces for these items before recording
+        selectedWorkItemIds.forEach(id => {
+            if (debounceTimers.current[id]) {
+                clearTimeout(debounceTimers.current[id]);
+                delete debounceTimers.current[id];
+            }
+        });
 
         try {
             setIsLoading(true);
@@ -443,20 +511,26 @@ export default function WorkbenchShell({
             {/* Navigation Tabs */}
             <nav className="flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold" aria-label="Workbench navigation">
                 {[
-                    { id: 'queue', label: `My Queue (${stats.totalItems || 0})` },
+                    { id: 'queue', label: `My Work (${stats.myWorkCount ?? stats.totalItems ?? 0})` },
                     { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
-                    { id: 'review', label: `Review & Submit (${stats.totalPending === 0 ? '✓' : stats.totalItems || 0})` },
+                    { id: 'review', label: `Ready to Submit (${stats.readyToSubmitCount ?? 0})` },
+                    { id: 'completed', label: `Sent & Completed (${(stats.submittedCount || 0) + (stats.completedCount || 0)})` },
                     { id: 'activity', label: `Activity Receipts (${receipts.length})` }
                 ].map(tab => (
                     <button
                         key={tab.id}
                         type="button"
                         onClick={() => {
-                            if (tab.id === 'review' && activeTab !== 'review') {
+                            if (tab.id === 'review') {
                                 handleOpenSubmissionReview();
-                            } else {
-                                setActiveTab(tab.id);
+                            } else if (tab.id === 'completed') {
+                                setQueueView('completed');
+                                fetchQueue('completed');
+                            } else if (tab.id === 'queue') {
+                                setQueueView('my_work');
+                                fetchQueue('my_work');
                             }
+                            setActiveTab(tab.id);
                         }}
                         className={`px-4 py-2.5 border-b-2 transition-colors ${
                             activeTab === tab.id
@@ -471,7 +545,7 @@ export default function WorkbenchShell({
 
             {/* Tab Views */}
             <div className="pt-2">
-                {activeTab === 'queue' && (
+                {(activeTab === 'queue' || activeTab === 'completed') && (
                     <WorkbenchQueue
                         groups={groups}
                         onOpenWorksheet={(analysis, sampleId) => {
@@ -499,11 +573,12 @@ export default function WorkbenchShell({
                         onDiscardDraft={handleDiscardDraft}
                         onResolveConflict={handleResolveConflict}
                         onReviewRecord={handleReviewRecord}
+                        onConfirmOperation={handleConfirmOperation}
                         onOpenSpectralIntake={(item) => {
                             setSelectedSpectralItem(item);
                             setIsSpectralModalOpen(true);
                         }}
-                        onBatchUpdated={fetchQueue}
+                        onBatchUpdated={() => fetchQueue(queueView)}
                     />
                 )}
 

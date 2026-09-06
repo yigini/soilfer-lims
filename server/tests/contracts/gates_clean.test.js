@@ -58,7 +58,7 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
         await request(app)
             .put(`/api/samples/${sampleId}/phase`)
             .set('Authorization', `Bearer ${managerToken}`)
-            .send({ phase: 'DRYING', status: 'DONE' });
+            .send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
 
         // 4. Now Prep update to IN_PROGRESS should be allowed
         const prepAllowed = await request(app)
@@ -85,7 +85,7 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
         await request(app)
             .put(`/api/samples/${sampleId}/phase`)
             .set('Authorization', `Bearer ${managerToken}`)
-            .send({ phase: 'PREPARATION', status: 'DONE' });
+            .send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
 
         // 7. Analysis Allowed
         // We need sample status to be PROCESSING? 
