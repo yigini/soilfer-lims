@@ -65,6 +65,23 @@ const SampleDetail = () => {
         const queryParams = new URLSearchParams(location.search);
         return queryParams.get('tab') || 'work';
     });
+    const [selectedSubmissionId, setSelectedSubmissionId] = useState(() => {
+        const queryParams = new URLSearchParams(location.search);
+        return queryParams.get('submissionId') || null;
+    });
+
+    // Sync tab and submissionId from external/browser navigation
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const urlTab = queryParams.get('tab');
+        const urlSub = queryParams.get('submissionId');
+        if (urlTab && urlTab !== activeTab) {
+            setActiveTab(urlTab);
+        }
+        if (urlSub !== selectedSubmissionId) {
+            setSelectedSubmissionId(urlSub);
+        }
+    }, [location.search]);
 
     // Sub-view / modal state
     const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);

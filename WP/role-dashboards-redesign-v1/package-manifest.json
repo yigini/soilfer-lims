@@ -1,0 +1,116 @@
+{
+  "kind": "implementation-handoff-assets",
+  "createdAt": "2026-09-06T15:39:23.732Z",
+  "files": [
+    {
+      "path": "acceptance.md",
+      "bytes": 9710,
+      "sha256": "e7d5870d75a7cc9bb5e994d9fafdabeed587cd98be7b253d11431002178467ec"
+    },
+    {
+      "path": "ANTIGRAVITY-HANDOFF.md",
+      "bytes": 6249,
+      "sha256": "86312b5502fe5ff76b5230bbb0b3d820f5f9ef172beffcd3eeef0fadb5e1f0d8"
+    },
+    {
+      "path": "assets/soilfer-logo.png",
+      "bytes": 79699,
+      "sha256": "083ea40571640a2cde06a4bed8401497b67246ab6d696220912f3d25c3dee993"
+    },
+    {
+      "path": "contracts.md",
+      "bytes": 16318,
+      "sha256": "4dac405f1940fc045be4c48f05c3c9d7c2b7386bf3c5ae6a00130525cb9616b7"
+    },
+    {
+      "path": "dashboard-contract.reference.cjs",
+      "bytes": 2581,
+      "sha256": "05c1d97229d3fc868360b762f18d4260dd1740a189d92633597b4b3f2b9bddc9"
+    },
+    {
+      "path": "dashboard-contract.reference.test.cjs",
+      "bytes": 2784,
+      "sha256": "b1f5f4ea63fc8dadc0da7af9620d34702bf2cc26a6faf56c1ee58268e3907af7"
+    },
+    {
+      "path": "implementation-plan.md",
+      "bytes": 15849,
+      "sha256": "b9ffef841c91bd3fabc6e116473dde1e6f2c68049151d1b5cef1902b29ff42e9"
+    },
+    {
+      "path": "PLAN-REVIEW-2026-09-06.md",
+      "bytes": 9638,
+      "sha256": "b80716a11b31b36ffbad21f59d678401b0e1130e3e281f74c9f83bd88bee6707"
+    },
+    {
+      "path": "preview-checks/manager-desktop.png",
+      "bytes": 103553,
+      "sha256": "e4c4b2a594e411b30f39a1a7ce2eda87b40f82e22568c9d4791b9fa1bb7a9f8e"
+    },
+    {
+      "path": "preview-checks/reception-desktop.png",
+      "bytes": 104565,
+      "sha256": "7eca49db82bf731c4f2849e0b51e3d7605871cdc3381cdb0d6a01cb5c7995f5c"
+    },
+    {
+      "path": "preview-checks/technician-dark.png",
+      "bytes": 117316,
+      "sha256": "7d81069b3a7c4aa8e84f656d8a31db331b4348f32efad9a9712d7f7d2e56ecae"
+    },
+    {
+      "path": "preview-checks/technician-desktop.png",
+      "bytes": 115885,
+      "sha256": "b11a80fce86b892d3cedca643786851c63e74efdddd1604df76b80e345bfd3cc"
+    },
+    {
+      "path": "preview-checks/technician-mobile.png",
+      "bytes": 93139,
+      "sha256": "f7e2e693a3822e1f190e19c6f3d3a7b0b8814b64cdb75739f451999547eed545"
+    },
+    {
+      "path": "preview-checks/verification.json",
+      "bytes": 4104,
+      "sha256": "8b26436393cd376fb097bab35fa208de0d2eb7edcd67c7b44084277fb988e18f"
+    },
+    {
+      "path": "prototype.css",
+      "bytes": 10823,
+      "sha256": "4a248e515b8093694b479410f72b15b741725361ca2a0e2fd7e74f4bba90b804"
+    },
+    {
+      "path": "prototype.html",
+      "bytes": 3168,
+      "sha256": "fa73d5f50c659b6537de4965c860e1f00a9286dc44ae516b0617939ffaa3176f"
+    },
+    {
+      "path": "prototype.js",
+      "bytes": 31586,
+      "sha256": "60cd470bfe468ba82a13357304cb1cb071ace587a00e547781f11307ca7ff492"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3376,
+      "sha256": "8b967a4c0e2e10628503d20def1fc70fa9d1956f3f114cd1a142d095e20634e9"
+    },
+    {
+      "path": "role-control-matrix.md",
+      "bytes": 6569,
+      "sha256": "30ea6737566843032de6a15e77f3e9c8ca37845e5085e6cb38db48454eb4891f"
+    },
+    {
+      "path": "source-audit.md",
+      "bytes": 10150,
+      "sha256": "97e99691550c07d13b10cff0b2ea702ad18c98efe8f4adf3ff8ba6ffba737891"
+    },
+    {
+      "path": "verification-notes.md",
+      "bytes": 2201,
+      "sha256": "053f8bc2d4b2330294df1e8f63d414ba243602bec41869f1ade09ebcc88891f4"
+    },
+    {
+      "path": "verify-prototype.cjs",
+      "bytes": 5106,
+      "sha256": "7eaa3130c0c4df83e8df50e4ac175acc64e116d071b64f7c34f5ab8f0b43a09a"
+    }
+  ]
+}

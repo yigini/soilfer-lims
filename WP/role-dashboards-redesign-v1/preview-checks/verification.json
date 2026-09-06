@@ -1,0 +1,218 @@
+{
+  "artifactOnly": true,
+  "checkedAt": "2026-09-06T15:25:52.863Z",
+  "roles": 10,
+  "queueInteractions": 34,
+  "fortySampleDetail": true,
+  "search": true,
+  "pagination": true,
+  "errorEmptyStale": true,
+  "layouts": [
+    {
+      "role": "SAMPLE_RECEPTION",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_TECHNICIAN",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_MANAGER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "MASTER_USER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "PROJECT_MANAGER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "AUDIT_USER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "SURVEYOR",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "EXTERNAL_VIEWER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "VIEWER",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "width": 1440,
+      "pageOverflow": false
+    },
+    {
+      "role": "SAMPLE_RECEPTION",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_TECHNICIAN",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_MANAGER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "MASTER_USER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "PROJECT_MANAGER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "AUDIT_USER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "SURVEYOR",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "EXTERNAL_VIEWER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "VIEWER",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "width": 1024,
+      "pageOverflow": false
+    },
+    {
+      "role": "SAMPLE_RECEPTION",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_TECHNICIAN",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_MANAGER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "MASTER_USER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "PROJECT_MANAGER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "AUDIT_USER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "SURVEYOR",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "EXTERNAL_VIEWER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "VIEWER",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "width": 390,
+      "pageOverflow": false
+    },
+    {
+      "role": "SAMPLE_RECEPTION",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_TECHNICIAN",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "LAB_MANAGER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "MASTER_USER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "PROJECT_MANAGER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "AUDIT_USER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "SURVEYOR",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "EXTERNAL_VIEWER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "VIEWER",
+      "width": 320,
+      "pageOverflow": false
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "width": 320,
+      "pageOverflow": false
+    }
+  ],
+  "browserErrors": [],
+  "limitations": [
+    "No production/application integration verified",
+    "No screen-reader or full accessibility certification",
+    "Prototype route previews are not implemented destination pages"
+  ]
+}

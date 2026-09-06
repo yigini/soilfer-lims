@@ -39,6 +39,13 @@ async function generateReport(req, res) {
             return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
+        // R1: Enforce publication authority & sample approval state
+        const { canPublish } = require('../services/workEligibility');
+        const publishCheck = canPublish(sample, null, req.user);
+        if (!publishCheck.allowed) {
+            return res.status(403).json({ error: publishCheck.reason, code: 'PUBLISH_DENIED' });
+        }
+
         // S13: Find max historical version across ALL reports for this sample to ensure strictly monotonic versioning
         const maxReport = await prisma.report.findFirst({
             where: { sampleId },
@@ -133,6 +140,11 @@ async function getReport(req, res) {
             return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
         }
 
+        // R1: External and general viewers can only view PUBLISHED reports
+        if (['EXTERNAL_VIEWER', 'VIEWER'].includes(req.user?.role) && report.status !== 'PUBLISHED') {
+            return res.status(403).json({ error: 'Access denied: Only published reports are viewable by external viewers' });
+        }
+
         res.json({
             ...report,
             content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
@@ -167,7 +179,8 @@ async function getReportBySample(req, res) {
             orderBy: { version: 'desc' }
         });
 
-        if (!report) {
+        // Non-external users can fall back to latest draft report
+        if (!report && !['EXTERNAL_VIEWER', 'VIEWER'].includes(req.user?.role)) {
             report = await prisma.report.findFirst({
                 where: { sampleId },
                 orderBy: { version: 'desc' }
@@ -194,23 +207,36 @@ async function getReportBySample(req, res) {
  */
 async function searchReports(req, res) {
     try {
-        const { q, status, page = 1, limit = 25 } = req.query;
+        const { q, status, page = 1, limit = 25, projectId } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const where = {};
 
-        // R-9: Lab-scoping — non-admin users only see reports for their lab
+        // R-9 & R1: Scoping — non-admin users only see reports in their authorized scope
         const userRole = req.user?.role;
         const userLab = req.user?.labId;
+        const userProjects = req.user?.projects ? (typeof req.user.projects === 'string' ? JSON.parse(req.user.projects) : req.user.projects) : [];
+
         if (userLab && !['SUPER_ADMIN', 'MASTER_USER'].includes(userRole)) {
             where.labId = userLab;
         }
 
-        // Status filter
-        if (status) {
+        // R1: External and general viewers strictly view PUBLISHED reports for authorized projects
+        if (['EXTERNAL_VIEWER', 'VIEWER'].includes(userRole)) {
+            where.status = 'PUBLISHED';
+            if (userProjects.length > 0) {
+                where.projectCode = { in: userProjects };
+            } else if (!userLab) {
+                return res.json({ reports: [], pagination: { total: 0, page: 1, limit: parseInt(limit), pages: 0 } });
+            }
+        } else if (status) {
             where.status = status;
         } else {
             where.status = 'PUBLISHED'; // Default to published
+        }
+
+        if (projectId) {
+            where.projectCode = String(projectId);
         }
 
         // Full-text search across denormalized keys
@@ -290,6 +316,10 @@ async function createShareLink(req, res) {
     try {
         const { reportId } = req.params;
         const { expiresInDays = 30 } = req.body;
+
+        if (!['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(req.user?.role)) {
+            return res.status(403).json({ error: 'Access denied: Only managers can create report share links' });
+        }
 
         const report = await prisma.report.findUnique({ where: { id: reportId } });
         if (!report) {
@@ -544,6 +574,17 @@ async function getReportPdf(req, res) {
             return res.status(404).json({ error: 'Report not found' });
         }
 
+        // Scope and published check
+        const scopeGuard = require('../utils/scopeGuard');
+        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
+        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Report not in your scope' });
+        }
+
+        if (['EXTERNAL_VIEWER', 'VIEWER'].includes(req.user?.role) && report.status !== 'PUBLISHED') {
+            return res.status(403).json({ error: 'Access denied: Only published reports are downloadable' });
+        }
+
         const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;
         if (!content) {
             return res.status(404).json({ error: 'Report content not available' });
@@ -575,6 +616,10 @@ async function getSampleReportPdf(req, res) {
             where: { sampleId, status: 'PUBLISHED' },
             orderBy: { version: 'desc' }
         });
+
+        if (['EXTERNAL_VIEWER', 'VIEWER'].includes(req.user?.role) && !report) {
+            return res.status(404).json({ error: 'No published report available for this sample' });
+        }
 
         let content;
         if (report && report.content) {

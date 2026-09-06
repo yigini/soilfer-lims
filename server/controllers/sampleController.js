@@ -1840,25 +1840,53 @@ exports.approveSample = async (req, res) => {
             return res.status(403).json({ error: 'Access Denied: Sample not in your lab scope.', code: 'ACCESS_DENIED_LAB' });
         }
 
-        // S04: Check analytical work items (must have items and all must be terminal/accepted)
-        const workItems = await prisma.workItem.findMany({
-            where: {
-                sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] }
+        // S04: Check analytical work items, active order lines, and QC batches
+        const [workItems, orderRevision, qcBatches] = await Promise.all([
+            prisma.workItem.findMany({
+                where: { sampleId: String(id) },
+                include: { batch: true }
+            }),
+            prisma.sampleOrderRevision.findFirst({
+                where: { sampleId: String(id), status: 'ACTIVE' },
+                include: { lines: true },
+                orderBy: { version: 'desc' }
+            }),
+            prisma.batch.findMany({
+                where: {
+                    workItems: {
+                        some: { sampleId: String(id) }
+                    }
+                }
+            })
+        ]);
+
+        // Concurrency validation
+        if (req.body?.expectedUpdatedAt) {
+            const currentMs = new Date(sample.updatedAt).getTime();
+            const expectedMs = new Date(req.body.expectedUpdatedAt).getTime();
+            if (currentMs !== expectedMs) {
+                return res.status(409).json({
+                    error: 'Sample was modified concurrently. Please reload the current record before approving.',
+                    code: 'CONCURRENCY_CONFLICT'
+                });
             }
-        });
-        if (workItems.length === 0) {
-            return res.status(400).json({
-                error: 'Cannot approve sample with no ordered analytical work items.',
-                code: 'NO_WORK_ITEMS'
-            });
         }
-        const unapprovedItems = workItems.filter(w => !['ACCEPTED', 'WAIVED', 'CANCELLED'].includes(w.status));
-        if (unapprovedItems.length > 0) {
-            return res.status(409).json({
-                error: 'Work items pending approval or completion',
-                code: 'UNAPPROVED_WORK_ITEMS',
-                blockers: unapprovedItems.map(w => ({ id: w.id, analysis: w.analysis, status: w.status }))
+
+        const { canFinalApprove } = require('../services/workEligibility');
+        const eligibility = canFinalApprove(
+            sample,
+            workItems,
+            orderRevision?.lines || [],
+            user,
+            { qcBatches }
+        );
+
+        if (!eligibility.allowed) {
+            const isNoWork = eligibility.blockers.some(b => b.startsWith('NO_ANALYTICAL_WORK') || b.startsWith('ALL_WORK_OMITTED'));
+            return res.status(isNoWork ? 400 : 409).json({
+                error: eligibility.reason || 'Sample is not eligible for final approval',
+                code: isNoWork ? 'NO_WORK_ITEMS' : 'UNAPPROVED_WORK_ITEMS',
+                blockers: eligibility.blockers
             });
         }
 

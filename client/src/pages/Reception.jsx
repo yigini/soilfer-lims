@@ -348,6 +348,30 @@ const Reception = () => {
         return () => window.removeEventListener('keydown', handleGlobalKeyDown);
     }, [isShortcutsOpen, isLabelPrintOpen, duplicateWarning, sampleData, result, loading, isWedgeMode]);
 
+    // Stage E: Deep link lookup for immutable sampleId or originalId from dashboard
+    useEffect(() => {
+        if (!token) return;
+        const params = new URLSearchParams(location.search);
+        const sampleId = params.get('sampleId') || params.get('id');
+        const code = params.get('code') || params.get('originalId');
+
+        if (sampleId) {
+            axios.get(`/api/samples/${sampleId}`, { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => {
+                    if (res.data) {
+                        const s = res.data;
+                        setMode(s.isWalkIn ? 'WALK_IN' : 'PROJECT');
+                        setSampleData(s);
+                        setScanCode(s.originalId || s.id);
+                        populateDeskFacts(s);
+                    }
+                })
+                .catch(err => console.error('[Reception] Failed to load sample from URL param:', err));
+        } else if (code) {
+            handleLookup(code);
+        }
+    }, [location.search, token]);
+
     const resetForm = () => {
         setScanCode('');
         setSampleData(null);

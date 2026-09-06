@@ -270,9 +270,10 @@ app.get('/api/kobo/media', koboController.proxyMedia);
 // Kobo API routes (authenticated)
 app.use('/api/kobo', verifyToken, require('./routes/koboRoutes'));
 
-// Auth change-password is handled by authRoutes.js (single canonical mount above)
+// Canonical dashboard routes
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
-// ─── UNIFIED LIVE DASHBOARD ENDPOINT ───
+// ─── UNIFIED LIVE DASHBOARD ENDPOINT (Backward Compatibility) ───
 app.get('/api/dashboard/live', verifyToken, async (req, res) => {
     const user = req.user;
     try {

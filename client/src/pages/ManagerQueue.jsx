@@ -65,8 +65,11 @@ const ManagerQueue = () => {
     // If unparameterized, prioritize highest actionable lane once live data arrives
     useEffect(() => {
         if (!laneParam && !userSelected && liveData?.kpis) {
-            const { awaitingReview, unassignedTasks, pendingIntakes } = liveData.kpis;
-            if (awaitingReview > 0) {
+            const { awaitingReview, unassignedTasks, pendingIntakes, pendingApproval } = liveData.kpis;
+            if (pendingApproval > 0) {
+                setActiveTab(QUEUE_Tabs.APPROVE);
+                setUserSelected(true);
+            } else if (awaitingReview > 0) {
                 setActiveTab(QUEUE_Tabs.REVIEW);
                 setUserSelected(true);
             } else if (unassignedTasks > 0) {
@@ -100,12 +103,33 @@ const ManagerQueue = () => {
                     endpoint = '/api/submissions';
                     break;
                 case QUEUE_Tabs.APPROVE:
-                    endpoint = '/api/samples';
-                    params.status = 'PROCESSING';
+                    endpoint = '/api/dashboard/queues/manager.finalApproval';
                     break;
             }
 
             const res = await axios.get(endpoint, { params });
+
+            if (res.data.rows && activeTab === QUEUE_Tabs.APPROVE) {
+                const total = res.data.total || res.data.rows.length;
+                const limit = params.limit || 20;
+                setData(res.data.rows.map(r => ({
+                    id: r.sampleId || r.key,
+                    sampleId: r.sampleId || r.key,
+                    labId: r.title,
+                    originalId: r.key,
+                    analysis: r.context,
+                    status: r.status,
+                    createdAt: new Date().toISOString()
+                })));
+                setMeta({
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit) || 1
+                });
+                return;
+            }
+
             const result = res.data.data ? res.data : { data: res.data, meta: { page: 1, limit: 100, total: res.data.length, totalPages: 1 } };
 
             // Client-side filtering logic

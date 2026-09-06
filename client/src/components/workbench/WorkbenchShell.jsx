@@ -21,7 +21,15 @@ import SpectralIntakeModal from './SpectralIntakeModal';
  * Coordinates real-time queue synchronization, isolated draft persistence,
  * the two-step completion/submission lifecycle, and specialized modality routing.
  */
-export default function WorkbenchShell({ initialAnalysis = null, initialSampleId = null }) {
+export default function WorkbenchShell({
+    initialAnalysis = null,
+    initialMethodologyId = null,
+    initialRevision = null,
+    initialSampleId = null,
+    initialWorkItemId = null,
+    initialRunId = null,
+    initialQueue = null
+}) {
     const { user } = useAuth();
     const { t } = useLanguage();
     const [toast, setToast] = useState(null);
@@ -30,8 +38,15 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
         setTimeout(() => setToast(null), 4000);
     }, []);
 
-    const [activeTab, setActiveTab] = useState('queue'); // queue | worksheet | review | activity
-    const [reviewSubView, setReviewSubView] = useState('completion'); // completion | submission
+    const [activeTab, setActiveTab] = useState(() => {
+        if (initialQueue === 'bench.toSubmit') return 'review';
+        if (initialAnalysis || initialSampleId || initialRunId || initialWorkItemId) return 'worksheet';
+        return 'queue';
+    });
+    const [reviewSubView, setReviewSubView] = useState(() => {
+        if (initialQueue === 'bench.toSubmit') return 'submission';
+        return 'completion';
+    });
     const [groups, setGroups] = useState([]);
     const [stats, setStats] = useState({});
     const [activeAnalysis, setActiveAnalysis] = useState(initialAnalysis);
@@ -104,6 +119,42 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
 
     // Deep link navigation
     useEffect(() => {
+        if (initialQueue === 'bench.toSubmit') {
+            setActiveTab('review');
+            setReviewSubView('submission');
+            return;
+        }
+
+        if (initialRunId && groups.length > 0) {
+            const runGroup = groups.find(g => g.items?.some(i => i.batchId === initialRunId));
+            if (runGroup) {
+                setActiveAnalysis(runGroup.analysis);
+                setActiveTab('worksheet');
+                return;
+            }
+        }
+
+        if (initialWorkItemId && groups.length > 0) {
+            for (const g of groups) {
+                const targetItem = g.items?.find(i => i.id === initialWorkItemId);
+                if (targetItem) {
+                    setActiveAnalysis(g.analysis);
+                    setActiveSampleId(targetItem.sampleId);
+                    setActiveTab('worksheet');
+                    return;
+                }
+            }
+        }
+
+        if (initialMethodologyId && groups.length > 0) {
+            const methGroup = groups.find(g => g.items?.some(i => i.methodologyId === initialMethodologyId));
+            if (methGroup) {
+                setActiveAnalysis(methGroup.analysis);
+                setActiveTab('worksheet');
+                return;
+            }
+        }
+
         if (initialAnalysis) {
             setActiveAnalysis(initialAnalysis);
             if (initialSampleId) setActiveSampleId(initialSampleId);
@@ -116,7 +167,7 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                 setActiveTab('worksheet');
             }
         }
-    }, [initialAnalysis, initialSampleId, groups]);
+    }, [initialAnalysis, initialMethodologyId, initialRevision, initialSampleId, initialWorkItemId, initialRunId, initialQueue, groups]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Debounced Draft Persistence

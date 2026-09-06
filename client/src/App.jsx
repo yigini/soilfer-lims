@@ -128,7 +128,16 @@ const Layout = ({ children }) => {
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
         navItems.push({ icon: User, label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
+    }
+
+    // Equipment — visible to technicians, managers, reception, and audit users
+    if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'AUDIT_USER'].includes(user?.role)) {
         navItems.push({ icon: Monitor, label: t('nav.equipment'), path: '/equipment' });
+    }
+
+    // QA & Audit view
+    if (['AUDIT_USER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
+        navItems.push({ icon: ShieldAlert, label: t('nav.qa', 'Quality Assurance'), path: '/qa' });
     }
 
     // Inventory — visible to technicians (view-only) + managers + admin
@@ -297,7 +306,7 @@ function App() {
             <Route path="/reception" element={<RequireAuth permission="RECEIVE_SAMPLE"><Reception /></RequireAuth>} />
 
             <Route path="/inventory" element={<RequireAuth permission="VIEW_INVENTORY"><Inventory /></RequireAuth>} />
-            <Route path="/equipment" element={<RequireAuth permission="MANAGE_ANALYSES"><Equipment /></RequireAuth>} />
+            <Route path="/equipment" element={<RequireAuth permission="VIEW_EQUIPMENT"><Equipment /></RequireAuth>} />
             <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
             <Route path="/projects" element={<RequireAuth permission="MANAGE_PROJECTS"><Projects /></RequireAuth>} />
 
@@ -311,7 +320,7 @@ function App() {
             {/* General Access */}
             <Route path="/datasheet" element={<RequireAuth><DataSheet /></RequireAuth>} />
             <Route path="/maps" element={<RequireAuth><CountryData /></RequireAuth>} />
-            <Route path="/qa" element={<RequireAuth><QADashboard /></RequireAuth>} />
+            <Route path="/qa" element={<RequireAuth permission="VIEW_AUDIT"><QADashboard /></RequireAuth>} />
             <Route path="/spectral-library" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
             <Route path="/spectral" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
             <Route path="/data-results" element={<RequireAuth><DataResults /></RequireAuth>} />
