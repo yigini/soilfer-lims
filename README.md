@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/yigini/soilfer-lims/main/client/public/assets/img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="340" />
+<img src="./soilfer-logo.png" alt="SoilFER LIMS Logo" width="340" />
 
 # SoilFER-LIMS
 
