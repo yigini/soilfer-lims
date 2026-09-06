@@ -77,3 +77,40 @@
 - **R6**: Honest freshness states implemented; stale data distinguished from true zero. Scoped event subscriptions wired.
 - **R7**: Full ledger maintained in `execution-ledger.md` covering all criteria A01–A46.
 - **R8**: Coordinated deployment prepared with SQLite backup, asset archive, immutable container tag, live read-only verification, and issue reconciliation last.
+
+---
+
+## 4. Live Production Deployment & Verification Receipt
+
+- **Production Host**: `root@46.19.33.37`
+- **Release Commit**: `bfc06ed` (Merged via Pull Request #55)
+- **Deployed Image**: `soilfer-lims:v3.1.0-bfc06ed`
+- **Immutable Image ID**: `sha256:d27aa3bcb1f8612d0ebe078829ffe11ce69a4b2cd362da77361d3e96db2db942`
+- **Pre-Cutover Backup**: `/opt/lims/release_checkpoints/release_dashboards_bfc06ed_2026_09_06_16_1`
+  - Database snapshot: `dev.db` (`PRAGMA integrity_check: ok`)
+  - Asset archive: `assets.tar.gz`
+- **Boot Rehearsal**: Isolated candidate on port 5098 responded with HTTP 200 `{"status":"ok"}`.
+- **Production Cutover**: Container `soilfer-lims` restarted with new image; health check: healthy.
+- **Production Database Metrics**:
+  - `PRAGMA integrity_check`: `ok`
+  - Total Samples: 35,191
+  - Work Items: 63
+  - Reports: 0
+  - Synthetic Data Pollution: 0 (verified zero test records written to live DB)
+- **Live Authenticated API Verification**:
+  - `SUPER_ADMIN` (`admin`): HTTP 200, schemaVersion 1, 3 metrics, view: `super_admin`.
+  - `MASTER_USER` (`master`): HTTP 200, schemaVersion 1, 3 metrics, view: `master_user`.
+  - `LAB_MANAGER` (`mgr_gtm`): HTTP 200, schemaVersion 1, 5 metrics, view: `lab_manager`.
+  - `SAMPLE_RECEPTION` (`intake_gtm`): HTTP 200, schemaVersion 1, 4 metrics, view: `sample_reception`.
+  - `LAB_TECHNICIAN` (`marco`): HTTP 200, schemaVersion 1, 5 metrics, view: `lab_technician`.
+  - `VIEWER` (`viewer`): HTTP 200, schemaVersion 1, 3 metrics, view: `viewer`.
+  - Multi-lab isolation: GTM-LAB1 vs HND-LAB1 active scopes strictly separated.
+  - Queue authorization:
+    - Technician requesting `bench.ready`: HTTP 200 PASS
+    - Technician requesting `manager.finalApproval`: HTTP 403 Forbidden PASS
+    - Reception requesting `reception.expected`: HTTP 200 PASS
+    - Viewer requesting `manager.finalApproval`: HTTP 403 Forbidden PASS
+  - All 10 canonical roles verified: PASS
+  - Unknown role fail-closed: rejected with HTTP 403 `UNRECOGNIZED_ROLE`: PASS
+- **Cleanup**: `soilfer-lims-prev` rollback container removed following successful verification.
+
