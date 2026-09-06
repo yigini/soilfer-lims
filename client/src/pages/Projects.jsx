@@ -4,8 +4,9 @@ import {
     Plus, Database, CheckCircle2, AlertTriangle, X,
     Calendar, Beaker, Archive, RotateCcw, Trash2,
     ArrowRight, ChevronRight, Clock, Search, Filter,
-    MoreVertical, PackageCheck, LayoutList, FileSearch, Edit2, Lock, BarChart2, Pause
+    MoreVertical, PackageCheck, LayoutList, FileSearch, Edit2, Lock, BarChart2, Pause, History
 } from 'lucide-react';
+import LegacyBackfillModal from '../components/projects/LegacyBackfillModal';
 
 const calculatePercentage = (actual, target) => {
     const a = parseInt(actual) || 0;
@@ -32,7 +33,7 @@ export const getProjectLabIds = (p) => {
     return [];
 };
 
-const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, handleArchive, handleRestore, initiateDelete, onViewSamples }) => {
+const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, handleArchive, handleRestore, initiateDelete, onViewSamples, onOpenLegacyBackfill }) => {
     if (!project) return null;
 
     const [uploading, setUploading] = useState(false);
@@ -242,6 +243,39 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                             )}
                         </div>
                     )}
+                    {/* Pre-Delivery Historical Analysis Backfill Card */}
+                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                        <div className="p-4 rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-amber-50/50 dark:bg-amber-950/20">
+                            <div className="flex items-start gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-700 dark:text-amber-300 flex-shrink-0 mt-0.5">
+                                    <History size={16} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <h4 className="text-xs font-bold text-gray-900 dark:text-white">
+                                            Pre-Platform Historical Analysis
+                                        </h4>
+                                        <span className="text-[9px] font-black uppercase tracking-wider bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded">
+                                            Backward Compatibility
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                                        Were samples for this project analysed before platform deployment? Bulk backfill historical wet chemistry, spectroscopy, and certificates.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="mt-3 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => onOpenLegacyBackfill && onOpenLegacyBackfill(project)}
+                                    className="px-3 py-1.5 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-900/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
+                                >
+                                    <span>Backfill Historical Data</span>
+                                    <ArrowRight size={13} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="p-6 border-t border-gray-100 dark:border-gray-700 space-y-3">
@@ -427,6 +461,10 @@ const Projects = () => {
     // Success Modal States
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+
+    // Legacy Backfill Modal States (Backward Compatibility for Pre-Platform Analysis)
+    const [showLegacyBackfillModal, setShowLegacyBackfillModal] = useState(false);
+    const [backfillTargetProject, setBackfillTargetProject] = useState(null);
 
     const [formData, setFormData] = useState({
         code: '',
@@ -829,6 +867,17 @@ const Projects = () => {
                     <p className="text-gray-500 dark:text-gray-400 mt-1">{t('projects.subtitle', 'Operational management of soil research projects')}</p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => { setBackfillTargetProject(null); setShowLegacyBackfillModal(true); }}
+                        className="bg-amber-50 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800/80 px-4 py-3 rounded-xl flex items-center gap-2 hover:shadow-md transition-all font-bold text-sm active:scale-95"
+                        title="Backward compatibility for project samples analysed prior to platform deployment"
+                    >
+                        <History size={18} className="text-amber-600 dark:text-amber-400" />
+                        <span>Pre-Delivery Backfill</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded">
+                            Legacy
+                        </span>
+                    </button>
                     {(user.role === 'SUPER_ADMIN' || user.role === 'MASTER_USER' || user.role === 'LAB_MANAGER') && (
                         <button
                             onClick={() => openModal()}
@@ -1189,6 +1238,11 @@ const Projects = () => {
                 handleRestore={handleRestore}
                 initiateDelete={initiateDelete}
                 onViewSamples={handleViewManifest}
+                onOpenLegacyBackfill={(p) => {
+                    setViewingProject(null);
+                    setBackfillTargetProject(p);
+                    setShowLegacyBackfillModal(true);
+                }}
             />
 
             <SampleManifestModal
@@ -1203,6 +1257,16 @@ const Projects = () => {
                 isOpen={showSuccessModal}
                 message={successMessage}
                 onClose={() => setShowSuccessModal(false)}
+            />
+
+            <LegacyBackfillModal
+                isOpen={showLegacyBackfillModal}
+                onClose={() => {
+                    setShowLegacyBackfillModal(false);
+                    setBackfillTargetProject(null);
+                }}
+                preselectedProject={backfillTargetProject}
+                projects={projects.filter(p => p.status !== 'DELETED')}
             />
 
             {deleteTarget && (

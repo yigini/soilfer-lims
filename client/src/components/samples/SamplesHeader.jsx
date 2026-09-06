@@ -47,7 +47,7 @@ const STATUS_CONFIG = [
     },
 ];
 
-const SamplesHeader = ({ facets = {}, onSync, onExport, loadingSync, onToggleQuickFilter }) => {
+const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadingSync, onToggleQuickFilter }) => {
     const lifecycleCounts = facets.lifecycle || {};
 
     return (
@@ -84,6 +84,20 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, loadingSync, onToggleQui
                             </button>
                             <InfoTooltip text="Download currently filtered list as CSV/Excel." position="bottom" />
                         </div>
+
+                        {/* Pre-Delivery Historical Analysis Backfill Action */}
+                        {onLegacyBackfill && (
+                            <div className="flex items-center">
+                                <button
+                                    onClick={onLegacyBackfill}
+                                    className="p-2 rounded-lg text-amber-600 dark:text-amber-400 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-200"
+                                    title="Pre-delivery historical sample analysis backfill (backward compatibility)"
+                                >
+                                    <History size={16} />
+                                </button>
+                                <InfoTooltip text="Backward compatibility: Ingest samples and analytical results completed prior to platform rollout." position="bottom" />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

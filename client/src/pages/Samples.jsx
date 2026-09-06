@@ -11,6 +11,7 @@ import SamplesTable from '../components/samples/SamplesTable';
 import { ChevronLeft, ChevronRight, AlertTriangle, X, Printer, Trash2 } from 'lucide-react';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ExportModal from '../components/common/ExportModal';
+import LegacyBackfillModal from '../components/projects/LegacyBackfillModal';
 
 const Samples = () => {
     const { token, user } = useAuth();
@@ -51,6 +52,7 @@ const Samples = () => {
     const [printTarget, setPrintTarget] = useState(null); // Sample to print
     const [syncing, setSyncing] = useState(false); // Kobo sync in progress
     const [isExportModalOpen, setExportModalOpen] = useState(false);
+    const [legacyModalOpen, setLegacyModalOpen] = useState(false);
 
     // Update options when facets change
     useEffect(() => {
@@ -315,6 +317,7 @@ const Samples = () => {
                 facets={facets}
                 onSync={handleSync}
                 onExport={() => setExportModalOpen(true)}
+                onLegacyBackfill={() => setLegacyModalOpen(true)}
                 loadingSync={syncing}
                 onToggleQuickFilter={handleQuickFilter}
             />
@@ -442,6 +445,13 @@ const Samples = () => {
                 onClose={() => setExportModalOpen(false)}
                 currentFilters={filters}
                 searchQuery={search}
+            />
+
+            {/* PRE-DELIVERY HISTORICAL ANALYSIS BACKFILL MODAL */}
+            <LegacyBackfillModal
+                isOpen={legacyModalOpen}
+                onClose={() => setLegacyModalOpen(false)}
+                projects={options.projects}
             />
         </div>
     );
