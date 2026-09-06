@@ -16,7 +16,11 @@ server/prisma/dev.db-wal
 server/prisma/dev - Copy*
 
 # Data
-server/data
+server/data/*
+!server/data/adminBoundaries.json
+!server/data/analysisDisplayNames.json
+!server/data/operationalChecklists.json
+!server/data/importedParameterNames.json
 server/uploads
 server/database.json
 
