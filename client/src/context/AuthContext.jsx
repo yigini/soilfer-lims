@@ -38,11 +38,18 @@ const PERMISSIONS = {
 
 export const AuthProvider = ({ children }) => {
     const { changeLanguage } = useLanguage();
+    const [token, setToken] = useState(() => {
+        try {
+            return localStorage.getItem('token') || null;
+        } catch {
+            return null;
+        }
+    });
     const [user, setUser] = useState(() => {
         try {
-            const token = localStorage.getItem('token');
-            if (token) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            const storedToken = localStorage.getItem('token');
+            if (storedToken) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             }
             return JSON.parse(localStorage.getItem('user')) || null;
         } catch {
@@ -52,8 +59,8 @@ export const AuthProvider = ({ children }) => {
 
     // Revalidate session on mount with server (Source of Truth)
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
             axios.get('/api/auth/me')
                 .then(res => {
                     const freshUser = res.data?.data || res.data;
@@ -83,10 +90,11 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await axios.post('/api/auth/login', { username, password });
             const payload = res.data?.data || res.data;
-            const { token, user: userData } = payload;
-            localStorage.setItem('token', token);
+            const { token: newToken, user: userData } = payload;
+            localStorage.setItem('token', newToken);
             localStorage.setItem('user', JSON.stringify(userData));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+            setToken(newToken);
             setUser(userData);
             return userData;
         } catch (error) {
@@ -99,6 +107,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
+        setToken(null);
         setUser(null);
     };
 
@@ -135,7 +144,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, hasAccess, hasPermission }}>
+        <AuthContext.Provider value={{ user, token, login, logout, hasAccess, hasPermission }}>
             {children}
         </AuthContext.Provider>
     );

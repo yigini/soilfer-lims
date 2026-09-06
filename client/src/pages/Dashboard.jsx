@@ -203,7 +203,8 @@ const ROLE_CONFIGS = {
 };
 
 export default function Dashboard() {
-    const { user, token } = useAuth();
+    const { user, token: ctxToken } = useAuth();
+    const token = ctxToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null) || '';
     const { subscribeToEvent } = useNotifications();
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -241,13 +242,15 @@ export default function Dashboard() {
 
     // 1. Fetch available labs & projects for selector (multi-lab roles)
     useEffect(() => {
-        if (!user || !token) return;
+        const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+        if (!user) return;
         if (['SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
-            axios.get('/api/labs', { headers: { Authorization: `Bearer ${token}` } })
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+            axios.get('/api/labs', { headers })
                 .then(res => setLabs(Array.isArray(res.data) ? res.data : []))
                 .catch(() => setLabs([]));
 
-            axios.get('/api/projects', { headers: { Authorization: `Bearer ${token}` } })
+            axios.get('/api/projects', { headers })
                 .then(res => setProjects(Array.isArray(res.data) ? res.data : []))
                 .catch(() => setProjects([]));
         }
@@ -255,7 +258,8 @@ export default function Dashboard() {
 
     // 2. Fetch Home Dashboard Bundle
     const fetchDashboardHome = useCallback(async (isBackground = false) => {
-        if (!user || !token) return;
+        const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+        if (!user) return;
         const currentReq = ++reqCounter.current;
 
         if (!isBackground) setIsLoadingHome(true);
@@ -267,9 +271,10 @@ export default function Dashboard() {
             if (paramLabId) params.labId = paramLabId;
             if (paramProjectId) params.projectId = paramProjectId;
 
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             const res = await axios.get('/api/dashboard/home', {
                 params,
-                headers: { Authorization: `Bearer ${token}` }
+                headers
             });
 
             if (currentReq !== reqCounter.current) return; // Stale response
@@ -313,7 +318,8 @@ export default function Dashboard() {
 
     // 3. Fetch Specific Queue Rows (when changing queue tab or pagination)
     const fetchQueueRows = useCallback(async (queueKey, page = 1) => {
-        if (!queueKey || !user || !token) return;
+        const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+        if (!queueKey || !user) return;
 
         setIsLoadingQueue(true);
         setQueueError(null);
@@ -326,9 +332,10 @@ export default function Dashboard() {
             if (paramLabId) params.labId = paramLabId;
             if (paramProjectId) params.projectId = paramProjectId;
 
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             const res = await axios.get(`/api/dashboard/queues/${queueKey}`, {
                 params,
-                headers: { Authorization: `Bearer ${token}` }
+                headers
             });
 
             setQueueData({
@@ -439,6 +446,27 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
                     Please contact your system administrator to assign an authorized operational role.
                 </p>
+            </div>
+        );
+    }
+
+    // Loading error state on initial bundle
+    if (homeError && !homeData) {
+        return (
+            <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 shadow-sm text-center">
+                <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                    Unable to load dashboard
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                    {homeError?.response?.data?.error || homeError?.response?.data?.message || homeError?.message || 'An error occurred while loading the dashboard data.'}
+                </p>
+                <button
+                    onClick={() => fetchDashboardHome(false)}
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700"
+                >
+                    Retry
+                </button>
             </div>
         );
     }
