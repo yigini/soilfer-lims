@@ -164,16 +164,16 @@ const Equipment = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
+                <div className="relative w-full lg:w-80 flex-shrink-0">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('equipment.searchPlaceholder', 'Search by name, tag, SN...')}
                         className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-                <div className="flex card-base rounded-lg border p-0.5 overflow-x-auto">
+                <div className="flex flex-wrap items-center gap-1 card-base rounded-lg border p-1">
                     {ASSET_TYPES.map(type => (
                         <button key={type} onClick={() => setTypeFilter(type)}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${typeFilter === type
+                            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${typeFilter === type
                                 ? 'bg-slate-700 dark:bg-slate-600 text-white shadow-sm'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
                             {type === 'ALL' ? t('common.all', 'ALL') : t(`dynamic.equipmentType.${type}.label`, type)}

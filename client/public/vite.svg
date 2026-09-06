@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="soilGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="sproutGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#84cc16" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#064e3b" />
+  <path d="M26 14 H38 V24 L48 42 C50 45.5 47.5 50 43.5 50 H20.5 C16.5 50 14 45.5 16 42 L26 24 V14 Z" fill="url(#soilGrad)" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M19 44 C21 41 43 41 45 44 C45 47 42 48.5 39 48.5 H25 C22 48.5 19 47 19 44 Z" fill="url(#amberGrad)" />
+  <path d="M32 40 V20" stroke="#86efac" stroke-width="3" stroke-linecap="round" />
+  <path d="M32 26 C26 26 22 20 23 15 C28 15 32 19 32 26 Z" fill="url(#sproutGrad)" />
+  <path d="M32 22 C37 20 42 22 43 17 C38 15 34 18 32 22 Z" fill="url(#sproutGrad)" />
+  <circle cx="32" cy="11" r="2.5" fill="#fbbf24" />
+</svg>
