@@ -10,6 +10,20 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
     let sampleCounter = 1;
 
     beforeAll(async () => {
+        await prisma.user.upsert({
+            where: { username: 'tech_tun_1' },
+            update: {},
+            create: {
+                id: 'user-tech-tun-1',
+                username: 'tech_tun_1',
+                password: 'Password123!',
+                name: 'Tech Tunisia 1',
+                email: 'tech_tun_1@example.com',
+                role: 'LAB_TECHNICIAN',
+                labId: 'TUN-LAB1'
+            }
+        });
+
         techToken = generateToken({
             id: 'user-tech-tun-1',
             username: 'tech_tun_1',

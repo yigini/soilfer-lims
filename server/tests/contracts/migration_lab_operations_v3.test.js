@@ -52,12 +52,44 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             // Fallback: copy current dev.db and inject pre-reconciliation state
             fs.copyFileSync(currentDbPath, rehearsalDbPath);
             const db = new Database(rehearsalDbPath);
+
+            // Ensure baseline sample and user exist for invariant checks
+            const sampleCount = db.prepare('SELECT COUNT(*) as c FROM "Sample"').get().c;
+            if (sampleCount === 0) {
+                db.prepare(`
+                    INSERT INTO "Sample" (id, originalId, status, preparationStatus, dryingStatus, createdAt, updatedAt)
+                    VALUES ('MIG-SMP-001', 'ORIG-MIG-001', 'ACCEPTED', 'DONE', 'DONE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).run();
+            }
+            const userCount = db.prepare('SELECT COUNT(*) as c FROM "User"').get().c;
+            if (userCount === 0) {
+                db.prepare(`
+                    INSERT INTO "User" (id, username, password, email, role, name, createdAt, updatedAt)
+                    VALUES ('usr-mig-mgr', 'mig_mgr', 'hash', 'mgr@example.com', 'LAB_MANAGER', 'Migration Manager', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).run();
+            }
+
             for (const item of METHODOLOGY_RECONCILIATION) {
-                db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(item.deprecatedMethodId);
-                db.prepare('UPDATE "Methodology" SET isDefault = 0 WHERE id = ?').run(item.canonicalMethodId);
+                const dep = db.prepare('SELECT id FROM "Methodology" WHERE id = ?').get(item.deprecatedMethodId);
+                if (dep) {
+                    db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(item.deprecatedMethodId);
+                } else {
+                    db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(item.deprecatedMethodId, item.analysisCode, 'Legacy ' + item.deprecatedMethodId);
+                }
+                const can = db.prepare('SELECT id FROM "Methodology" WHERE id = ?').get(item.canonicalMethodId);
+                if (can) {
+                    db.prepare('UPDATE "Methodology" SET isDefault = 0 WHERE id = ?').run(item.canonicalMethodId);
+                } else {
+                    db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(item.canonicalMethodId, item.analysisCode, 'Canonical ' + item.canonicalMethodId);
+                }
             }
             for (const sp of UNRESOLVED_SYNTHETIC_PLACEHOLDERS) {
-                db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(sp);
+                const existing = db.prepare('SELECT id FROM "Methodology" WHERE id = ?').get(sp);
+                if (existing) {
+                    db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(sp);
+                } else {
+                    db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(sp, 'SPEC_PARAM_LEGACY', 'Synthetic Placeholder ' + sp);
+                }
             }
             db.close();
         }
