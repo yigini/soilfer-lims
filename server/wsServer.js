@@ -177,12 +177,16 @@ function broadcastToUsers(userIds, eventType, payload) {
     userIds.forEach(uid => broadcastToUser(uid, eventType, payload));
 }
 
+const ALLOWED_GLOBAL_EVENTS = ['SYSTEM_HEALTH', 'SYSTEM_MAINTENANCE', 'SYSTEM_NOTICE'];
+
 /**
  * Broadcast an event to all users in a specific laboratory (and Super Admins).
+ * Fails closed if labId is missing to prevent leaking private lab data.
  */
 function broadcastToLab(labId, eventType, payload) {
     if (!labId) {
-        return broadcastToAll(eventType, payload);
+        if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+        return 0;
     }
     const data = JSON.stringify({ type: eventType, ...payload });
     let count = 0;
@@ -202,8 +206,13 @@ function broadcastToLab(labId, eventType, payload) {
 
 /**
  * Broadcast to ALL currently connected users.
+ * Strictly limited to allowlisted system-wide administrative events.
  */
 function broadcastToAll(eventType, payload) {
+    if (!ALLOWED_GLOBAL_EVENTS.includes(eventType)) {
+        if (DEBUG) console.warn(`[WS] Blocked broadcastToAll for non-global event: ${eventType}`);
+        return 0;
+    }
     const data = JSON.stringify({ type: eventType, ...payload });
     let count = 0;
     clients.forEach((sockets) => {

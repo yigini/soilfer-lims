@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -15,6 +16,7 @@ const Samples = () => {
     const { token, user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
+    const [searchParams] = useSearchParams();
 
     // Data State
     const [data, setData] = useState([]);
@@ -22,9 +24,15 @@ const Samples = () => {
     const [facets, setFacets] = useState({});
     const [loading, setLoading] = useState(false);
 
-    // Filter State
-    const [search, setSearch] = useState('');
-    const [filters, setFilters] = useState({});
+    // Initial Filter State from URL
+    const initialFilters = {};
+    if (searchParams.get('status')) initialFilters.status = searchParams.get('status');
+    if (searchParams.get('projectId')) initialFilters.projectId = searchParams.get('projectId');
+    if (searchParams.get('labId')) initialFilters.labId = searchParams.get('labId');
+    if (searchParams.get('country')) initialFilters.country = searchParams.get('country');
+
+    const [search, setSearch] = useState(searchParams.get('search') || searchParams.get('q') || '');
+    const [filters, setFilters] = useState(initialFilters);
     const [sort, setSort] = useState('attention');
     const [order, setOrder] = useState('desc');
 

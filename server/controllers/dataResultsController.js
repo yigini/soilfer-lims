@@ -10,6 +10,10 @@ exports.getAnalyticalResults = async (req, res) => {
         const where = {};
 
         // RBAC - THE ISOLATION FORGE
+        if (user && user.role === 'EXTERNAL_VIEWER') {
+            return res.status(403).json({ error: 'Access denied: External partners must view released reports via /result-reports', data: [], columns: [] });
+        }
+
         if (user && user.role !== 'SUPER_ADMIN') {
             const userLabId = user.labId;
             const isLabStaff = ['LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION'].includes(user.role);

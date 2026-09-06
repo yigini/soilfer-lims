@@ -77,8 +77,24 @@ class SampleWorkspaceService {
             throw err;
         }
 
+        // R1: External viewers may only view samples in their granted projects
+        if (user?.role === 'EXTERNAL_VIEWER') {
+            let userProjects = [];
+            try {
+                userProjects = typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []);
+            } catch {
+                userProjects = [];
+            }
+            if (userProjects.length > 0 && (!sample.projectCode || !userProjects.includes(sample.projectCode))) {
+                const err = new Error('Access denied: Sample does not belong to your authorized projects');
+                err.statusCode = 403;
+                err.code = 'FORBIDDEN_PROJECT';
+                throw err;
+            }
+        }
+
         // 3. Fetch submissions for this sample
-        const submissions = await prisma.submission.findMany({
+        const submissions = user?.role === 'EXTERNAL_VIEWER' ? [] : await prisma.submission.findMany({
             where: { sampleId: sample.id },
             orderBy: { submittedAt: 'desc' }
         });
@@ -342,6 +358,12 @@ class SampleWorkspaceService {
 
         // 11. Reports projection
         const publishedReports = reports.filter(r => r.status === 'PUBLISHED');
+        if (user?.role === 'EXTERNAL_VIEWER' && publishedReports.length === 0) {
+            const err = new Error('Access denied: Sample does not have an approved released report');
+            err.statusCode = 403;
+            err.code = 'REPORT_UNPUBLISHED';
+            throw err;
+        }
         const currentReleasedReport = publishedReports.length > 0 ? publishedReports[0] : null;
 
         // 12. Material Custody

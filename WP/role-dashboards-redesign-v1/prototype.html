@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SoilFER · Role dashboard design</title><link rel="stylesheet" href="prototype.css"></head>
+<body>
+<a class="skip" href="#main">Skip to work</a>
+<div class="preview"><strong>Design review · synthetic data</strong><label>Preview role <select id="role"></select></label><label>Situation <select id="scenario"><option value="normal">A working day</option><option value="empty">No work waiting</option><option value="blocked">Prerequisites pending</option><option value="stale">Refresh failed</option><option value="error">First load failed</option></select></label><button id="theme" aria-pressed="false">Dark appearance</button></div>
+<div class="layout">
+<aside class="sidebar"><div class="brand"><img src="assets/soilfer-logo.png" alt="SoilFER"><span>Laboratory information system</span></div><nav aria-label="Main navigation" id="nav"></nav><div class="sidebar-foot"><span class="avatar" id="initials"></span><div><strong id="person"></strong><small id="role-label"></small></div></div></aside>
+<div class="workspace"><div class="topbar"><span>SoilFER LIMS <span class="muted">/ Home</span></span><span id="scope" class="scope"></span></div>
+<main id="main"><header><div><div class="eyebrow" id="eyebrow"></div><h1 id="title"></h1><p id="subtitle"></p></div><button class="primary" id="primary"></button></header>
+<div class="status-line"><span id="date">Sunday, 6 September 2026 · Guatemala time</span><div><span id="freshness"></span><button class="text-button" id="refresh">Refresh</button></div></div>
+<div id="notice" role="status"></div><section class="summaries" id="summaries" aria-label="Work summary"></section>
+<div class="content-grid"><section class="queue-panel"><div class="queue-head"><div><h2 id="queue-title"></h2><p id="queue-subtitle"></p></div><label class="search"><span class="sr-only">Search this queue</span><input type="search" id="search" placeholder="Find a sample or method…"></label></div><div id="lanes" class="lanes" aria-label="Work queues"></div><div id="table-wrap"></div><div class="pagination"><span id="row-count" aria-live="polite"></span><div><button id="prev" aria-label="Previous page">Previous</button><button id="next" aria-label="Next page">Next</button></div></div></section><aside class="rail"><section><div class="eyebrow">Shift notes</div><h2 id="rail-title"></h2><div id="rail-copy"></div></section><section><div class="eyebrow">Continue elsewhere</div><div id="shortcuts"></div></section></aside></div>
+<footer class="product-footer">The source record is checked again when you open or act on work.</footer></main></div></div>
+<dialog id="detail" aria-labelledby="detail-title"><div class="dialog-top"><div><div class="eyebrow" id="detail-kind"></div><h2 id="detail-title"></h2></div><button id="close" aria-label="Close details">Close</button></div><div id="detail-body"></div><div class="dialog-foot"><span>Design preview · no laboratory record is changed</span><button id="done">Back to dashboard</button></div></dialog>
+<script src="prototype.js"></script>
+</body></html>

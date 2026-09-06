@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
@@ -14,6 +15,11 @@ const ResultReports = () => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
+    const [searchParams] = useSearchParams();
+    const paramReportId = searchParams.get('reportId');
+    const paramProjectId = searchParams.get('projectId');
+    const paramStatus = searchParams.get('status');
+
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
@@ -32,9 +38,15 @@ const ResultReports = () => {
     const fetchReports = useCallback(async (page = 1, search = query) => {
         setLoading(true);
         try {
-            const res = await axios.get('/api/reports/search', {
-                params: { q: search, page, limit: pagination.limit }
-            });
+            const params = {
+                q: search,
+                page,
+                limit: pagination.limit
+            };
+            if (paramProjectId) params.projectId = paramProjectId;
+            if (paramStatus) params.status = paramStatus;
+
+            const res = await axios.get('/api/reports/search', { params });
             setReports(res.data.reports || []);
             setPagination(res.data.pagination || { total: 0, page: 1, pages: 1, limit: 25 });
         } catch (e) {
@@ -42,11 +54,22 @@ const ResultReports = () => {
         } finally {
             setLoading(false);
         }
-    }, [query, pagination.limit]);
+    }, [query, pagination.limit, paramProjectId, paramStatus]);
 
     useEffect(() => {
         fetchReports(1, '');
-    }, []);
+    }, [fetchReports]);
+
+    // Load exact report if reportId is passed in URL
+    useEffect(() => {
+        if (paramReportId) {
+            axios.get(`/api/reports/${paramReportId}`)
+                .then(res => {
+                    if (res.data) setSelectedReport(res.data);
+                })
+                .catch(err => console.error('Failed to load report from param:', err));
+        }
+    }, [paramReportId]);
 
     const handleSearch = (e) => {
         e.preventDefault();
