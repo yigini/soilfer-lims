@@ -33,7 +33,14 @@ const ChangeView = ({ center }) => {
 };
 
 const SampleMap = ({ coordinates, title, uncertaintyM }) => {
-    const hasCoords = Boolean(coordinates && coordinates.lat && coordinates.lng);
+    const hasCoords = Boolean(
+        coordinates &&
+        coordinates.lat !== null && coordinates.lat !== undefined &&
+        coordinates.lng !== null && coordinates.lng !== undefined &&
+        !isNaN(Number(coordinates.lat)) && !isNaN(Number(coordinates.lng)) &&
+        Number(coordinates.lat) >= -90 && Number(coordinates.lat) <= 90 &&
+        Number(coordinates.lng) >= -180 && Number(coordinates.lng) <= 180
+    );
 
     if (!hasCoords) {
         return (

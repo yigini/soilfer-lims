@@ -76,24 +76,10 @@ exports.searchExpectedSamples = async (req, res) => {
             orderBy: { originalId: 'asc' }
         });
 
-        // Parse fieldMetadata and extract coordinates
+        // Use canonical coordinateResolver
+        const { resolveCoordinates } = require('../utils/coordinateResolver');
         const results = samples.map(s => {
-            let coords = null;
-            let location = null;
-            // Helper to extract value from either {value: 'x'} objects or plain strings
-            const v = (obj) => obj && typeof obj === 'object' ? obj.value : obj;
-            try {
-                const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
-                if (fm) {
-                    const lat = v(fm.latitude) || v(fm.lat) || v(fm.gps_latitude);
-                    const lng = v(fm.longitude) || v(fm.lng) || v(fm.gps_longitude) || v(fm.lon);
-                    if (lat && lng) {
-                        coords = { lat: parseFloat(lat), lng: parseFloat(lng) };
-                    }
-                    location = v(fm.location) || v(fm.site) || v(fm.village) || v(fm.district) || v(fm.site_id);
-                }
-            } catch (e) { }
-
+            const resolved = resolveCoordinates(s);
             return {
                 id: s.id,
                 originalId: s.originalId,
@@ -101,8 +87,13 @@ exports.searchExpectedSamples = async (req, res) => {
                 projectCode: s.projectCode,
                 status: s.status,
                 country: s.country,
-                coordinates: coords,
-                location
+                coordinates: resolved.isRecorded ? {
+                    lat: resolved.lat,
+                    lng: resolved.lng,
+                    accuracy: resolved.accuracy,
+                    elevation: resolved.elevation
+                } : null,
+                location: resolved.locationDescription
             };
         });
 

@@ -9,6 +9,14 @@ const crypto = require('crypto');
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
 
+// Immutable locked lifecycle statuses that must never regress via intake or draft save
+const LOCKED_INTAKE_STATUSES = [
+    'ACCEPTED', 'LAB_ID_ASSIGNED', 'PROCESSING', 'COMPLETED',
+    'APPROVED', 'ARCHIVED', 'DISPOSED', 'SUBMITTED_PARTIAL',
+    'SUBMITTED_FULL', 'IN_PROGRESS', 'RECEIVED_REJECTED'
+];
+exports.LOCKED_INTAKE_STATUSES = LOCKED_INTAKE_STATUSES;
+
 /**
  * RC-07 & RC-20: Derive confidence from evidence
  * Resists an unevidenced HIGH (e.g. manual desk pin or paste without device/field GPS)
@@ -189,10 +197,13 @@ exports.processIntake = async (req, res) => {
                 return res.status(403).json({ success: false, message: 'Access Denied: This sample belongs to another lab.' });
             }
 
-            const lockedStatuses = ['ACCEPTED', 'LAB_ID_ASSIGNED', 'PROCESSING', 'COMPLETED', 'APPROVED', 'ARCHIVED', 'DISPOSED', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'IN_PROGRESS'];
-            if (lockedStatuses.includes(sample.status) && !req.body.isDraft) {
-                console.warn(`[INTAKE] Blocked attempt to re-intake locked sample ${originalId} (Status: ${sample.status})`);
-                return res.status(403).json({ success: false, message: `Sample intake is already approved and locked (Status: ${sample.status}). Changes are not permitted.` });
+            if (LOCKED_INTAKE_STATUSES.includes(sample.status)) {
+                console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!req.body.isDraft})`);
+                return res.status(403).json({
+                    success: false,
+                    error: 'SAMPLE_LOCKED',
+                    message: `Sample intake is already locked in status '${sample.status}'. Changes are not permitted.`
+                });
             }
         }
 
@@ -279,11 +290,14 @@ exports.processIntake = async (req, res) => {
         }
 
         if (req.body.isDraft) {
+            // Never regress an already received record to DRAFT
+            const targetDraftStatus = sample.status === 'RECEIVED' ? 'RECEIVED' : 'DRAFT';
+
             history.push({
-                status: 'DRAFT',
+                status: targetDraftStatus,
                 changedBy: receivedBy,
                 timestamp: now,
-                note: 'Saved as Draft'
+                note: sample.status === 'RECEIVED' ? 'Intake draft updated (status retained as RECEIVED)' : 'Saved as Draft'
             });
 
             const currentFieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
@@ -310,10 +324,11 @@ exports.processIntake = async (req, res) => {
                 : null;
 
             const updateData = {
-                status: 'DRAFT',
+                status: targetDraftStatus,
                 history: JSON.stringify(history),
                 fieldMetadata: JSON.stringify(currentFieldMeta),
                 analysisGroupIds: JSON.stringify(analysisGroupIds || []),
+                requiredAnalyses: req.body.requiredAnalyses ? JSON.stringify(req.body.requiredAnalyses) : undefined,
                 receivedMass: parsedMass !== null && !isNaN(parsedMass) ? parsedMass : undefined,
                 massWarningAcknowledged: !!massWarningAcknowledged,
                 moistureOnArrival: moistureOnArrival || undefined,
@@ -329,34 +344,56 @@ exports.processIntake = async (req, res) => {
                     isWalkIn: isWalkIn || false,
                     receivedMass: parsedMass,
                     moistureOnArrival,
-                    foreignMaterial
+                    foreignMaterial,
+                    analysisAdditions: analysisAdditions || [],
+                    analysisRemovals: analysisRemovals || [],
+                    analysisGroupIds: analysisGroupIds || [],
+                    requiredAnalyses: req.body.requiredAnalyses || []
                 })
             };
 
-            // Validate FK before write
-            if (projectId && !isWalkIn) {
+            // Preserve project origin: client mode flag must not convert an existing project sample into a walk-in or clear its project
+            const existingProjectId = sample.projectId || sample.projectCode;
+            if (existingProjectId) {
+                updateData.projectId = sample.projectId || undefined;
+                updateData.projectCode = sample.projectCode || undefined;
+            } else if (isWalkIn) {
+                updateData.projectCode = null;
+                updateData.projectId = null;
+            } else if (projectId) {
                 const projExists = await prisma.project.findFirst({ where: { id: projectId } });
                 if (projExists) {
                     updateData.projectId = projectId;
+                    updateData.projectCode = projExists.code || projectId;
                 } else {
                     console.warn(`[INTAKE] Draft: projectId '${projectId}' not found in Project table, skipping FK.`);
                 }
             }
-            if (isWalkIn) {
-                updateData.projectCode = null;
-                updateData.projectId = null;
-            }
+
             // Ensure assignedLab is set so discard permission check works
             if (!sample.assignedLab) {
                 updateData.assignedLab = user.labId;
             }
 
-            const updated = await prisma.sample.update({
-                where: { id: sample.id },
+            // Atomic conditional update: guarantee state was not concurrently locked by another actor
+            const updateRes = await prisma.sample.updateMany({
+                where: {
+                    id: sample.id,
+                    status: { notIn: LOCKED_INTAKE_STATUSES }
+                },
                 data: updateData
             });
 
-            return res.json({ success: true, id: updated.id, message: 'Draft saved.' });
+            if (updateRes.count === 0) {
+                console.warn(`[INTAKE] Atomic conflict: sample ${sample.id} was concurrently modified or locked.`);
+                return res.status(409).json({
+                    success: false,
+                    error: 'CONCURRENT_MODIFICATION',
+                    message: 'Sample state was updated concurrently or locked by another user. Intake changes rejected.'
+                });
+            }
+
+            return res.json({ success: true, id: sample.id, originalId: sample.originalId, status: targetDraftStatus, message: 'Draft saved.' });
         }
 
         // Final Acceptance Processing
@@ -673,18 +710,22 @@ exports.processIntake = async (req, res) => {
             })
         };
 
-        // Validate FK before write
-        if (projectId && !isWalkIn) {
+        // Preserve project origin: client mode flag must not convert an existing project sample into a walk-in or clear its project
+        const existingProjectId = sample.projectId || sample.projectCode;
+        if (existingProjectId) {
+            updateData.projectId = sample.projectId || undefined;
+            updateData.projectCode = sample.projectCode || undefined;
+        } else if (isWalkIn) {
+            updateData.projectCode = null;
+            updateData.projectId = null;
+        } else if (projectId) {
             const projExists = await prisma.project.findFirst({ where: { id: projectId } });
             if (projExists) {
                 updateData.projectId = projectId;
+                updateData.projectCode = projExists.code || projectId;
             } else {
                 console.warn(`[INTAKE] Intake: projectId '${projectId}' not found in Project table, skipping FK.`);
             }
-        }
-        if (isWalkIn) {
-            updateData.projectCode = null;
-            updateData.projectId = null;
         }
 
         console.log(`[INTAKE] Updating sample ${sample.id} with status RECEIVED`);
@@ -1700,4 +1741,109 @@ exports.parseManifestEndpoint = async (req, res) => {
         return res.status(500).json({ error: 'Failed to parse manifest: ' + err.message });
     }
 };
+
+/**
+ * GET /api/reception/sample-context/:id or ?originalId=...
+ * Scoped, pure read-only intake detail resolver.
+ * Loads complete intake context (fieldMetadata, receptionData, project,
+ * resolved coordinates) without side effects or mutating self-healing writes.
+ */
+exports.getSampleIntakeContext = async (req, res) => {
+    const identifier = req.params.id || req.query.id || req.query.originalId || req.query.identifier || req.query.code;
+    if (!identifier || !String(identifier).trim()) {
+        return res.status(400).json({
+            success: false,
+            error: 'MISSING_IDENTIFIER',
+            message: 'Sample identifier is required.'
+        });
+    }
+    const cleanId = String(identifier).trim();
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findFirst({
+            where: {
+                OR: [
+                    { id: cleanId },
+                    { originalId: cleanId },
+                    { labId: cleanId }
+                ]
+            },
+            include: {
+                project: {
+                    select: {
+                        id: true,
+                        code: true,
+                        name: true,
+                        projectType: true,
+                        status: true,
+                        defaultAnalysisBundle: true
+                    }
+                }
+            }
+        });
+
+        if (!sample) {
+            return res.status(404).json({
+                success: false,
+                error: 'SAMPLE_NOT_FOUND',
+                message: `Sample '${cleanId}' not found.`
+            });
+        }
+
+        // Scope check
+        const scopeGuard = require('../utils/scopeGuard');
+        try {
+            scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
+        } catch (scopeErr) {
+            return res.status(403).json({
+                success: false,
+                error: 'ACCESS_DENIED',
+                message: 'Access denied: sample belongs to another laboratory.'
+            });
+        }
+
+        const parseJson = (val) => {
+            if (!val) return null;
+            if (typeof val === 'object') return val;
+            try { return JSON.parse(val); } catch { return null; }
+        };
+
+        const fieldMetadata = parseJson(sample.fieldMetadata) || {};
+        const receptionData = parseJson(sample.receptionData) || {};
+        const requiredAnalyses = parseJson(sample.requiredAnalyses) || [];
+        const analysisGroupIds = parseJson(sample.analysisGroupIds) || [];
+        const intakePhotos = parseJson(sample.intakePhotos) || [];
+        const foreignMaterial = parseJson(sample.foreignMaterial) || [];
+        const history = parseJson(sample.history) || [];
+
+        // Coordinate resolution
+        const { resolveCoordinates } = require('../utils/coordinateResolver');
+        const coordinates = resolveCoordinates({
+            ...sample,
+            fieldMetadata,
+            receptionData
+        });
+
+        return res.json({
+            success: true,
+            sample: {
+                ...sample,
+                fieldMetadata,
+                receptionData,
+                requiredAnalyses,
+                analysisGroupIds,
+                intakePhotos,
+                foreignMaterial,
+                history
+            },
+            coordinates,
+            project: sample.project || null
+        });
+    } catch (err) {
+        console.error('[getSampleIntakeContext] Error:', err);
+        return res.status(500).json({ success: false, error: 'SERVER_ERROR', message: err.message });
+    }
+};
+
 

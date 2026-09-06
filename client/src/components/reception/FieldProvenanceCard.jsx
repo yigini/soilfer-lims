@@ -33,14 +33,21 @@ const FieldProvenanceCard = ({ sampleData, coordinates }) => {
     const collectionDate = getVal('collectionDate') || getVal('date') || getVal('samplingDate') || 'Not recorded';
     const crop = getVal('crop') || getVal('currentCrop') || getVal('crops') || '—';
     const landUse = getVal('landUse') || getVal('landuse') || getVal('management') || '—';
-    const depth = getVal('depth') || (meta.depthTop !== undefined ? `${meta.depthTop}–${meta.depthBottom} cm` : '0–20 cm');
+    const depth = getVal('depth') || (meta.depthTop !== undefined && meta.depthBottom !== undefined ? `${meta.depthTop}–${meta.depthBottom} cm` : (sampleData.depthTopCm != null ? `${sampleData.depthTopCm}–${sampleData.depthBottomCm} cm` : 'Not recorded'));
     const organization = getVal('organization') || getVal('institution') || getVal('partner') || '—';
 
-    // Spatial coordinates extraction
-    const hasCoordinates = Boolean(coordinates?.lat && coordinates?.lng);
-    const lat = coordinates?.lat ? parseFloat(coordinates.lat) : null;
-    const lng = coordinates?.lng ? parseFloat(coordinates.lng) : null;
+    // Spatial coordinates extraction (accept valid 0 coordinates)
+    const hasCoordinates = Boolean(
+        coordinates &&
+        coordinates.lat !== null && coordinates.lat !== undefined &&
+        coordinates.lng !== null && coordinates.lng !== undefined &&
+        !isNaN(Number(coordinates.lat)) && !isNaN(Number(coordinates.lng))
+    );
+    const lat = hasCoordinates ? Number(coordinates.lat) : null;
+    const lng = hasCoordinates ? Number(coordinates.lng) : null;
     const accuracy = coordinates?.accuracy || coordinates?.positionalUncertaintyM || meta.gpsAccuracy || meta.accuracy;
+    const source = coordinates?.source || 'RECORDED';
+    const isHighAccuracyFieldGps = (source === 'FIELD_GPS' || source === 'KOBO') && accuracy && accuracy <= 20;
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
@@ -77,13 +84,13 @@ const FieldProvenanceCard = ({ sampleData, coordinates }) => {
                         <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
                             <CheckCircle size={16} className="text-emerald-600 shrink-0" />
                             <div>
-                                <span className="font-bold">Field Coordinates Verified:</span>{' '}
+                                <span className="font-bold">Field Coordinates Recorded:</span>{' '}
                                 <span className="font-mono">{lat.toFixed(5)}&deg;, {lng.toFixed(5)}&deg;</span>
                                 {accuracy && <span className="ml-1 text-emerald-700 dark:text-emerald-400">(&plusmn;{accuracy}m)</span>}
                             </div>
                         </div>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200 rounded font-semibold text-[10px]">
-                            FIELD-GRADE GPS
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 rounded font-semibold text-[10px]">
+                            {isHighAccuracyFieldGps ? 'FIELD-GRADE GPS' : (source || 'RECORDED')}
                         </span>
                     </div>
                 ) : (

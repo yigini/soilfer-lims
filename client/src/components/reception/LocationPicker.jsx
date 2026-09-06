@@ -69,14 +69,6 @@ export function deriveLocationConfidence(source, uncertaintyM) {
 }
 
 const getDefaultCenter = (countryCode) => {
-    try {
-        const saved = localStorage.getItem('lastIntakeLocation');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.lat && parsed.lng) return [parsed.lat, parsed.lng];
-        }
-    } catch (e) { /* ignore */ }
-
     if (countryCode && COUNTRY_CENTERS[countryCode.toUpperCase()]) {
         return COUNTRY_CENTERS[countryCode.toUpperCase()];
     }
@@ -119,8 +111,9 @@ const LocationPicker = ({
     errors = []
 }) => {
     const defaultCenter = useMemo(() => getDefaultCenter(countryCode), [countryCode]);
-    const [position, setPosition] = useState(value?.lat && value?.lng ? [value.lat, value.lng] : defaultCenter);
-    const [zoom, setZoom] = useState(value?.lat ? 13 : 7);
+    const hasInitialCoords = Boolean(value?.lat != null && value?.lng != null && !isNaN(Number(value.lat)) && !isNaN(Number(value.lng)));
+    const [position, setPosition] = useState(hasInitialCoords ? [Number(value.lat), Number(value.lng)] : null);
+    const [zoom, setZoom] = useState(hasInitialCoords ? 13 : 7);
 
     // Paste mode state
     const [pasteText, setPasteText] = useState('');
@@ -142,8 +135,10 @@ const LocationPicker = ({
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
 
     useEffect(() => {
-        if (value?.lat && value?.lng) {
-            setPosition([value.lat, value.lng]);
+        if (value?.lat != null && value?.lng != null && !isNaN(Number(value.lat)) && !isNaN(Number(value.lng))) {
+            setPosition([Number(value.lat), Number(value.lng)]);
+        } else {
+            setPosition(null);
         }
     }, [value?.lat, value?.lng]);
 
@@ -166,13 +161,13 @@ const LocationPicker = ({
         fetchAdminUnits();
     }, [countryCode]);
 
-    // Sync localStorage on position changes
+    // Sync localStorage on explicit coordinate values only (do not copy viewport/default center)
     useEffect(() => {
-        if (position && position[0] !== 0) {
+        if (value?.lat != null && value?.lng != null && !isNaN(Number(value.lat)) && !isNaN(Number(value.lng))) {
             try {
                 localStorage.setItem('lastIntakeLocation', JSON.stringify({
-                    lat: position[0],
-                    lng: position[1],
+                    lat: Number(value.lat),
+                    lng: Number(value.lng),
                     elevation: value?.elevation,
                     positionalUncertaintyM,
                     siteName,
@@ -183,7 +178,7 @@ const LocationPicker = ({
                 }));
             } catch (e) { /* ignore */ }
         }
-    }, [position, value?.elevation, positionalUncertaintyM, siteName, areaVillage, district, landmark, countryCode]);
+    }, [value?.lat, value?.lng, value?.elevation, positionalUncertaintyM, siteName, areaVillage, district, landmark, countryCode]);
 
     // Handle map click
     const LocationMarker = () => {
@@ -674,12 +669,12 @@ const LocationPicker = ({
 
                     {/* STATIC MAP CONTAINER - PREVENTS PAGE SHIFT */}
                     <div className="h-64 w-full rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 relative z-0 shadow-inner">
-                        <MapContainer center={position} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                        <MapContainer center={position || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                             <TileLayer
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
-                            <RecenterMap center={position} zoom={zoom} />
+                            <RecenterMap center={position || defaultCenter} zoom={zoom} />
                             <LocationMarker />
                         </MapContainer>
                     </div>
