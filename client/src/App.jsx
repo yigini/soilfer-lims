@@ -291,6 +291,7 @@ function App() {
             <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
             <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
             <Route path="/samples/:id/map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
+            <Route path="/workflow-map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
 
             {/* Restricted Routes */}
             <Route path="/my-work" element={<RequireAuth permission="ENTER_RESULTS"><MyWork /></RequireAuth>} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSampleWorkflow } from '../hooks/useSampleWorkflow';
 import WorkflowHeader from '../components/workflow/WorkflowHeader';
 import WorkflowOverviewGraph from '../components/workflow/WorkflowOverviewGraph';
@@ -18,7 +18,10 @@ import '../styles/workflow-map-v2.css';
  * Docked inspector panel at wide screens, stacked on tablet/mobile.
  */
 export default function SampleWorkflowMap() {
-    const { id } = useParams();
+    const { id: paramId } = useParams();
+    const location = useLocation();
+    const queryId = new URLSearchParams(location.search).get('sampleId');
+    const id = paramId || queryId;
     const navigate = useNavigate();
 
     const {
@@ -104,6 +107,28 @@ export default function SampleWorkflowMap() {
             }
         }
     }, [selectedItem, mapState]);
+
+    // Missing ID State
+    if (!id) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[460px] p-8 text-center">
+                <div className="p-4 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 mb-4">
+                    <AlertTriangle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">No Sample Specified</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6">
+                    A sample ID is required to display the workflow map.
+                </p>
+                <button
+                    type="button"
+                    onClick={() => navigate('/samples')}
+                    className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Return to Samples
+                </button>
+            </div>
+        );
+    }
 
     // Loading State
     if (loading && !mapState) {
