@@ -62,3 +62,5 @@ server/prisma/*.bak
 *pre_reconciliation_bak*
 server/prisma/*pre_reconciliation_bak*
 scratch/
+server/tests/.tmp/
+server/tests/.tmp*
