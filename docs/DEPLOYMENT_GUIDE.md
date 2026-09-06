@@ -15,13 +15,13 @@
 
 ---
 
-## 📖 Online Documentation (GitHub Pages)
+## 📖 In-Repository & Local Documentation
 
-* 🌐 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
 * 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
 * 🔄 **[Upgrading & Maintenance Guide](UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
+* 📚 **Interactive mdBook Site (Local)** — Run `mdbook serve docs/book` from repository root to launch the documentation site locally.
 
 ---
 
@@ -407,9 +407,9 @@ You should see the SoilFER-LIMS login page.
 | Field | Value |
 |-------|-------|
 | Username | `admin` |
-| Password | `password` |
+| Password | `<generated-initial-password>` (or value of `ADMIN_INITIAL_PASSWORD`) |
 
-You will be **immediately prompted to change your password**. Choose a strong password and remember it.
+Check the container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) for your randomly generated password. You will be **immediately prompted to change your password** on first login. Choose a strong institutional password and remember it.
 
 ---
 
@@ -797,41 +797,54 @@ Your LIMS data lives in a single file (`dev.db`). Backing it up is as simple as 
 
 ### Manual Backup
 
-```bash
-# Create a backup directory
-mkdir -p /opt/backups
+### Creating an Immediate Online Backup
 
-# Create a backup (with today's date in the filename)
-docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db
+SoilFER-LIMS runs SQLite in WAL (Write-Ahead Logging) mode. Never copy a live `dev.db` file directly while the container is running. Instead, trigger the online backup script:
+
+```bash
+# Trigger transactionally safe online backup
+docker exec soilfer-lims node scripts/backup_db.js
+
+# The backup is saved to /app/server/backups/soilfer_lims_backup_<timestamp>.db.gz
+# Copy the generated archive to your host backup directory:
+mkdir -p /opt/backups
+docker cp soilfer-lims:/app/server/backups/ /opt/
+```
+
+### Verifying Backup Integrity
+
+```bash
+# Verify SQLite integrity check and table counts inside the backup archive:
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
 ```
 
 ### Automatic Daily Backups
 
-Set up a daily backup that runs at 2 AM:
+Set up a daily cron job that triggers the online backup API:
 
 ```bash
-# Create the backup directory
-mkdir -p /opt/backups
-
-# Add a daily backup job
-echo '0 2 * * * root docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +\%Y\%m\%d).db' | sudo tee /etc/cron.d/lims-backup
-
-# Optional: delete backups older than 30 days
-echo '0 3 * * * root find /opt/backups -name "lims-*.db" -mtime +30 -delete' | sudo tee -a /etc/cron.d/lims-backup
+# Add a daily backup job at 02:00 UTC
+echo '0 2 * * * root docker exec soilfer-lims node scripts/backup_db.js' | sudo tee /etc/cron.d/lims-backup
 ```
 
 ### Restoring from a Backup
 
+To restore a database safely:
+
 ```bash
-# Stop the application
+# 1. Stop the application container to flush open connections
 cd /opt/soilfer-lims
-docker compose down
+docker compose stop
 
-# Copy the backup file into the container volume
-docker cp /opt/backups/lims-20260211.db soilfer-lims:/app/server/prisma/dev.db
+# 2. Run the restore utility against the named volume
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
 
-# Restart
-docker compose up -d   # add -f docker-compose.global.yml if using global mode
+# 3. Restart the container
+docker compose start
+
+# 4. Verify application health
+curl -f http://localhost/api/health
 ```
 
 ## 9.2 Updating SoilFER-LIMS
@@ -892,11 +905,14 @@ cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
 const bcrypt=require('bcryptjs');
+const crypto=require('crypto');
 const p=new PrismaClient();
 (async()=>{
-  const hash=await bcrypt.hash('password',10);
+  const tempPass = crypto.randomBytes(6).toString('base64url');
+  const hash=await bcrypt.hash(tempPass,10);
   await p.user.updateMany({where:{username:'admin'},data:{password:hash,mustChangePassword:true}});
-  console.log('Password reset to: password');
+  console.log('Password reset successfully.');
+  console.log('Temporary password:', tempPass);
   process.exit(0);
 })()
 "
@@ -905,7 +921,7 @@ const p=new PrismaClient();
 exit
 ```
 
-Now log in with `admin` / `password` and set a new password.
+Now log in with `admin` and your temporary password, then set a new institutional password.
 
 ---
 
@@ -1019,15 +1035,19 @@ docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
 | Restart LIMS | `cd /opt/soilfer-lims && docker compose restart` |
 | View logs | `docker logs soilfer-lims -f --tail 50` |
 | Check status | `docker ps` |
-| Backup database | `docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db` |
+| Backup database | `docker exec soilfer-lims node scripts/backup_db.js` |
+| Verify backup | `docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<file>.db.gz` |
+| Restore database | `docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups soilfer-lims-app node scripts/restore_db.js /app/server/backups/<file>.db.gz` |
 | Update LIMS | `cd /opt/soilfer-lims && git pull && docker compose down && docker compose up -d --build` |
 
-## Default Credentials
+## Initial Administration Credentials
 
-| Mode | Username | Password |
-|------|----------|----------|
-| Local | `admin` | `password` |
-| Global | `admin` | `password` |
+| Mode | Username | Initial Password | Role |
+|------|----------|------------------|------|
+| Local | `admin` | `<generated-initial-password>` (printed on startup) | Lab Manager |
+| Global | `admin` | `<generated-initial-password>` (printed on startup) | Super Admin |
+
+*Note: Initial password is generated randomly on first seed unless `ADMIN_INITIAL_PASSWORD` is supplied in `.env`. Password change is enforced on first login.*
 
 ## Key URLs
 
@@ -1036,6 +1056,17 @@ docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
 | Login page | `https://your-domain.com` |
 | Health check | `https://your-domain.com/api/health` |
 | GitHub repo | `https://github.com/yigini/soilfer-lims` |
+
+---
+
+## Scope & Validation Responsibility
+
+SoilFER-LIMS provides analytical data management tools, calculation routines, and quality record structures. Each adopting laboratory remains responsible for:
+- Validating analytical methods, calculations, and instruments prior to reporting operational results.
+- Establishing and approving method-specific quality control acceptance thresholds (blanks, duplicates, and reference materials).
+- Managing user access controls, role assignments, and password rotation policies according to institutional security standards.
+- Ensuring compliance with national, regional, and international laboratory accreditation requirements (such as ISO/IEC 17025).
+- Implementing routine off-site database backups and validating disaster recovery procedures.
 
 ---
 

@@ -11,7 +11,9 @@ When a new version is released, updating is simple. Your data is safe — it liv
 ssh root@YOUR_SERVER_IP
 
 # 2. Back up your database first (always!)
-docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-pre-update-$(date +%Y%m%d).db
+docker exec soilfer-lims node scripts/backup_db.js
+mkdir -p /opt/backups
+docker cp soilfer-lims:/app/server/backups/ /opt/
 
 # 3. Pull the latest code
 cd /opt/soilfer-lims
@@ -47,14 +49,17 @@ Then open your LIMS in the browser and verify it loads correctly.
 If something goes wrong with the update:
 
 ```bash
-# 1. Restore the database backup
-docker compose down
-docker cp /opt/backups/lims-pre-update-20260211.db soilfer-lims:/app/server/prisma/dev.db
-
-# 2. Roll back the code
+# 1. Stop containers
 cd /opt/soilfer-lims
-git checkout HEAD~1   # Go back to the previous version
+docker compose stop
 
-# 3. Rebuild
+# 2. Restore the database backup if schema changes occurred
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
+
+# 3. Roll back the code to previous commit or release tag
+git checkout HEAD~1
+
+# 4. Rebuild and restart
 docker compose up -d --build
 ```

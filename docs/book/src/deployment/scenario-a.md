@@ -120,9 +120,9 @@ You should see the SoilFER-LIMS login page! 🎉
 | Field | Value |
 |-------|-------|
 | **Username** | `admin` |
-| **Password** | `password` |
+| **Password** | `<generated-initial-password>` (or set via `ADMIN_INITIAL_PASSWORD`) |
 
-You will be **immediately prompted to change your password**. Choose a strong password (at least 12 characters, with a mix of letters, numbers, and symbols) and remember it or store it securely.
+Check your container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) for your randomly generated password. You will be **immediately prompted to change your password**. Choose a strong password (at least 12 characters, with a mix of letters, numbers, and symbols) and remember it or store it securely.
 
 ---
 

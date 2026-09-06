@@ -25,14 +25,17 @@ cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
 const bcrypt=require('bcryptjs');
+const crypto=require('crypto');
 const p=new PrismaClient();
 (async()=>{
-  const hash=await bcrypt.hash('password',10);
+  const tempPass = crypto.randomBytes(6).toString('base64url');
+  const hash=await bcrypt.hash(tempPass,10);
   await p.user.updateMany({
     where:{username:'admin'},
     data:{password:hash, mustChangePassword:true}
   });
-  console.log('Password reset to: password');
+  console.log('Password reset successfully.');
+  console.log('Temporary password:', tempPass);
   process.exit(0);
 })()
 "
@@ -48,9 +51,9 @@ exit
 
 Go to your LIMS URL and log in with:
 - **Username:** `admin`
-- **Password:** `password`
+- **Password:** `<temporary-password>` (from step 3 above)
 
-You'll be prompted to set a new password immediately.
+You'll be prompted to set a new institutional password immediately.
 
 ---
 

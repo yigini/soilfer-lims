@@ -38,8 +38,8 @@ Welcome to the **SoilFER-LIMS Administration Guide**. This document is designed 
 1. Open your web browser to your LIMS domain (e.g. `https://lims.your-institution.org` or `http://localhost`).
 2. Sign in with the primary administrative credentials:
    * **Username:** `admin`
-   * **Password:** `password`
-3. Upon first login, the system will prompt you to replace the default password with an institutional-strength passphrase (minimum 8 characters with letters, numbers, and symbols).
+   * **Password:** The initial password randomly generated upon database seed (displayed once in server startup logs as `<generated-initial-password>`) or configured via `ADMIN_INITIAL_PASSWORD` in your `.env` file.
+3. Upon first login, the system will prompt you to replace the initial password with an institutional-strength passphrase (minimum 8 characters with letters, numbers, and symbols).
 4. Navigate to the **Admin Panel** (`/admin`) using the top-right navigation menu.
 
 > 💡 **Tip:** In **Global Mode** (`DEPLOYMENT_MODE=global`), the initial `admin` account possesses the `SUPER_ADMIN` role, enabling multi-laboratory management. In **Local Mode**, `admin` operates as the primary `LAB_MANAGER`.
@@ -97,16 +97,17 @@ Group common laboratory determinations into 1-click packages for intake officers
 
 ---
 
-## 5. ISO/IEC 17025 Quality Control & Batch Disposition
+## 5. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
 
-Quality assurance is embedded into every analytical batch:
+Quality assurance is embedded into every analytical batch to support an ISO/IEC 17025 aligned management system:
 
-1. **Mandatory QC Samples**:
-   * **Method Blanks:** Checked against maximum background limit ($\le 0.05$).
-   * **Analytical Duplicates:** Verified using Relative Percent Difference ($\text{RPD} \le 10.0\%$).
-   * **Certified Reference Materials (CRMs):** Verified against certified recovery windows ($90.0\% \le \text{Recovery} \le 110.0\%$).
-2. **Automated Evaluation:** Batches are automatically classified as `QC_PASS` or `QC_FAIL` by the calculation engine.
-3. **Manager Disposition Overrides:** When natural soil heterogeneity causes duplicate failure, only a `LAB_MANAGER` can sign a `PROCEED_WITH_WARNING` disposition with a mandatory written justification recorded in the immutable audit log.
+1. **Batch QC Samples**:
+   * **Method Blanks:** Checked against default background limit ($\le 0.05$).
+   * **Analytical Duplicates:** Verified using Relative Percent Difference (default $\text{RPD} \le 10.0\%$).
+   * **Certified Reference Materials (CRMs):** Verified against recovery windows (default $90.0\% \le \text{Recovery} \le 110.0\%$).
+   * *Note: Thresholds are configurable defaults. Laboratories must validate and approve method-specific acceptance limits.*
+2. **Automated Evaluation:** Batches are classified as `QC_PASS` or `QC_FAIL` by the calculation engine based on configured limits.
+3. **Manager Disposition Overrides:** When natural soil heterogeneity causes duplicate failure, only an authorized `LAB_MANAGER` can sign a `PROCEED_WITH_WARNING` disposition with a mandatory written justification recorded in the audit trail.
 
 ---
 
@@ -131,52 +132,67 @@ curl -H "X-API-Key: sis_live_a8f9c2d1..." \
 
 Connect field sampling campaigns directly with the laboratory reception desk:
 
-1. Open **Admin Panel → KoboToolbox Integration** (`/admin?tab=kobo`).
-2. Enter your KoboToolbox server endpoint (e.g. `https://kf.kobotoolbox.org`) and your API Account Token.
-3. Select the active sampling survey form.
-4. Field records, geographic GPS coordinates, depth horizons ($0\text{--}20\text{ cm}$, $20\text{--}50\text{ cm}$), and bag photographs will synchronize automatically into the **Reception** queue as expected arrivals.
+1. Open **Projects** (`/projects`) and select your target project.
+2. Open **KoboToolbox Settings** within the project configuration.
+3. Enter your KoboToolbox server endpoint (e.g. `https://kf.kobotoolbox.org`) and your API Account Token.
+4. Select the active sampling survey form.
+5. Field records, geographic GPS coordinates, depth horizons ($0\text{--}20\text{ cm}$, $20\text{--}50\text{ cm}$), and bag photographs will synchronize automatically into the **Reception** queue as expected arrivals.
 
 ---
 
-## 8. Historical Analysis Backfill (Pre-Delivery Compatibility)
+## 8. Historical Analysis Data Ingestion
 
-For laboratories with thousands of historical soil samples analyzed prior to SoilFER LIMS deployment:
+For laboratories migrating historical soil datasets analyzed prior to SoilFER LIMS deployment:
 
-1. Open the **Projects** console (`/projects`).
-2. Select your target project and click **Historical Analysis Backfill**.
-3. Use the guided backfill modal to:
-   * Specify legacy sample ID ranges and collection intervals.
-   * Attach historical standard operating procedures.
-   * Ingest pre-analyzed determinations with the formal `PROVENANCE: PRE_DELIVERY_BACKFILL` audit tag.
-4. Historical records are preserved for national reporting without corrupting active chain-of-custody ledgers.
+1. Authorized Intake Officers and Lab Managers can open the historical ingestion engine directly at **Admin Panel → Legacy Import** (`/admin/legacy-import`) or via the backfill informational modal in **Projects** (`/projects`).
+2. Upload a standard `.csv` file (plain text comma-separated values).
+3. The engine parses and previews CSV headers.
+4. Map each column to:
+   * A canonical analysis code from the method catalogue.
+   * A validated laboratory methodology.
+   * A controlled measurement unit.
+5. Review the preview validation check to resolve any unmapped columns or format discrepancies.
+6. Execute import. Successfully ingested records are stored with standard provenance and recorded in the audit log.
 
 ---
 
-## 9. Localization, Branding & Translation Editor
+## 9. Localization, Branding & Language Editor
 
 SoilFER-LIMS provides multi-lingual access in English, Spanish (`es` and `es-419`), French, and Portuguese:
 
-1. Open **Admin Panel → Translations** (`/admin?tab=translations`).
-2. Choose your language.
+1. Open **Admin Panel → Languages** (`/admin?tab=languages`).
+2. Choose your target language.
 3. Modify any UI label or scientific terminology in real time.
-4. Click **Save Translations** — changes update immediately across all connected users.
+4. Click **Save Translations** — changes update immediately across connected sessions.
 
 ---
 
 ## 10. Automated Backups & Disaster Recovery
 
-### Automated Nightly Database Backup
-Configure a daily cron job on the host machine to back up the SQLite WAL database:
+SoilFER-LIMS stores all database records in SQLite with Write-Ahead Logging (WAL) enabled.
 
+> [!WARNING]
+> **Do not copy a live `dev.db` file directly.** Doing so risks creating an inconsistent copy due to uncommitted WAL transactions. Always use the provided online backup utilities.
+
+### Creating an Online Backup
+Execute an online backup inside the running container:
 ```bash
-# Open host crontab editor
-crontab -e
-
-# Add automated daily backup at 02:00 UTC:
-0 2 * * * docker exec -w /app/server soilfer-lims node scripts/backup_db.js
+docker exec soilfer-lims node scripts/backup_db.js
 ```
+The compressed backup is stored at `/app/server/backups/soilfer_lims_backup_<timestamp>.db.gz` inside the `lims-backups` Docker named volume.
 
-Backups are saved with UTC timestamps in `/opt/soilfer-lims/server/backups/`.
+### Verifying and Restoring Backups
+```bash
+# 1. Verify backup archive integrity:
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
+
+# 2. To restore (stop application first to ensure clean state):
+docker compose stop
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
+docker compose start
+curl -f http://localhost/api/health
+```
 
 ---
 
@@ -186,6 +202,18 @@ Prior to commissioning your laboratory system for official use, verify the follo
 
 - [ ] **HTTPS Enforced:** Strict Transport Security (HSTS) and automatic HTTP $\rightarrow$ HTTPS redirection active.
 - [ ] **High-Entropy Secrets:** Ensure `JWT_SECRET` in `.env` is at least 64 random alphanumeric characters.
-- [ ] **Default Passwords Changed:** Change passwords for `admin`, `mgr_*`, and `tech_*` demo accounts.
+- [ ] **Initial Password Changed:** Change the generated administrator password immediately upon first login.
+- [ ] **User Role Least-Privilege:** Assign users strictly to required roles (`SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `LAB_MANAGER`).
 - [ ] **Firewall Restricted:** Only ports `80` and `443` should be reachable publicly. Port `22` (SSH) restricted to authorized administrative IPs.
 - [ ] **Branding Protection:** Partner logos and institutional badges locked by global `SUPER_ADMIN`.
+
+---
+
+## 12. Scope & Validation Responsibility
+
+SoilFER-LIMS provides analytical data management tools, calculation routines, and quality record structures. Each adopting laboratory remains responsible for:
+- Validating analytical methods, calculations, and instruments prior to reporting operational results.
+- Establishing and approving method-specific quality control acceptance thresholds (blanks, duplicates, and reference materials).
+- Managing user access controls, role assignments, and password rotation policies according to institutional security standards.
+- Ensuring compliance with national, regional, and international laboratory accreditation requirements (such as ISO/IEC 17025).
+- Implementing routine off-site database backups and validating disaster recovery procedures.

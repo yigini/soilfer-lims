@@ -98,7 +98,7 @@ You should see the SoilFER-LIMS login page! 🎉
 
 Log in with:
 - **Username:** `admin`
-- **Password:** `password`
+- **Password:** `<generated-initial-password>` (check startup logs with `docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`)
 
 ---
 

@@ -20,7 +20,9 @@ You should see the login page.
 | Field | Value |
 |-------|-------|
 | **Username** | `admin` |
-| **Password** | `password` |
+| **Password** | `<generated-initial-password>` (or set via `ADMIN_INITIAL_PASSWORD`) |
+
+Check your container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) to retrieve your generated initial password.
 
 Click **"Sign In"**.
 
@@ -28,7 +30,7 @@ Click **"Sign In"**.
 
 ## Step 3: Change Your Password
 
-You will be immediately prompted to change the default password. This is mandatory — you cannot skip it.
+You will be immediately prompted to change the initial password. This is mandatory — you cannot skip it.
 
 Choose a strong password:
 - At least **12 characters** long

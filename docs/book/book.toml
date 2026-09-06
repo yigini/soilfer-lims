@@ -1,6 +1,6 @@
 [book]
 title = "SoilFER-LIMS — Complete Deployment & User Guide"
-authors = ["FAO Global Soil Partnership / SoilFER Programme"]
+authors = ["SoilFER-LIMS Documentation Team"]
 description = "Step-by-step guide for deploying and using the SoilFER Laboratory Information Management System"
 language = "en"
 src = "src"

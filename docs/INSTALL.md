@@ -9,19 +9,19 @@
 
 [![Quickstart](https://img.shields.io/badge/Quickstart-Beginner%20Friendly-emerald.svg)](#)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](../Dockerfile)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B%20%7C%2020%2B-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B%20%7C%2022%2B-green.svg)](https://nodejs.org/)
 
 </div>
 
 ---
 
-## 📖 Online Documentation (GitHub Pages)
+## 📖 In-Repository & Local Documentation
 
-* 🌐 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
 * 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
 * 🔄 **[Upgrading & Maintenance Guide](UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
+* 📚 **Interactive mdBook Site (Local)** — Run `mdbook serve docs/book` from the repository root to read the book locally.
 
 ---
 
@@ -217,8 +217,8 @@ curl http://localhost/api/health
 Go to **http://soillab.org** — you should see the LIMS login page!
 
 - **Username:** `admin`
-- **Password:** `password`
-- You'll be asked to change the password on first login.
+- **Password:** `<generated-initial-password>` (check startup logs with `docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`)
+- You will be prompted to change your password immediately on first login.
 
 ### A5. Add SSL (HTTPS) — Recommended
 
@@ -400,7 +400,7 @@ sudo systemctl reload nginx
 Open **http://lims.mainsite.org** in your browser. You should see the LIMS login page.
 
 - **Username:** `admin`
-- **Password:** `password`
+- **Password:** `<generated-initial-password>` (from container logs, or set via `ADMIN_INITIAL_PASSWORD`)
 
 ### B5. Add SSL for the Subdomain
 
@@ -465,22 +465,45 @@ sudo certbot --apache -d lims.mainsite.org
 ### First Login
 
 1. Open your LIMS URL
-2. Log in with `admin` / `password`
-3. **Change the password immediately** (you'll be prompted)
+2. Log in with `admin` and your `<generated-initial-password>`
+3. **Change the password immediately** when prompted
 4. Go to **Settings** → update your laboratory name, address, contact details
-5. Create user accounts for your team
+5. Create user accounts for your team under **Admin Panel → Users** (`/admin?tab=users`)
 
 ### Backup Your Database
 
-Your data lives in a single SQLite file. Back it up regularly:
+SoilFER-LIMS uses SQLite in WAL mode. Never copy live `dev.db` files directly. Trigger the online backup script inside the container:
 
 ```bash
-# Create a backup
-docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db
+# Trigger an online compressed backup:
+docker exec soilfer-lims node scripts/backup_db.js
 
-# Set up daily automatic backups at 2 AM
+# Copy the backup archive to host storage:
 mkdir -p /opt/backups
-echo "0 2 * * * root docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-\$(date +\%Y\%m\%d).db" | sudo tee /etc/cron.d/lims-backup
+docker cp soilfer-lims:/app/server/backups/ /opt/
+
+# Verify backup integrity:
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
+
+# Set up daily automated backup at 02:00 UTC:
+echo "0 2 * * * root docker exec soilfer-lims node scripts/backup_db.js" | sudo tee /etc/cron.d/lims-backup
+```
+
+### Restoring from Backup
+
+To restore safely:
+```bash
+# Stop the application container
+cd /opt/soilfer-lims
+docker compose stop
+
+# Run restore utility in disposable container
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
+
+# Restart application container
+docker compose start
+curl -f http://localhost/api/health
 ```
 
 ### Updating to a New Version
@@ -492,7 +515,18 @@ docker compose down
 docker compose up -d --build     # or add -f docker-compose.global.yml for Scenario A
 ```
 
-> Your database is preserved across updates — it lives in a Docker volume.
+> Your database is preserved across updates — it lives in the Docker volume `lims-data`.
+
+---
+
+## ⚖️ Scope & Validation Responsibility
+
+SoilFER-LIMS provides analytical data management tools, calculation routines, and quality record structures. Each adopting laboratory remains responsible for:
+- Validating analytical methods, calculations, and instruments prior to reporting operational results.
+- Establishing and approving method-specific quality control acceptance thresholds (blanks, duplicates, and reference materials).
+- Managing user access controls, role assignments, and password rotation policies according to institutional security standards.
+- Ensuring compliance with national, regional, and international laboratory accreditation requirements (such as ISO/IEC 17025).
+- Implementing routine off-site database backups and validating disaster recovery procedures.
 
 ### Checking Logs
 
