@@ -135,13 +135,13 @@ function resolveRunProfile(analysis, instrument, requestedCapacity, requestedPro
 }
 
 exports.createBatch = async (req, res) => {
-    const { analysis, instrument, notes, profile: reqProfile, capacity: reqCapacity, maxCapacity: reqMaxCap } = req.body;
+    const { id, analysis, instrument, notes, profile: reqProfile, capacity: reqCapacity, maxCapacity: reqMaxCap } = req.body;
     const user = req.user;
 
     try {
         if (!analysis) return res.status(400).json({ error: 'Analysis type required' });
 
-        const batchId = `BATCH-${Date.now()}`;
+        const batchId = (typeof id === 'string' && id.trim()) ? id.trim() : `BATCH-${Date.now()}`;
         const now = new Date();
 
         const runProfile = resolveRunProfile(analysis, instrument, reqMaxCap || reqCapacity, reqProfile);
@@ -190,7 +190,7 @@ exports.createBatch = async (req, res) => {
 exports.getBatches = async (req, res) => {
     const { status, analysis } = req.query;
     try {
-        let where = scopeGuard.buildScopedWhere(req.user, {}, { labField: 'labId' });
+        let where = scopeGuard.buildScopedWhere(req.user, {}, { entityType: 'Generic', labField: 'labId', altLabField: null });
 
         if (status) where.status = status;
         if (analysis) where.analysis = analysis;

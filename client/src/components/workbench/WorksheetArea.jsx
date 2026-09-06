@@ -2,13 +2,14 @@ import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Filter, Search, Clipboard, ArrowRight, CheckCircle2,
-    AlertTriangle, Sparkles, Check
+    AlertTriangle, Sparkles, Check, Layers
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import WorkbenchInspector from './WorkbenchInspector';
 import PastePreviewModal from './PastePreviewModal';
+import BatchModal from './BatchModal';
 
 /**
  * WorksheetArea
@@ -27,6 +28,7 @@ export default function WorksheetArea({
     onResolveConflict,
     onReviewRecord,
     onOpenSpectralIntake,
+    onBatchUpdated,
     isDiscarding = false
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
@@ -41,6 +43,7 @@ export default function WorksheetArea({
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRows, setSelectedRows] = useState(new Set());
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
     useEffect(() => {
         if (initialSampleId && items.length > 0) {
@@ -140,14 +143,26 @@ export default function WorksheetArea({
                     </label>
 
                     {!isSpectral && !isOperationalGate && (
-                        <button
-                            type="button"
-                            onClick={() => setIsPasteModalOpen(true)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
-                        >
-                            <Clipboard size={13} />
-                            <span>Paste Values</span>
-                        </button>
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setIsPasteModalOpen(true)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                            >
+                                <Clipboard size={13} />
+                                <span>Paste Values</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsBatchModalOpen(true)}
+                                data-testid="open-batch-modal-btn"
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                            >
+                                <Layers size={13} />
+                                <span>Batch & QC Runs</span>
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -441,6 +456,15 @@ export default function WorksheetArea({
                 onApply={handlePasteApply}
                 currentItems={items}
                 analysisCode={activeGroup?.analysis || ''}
+            />
+
+            {/* Batch & QC Modal */}
+            <BatchModal
+                isOpen={isBatchModalOpen}
+                onClose={() => setIsBatchModalOpen(false)}
+                analysisCode={activeGroup?.analysis || ''}
+                selectedWorkItemIds={Array.from(selectedRows)}
+                onBatchUpdated={onBatchUpdated}
             />
         </div>
     );

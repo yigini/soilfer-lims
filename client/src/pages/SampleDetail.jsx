@@ -305,6 +305,16 @@ const SampleDetail = () => {
         }
     };
 
+    const handleApproveSample = async () => {
+        try {
+            await axios.post(`/api/samples/${id}/approve`, {});
+            showInfo(t('common.success', 'Success'), 'Sample approved successfully.');
+            fetchWorkspaceData(true);
+        } catch (err) {
+            showInfo(t('common.error', 'Approval Failed'), err.response?.data?.error || err.message);
+        }
+    };
+
     const handleArchive = async () => {
         try {
             await axios.post(`/api/samples/${id}/archive`, {});
@@ -500,6 +510,18 @@ const SampleDetail = () => {
                                 >
                                     <FileText size={14} />
                                     View report v{currentReleasedReport.version || 1}
+                                </button>
+                            )}
+
+                            {/* Final Approve Sample Button */}
+                            {isManager && identity.status !== 'APPROVED' && (
+                                <button
+                                    onClick={handleApproveSample}
+                                    data-testid="final-approve-sample-btn"
+                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
+                                >
+                                    <ShieldCheck size={14} />
+                                    Final approve sample
                                 </button>
                             )}
 

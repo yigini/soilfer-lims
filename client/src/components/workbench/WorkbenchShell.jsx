@@ -452,6 +452,7 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                             setSelectedSpectralItem(item);
                             setIsSpectralModalOpen(true);
                         }}
+                        onBatchUpdated={fetchQueue}
                     />
                 )}
 

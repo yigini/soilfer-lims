@@ -1,6 +1,6 @@
 {
   "meta": {
-    "executedAt": "2026-09-06T13:17:37.038Z",
+    "executedAt": "2026-09-06T13:59:17.510Z",
     "targetUrl": "http://127.0.0.1:5059",
     "sampleCount": 40,
     "runProfiles": {
@@ -25,23 +25,21 @@
       "name": "Profile Capacity Boundary Rejection",
       "passed": true,
       "details": {
-        "expectedStatus": 400,
-        "observedStatus": 400,
-        "error": "Cannot add item WI-PH-037: No available non-QC rack positions remaining in profile RACK_40 (capacity: 40)",
-        "summary": "37th sample rejected from RACK_40 (capacity boundary honored)"
+        "observedErrorBanner": "Boundary error (HTTP 400): Cannot add item WI-PH-037: No available non-QC rack positions remaining in profile RACK_40 (capacity: 40)",
+        "summary": "37th sample rejected from RACK_40 with on-screen boundary error banner"
       },
-      "timestamp": "2026-09-06T13:17:39.612Z"
+      "timestamp": "2026-09-06T13:59:26.599Z"
     },
     {
       "name": "Multi-Run 40-Sample Allocation (36 + 4)",
       "passed": true,
       "details": {
-        "run1Allocated": 36,
-        "run2Allocated": 4,
-        "reservedSlot1Protected": true,
-        "summary": "40 samples allocated over Run 1 (36) and Run 2 (4) with reserved QC slots"
+        "run1Count": 36,
+        "run2Count": 4,
+        "slot1ReservedForBlank": true,
+        "summary": "40 samples allocated over Run 1 (36) and Run 2 (4) via UI with slot 1 reserved"
       },
-      "timestamp": "2026-09-06T13:17:39.701Z"
+      "timestamp": "2026-09-06T13:59:34.368Z"
     },
     {
       "name": "Desktop Layout (1440x900)",
@@ -49,7 +47,7 @@
       "details": {
         "summary": "Workbench shell rendered on desktop viewport"
       },
-      "timestamp": "2026-09-06T13:17:41.264Z"
+      "timestamp": "2026-09-06T13:59:35.588Z"
     },
     {
       "name": "Responsive Viewport (375x667)",
@@ -59,7 +57,7 @@
         "height": 667,
         "summary": "No horizontal overflow or chunk errors"
       },
-      "timestamp": "2026-09-06T13:17:41.795Z"
+      "timestamp": "2026-09-06T13:59:36.118Z"
     },
     {
       "name": "Method Switching via UI Controls",
@@ -70,7 +68,7 @@
         "dbPersistedMethod": "ISO_10390_H2O",
         "summary": "Switched PH_H2O to ISO_10390_H2O via dropdown and Save button"
       },
-      "timestamp": "2026-09-06T13:17:45.498Z"
+      "timestamp": "2026-09-06T13:59:40.101Z"
     },
     {
       "name": "Worksheet Decimal Data Entry",
@@ -79,7 +77,7 @@
         "enteredValue": "6.45",
         "summary": "Typed 6.45 into UAT-SMP-001 input with Enter navigation"
       },
-      "timestamp": "2026-09-06T13:17:50.086Z"
+      "timestamp": "2026-09-06T13:59:45.252Z"
     },
     {
       "name": "Batch Paste Modal Preview & Apply",
@@ -89,7 +87,7 @@
         "excluded": "3 Excluded",
         "summary": "Parsed tab-separated batch, flagged 3 exclusions, applied 34 matched drafts"
       },
-      "timestamp": "2026-09-06T13:17:52.235Z"
+      "timestamp": "2026-09-06T13:59:47.423Z"
     },
     {
       "name": "Out-of-Bounds Range Validation",
@@ -101,18 +99,31 @@
         ],
         "summary": "pH value 99.0 flagged and blocked from completion"
       },
-      "timestamp": "2026-09-06T13:17:52.243Z"
+      "timestamp": "2026-09-06T13:59:47.432Z"
     },
     {
       "name": "Saved Draft Reload Persistence",
       "passed": true,
       "details": {
-        "reloadedUat001": "6.45",
-        "reloadedUat002": "6.50",
-        "reloadedUat036": "7.15",
-        "summary": "All 40 draft determinations intact in DOM after page reload"
+        "totalSamplesVerifiedInDom": 40,
+        "missingSamples": [],
+        "sampleValues": [
+          {
+            "sCode": "UAT-SMP-001",
+            "val": "6.45"
+          },
+          {
+            "sCode": "UAT-SMP-002",
+            "val": "6.50"
+          },
+          {
+            "sCode": "UAT-SMP-003",
+            "val": "6.53"
+          }
+        ],
+        "summary": "All 40/40 draft determinations verified intact in DOM after reload"
       },
-      "timestamp": "2026-09-06T13:17:56.001Z"
+      "timestamp": "2026-09-06T13:59:51.058Z"
     },
     {
       "name": "Texture USDA Classification in UI",
@@ -122,7 +133,7 @@
         "sum100Shown": true,
         "summary": "Sand 45/Silt 35/Clay 20 dynamically computed USDA Loam in UI"
       },
-      "timestamp": "2026-09-06T13:17:58.838Z"
+      "timestamp": "2026-09-06T13:59:54.117Z"
     },
     {
       "name": "Texture Closure Failure Warning in UI",
@@ -131,7 +142,7 @@
         "sum115Warned": true,
         "summary": "Sum 115% triggered on-screen closure warning"
       },
-      "timestamp": "2026-09-06T13:17:58.838Z"
+      "timestamp": "2026-09-06T13:59:54.117Z"
     },
     {
       "name": "Two-Step Recording & Submission Flow",
@@ -140,9 +151,11 @@
         "reviewOpened": true,
         "step1Recorded": true,
         "step2Submitted": true,
-        "summary": "Preflight review confirmed, determinations recorded, 40 samples submitted for review"
+        "dbPersistedSubmittedCount": 40,
+        "dbSubmissionRecords": 40,
+        "summary": "All 40/40 items confirmed SUBMITTED in database with 40 submission packages"
       },
-      "timestamp": "2026-09-06T13:18:03.603Z"
+      "timestamp": "2026-09-06T13:59:59.117Z"
     },
     {
       "name": "QC Batch Evaluation & Authorization Guard",
@@ -150,20 +163,21 @@
       "details": {
         "run1Status": "QC_PASS",
         "run2Status": "QC_PASS",
-        "techCloseForbidden": true,
-        "summary": "Runs 1 & 2 passed QC policy; unauthorized close rejected with 403"
+        "techCloseForbiddenBanner": "HTTP 403: Only lab managers can close batches.",
+        "summary": "Runs 1 & 2 passed QC evaluation to QC_PASS in UI; close attempt rejected with 403 banner"
       },
-      "timestamp": "2026-09-06T13:18:03.623Z"
+      "timestamp": "2026-09-06T14:00:05.209Z"
     },
     {
       "name": "Manager On-Screen Review & Approval",
       "passed": true,
       "details": {
         "acceptedInUi": true,
-        "sampleStatus": "APPROVED",
-        "summary": "Manager reviewed submitted evidence, accepted results, and approved sample"
+        "finalApproveButtonClicked": true,
+        "sampleStatusInDb": "APPROVED",
+        "summary": "Manager accepted determinations, clicked on-screen Final Approve button, sample APPROVED in DB"
       },
-      "timestamp": "2026-09-06T13:18:12.101Z"
+      "timestamp": "2026-09-06T14:00:26.548Z"
     },
     {
       "name": "Mandatory Amendment Reason Enforcement",
@@ -174,7 +188,7 @@
         "dbPersistedReason": "Client requested verified re-test of soil pH in duplicate",
         "summary": "Blank reason disabled in UI; amendment with reason committed to database"
       },
-      "timestamp": "2026-09-06T13:18:16.157Z"
+      "timestamp": "2026-09-06T14:00:30.733Z"
     },
     {
       "name": "Spectroscopy Interface Render",
@@ -182,7 +196,7 @@
       "details": {
         "summary": "Spectral Library interface mounted cleanly with zero uncaught errors"
       },
-      "timestamp": "2026-09-06T13:18:18.048Z"
+      "timestamp": "2026-09-06T14:00:32.632Z"
     }
   ],
   "checks": {
@@ -205,120 +219,15 @@
   },
   "consoleErrors": [
     {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY1OCwiZXhwIjoxNzg4Nzg3MDU4fQ.aKE04BOnKlaF8a13uOsf781-kBYMasryw42OL0cyHus' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
       "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
       "location": {
-        "url": "http://127.0.0.1:5059/api/qc/batches/BATCH-1788700659592/items"
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY1OCwiZXhwIjoxNzg4Nzg3MDU4fQ.aKE04BOnKlaF8a13uOsf781-kBYMasryw42OL0cyHus' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY1OCwiZXhwIjoxNzg4Nzg3MDU4fQ.aKE04BOnKlaF8a13uOsf781-kBYMasryw42OL0cyHus' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2NjMsImV4cCI6MTc4ODc4NzA2M30.eE5PKxJYY4BDufZahS36wElPS42IlI6XcGQI4bPaODQ' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2NjMsImV4cCI6MTc4ODc4NzA2M30.eE5PKxJYY4BDufZahS36wElPS42IlI6XcGQI4bPaODQ' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2NjMsImV4cCI6MTc4ODc4NzA2M30.eE5PKxJYY4BDufZahS36wElPS42IlI6XcGQI4bPaODQ' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtdGVjaCIsInVzZXJuYW1lIjoidWF0X3RlY2giLCJyb2xlIjoiTEFCX1RFQ0hOSUNJQU4iLCJ0b2tlblZlcnNpb24iOjAsImlhdCI6MTc4ODcwMDY2NiwiZXhwIjoxNzg4Nzg3MDY2fQ.HgoluHddrbT4CxrErPIDS5EMPxs55z66Tj-LSd-5Ikk' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
+        "url": "http://127.0.0.1:5059/api/qc/batches/batch-uat-run-01/items"
       }
     },
     {
       "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
       "location": {
-        "url": "http://127.0.0.1:5059/api/qc/batches/BATCH-1788700659614"
+        "url": "http://127.0.0.1:5059/api/qc/batches/batch-uat-tex-01"
       }
     },
     {
@@ -328,17 +237,9 @@
       }
     },
     {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2ODQsImV4cCI6MTc4ODc4NzA4NH0.sUYqaTqxTs9vWpww341D68ort-7DYERl0NM9k7XWHNo' failed: Error during WebSocket handshake: Unexpected response code: 200",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
       "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
-      }
-    },
-    {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2ODQsImV4cCI6MTc4ODc4NzA4NH0.sUYqaTqxTs9vWpww341D68ort-7DYERl0NM9k7XWHNo' failed: Error during WebSocket handshake: Unexpected response code: 200",
-      "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
       }
     },
     {
@@ -348,10 +249,9 @@
       }
     },
     {
-      "text": "WebSocket connection to 'ws://127.0.0.1:5059/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzci11YXQtbWdyIiwidXNlcm5hbWUiOiJ1YXRfbWdyIiwicm9sZSI6IkxBQl9NQU5BR0VSIiwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3ODg3MDA2ODQsImV4cCI6MTc4ODc4NzA4NH0.sUYqaTqxTs9vWpww341D68ort-7DYERl0NM9k7XWHNo' failed: Error during WebSocket handshake: Unexpected response code: 200",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
       "location": {
-        "url": "http://127.0.0.1:5059/assets/index-g6roxHX1.js",
-        "lineNumber": 601
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
       }
     }
   ]

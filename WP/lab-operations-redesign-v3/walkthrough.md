@@ -33,13 +33,16 @@ This walkthrough documents the full verification, regression hardening, database
 ## 2. Requirement A98: Database & Assets Restore Rehearsal
 
 - **Evidence Document**: [WP/lab-operations-redesign-v3/restore-rehearsal-evidence.md](file:///C:/Users/yigin/Documents/soilfer-lims/WP/lab-operations-redesign-v3/restore-rehearsal-evidence.md)
-- **Execution Script**: `scratch/rehearse_restore_v3.cjs`
+- **Execution Script**: `tools/rehearsal/rehearse_restore_v3.cjs`
 - **Rehearsal Scope & Results**:
-  1. **Consistent Backup Snapshot**: Executed online SQLite backup API (`vacuum into`) creating `live_snapshot.db` (19.91 MB) plus 654 asset files.
-  2. **Isolated Restoration**: Restored database and assets to an isolated scratch folder with zero live volume interaction.
-  3. **Database Integrity**: Verified `PRAGMA integrity_check` and `PRAGMA quick_check` returned `ok`. Verified 52 tables, 35,192 samples, 69,578 work items, 27 labs, 64 users intact.
-  4. **Migration Verification**: Executed `migrate_lab_operations_v3.js` in dry-run mode (0 mutations verified), applied migration idempotently, re-applied migration (0 duplicate changes).
-  5. **Live Volume Immutability**: Verified live database SHA-256 hash was completely untouched before, during, and after rehearsal.
+  1. **Consistent Backup Snapshot**: Executed online SQLite backup API (`better-sqlite3` `db.backup()`) creating `snapshot.db` (537.11 MB uncompressed database volume), compressed with Gzip to `snapshot.db.gz` (19.91 MB, 96.3% reduction), plus 654 asset files.
+  2. **Isolated Restoration**: Restored database and assets into an isolated scratch directory with zero live volume interaction.
+  3. **Database Integrity**: Verified `PRAGMA quick_check` and `PRAGMA integrity_check` returned `ok`. Verified 52 tables, 46 users, 35,192 samples, 654 asset files intact.
+  4. **Representative Asset Retrieval**: Verified spectral scans directory (654 scans) and report snapshots linking accurately to restored database records.
+  5. **Migration Verification & Apply-Twice Idempotency**: Executed `migrate_lab_operations_v3.js` in dry-run mode (0 uncommitted alterations), applied migration (Pass 1), and re-applied migration (Pass 2, 0 duplicate records created; post-migration dry run confirmed 0 pending changes).
+  6. **Simulated Failure & Rollback Recovery**: Injected simulated constraint violation midway through transactional execution; verified clean abort and 100% bit-for-bit pre- and post-rollback SHA-256 match.
+  7. **Candidate Server Boot Verification**: Booted candidate server against restored database and assets on port 5098; verified WebSocket gateway attachment, `/api/health` HTTP 200, and 216 active catalogue analyses.
+  8. **Live Volume Immutability**: Verified live database SHA-256 hash (`5b574235efc2cad17cec33d9f21fc7f29c5bf7ae935d8bb03492ea9b84e86723`) and 654 asset files were completely untouched before, during, and after rehearsal.
 
 ---
 

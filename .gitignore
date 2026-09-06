@@ -19,6 +19,8 @@ server/prisma/dev - Copy*
 server/prisma_client/
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 
 # ─── Data & Uploads ───
 server/data/*
