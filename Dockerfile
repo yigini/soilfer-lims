@@ -59,7 +59,7 @@ RUN mkdir -p /app/server/.schema-backup && \
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
 
 ENV NODE_ENV=production
 ENV PORT=3000
