@@ -185,7 +185,7 @@ const LegacyImport = () => {
                         Legacy Historical Data Harmonisation &amp; Import
                     </h1>
                     <p className="text-sm text-gray-600 mt-1">
-                        FAO SoilFER National Repositories Harmonisation — Enforces mandatory ISO 17025 method and unit bindings on all legacy datasets.
+                        FAO SoilFER National Repositories Harmonisation — Enforces mandatory method and controlled unit bindings on all imported legacy datasets.
                     </p>
                 </div>
             </div>

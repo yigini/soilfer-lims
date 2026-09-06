@@ -139,7 +139,7 @@ export function parseCoordinates(input) {
 
     // 2. Try DMS or DD with cardinal letters
     if (/[°'"NSEW]/i.test(text) && /[,\s]+/.test(text)) {
-        let parts = text.split(/[,;\/]/);
+        let parts = text.split(/[,;/]/);
         if (parts.length === 1) {
             const splitMatch = text.match(/^(.*?[NS])[\s,]+(.*?)$/i);
             if (splitMatch) {
@@ -168,7 +168,7 @@ export function parseCoordinates(input) {
     }
 
     // 3. Try Standard Decimal Degrees Pattern (plain numbers)
-    const ddRegex = /([+-]?\d+(?:\.\d+)?)\s*°?\s*([NS])?[\s,;\/]+([+-]?\d+(?:\.\d+)?)\s*°?\s*([EW])?/i;
+    const ddRegex = /([+-]?\d+(?:\.\d+)?)\s*°?\s*([NS])?[\s,;/]+([+-]?\d+(?:\.\d+)?)\s*°?\s*([EW])?/i;
     const ddMatch = text.match(ddRegex);
     if (ddMatch) {
         let lat = parseFloat(ddMatch[1]);

@@ -315,7 +315,7 @@ function App() {
             <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
             <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
             <Route path="/admin/labs" element={<RequireAuth requiredRole="SUPER_ADMIN"><LabManagement /></RequireAuth>} />
-            <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLES"><LegacyImport /></RequireAuth>} />
+            <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
 
             {/* General Access */}
             <Route path="/datasheet" element={<RequireAuth><DataSheet /></RequireAuth>} />

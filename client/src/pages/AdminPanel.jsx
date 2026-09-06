@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 import { Globe, Palette, Users, FlaskConical, ShieldCheck, Key } from 'lucide-react';
 import AnalysisConfig from '../components/AnalysisConfig';
 import AuditLogs from './AuditLogs';
@@ -11,10 +12,28 @@ import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import { useAuth } from '../context/AuthContext';
 
+const TAB_ALIASES = {
+    'translations': 'languages',
+    'languages': 'languages',
+    'branding': 'branding',
+    'analysis': 'lab-config',
+    'analyses': 'lab-config',
+    'lab-config': 'lab-config',
+    'config': 'lab-config',
+    'audit': 'audit',
+    'security': 'audit',
+    'api-keys': 'api-keys',
+    'api': 'api-keys',
+    'sis': 'api-keys',
+    'users': 'users',
+    'staff': 'users'
+};
+
 const AdminPanel = () => {
     const { t } = useLanguage();
     const { showDialog } = useDialog();
     const { user, hasPermission } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const isSuperAdmin = user?.role === 'SUPER_ADMIN';
     const isMasterUser = user?.role === 'MASTER_USER';
@@ -26,15 +45,53 @@ const AdminPanel = () => {
     const canManageApiKeys = isSuperAdmin || isMasterUser || isLabManager;
     const canManageUsers = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_USERS');
 
-    const [activeTab, setActiveTab] = useState(() => {
+    const isTabAllowed = (tab) => {
+        switch (tab) {
+            case 'branding': return canManageBranding;
+            case 'languages': return canManageBranding;
+            case 'lab-config': return canManageAnalyses;
+            case 'audit': return canViewAudit;
+            case 'api-keys': return canManageApiKeys;
+            case 'users': return canManageUsers;
+            default: return false;
+        }
+    };
+
+    const getDefaultTab = () => {
         if (canManageBranding) return 'branding';
         if (canManageAnalyses) return 'lab-config';
         if (canManageUsers) return 'users';
         if (canViewAudit) return 'audit';
+        if (canManageApiKeys) return 'api-keys';
         return 'lab-config';
-    });
-    const [languages, setLanguages] = useState([]);
+    };
 
+    const initialTab = useMemo(() => {
+        const requested = searchParams.get('tab')?.toLowerCase();
+        const resolved = requested && TAB_ALIASES[requested];
+        if (resolved && isTabAllowed(resolved)) return resolved;
+        return getDefaultTab();
+    }, []);
+
+    const [activeTab, setActiveTab] = useState(initialTab);
+
+    // Keep state in sync if URL query parameter changes externally
+    useEffect(() => {
+        const requested = searchParams.get('tab')?.toLowerCase();
+        if (requested && TAB_ALIASES[requested]) {
+            const canonical = TAB_ALIASES[requested];
+            if (isTabAllowed(canonical) && canonical !== activeTab) {
+                setActiveTab(canonical);
+            }
+        }
+    }, [searchParams]);
+
+    const handleTabChange = (newTab) => {
+        setActiveTab(newTab);
+        setSearchParams({ tab: newTab }, { replace: true });
+    };
+
+    const [languages, setLanguages] = useState([]);
     const [labSettings, setLabSettings] = useState(null);
 
     useEffect(() => {
@@ -134,13 +191,13 @@ const AdminPanel = () => {
                 {canManageBranding && (
                     <>
                         <button
-                            onClick={() => setActiveTab('branding')}
+                            onClick={() => handleTabChange('branding')}
                             className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'branding' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             <Palette size={17} /> {t('admin.branding', 'Branding & Identity')}
                         </button>
                         <button
-                            onClick={() => setActiveTab('languages')}
+                            onClick={() => handleTabChange('languages')}
                             className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'languages' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             <Globe size={17} /> {t('admin.languages', 'Languages & Localization')}
@@ -149,7 +206,7 @@ const AdminPanel = () => {
                 )}
                 {canManageAnalyses && (
                     <button
-                        onClick={() => setActiveTab('lab-config')}
+                        onClick={() => handleTabChange('lab-config')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'lab-config' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
                         <FlaskConical size={17} /> {t('admin.analysis', 'Analysis Configuration')}
@@ -157,7 +214,7 @@ const AdminPanel = () => {
                 )}
                 {canViewAudit && (
                     <button
-                        onClick={() => setActiveTab('audit')}
+                        onClick={() => handleTabChange('audit')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'audit' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
                         <ShieldCheck size={17} /> Audit & Security
@@ -165,7 +222,7 @@ const AdminPanel = () => {
                 )}
                 {canManageApiKeys && (
                     <button
-                        onClick={() => setActiveTab('api-keys')}
+                        onClick={() => handleTabChange('api-keys')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'api-keys' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
                         <Key size={17} /> National SIS & Data Exchange
@@ -173,7 +230,7 @@ const AdminPanel = () => {
                 )}
                 {canManageUsers && (
                     <button
-                        onClick={() => setActiveTab('users')}
+                        onClick={() => handleTabChange('users')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ml-auto ${activeTab === 'users' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
                         <Users size={17} /> Laboratory Staff
