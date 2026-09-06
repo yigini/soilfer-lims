@@ -101,13 +101,13 @@ Not everyone in a lab should have access to everything. RBAC ensures people only
 
 ## 📜 Publication-Grade Certificates & PDF Reports
 
-Generate formal, bilingual **Certificates of Analysis (COA)** compliant with **ISO/IEC 17025** and FAO SoilFER branding guidelines.
+Generate structured **Certificates of Analysis (COA)** aligned with laboratory SOPs and soil testing guidelines.
 
 **What you can do:**
-- **Zero-Dependency Native PDF Rendering**: Built on PDFKit for fast, container-friendly rendering without headless browsers.
+- **Server-Side PDF Rendering**: Built on PDFKit for fast, container-friendly rendering without headless browsers.
 - **Complete Provenance & Quality Gates**: 2-column metadata grid showing sampling coordinates, depths (D1/D2), reception date, and preparation gate checks (Drying $<40^\circ\text{C}$, 2mm sieving).
 - **Categorized Results with FAO Ratings**: Displays analytical parameters with standardized units, method references, and FAO 5-tier agronomic classification badges.
-- **Derived Diagnostics & Signatures**: Derives USDA texture triangle class, C:N stoichiometry, and includes Lab Manager digital signature.
+- **Derived Diagnostics & Approvals**: Derives USDA texture triangle class, C:N stoichiometry, and includes Lab Manager electronic approval record.
 - **Secure Public Verification Tokens**: Share certificates via secure token links (`/api/reports/public/:token/pdf`) without requiring login.
 
 ---
@@ -161,14 +161,14 @@ This is critical for:
 
 ---
 
-## 📦 Historical Analysis Backfill (Pre-Delivery Compatibility)
+## 📦 Historical Analysis Data Ingestion
 
-For national soil laboratories with thousands of historical soil samples analyzed prior to SoilFER LIMS rollout:
+For soil laboratories with historical soil datasets analyzed prior to SoilFER LIMS rollout:
 
 **What you can do:**
-- **Legacy Batch Ingestion**: Ingest batches analyzed during platform deployment intervals without breaking strict ISO 17025 custody gating.
-- **Auditable Provenance Tagging**: Each record receives a formal \`PROVENANCE: PRE_DELIVERY_BACKFILL\` tag.
-- **Chain of Custody Protection**: Historical data is isolated from active laboratory queues while remaining fully accessible for longitudinal reporting and national statistics.
+- **Legacy CSV Ingestion**: Ingest historical sample datasets through the Admin Panel CSV ingestion engine (`/admin/legacy-import`).
+- **Controlled Mapping & Validation**: Map legacy columns to canonical catalogue analyses, validated laboratory methods, and controlled measurement units with pre-import validation.
+- **Audit Trail Traceability**: Ingested determinations are stored with sample provenance and recorded in the audit trail for reporting and statistics.
 
 ---
 

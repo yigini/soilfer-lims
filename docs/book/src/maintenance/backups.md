@@ -1,58 +1,73 @@
 # Backing Up Your Data
 
-All your LIMS data — samples, results, users, settings — is stored in a single SQLite database file called `dev.db`. Backing it up is as simple as copying that file.
+SoilFER-LIMS stores all database records in SQLite with Write-Ahead Logging (WAL) enabled.
+
+> [!WARNING]
+> **Do not directly copy a live `dev.db` file while the system is running.** Direct file copying while SQLite has active WAL transactions can produce an incomplete or corrupted backup file. Always use the built-in online backup script.
 
 ---
 
-## Manual Backup
+## Creating an Online Backup
 
-Copy the database file from the Docker container to your server:
+SoilFER-LIMS includes an online backup script that uses SQLite's transactional backup API to take a non-blocking, consistent snapshot and compress it with gzip:
 
 ```bash
-# Create a backup directory (first time only)
-mkdir -p /opt/backups
-
-# Create a backup with today's date
-docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db
+# Run the online backup script inside the container
+docker exec soilfer-lims node scripts/backup_db.js
 ```
 
-This creates a file like `/opt/backups/lims-20260211.db`.
+This creates a compressed backup archive inside the container at:
+`/app/server/backups/soilfer_lims_backup_<timestamp>.db.gz`
+(stored within the Docker volume `lims-backups`).
 
-> 💡 **How often should you back up?** At minimum, back up before any system update. For active labs, daily backups are recommended.
+### Copying to the Host Server
+To copy the generated backup file to host storage:
+
+```bash
+mkdir -p /opt/backups
+docker cp soilfer-lims:/app/server/backups/ /opt/
+```
+
+### Verifying Backup Integrity
+Verify that the backup archive decompresses cleanly and passes SQLite `PRAGMA integrity_check`:
+
+```bash
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
+```
 
 ---
 
 ## Automatic Daily Backups
 
-Set up a cron job (scheduled task) to back up automatically every day at 2 AM:
+Set up a daily cron job to run the backup script automatically every day at 2 AM UTC:
 
 ```bash
-# Create the backup directory
-mkdir -p /opt/backups
-
-# Set up the daily backup
-echo '0 2 * * * root docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +\%Y\%m\%d).db' | sudo tee /etc/cron.d/lims-backup
-
-# Also clean up backups older than 30 days (to save disk space)
-echo '0 3 * * * root find /opt/backups -name "lims-*.db" -mtime +30 -delete' | sudo tee -a /etc/cron.d/lims-backup
+# Set up the daily backup cron job
+echo '0 2 * * * root docker exec soilfer-lims node scripts/backup_db.js' | sudo tee /etc/cron.d/lims-backup
 ```
+
+The backup script automatically rotates old backups according to retention policy.
 
 ---
 
 ## Restoring from a Backup
 
-If something goes wrong and you need to restore:
+To restore a database safely without connection conflicts:
 
 ```bash
-# Stop the application
+# 1. Stop the application container
 cd /opt/soilfer-lims
-docker compose down
+docker compose stop
 
-# Copy the backup into the container's data volume
-docker cp /opt/backups/lims-20260210.db soilfer-lims:/app/server/prisma/dev.db
+# 2. Run the restore utility against the named volume
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
 
-# Start the application
-docker compose up -d
+# 3. Start the application container
+docker compose start
+
+# 4. Verify system health
+curl -f http://localhost/api/health
 ```
 
 ---

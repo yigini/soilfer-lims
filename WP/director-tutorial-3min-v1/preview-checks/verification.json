@@ -1,0 +1,871 @@
+{
+  "checkedAt": "2026-09-06T18:30:24.520Z",
+  "artifactOnly": true,
+  "durationSeconds": 180,
+  "scenes": 12,
+  "narrationWords": 358,
+  "fiveSamples": true,
+  "checks": [
+    "all titles and scene anchors",
+    "120 theme/width/scene layouts",
+    "guide does not cover target",
+    "timed playback reaches 0:00",
+    "play/pause/restart",
+    "back/next/chapter navigation",
+    "notes pause timer",
+    "optional feature details",
+    "multilingual feature explanation",
+    "dock variant",
+    "exit clears overlay"
+  ],
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 736,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 736,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "welcome",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "home",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "field",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "receive",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "assign",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "prepare",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "worksheet",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "spectra",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "review",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "report",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "exchange",
+      "overflow": false,
+      "targetCovered": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scene": "pilot",
+      "overflow": false,
+      "targetCovered": false
+    }
+  ],
+  "browserErrors": [],
+  "httpRequests": [],
+  "limitations": [
+    "Mockup only; no actual laboratory processing or authentication.",
+    "No measured proof of live app readiness, actual external SIS delivery or translated tour strings.",
+    "Spectral curve and displayed results are synthetic.",
+    "Timed playback was checked by advancing the same local timer function; live-route latency still requires rehearsal."
+  ]
+}

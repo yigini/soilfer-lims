@@ -1,13 +1,13 @@
 # Certificate of Analysis & PDF Reports
 
-SoilFER-LIMS generates publication-grade, bilingual **Certificates of Analysis (COA)** compliant with **ISO/IEC 17025** reporting requirements and **FAO SoilFER** institutional guidelines.
+SoilFER-LIMS generates analytical reports and **Certificates of Analysis (COA)** structured according to laboratory SOPs and soil testing quality guidelines.
 
 ---
 
-## 📄 Pure JavaScript PDF Engine
+## 📄 Server-Side PDF Generation
 
 Reports are compiled using a native, server-side **PDFKit** rendering pipeline:
-- **Zero Headless Chrome / Puppeteer Dependencies**: Highly reliable, low memory footprint, runs in all container environments.
+- **Server-Side Rendering Without Headless Browser**: Generates PDFs directly with PDFKit, eliminating headless Chrome or Puppeteer overhead.
 - **Fast Execution**: Streams generated PDF documents directly to the client in milliseconds.
 - **True Vector Typography**: Crisply rendered typography, vector badge shields, and tabular layouts.
 
@@ -18,21 +18,21 @@ Reports are compiled using a native, server-side **PDFKit** rendering pipeline:
 Each generated certificate includes:
 
 1. **Header & Institutional Branding**:
-   - Official FAO SoilFER emblem and national ministry / laboratory co-branding.
-   - Laboratory accreditation statements and ISO/IEC 17025 conformity notice.
+   - Laboratory and programme identification.
+   - Quality system alignment notice.
 2. **Sample Provenance & Chain of Custody (2-Column Grid)**:
    - Sample ID & Laboratory Registration Number.
    - Field Origin, Sampling Depth Layer (D1/D2), GPS Coordinates, and Sampling Date.
    - Reception Date, Analysis Date, Submitter, and Project Name.
 3. **Pre-Analytical Quality Gates Verification**:
-   - Explicit confirmation of Sample Reception, Air-Drying ($< 40^\circ\text{C}$), and 2mm Sieving preparation standards.
+   - Confirmation of Sample Reception, Air-Drying ($< 40^\circ\text{C}$), and 2mm Sieving preparation records.
 4. **Categorized Analytical Results Table**:
    - Grouped by analytical category (Soil Reaction, Organic Matter, Primary Nutrients, Secondary/Micronutrients, Physical Properties).
    - Shows Parameter, Standardized Controlled Unit, Measured Concentration, Method Reference (e.g. *ISO 10390*, *Walkley-Black*, *Olsen P*), and FAO 5-tier agronomic rating badge.
 5. **Soil Diagnostics Callout**:
    - Derived USDA Textural Class and Carbon-to-Nitrogen ($\text{C:N}$) stoichiometric assessment.
-6. **Authorization & Digital Signature**:
-   - Laboratory Manager authorization signature block, date of issuance, and official laboratory stamp placeholder.
+6. **Authorization & Electronic Approval Record**:
+   - Laboratory Manager electronic approval record, date of approval, and audit log reference.
 
 ---
 

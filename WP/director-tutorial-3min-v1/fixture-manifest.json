@@ -1,0 +1,27 @@
+{
+  "scenarioId":"director-3m-soilfer-us-v1",
+  "provenance":"SYNTHETIC_DEMONSTRATION_ONLY",
+  "liveSampleIds":[],
+  "productionWritesPermitted":false,
+  "projectCode":"SOILFER-US",
+  "laboratoryLabel":"Guatemala laboratory — demonstration",
+  "databaseNamespace":"unique-per-rehearsal-session",
+  "orderGroups":["pH in water","Soil texture","MIR spectroscopy"],
+  "gateTasksPerSample":["Sample drying","Sample preparation"],
+  "counts":{"samples":5,"analyticalOrderGroups":15,"operationalTasks":10,"pHResults":5,"textureGroups":5,"spectralAcquisitions":5},
+  "samples":[
+    {"displayId":"DEMO-US-001","fieldId":"DEMO-FIELD-001","matrix":"SOIL","collectionLabel":"Demonstration site A","pH":6.2,"texture":{"sand":40,"silt":40,"clay":20,"unit":"%","illustrativeClass":"Loam"},"spectrum":"DEMO-US-001-MIR.csv"},
+    {"displayId":"DEMO-US-002","fieldId":"DEMO-FIELD-002","matrix":"SOIL","collectionLabel":"Demonstration site B","pH":6.6,"texture":{"sand":40,"silt":40,"clay":20,"unit":"%","illustrativeClass":"Loam"},"spectrum":"DEMO-US-002-MIR.csv"},
+    {"displayId":"DEMO-US-003","fieldId":"DEMO-FIELD-003","matrix":"SOIL","collectionLabel":"Demonstration site C","pH":5.9,"texture":{"sand":40,"silt":40,"clay":20,"unit":"%","illustrativeClass":"Loam"},"spectrum":"DEMO-US-003-MIR.csv"},
+    {"displayId":"DEMO-US-004","fieldId":"DEMO-FIELD-004","matrix":"SOIL","collectionLabel":"Demonstration site D","pH":7.1,"texture":{"sand":40,"silt":40,"clay":20,"unit":"%","illustrativeClass":"Loam"},"spectrum":"DEMO-US-004-MIR.csv"},
+    {"displayId":"DEMO-US-005","fieldId":"DEMO-FIELD-005","matrix":"SOIL","collectionLabel":"Demonstration site E","pH":6.4,"texture":{"sand":40,"silt":40,"clay":20,"unit":"%","illustrativeClass":"Loam"},"spectrum":"DEMO-US-005-MIR.csv"}
+  ],
+  "notes":[
+    "These identifiers are labels. Generate fresh immutable IDs in the isolated rehearsal database; do not reuse W001 or existing samples.",
+    "No actual Kobo records, personal details or precise locations were copied. Field provenance in the mockup is illustrative.",
+    "Resolve real applicable methods, procedure revisions, units, instruments and qualification on the rehearsal build. Do not invent a scientific SOP to match this manifest.",
+    "Spectrum filenames are planned fixture names, not measured instrument exports. The preview curve is illustrative. Antigravity must generate labelled synthetic import fixtures or use authorized anonymized exports and verify the real parser before the live rehearsal.",
+    "The illustrative texture class must be recomputed by the actual validated classifier in rehearsal. This file does not replace method-specific mass balance tolerances or scientific validation.",
+    "All five samples reach every demonstrated checkpoint. Extra physical replicates and QC controls have separate identifiers and do not inflate the five-sample story."
+  ]
+}

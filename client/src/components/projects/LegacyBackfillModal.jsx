@@ -26,7 +26,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
 
     const handleDownloadTemplate = () => {
         const headers = [
-            ['Sample_ID', 'Original_Field_ID', 'Project_Code', 'Analysis_Code', 'Method_Code', 'Result_Value', 'Unit', 'Analysis_Date', 'Analyst_Name', 'Status', 'QA_Remarks']
+            'Sample_ID', 'Original_Field_ID', 'Project_Code', 'Analysis_Code', 'Method_Code', 'Result_Value', 'Unit', 'Analysis_Date', 'Analyst_Name', 'Status', 'QA_Remarks'
         ];
         const sampleRows = [
             ['ZMB-LUS-001', 'FIELD-ZMB-A12', currentProject?.code || 'PRJ-ZMB-01', 'PH', 'ISO_10390_H2O', '6.45', 'pH units', '2025-11-14', 'Dr. Mulenga', 'APPROVED', 'Historical pre-LIMS bench run'],
@@ -36,18 +36,19 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
             ['ZMB-LUS-002', 'FIELD-ZMB-B04', currentProject?.code || 'PRJ-ZMB-01', 'P_MEHLICH3', 'MEHLICH3_ICP', '14.2', 'mg/kg', '2025-11-18', 'L. Zulu', 'APPROVED', 'External reference batch']
         ];
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
+        const csvContent = [
+            headers.join(','),
+            ...sampleRows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
 
-        // Auto column widths
-        ws['!cols'] = [
-            { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 14 },
-            { wch: 22 }, { wch: 14 }, { wch: 12 }, { wch: 14 },
-            { wch: 16 }, { wch: 12 }, { wch: 32 }
-        ];
-
-        XLSX.utils.book_append_sheet(wb, ws, 'Historical_Samples');
-        XLSX.writeFile(wb, `SoilFER_Legacy_Backfill_Template_${currentProject?.code || 'PROJECT'}.xlsx`);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `SoilFER_Legacy_Backfill_Template_${currentProject?.code || 'PROJECT'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const handleFileDrop = (e) => {
@@ -216,7 +217,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                                4. Historical Spreadsheet Ingestion
+                                4. Historical Dataset Ingestion (CSV)
                             </label>
                             <button
                                 type="button"
@@ -224,7 +225,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:underline"
                             >
                                 <Download size={14} />
-                                <span>Download Excel Backfill Template (.xlsx)</span>
+                                <span>Download CSV Backfill Template (.csv)</span>
                             </button>
                         </div>
 
@@ -238,16 +239,16 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                     <Upload size={20} />
                                 </div>
                                 <div className="text-xs font-semibold text-gray-900 dark:text-white">
-                                    {uploadedFile ? uploadedFile.name : 'Drop historical Excel (.xlsx) or CSV file here'}
+                                    {uploadedFile ? uploadedFile.name : 'Drop historical CSV file here'}
                                 </div>
                                 <p className="text-[11px] text-gray-500">
-                                    {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB — Ready to parse` : 'Supports legacy bench logs, instrument export files, and lab summaries'}
+                                    {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB — Ready to parse` : 'Active importer accepts standard comma-separated values (.csv)'}
                                 </p>
                                 <label className="inline-block mt-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 cursor-pointer shadow-sm">
                                     <span>Browse Files</span>
                                     <input
                                         type="file"
-                                        accept=".xlsx,.xls,.csv"
+                                        accept=".csv"
                                         className="hidden"
                                         onChange={(e) => e.target.files?.[0] && setUploadedFile(e.target.files[0])}
                                     />
@@ -274,9 +275,9 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                 {/* Modal Footer */}
                 <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
                         <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                            Roadmap Feature · Full Ingestion Engine available in Admin Panel
+                            Ingestion Engine available in Admin Panel (`/admin/legacy-import`)
                         </span>
                     </div>
 

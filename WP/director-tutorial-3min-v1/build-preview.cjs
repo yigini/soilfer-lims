@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');
+const dir=__dirname;
+const story=JSON.parse(fs.readFileSync(path.join(dir,'storyboard.json'),'utf8'));
+const fixture=JSON.parse(fs.readFileSync(path.join(dir,'fixture-manifest.json'),'utf8'));
+const template=fs.readFileSync(path.join(dir,'preview.template.html'),'utf8');
+const fragment=template.replace('__STORY_JSON__',JSON.stringify(story).replaceAll('<','\\u003c')).replace('__FIXTURE_JSON__',JSON.stringify(fixture).replaceAll('<','\\u003c'));
+const inline='C:/Users/yigin/.codex/visualizations/2026/09/05/01a0725c-1d6c-73c1-8593-a73f1bd55905/director-meeting-tour.html';
+fs.writeFileSync(inline,fragment);
+fs.writeFileSync(path.join(dir,'preview.html'),'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SoilFER director walkthrough — proposal</title><style>body{margin:0;padding:20px;background:#edf1ed;font-family:Segoe UI,Arial,sans-serif}#soilfer-director-tour{max-width:1280px;margin:auto}@media(prefers-color-scheme:dark){body{background:#101c15}}@media(max-width:560px){body{padding:0}}</style></head><body>'+fragment+'</body></html>');
+console.log('Built inline preview and standalone review copy from one storyboard.');
+const time=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+let cursor=0;
+const sections=story.steps.map((step,index)=>{
+ const start=cursor;cursor+=step.seconds;
+ return `## ${time(start)}–${time(cursor)} · ${index+1}. ${step.title}\n\n**Show:** ${step.caption}\n\n**Say:** ${step.say}\n\n**Advance:** ${step.action}.\n`;
+});
+const words=story.steps.map(s=>s.say).join(' ').split(/\s+/).length;
+fs.writeFileSync(path.join(dir,'presenter-script.md'),`# Director walkthrough — timed English script\n\n**3:00 · 12 scenes · ${words} spoken words. Proposal awaiting preview approval.**\n\nRead only the “Say” paragraphs. The “Show” and “Advance” lines are presenter cues. No recording or synthetic voice is included. Manual Next is the meeting default; timed playback is for rehearsal. Pause for questions, then continue. The duration excludes questions and login trouble.\n\nThe real overlay starts on the real login page in the isolated rehearsal deployment. All five demonstration samples must be labelled throughout. Preparation and measured results are recorded checkpoints: never imply physical laboratory work took seconds.\n\n${sections.join('\n')}\n## Before presenting\n\nRehearse the actual route sequence once with a stopwatch on the intended display. Check all five records, staff role handovers, saved preparation, submitted results, review and report links. Hide credentials and tokens; keep SIS exchange in preview unless a real receiver has acknowledged delivery. Do not read speaker notes from a shared screen if they should be private.\n\nThe default close is “Next: controlled testing in a real laboratory.” Change it to “Ready for controlled testing” only after the checks in acceptance-and-rehearsal.md have passed and the responsible laboratory team signs off the demonstrated build.\n`);
+console.log(`Generated presenter script: ${words} words, ${cursor} seconds.`);

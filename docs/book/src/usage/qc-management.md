@@ -1,6 +1,6 @@
 # Quality Control & Batch Management
 
-SoilFER-LIMS complies with **ISO/IEC 17025** and **GLOSOLAN Quality Assurance / Quality Control (QA/QC)** guidelines for soil laboratory testing.
+SoilFER-LIMS is designed to support laboratory workflows and records aligned with **ISO/IEC 17025** quality systems and **GLOSOLAN Quality Assurance / Quality Control (QA/QC)** soil testing guidelines. Accreditation belongs to the laboratory and its validated procedures.
 
 ---
 
@@ -11,21 +11,21 @@ Analytical batches in SoilFER-LIMS group routine sample determinations with thre
 ### 1. Method Blanks (Reagent Blanks)
 - **Purpose**: Verify that reagents, glassware, and analytical instruments are free from contamination and baseline drift.
 - **Acceptance Rule**: Measured value must not exceed the maximum allowed background limit:
-  $$|\text{Measured Value}| \le \text{Max Allowed Threshold (Default } \le 0.05\text{)}$$
+  $$|\text{Measured Value}| \le \text{Configured Threshold (Default } \le 0.05\text{)}$$
 - **Status Outcome**: Evaluated automatically as `PASS` or `FAIL`.
 
 ### 2. Analytical Duplicates (Laboratory Replicates)
 - **Purpose**: Evaluate analytical repeatability and precision within the laboratory.
 - **Acceptance Rule**: Calculates the **Relative Percent Difference (RPD)** between duplicate measurements:
   $$\text{RPD} = \frac{|V_1 - V_2|}{(V_1 + V_2) / 2} \times 100\%$$
-- **Threshold**: Acceptance limit is typically $\text{RPD} \le 10.0\%$ (or customized per procedure).
+- **Threshold**: Default acceptance limit is $\text{RPD} \le 10.0\%$ (configurable per procedure; the laboratory must approve method-specific limits).
 - **Status Outcome**: If $\text{RPD} \le \text{Max RPD} \rightarrow \text{PASS}$; otherwise $\text{FAIL}$.
 
 ### 3. Certified Reference Materials (CRMs) / Standard Controls
 - **Purpose**: Assess the trueness, accuracy, and calibration drift of the analytical method.
 - **Acceptance Rule**: Compares the measured concentration against the certified reference value to calculate **Recovery %**:
   $$\text{Recovery \%} = \frac{\text{Measured Concentration}}{\text{Certified Reference Value}} \times 100\%$$
-- **Threshold**: Standard acceptable recovery window is $90.0\% \le \text{Recovery} \le 110.0\%$.
+- **Threshold**: Default acceptable recovery window is $90.0\% \le \text{Recovery} \le 110.0\%$ (laboratories must approve method-specific acceptance limits).
 - **Status Outcome**: If within the recovery range $\rightarrow \text{PASS}$; otherwise $\text{FAIL}$.
 
 ---

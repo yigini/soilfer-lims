@@ -14,21 +14,23 @@ A single-page reference with the most commonly needed commands and information.
 | **Restart LIMS** | `cd /opt/soilfer-lims && docker compose restart` |
 | **View logs** | `docker logs soilfer-lims -f --tail 50` |
 | **Check status** | `docker ps` |
-| **Backup database** | `docker cp soilfer-lims:/app/server/prisma/dev.db /opt/backups/lims-$(date +%Y%m%d).db` |
+| **Backup database** | `docker exec soilfer-lims node scripts/backup_db.js` |
+| **Verify backup** | `docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<file>.db.gz` |
+| **Restore database** | `docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups soilfer-lims-app node scripts/restore_db.js /app/server/backups/<file>.db.gz` |
 | **Update LIMS** | `cd /opt/soilfer-lims && git pull && docker compose down && docker compose up -d --build` |
 | **Check health** | `curl http://localhost:3000/api/health` |
 | **Reset admin password** | See [Password Reset](../maintenance/password-reset.md) |
 
 ---
 
-## Default Credentials
+## Initial Administration Credentials
 
-| Mode | Username | Password | Role |
-|------|----------|----------|------|
-| Local | `admin` | `password` | Lab Manager |
-| Global | `admin` | `password` | Super Admin |
+| Mode | Username | Initial Password | Role |
+|------|----------|------------------|------|
+| Local | `admin` | `<generated-initial-password>` (printed on startup) | Lab Manager |
+| Global | `admin` | `<generated-initial-password>` (printed on startup) | Super Admin |
 
-> ⚠️ You **must** change this on first login.
+> ⚠️ Initial password is randomly generated upon first database initialization unless `ADMIN_INITIAL_PASSWORD` is supplied. You **must** change this password on first login.
 
 ---
 

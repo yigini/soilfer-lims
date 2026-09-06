@@ -155,7 +155,7 @@ const ROLE_CONFIGS = {
             items: [
                 'Access is restricted to finalized, published laboratory certificates.',
                 'Internal draft analyses, operator notes, and raw spectra are excluded from view.',
-                'Published reports carry monotonic versioning and tamper-evident digital signatures.'
+                'Published reports carry monotonic versioning and authorized electronic approval records.'
             ]
         },
         shortcuts: [

@@ -6,14 +6,13 @@
 
 ### Global & Local Laboratory Information Management System for Soil Analysis
 
-*An enterprise-grade, open-source laboratory platform aligned with the **FAO Global Soil Partnership (GSP)**, **GLOSOLAN**, **ISO/IEC 17025**, and **GloSIS Soil Ontology Standards**.*
+*An open-source laboratory information platform designed to support soil testing workflows aligned with the **FAO Global Soil Partnership (GSP)**, **GLOSOLAN**, **ISO/IEC 17025**, and **GloSIS Soil Ontology** guidelines.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](Dockerfile)
-[![GloSIS Compatible](https://img.shields.io/badge/GloSIS-v1.0%20Compatible-green.svg)](https://github.com/glosis-ld/glosis)
-[![ISO 17025 Ready](https://img.shields.io/badge/ISO%2FIEC-17025%20Ready-brightgreen.svg)](docs/ADMIN_GUIDE.md)
+[![GloSIS Format](https://img.shields.io/badge/GloSIS-Format%20Ready-green.svg)](https://github.com/glosis-ld/glosis)
 [![Tests](https://img.shields.io/badge/Tests-77%20Suites%20%7C%20555%20Passing-brightgreen.svg)](#-automated-test-suite-77-suites-555-tests)
-[![Node.js](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v20%2B-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-v20%2B%20%7C%20v22%2B-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg)](https://vitejs.dev/)
 
@@ -21,21 +20,21 @@
 
 ---
 
-## 📖 Online Documentation (GitHub Pages)
+## 📖 In-Repository & Local Documentation
 
-Our comprehensive, beginner-friendly online documentation is continuously published and updated:
+Complete, operator-focused documentation is available directly in the repository and viewable locally as an interactive book:
 
-* 🌐 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
-* 📖 **[Administration Guide](https://github.com/yigini/soilfer-lims/blob/main/docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, quality rules, and SIS API keys.
-* 🚀 **[Deployment & Production Guide](https://github.com/yigini/soilfer-lims/blob/main/docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Docker Compose, Nginx/Apache reverse proxy, SSL/Certbot, and zero-downtime updates.
-* 🛠️ **[Installation Quickstart](https://github.com/yigini/soilfer-lims/blob/main/docs/INSTALL.md)** — Step-by-step local machine and server installation for beginners.
-* 🔄 **[Upgrading & Maintenance Guide](https://github.com/yigini/soilfer-lims/blob/main/docs/UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
+* 📖 **[Administration Guide](docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, quality rules, and SIS API keys.
+* 🚀 **[Deployment & Production Guide](docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Docker Compose, Nginx/Apache reverse proxy, SSL/Certbot, and zero-downtime updates.
+* 🛠️ **[Installation Quickstart](docs/INSTALL.md)** — Step-by-step local machine and server installation for beginners.
+* 🔄 **[Upgrading & Maintenance Guide](docs/UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
+* 📚 **Interactive mdBook Site (Local)** — Run `mdbook serve docs/book` from the repository root to launch the local interactive documentation site at `http://localhost:3000`.
 
 ---
 
 ## 🌟 What is SoilFER-LIMS?
 
-**SoilFER-LIMS** (Laboratory Information Management System) is an open-source web application designed to help soil testing laboratories manage their entire daily workflow digitally. Developed under the FAO SoilFER Programme and supported by GLOSOLAN, it replaces paper logbooks, disconnected spreadsheets, and error-prone manual calculations with an immutable, auditable digital chain of custody.
+**SoilFER-LIMS** (Laboratory Information Management System) is an open-source web application designed to help soil testing laboratories manage their daily analytical workflow digitally. Developed to support laboratories implementing FAO SoilFER Programme and GLOSOLAN guidance, it replaces paper logbooks, disconnected spreadsheets, and error-prone manual calculations with a structured, auditable digital chain of custody.
 
 Whether you run a single provincial soil laboratory or coordinate a national network across agricultural research stations, SoilFER-LIMS connects your staff, field teams, bench analysts, and laboratory managers in a unified, multilingual platform.
 
@@ -49,16 +48,16 @@ Whether you run a single provincial soil laboratory or coordinate a national net
                                                          |
 +-----------------+     +-----------------+     +--------v--------+
 | 6. SIS Exchange | <-- | 5. Certificates | <-- | 4. QA Review    |
-| RFC 7946 GeoJSON|     | PDF with Sign   |     | Blank / Dups /QC|
+| RFC 7946 GeoJSON|     | PDF Report      |     | Blanks/Dups/QC  |
 +-----------------+     +-----------------+     +-----------------+
 ```
 
 1. **Field Intake & Provenance**: Expected arrivals from KoboToolbox mobile surveys, physical inspection of bags, barcode/QR label printing, and non-conformance tracking.
-2. **Operational Prerequisite Gates**: Server-side enforced preparation gates (forced-air drying at 40°C, 2mm sieving) requiring immutable operational checklist receipts before testing can begin.
+2. **Operational Prerequisite Gates**: Server-side enforced preparation gates (configurable drying and sieving steps, default 40 °C forced-air drying and 2 mm sieving) requiring verified operational checklist receipts before testing can begin.
 3. **Bench Execution & Worksheets**: Single-entry bench worksheets for routine soil chemistry, AAS, ICP, photometry, titration, and mid-infrared (MIR) diffuse reflectance spectroscopy.
-4. **ISO/IEC 17025 Quality Control**: Automated evaluation of method blanks ($\le 0.05$), analytical duplicate RPD ($\le 10.0\%$), and Certified Reference Material (CRM) recovery ($90\%\text{--}110\%$).
-5. **Publication-Grade Certificates**: Tamper-evident PDF certificates featuring FAO/lab co-branding, USDA 12-class soil texture classification, 5-tier agronomic ratings, and manager signatures.
-6. **National Soil Information System (SIS) Interoperability**: Automated machine-to-machine data exchange conforming to GloSIS ontologies and RFC 7946 GeoJSON standards.
+4. **Quality Assurance Workflows**: Automated calculation and evaluation of method blanks, analytical duplicate RPD, and Certified Reference Material (CRM) recovery against laboratory-approved acceptance limits (with configurable default thresholds).
+5. **Analytical Reports**: PDF reports generated via PDFKit featuring laboratory branding, USDA 12-class soil texture classification, 5-tier agronomic ratings, and authorized electronic approval records.
+6. **National Soil Information System (SIS) Interoperability**: Data exchange and export tools formatted according to GloSIS ontologies and RFC 7946 GeoJSON guidelines.
 
 ---
 
@@ -85,13 +84,15 @@ To switch modes, simply adjust `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=globa
 * **Controlled Unit Vocabulary**: Built-in unit normalization converting `%`, `ppm`, `meq/100g`, `g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, and `µS/cm` with exact scientific conversion factors.
 * **Canonical Soil Measurands**: Standardized parameters for `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `exchangeableBases`, `particleSizeAnalysis`, and `cationExchangeCapacitySoil`.
 
-### 🛡️ 2. ISO/IEC 17025 Quality Assurance & Batch Control
+### 🛡️ 2. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
+SoilFER-LIMS is designed to support workflows and records that contribute to an ISO/IEC 17025 quality system. Formal accreditation belongs to the testing laboratory and its validated procedures.
 * **Typed Quality Control Samples**:
-  * **Method Blanks**: Automatic evaluation against background limits ($\le 0.05$).
-  * **Analytical Duplicates**: Relative Percent Difference monitoring ($\text{RPD} \le 10.0\%$).
-  * **Certified Reference Materials (CRMs)**: Standard recovery window ($90.0\% \le \text{Recovery} \le 110.0\%$).
-* **Automated Batch Disposition**: Batches transition to `QC_PASS` or `QC_FAIL` automatically based on entered readings.
+  * **Method Blanks**: Automatic evaluation against background limits (default $\le 0.05$).
+  * **Analytical Duplicates**: Relative Percent Difference monitoring (default $\text{RPD} \le 10.0\%$).
+  * **Certified Reference Materials (CRMs)**: Recovery monitoring (default $90.0\% \le \text{Recovery} \le 110.0\%$).
+* **Automated Batch Disposition**: Batches transition to `QC_PASS` or `QC_FAIL` based on entered readings and configured acceptance criteria.
 * **Managerial Disposition Overrides**: Authorize `PROCEED_WITH_WARNING` or order batch re-runs with mandatory audit trail justification.
+* **Method-Specific Thresholds**: Laboratories must review, validate, and approve method-specific limits appropriate to their testing scope.
 
 ### 🌿 3. USDA Soil Texture & Agronomic Interpretation Engine
 * **USDA 12-Class Textural Triangle**: Automatic soil texture derivation (`Sandy Loam`, `Clay`, `Silty Clay Loam`, etc.) with strict composite mass-balance closure validation ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm 2.0\%$).
@@ -103,13 +104,13 @@ To switch modes, simply adjust `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=globa
 * **Diffuse Reflectance Spectroscopy**: Upload, display, and manage Full-Range Mid-Infrared (MIR $400\text{--}4000\text{ cm}^{-1}$) and VIS-NIR spectral files linked directly to sample custody IDs.
 * **Instrument Readiness**: Tracks analytical balances, pH meters, and spectrophotometers with calibration reminders.
 
-### 📄 5. Publication-Grade Certificates & Public Verification
-* **Zero-Dependency PDF Engine**: High-performance pure JavaScript PDF generator powered by PDFKit (no Chromium/Puppeteer overhead).
-* **Official Layout**: FAO and laboratory co-branded headers, sample GPS coordinates, depth layers, complete analytical results grid, and Lab Manager digital signature.
+### 📄 5. Certificate & Report Generation
+* **Server-Side PDF Engine**: High-performance pure JavaScript PDF generator powered by PDFKit without a headless browser.
+* **Official Layout**: Laboratory and program headers, sample GPS coordinates, depth layers, complete analytical results grid, and authorized electronic approval records.
 * **Public QR Verification**: Instant validation of printed certificates via secure public URL tokens (`/api/reports/public/:token/pdf`).
 
-### 📦 6. Historical Sample Analysis Backfill (Pre-Delivery Compatibility)
-* **Legacy Batch Ingestion**: Built-in backward compatibility module in Projects workspace allowing laboratories to backfill historical samples analyzed prior to system delivery without corrupting active chain-of-custody ledgers.
+### 📦 6. Historical Sample Analysis Backfill
+* **Legacy Batch Ingestion**: Built-in CSV ingestion engine in the Admin Panel (`/admin/legacy-import`, accessible by authorized intake and manager roles) with CSV header preview, required column-to-method mappings, unit validation, duplicate handling, and audit logging.
 
 ---
 
@@ -146,20 +147,24 @@ Open your web browser and navigate to:
 
 ---
 
-## 🔑 Default User Roles Reference
+## 🔑 Initial Administration & User Provisioning
 
-Upon first deployment, the database is pre-seeded with demonstration accounts across all operational roles:
+When a fresh database is initialized, SoilFER-LIMS provisions a single administrative account:
 
-| Username | Default Password | Role Persona | Typical Duties & Capabilities |
-| :--- | :--- | :--- | :--- |
-| **`admin`** | `password` | `SUPER_ADMIN` / `LAB_MANAGER` | Global administration, laboratory creation, SIS API keys, institutional branding |
-| **`mgr_gtm`** | `password` | `LAB_MANAGER` | Work assignment, batch reviews, QC dispositions, report approvals (`GTM-LAB1`) |
-| **`intake_gtm`** | `password` | `SAMPLE_RECEPTION` | Sample arrival verification, condition inspection, Lab ID barcodes, Kobo sync |
-| **`tech_gtm_1`** | `password` | `LAB_TECHNICIAN` | Bench worksheets, drying/milling preparation receipts, MIR spectral scans |
-| **`mgr_moz`** | `password` | `LAB_MANAGER` | Mozambique laboratory manager (`MOZ-LAB1`) |
-| **`tech_moz_1`** | `password` | `LAB_TECHNICIAN` | Mozambique bench analyst (`MOZ-LAB1`) |
-
-> 🔒 **Security Notice:** You will be prompted to change default administrator passwords immediately upon your initial login.
+- **Username:** `admin`
+- **Role Assignment:**
+  - In **Local Mode** (`DEPLOYMENT_MODE=local`): `LAB_MANAGER` scoped to the initial default laboratory.
+  - In **Global Mode** (`DEPLOYMENT_MODE=global`): `SUPER_ADMIN` with system-wide management authority.
+- **Initial Password:** Randomly generated during first initialization (or set via `ADMIN_INITIAL_PASSWORD` in your `.env` file). The password is printed once to the container/server logs:
+  ```text
+  ┌────────────────────────────────────────────────────────┐
+  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │
+  │    Username: admin                                     │
+  │    Password: <generated-initial-password>              │
+  └────────────────────────────────────────────────────────┘
+  ```
+- **Mandatory Password Change:** You will be prompted to set an institutional-strength password upon first login.
+- **Staff Provisioning:** Operational roles (`SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `LAB_MANAGER`, `PROJECT_MANAGER`) are created by administrators via **Admin Panel → User Management** (`/admin?tab=users`) rather than persistent default accounts.
 
 ---
 
@@ -168,7 +173,7 @@ Upon first deployment, the database is pre-seeded with demonstration accounts ac
 For software developers or contributors who prefer running Node.js directly on their workstation:
 
 ### Prerequisites
-* **Node.js**: v18.0.0+ or v20.0.0+ ([Download Node.js](https://nodejs.org/))
+* **Node.js**: `^20.19`, `^22.12`, or `>=24` (Docker is strongly recommended for standard deployment)
 * **Git**: ([Download Git](https://git-scm.com/))
 
 ### 1. Install Server Dependencies
@@ -202,7 +207,7 @@ Open `http://localhost:5173` to access your local development environment.
 
 ---
 
-## 🧪 Automated Test Suite (77 Suites, 555 Tests)
+## 🧪 Automated Test Suite
 
 SoilFER-LIMS features an extensive automated test suite covering security authorization, database schema integrity, scientific metrology, and operational prerequisite contracts:
 
@@ -211,47 +216,67 @@ cd server
 npm test
 ```
 
-```text
-PASS tests/contracts/reception_honest_metrics.test.js
-PASS tests/contracts/reception_stage_e.test.js
-PASS tests/contracts/reception_stage_b.test.js
-PASS tests/contracts/catalogue_seeder.test.js
-PASS tests/contracts/texture_boundary_verification.test.js
-PASS tests/contracts/matrix_validation.test.js
-PASS tests/contracts/nsis_exchange.test.js
-PASS tests/contracts/prerequisite_gate.test.js
-PASS tests/contracts/workbench_draft_integrity.test.js
-PASS tests/contracts/spectral_mir_window.test.js
-PASS tests/contracts/rbac_sample_registry.test.js
-PASS tests/contracts/qc_disposition_flagging.test.js
-PASS tests/contracts/workflow_map_redesign.test.js
-...
-Test Suites: 77 passed, 77 total
-Tests:       555 passed, 555 total
-Snapshots:   0 total
-Time:        144.256 s
-```
-
 ---
 
 ## 💾 Backups & Disaster Recovery
 
-SoilFER-LIMS stores all database records in an ACID-compliant, self-contained database engine with Write-Ahead Logging (WAL) enabled.
+SoilFER-LIMS stores all database records in SQLite with Write-Ahead Logging (WAL) enabled.
 
-### Creating an Immediate Backup
+> [!WARNING]
+> **Do not directly copy a live `dev.db` file while the application is running.** Doing so can omit committed WAL transactions and produce a corrupted database copy. Always use the provided online backup utilities.
+
+### 1. Creating an Online SQLite Backup
+Run the online backup script inside the container. It uses SQLite's online backup API to take a non-blocking, transactionally consistent snapshot and compresses it with gzip:
+
 ```bash
-# On a Docker deployment:
-docker exec -w /app/server soilfer-lims node scripts/backup_db.js
-
-# Or copy the database file directly:
-docker cp soilfer-lims:/app/server/prisma/dev.db ./backup-$(date +%Y%m%d).db
+docker exec soilfer-lims node scripts/backup_db.js
 ```
 
-### Restoring from a Backup
+The backup archive is saved to `/app/server/backups/soilfer_lims_backup_<timestamp>.db.gz` inside the `lims-backups` Docker named volume.
+
+### 2. Identifying and Copying the Backup File
 ```bash
-docker cp ./backup-20260906.db soilfer-lims:/app/server/prisma/dev.db
-docker restart soilfer-lims
+# List recent backup files:
+docker exec soilfer-lims ls -la /app/server/backups/
+
+# Copy the backup archive to safe host or off-host storage:
+docker cp soilfer-lims:/app/server/backups/<backup-filename>.db.gz ./backups/
 ```
+
+### 3. Verifying Backup Integrity
+Verify that the backup uncompresses cleanly and passes SQLite `PRAGMA integrity_check`:
+```bash
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
+```
+
+### 4. Safe Database Restoration
+To restore a backup safely without corrupting active connections:
+
+```bash
+# 1. Stop the application container to flush open connections
+docker compose stop
+
+# 2. Run the restore utility against the target database
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
+
+# 3. Restart the application container
+docker compose start
+
+# 4. Verify system health and verify read-only accessibility
+curl -f http://localhost/api/health
+```
+
+---
+
+## ⚖️ Scope & Validation Responsibility
+
+SoilFER-LIMS provides analytical data management tools, calculation routines, and quality record structures. Each adopting laboratory remains responsible for:
+- Validating all analytical methods, calculations, and instruments prior to reporting operational results.
+- Establishing and approving method-specific quality control acceptance thresholds (blanks, duplicates, and reference materials).
+- Managing user access controls, role assignments, and password rotation policies according to institutional security standards.
+- Ensuring compliance with national, regional, and international laboratory accreditation requirements (such as ISO/IEC 17025).
+- Implementing routine off-site database backups and validating disaster recovery procedures.
 
 ---
 
@@ -259,13 +284,15 @@ docker restart soilfer-lims
 
 SoilFER-LIMS is distributed under the **MIT License**. See [`LICENSE`](LICENSE) for terms.
 
-### Institutional Acknowledgements
-* **Food and Agriculture Organization of the United Nations (FAO)**: GLOSOLAN Standard Operating Procedures, SoilFER technical guidelines, and GloSIS ontology specifications (CC BY-NC-SA 3.0 IGO).
-* **International Organization for Standardization (ISO)**: Standard method references (ISO/IEC 17025, ISO 10390, ISO 11265, ISO 14255).
+### Method & Standards References
+* **FAO Global Soil Partnership (GSP) & GLOSOLAN**: Standard Operating Procedures and soil laboratory guidelines referenced under CC BY-NC-SA 3.0 IGO.
+* **International Organization for Standardization (ISO)**: Method references (ISO/IEC 17025, ISO 10390, ISO 11265, ISO 14255).
 * **USDA Natural Resources Conservation Service (NRCS)**: Soil Survey Laboratory Methods and USDA 12-Class Textural Classification.
+
+*Disclaimer: This open-source software is developed to support soil testing laboratories adopting international guidelines. It is an independent community software project and does not represent formal accreditation, official certification, or endorsement by FAO, GSP, GLOSOLAN, or ISO.*
 
 ---
 
 <div align="center">
-  <sub>Developed in support of the <b>Global Soil Partnership (GSP)</b>, <b>GLOSOLAN</b>, and the <b>FAO SoilFER Programme</b> for global soil health, agricultural resilience, and food security.</sub>
+  <sub>SoilFER-LIMS — Open-Source Laboratory Information Management System for Soil Analysis.</sub>
 </div>

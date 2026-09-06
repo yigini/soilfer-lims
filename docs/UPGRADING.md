@@ -30,13 +30,17 @@ docker exec -w /app/server soilfer-lims node node_modules/prisma/build/index.js 
 ## 2. Standard Production Upgrade Procedure
 
 ### Step 1: Pre-Upgrade Safety Backup
-Always create an immediate timestamped backup of the production database before initiating an update:
+Always create an online, transactionally consistent backup before initiating an update:
 
 ```bash
-# On host server:
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-cp /var/lib/docker/volumes/lims_lims-data/_data/dev.db \
-   /var/lib/docker/volumes/lims_lims-data/_data/dev.db.pre_upgrade_${TIMESTAMP}
+# Inside the running container:
+docker exec soilfer-lims node scripts/backup_db.js
+
+# Verify the generated backup archive:
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
+
+# Copy off-container to host storage:
+docker cp soilfer-lims:/app/server/backups/<backup-filename>.db.gz /opt/backups/
 ```
 
 ### Step 2: Tag-Based Container Deployment
@@ -44,7 +48,7 @@ Pull the target release tag from the GitHub Container Registry (GHCR) or Docker 
 
 ```bash
 # Pull new image tag
-docker pull ghcr.io/yigini/soilfer-lims:v1.0.0
+docker pull ghcr.io/yigini/soilfer-lims:v1.4.0
 
 # Stop and recreate container with new image
 docker compose stop
@@ -61,11 +65,10 @@ docker restart soilfer-lims
 ### Step 4: Verification
 ```bash
 # Verify HTTP 200 health check
-curl -fsSL -I https://lims.yigini.net/
+curl -fsSL -I https://lims.yigini.net/api/health
 
-# Verify database integrity
-sqlite3 /var/lib/docker/volumes/lims_lims-data/_data/dev.db \
-  "SELECT 'Users:', count(*) FROM User; SELECT 'Samples:', count(*) FROM Sample;"
+# Verify database integrity inside the container
+docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<backup-filename>.db.gz
 ```
 
 ---
@@ -76,16 +79,20 @@ If unexpected errors occur after deployment:
 
 ### Step 1: Rollback Container to Previous Tag
 ```bash
-docker stop soilfer-lims
-docker run -d --name soilfer-lims-rollback \
-  --restart unless-stopped \
-  -v lims_lims-data:/app/server/prisma \
-  ghcr.io/yigini/soilfer-lims:v0.9.9
+docker compose stop
+# Update docker-compose image tag to previous stable release and restart:
+docker compose up -d
 ```
 
 ### Step 2: Restore Database Snapshot (if needed)
 ```bash
-cp /var/lib/docker/volumes/lims_lims-data/_data/dev.db.pre_upgrade_${TIMESTAMP} \
-   /var/lib/docker/volumes/lims_lims-data/_data/dev.db
-docker restart soilfer-lims
+# Stop application container to prevent concurrent database writes
+docker compose stop
+
+# Restore database using the verified restore utility
+docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups \
+  soilfer-lims-app node scripts/restore_db.js /app/server/backups/<backup-filename>.db.gz
+
+docker compose start
+curl -f http://localhost/api/health
 ```

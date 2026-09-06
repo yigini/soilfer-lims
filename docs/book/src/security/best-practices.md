@@ -46,7 +46,7 @@ To                         Action      From
 Here are the most important security practices for your LIMS deployment:
 
 - [ ] **Use HTTPS** — set up SSL certificates (see [previous chapter](./ssl.md))
-- [ ] **Change the default password** — do this immediately after first login
+- [ ] **Change the initial administrator password** — do this immediately upon first login
 - [ ] **Enable the firewall** — only open ports 22, 80, and 443
 - [ ] **Use strong passwords** — at least 12 characters, mix of letters, numbers, symbols
 - [ ] **Create individual user accounts** — don't share the admin account
