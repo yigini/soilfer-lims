@@ -27,7 +27,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
 const ReceptionDashboard = ({ user }) => {
     const navigate = useNavigate();
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState('ATTENTION'); // 'ATTENTION' | 'DRAFTS' | 'EXPECTED' | 'RECENT'
+    const [selectedTab, setSelectedTab] = useState(null); // dynamic actionable default
 
     const { data, loading, error, isLive, isStale, lastUpdated, refresh } = useRealtimeData('/api/dashboard/live', {
         interval: 15000,
@@ -78,6 +78,18 @@ const ReceptionDashboard = ({ user }) => {
     const waitingDrying = kpis.waitingDrying ?? kpis.pendingDrying ?? 0;
     const readyPreparation = kpis.readyPreparation ?? kpis.pendingPreparation ?? 0;
     const totalRegistered = kpis.totalRegistered ?? kpis.totalProcessed ?? 0;
+
+    // Actionable default tab: attention if pending issues exist, else drafts, else expected, else recent
+    const defaultTab = (needsAttention > 0 || attentionQueue.length > 0)
+        ? 'ATTENTION'
+        : (incompleteDrafts > 0 || draftQueue.length > 0)
+            ? 'DRAFTS'
+            : (expectedArrivals > 0 || expectedQueue.length > 0)
+                ? 'EXPECTED'
+                : 'RECENT';
+
+    const activeTab = selectedTab || defaultTab;
+    const setActiveTab = setSelectedTab;
 
     // Format date in laboratory timezone
     const todayFormatted = (() => {
@@ -333,11 +345,16 @@ const ReceptionDashboard = ({ user }) => {
                             {expectedQueue.length > 0 ? (
                                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                                     {expectedQueue.map(s => {
-                                        let hasCoords = false;
-                                        try {
-                                            const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
-                                            hasCoords = Boolean(fm?.latitude || fm?.lat || fm?.gps || fm?.coordinates);
-                                        } catch {}
+                                        const hasCoords = Boolean(
+                                            s.hasCoordinates ||
+                                            (s.latitude != null && s.longitude != null) ||
+                                            (() => {
+                                                try {
+                                                    const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
+                                                    return Boolean(fm?.latitude || fm?.lat || fm?.gps || fm?.coordinates);
+                                                } catch { return false; }
+                                            })()
+                                        );
                                         return (
                                             <div key={s.id} className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-750 rounded-lg px-2 transition">
                                                 <div className="min-w-0 flex-1">

@@ -284,6 +284,13 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
         const sampleWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample' });
         const workWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'WorkItem' });
 
+        // Safe query condition composer: prevents overwriting top-level scope OR clauses
+        const composeWhere = (scope, condition) => {
+            if (!scope || Object.keys(scope).length === 0) return condition || {};
+            if (!condition || Object.keys(condition).length === 0) return scope;
+            return { AND: [scope, condition] };
+        };
+
         // ── LAB_MANAGER / SUPER_ADMIN ──
         if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
             // KPIs
@@ -529,6 +536,26 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
                 dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
             }
 
+            // Determine operational gate applicability for this laboratory
+            let isDryingApplicable = true;
+            try {
+                const dryingGate = await prisma.operationalGate.findFirst({
+                    where: {
+                        code: 'DRYING',
+                        isActive: true,
+                        ...(user.labId ? { OR: [{ labId: user.labId }, { labId: null }] } : {})
+                    }
+                });
+                const totalConfiguredGates = await prisma.operationalGate.count({
+                    where: user.labId ? { OR: [{ labId: user.labId }, { labId: null }] } : {}
+                });
+                if (totalConfiguredGates > 0 && !dryingGate) {
+                    isDryingApplicable = false;
+                }
+            } catch {
+                isDryingApplicable = true;
+            }
+
             // Explicit Reception KPIs
             const [
                 expectedArrivals,
@@ -541,108 +568,101 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             ] = await Promise.all([
                 // 1. Expected arrivals (registered in project manifest but not yet received)
                 prisma.sample.count({
-                    where: { ...sampleWhere, status: 'EXPECTED' }
+                    where: composeWhere(sampleWhere, { status: 'EXPECTED' })
                 }),
                 // 2. Incomplete drafts (in-progress intake drafts)
                 prisma.sample.count({
-                    where: { ...sampleWhere, status: 'DRAFT' }
+                    where: composeWhere(sampleWhere, { status: 'DRAFT' })
                 }),
                 // 3. Received today (half-open day interval in lab timezone, excluding EXPECTED/DRAFT)
                 prisma.sample.count({
-                    where: {
-                        ...sampleWhere,
+                    where: composeWhere(sampleWhere, {
                         receptionDate: { gte: dayStart, lt: dayEnd },
                         status: { notIn: ['EXPECTED', 'DRAFT'] }
-                    }
+                    })
                 }),
                 // 4. Needs attention: rejected intake, non-conformance, or overdue unreviewed
                 prisma.sample.count({
-                    where: {
-                        ...sampleWhere,
+                    where: composeWhere(sampleWhere, {
                         OR: [
                             { status: 'RECEIVED_REJECTED' },
                             { status: 'RECEIVED', receptionDate: { lt: dayStart } }
                         ]
-                    }
+                    })
                 }),
                 // 5. Total registered in scope
                 prisma.sample.count({ where: sampleWhere }),
                 // 6. Operational handoff: strictly received/accepted samples awaiting drying
                 //    Excludes unreceived EXPECTED and DRAFT samples, and closed/approved samples
-                prisma.sample.count({
-                    where: {
-                        ...sampleWhere,
-                        status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING'] },
-                        receptionDate: { not: null },
-                        dryingStatus: 'PENDING'
-                    }
-                }),
+                isDryingApplicable
+                    ? prisma.sample.count({
+                        where: composeWhere(sampleWhere, {
+                            status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING'] },
+                            receptionDate: { not: null },
+                            dryingStatus: 'PENDING'
+                        })
+                    })
+                    : 0,
                 // 7. Operational handoff: strictly received/accepted samples ready for preparation
-                //    Requires drying completed (or not required), not sequential conflict
+                //    Missing drying is unknown, not waived; requires dryingStatus: DONE when applicable
                 prisma.sample.count({
-                    where: {
-                        ...sampleWhere,
+                    where: composeWhere(sampleWhere, {
                         status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] },
                         receptionDate: { not: null },
                         preparationStatus: 'PENDING',
-                        OR: [
-                            { dryingStatus: 'DONE' },
-                            { dryingStatus: null }
-                        ]
-                    }
+                        ...(isDryingApplicable ? { dryingStatus: 'DONE' } : {})
+                    })
                 })
             ]);
 
             // Scoped queues for Reception Dashboard tabs
-            const [recentIntakes, draftQueue, expectedQueue, attentionQueue] = await Promise.all([
+            const [rawRecentIntakes, draftQueue, rawExpectedQueue, attentionQueue] = await Promise.all([
                 // Today's receipts
                 prisma.sample.findMany({
-                    where: {
-                        ...sampleWhere,
+                    where: composeWhere(sampleWhere, {
                         receptionDate: { gte: dayStart, lt: dayEnd },
                         status: { notIn: ['EXPECTED', 'DRAFT'] }
-                    },
+                    }),
                     orderBy: { receptionDate: 'desc' },
                     take: 20,
                     select: {
                         id: true, originalId: true, labId: true, projectCode: true,
                         projectId: true, clientName: true, receptionDate: true,
                         receivedBy: true, status: true, dryingStatus: true,
-                        preparationStatus: true, latitude: true, longitude: true,
-                        fieldMetadata: true
+                        preparationStatus: true, latitude: true, longitude: true
                     }
                 }),
                 // Incomplete drafts
                 prisma.sample.findMany({
-                    where: { ...sampleWhere, status: 'DRAFT' },
+                    where: composeWhere(sampleWhere, { status: 'DRAFT' }),
                     orderBy: { updatedAt: 'desc' },
                     take: 20,
                     select: {
                         id: true, originalId: true, labId: true, projectCode: true,
                         projectId: true, clientName: true, updatedAt: true,
-                        receivedBy: true, status: true, receptionData: true
+                        receivedBy: true, status: true
                     }
                 }),
                 // Expected arrivals
                 prisma.sample.findMany({
-                    where: { ...sampleWhere, status: 'EXPECTED' },
+                    where: composeWhere(sampleWhere, { status: 'EXPECTED' }),
                     orderBy: { createdAt: 'desc' },
                     take: 20,
                     select: {
                         id: true, originalId: true, projectCode: true,
                         projectId: true, clientName: true, createdAt: true,
-                        status: true, fieldMetadata: true
+                        status: true, latitude: true, longitude: true,
+                        fieldMetadata: true
                     }
                 }),
                 // Needs attention (rejected or unreviewed)
                 prisma.sample.findMany({
-                    where: {
-                        ...sampleWhere,
+                    where: composeWhere(sampleWhere, {
                         OR: [
                             { status: 'RECEIVED_REJECTED' },
                             { status: 'RECEIVED', receptionDate: { lt: dayStart } }
                         ]
-                    },
+                    }),
                     orderBy: { updatedAt: 'desc' },
                     take: 20,
                     select: {
@@ -652,6 +672,42 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
                     }
                 })
             ]);
+
+            // Normalize lean provenance in previews without transmitting raw fieldMetadata blobs
+            const recentIntakes = rawRecentIntakes.map(s => ({
+                id: s.id,
+                originalId: s.originalId,
+                labId: s.labId,
+                projectCode: s.projectCode,
+                projectId: s.projectId,
+                clientName: s.clientName,
+                receptionDate: s.receptionDate,
+                receivedBy: s.receivedBy,
+                status: s.status,
+                dryingStatus: s.dryingStatus,
+                preparationStatus: s.preparationStatus,
+                hasCoordinates: Boolean(s.latitude != null && s.longitude != null)
+            }));
+
+            const expectedQueue = rawExpectedQueue.map(s => {
+                let hasCoords = Boolean(s.latitude != null && s.longitude != null);
+                if (!hasCoords && s.fieldMetadata) {
+                    try {
+                        const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
+                        hasCoords = Boolean(fm?.latitude || fm?.lat || fm?.gps || fm?.coordinates);
+                    } catch {}
+                }
+                return {
+                    id: s.id,
+                    originalId: s.originalId,
+                    projectCode: s.projectCode,
+                    projectId: s.projectId,
+                    clientName: s.clientName,
+                    createdAt: s.createdAt,
+                    status: s.status,
+                    hasCoordinates: hasCoords
+                };
+            });
 
             return res.json({
                 role: user.role,

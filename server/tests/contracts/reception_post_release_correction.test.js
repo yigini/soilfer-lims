@@ -424,6 +424,178 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             expect(res.status).toBe(200);
             expect(res.body.kpis.readyPreparation).toBeGreaterThanOrEqual(1);
         });
+
+        it('Sample with dryingStatus: null is NOT counted in readyPreparation when drying is applicable', async () => {
+            const sNullDrying = `DASH-NULL-DRY-${Date.now()}`;
+            trackedSampleIds.add(sNullDrying);
+
+            // Create a sample with dryingStatus: null and preparationStatus: PENDING
+            await prisma.sample.create({
+                data: {
+                    id: sNullDrying,
+                    originalId: sNullDrying,
+                    status: 'ACCEPTED',
+                    assignedLab: testLab,
+                    dryingStatus: null,
+                    preparationStatus: 'PENDING',
+                    receptionDate: new Date()
+                }
+            });
+
+            const res = await request(app)
+                .get('/api/dashboard/live')
+                .set('Authorization', authHeader);
+
+            expect(res.status).toBe(200);
+            // Count must only reflect samples with dryingStatus: 'DONE'
+            // The sample with dryingStatus: null must be treated as unknown, NOT waived!
+            const matchingReady = res.body.kpis.readyPreparation;
+            expect(matchingReady).toBeDefined();
+
+            // Verify explicitly via Prisma count using the exact query condition
+            const explicitDoneCount = await prisma.sample.count({
+                where: {
+                    assignedLab: testLab,
+                    status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] },
+                    receptionDate: { not: null },
+                    preparationStatus: 'PENDING',
+                    dryingStatus: 'DONE'
+                }
+            });
+            expect(res.body.kpis.readyPreparation).toBe(explicitDoneCount);
+        });
+
+        it('Second-Lab Fixture: Scope predicates are never overwritten by queue criteria; counts and preview rows strictly exclude other labs', async () => {
+            const ts = Date.now();
+            const sForeignRejected = `FOR-REJ-${ts}`;
+            const sForeignOverdue = `FOR-OVD-${ts}`;
+            const sForeignExpected = `FOR-EXP-${ts}`;
+            const sForeignDraft = `FOR-DFT-${ts}`;
+            const sForeignReceived = `FOR-RCV-${ts}`;
+
+            trackedSampleIds.add(sForeignRejected);
+            trackedSampleIds.add(sForeignOverdue);
+            trackedSampleIds.add(sForeignExpected);
+            trackedSampleIds.add(sForeignDraft);
+            trackedSampleIds.add(sForeignReceived);
+
+            const pastDate = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+            const now = new Date();
+
+            // Create foreign lab samples
+            await prisma.sample.createMany({
+                data: [
+                    {
+                        id: sForeignRejected,
+                        originalId: sForeignRejected,
+                        status: 'RECEIVED_REJECTED',
+                        assignedLab: foreignLab,
+                        labId: foreignLab,
+                        receptionDate: now,
+                        rejectionReason: 'Damaged container'
+                    },
+                    {
+                        id: sForeignOverdue,
+                        originalId: sForeignOverdue,
+                        status: 'RECEIVED',
+                        assignedLab: foreignLab,
+                        labId: foreignLab,
+                        receptionDate: pastDate
+                    },
+                    {
+                        id: sForeignExpected,
+                        originalId: sForeignExpected,
+                        status: 'EXPECTED',
+                        assignedLab: foreignLab,
+                        labId: foreignLab
+                    },
+                    {
+                        id: sForeignDraft,
+                        originalId: sForeignDraft,
+                        status: 'DRAFT',
+                        assignedLab: foreignLab,
+                        labId: foreignLab
+                    },
+                    {
+                        id: sForeignReceived,
+                        originalId: sForeignReceived,
+                        status: 'RECEIVED',
+                        assignedLab: foreignLab,
+                        labId: foreignLab,
+                        receptionDate: now,
+                        dryingStatus: 'DONE',
+                        preparationStatus: 'PENDING'
+                    }
+                ]
+            });
+
+            // 1. Query as Lab A (testLab) - MUST NOT see any foreign lab samples
+            const resA = await request(app)
+                .get('/api/dashboard/live')
+                .set('Authorization', authHeader);
+
+            expect(resA.status).toBe(200);
+
+            // Preview queues must not leak any foreign lab samples
+            const foreignIds = [sForeignRejected, sForeignOverdue, sForeignExpected, sForeignDraft, sForeignReceived];
+            const checkNoForeignRows = (queue, queueName) => {
+                const found = queue.filter(item => foreignIds.includes(item.id) || foreignIds.includes(item.originalId));
+                expect(found).toHaveLength(0);
+            };
+
+            checkNoForeignRows(resA.body.attentionQueue, 'attentionQueue');
+            checkNoForeignRows(resA.body.expectedQueue, 'expectedQueue');
+            checkNoForeignRows(resA.body.draftQueue, 'draftQueue');
+            checkNoForeignRows(resA.body.recentIntakes, 'recentIntakes');
+
+            // 2. Query as Foreign Lab (foreignLab) - MUST see its own samples
+            const resB = await request(app)
+                .get('/api/dashboard/live')
+                .set('Authorization', foreignAuthHeader);
+
+            expect(resB.status).toBe(200);
+            expect(resB.body.kpis.expectedArrivals).toBeGreaterThanOrEqual(1);
+            expect(resB.body.kpis.incompleteDrafts).toBeGreaterThanOrEqual(1);
+            expect(resB.body.kpis.needsAttention).toBeGreaterThanOrEqual(2); // sForeignRejected + sForeignOverdue
+            expect(resB.body.kpis.receivedToday).toBeGreaterThanOrEqual(1); // sForeignReceived
+
+            const attentionIds = resB.body.attentionQueue.map(s => s.id);
+            expect(attentionIds).toContain(sForeignRejected);
+            expect(attentionIds).toContain(sForeignOverdue);
+
+            const expectedIds = resB.body.expectedQueue.map(s => s.id);
+            expect(expectedIds).toContain(sForeignExpected);
+
+            const draftIds = resB.body.draftQueue.map(s => s.id);
+            expect(draftIds).toContain(sForeignDraft);
+
+            const recentIds = resB.body.recentIntakes.map(s => s.id);
+            expect(recentIds).toContain(sForeignReceived);
+        });
+
+        it('Projects lean preview rows without transmitting raw fieldMetadata strings', async () => {
+            const res = await request(app)
+                .get('/api/dashboard/live')
+                .set('Authorization', authHeader);
+
+            expect(res.status).toBe(200);
+
+            // Check expectedQueue items have hasCoordinates boolean and NO raw fieldMetadata string
+            if (res.body.expectedQueue.length > 0) {
+                res.body.expectedQueue.forEach(item => {
+                    expect(typeof item.hasCoordinates).toBe('boolean');
+                    expect(item.fieldMetadata).toBeUndefined();
+                });
+            }
+
+            // Check recentIntakes items have hasCoordinates boolean and NO raw fieldMetadata string
+            if (res.body.recentIntakes.length > 0) {
+                res.body.recentIntakes.forEach(item => {
+                    expect(typeof item.hasCoordinates).toBe('boolean');
+                    expect(item.fieldMetadata).toBeUndefined();
+                });
+            }
+        });
     });
 
     // ─────────────────────────────────────────────────────────────
