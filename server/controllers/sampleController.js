@@ -2092,16 +2092,25 @@ exports.archiveSample = async (req, res) => {
         const activeWork = await prisma.workItem.findMany({
             where: {
                 sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
             },
             select: { id: true, analysis: true, status: true }
         });
-        if (activeWork.length > 0) {
-            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+        const uncompletedGates = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DRYING', 'PREPARATION'] },
+                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0 || uncompletedGates.length > 0) {
+            const allUnfinished = [...activeWork, ...uncompletedGates];
+            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
             return res.status(409).json({
                 error: `Cannot archive sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: activeWork
+                activeWorkItems: allUnfinished
             });
         }
 
@@ -2199,16 +2208,25 @@ exports.disposeSample = async (req, res) => {
         const activeWork = await prisma.workItem.findMany({
             where: {
                 sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'] },
+                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
             },
             select: { id: true, analysis: true, status: true }
         });
-        if (activeWork.length > 0) {
-            const codes = activeWork.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
+        const uncompletedGates = await prisma.workItem.findMany({
+            where: {
+                sampleId: String(id),
+                analysis: { in: ['DRYING', 'PREPARATION'] },
+                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
+            },
+            select: { id: true, analysis: true, status: true }
+        });
+        if (activeWork.length > 0 || uncompletedGates.length > 0) {
+            const allUnfinished = [...activeWork, ...uncompletedGates];
+            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
             return res.status(409).json({
                 error: `Cannot dispose sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: activeWork
+                activeWorkItems: allUnfinished
             });
         }
 
