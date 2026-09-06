@@ -161,6 +161,28 @@ This is critical for:
 
 ---
 
+## 📦 Historical Analysis Backfill (Pre-Delivery Compatibility)
+
+For national soil laboratories with thousands of historical soil samples analyzed prior to SoilFER LIMS rollout:
+
+**What you can do:**
+- **Legacy Batch Ingestion**: Ingest batches analyzed during platform deployment intervals without breaking strict ISO 17025 custody gating.
+- **Auditable Provenance Tagging**: Each record receives a formal \`PROVENANCE: PRE_DELIVERY_BACKFILL\` tag.
+- **Chain of Custody Protection**: Historical data is isolated from active laboratory queues while remaining fully accessible for longitudinal reporting and national statistics.
+
+---
+
+## 🌐 National SIS Interoperability & Machine-to-Machine APIs
+
+Connect laboratory data directly with national Soil Information Systems (SIS) and international FAO repositories.
+
+**What you can do:**
+- **RFC 7946 GeoJSON & GloSIS Schemas**: Standardized geospatial exchange format containing field metadata, depth horizons, and categorized analytical findings.
+- **Secure API Key Token Authorization**: Issue scoped, revocable machine-to-machine API keys with expiration management.
+- **RESTful Neutral Endpoints**: Access analytics and statistics through standard, automated endpoints.
+
+---
+
 ## 🌙 Dark Mode
 
 Full dark/light theme support. Because lab technicians entering data at the end of a long day deserve gentle lighting.
@@ -172,7 +194,7 @@ Full dark/light theme support. Because lab technicians entering data at the end 
 The interface is available in:
 - 🇬🇧 English
 - 🇫🇷 Français (French)
-- 🇪🇸 Español (Spanish)
+- 🇪🇸 Español (Spanish & Latin American Spanish)
 - 🇵🇹 Português (Portuguese)
 
-Users can switch languages from their profile settings. The system remembers their preference.
+Users can switch languages from any page or their profile settings. The system remembers their preference.

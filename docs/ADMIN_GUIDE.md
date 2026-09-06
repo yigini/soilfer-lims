@@ -1,134 +1,191 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/yigini/soilfer-lims/main/client/public/assets/img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="300" />
+
 # 🔧 SoilFER-LIMS — Comprehensive Administration Guide
 
-A complete guide for System Administrators and Laboratory Managers configuring, operating, and maintaining SoilFER-LIMS.
+**Operational Reference for System Administrators & Laboratory Managers**  
+*Aligned with FAO GLOSOLAN, ISO/IEC 17025, and GloSIS Standards*
+
+[![Admin Reference](https://img.shields.io/badge/Guide-Administration-0284c7.svg)](#)
+[![Security Hardened](https://img.shields.io/badge/Security-RBAC%20Enforced-emerald.svg)](#)
+[![GloSIS Compatible](https://img.shields.io/badge/GloSIS-v1.0-green.svg)](https://github.com/glosis-ld/glosis)
+
+</div>
 
 ---
 
-## 1. First Login & Initial Setup
+## 📖 Table of Contents
+1. [Introduction & First-Time Setup](#1-introduction--first-time-setup)
+2. [Role-Based Access Control (RBAC) Matrix](#2-role-based-access-control-rbac-matrix)
+3. [Laboratory Configuration & Multi-Tenancy](#3-laboratory-configuration--multi-tenancy)
+4. [FAO GLOSOLAN Method Catalogue & Analytical Packages](#4-fao-glosolan-method-catalogue--analytical-packages)
+5. [ISO/IEC 17025 Quality Control & Batch Disposition](#5-isoiec-17025-quality-control--batch-disposition)
+6. [Machine-to-Machine SIS API & GloSIS Exchange](#6-machine-to-machine-sis-api--glosis-exchange)
+7. [Field Intake & KoboToolbox Integration](#7-field-intake--kobotoolbox-integration)
+8. [Historical Analysis Backfill (Pre-Delivery Compatibility)](#8-historical-analysis-backfill-pre-delivery-compatibility)
+9. [Localization, Branding & Translation Editor](#9-localization-branding--translation-editor)
+10. [Automated Backups & Disaster Recovery](#10-automated-backups--disaster-recovery)
+11. [Production Security Hardening Checklist](#11-production-security-hardening-checklist)
 
-1. Open your LIMS URL (e.g., `https://lims.your-domain.org` or `http://localhost`).
-2. Log in with initial credentials:
+---
+
+## 1. Introduction & First-Time Setup
+
+Welcome to the **SoilFER-LIMS Administration Guide**. This document is designed for System Administrators and Laboratory Directors responsible for setting up, configuring, and operating a production soil laboratory information management system.
+
+### Initial Access Checklist
+1. Open your web browser to your LIMS domain (e.g. `https://lims.your-institution.org` or `http://localhost`).
+2. Sign in with the primary administrative credentials:
    * **Username:** `admin`
    * **Password:** `password`
-3. You will be prompted to set a new, strong password (minimum 8 characters with alphanumeric requirements).
+3. Upon first login, the system will prompt you to replace the default password with an institutional-strength passphrase (minimum 8 characters with letters, numbers, and symbols).
+4. Navigate to the **Admin Panel** (`/admin`) using the top-right navigation menu.
+
+> 💡 **Tip:** In **Global Mode** (`DEPLOYMENT_MODE=global`), the initial `admin` account possesses the `SUPER_ADMIN` role, enabling multi-laboratory management. In **Local Mode**, `admin` operates as the primary `LAB_MANAGER`.
 
 ---
 
-## 2. Roles & Permissions Matrix (RBAC)
+## 2. Role-Based Access Control (RBAC) Matrix
 
-SoilFER-LIMS uses strict, type-safe Role-Based Access Control and multi-tenancy lab isolation:
+SoilFER-LIMS enforces strict, type-safe Role-Based Access Control with automatic database query scoping:
 
-| Role | Scope | Key Responsibilities |
-| :--- | :--- | :--- |
-| **`SUPER_ADMIN`** | Global (All Labs) | Manage all physical laboratories, create lab managers, generate SIS API keys, manage global GloSIS catalogs, system backups. |
-| **`LAB_MANAGER`** | Single Laboratory (e.g. `GTM-LAB1`) | Assign work items to technicians, review and approve test results, configure laboratory test packages, manage lab equipment and reagents. |
-| **`LAB_TECHNICIAN`** | Personal Work Queue | Access personal bench queue ("My Work"), enter test measurements on the Workbench, save autosaving drafts, log instrument usage. |
-| **`SAMPLE_RECEPTION`** | Lab Reception Desk | Perform physical sample intake, check compliance/condition, assign generated Lab IDs (e.g. `S001`), print barcode/QR labels. |
-| **`PROJECT_MANAGER`** | Project-specific Scope | View sample progress, inspect 3D field coordinates, export project data reports. |
+| Role Persona | System Code | Scope of Access | Primary Operational Responsibilities |
+| :--- | :--- | :--- | :--- |
+| **Global Administrator** | `SUPER_ADMIN` | Global (All Laboratories) | Laboratory creation, user provisioning, institutional branding locks, SIS API tokens, system backups. |
+| **Laboratory Manager** | `LAB_MANAGER` | Single Laboratory (e.g. `GTM-LAB1`) | Work item assignment, batch approvals, QC disposition overrides, equipment calibration, inventory lots. |
+| **Bench Analyst** | `LAB_TECHNICIAN` | Assigned Work Queue | Sample drying and milling checklist receipts, worksheet results recording, instrument linkage, MIR scan uploads. |
+| **Intake Officer** | `SAMPLE_RECEPTION` | Reception Desk | Physical sample inspection, container condition checks, barcode/QR label printing, Kobo manifest matching. |
+| **Project Sponsor** | `PROJECT_MANAGER` | Assigned Projects | Project progress dashboards, spatial GIS coordinates, and batch CSV/Excel report exports. |
 
----
-
-## 3. FAO GloSIS & Analytical Methods Configuration
-
-SoilFER-LIMS natively implements the **FAO Global Soil Information System (GloSIS)** code and procedure ontology:
-
-Navigate to **Admin Panel → Lab Configuration** (`/admin?tab=lab-config`):
-
-### A. Analyses & Methods Tab
-* **Soil Property (Code):** The canonical soil property code (e.g. `pH`, `carbonOrganic`, `nitrogenTotal`, `pSA`, `exchangeableBases`).
-* **Analytical Method (Label):** The exact laboratory procedure from `glosis_procedure.csv` (e.g. `pHH2O_ratio1-2.5`, `OrgC_wc-cro3-walkleyblack`, `pipette-dispersion`).
-* **Validation Bounds:** Set realistic minimum and maximum physical thresholds to trigger real-time bench warnings.
-
-### B. Analysis Packages (Suites)
-Group individual tests into standard packages for 1-click reception:
-* **Basic Soil Fertility Package:** `pH`, `carbonOrganic`, `nitrogenTotal`, `extractableElements`, `exchangeableBases`, `electricalConductivity`.
-* **Physical & Texture Properties:** `pSA` (`SAND`, `SILT`, `CLAY`), `bulkDensityWholeSoil`, `soilWaterContent`.
-* **Exchangeable Cations & CEC:** `CA_EXCH`, `MG_EXCH`, `K_EXCH`, `NA_EXCH`, `cationExchangeCapacitySoil`.
-
-### C. GloSIS Procedure Explorer
-* Live search and explore all **275 official FAO analytical procedures** with definitions, citations (ISO, USDA-NRCS, GLOSOLAN), and URI links.
+> 🔒 **Security Guarantee:** Technicians and Intake Officers are physically scoped to their assigned laboratory. Cross-laboratory queries fail closed with an HTTP 403 Forbidden error.
 
 ---
 
-## 4. Machine-to-Machine SIS API & External Data Exchange
+## 3. Laboratory Configuration & Multi-Tenancy
 
-To securely exchange soil analytical data with National Soil Information Systems (SIS) or FAO central repositories:
+In multi-laboratory deployments, national ministries can host multiple regional laboratories on a single server instance:
+
+1. Navigate to **Admin Panel → Laboratories** (`/admin?tab=labs`).
+2. Click **Create New Laboratory**.
+3. Fill in the required institutional parameters:
+   * **Lab Code:** Unique identifier (e.g. `GTM-LAB1`, `MOZ-SOIL2`).
+   * **Laboratory Name:** Official institutional title.
+   * **Country:** Target nation ISO code.
+   * **Default Timezone:** Local IANA timezone (e.g. `America/Guatemala`, `Africa/Maputo`).
+   * **Active Status:** Toggle laboratory operations on or off.
+4. Assign a **Laboratory Manager** to the newly registered facility.
+
+---
+
+## 4. FAO GLOSOLAN Method Catalogue & Analytical Packages
+
+SoilFER-LIMS natively includes the **FAO GLOSOLAN Standard Operating Procedures** catalogue:
+
+Navigate to **Admin Panel → Lab Configuration → Analyses & Methods** (`/admin?tab=lab-config`):
+
+### A. Core Soil Properties (Measurands)
+* **Canonical Codes:** `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `exchangeableBases` (`Ca`, `Mg`, `K`, `Na`), `pSA` (Sand, Silt, Clay).
+* **Controlled Units:** Automatically converts and standardizes units (`g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, `µS/cm`, `%`).
+* **Plausibility Bounds:** Enforces strict physical minimum and maximum bounds to catch data entry errors before submission.
+
+### B. Standard Analysis Suites (Packages)
+Group common laboratory determinations into 1-click packages for intake officers:
+* **Routine Soil Fertility Suite:** pH ($1:2.5\ \text{H}_2\text{O}$), Organic Carbon (Walkley-Black), Total Nitrogen (Kjeldahl), Available Phosphorus (Olsen / Mehlich-3), Electrical Conductivity.
+* **Physical Soil Suite:** Particle Size Analysis (`SAND`, `SILT`, `CLAY` with USDA 12-class textural closure validation), Bulk Density, Moisture Content.
+* **Exchangeable Cations & CEC:** Ammonium Acetate extraction for exchangeable $\text{Ca}^{2+}$, $\text{Mg}^{2+}$, $\text{K}^+$, $\text{Na}^+$, and Effective Cation Exchange Capacity (ECEC).
+
+---
+
+## 5. ISO/IEC 17025 Quality Control & Batch Disposition
+
+Quality assurance is embedded into every analytical batch:
+
+1. **Mandatory QC Samples**:
+   * **Method Blanks:** Checked against maximum background limit ($\le 0.05$).
+   * **Analytical Duplicates:** Verified using Relative Percent Difference ($\text{RPD} \le 10.0\%$).
+   * **Certified Reference Materials (CRMs):** Verified against certified recovery windows ($90.0\% \le \text{Recovery} \le 110.0\%$).
+2. **Automated Evaluation:** Batches are automatically classified as `QC_PASS` or `QC_FAIL` by the calculation engine.
+3. **Manager Disposition Overrides:** When natural soil heterogeneity causes duplicate failure, only a `LAB_MANAGER` can sign a `PROCEED_WITH_WARNING` disposition with a mandatory written justification recorded in the immutable audit log.
+
+---
+
+## 6. Machine-to-Machine SIS API & GloSIS Exchange
+
+National Soil Information Systems (SIS) and research repositories can ingest laboratory data programmatically:
 
 1. Navigate to **Admin Panel → API Keys** (`/admin?tab=api-keys`).
 2. Click **Generate New API Key**.
-3. Specify a Name (e.g., `National-SIS-Sync-Service`), select the Lab Scope, and set expiration.
-4. Use the API Key in the `X-API-Key` HTTP header:
+3. Specify a client description (e.g. `National-SIS-Data-Exchange`), select the authorized laboratory scope, and set an expiration date.
+4. Clients pass the token in the `X-API-Key` header:
 
 ```bash
-# Fetch sample results formatted in GloSIS Linked-Data structure:
-curl -H "X-API-Key: sis_live_abc123..." https://lims.your-domain.org/api/sis/samples/GTM0236-5-3C-T
+# Query authorized sample data in standardized RFC 7946 GeoJSON format:
+curl -H "X-API-Key: sis_live_a8f9c2d1..." \
+     https://lims.your-institution.org/api/v1/data-exchange/samples?limit=50
 ```
 
 ---
 
-## 5. Field Intake & KoboToolbox Integration
+## 7. Field Intake & KoboToolbox Integration
 
-To connect field sampling teams with laboratory reception:
+Connect field sampling campaigns directly with the laboratory reception desk:
 
-1. Go to **Admin Panel → KoboToolbox Config**.
-2. Enter your KoboToolbox Server URL (e.g., `https://kf.soilfer-data.fao.org`) and API Access Token.
-3. Select the active survey form.
-4. Field records, GPS coordinates, depth layers (D1/D2), and land-feature photos will automatically populate in **Reception**.
-
----
-
-## 6. ISO/IEC 17025 Quality Control & Batch Disposition
-
-SoilFER-LIMS enforces strict analytical quality assurance across every testing run:
-
-1. **QC Sample Types**:
-   * **Method Blanks**: Verified against maximum background thresholds ($\le 0.05$).
-   * **Analytical Duplicates**: Verified using Relative Percent Difference ($\text{RPD} \le 10.0\%$).
-   * **Certified Reference Materials (CRMs)**: Verified using standard recovery windows ($90.0\% \le \text{Recovery} \le 110.0\%$).
-2. **Automated Batch Evaluation**: Batches transition to `QC_PASS` or `QC_FAIL` automatically based on entered QC measurements.
-3. **Managerial Disposition Overrides**: When analytical duplicates or CRMs fail due to sample matrix heterogeneity, only a `LAB_MANAGER` or `SUPER_ADMIN` can authorize a `PROCEED_WITH_WARNING` disposition with mandatory audit trail justification.
+1. Open **Admin Panel → KoboToolbox Integration** (`/admin?tab=kobo`).
+2. Enter your KoboToolbox server endpoint (e.g. `https://kf.kobotoolbox.org`) and your API Account Token.
+3. Select the active sampling survey form.
+4. Field records, geographic GPS coordinates, depth horizons ($0\text{--}20\text{ cm}$, $20\text{--}50\text{ cm}$), and bag photographs will synchronize automatically into the **Reception** queue as expected arrivals.
 
 ---
 
-## 7. Agronomic Interpretation & Reporting
+## 8. Historical Analysis Backfill (Pre-Delivery Compatibility)
 
-1. **Controlled Units**: Incoming results are standardized into controlled scientific units (`g/kg`, `mg/kg`, `cmol(+)/kg`, `µS/cm`, `pH units`, `%`).
-2. **FAO 5-Tier Agronomic Engine**: Classifies parameters into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH` ratings with practical recommendations.
-3. **Publication-Grade PDF Certificates**:
-   * Pure JS PDF rendering with zero browser dependencies.
-   * Official FAO SoilFER layout with 2-column provenance metadata, pre-analytical gates badge, and Lab Manager digital signature.
-   * Secure public sharing tokens (`/api/reports/public/:token/pdf`).
+For laboratories with thousands of historical soil samples analyzed prior to SoilFER LIMS deployment:
 
----
-
-## 8. Multi-Lingual Customization & Translation Editor
-
-SoilFER-LIMS supports English, Spanish, Latin American Spanish, French, and Portuguese:
-
-1. Navigate to **Admin Panel → Translations** (`/admin?tab=translations`).
-2. Select your target language.
-3. Edit any UI phrase or localized lab terminology in real time.
-4. Click **Save Translations** — changes take effect immediately across all connected users.
+1. Open the **Projects** console (`/projects`).
+2. Select your target project and click **Historical Analysis Backfill**.
+3. Use the guided backfill modal to:
+   * Specify legacy sample ID ranges and collection intervals.
+   * Attach historical standard operating procedures.
+   * Ingest pre-analyzed determinations with the formal `PROVENANCE: PRE_DELIVERY_BACKFILL` audit tag.
+4. Historical records are preserved for national reporting without corrupting active chain-of-custody ledgers.
 
 ---
 
-## 9. Automated Backups & Maintenance
+## 9. Localization, Branding & Translation Editor
 
-### Schedule an Automated Daily Cron Backup
+SoilFER-LIMS provides multi-lingual access in English, Spanish (`es` and `es-419`), French, and Portuguese:
+
+1. Open **Admin Panel → Translations** (`/admin?tab=translations`).
+2. Choose your language.
+3. Modify any UI label or scientific terminology in real time.
+4. Click **Save Translations** — changes update immediately across all connected users.
+
+---
+
+## 10. Automated Backups & Disaster Recovery
+
+### Automated Nightly Database Backup
+Configure a daily cron job on the host machine to back up the SQLite WAL database:
+
 ```bash
-# Add to host crontab (crontab -e):
+# Open host crontab editor
+crontab -e
+
+# Add automated daily backup at 02:00 UTC:
 0 2 * * * docker exec -w /app/server soilfer-lims node scripts/backup_db.js
 ```
 
-Backups are timestamped and saved in `/opt/soilfer-lims/server/backups/`.
+Backups are saved with UTC timestamps in `/opt/soilfer-lims/server/backups/`.
 
 ---
 
-## 10. Security Checklist for Production
+## 11. Production Security Hardening Checklist
 
-1. ✅ **HTTPS / SSL:** Always terminate TLS using Let's Encrypt / Certbot with HTTP $\rightarrow$ HTTPS redirection.
-2. ✅ **JWT Secret:** Ensure `JWT_SECRET` in `.env` is a high-entropy string ($64+$ characters).
-3. ✅ **Default Passwords:** Ensure `admin`, `mgr_*`, and `tech_*` accounts have custom passwords.
-4. ✅ **Firewall:** Expose only port `80` and `443` externally. Protect SSH with key-based authentication.
-5. ✅ **Branding Protection:** Partner and institutional branding can only be modified by global `SUPER_ADMIN`.
+Prior to commissioning your laboratory system for official use, verify the following:
 
+- [ ] **HTTPS Enforced:** Strict Transport Security (HSTS) and automatic HTTP $\rightarrow$ HTTPS redirection active.
+- [ ] **High-Entropy Secrets:** Ensure `JWT_SECRET` in `.env` is at least 64 random alphanumeric characters.
+- [ ] **Default Passwords Changed:** Change passwords for `admin`, `mgr_*`, and `tech_*` demo accounts.
+- [ ] **Firewall Restricted:** Only ports `80` and `443` should be reachable publicly. Port `22` (SSH) restricted to authorized administrative IPs.
+- [ ] **Branding Protection:** Partner logos and institutional badges locked by global `SUPER_ADMIN`.

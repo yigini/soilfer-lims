@@ -1,8 +1,27 @@
-# 📦 SoilFER-LIMS — Deployment Guide
+<div align="center">
 
-A step-by-step guide for deploying SoilFER-LIMS on a Linux server. Written for non-IT users — no prior server experience needed.
+<img src="https://raw.githubusercontent.com/yigini/soilfer-lims/main/client/public/assets/img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="300" />
 
-> **What you'll get:** A public website (e.g. `https://lims.yourdomain.com`) where your lab team can log in and manage samples.
+# 🛠️ SoilFER-LIMS — Installation Quickstart
+
+**Step-by-Step Installation Guide for Developers & Laboratory IT Staff**  
+*Written for non-IT users — no prior server experience needed.*
+
+[![Quickstart](https://img.shields.io/badge/Quickstart-Beginner%20Friendly-emerald.svg)](#)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](../Dockerfile)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B%20%7C%2020%2B-green.svg)](https://nodejs.org/)
+
+</div>
+
+---
+
+## 📖 Online Documentation (GitHub Pages)
+
+* 🌐 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
+* 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
+* 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
+* 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
+* 🔄 **[Upgrading & Maintenance Guide](UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
 
 ---
 

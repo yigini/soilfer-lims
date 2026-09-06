@@ -1,7 +1,27 @@
-# SoilFER-LIMS — Complete Guide
+<div align="center">
 
-> **Version 1.0** · Laboratory Information Management System for Soil Analysis  
-> An open-source system for managing soil samples — from field collection to laboratory analysis and final reporting.
+<img src="https://raw.githubusercontent.com/yigini/soilfer-lims/main/client/public/assets/img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="320" />
+
+# 🚀 SoilFER-LIMS — Complete Production & Deployment Guide
+
+> **Version 1.4.0** · Laboratory Information Management System for Soil Analysis  
+> *Developed under the FAO SoilFER Programme · Supported by GLOSOLAN & Global Soil Partnership*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](../LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](../Dockerfile)
+[![Tests](https://img.shields.io/badge/Tests-77%20Suites%20%7C%20555%20Passing-brightgreen.svg)](#)
+
+</div>
+
+---
+
+## 📖 Online Documentation (GitHub Pages)
+
+* 🌐 **Interactive Documentation Site**: [https://yigini.github.io/soilfer-lims/](https://yigini.github.io/soilfer-lims/)
+* 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
+* 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
+* 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
+* 🔄 **[Upgrading & Maintenance Guide](UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
 
 ---
 
