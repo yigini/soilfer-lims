@@ -242,7 +242,6 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
                         labId: testLab1.id,
                         assignedLab: testLab1.id,
                         analysis: 'PH_H2O',
-                        methodologyId: 'meth-std-1',
                         version: 3,
                         status: 'ASSIGNED',
                         assignedTo: testUsers.LAB_TECHNICIAN.username
