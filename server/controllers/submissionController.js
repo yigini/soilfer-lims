@@ -433,6 +433,22 @@ exports.reviewSubmission = async (req, res) => {
                 }
             }));
 
+            operations.push(prisma.reviewDecision.create({
+                data: {
+                    id: `rd-sub-${workItemId}-${Date.now()}`,
+                    sampleId: String(submission.sampleId),
+                    workItemId,
+                    submissionItemId: submission.id,
+                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'WAIVE'),
+                    reason: reason || null,
+                    reviewerId: user.id || user.username,
+                    reviewerName: user.username,
+                    authorization: user.role,
+                    policyVersion: 'v1',
+                    createdAt: now
+                }
+            }));
+
             results.push({ workItemId, status: newStatus, decision: verdict });
         }
 

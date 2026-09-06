@@ -952,6 +952,53 @@ exports.updateWorkItemStatus = async (req, res) => {
             }
         }
 
+        const isOperationalGate = ['DRYING', 'PREPARATION'].includes((item.analysis || '').toUpperCase());
+        if (isOperationalGate && status === workflow.WORK_ITEM_STATES.COMPLETED) {
+            let checklist = req.body.checklist;
+            if (!checklist && typeof result === 'string') {
+                try {
+                    const parsed = JSON.parse(result);
+                    if (Array.isArray(parsed.checklist)) checklist = parsed.checklist;
+                } catch (e) {}
+            }
+
+            if (!checklist || !Array.isArray(checklist) || checklist.length !== 3 || !checklist.every(Boolean)) {
+                return res.status(422).json({
+                    error: `Operational gate '${item.analysis}' requires checklist confirmation with all procedural steps verified. Complete this in Workbench.`,
+                    code: 'CHECKLIST_REQUIRED',
+                    destination: `/workbench?workItemId=${item.id}`
+                });
+            }
+
+            const OperationalConfirmationService = require('../services/operationalConfirmationService');
+            try {
+                const outcome = await OperationalConfirmationService.confirmOperation({
+                    actor: user,
+                    workItemId: id,
+                    checklist,
+                    observations: req.body.observations,
+                    idempotencyKey: req.body.idempotencyKey
+                });
+                return res.json({
+                    success: true,
+                    updates: outcome.workItem,
+                    receipt: outcome.receipt
+                });
+            } catch (opErr) {
+                return res.status(opErr.status || 400).json({ error: opErr.message, code: opErr.code });
+            }
+        }
+
+        if (!isOperationalGate && status === workflow.WORK_ITEM_STATES.COMPLETED) {
+            if (result === 'Done' || result === null || result === undefined || String(result).trim() === '') {
+                return res.status(422).json({
+                    error: `Cannot complete analytical work item '${item.analysis}' with bare 'Done' or missing evidence. Record scientific results in Workbench.`,
+                    code: 'INVALID_RESULT_EVIDENCE',
+                    destination: `/workbench?workItemId=${item.id}`
+                });
+            }
+        }
+
         if ((status === workflow.WORK_ITEM_STATES.COMPLETED || result !== undefined) && result !== null && result !== '') {
             const methods = await analysisService.loadAnalyses();
             const method = methods.find(m => m.code === item.analysis);
@@ -1038,34 +1085,6 @@ exports.updateWorkItemStatus = async (req, res) => {
                     notes: `Used during ${item.analysis} result entry`
                 }
             }));
-        }
-
-        if (status === workflow.WORK_ITEM_STATES.COMPLETED) {
-            if (item.analysis === 'DRYING') {
-                operations.push(prisma.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { dryingStatus: 'DONE' }
-                }));
-                // Auto-accept gates
-                updateData.status = workflow.WORK_ITEM_STATES.ACCEPTED;
-                updateData.history = JSON.stringify([...JSON.parse(updateData.history), {
-                    status: workflow.WORK_ITEM_STATES.ACCEPTED,
-                    note: 'Auto-accepted by System (Operational Gate)',
-                    timestamp: now
-                }]);
-            } else if (item.analysis === 'PREPARATION') {
-                operations.push(prisma.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { preparationStatus: 'DONE' }
-                }));
-                // Auto-accept gates
-                updateData.status = workflow.WORK_ITEM_STATES.ACCEPTED;
-                updateData.history = JSON.stringify([...JSON.parse(updateData.history), {
-                    status: workflow.WORK_ITEM_STATES.ACCEPTED,
-                    note: 'Auto-accepted by System (Operational Gate)',
-                    timestamp: now
-                }]);
-            }
         }
 
         if (operations.length > 0) {
@@ -1168,7 +1187,7 @@ exports.reviewWorkItem = async (req, res) => {
                 // Canonical guard: must be in SUBMITTED state (COMPLETED is not SUBMITTED)
                 if (item.status !== workflow.WORK_ITEM_STATES.SUBMITTED) {
                     return res.status(400).json({
-                        error: `Cannot approve work item in '${item.status}' state. Analyses must be completed and submitted by a technician before manager approval.`,
+                        error: `Cannot approve work item in '${item.status}' state. Analyses must be completed and submitted by a technician before manager approval. Only submitted work items can be reviewed.`,
                         code: 'INVALID_TRANSITION'
                     });
                 }
@@ -1306,6 +1325,44 @@ exports.reviewWorkItem = async (req, res) => {
             }
         }
 
+        const decisionVerdict = status === workflow.WORK_ITEM_STATES.ACCEPTED
+            ? 'ACCEPT'
+            : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
+
+        operations.push(prisma.reviewDecision.create({
+            data: {
+                id: `rd-${id}-${Date.now()}`,
+                sampleId: String(item.sampleId),
+                workItemId: id,
+                submissionItemId: item.submissionId || null,
+                decision: decisionVerdict,
+                reason: effectiveReason || note || 'Manager Review',
+                reviewerId: user.id || user.username,
+                reviewerName: user.username,
+                authorization: user.role,
+                policyVersion: 'v1',
+                createdAt: now
+            }
+        }));
+
+        if (item.submissionId) {
+            const allSubItems = await prisma.workItem.findMany({
+                where: { submissionId: item.submissionId },
+                select: { id: true, status: true }
+            });
+            const unreviewed = allSubItems.filter(si => si.id !== id && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
+            const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
+            operations.push(prisma.submission.update({
+                where: { id: item.submissionId },
+                data: {
+                    status: subStatus,
+                    reviewedBy: user.username,
+                    reviewedAt: now,
+                    reviewNote: `${user.username} reviewed item ${id} (${decisionVerdict})`
+                }
+            }));
+        }
+
         operations.push(prisma.auditLog.create({
             data: {
                 id: `audit-wi-rev-${id}-${Date.now()}`,
@@ -1350,12 +1407,13 @@ exports.reviewWorkItem = async (req, res) => {
                 body = `Your work on "${item.analysis}" for sample ${labId} requires reanalysis.${note ? `\n\nManager's feedback: ${note}` : ''}\n\nPlease review and resubmit.`;
             }
 
-            // Only create message if we have a valid recipient ID
-            if (subject && body && recipient?.id) {
+            // Only create message if we have a valid recipient ID and sender ID
+            const senderId = user.id || (await prisma.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
+            if (subject && body && recipient?.id && senderId) {
                 operations.push(prisma.message.create({
                     data: {
                         id: `msg-review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                        senderId: user.id,
+                        senderId: senderId,
                         recipientId: recipient.id,
                         subject,
                         body,
@@ -1615,6 +1673,26 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
             }));
 
+            const decisionVerdict = status === workflow.WORK_ITEM_STATES.ACCEPTED
+                ? 'ACCEPT'
+                : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
+
+            operations.push(prisma.reviewDecision.create({
+                data: {
+                    id: `rd-bulk-${item.id}-${Date.now()}`,
+                    sampleId: String(item.sampleId),
+                    workItemId: item.id,
+                    submissionItemId: item.submissionId || null,
+                    decision: decisionVerdict,
+                    reason: effectiveReason || note || 'Bulk Manager Review',
+                    reviewerId: user.id || user.username,
+                    reviewerName: user.username,
+                    authorization: user.role,
+                    policyVersion: 'v1',
+                    createdAt: now
+                }
+            }));
+
             // Send message to technician if assigned
             if (item.assignedTo) {
                 // Lookup recipient user ID (assignedTo is username, not ID)
@@ -1639,12 +1717,13 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     body = `Your work on "${item.analysis}" for sample ${item.labId || item.sampleId} requires reanalysis.${note ? `\n\nFeedback: ${note}` : ''}`;
                 }
 
-                // Only create message if we have a valid recipient ID
-                if (subject && body && recipient?.id) {
+                // Only create message if we have a valid recipient ID and sender ID
+                const senderId = user.id || (await prisma.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
+                if (subject && body && recipient?.id && senderId) {
                     operations.push(prisma.message.create({
                         data: {
                             id: `msg-bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                            senderId: user.id,
+                            senderId: senderId,
                             recipientId: recipient.id,
                             subject,
                             body,
@@ -1669,6 +1748,27 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     );
                 }
             }
+        }
+
+        // Reconcile parent Submissions for all affected items
+        const affectedSubIds = [...new Set(items.map(i => i.submissionId).filter(Boolean))];
+        for (const subId of affectedSubIds) {
+            const allSubItems = await prisma.workItem.findMany({
+                where: { submissionId: subId },
+                select: { id: true, status: true }
+            });
+            const itemIdsBeingReviewed = new Set(items.map(i => i.id));
+            const unreviewed = allSubItems.filter(si => !itemIdsBeingReviewed.has(si.id) && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
+            const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
+            operations.push(prisma.submission.update({
+                where: { id: subId },
+                data: {
+                    status: subStatus,
+                    reviewedBy: user.username,
+                    reviewedAt: now,
+                    reviewNote: `${user.username} bulk reviewed items`
+                }
+            }));
         }
 
         if (operations.length > 0) {
