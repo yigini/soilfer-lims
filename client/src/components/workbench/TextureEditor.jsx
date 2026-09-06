@@ -13,7 +13,7 @@ export default function TextureEditor({
     disabled = false,
     onEnterNext = null,
     sampleId = '',
-    tolerance = 1.0
+    tolerance = null
 }) {
     let sandVal = '';
     let siltVal = '';
@@ -41,11 +41,12 @@ export default function TextureEditor({
         if (index === 1) nextSilt = val;
         if (index === 2) nextClay = val;
 
-        const nextArr = [nextSand, nextSilt, nextClay];
-        nextArr.sand = nextSand;
-        nextArr.silt = nextSilt;
-        nextArr.clay = nextClay;
-        onChange(nextArr);
+        const nextObj = {
+            sand: nextSand,
+            silt: nextSilt,
+            clay: nextClay
+        };
+        onChange(nextObj);
     };
 
     const s = Number(String(sandVal).replace(',', '.')) || 0;
@@ -55,7 +56,7 @@ export default function TextureEditor({
     const hasAny = sandVal !== '' || siltVal !== '' || clayVal !== '';
     const hasAll = sandVal !== '' && siltVal !== '' && clayVal !== '';
 
-    const tolVal = typeof tolerance === 'number' ? tolerance : (tolerance?.tolerance ?? 1.0);
+    const tolVal = typeof tolerance === 'number' ? tolerance : (tolerance?.tolerance ?? null);
 
     const textureResult = useMemo(() => {
         if (!hasAll) return null;
@@ -64,7 +65,7 @@ export default function TextureEditor({
 
     const total = Number((s + si + c).toFixed(1));
     const closureError = Number(Math.abs(100 - total).toFixed(1));
-    const isClosurePassing = hasAll && closureError <= tolVal;
+    const isClosurePassing = hasAll && (tolVal !== null ? closureError <= tolVal : closureError <= 1e-4);
 
     return (
         <div className="flex flex-col gap-1.5">
@@ -151,8 +152,8 @@ export default function TextureEditor({
                             </span>
                         ) : (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
-                                title={`Total is ${total}%. Allowed tolerance is ±${tolVal}%.`}>
-                                <span>⚠ Sum {total}% (error {closureError}% &gt; ±${tolVal}%)</span>
+                                title={tolVal !== null ? `Total is ${total}%. Allowed tolerance is ±${tolVal}%.` : `Total is ${total}%. Closure tolerance is not configured.`}>
+                                <span>⚠ Sum {total}% ({tolVal !== null ? `error ${closureError}% > ±${tolVal}%` : (closureError > 0 ? 'closure tolerance unconfigured' : 'closure error')})</span>
                             </span>
                         )
                     ) : (

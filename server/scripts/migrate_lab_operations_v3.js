@@ -15,8 +15,9 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
+const { calculateUsdaTexture } = require('../utils/soilCalculations');
 
-// Explicit scientific methodology reconciliation dictionary (Correction 6)
+// Explicit scientific methodology reconciliation dictionary (authoritative ISO / GLOSOLAN mappings)
 const METHODOLOGY_RECONCILIATION = [
     {
         analysisCode: 'PH_H2O',
@@ -25,14 +26,6 @@ const METHODOLOGY_RECONCILIATION = [
         canonicalMethodId: 'GLOSOLAN_PH_H2O',
         canonicalName: 'GLOSOLAN 2021 Potentiometry (1:2.5 H₂O)',
         reason: 'Replaced unreviewed synthetic placeholder with authoritative GLOSOLAN 2021 Standard Operating Procedure.'
-    },
-    {
-        analysisCode: 'pH',
-        deprecatedMethodId: 'meth-std-4',
-        deprecatedName: 'Potentiometry in 1:2.5 H2O Suspension',
-        canonicalMethodId: 'pHNaF_ratio1-5',
-        canonicalName: 'pHNaF_ratio1-5',
-        reason: 'Replaced placeholder with ISO/GLOSOLAN fluoride extraction method.'
     },
     {
         analysisCode: 'PH_CACL2',
@@ -59,14 +52,6 @@ const METHODOLOGY_RECONCILIATION = [
         reason: 'Replaced placeholder with ISO 11265 standard conductometry.'
     },
     {
-        analysisCode: 'electricalConductivity',
-        deprecatedMethodId: 'meth-std-9',
-        deprecatedName: 'Conductometry in 1:5 Soil-Water Suspension',
-        canonicalMethodId: 'EC_ratio1-10',
-        canonicalName: 'EC_ratio1-10',
-        reason: 'Replaced placeholder with standard 1:10 soil:water ratio procedure.'
-    },
-    {
         analysisCode: 'SOC',
         deprecatedMethodId: 'meth-std-10',
         deprecatedName: 'Walkley-Black Chromic Acid Wet Oxidation',
@@ -75,28 +60,12 @@ const METHODOLOGY_RECONCILIATION = [
         reason: 'Replaced placeholder with authoritative GLOSOLAN Walkley-Black SOP.'
     },
     {
-        analysisCode: 'carbonOrganic',
-        deprecatedMethodId: 'meth-std-12',
-        deprecatedName: 'Walkley-Black Chromic Acid Wet Oxidation',
-        canonicalMethodId: 'OrgC_dc-lt-loi',
-        canonicalName: 'OrgC_dc-lt-loi',
-        reason: 'Replaced placeholder with Loss-on-Ignition / dry combustion standard.'
-    },
-    {
         analysisCode: 'TN',
         deprecatedMethodId: 'meth-std-13',
         deprecatedName: 'Modified Kjeldahl Digestion & Titration',
         canonicalMethodId: 'GLOSOLAN_TN_KJELDAHL',
         canonicalName: 'GLOSOLAN Modified Kjeldahl Digestion',
         reason: 'Replaced placeholder with authoritative GLOSOLAN Kjeldahl SOP.'
-    },
-    {
-        analysisCode: 'nitrogenTotal',
-        deprecatedMethodId: 'meth-std-15',
-        deprecatedName: 'Modified Kjeldahl Digestion & Titration',
-        canonicalMethodId: 'TotalN_h2so4',
-        canonicalName: 'TotalN_h2so4',
-        reason: 'Replaced placeholder with sulfuric acid digestion standard.'
     },
     {
         analysisCode: 'P_OLSEN',
@@ -129,14 +98,6 @@ const METHODOLOGY_RECONCILIATION = [
         canonicalMethodId: 'GLOSOLAN_CEC_NH4OAC',
         canonicalName: 'GLOSOLAN 1 M Ammonium Acetate pH 7.0',
         reason: 'Replaced placeholder with authoritative GLOSOLAN CEC SOP.'
-    },
-    {
-        analysisCode: 'cationExchangeCapacitySoil',
-        deprecatedMethodId: 'meth-std-21',
-        deprecatedName: '1 M Ammonium Acetate (NH4OAc) pH 7.0',
-        canonicalMethodId: 'CEC_ph0-cohex',
-        canonicalName: 'CEC_ph0-cohex',
-        reason: 'Replaced placeholder with cobaltihexamine standard.'
     },
     {
         analysisCode: 'EXCH_CA',
@@ -319,6 +280,42 @@ const METHODOLOGY_RECONCILIATION = [
 // Unresolved synthetic placeholder methods: SPEC_PARAM_1_SOP_1 to SPEC_PARAM_38_SOP_1
 const UNRESOLVED_SYNTHETIC_PLACEHOLDERS = Array.from({ length: 38 }, (_, i) => `SPEC_PARAM_${i + 1}_SOP_1`);
 
+// Unresolved non-identical chemical methodologies requiring explicit laboratory configuration (Correction 6)
+// These synthetic placeholders have no valid 1:1 automated replacement.
+// The migration leaves existing LabMethodDefault and historical records untouched.
+const UNRESOLVED_METHODOLOGY_MAPPINGS = [
+    {
+        analysisCode: 'pH',
+        deprecatedMethodId: 'meth-std-4',
+        deprecatedName: 'Potentiometry in 1:2.5 H2O Suspension',
+        reason: 'Chemical mismatch: Sodium Fluoride (NaF) extraction is chemically distinct from H2O potentiometry. Requires explicit laboratory method assignment.'
+    },
+    {
+        analysisCode: 'electricalConductivity',
+        deprecatedMethodId: 'meth-std-9',
+        deprecatedName: 'Conductometry in 1:5 Soil-Water Suspension',
+        reason: 'Dilution mismatch: 1:10 soil:water ratio is not equivalent to 1:5 extract. Requires explicit laboratory method assignment.'
+    },
+    {
+        analysisCode: 'carbonOrganic',
+        deprecatedMethodId: 'meth-std-12',
+        deprecatedName: 'Walkley-Black Chromic Acid Wet Oxidation',
+        reason: 'Methodological mismatch: Loss on Ignition (LOI) / dry combustion is not Walkley-Black wet oxidation. Requires explicit laboratory method assignment.'
+    },
+    {
+        analysisCode: 'nitrogenTotal',
+        deprecatedMethodId: 'meth-std-15',
+        deprecatedName: 'Modified Kjeldahl Digestion & Titration',
+        reason: 'Digestion mismatch: Generic H2SO4 digestion lacks catalyst/reduction equivalence to Kjeldahl. Requires explicit laboratory method assignment.'
+    },
+    {
+        analysisCode: 'cationExchangeCapacitySoil',
+        deprecatedMethodId: 'meth-std-21',
+        deprecatedName: '1 M Ammonium Acetate (NH4OAc) pH 7.0',
+        reason: 'Chemistry mismatch: Cobaltihexamine method is chemically distinct from compulsive ammonium acetate. Requires explicit laboratory method assignment.'
+    }
+];
+
 function parseArgs() {
     const args = process.argv.slice(2);
     let dryRun = false;
@@ -379,12 +376,49 @@ function runMigration({ dryRun, apply, dbPath }) {
         console.log(`Reports:     ${countReports}`);
         console.log('-------------------------------------\n');
 
+        // 0. Check _schema_migrations idempotency gate (read-only; no table creation in dry run)
+        const MIGRATION_KEY = 'v3_lab_operations_20260906';
+        const schemaTableExists = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='_schema_migrations'").get();
+        if (schemaTableExists) {
+            const priorMigration = db.prepare('SELECT id, appliedAt FROM "_schema_migrations" WHERE id = ?').get(MIGRATION_KEY);
+            if (priorMigration && apply) {
+                console.log(`ℹ️ [SCHEMA MIGRATIONS] Migration '${MIGRATION_KEY}' was already applied at ${priorMigration.appliedAt}.`);
+                console.log('Skipping default re-assertions and data migrations to preserve administrative changes.\n');
+                return {
+                    success: true,
+                    mode: 'APPLY',
+                    alreadyApplied: true,
+                    audit: {
+                        ddlApplied: [],
+                        methodologyChanges: [],
+                        syntheticPlaceholdersDeprecations: [],
+                        analysisStatusUpdates: 0,
+                        unresolvedPlaceholders: [],
+                        unresolvedMethodologies: [],
+                        unresolvedStandaloneFractions: [],
+                        unresolvedLegacyFractions: [],
+                        a94Consolidated: { samples: 0, tasks: 0 },
+                        a95ReconciledAttempts: 0,
+                        a96FlaggedDrafts: 0,
+                        a97ImpactAssessment: { totalAudited: 0, misclassifiedCount: 0, misclassifiedRecords: [] }
+                    }
+                };
+            }
+        }
+
         const auditTrail = {
             ddlApplied: [],
             methodologyChanges: [],
             syntheticPlaceholdersDeprecations: [],
             analysisStatusUpdates: 0,
-            unresolvedPlaceholders: []
+            unresolvedPlaceholders: [],
+            unresolvedMethodologies: [],
+            unresolvedStandaloneFractions: [],
+            unresolvedLegacyFractions: [],
+            a94Consolidated: { samples: 0, tasks: 0 },
+            a95ReconciledAttempts: 0,
+            a96FlaggedDrafts: 0,
+            a97ImpactAssessment: { totalAudited: 0, misclassifiedCount: 0, misclassifiedRecords: [] }
         };
 
         // If in dry-run mode, we wrap everything in a transaction and rollback at the end.
@@ -636,29 +670,43 @@ function runMigration({ dryRun, apply, dbPath }) {
             // Columns on Result
             ensureColumn('Result', 'provenance', 'TEXT');
 
+            // Columns on WorkItem & Batch
+            ensureColumn('WorkItem', 'rackPosition', 'INTEGER');
+            ensureColumn('Batch', 'maxCapacity', 'INTEGER DEFAULT 40');
+            ensureColumn('Batch', 'profile', 'TEXT');
+
             console.log('  ✓ Schema synchronization complete.\n');
 
             // STEP 2: Methodology Defaults Reconciliation
             console.log('STEP 2: Methodology Defaults Reconciliation...');
 
             for (const item of METHODOLOGY_RECONCILIATION) {
-                // Check current state of deprecated method
+                // Check current state of deprecated and canonical methods
                 const depRow = db.prepare('SELECT id, isDefault FROM "Methodology" WHERE id = ?').get(item.deprecatedMethodId);
                 const canRow = db.prepare('SELECT id, isDefault FROM "Methodology" WHERE id = ?').get(item.canonicalMethodId);
 
+                if (!canRow) {
+                    // Canonical method not present in database; preserve existing valid default
+                    auditTrail.unresolvedMethodologies.push({
+                        analysisCode: item.analysisCode,
+                        deprecatedMethodId: item.deprecatedMethodId,
+                        canonicalMethodId: item.canonicalMethodId,
+                        status: 'CANONICAL_METHOD_NOT_FOUND',
+                        reason: `Canonical method ${item.canonicalMethodId} not found in database; preserved existing method default.`
+                    });
+                    continue;
+                }
+
                 let depWasDefault = false;
-                let canWasDefault = false;
+                let canWasDefault = (canRow.isDefault === 1 || canRow.isDefault === true);
 
                 if (depRow && (depRow.isDefault === 1 || depRow.isDefault === true)) {
                     depWasDefault = true;
                     db.prepare('UPDATE "Methodology" SET "isDefault" = 0, "updatedAt" = CURRENT_TIMESTAMP WHERE id = ?').run(item.deprecatedMethodId);
                 }
 
-                if (canRow) {
-                    canWasDefault = (canRow.isDefault === 1 || canRow.isDefault === true);
-                    if (!canWasDefault) {
-                        db.prepare('UPDATE "Methodology" SET "isDefault" = 1, "updatedAt" = CURRENT_TIMESTAMP WHERE id = ?').run(item.canonicalMethodId);
-                    }
+                if (!canWasDefault) {
+                    db.prepare('UPDATE "Methodology" SET "isDefault" = 1, "updatedAt" = CURRENT_TIMESTAMP WHERE id = ?').run(item.canonicalMethodId);
                 }
 
                 if (depWasDefault || !canWasDefault) {
@@ -671,7 +719,7 @@ function runMigration({ dryRun, apply, dbPath }) {
                 }
             }
 
-            // Unresolved synthetic placeholders (SPEC_PARAM_1_SOP_1 to SPEC_PARAM_38_SOP_1)
+            // 2.2 Unresolved synthetic placeholders (SPEC_PARAM_1_SOP_1 to SPEC_PARAM_38_SOP_1)
             for (const placeholderId of UNRESOLVED_SYNTHETIC_PLACEHOLDERS) {
                 const pRow = db.prepare('SELECT id, analysisCode, isDefault FROM "Methodology" WHERE id = ?').get(placeholderId);
                 if (pRow) {
@@ -689,9 +737,25 @@ function runMigration({ dryRun, apply, dbPath }) {
                 }
             }
 
+            // 2.3 Unresolved non-identical chemical methodologies (Correction 6)
+            for (const item of UNRESOLVED_METHODOLOGY_MAPPINGS) {
+                const labDefaults = db.prepare('SELECT id, labId, methodologyId FROM "LabMethodDefault" WHERE analysisCode = ?').all(item.analysisCode);
+                // Do NOT clear shared default: one lab's override is not authority to alter shared defaults used elsewhere.
+                // Preserve existing valid choices and document required lab-specific configuration.
+                auditTrail.unresolvedMethodologies.push({
+                    analysisCode: item.analysisCode,
+                    deprecatedMethodId: item.deprecatedMethodId,
+                    deprecatedName: item.deprecatedName,
+                    status: 'UNRESOLVED_REQUIRING_LAB_CONFIG',
+                    reason: item.reason,
+                    preservedLabDefaultsCount: labDefaults.length
+                });
+            }
+
             console.log(`  ✓ Reconciled ${auditTrail.methodologyChanges.length} standard methodologies to canonical ISO/GLOSOLAN.`);
             console.log(`  ✓ Set ${auditTrail.syntheticPlaceholdersDeprecations.length} synthetic placeholder methodologies (SPEC_PARAM_*) to isDefault = 0.`);
-            console.log(`  ✓ Documented ${auditTrail.unresolvedPlaceholders.length} unresolved synthetic placeholders (no default assigned).\n`);
+            console.log(`  ✓ Documented ${auditTrail.unresolvedPlaceholders.length} unresolved synthetic placeholders (no default assigned).`);
+            console.log(`  ✓ Documented ${auditTrail.unresolvedMethodologies.length} unresolved non-identical chemical methodologies requiring lab config.\n`);
 
             // STEP 3: Analysis Status Reconciliation
             console.log('STEP 3: Analysis Status Reconciliation...');
@@ -705,16 +769,410 @@ function runMigration({ dryRun, apply, dbPath }) {
             }
             console.log('');
 
-            // STEP 4: Verification of Invariants & Zero Regression
-            console.log('STEP 4: Invariant and Data Preservation Verification...');
-            const postWorkItems = db.prepare('SELECT COUNT(*) as c FROM "WorkItem"').get()?.c || 0;
+            // STEP 5 (A94): Consolidate unstarted separate texture tasks (SAND, SILT, CLAY) into unified TEXTURE work items
+            console.log('STEP 5 (A94): Consolidating unstarted legacy texture fraction tasks...');
+            const unstartedFractions = db.prepare(`
+                SELECT w.id, w.sampleId, w.analysis, w.status, w.assignedTo, w.assignedBy, w.assignedAt,
+                       w.priority, w.labId, w.assignedLab, w.batchId, w.rackPosition, w.methodologyId
+                FROM "WorkItem" w
+                WHERE w.analysis IN ('SAND', 'SILT', 'CLAY')
+                  AND w.status IN ('PENDING', 'ASSIGNED', 'NOT_ASSIGNED')
+                  AND NOT EXISTS (
+                      SELECT 1 FROM "WorkItemDraft" d WHERE d.workItemId = w.id
+                  )
+                  AND NOT EXISTS (
+                      SELECT 1 FROM "Result" r WHERE r.sampleId = w.sampleId AND r.param = w.analysis
+                  )
+            `).all();
+
+            const fractionsBySample = {};
+            for (const row of unstartedFractions) {
+                if (!fractionsBySample[row.sampleId]) fractionsBySample[row.sampleId] = [];
+                fractionsBySample[row.sampleId].push(row);
+            }
+
+            let consolidatedSampleCount = 0;
+            let consolidatedTaskCount = 0;
+
+            for (const [sampleId, tasks] of Object.entries(fractionsBySample)) {
+                // Check if all 3 fractions exist in unstarted tasks
+                const taskAnalyses = new Set(tasks.map(t => t.analysis));
+                const hasAllThreeFractions = taskAnalyses.has('SAND') && taskAnalyses.has('SILT') && taskAnalyses.has('CLAY');
+
+                // Check if sample has an explicit confirmed grouped texture order
+                let orderHasTexture = false;
+                try {
+                    const revOrder = db.prepare(`
+                        SELECT 1 FROM "OrderLine" ol
+                        JOIN "SampleOrderRevision" sor ON ol.revisionId = sor.id
+                        WHERE sor.sampleId = ? AND ol.analysis IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
+                        LIMIT 1
+                    `).get(sampleId);
+                    if (revOrder) orderHasTexture = true;
+                } catch (e) {}
+
+                if (!orderHasTexture) {
+                    try {
+                        const sampleRow = db.prepare('SELECT requiredAnalyses FROM "Sample" WHERE id = ?').get(sampleId);
+                        if (sampleRow?.requiredAnalyses) {
+                            const reqStr = sampleRow.requiredAnalyses.toUpperCase();
+                            if (reqStr.includes('TEXTURE') || reqStr.includes('PSA') ||
+                                (reqStr.includes('SAND') && reqStr.includes('SILT') && reqStr.includes('CLAY'))) {
+                                orderHasTexture = true;
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                // If not confirmed grouped order, keep standalone fractions untouched and report for review
+                if (!hasAllThreeFractions && !orderHasTexture) {
+                    auditTrail.unresolvedStandaloneFractions.push({
+                        sampleId,
+                        preservedAnalyses: Array.from(taskAnalyses),
+                        tasks: tasks.map(t => ({ id: t.id, analysis: t.analysis, status: t.status, assignedTo: t.assignedTo })),
+                        reason: 'Standalone or incomplete fraction tasks preserved without confirmed grouped texture order.'
+                    });
+                    continue;
+                }
+
+                // Check if sample already has an active TEXTURE work item
+                const existingTexture = db.prepare(`
+                    SELECT id FROM "WorkItem"
+                    WHERE sampleId = ? AND analysis IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
+                      AND status != 'SUPERSEDED'
+                `).get(sampleId);
+
+                // Preserve assignment, priority, batch, and status from consolidated tasks
+                const preservedStatus = tasks.some(t => t.status === 'ASSIGNED') ? 'ASSIGNED' : 'PENDING';
+                const preservedAssignedTo = tasks.find(t => t.assignedTo)?.assignedTo || null;
+                const preservedAssignedBy = tasks.find(t => t.assignedBy)?.assignedBy || null;
+                const preservedAssignedAt = tasks.find(t => t.assignedAt)?.assignedAt || null;
+                const preservedPriority = Math.max(...tasks.map(t => typeof t.priority === 'number' ? t.priority : 0), 0);
+                const preservedLabId = tasks.find(t => t.labId)?.labId || null;
+                const preservedAssignedLab = tasks.find(t => t.assignedLab)?.assignedLab || null;
+                const preservedBatchId = tasks.find(t => t.batchId)?.batchId || null;
+                const preservedRackPosition = tasks.find(t => t.rackPosition != null)?.rackPosition || null;
+                const preservedMethodologyId = tasks.find(t => t.methodologyId)?.methodologyId || null;
+
+                if (!existingTexture) {
+                    const textureId = `WI_TEXTURE_${sampleId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+                    db.prepare(`
+                        INSERT INTO "WorkItem" (
+                            id, sampleId, analysis, status, assignedTo, assignedBy, assignedAt,
+                            priority, labId, assignedLab, batchId, rackPosition, methodologyId,
+                            createdAt, updatedAt
+                        )
+                        VALUES (?, ?, 'TEXTURE', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    `).run(
+                        textureId,
+                        sampleId,
+                        preservedStatus,
+                        preservedAssignedTo,
+                        preservedAssignedBy,
+                        preservedAssignedAt,
+                        preservedPriority,
+                        preservedLabId,
+                        preservedAssignedLab,
+                        preservedBatchId,
+                        preservedRackPosition,
+                        preservedMethodologyId
+                    );
+                    consolidatedSampleCount++;
+                }
+
+                // Supercede the unstarted separate fraction items
+                for (const task of tasks) {
+                    db.prepare(`
+                        UPDATE "WorkItem"
+                        SET status = 'SUPERSEDED',
+                            updatedAt = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `).run(task.id);
+                    consolidatedTaskCount++;
+                }
+            }
+            auditTrail.a94Consolidated = { samples: consolidatedSampleCount, tasks: consolidatedTaskCount };
+            console.log(`  ✓ Consolidated ${consolidatedTaskCount} unstarted fraction tasks across ${consolidatedSampleCount} samples into unified TEXTURE work items.`);
+            console.log(`  ✓ Preserved ${auditTrail.unresolvedStandaloneFractions.length} standalone fraction samples untouched for manual review.\n`);
+
+            // STEP 6 (A95): Audit and reconcile partial/approved legacy fractions with explicit attempt linkage
+            console.log('STEP 6 (A95): Reconciling legacy fraction results with explicit WorkAttempt linkage...');
+            const fractionResults = db.prepare(`
+                SELECT r.id, r.sampleId, r.param, r.value, r.replicateNo, r.basis, r.methodologyId, r.enteredBy, r.createdAt
+                FROM "Result" r
+                WHERE r.param IN ('SAND', 'SILT', 'CLAY')
+            `).all();
+
+            // Group strictly by sampleId + replicateNo + basis
+            const sampleFractionGroups = {};
+            for (const r of fractionResults) {
+                const rep = r.replicateNo != null ? r.replicateNo : 1;
+                const basis = (r.basis || 'AIR_DRY').toUpperCase();
+                const key = `${r.sampleId}::${rep}::${basis}`;
+                if (!sampleFractionGroups[key]) sampleFractionGroups[key] = [];
+                sampleFractionGroups[key].push(r);
+            }
+
+            let reconciledAttempts = 0;
+            for (const [groupKey, resList] of Object.entries(sampleFractionGroups)) {
+                const [sampleId, repStr, basis] = groupKey.split('::');
+                const repNo = parseInt(repStr, 10) || 1;
+
+                const fractionsByParam = {};
+                for (const f of resList) {
+                    fractionsByParam[f.param] = f;
+                }
+
+                const hasSand = !!fractionsByParam['SAND'];
+                const hasSilt = !!fractionsByParam['SILT'];
+                const hasClay = !!fractionsByParam['CLAY'];
+
+                if (!hasSand || !hasSilt || !hasClay) {
+                    auditTrail.unresolvedLegacyFractions.push({
+                        sampleId,
+                        replicateNo: repNo,
+                        basis,
+                        reason: 'Incomplete fractions: requires all 3 fractions (SAND, SILT, CLAY) with matching replicate and basis.',
+                        resultIds: resList.map(r => r.id)
+                    });
+                    continue;
+                }
+
+                const sandVal = parseFloat(fractionsByParam['SAND'].value);
+                const siltVal = parseFloat(fractionsByParam['SILT'].value);
+                const clayVal = parseFloat(fractionsByParam['CLAY'].value);
+
+                if (isNaN(sandVal) || isNaN(siltVal) || isNaN(clayVal) || sandVal < 0 || siltVal < 0 || clayVal < 0) {
+                    auditTrail.unresolvedLegacyFractions.push({
+                        sampleId,
+                        replicateNo: repNo,
+                        basis,
+                        reason: 'Invalid fraction numerical values.',
+                        resultIds: resList.map(r => r.id)
+                    });
+                    continue;
+                }
+
+                // Closure check within standard metrological tolerance (2.0%)
+                const total = sandVal + siltVal + clayVal;
+                const closureError = Math.abs(100 - total);
+                if (closureError > 2.0) {
+                    auditTrail.unresolvedLegacyFractions.push({
+                        sampleId,
+                        replicateNo: repNo,
+                        basis,
+                        reason: `Closure check failed: sum is ${total}% (closure error ${closureError.toFixed(2)}% > 2.0%).`,
+                        resultIds: resList.map(r => r.id)
+                    });
+                    continue;
+                }
+
+                // Find matching WorkItem
+                let wi = db.prepare(`
+                    SELECT id FROM "WorkItem"
+                    WHERE sampleId = ? AND analysis IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
+                    LIMIT 1
+                `).get(sampleId);
+
+                if (!wi) {
+                    wi = db.prepare(`
+                        SELECT id FROM "WorkItem"
+                        WHERE sampleId = ? AND analysis IN ('SAND', 'SILT', 'CLAY')
+                        LIMIT 1
+                    `).get(sampleId);
+                }
+
+                if (wi) {
+                    const existingAttempt = db.prepare('SELECT id FROM "WorkAttempt" WHERE workItemId = ? AND attemptNo = ?').get(wi.id, repNo);
+                    if (!existingAttempt) {
+                        const attemptId = `ATTEMPT_LEGACY_${sampleId.replace(/[^a-zA-Z0-9_-]/g, '_')}_REP${repNo}`;
+                        const fracObj = {
+                            sand: sandVal,
+                            silt: siltVal,
+                            clay: clayVal
+                        };
+
+                        db.prepare(`
+                            INSERT INTO "WorkAttempt" (
+                                id, workItemId, attemptNo, executedMethodRevision, author,
+                                version, status, evidenceData, createdAt, updatedAt
+                            )
+                            VALUES (?, ?, ?, 'LEGACY_FRACTIONS', ?, 1, 'RECORDED', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        `).run(
+                            attemptId,
+                            wi.id,
+                            repNo,
+                            resList[0]?.enteredBy || 'legacy_migration',
+                            JSON.stringify({
+                                legacyReconciliation: true,
+                                replicateNo: repNo,
+                                basis,
+                                fractions: fracObj,
+                                total,
+                                closureError: Number(closureError.toFixed(2)),
+                                sourceResultIds: resList.map(r => r.id)
+                            })
+                        );
+                        reconciledAttempts++;
+                    }
+                }
+            }
+            auditTrail.a95ReconciledAttempts = reconciledAttempts;
+            console.log(`  ✓ Linked ${reconciledAttempts} valid matching legacy fraction sets to explicit WorkAttempt records.`);
+            console.log(`  ✓ Preserved ${auditTrail.unresolvedLegacyFractions.length} incompatible or incomplete fraction sets as unresolved.\n`);
+
+            // STEP 7 (A96): Flag premature drafts created before preparation completed
+            console.log('STEP 7 (A96): Flagging premature drafts without fabricating preparation records...');
+            const prematureDrafts = db.prepare(`
+                SELECT d.id, d.analysis, d.checks, d.notes, s.id as sampleId, s.status as sampleStatus,
+                       s.preparationStatus, s.dryingStatus
+                FROM "WorkItemDraft" d
+                JOIN "Sample" s ON d.sampleId = s.id
+                WHERE d.analysis NOT IN ('DRYING', 'PREPARATION', 'SAMPLE_PREP')
+                  AND (
+                      (s.preparationStatus IS NOT NULL AND s.preparationStatus != 'DONE')
+                      OR (s.preparationStatus IS NULL AND s.status IN ('REGISTERED', 'RECEIVED', 'IN_PREPARATION'))
+                  )
+            `).all();
+
+            let flaggedDraftCount = 0;
+            const warningTag = '[WARNING: PREPARATION_PENDING]';
+            for (const draft of prematureDrafts) {
+                const currentNotes = draft.notes || '';
+                if (!currentNotes.includes(warningTag)) {
+                    const warningMsg = `${warningTag} Draft saved before sample preparation was confirmed complete.`;
+                    const updatedNotes = currentNotes ? `${warningMsg} | ${currentNotes}` : warningMsg;
+
+                    db.prepare(`
+                        UPDATE "WorkItemDraft"
+                        SET notes = ?,
+                            updatedAt = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `).run(updatedNotes, draft.id);
+                    flaggedDraftCount++;
+                }
+            }
+            auditTrail.a96FlaggedDrafts = flaggedDraftCount;
+            console.log(`  ✓ Flagged ${flaggedDraftCount} premature drafts with ${warningTag} in durable notes (checks array preserved intact; zero preparation records fabricated).\n`);
+
+            // STEP 8 (A97): Historical texture classification discrepancy audit
+            console.log('STEP 8 (A97): Auditing historical texture classifications against authoritative USDA algorithm...');
+            const textureResults = db.prepare(`
+                SELECT r.id, r.sampleId, r.value, r.provenance, r.replicateNo, r.basis, s.labId as sampleCode
+                FROM "Result" r
+                LEFT JOIN "Sample" s ON r.sampleId = s.id
+                WHERE r.param IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
+            `).all();
+
+            const misclassifiedRecords = [];
+            for (const res of textureResults) {
+                let sand = null, silt = null, clay = null;
+                if (res.provenance) {
+                    try {
+                        const prov = typeof res.provenance === 'string' ? JSON.parse(res.provenance) : res.provenance;
+                        if (prov && prov.fractions) {
+                            sand = prov.fractions.sand;
+                            silt = prov.fractions.silt;
+                            clay = prov.fractions.clay;
+                        }
+                    } catch (e) {}
+                }
+                if (sand === null) {
+                    const siblings = db.prepare(`
+                        SELECT param, value, replicateNo, basis FROM "Result"
+                        WHERE sampleId = ? AND param IN ('SAND', 'SILT', 'CLAY')
+                    `).all(res.sampleId);
+
+                    const sibGroups = {};
+                    for (const sib of siblings) {
+                        const rep = sib.replicateNo != null ? sib.replicateNo : 1;
+                        const bas = (sib.basis || 'AIR_DRY').toUpperCase();
+                        const k = `${rep}::${bas}`;
+                        if (!sibGroups[k]) sibGroups[k] = {};
+                        const num = parseFloat(sib.value);
+                        if (!isNaN(num)) {
+                            sibGroups[k][sib.param] = num;
+                        }
+                    }
+
+                    for (const [k, group] of Object.entries(sibGroups)) {
+                        if (group.SAND !== undefined && group.SILT !== undefined && group.CLAY !== undefined) {
+                            const [repStr, bas] = k.split('::');
+                            const repVal = parseInt(repStr, 10);
+                            if (res.replicateNo != null && res.replicateNo !== repVal) continue;
+                            if (res.basis && res.basis.toUpperCase() !== bas) continue;
+
+                            const sVal = group.SAND;
+                            const siVal = group.SILT;
+                            const cVal = group.CLAY;
+                            const closureErr = Math.abs(100 - (sVal + siVal + cVal));
+                            if (closureErr <= 2.0) {
+                                sand = sVal;
+                                silt = siVal;
+                                clay = cVal;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (sand !== null && silt !== null && clay !== null) {
+                    const usda = calculateUsdaTexture(sand, silt, clay, 2.0);
+                    if (usda.isValid && usda.className) {
+                        const recordedClass = (res.value || '').trim();
+                        if (recordedClass && recordedClass.toLowerCase() !== usda.className.toLowerCase() && recordedClass !== usda.code) {
+                            misclassifiedRecords.push({
+                                resultId: res.id,
+                                sampleId: res.sampleId,
+                                sampleCode: res.sampleCode,
+                                sand,
+                                silt,
+                                clay,
+                                recordedClass,
+                                authoritativeClass: usda.className,
+                                authoritativeCode: usda.code
+                            });
+                        }
+                    }
+                }
+            }
+
+            auditTrail.a97ImpactAssessment = {
+                totalAudited: textureResults.length,
+                misclassifiedCount: misclassifiedRecords.length,
+                misclassifiedRecords
+            };
+
+            for (const mis of misclassifiedRecords) {
+                const existingAmend = db.prepare(`
+                    SELECT id FROM "SampleAmendment"
+                    WHERE sampleId = ? AND type = 'TEXTURE_IMPACT_AUDIT'
+                `).get(mis.sampleId);
+
+                if (!existingAmend) {
+                    const amendId = `AMEND_TEX_${mis.sampleId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+                    db.prepare(`
+                        INSERT INTO "SampleAmendment" (
+                            id, sampleId, type, status, reason, impactAssessment, createdBy, createdAt, updatedAt
+                        )
+                        VALUES (?, ?, 'TEXTURE_IMPACT_AUDIT', 'PENDING',
+                                'Historical texture class discrepancy identified by USDA v3 migration audit',
+                                ?, 'system_migration_v3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    `).run(
+                        amendId,
+                        mis.sampleId,
+                        JSON.stringify(mis)
+                    );
+                }
+            }
+            console.log(`  ✓ Audited ${textureResults.length} historical texture records; identified ${misclassifiedRecords.length} misclassifications logged for review.\n`);
+
+            // STEP 9: Verification of Invariants & Zero Regression
+            console.log('STEP 9: Invariant and Data Preservation Verification...');
             const postResults = db.prepare('SELECT COUNT(*) as c FROM "Result"').get()?.c || 0;
             const postReports = db.prepare('SELECT COUNT(*) as c FROM "Report"').get()?.c || 0;
             const postSamples = db.prepare('SELECT COUNT(*) as c FROM "Sample"').get()?.c || 0;
 
-            if (postWorkItems !== countWorkItems) {
-                throw new Error(`Data corruption invariant violated! WorkItem count changed: ${countWorkItems} -> ${postWorkItems}`);
-            }
             if (postResults !== countResults) {
                 throw new Error(`Data corruption invariant violated! Result count changed: ${countResults} -> ${postResults}`);
             }
@@ -725,7 +1183,36 @@ function runMigration({ dryRun, apply, dbPath }) {
                 throw new Error(`Data corruption invariant violated! Sample count changed: ${countSamples} -> ${postSamples}`);
             }
 
-            console.log('  ✓ Verified zero mutation to WorkItems, Results, Reports, or Samples.');
+            console.log('  ✓ Verified zero mutation to Results, Reports, or Samples.');
+
+            // Record schema migration upon successful apply
+            if (apply) {
+                db.exec(`
+                    CREATE TABLE IF NOT EXISTS "_schema_migrations" (
+                        "id" TEXT PRIMARY KEY NOT NULL,
+                        "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        "details" TEXT
+                    );
+                `);
+                db.prepare(`
+                    INSERT INTO "_schema_migrations" ("id", "details")
+                    VALUES (?, ?)
+                `).run(
+                    MIGRATION_KEY,
+                    JSON.stringify({
+                        appliedAt: new Date().toISOString(),
+                        auditSummary: {
+                            methodologyChanges: auditTrail.methodologyChanges.length,
+                            syntheticDeprecations: auditTrail.syntheticPlaceholdersDeprecations.length,
+                            unresolvedMethodologies: auditTrail.unresolvedMethodologies.length,
+                            a94Consolidated: auditTrail.a94Consolidated,
+                            a95ReconciledAttempts: auditTrail.a95ReconciledAttempts,
+                            a96FlaggedDrafts: auditTrail.a96FlaggedDrafts,
+                            a97Misclassified: auditTrail.a97ImpactAssessment.misclassifiedCount
+                        }
+                    })
+                );
+            }
 
             if (dryRun) {
                 console.log('\n[DRY RUN] Rolling back all changes made during dry run.');
@@ -772,5 +1259,6 @@ if (require.main === module) {
 module.exports = {
     runMigration,
     METHODOLOGY_RECONCILIATION,
-    UNRESOLVED_SYNTHETIC_PLACEHOLDERS
+    UNRESOLVED_SYNTHETIC_PLACEHOLDERS,
+    UNRESOLVED_METHODOLOGY_MAPPINGS
 };

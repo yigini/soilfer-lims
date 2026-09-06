@@ -166,17 +166,23 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
     let cVal = clay;
     let tol = tolerance;
 
+    if (Array.isArray(sandOrObj)) {
+        return {
+            isValid: false,
+            closureError: null,
+            sum: null,
+            className: null,
+            code: null,
+            flags: ['INVALID_FORMAT'],
+            error: 'Fractions must be provided as an object with named fields { sand, silt, clay }, not a positional array'
+        };
+    }
+
     if (sandOrObj && typeof sandOrObj === 'object') {
-        if (Array.isArray(sandOrObj)) {
-            sand = sandOrObj[0];
-            silt = sandOrObj[1];
-            cVal = sandOrObj[2];
-        } else {
-            sand = sandOrObj.sand ?? sandOrObj.SAND ?? sandOrObj.Sand;
-            silt = sandOrObj.silt ?? sandOrObj.SILT ?? sandOrObj.Silt;
-            cVal = sandOrObj.clay ?? sandOrObj.CLAY ?? sandOrObj.Clay;
-        }
-        if (typeof siltOrTol === 'number' || (siltOrTol && typeof siltOrTol === 'object')) {
+        sand = sandOrObj.sand ?? sandOrObj.SAND ?? sandOrObj.Sand;
+        silt = sandOrObj.silt ?? sandOrObj.SILT ?? sandOrObj.Silt;
+        cVal = sandOrObj.clay ?? sandOrObj.CLAY ?? sandOrObj.Clay;
+        if (siltOrTol !== undefined) {
             tol = siltOrTol;
         }
     }
@@ -242,10 +248,9 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
         withinTolerance: textureResult.isValid,
         className: textureResult.className,
         code: textureResult.code,
-        normalized: textureResult.normalized,
         fractions: { sand: s, silt: si, clay: c },
         flags,
-        error: textureResult.isValid ? null : `Fractions sum to ${sum}% (closure error ${textureResult.closureError}% exceeds allowed ±${tolDisplay}%)`
+        error: textureResult.isValid ? null : (textureResult.error || `Soil texture fractions sum to ${sum}%, exceeding closure tolerance of ±${tolDisplay}%`)
     };
 }
 

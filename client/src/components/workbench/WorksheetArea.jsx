@@ -53,16 +53,26 @@ export default function WorksheetArea({
     const isOperationalGate = activeGroup?.category === 'Operational Gates';
     const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'SPECTRAL');
 
-    // Filter items by search
+    // Filter items by search and sort stably by rackPosition
     const filteredItems = useMemo(() => {
-        if (!searchQuery) return items;
-        const q = searchQuery.toLowerCase();
-        return items.filter(i =>
-            (i.sampleDisplayId && i.sampleDisplayId.toLowerCase().includes(q)) ||
-            (i.labId && i.labId.toLowerCase().includes(q)) ||
-            (i.sampleId && i.sampleId.toLowerCase().includes(q)) ||
-            (i.originalId && i.originalId.toLowerCase().includes(q))
-        );
+        let list = items;
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            list = list.filter(i =>
+                (i.sampleDisplayId && i.sampleDisplayId.toLowerCase().includes(q)) ||
+                (i.labId && i.labId.toLowerCase().includes(q)) ||
+                (i.sampleId && i.sampleId.toLowerCase().includes(q)) ||
+                (i.originalId && i.originalId.toLowerCase().includes(q))
+            );
+        }
+        return [...list].sort((a, b) => {
+            const posA = typeof a.rackPosition === 'number' ? a.rackPosition : null;
+            const posB = typeof b.rackPosition === 'number' ? b.rackPosition : null;
+            if (posA !== null && posB !== null) return posA - posB;
+            if (posA !== null) return -1;
+            if (posB !== null) return 1;
+            return 0;
+        });
     }, [items, searchQuery]);
 
     // Active inspected item
@@ -234,6 +244,15 @@ export default function WorksheetArea({
 
                                             <td className="py-3 px-3">
                                                 <div className="flex items-center gap-1.5">
+                                                    {item.rackPosition != null && (
+                                                        <span
+                                                            data-testid={`rack-pos-${item.workItemId}`}
+                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0"
+                                                            title={`Rack Position ${item.rackPosition}${item.batchId ? ` (Batch: ${item.batchId})` : ''}`}
+                                                        >
+                                                            #{item.rackPosition}
+                                                        </span>
+                                                    )}
                                                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                                                         {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
                                                     </span>
@@ -255,7 +274,7 @@ export default function WorksheetArea({
                                                     <TextureEditor
                                                         disabled={!item.readiness?.isReady || isRecorded}
                                                         values={draft?.values || []}
-                                                        tolerance={activeGroup?.validation?.tolerance ?? 1.0}
+                                                        tolerance={activeGroup?.validation?.tolerance ?? null}
                                                         onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
                                                         sampleId={item.sampleId}
                                                         onEnterNext={() => handleEnterNext(idx)}

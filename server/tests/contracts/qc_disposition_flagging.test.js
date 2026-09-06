@@ -83,7 +83,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
                 blanks: [{ value: 0.12, maxAllowed: 0.05, label: 'Reagent Blank' }], // FAILS
                 controls: [{ expected: 100, measured: 99, label: 'Standard CRM' }]  // PASSES
             },
-            user: { username: 'test_tech' }
+            user: { username: 'test_tech', role: 'LAB_TECHNICIAN', labId: 'LAB-TEST' }
         };
         const res = {
             json: jest.fn(),
@@ -116,7 +116,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
                 decision: 'PROCEED_WITH_WARNING',
                 reason: 'Blank contamination negligible relative to high analyte concentration'
             },
-            user: { username: 'lab_mgr', role: 'LAB_MANAGER' }
+            user: { username: 'lab_mgr', role: 'LAB_MANAGER', labId: 'LAB-TEST' }
         };
         const res = {
             json: jest.fn(),

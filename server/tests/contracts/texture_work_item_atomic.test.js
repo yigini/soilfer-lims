@@ -121,6 +121,39 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
             expect(parsedValues.clay).toBe(15.0);
         });
 
+        test('Queue reload contract: GET /api/workbench/queue returns parsed { sand, silt, clay } without positional array dependency', async () => {
+            // Save draft with named fractions
+            await request(app)
+                .post('/api/workbench/batch-save')
+                .set('Authorization', `Bearer ${techToken}`)
+                .send({
+                    draft: true,
+                    entries: [
+                        {
+                            workItemId,
+                            values: { sand: 45.0, silt: 35.0, clay: 20.0 }
+                        }
+                    ]
+                });
+
+            // Fetch queue
+            const queueRes = await request(app)
+                .get('/api/workbench/queue')
+                .set('Authorization', `Bearer ${techToken}`);
+
+            expect(queueRes.statusCode).toBe(200);
+            const texGroup = queueRes.body.groups.find(g => g.analysis === 'TEXTURE' || g.analysisCode === 'TEXTURE');
+            expect(texGroup).toBeDefined();
+            const item = texGroup.items.find(i => i.workItemId === workItemId);
+            expect(item).toBeDefined();
+            expect(item.draft).toBeDefined();
+            expect(item.draft.values).toEqual({ sand: 45.0, silt: 35.0, clay: 20.0 });
+            expect(Array.isArray(item.draft.values)).toBe(false);
+            expect(item.draft.values.sand).toBe(45.0);
+            expect(item.draft.values.silt).toBe(35.0);
+            expect(item.draft.values.clay).toBe(20.0);
+        });
+
         test('Preview completion: fails closed if fractions are missing or closure exceeds tolerance', async () => {
             // Missing silt and clay
             const incompleteRes = await request(app)

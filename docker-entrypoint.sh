@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+cd /app/server
+
+# If command arguments are passed (e.g. rehearsal, CLI tasks), execute them directly
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 echo "╔═══════════════════════════════════════╗"
 echo "║    SoilFER-LIMS Docker Entrypoint     ║"
 echo "╚═══════════════════════════════════════╝"
@@ -11,8 +18,6 @@ if [ -z "$JWT_SECRET" ] || [ "$JWT_SECRET" = "please-change-this-secret" ]; then
     echo "⚠ JWT_SECRET was not set — auto-generated a random secret."
     echo "  For persistent tokens across restarts, set JWT_SECRET in your .env or docker-compose.yml"
 fi
-
-cd /app/server
 
 # Ensure schema is available (volume mount may overlay prisma dir)
 if [ ! -f prisma/schema.prisma ]; then

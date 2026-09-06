@@ -243,11 +243,25 @@ exports.getQueue = async (req, res) => {
                 sampleStatus: item.sample?.status || null,
                 version: item.version,
                 category: groupsMap[code].category,
+                rackPosition: item.rackPosition !== undefined ? item.rackPosition : null,
+                batchId: item.batchId || null,
                 readiness,
                 draft: itemDraft,
                 spectralScans: isSpectral ? scans : undefined,
                 hasSpectrum: scans.length > 0,
                 latestSpectralScan: latestScan
+            });
+        }
+
+        // Sort items within each group by rackPosition (if assigned), else by priority
+        for (const group of Object.values(groupsMap)) {
+            group.items.sort((a, b) => {
+                const posA = typeof a.rackPosition === 'number' ? a.rackPosition : null;
+                const posB = typeof b.rackPosition === 'number' ? b.rackPosition : null;
+                if (posA !== null && posB !== null) return posA - posB;
+                if (posA !== null) return -1;
+                if (posB !== null) return 1;
+                return (b.priority || 0) - (a.priority || 0);
             });
         }
 
