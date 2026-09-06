@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../../context/LanguageContext';
@@ -282,6 +283,7 @@ const HistoryTab = ({ events = [] }) => (
 );
 
 const EligibilityTab = ({ asset }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const [mappings, setMappings] = React.useState([]);
     const [loadingEligibility, setLoadingEligibility] = React.useState(true);
 
@@ -318,7 +320,7 @@ const EligibilityTab = ({ asset }) => {
                     <div className="space-y-2">
                         {mappings.map(m => (
                             <div key={m.id} className="p-3 rounded-lg border dark:border-gray-700 flex justify-between items-center text-sm">
-                                <span className="font-bold">{m.analysisCode}</span>
+                                <span className="font-bold">{getAnalysisDisplayName(m.analysisCode)}</span>
                                 <span className={`text-xs px-2 py-0.5 rounded ${m.isRequired ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-700'}`}>
                                     {m.isRequired ? 'MANDATORY' : 'OPTIONAL'}
                                 </span>

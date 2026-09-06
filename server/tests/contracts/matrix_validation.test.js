@@ -2,6 +2,16 @@ const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const { samplesDb } = require('../../db');
+const prisma = require('../../prisma');
+const parameters = [['SAND', '%'], ['SILT', '%'], ['CLAY', '%'], ['SOC', 'g/kg'], ['TN', 'g/kg'], ['CEC', 'cmol(+)/kg'], ['EXCH_CA', 'cmol(+)/kg'], ['EXCH_MG', 'cmol(+)/kg'], ['EXCH_K', 'cmol(+)/kg']];
+async function assignOrderedWork(sampleId, token) {
+    const username = require('jsonwebtoken').decode(token).username;
+    await prisma.sample.update({ where: { id: sampleId }, data: { dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(parameters.map(([code]) => code)) } });
+    for (const [code, units] of parameters) {
+        await prisma.analysis.upsert({ where: { code }, create: { code, name: `${code} matrix test parameter`, units }, update: { units, labId: null } });
+        await prisma.workItem.create({ data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
+    }
+}
 
 describe('Sample Matrix Cross-Parameter Validation Contract', () => {
     let techToken, sampleId;
@@ -16,6 +26,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
             status: 'PROCESSING'
         });
         sampleId = s.id;
+        await assignOrderedWork(sampleId, techToken);
     });
 
     test('1. saveResults validates matrix integrity and computes USDA texture & C:N diagnostics', async () => {
@@ -62,6 +73,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
             assignedLab: 'LAB-MX',
             status: 'PROCESSING'
         });
+        await assignOrderedWork(sBad.id, techToken);
 
         const res = await request(app)
             .post(`/api/results/${sBad.id}`)

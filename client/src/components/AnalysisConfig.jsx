@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useAnalysisCatalogue } from '../context/AnalysisCatalogueContext';
 import { useLanguage } from '../context/LanguageContext';
 import AnalysisManager from './admin/AnalysisManager';
 import GroupManager from './admin/GroupManager';
@@ -8,11 +10,20 @@ import { FlaskConical, Layers, Tag } from 'lucide-react';
 const AnalysisConfig = () => {
     const { t } = useLanguage();
     const [view, setView] = useState('analyses'); // analyses, groups, categories
+    const { analyses } = useAnalysisCatalogue();
+    const [counts, setCounts] = useState({ groups: '…', categories: '…' });
+    useEffect(() => {
+        let active = true;
+        Promise.all([axios.get('/api/config/groups'), axios.get('/api/config/categories')])
+            .then(([groups, categories]) => { if (active) setCounts({ groups: groups.data.length, categories: categories.data.length }); })
+            .catch(() => { if (active) setCounts({ groups: 'Unavailable', categories: 'Unavailable' }); });
+        return () => { active = false; };
+    }, [view, analyses]);
 
     const navItems = [
-        { id: 'analyses', label: t('analytics.testMethods', 'Analyses & Methodologies'), icon: FlaskConical, badge: '166 Parameters' },
-        { id: 'groups', label: 'Analysis Packages', icon: Layers, badge: '23 Packages' },
-        { id: 'categories', label: 'Property Categories', icon: Tag, badge: '10 Domains' }
+        { id: 'analyses', label: t('analytics.testMethods', 'Analyses & Methodologies'), icon: FlaskConical, badge: `${analyses.length} Parameters` },
+        { id: 'groups', label: 'Analysis Packages', icon: Layers, badge: `${counts.groups} Packages` },
+        { id: 'categories', label: 'Property Categories', icon: Tag, badge: `${counts.categories} Domains` }
     ];
 
     return (

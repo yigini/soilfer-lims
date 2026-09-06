@@ -1,3 +1,5 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
+import { workItemEvidenceText } from '../../utils/workItemEvidence';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, CheckCircle, AlertTriangle, FileText, Upload, UserPlus, XCircle, Download, ShieldAlert, HelpCircle } from 'lucide-react';
@@ -6,9 +8,9 @@ import SpectraBatchUpload from '../SpectraBatchUpload';
 import { useAuth } from '../../context/AuthContext';
 import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
-import { getAnalysisDisplayName } from '../../utils/analysisNames';
 
 const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssignmentSuccess, onReview, onReviewBulk }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const isTech = user.role === 'LAB_TECHNICIAN';
@@ -160,7 +162,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                 const searchRes = await axios.get('/api/spectral', { params: searchParams });
                 const scans = searchRes.data.data;
                 if (!scans || scans.length === 0) {
-                    showDialog({ title: 'No Data', message: `No spectral data found for ${item.analysisName || item.analysis} (${modality}). Please upload spectral data first.`, type: 'info' });
+                    showDialog({ title: 'No Data', message: `No spectral data found for ${getAnalysisDisplayName(item.analysis, item.analysisName)} (${modality}). Please upload spectral data first.`, type: 'info' });
                     return;
                 }
                 const exactScan = scans.find(s => s.workItemId === item.id) || scans[0];
@@ -454,10 +456,9 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                             )}
                                             <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
                                                 <div className="font-bold text-xs text-gray-900 dark:text-gray-100">
-                                                    {item.analysisName || getAnalysisDisplayName(item.analysis)}
+                                                    {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                                 </div>
                                                 <div className="text-[10px] text-gray-400 font-mono flex items-center gap-1.5 mt-0.5">
-                                                    <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700/80 rounded text-gray-600 dark:text-gray-300 font-semibold">{item.analysis}</span>
                                                     <span>• TASK: {String(item.id).split('-').pop()}</span>
                                                 </div>
                                                 {!isPrepComplete && !isOpsGate && !isPostAnalytical && !isCompleted && !isSealed ? (
@@ -615,7 +616,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     ) : (
                                                         <div className="flex flex-col">
                                                             <span className="font-mono text-sm font-bold text-gray-700 dark:text-gray-300">
-                                                                {item.result ? (typeof item.result === 'object' ? item.result.value : item.result) : '-'}
+                                                                {workItemEvidenceText(item)}
                                                                 {item.unit && item.result && <span className="text-[10px] text-gray-400 dark:text-gray-500 font-normal ml-1">{item.unit}</span>}
                                                             </span>
                                                             {isManager && !item.assignedTo && !isSealed && (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { notifyCatalogueChanged } from '../../context/AnalysisCatalogueContext';
 import { Plus, Edit2, Trash2, Check, Tag, AlertTriangle, X } from 'lucide-react';
 
 const CategoryManager = () => {
@@ -31,7 +32,8 @@ const CategoryManager = () => {
             } else {
                 await axios.put(`/api/config/categories/${editingItem.id}`, editingItem);
             }
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
             setEditingItem(null);
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to save category');
@@ -43,7 +45,8 @@ const CategoryManager = () => {
         setError(null);
         try {
             await axios.delete(`/api/config/categories/${id}`);
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to delete category');
         }
@@ -97,6 +100,7 @@ const CategoryManager = () => {
                         <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity flex-shrink-0">
                             <button
                                 onClick={() => setEditingItem({ ...c, _isNew: false })}
+                                disabled={c.canEdit === false}
                                 className="p-1.5 text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 title="Edit Category"
                             >
@@ -104,6 +108,7 @@ const CategoryManager = () => {
                             </button>
                             <button
                                 onClick={() => handleDelete(c.id, c.name)}
+                                disabled={c.canEdit === false}
                                 className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 title="Delete Category"
                             >

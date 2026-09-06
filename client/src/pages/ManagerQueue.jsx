@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +10,6 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
-import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -301,6 +301,7 @@ const ManagerQueue = () => {
 
 // Internal Component for Card Rendering
 const QueueCard = ({ item, type, navigate, t }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const config = {
         intake: {
             icon: FlaskConical,

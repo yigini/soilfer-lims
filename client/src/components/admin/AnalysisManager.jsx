@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Check, Search, FlaskConical, X, Star, AlertTriangle, Layers, Tag, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { notifyCatalogueChanged } from '../../context/AnalysisCatalogueContext';
 
 const AnalysisManager = () => {
     const { t } = useLanguage();
@@ -13,6 +14,10 @@ const AnalysisManager = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCat, setFilterCat] = useState('all');
     const [error, setError] = useState(null);
+    const [loadError, setLoadError] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [usage, setUsage] = useState(null);
 
     // Methodology modal / drawer state
     const [activeMethodAnalysis, setActiveMethodAnalysis] = useState(null);
@@ -23,17 +28,18 @@ const AnalysisManager = () => {
     }, []);
 
     const fetchData = async () => {
+        setLoadError(null);
         try {
             const [aRes, cRes, mRes] = await Promise.all([
                 axios.get('/api/config/analyses'),
                 axios.get('/api/config/categories'),
-                axios.get('/api/config/methodologies').catch(() => ({ data: [] }))
+                axios.get('/api/config/methodologies')
             ]);
             setAnalyses(aRes.data);
             setCategories(cRes.data);
             setMethodologies(mRes.data || []);
         } catch (e) {
-            console.error('Failed to load analysis config:', e);
+            setLoadError('The catalogue could not be loaded completely. Retry before editing parameters or methods.');
         } finally {
             setLoading(false);
         }
@@ -44,16 +50,36 @@ const AnalysisManager = () => {
             _isNew: true,
             code: '',
             name: '',
-            categoryId: categories[0]?.id || '',
-            units: 'mg/kg',
-            status: 'active',
+            categoryId: '',
+            units: '',
+            status: 'inactive',
+            matrix: 'SOIL',
             description: '',
-            validation: { min: 0, max: 1000, decimalPlaces: 2 }
+            validation: {}
         });
+        setUsage(null);
         setError(null);
     };
 
+    const handleEdit = async (analysis) => {
+        setEditingItem({ ...analysis, _isNew: false });
+        setError(null);
+        setUsage(null);
+    };
+
+    useEffect(() => {
+        setUsage(null);
+        if (!editingItem || editingItem._isNew || editingItem.canEdit === false) return;
+        let current = true;
+        axios.get(`/api/config/analyses/${encodeURIComponent(editingItem.code)}/usage`)
+            .then(({ data }) => { if (current) setUsage(data); })
+            .catch(() => { if (current) setError('Could not check existing connections. Unit and matrix changes are locked until this check succeeds.'); });
+        return () => { current = false; };
+    }, [editingItem?.code, editingItem?._isNew, editingItem?.canEdit]);
+
     const handleSave = async () => {
+        if (saving) return;
+        setSaving(true);
         setError(null);
         try {
             const payload = {
@@ -64,21 +90,23 @@ const AnalysisManager = () => {
             if (editingItem._isNew) {
                 await axios.post('/api/config/analyses', payload);
             } else {
-                await axios.put('/api/config/analyses/' + editingItem.code, payload);
+                await axios.put('/api/config/analyses/' + encodeURIComponent(editingItem.code), payload);
             }
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
             setEditingItem(null);
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to save analysis');
-        }
+        } finally { setSaving(false); }
     };
 
     const handleDelete = async (code, name) => {
         if (!confirm(`Delete analysis "${name}" (${code})? This will remove its configuration.`)) return;
         setError(null);
         try {
-            await axios.delete('/api/config/analyses/' + code);
-            fetchData();
+            await axios.delete('/api/config/analyses/' + encodeURIComponent(code));
+            await fetchData();
+            notifyCatalogueChanged();
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to delete');
         }
@@ -86,7 +114,8 @@ const AnalysisManager = () => {
 
     // Methodology handlers
     const handleSaveMethodology = async () => {
-        if (!editingMethod || !activeMethodAnalysis) return;
+        if (!editingMethod || !activeMethodAnalysis || saving) return;
+        setSaving(true);
         setError(null);
         try {
             if (editingMethod._isNew) {
@@ -103,18 +132,20 @@ const AnalysisManager = () => {
                     isDefault: editingMethod.isDefault || false
                 });
             }
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
             setEditingMethod(null);
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to save methodology');
-        }
+        } finally { setSaving(false); }
     };
 
     const handleDeleteMethodology = async (id, name) => {
         if (!confirm(`Delete methodology "${name}"?`)) return;
         try {
             await axios.delete('/api/config/methodologies/' + id);
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
         } catch (e) {
             setError(e.response?.data?.error || 'Failed to delete methodology');
         }
@@ -127,7 +158,8 @@ const AnalysisManager = () => {
             (a.units && a.units.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (a.description && a.description.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesCat = filterCat === 'all' || a.categoryId === filterCat;
-        return matchesSearch && matchesCat;
+        const matchesStatus = filterStatus === 'all' || (filterStatus === 'review' ? (a.configurationIssues?.length || a.scientificWarnings?.length) > 0 : a.status === filterStatus);
+        return matchesSearch && matchesCat && matchesStatus;
     });
 
     if (loading) {
@@ -172,7 +204,15 @@ const AnalysisManager = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {editingItem.canEdit === false && <p className="text-sm text-amber-800 dark:text-amber-200">Shared definition — maintained by the system administrator. Local method defaults are configured per laboratory.</p>}
+                {!editingItem._isNew && usage && <div className="text-sm bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl" role="status">Connected records: {Object.entries(usage).filter(([,count]) => count > 0).map(([key,count]) => `${count} ${key}`).join(' · ') || 'No references yet'}. Inactivating preserves existing work; deletion is allowed only for unused definitions.</div>}
+                <fieldset disabled={editingItem.canEdit === false || saving} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Sample matrix
+                        <select aria-label="Sample matrix" className="block w-full mt-2 p-2.5 rounded-xl border dark:border-gray-700 bg-white dark:bg-gray-900" value={editingItem.matrix || 'SOIL'} disabled={!editingItem._isNew && (!usage || usage.workItems + usage.results + usage.orderLines + usage.sampleOrders > 0)} onChange={e => setEditingItem({ ...editingItem, matrix: e.target.value })}>
+                            {['SOIL', 'PLANT', 'WATER', 'AMENDMENT', 'FERTILIZER', 'LIMING'].map(matrix => <option key={matrix} value={matrix}>{matrix.charAt(0) + matrix.slice(1).toLowerCase()}</option>)}
+                        </select>
+                    </label>
+                    <p className="text-xs text-gray-500 self-center">Category organizes the list. It does not define result capture or sample preparation. A method must specify the procedure, evidence, applicable matrix and reporting basis.</p>
                     {/* Analysis Code */}
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
@@ -185,7 +225,7 @@ const AnalysisManager = () => {
                             onChange={e => setEditingItem({ ...editingItem, code: e.target.value.toUpperCase() })}
                             placeholder="e.g. PH_H2O, SOC, TN, P_OLSEN, SAND"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1 font-medium">Standard analytical code used across workbenches and reports.</p>
+                        <p className="text-[11px] text-gray-500 mt-1">Internal identifier for integrations and historical links. Working screens use the parameter name.</p>
                     </div>
 
                     {/* Display Name */}
@@ -199,7 +239,7 @@ const AnalysisManager = () => {
                             onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                             placeholder="e.g. Soil pH (1:2.5 H2O potentiometric)"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1 font-medium">Full human-readable label presented on certificates and QA sheets.</p>
+                        <p className="text-[11px] text-gray-500 mt-1">Name used in selection, workbench, sample pages and new reports. Include the measurand and distinctions needed to interpret the result.</p>
                     </div>
 
                     {/* Category */}
@@ -225,10 +265,11 @@ const AnalysisManager = () => {
                         <input
                             className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                             value={editingItem.units || ''}
+                            disabled={!editingItem._isNew && (!usage || usage.workItems + usage.results + usage.orderLines + usage.sampleOrders > 0)}
                             onChange={e => setEditingItem({ ...editingItem, units: e.target.value })}
                             placeholder="e.g. g/kg, mg/kg, cmol(+)/kg, %, dS/m, pH units"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1 font-medium">Standard unit symbol automatically normalized during certificate generation.</p>
+                        <p className="text-[11px] text-gray-500 mt-1">Specify the correct reporting unit. Changing this label does not convert recorded values. Leave blank for non-numeric evidence.</p>
                     </div>
 
                     {/* Validation Range */}
@@ -268,10 +309,10 @@ const AnalysisManager = () => {
                                 min="0"
                                 max="4"
                                 className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white outline-none"
-                                value={editingItem.validation?.decimalPlaces ?? 2}
+                                value={editingItem.validation?.decimalPlaces ?? ''}
                                 onChange={e => setEditingItem({
                                     ...editingItem,
-                                    validation: { ...editingItem.validation, decimalPlaces: parseInt(e.target.value, 10) || 0 }
+                                    validation: { ...editingItem.validation, decimalPlaces: e.target.value === '' ? null : Number(e.target.value) }
                                 })}
                             />
                         </div>
@@ -289,7 +330,7 @@ const AnalysisManager = () => {
                             placeholder="Analytical summary, sample extraction ratio, instrument specifications, or QA instructions..."
                         />
                     </div>
-                </div>
+                </fieldset>
 
                 {/* Footer Actions */}
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -298,10 +339,11 @@ const AnalysisManager = () => {
                         <select
                             className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-2.5 py-1 text-xs font-bold text-gray-800 dark:text-gray-200"
                             value={editingItem.status || 'active'}
+                            disabled={editingItem.canEdit === false || saving}
                             onChange={e => setEditingItem({ ...editingItem, status: e.target.value })}
                         >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="active">Active — available for new orders</option>
+                            <option value="inactive">Inactive — retain existing work and history</option>
                         </select>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
@@ -313,9 +355,10 @@ const AnalysisManager = () => {
                         </button>
                         <button
                             onClick={handleSave}
+                            disabled={saving || editingItem.canEdit === false || !editingItem.name?.trim() || !editingItem.code?.trim()}
                             className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm shadow-emerald-700/20 transition-all text-xs active:scale-95"
                         >
-                            <Check size={16} /> Save Analysis Parameter
+                            <Check size={16} /> {saving ? 'Saving…' : 'Save Analysis Parameter'}
                         </button>
                     </div>
                 </div>
@@ -325,6 +368,9 @@ const AnalysisManager = () => {
 
     return (
         <div className="space-y-4 font-sans w-full min-w-0">
+            {error && <div role="alert" className="p-4 rounded-xl bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200">{error}</div>}
+            {loadError && <div role="alert" className="p-4 rounded-xl bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200">{loadError} <button className="underline font-bold" onClick={fetchData}>Retry</button></div>}
+            <div className="p-3 rounded-xl bg-blue-50 text-blue-900 dark:bg-blue-950/30 dark:text-blue-100 text-sm">{analyses.filter(a => a.orderable).length} available for new orders · {analyses.filter(a => a.status !== 'active').length} inactive · {analyses.filter(a => a.configurationIssues?.length || a.scientificWarnings?.length).length} need configuration review. Existing orders and historical results retain their parameter links.</div>
             {/* Header & Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div>
@@ -333,6 +379,7 @@ const AnalysisManager = () => {
                 </div>
                 <button
                     onClick={handleStartNew}
+                    disabled={!!loadError}
                     className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl shadow-md shadow-emerald-700/20 text-xs font-bold transition-all active:scale-95 whitespace-nowrap"
                 >
                     <Plus size={16} /> Add Analysis Parameter
@@ -358,6 +405,9 @@ const AnalysisManager = () => {
                     <option value="all">All Categories ({analyses.length})</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+                <select aria-label="Parameter availability" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="p-2 rounded-xl border dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+                    <option value="all">All availability</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="review">Needs configuration review</option>
+                </select>
             </div>
 
             {/* Master Table Card */}
@@ -366,8 +416,8 @@ const AnalysisManager = () => {
                     <table className="w-full text-left text-xs min-w-[840px]">
                         <thead className="bg-gray-50/90 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-gray-500 dark:text-gray-400 font-extrabold text-[11px]">
                             <tr>
-                                <th className="py-3.5 px-5 w-[15%]">Code</th>
                                 <th className="py-3.5 px-4 w-[35%]">Parameter Name</th>
+                                <th className="py-3.5 px-5 w-[15%]">Internal code</th>
                                 <th className="py-3.5 px-4 w-[22%]">Category</th>
                                 <th className="py-3.5 px-4 w-[10%]">Units</th>
                                 <th className="py-3.5 px-4 w-[10%]">Methods</th>
@@ -377,29 +427,26 @@ const AnalysisManager = () => {
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
                             {filtered.map(a => {
                                 const methods = methodologies.filter(m => m.analysisCode === a.code);
-                                const defaultMethod = methods.find(m => m.isDefault) || methods[0];
                                 const catName = categories.find(c => c.id === a.categoryId)?.name || a.categoryId || 'General';
 
                                 return (
                                     <tr key={a.code} className="hover:bg-emerald-50/40 dark:hover:bg-gray-700/40 transition-colors group">
-                                        {/* Code */}
-                                        <td className="py-3.5 px-5 align-middle">
-                                            <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 tracking-wide font-sans">
-                                                {a.code}
-                                            </span>
-                                        </td>
-
                                         {/* Parameter Name */}
                                         <td className="py-3.5 px-4 align-middle">
                                             <div className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-snug">
                                                 {a.name}
                                             </div>
+                                            <div className="text-[11px] mt-1 text-gray-600 dark:text-gray-300">{a.matrix} · {a.orderable ? 'Available for new orders' : 'Unavailable for new orders'} · {a.labId ? 'Laboratory definition' : 'Shared definition'}</div>
+                                            {a.configurationIssues?.map(issue => <p key={issue} className="text-xs text-amber-800 dark:text-amber-300 mt-1">{issue}</p>)}
+                                            {a.scientificWarnings?.map(warning => <p key={warning} className="text-xs text-amber-800 dark:text-amber-300 mt-1">Scientific review: {warning}</p>)}
                                             {a.description && (
                                                 <div className="text-[11px] text-gray-400 dark:text-gray-400 font-medium truncate max-w-md mt-0.5" title={a.description}>
                                                     {a.description}
                                                 </div>
                                             )}
                                         </td>
+
+                                        <td className="py-3.5 px-5 align-middle text-xs text-gray-500 dark:text-gray-400 break-all">{a.code}</td>
 
                                         {/* Category */}
                                         <td className="py-3.5 px-4 align-middle">
@@ -431,7 +478,8 @@ const AnalysisManager = () => {
                                         <td className="py-3.5 px-5 align-middle text-right">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button
-                                                    onClick={() => setEditingItem({ ...a, _isNew: false })}
+                                                    onClick={() => handleEdit(a)}
+                                                    disabled={!!loadError}
                                                     className="p-2 rounded-xl text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors"
                                                     title="Edit Parameter"
                                                 >
@@ -439,6 +487,7 @@ const AnalysisManager = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(a.code, a.name)}
+                                                    disabled={a.canEdit === false || !!loadError}
                                                     className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
                                                     title="Delete Parameter"
                                                 >
@@ -454,7 +503,7 @@ const AnalysisManager = () => {
                 </div>
 
                 <div className="p-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 text-center border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
-                    Showing {filtered.length} of {analyses.length} standard soil analysis parameters
+                    Showing {filtered.length} of {analyses.length} configured parameters across all sample matrices
                 </div>
             </div>
 
@@ -502,12 +551,14 @@ const AnalysisManager = () => {
                                     <div className="flex items-center gap-3">
                                         <button
                                             onClick={() => setEditingMethod(m)}
+                                            disabled={m.canEdit === false}
                                             className="text-xs text-emerald-700 dark:text-emerald-400 hover:underline font-bold"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleDeleteMethodology(m.id, m.name)}
+                                            disabled={m.canEdit === false}
                                             className="text-xs text-red-600 hover:underline font-bold"
                                         >
                                             Delete
@@ -525,6 +576,7 @@ const AnalysisManager = () => {
                         </div>
 
                         {/* Add / Edit Form */}
+                        {error && <p role="alert" className="p-3 rounded-xl bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200 text-sm">{error}</p>}
                         {editingMethod ? (
                             <div className="p-4 bg-gray-50 dark:bg-gray-900/70 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3">
                                 <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
@@ -569,6 +621,7 @@ const AnalysisManager = () => {
                                     </button>
                                     <button
                                         onClick={handleSaveMethodology}
+                                        disabled={saving}
                                         className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95"
                                     >
                                         Save Method
@@ -591,4 +644,3 @@ const AnalysisManager = () => {
 };
 
 export default AnalysisManager;
-

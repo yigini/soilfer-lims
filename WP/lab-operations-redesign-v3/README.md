@@ -4,6 +4,10 @@ Review date: 6 September 2026. Working repository: **C:\Users\yigin\Documents\so
 
 This is the connected follow-up to `WP/sample-workspace-redesign-v2`. It covers preparation, technician batches, the analysis catalogue, compound and derived results, reporting, and role dashboards. Implement it against the current sample-workspace services, not as a second independent lifecycle.
 
+**Implementation update, 6 September:** read [catalogue-implementation-update.md](catalogue-implementation-update.md) before continuing. It distinguishes the catalogue, naming and entry safeguards now implemented locally from the remaining v3 redesign, and includes actual server/browser verification evidence. The original audit and inventory below retain their baseline meaning.
+
+**Antigravity integration:** begin with [the safe handoff](../antigravity-safe-handoff-2026-09-06/START-HERE.md), which records the exact source snapshot and the checkpoint, migration, testing and deployment sequence.
+
 ## Read in order
 
 1. `source-audit.md` — observed defects, source locations, evidence and limits.

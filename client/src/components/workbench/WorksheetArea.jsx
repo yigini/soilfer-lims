@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Filter, Search, Clipboard, ArrowRight, CheckCircle2,
@@ -28,6 +29,7 @@ export default function WorksheetArea({
     onOpenSpectralIntake,
     isDiscarding = false
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     const items = activeGroup?.items || [];
     const [selectedItemId, setSelectedItemId] = useState(() => {
         if (initialSampleId && items.length > 0) {
@@ -113,7 +115,7 @@ export default function WorksheetArea({
             <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        <span>Analysis Method:</span>
+                        <span>Work type:</span>
                         <select
                             value={activeGroup?.analysis || ''}
                             onChange={(e) => onSelectGroup(e.target.value)}
@@ -121,7 +123,7 @@ export default function WorksheetArea({
                         >
                             {allGroups.map(g => (
                                 <option key={g.analysis} value={g.analysis}>
-                                    {g.analysisName || g.analysis} ({g.items.length})
+                                    {getAnalysisDisplayName(g.analysis, g.analysisName)} ({g.items.length})
                                 </option>
                             ))}
                         </select>
@@ -155,10 +157,7 @@ export default function WorksheetArea({
             <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                        <span>{activeGroup?.analysisName || activeGroup?.analysis}</span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {activeGroup?.analysis}
-                        </span>
+                        <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
                     </h3>
                     <p className="text-slate-500 text-[11px] mt-0.5">
                         {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
@@ -197,7 +196,7 @@ export default function WorksheetArea({
                                     <th className="py-2.5 px-3 font-semibold min-w-[130px]">Sample</th>
                                     <th className="py-2.5 px-3 font-semibold min-w-[220px]">
                                         {isTexture ? 'Fractions (Sand / Silt / Clay %)' :
-                                         isOperationalGate ? 'SOP Verification' :
+                                         isOperationalGate ? 'Completion checklist' :
                                          isSpectral ? 'Spectra Acquisition Status' :
                                          `Determination (${activeGroup?.unit || 'value'})`}
                                     </th>
@@ -254,6 +253,7 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 {isTexture ? (
                                                     <TextureEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         values={draft?.values || []}
                                                         onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
                                                         sampleId={item.sampleId}
@@ -261,6 +261,7 @@ export default function WorksheetArea({
                                                     />
                                                 ) : isOperationalGate ? (
                                                     <OperationalTaskEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         analysis={item.analysis}
                                                         checks={draft?.checks || [false, false, false]}
                                                         onChange={(chk) => onDraftChange(item.workItemId, null, { checks: chk })}
@@ -298,6 +299,7 @@ export default function WorksheetArea({
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
+                                                                    disabled={!item.readiness?.isReady || isRecorded}
                                                                     className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
                                                                 >
                                                                     Upload spectra →
@@ -307,6 +309,7 @@ export default function WorksheetArea({
                                                     </div>
                                                 ) : (
                                                     <NumericEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         value={draft?.value ?? item.currentResult ?? ''}
                                                         onChange={(val) => onDraftChange(item.workItemId, val)}
                                                         unit={activeGroup?.unit || ''}

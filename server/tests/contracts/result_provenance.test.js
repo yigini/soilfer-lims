@@ -8,6 +8,9 @@ describe('WP-31: Result Provenance Tracking', () => {
 
     beforeAll(async () => {
         testSampleId = `SMP-PROV-${Date.now()}`;
+        for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
+            await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active' }, update: { name, units, labId: null } });
+        }
         await prisma.sample.create({
             data: {
                 id: testSampleId,
@@ -16,7 +19,8 @@ describe('WP-31: Result Provenance Tracking', () => {
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',
                 labId: 'LAB-DEFAULT',
-                assignedLab: 'LAB-DEFAULT'
+                assignedLab: 'LAB-DEFAULT',
+                requiredAnalyses: JSON.stringify(['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'])
             }
         });
     });
@@ -179,4 +183,3 @@ describe('WP-31: Result Provenance Tracking', () => {
         expect(nItems.length).toBeGreaterThanOrEqual(1);
     });
 });
-

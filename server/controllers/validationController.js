@@ -11,11 +11,12 @@ exports.validateResult = async (paramId, value, methodologyId = null) => {
     const normalizedStr = strVal.replace(',', '.');
 
     // Strict numeric regex: numbers like 12, 12.5, -0.5
-    const isStrictNumeric = /^-?\d+(\.\d+)?$/.test(normalizedStr);
+    const numericPattern = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?';
+    const isStrictNumeric = new RegExp(`^${numericPattern}$`).test(normalizedStr) && Number.isFinite(Number(normalizedStr));
 
     if (!isStrictNumeric) {
         // Support below LOQ / above range censoring markers like "<0.5", "< 0.01", ">100"
-        if (/^[<>]\s*-?\d+(\.\d+)?$/.test(normalizedStr)) {
+        if (new RegExp(`^[<>]\\s*${numericPattern}$`).test(normalizedStr) && Number.isFinite(Number(normalizedStr.replace(/^[<>]\s*/, '')))) {
             const cleanNum = parseFloat(normalizedStr.replace(/^[<>]\s*/, ''));
             return {
                 valid: true,
@@ -48,7 +49,7 @@ exports.validateResult = async (paramId, value, methodologyId = null) => {
     if (analysis?.validation) {
         try {
             const rules = JSON.parse(analysis.validation);
-            if (rules.min !== undefined && min === undefined) min = rules.min;
+            if (rules.min != null && min == null) min = rules.min;
             if (rules.max !== undefined) max = rules.max;
         } catch (e) { }
     }

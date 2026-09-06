@@ -34,6 +34,9 @@ describe('WP-20: Per-Lab Methodology Defaults & Isolation', () => {
             where: { analysisCode: 'SOC', isDefault: true }
         });
         defaultMethodId = defaultMethod?.id;
+        // This scenario requires one shared default. A copied developer catalogue may
+        // contain duplicates; ambiguity is covered separately by catalogue governance.
+        await prisma.methodology.updateMany({ where: { analysisCode: 'SOC', labId: null, id: { not: defaultMethodId } }, data: { isDefault: false } });
     });
 
     test('1. Changing Lab A default to Dumas updates Lab A defaults API without affecting Lab B', async () => {

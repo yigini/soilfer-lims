@@ -1,8 +1,11 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
+import { operationalEvidence, workItemEvidenceText } from '../../utils/workItemEvidence';
 ﻿import React from 'react';
 import { FileText, AlertTriangle, ShieldCheck, CheckCircle, X, ExternalLink, Activity } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { t } = useLanguage();
 
     if (!isOpen || !item) return null;
@@ -20,7 +23,7 @@ const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra 
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                             <FileText size={20} className="text-indigo-600 dark:text-indigo-400" />
-                            {item.analysisName || item.analysis} — Evidence Inspection
+                            {getAnalysisDisplayName(item.analysis, item.analysisName)} — Evidence Inspection
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             Sample: <strong className="text-gray-700 dark:text-gray-300">{sample?.labId || sample?.originalId}</strong> • Category: {item.category || 'Analytical'}
@@ -116,15 +119,19 @@ const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra 
                         ) : (
                             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                                 <div className="text-2xl font-black text-gray-900 dark:text-white font-mono">
-                                    {item.result !== null && item.result !== undefined && item.result !== '' ? String(item.result) : (
+                                    {item.result !== null && item.result !== undefined && item.result !== '' ? workItemEvidenceText(item) : (
                                         <span className="text-gray-400 italic text-base font-normal">No measurement recorded</span>
                                     )}
                                 </div>
+                                {operationalEvidence(item) && <div className="mt-3 text-sm text-gray-700 dark:text-gray-200 space-y-2">
+                                    {operationalEvidence(item).steps.map((step, index) => <p key={index}>{operationalEvidence(item).checks[index] === true ? '✓' : '○'} {step}</p>)}
+                                    <p className="text-xs text-gray-500">Recorded by {operationalEvidence(item).recordedBy} · Checklist template: {operationalEvidence(item).revision}</p>
+                                </div>}
                                 {hasResults && (
                                     <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs space-y-1">
                                         {item.results.map((r, i) => (
                                             <div key={r.id || i} className="flex justify-between text-gray-600 dark:text-gray-400 font-mono">
-                                                <span>{r.param}: {r.value} {r.unit || ''}</span>
+                                                <span>{getAnalysisDisplayName(r.param)}: {r.value} {r.unit || ''}</span>
                                                 <span>Attempt #{r.attemptNo || 1} • {new Date(r.createdAt).toLocaleDateString()}</span>
                                             </div>
                                         ))}

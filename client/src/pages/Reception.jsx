@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +21,7 @@ import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAu
 
 
 const Reception = () => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { user, token } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
@@ -168,7 +170,7 @@ const Reception = () => {
                     axios.get('/api/config/analyses'),
                     axios.get('/api/projects')
                 ]);
-                setGroups(gRes.data);
+                setGroups(gRes.data.filter(g => g.orderable));
                 setAnalyses(aRes.data);
                 setAvailableProjects(Array.isArray(pRes.data) ? pRes.data : pRes.data.data || []);
 
@@ -1632,9 +1634,9 @@ const Reception = () => {
                                     <input value={searchAnalysis} onChange={e => setSearchAnalysis(e.target.value)} placeholder="Search analysis code..." className="flex-1 p-2 border rounded" />
                                     {searchAnalysis && (
                                         <div className="absolute top-full left-0 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded z-10 max-h-40 overflow-y-auto">
-                                            {analyses.filter(a => !effectiveList.includes(a.code) && a.name.toLowerCase().includes(searchAnalysis.toLowerCase())).map(a => (
+                                            {analyses.filter(a => a.orderable && !effectiveList.includes(a.code) && a.name.toLowerCase().includes(searchAnalysis.toLowerCase())).map(a => (
                                                 <div key={a.code} onClick={() => { toggleAnalysis(a.code); setSearchAnalysis(''); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">
-                                                    {a.name} ({a.code})
+                                                    {getAnalysisDisplayName(a.code, a.name)}
                                                 </div>
                                             ))}
                                         </div>
@@ -1755,7 +1757,7 @@ const Reception = () => {
                                                     <span className="font-semibold">Tests at risk:</span>
                                                     {massRequirementBreakdown.map(b => (
                                                         <span key={b.code} className="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 font-mono text-[10px]">
-                                                            {b.code}: {b.massRequired}g
+                                                            {getAnalysisDisplayName(b.code)}: {b.massRequired}g
                                                         </span>
                                                     ))}
                                                 </div>

@@ -7,6 +7,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { DialogProvider } from './context/DialogContext'
+import { AnalysisCatalogueProvider } from './context/AnalysisCatalogueContext'
 
 import axios from 'axios';
 axios.defaults.baseURL = import.meta.env.DEV ? 'http://localhost:3000' : ''; // Use relative URLs in production
@@ -57,9 +58,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <ThemeProvider>
                     <LanguageProvider>
                         <AuthProvider>
+                            <AnalysisCatalogueProvider>
                             <DialogProvider>
                                 <App />
                             </DialogProvider>
+                            </AnalysisCatalogueProvider>
                         </AuthProvider>
                     </LanguageProvider>
                 </ThemeProvider>

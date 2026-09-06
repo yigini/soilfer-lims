@@ -5,9 +5,9 @@ const prisma = require('../prisma');
 /**
  * SoilFER-LIMS Analysis Catalogue Seeder (WP-19)
  * 
- * Ingests 214 standard analyses and ~430 methodologies.
+ * Ingests the checked-in parameter definitions and their referenced methodologies.
  * Follows strict match-preservation rules:
- * - A clean database directly seeds all 214 analyses.
+ * - A clean database directly seeds the configured analysis definitions.
  * - An existing database produces a match report and changes nothing unless confirmed.
  * - Local unmatched analyses are marked with isGlobal: false.
  * - Environmental module parameters ship disabled (status: 'inactive').

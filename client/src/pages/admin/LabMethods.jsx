@@ -60,7 +60,7 @@ const LabMethods = () => {
                 if (!hasOverrides && data.length > 0) {
                     setIsWizardOpen(true);
                 }
-            }
+            } else { throw new Error('Configuration could not be loaded.'); }
         } catch (err) {
             console.error('Failed to load defaults:', err);
             setMessage({ type: 'error', text: 'Failed to load laboratory methodology defaults.' });
@@ -299,20 +299,22 @@ const LabMethods = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 min-w-[320px]">
+                                                {item.configurationError && <p role="alert" className="mb-2 text-xs text-amber-800 dark:text-amber-300">{item.configurationError}</p>}
                                                 {item.methodologies.length > 0 ? (
                                                     <select
                                                         value={item.effectiveMethodologyId || ''}
                                                         onChange={(e) => handleMethodChange(item.analysisCode, e.target.value)}
                                                         className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
                                                     >
+                                                        <option value="">Choose a method / use a valid shared default</option>
                                                         {item.methodologies.map(m => (
                                                             <option key={m.id} value={m.id}>
-                                                                {m.name} {m.standard ? `(${m.standard})` : ''} {m.isDefault ? '★ [GLOSOLAN Default]' : ''}
+                                                                {m.name} {m.standard ? `(${m.standard})` : ''} {m.isDefault ? '★ Default' : ''}
                                                             </option>
                                                         ))}
                                                     </select>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400 italic">Standard procedure only</span>
+                                                    <span className="text-xs text-amber-700 italic">No method configured</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">

@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { X, Droplet, CheckCircle, AlertTriangle, Plus, Search, Trash2, Info, Layers } from 'lucide-react';
@@ -5,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import InfoTooltip from '../common/InfoTooltip';
 
 const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { token } = useAuth();
     const [loading, setLoading] = useState(false);
     const [groups, setGroups] = useState([]);
@@ -65,10 +67,10 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                 axios.get('/api/config/groups'),
                 axios.get('/api/config/analyses')
             ]);
-            setGroups(gRes.data);
+            setGroups(gRes.data.filter(g => g.orderable));
             setAllAnalyses(aRes.data);
         } catch (e) {
-            console.error("Failed to fetch analysis config", e);
+            setError('Analysis configuration could not be loaded. Close and reopen before changing the selection.');
         }
     };
 
@@ -244,7 +246,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                             {searchQuery && (
                                 <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-60 overflow-y-auto animate-in slide-in-from-top-2">
                                     {allAnalyses
-                                        .filter(a => !currentAnalyses.includes(a.code) && (
+                                        .filter(a => a.orderable && !currentAnalyses.includes(a.code) && (
                                             a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                             a.code.toLowerCase().includes(searchQuery.toLowerCase())
                                         ))
@@ -258,14 +260,13 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                                 className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 last:border-0"
                                             >
                                                 <div>
-                                                    <div className="font-bold text-sm text-gray-900 dark:text-white uppercase">{a.code}</div>
-                                                    <div className="text-xs text-gray-500">{a.name}</div>
+                                                    <div className="font-bold text-sm text-gray-900 dark:text-white uppercase">{getAnalysisDisplayName(a.code, a.name)}</div>
                                                 </div>
                                                 <Plus size={16} className="text-blue-500" />
                                             </button>
                                         ))
                                     }
-                                    {allAnalyses.filter(a => !currentAnalyses.includes(a.code) && (
+                                    {allAnalyses.filter(a => a.orderable && !currentAnalyses.includes(a.code) && (
                                         a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                         a.code.toLowerCase().includes(searchQuery.toLowerCase())
                                     )).length === 0 && (
@@ -291,8 +292,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                 return (
                                     <div key={code} className="group flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm hover:border-red-300 dark:hover:border-red-900/50 transition-all">
                                         <div>
-                                            <span className="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase leading-none">{code}</span>
-                                            {ana && <p className="text-[10px] text-gray-400 truncate max-w-[100px] leading-tight">{ana.name}</p>}
+                                            <span className="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase leading-none">{getAnalysisDisplayName(code, ana?.name)}</span>
                                         </div>
                                         <button
                                             onClick={() => handleToggleAnalysis(code)}

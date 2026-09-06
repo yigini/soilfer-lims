@@ -86,14 +86,15 @@ const DYNAMIC_CONFIGS = {};
  */
 function registerAnalysisConfig(code, config) {
     if (!code) return;
-    let prereqs = config.prerequisites || [];
+    const previous = ANALYSIS_CONFIG[code] || { prerequisites: ['PREPARATION'], category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY, order: 50 };
+    let prereqs = config.prerequisites ?? previous.prerequisites;
     if (typeof prereqs === 'string') {
-        try { prereqs = JSON.parse(prereqs); } catch (e) { prereqs = []; }
+        try { prereqs = JSON.parse(prereqs); } catch (e) { prereqs = previous.prerequisites; }
     }
     DYNAMIC_CONFIGS[code] = {
-        category: config.category || config.categoryId || WORK_ITEM_CATEGORIES.WET_CHEMISTRY,
+        category: typeof config.category === 'string' ? config.category : previous.category,
         order: config.order ?? config.executionOrder ?? 50,
-        prerequisites: Array.isArray(prereqs) ? prereqs : [],
+        prerequisites: Array.isArray(prereqs) ? prereqs : previous.prerequisites,
         displayName: config.displayName || config.name || code
     };
 }
@@ -203,7 +204,7 @@ function getAnalysisConfig(analysisCode) {
         category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY,
         order: 50,
         prerequisites: ['PREPARATION'],
-        displayName: analysisCode
+          displayName: require('../data/analysisDisplayNames.json')[analysisCode] || 'Unconfigured parameter'
     };
 }
 

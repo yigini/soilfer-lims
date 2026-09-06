@@ -25,7 +25,7 @@ function evaluateItemReadiness(item, user, options = {}) {
     const category = item.category;
 
     // 1. Assignment check
-    if (user && user.role === 'LAB_TECHNICIAN' && item.assignedTo && item.assignedTo !== user.username) {
+    if (user && user.role === 'LAB_TECHNICIAN' && item.assignedTo !== user.username) {
         blockers.push('UNASSIGNED_TO_USER');
         reasons.push(`Assigned to ${item.assignedTo}, not you`);
     }
@@ -45,12 +45,17 @@ function evaluateItemReadiness(item, user, options = {}) {
         if (sample.status === 'ON_HOLD') {
             blockers.push('SAMPLE_ON_HOLD');
             reasons.push('Sample is ON_HOLD — contact lab manager');
-        } else if (sample.status === 'REJECTED') {
+        } else if (['REJECTED', 'RECEIVED_REJECTED'].includes(sample.status)) {
             blockers.push('SAMPLE_REJECTED');
             reasons.push('Sample was rejected during reception intake');
         } else if (sample.status === 'RECEIVED') {
             blockers.push('SAMPLE_NOT_ACCEPTED');
             reasons.push('Sample has not yet been accepted by reception');
+        }
+
+        if (category !== 'Post-Analytical' && !['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'ANALYSIS', 'PARTIALLY_COMPLETE'].includes(sample.status)) {
+            blockers.push('SAMPLE_STATUS_INELIGIBLE');
+            reasons.push('Sample must be accepted and open for analysis before recording work.');
         }
 
         // 4. Operational Gate Prerequisite Trail

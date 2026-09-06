@@ -1,3 +1,4 @@
+import checklists from '../../../../server/data/operationalChecklists.json';
 import React from 'react';
 import { CheckSquare, Square, CheckCircle2 } from 'lucide-react';
 
@@ -16,15 +17,7 @@ export default function OperationalTaskEditor({
 }) {
     const rawChecks = Array.isArray(checks) ? checks : [false, false, false];
 
-    const sopSteps = analysis === 'DRYING' ? [
-        'Sample intake identity & batch bar-code verified',
-        'Drying cabinet/oven maintained at 40°C ± 2°C',
-        'Sample dried to constant mass and cooling protocol completed'
-    ] : [
-        'Dried sample identity & condition verified',
-        'Crushed, milled, and sieved through 2.0 mm mesh',
-        'Sub-sampling split and storage container labeled'
-    ];
+    const sopSteps = checklists[analysis]?.steps || [];
 
     const toggleCheck = (index) => {
         if (disabled) return;
@@ -34,8 +27,8 @@ export default function OperationalTaskEditor({
         onChange(next);
     };
 
-    const completedCount = rawChecks.filter(Boolean).length;
-    const isAllComplete = completedCount === sopSteps.length;
+    const completedCount = rawChecks.filter(c => c === true).length;
+    const isAllComplete = sopSteps.length > 0 && completedCount === sopSteps.length;
 
     return (
         <div className="flex flex-col gap-2 py-1">
@@ -75,7 +68,7 @@ export default function OperationalTaskEditor({
                     {isAllComplete ? (
                         <>
                             <CheckCircle2 size={12} />
-                            <span>SOP Checklist Complete (3/3)</span>
+                            <span>Operational checklist complete</span>
                         </>
                     ) : (
                         <span>Checklist: {completedCount}/{sopSteps.length} confirmed</span>

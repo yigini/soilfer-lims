@@ -1,3 +1,4 @@
+const operationalChecklists = require('../data/operationalChecklists.json');
 const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
@@ -184,7 +185,7 @@ exports.getQueue = async (req, res) => {
 
             if (!groupsMap[code]) {
                 const meta = analysisMap[code] || {};
-                const categoryName = meta.categoryId ? (categoryMap[meta.categoryId] || 'Uncategorized') : 'Uncategorized';
+                const categoryName = operationalChecklists[code] ? 'Operational Gates' : meta.categoryId ? (categoryMap[meta.categoryId] || 'Uncategorized') : 'Uncategorized';
 
                 // Build eligible equipment list for this group
                 const eligibleIds = equipReqMap[equipKey]?.eligibleIds || [];
@@ -194,9 +195,9 @@ exports.getQueue = async (req, res) => {
 
                 groupsMap[code] = {
                     analysis: code,
-                    analysisName: meta.name || code,
+                    analysisName: operationalChecklists[code]?.name || meta.name || await analysisService.getAnalysisName(code),
                     category: categoryName,
-                    unit: meta.unit || null,
+                    unit: operationalChecklists[code] ? null : meta.unit || null,
                     validation: meta.validation || null,
                     equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
                     eligibleEquipment,
@@ -383,6 +384,31 @@ exports.batchSave = async (req, res) => {
                 continue;
             }
 
+            if (!require('../utils/scopeGuard').canAccessEntity(user, sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+                errors.push({ workItemId: entry.workItemId, error: 'Work is outside your laboratory scope.', code: 'OUT_OF_SCOPE' });
+                continue;
+            }
+
+            const checklist = operationalChecklists[item.analysis];
+            const isOperationalTask = !!checklist;
+            const executionReadiness = readinessService.evaluateItemReadiness(item, user);
+            if (!executionReadiness.isReady) {
+                errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: 'EXECUTION_BLOCKED' });
+                continue;
+            }
+            if (isOperationalTask && entry.value != null && entry.value !== '') {
+                errors.push({ workItemId: entry.workItemId, error: 'Preparation work requires checklist evidence, not a numerical result.', code: 'OPERATIONAL_SCALAR_FORBIDDEN' });
+                continue;
+            }
+            if (isOperationalTask && (!Array.isArray(entry.checks) || entry.checks.length !== checklist.steps.length || entry.checks.some(c => typeof c !== 'boolean'))) {
+                errors.push({ workItemId: entry.workItemId, error: 'Supply the complete operational checklist with explicit confirmations.' });
+                continue;
+            }
+            if (isOperationalTask && !draft && !entry.checks.every(c => c === true)) {
+                errors.push({ workItemId: entry.workItemId, error: 'Confirm every operational checklist step before completing this work.' });
+                continue;
+            }
+
             // HARD BLOCK: Spectral acquisition tasks require spectrometer scans, never scalar values
             const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
             if (isSpectralAnalysis) {
@@ -404,30 +430,18 @@ exports.batchSave = async (req, res) => {
             }
 
             // Skip empty values for draft mode
-            if (draft && (entry.value === null || entry.value === undefined || entry.value === '')) {
+            if (draft && !isOperationalTask && (entry.value === null || entry.value === undefined || entry.value === '')) {
                 results.push({ workItemId: entry.workItemId, status: 'skipped', validation: { valid: true, flags: [] } });
                 continue;
             }
 
             // Validation
             let validation = { valid: true, flags: [] };
-            const value = entry.value;
+            const value = isOperationalTask && !draft ? JSON.stringify({ revision: checklist.revision, steps: checklist.steps, checks: entry.checks, recordedBy: user.username, recordedAt: now.toISOString() }) : entry.value;
 
-            if (value !== null && value !== undefined && value !== '') {
-                const method = methodMap[item.analysis];
-                if (method && method.validation) {
-                    const rules = method.validation;
-                    if (rules.type === 'numeric') {
-                        const numVal = Number(value);
-                        if (isNaN(numVal)) {
-                            validation = { valid: false, flags: ['INVALID_FORMAT'] };
-                        } else {
-                            if (rules.min !== undefined && numVal < rules.min) validation.flags.push('BELOW_MIN');
-                            if (rules.max !== undefined && numVal > rules.max) validation.flags.push('ABOVE_MAX');
-                            if (validation.flags.length > 0) validation.valid = false;
-                        }
-                    }
-                }
+            if (!isOperationalTask && value !== null && value !== undefined && value !== '') {
+                const checked = validationService.validateNumericMethod(value, methodMap[item.analysis]?.validation);
+                validation = { ...checked, valid: checked.isValid };
             }
 
             // ─── Fix 3: Compute target status and enforce workflow transitions ───
@@ -463,7 +477,7 @@ exports.batchSave = async (req, res) => {
                         basis: entry.basis || 'AIR_DRY',
                         replicateNo: entry.replicateNo || 1,
                         instrumentId: entry.equipmentId || item.equipmentId || null,
-                        methodologyId: methodMap[item.analysis]?.id || null,
+                        methodologyId: item.methodologyId || null,
                         notes: entry.notes || null,
                         baseVersion: entry.version !== undefined ? entry.version : item.version
                     });
@@ -608,8 +622,15 @@ exports.batchSave = async (req, res) => {
                 data: updateData
             }));
 
+            if (isOperationalTask) {
+                ops.push(prisma.sample.update({
+                    where: { id: sample.id, status: sample.status, dryingStatus: sample.dryingStatus, preparationStatus: sample.preparationStatus },
+                    data: item.analysis === 'DRYING' ? { dryingStatus: 'DONE' } : { preparationStatus: 'DONE' }
+                }));
+            }
+
             // Create/update Result record (Append-Only with Replicate & History)
-            if (value !== undefined && value !== null && value !== '') {
+            if (!isOperationalTask && value !== undefined && value !== null && value !== '') {
                 const method = methodMap[item.analysis];
                 const flagsData = validation.flags || [];
                 if (validation.overrideReason) {
@@ -660,7 +681,7 @@ exports.batchSave = async (req, res) => {
                         censoring: censoringType,
                         basis: validBasis,
                         provenance: entry.provenance || 'MEASURED',
-                        methodologyId: method?.id || null,
+                        methodologyId: item.methodologyId || null,
                         replicateNo: repNo,
                         isCurrent: true,
                         enteredBy: user.username,
@@ -672,26 +693,13 @@ exports.batchSave = async (req, res) => {
                     }
                 }));
 
-                // Purge draft from WorkItemDraft upon successful record
-                ops.push(prisma.workItemDraft.deleteMany({
-                    where: { workItemId: item.id }
-                }));
             }
+
+            // Both analytical results and operational evidence replace their working draft.
+            ops.push(prisma.workItemDraft.deleteMany({ where: { workItemId: item.id } }));
 
             // Handle operational gate side-effects (non-draft only)
             if (!draft && targetStatus === 'COMPLETED') {
-                if (item.analysis === 'DRYING') {
-                    ops.push(prisma.sample.update({
-                        where: { id: String(item.sampleId) },
-                        data: { dryingStatus: 'DONE' }
-                    }));
-                } else if (item.analysis === 'PREPARATION') {
-                    ops.push(prisma.sample.update({
-                        where: { id: String(item.sampleId) },
-                        data: { preparationStatus: 'DONE' }
-                    }));
-                }
-
                 // Equipment usage log
                 if (entry.equipmentId) {
                     ops.push(prisma.workItemEquipmentUse.create({
@@ -1116,7 +1124,7 @@ exports.previewCompletion = async (req, res) => {
                 const vals = entry.values || [];
                 validation = validationService.validateTextureFractions(vals[0], vals[1], vals[2]);
             } else if (item.category === 'Operational Gates') {
-                validation = validationService.validateOperationalTask(entry.checks || [true], 1);
+                validation = validationService.validateOperationalTask(entry.checks, operationalChecklists[item.analysis]?.steps.length || 3);
             } else {
                 const method = methodMap[item.analysis];
                 validation = validationService.validateNumericMethod(entry.value, method?.validation);

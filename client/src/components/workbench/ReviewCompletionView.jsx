@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState } from 'react';
 import {
     ArrowLeft, CheckCircle2, AlertTriangle, ShieldCheck,
@@ -16,6 +17,7 @@ export default function ReviewCompletionView({
     onCommit,
     isSubmitting = false
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     const [confirmed, setConfirmed] = useState(false);
 
     const included = previewData?.included || [];
@@ -89,7 +91,7 @@ export default function ReviewCompletionView({
                                 </span>
                                 <span className="text-slate-400 mx-2">·</span>
                                 <span className="text-slate-600 dark:text-slate-300 font-medium">
-                                    {item.analysis}
+                                    {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                 </span>
                                 <span className="text-slate-400 text-[11px] ml-2">
                                     (Basis: {item.basis || 'Air-dry'}, Rep: {item.replicateNo || 1})
@@ -128,7 +130,7 @@ export default function ReviewCompletionView({
                                         {item.sampleId}
                                     </span>
                                     <span className="text-slate-400 mx-2">·</span>
-                                    <span className="text-slate-500">{item.analysis}</span>
+                                    <span className="text-slate-500">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5">
                                         • {item.reasons?.[0] || 'Prerequisites or validation incomplete'}
                                     </div>

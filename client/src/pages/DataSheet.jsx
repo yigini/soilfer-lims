@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, Filter, Search, CheckCircle, AlertCircle, FlaskConical, ClipboardList } from 'lucide-react';
@@ -6,6 +7,7 @@ import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const DataSheet = () => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
@@ -176,7 +178,7 @@ const DataSheet = () => {
                                     <td className="px-6 py-3 font-mono text-gray-700 dark:text-gray-300 font-medium">{item.labId}</td>
                                     <td className="px-6 py-3 font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                                         <div className="w-1.5 h-6 bg-blue-500 dark:bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        {item.analysis}
+                                        {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                     </td>
                                     <td className="px-6 py-3">
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${item.status === 'COMPLETED' ? 'bg-green-100 text-green-700 border-green-200' :

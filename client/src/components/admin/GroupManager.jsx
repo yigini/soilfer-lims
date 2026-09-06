@@ -1,9 +1,11 @@
+import { notifyCatalogueChanged, useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Check, X, Layers, FlaskConical, AlertTriangle } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 
 const GroupManager = () => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { showDialog } = useDialog();
     const [groups, setGroups] = useState([]);
     const [analyses, setAnalyses] = useState([]);
@@ -36,7 +38,8 @@ const GroupManager = () => {
             } else {
                 await axios.put(`/api/config/groups/${editingGroup.id}`, editingGroup);
             }
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
             setEditingGroup(null);
         } catch (e) {
             showDialog({ title: 'Save Failed', message: e.response?.data?.error || 'Failed to save package', type: 'error' });
@@ -47,9 +50,10 @@ const GroupManager = () => {
         if (!confirm(`Delete package "${name || id}"?`)) return;
         try {
             await axios.delete(`/api/config/groups/${id}`);
-            fetchData();
+            await fetchData();
+            notifyCatalogueChanged();
         } catch (e) {
-            showDialog({ title: 'Delete Failed', message: 'Failed to delete package.', type: 'error' });
+            showDialog({ title: 'Delete Failed', message: e.response?.data?.error || 'Failed to delete package.', type: 'error' });
         }
     };
 
@@ -144,8 +148,8 @@ const GroupManager = () => {
                                             className="w-4 h-4 mt-0.5 text-emerald-600 rounded focus:ring-emerald-500"
                                         />
                                         <div className="min-w-0 flex-1">
-                                            <div className="font-bold text-xs tracking-wide">{a.code}</div>
-                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{a.name}</div>
+                                            <div className="font-bold text-xs tracking-wide">{getAnalysisDisplayName(a.code, a.name)}</div>
+                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{a.orderable ? a.units || a.matrix : "Unavailable for new orders"}</div>
                                         </div>
                                     </label>
                                 );
@@ -201,6 +205,7 @@ const GroupManager = () => {
                                 <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity flex-shrink-0">
                                     <button
                                         onClick={() => setEditingGroup({ ...g, _isNew: false })}
+                                        disabled={g.canEdit === false}
                                         className="p-1.5 text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         title="Edit Package"
                                     >
@@ -208,6 +213,7 @@ const GroupManager = () => {
                                     </button>
                                     <button
                                         onClick={() => handleDelete(g.id, g.name)}
+                                        disabled={g.canEdit === false}
                                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         title="Delete Package"
                                     >
@@ -222,8 +228,8 @@ const GroupManager = () => {
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 max-h-28 overflow-hidden">
                                     {g.analyses?.slice(0, 8).map(code => (
-                                        <span key={code} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-semibold rounded-md border border-gray-200 dark:border-gray-600">
-                                            {code}
+                                        <span key={getAnalysisDisplayName(code)} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-semibold rounded-md border border-gray-200 dark:border-gray-600">
+                                            {getAnalysisDisplayName(code)}
                                         </span>
                                     ))}
                                     {g.analyses?.length > 8 && (

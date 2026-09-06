@@ -48,7 +48,7 @@ function parseDeterminationValue(rawInput) {
         const numPart = censorMatch[2].replace(',', '.').trim();
         const numVal = Number(numPart);
 
-        if (isNaN(numVal)) {
+        if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(String(numPart ?? '').trim())) {
             return {
                 isBlank: false,
                 isValid: false,
@@ -77,7 +77,7 @@ function parseDeterminationValue(rawInput) {
     const normalizedStr = str.replace(',', '.');
     const numVal = Number(normalizedStr);
 
-    if (isNaN(numVal)) {
+    if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(normalizedStr)) {
         return {
             isBlank: false,
             isValid: false,
@@ -252,8 +252,8 @@ function validateOperationalTask(checks, requiredStepCount = 1) {
         };
     }
 
-    const completedSteps = checkList.filter(Boolean).length;
-    const isValid = completedSteps >= requiredStepCount && checkList.length >= requiredStepCount;
+    const completedSteps = checkList.filter(c => c === true).length;
+    const isValid = completedSteps === requiredStepCount && checkList.length === requiredStepCount;
 
     return {
         isValid,

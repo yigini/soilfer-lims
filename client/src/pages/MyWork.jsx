@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -8,7 +9,6 @@ import {
     RefreshCw, ClipboardList, ArrowUpRight, Filter
 } from 'lucide-react';
 import { formatLastUpdated } from '../hooks/useRealtimeData';
-import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 // ─── Live Indicator ───
 const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
@@ -27,6 +27,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
 );
 
 const MyWork = () => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('active');

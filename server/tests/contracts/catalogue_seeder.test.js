@@ -1,16 +1,27 @@
 const prisma = require('../../prisma');
+const catalogue = require('../../seeds/data/catalogue.json');
 const { seedCatalogue } = require('../../seeds/catalogue');
 
 describe('WP-19: Analysis Catalogue Seeder Contract', () => {
-    test('1. A clean database seeds all 214 standard analyses', async () => {
+    test('Imported measurands without verified reporting definitions remain inactive without invented units', () => {
+        const importedNames = require('../../data/importedParameterNames.json');
+        for (const code of Object.keys(importedNames)) {
+            expect(catalogue.analyses.find(a => a.code === code)).toMatchObject({ name: importedNames[code], status: 'inactive', units: null, validation: null });
+        }
+    });
+    test('No synthetic count-padding parameters or methodologies ship as laboratory definitions', () => {
+        expect(catalogue.analyses.some(a => /^SPEC_PARAM_/.test(a.code))).toBe(false);
+        expect(catalogue.methodologies.some(m => /^SPEC_PARAM_/.test(m.analysisCode) || /_ALT_\d+$/.test(m.id))).toBe(false);
+    });
+    test('1. A clean database seeds the configured parameter definitions', async () => {
         const result = await seedCatalogue({ forceClean: true });
 
         expect(result.isCleanDb).toBe(true);
-        expect(result.seededCount).toBe(214);
+        expect(result.seededCount).toBe(catalogue.analyses.length);
         expect(result.changesApplied).toBe(true);
 
         const totalAnalyses = await prisma.analysis.count();
-        expect(totalAnalyses).toBeGreaterThanOrEqual(214);
+        expect(totalAnalyses).toBeGreaterThanOrEqual(catalogue.analyses.length);
     });
 
     test('2. A database with existing analyses produces a match report and changes nothing without confirmation', async () => {

@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useMemo } from 'react';
 import {
     Search, Filter, CheckCircle2, AlertTriangle, ArrowRight,
@@ -17,6 +18,7 @@ export default function WorkbenchQueue({
     searchQuery = '',
     onSearchChange
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     const [statusFilter, setStatusFilter] = useState('ALL');
 
     // Flatten all items across analysis groups
@@ -50,13 +52,13 @@ export default function WorkbenchQueue({
                 const matchLabId = item.labId?.toLowerCase().includes(q);
                 const matchId = item.sampleId?.toLowerCase().includes(q);
                 const matchOrig = item.originalId?.toLowerCase().includes(q);
-                const matchParam = item.analysis?.toLowerCase().includes(q) || item.analysisName?.toLowerCase().includes(q);
+                const matchParam = item.analysis?.toLowerCase().includes(q) || getAnalysisDisplayName(item.analysis, item.analysisName).toLowerCase().includes(q);
                 if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam) return false;
             }
 
             return true;
         });
-    }, [allItems, statusFilter, searchQuery]);
+    }, [allItems, statusFilter, searchQuery, getAnalysisDisplayName]);
 
     const stats = useMemo(() => {
         return {
@@ -150,10 +152,10 @@ export default function WorkbenchQueue({
 
                                     <td className="py-3 px-4">
                                         <div className="font-medium text-slate-800 dark:text-slate-200">
-                                            {item.analysisName || item.analysis}
+                                            {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                         </div>
                                         <div className="text-[11px] text-slate-400">
-                                            {item.analysis} · {item.groupCategory}
+                                            {item.groupCategory}
                                         </div>
                                     </td>
 

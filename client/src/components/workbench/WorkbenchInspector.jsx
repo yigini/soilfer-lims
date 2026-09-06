@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React from 'react';
 import {
     CheckCircle2, AlertTriangle, XCircle, Clock, ShieldCheck,
@@ -23,6 +24,7 @@ export default function WorkbenchInspector({
     onResolveConflict,
     isDiscarding = false
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     if (!selectedItem) {
         return (
             <aside className="w-full lg:w-64 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 text-xs flex items-center justify-center min-h-[300px]">
@@ -47,8 +49,8 @@ export default function WorkbenchInspector({
     } = selectedItem;
 
     const hasConflict = !!draft?.conflictValue;
-    const isLocked = ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(status);
-    const isOperationalGate = selectedItem.category === 'Operational Gates';
+    const isLocked = !readiness?.isReady || ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(status);
+    const isOperationalGate = selectedItem.editorKind === 'OPERATIONAL' || ['DRYING', 'PREPARATION'].includes(analysis) || selectedItem.category === 'Operational Gates';
 
     const basis = draft?.basis || 'AIR_DRY';
     const replicateNo = draft?.replicateNo || 1;
@@ -70,7 +72,7 @@ export default function WorkbenchInspector({
                     <p className="text-[11px] text-slate-500 truncate">Field ID: {originalId}</p>
                 )}
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                    {methodDefinition?.name || analysis}
+                    {getAnalysisDisplayName(analysis, methodDefinition?.name)}
                 </p>
                 {projectCode && (
                     <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">

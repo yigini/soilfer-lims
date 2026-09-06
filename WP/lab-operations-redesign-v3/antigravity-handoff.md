@@ -1,5 +1,7 @@
 # Connected workbench, catalogue and dashboard follow-up
 
+**Updated handoff:** Start with `WP/antigravity-safe-handoff-2026-09-06/START-HERE.md`. Catalogue, naming and execution safeguards now exist as uncommitted source changes. Checkpoint and review them before implementing the remaining plan. The instructions and inventory below describe the earlier planning baseline; they are not a command to replace current code.
+
 Work only in `C:\Users\yigin\Documents\soilfer-lims`. Read all material under `WP/lab-operations-redesign-v3` together with `WP/sample-workspace-redesign-v2` before implementation. Inspect current Git state and preserve overlapping/unrelated work; this audit's baseline is `bee0b6e`.
 
 The latest user report concerns Elena's S004 drying worksheet, preparation gates, practical 40-sample method batches, texture as one order/task with grouped fraction results and derived class, other catalogue families, and correct dashboards for every user group. This is a connected implementation, not a UI relabeling.

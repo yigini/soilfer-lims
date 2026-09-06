@@ -1,10 +1,11 @@
 {
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "generatedAt": "2026-09-02T15:39:45.901Z",
-    "totalAnalyses": 214,
-    "totalMethodologies": 543,
-    "totalCategories": 10
+    "totalAnalyses": 176,
+    "totalMethodologies": 467,
+    "totalCategories": 10,
+    "reviewNote": "Synthetic quota-filling entries removed. Remaining definitions require method-specific laboratory verification; catalogue membership is not SOP validation."
   },
   "categories": [
     {
@@ -2777,28 +2778,28 @@
     },
     {
       "code": "availableWaterHoldingCapacity",
-      "name": "availableWaterHoldingCapacity Determination",
-      "description": "availableWaterHoldingCapacity Determination standard determination",
+      "name": "Available water holding capacity",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
     },
     {
       "code": "carbonInorganic",
-      "name": "carbonInorganic Determination",
-      "description": "carbonInorganic Determination standard determination",
+      "name": "Soil inorganic carbon",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -2819,28 +2820,28 @@
     },
     {
       "code": "totalElements",
-      "name": "totalElements Determination",
-      "description": "totalElements Determination standard determination",
+      "name": "Elemental analysis",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
     },
     {
       "code": "solubleSalts",
-      "name": "solubleSalts Determination",
-      "description": "solubleSalts Determination standard determination",
+      "name": "Soluble salts",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -2861,56 +2862,56 @@
     },
     {
       "code": "textureSum",
-      "name": "textureSum Determination",
-      "description": "textureSum Determination standard determination",
+      "name": "Particle size fraction total",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
     },
     {
       "code": "coarseFragments",
-      "name": "coarseFragments Determination",
-      "description": "coarseFragments Determination standard determination",
+      "name": "Coarse fragments",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
     },
     {
       "code": "pH",
-      "name": "pH Determination",
-      "description": "pH Determination standard determination",
+      "name": "Soil pH",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
     },
     {
       "code": "phosphorusRetention",
-      "name": "phosphorusRetention Determination",
-      "description": "phosphorusRetention Determination standard determination",
+      "name": "Phosphorus retention",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -2945,14 +2946,14 @@
     },
     {
       "code": "moistureContent",
-      "name": "moistureContent Determination",
-      "description": "moistureContent Determination standard determination",
+      "name": "Soil moisture content",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -3015,14 +3016,14 @@
     },
     {
       "code": "organicMatter",
-      "name": "organicMatter Determination",
-      "description": "organicMatter Determination standard determination",
+      "name": "Soil organic matter",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -3043,14 +3044,14 @@
     },
     {
       "code": "hydraulicConductivity",
-      "name": "hydraulicConductivity Determination",
-      "description": "hydraulicConductivity Determination standard determination",
+      "name": "Hydraulic conductivity",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -3071,14 +3072,14 @@
     },
     {
       "code": "carbonTotal",
-      "name": "carbonTotal Determination",
-      "description": "carbonTotal Determination standard determination",
+      "name": "Soil total carbon",
+      "description": "Imported measurand: verify the applicable laboratory procedure, quantity, reporting unit and result structure before activation.",
       "categoryId": "chemical_properties",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
+      "units": null,
+      "unitCode": null,
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -3096,690 +3097,6 @@
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
-    },
-    {
-      "code": "SPEC_PARAM_1",
-      "name": "Specialized Agronomic Parameter 1",
-      "description": "Specialized Agronomic Parameter 1 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_2",
-      "name": "Specialized Agronomic Parameter 2",
-      "description": "Specialized Agronomic Parameter 2 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_3",
-      "name": "Specialized Agronomic Parameter 3",
-      "description": "Specialized Agronomic Parameter 3 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_4",
-      "name": "Specialized Agronomic Parameter 4",
-      "description": "Specialized Agronomic Parameter 4 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_5",
-      "name": "Specialized Agronomic Parameter 5",
-      "description": "Specialized Agronomic Parameter 5 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_6",
-      "name": "Specialized Agronomic Parameter 6",
-      "description": "Specialized Agronomic Parameter 6 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_7",
-      "name": "Specialized Agronomic Parameter 7",
-      "description": "Specialized Agronomic Parameter 7 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_8",
-      "name": "Specialized Agronomic Parameter 8",
-      "description": "Specialized Agronomic Parameter 8 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_9",
-      "name": "Specialized Agronomic Parameter 9",
-      "description": "Specialized Agronomic Parameter 9 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_10",
-      "name": "Specialized Agronomic Parameter 10",
-      "description": "Specialized Agronomic Parameter 10 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_11",
-      "name": "Specialized Agronomic Parameter 11",
-      "description": "Specialized Agronomic Parameter 11 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_12",
-      "name": "Specialized Agronomic Parameter 12",
-      "description": "Specialized Agronomic Parameter 12 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_13",
-      "name": "Specialized Agronomic Parameter 13",
-      "description": "Specialized Agronomic Parameter 13 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_14",
-      "name": "Specialized Agronomic Parameter 14",
-      "description": "Specialized Agronomic Parameter 14 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_15",
-      "name": "Specialized Agronomic Parameter 15",
-      "description": "Specialized Agronomic Parameter 15 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_16",
-      "name": "Specialized Agronomic Parameter 16",
-      "description": "Specialized Agronomic Parameter 16 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_17",
-      "name": "Specialized Agronomic Parameter 17",
-      "description": "Specialized Agronomic Parameter 17 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_18",
-      "name": "Specialized Agronomic Parameter 18",
-      "description": "Specialized Agronomic Parameter 18 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_19",
-      "name": "Specialized Agronomic Parameter 19",
-      "description": "Specialized Agronomic Parameter 19 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_20",
-      "name": "Specialized Agronomic Parameter 20",
-      "description": "Specialized Agronomic Parameter 20 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_21",
-      "name": "Specialized Agronomic Parameter 21",
-      "description": "Specialized Agronomic Parameter 21 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_22",
-      "name": "Specialized Agronomic Parameter 22",
-      "description": "Specialized Agronomic Parameter 22 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_23",
-      "name": "Specialized Agronomic Parameter 23",
-      "description": "Specialized Agronomic Parameter 23 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_24",
-      "name": "Specialized Agronomic Parameter 24",
-      "description": "Specialized Agronomic Parameter 24 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_25",
-      "name": "Specialized Agronomic Parameter 25",
-      "description": "Specialized Agronomic Parameter 25 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_26",
-      "name": "Specialized Agronomic Parameter 26",
-      "description": "Specialized Agronomic Parameter 26 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_27",
-      "name": "Specialized Agronomic Parameter 27",
-      "description": "Specialized Agronomic Parameter 27 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_28",
-      "name": "Specialized Agronomic Parameter 28",
-      "description": "Specialized Agronomic Parameter 28 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_29",
-      "name": "Specialized Agronomic Parameter 29",
-      "description": "Specialized Agronomic Parameter 29 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_30",
-      "name": "Specialized Agronomic Parameter 30",
-      "description": "Specialized Agronomic Parameter 30 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_31",
-      "name": "Specialized Agronomic Parameter 31",
-      "description": "Specialized Agronomic Parameter 31 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_32",
-      "name": "Specialized Agronomic Parameter 32",
-      "description": "Specialized Agronomic Parameter 32 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_33",
-      "name": "Specialized Agronomic Parameter 33",
-      "description": "Specialized Agronomic Parameter 33 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_34",
-      "name": "Specialized Agronomic Parameter 34",
-      "description": "Specialized Agronomic Parameter 34 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_35",
-      "name": "Specialized Agronomic Parameter 35",
-      "description": "Specialized Agronomic Parameter 35 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_36",
-      "name": "Specialized Agronomic Parameter 36",
-      "description": "Specialized Agronomic Parameter 36 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_37",
-      "name": "Specialized Agronomic Parameter 37",
-      "description": "Specialized Agronomic Parameter 37 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
-    },
-    {
-      "code": "SPEC_PARAM_38",
-      "name": "Specialized Agronomic Parameter 38",
-      "description": "Specialized Agronomic Parameter 38 standard determination",
-      "categoryId": "plant_nutrients",
-      "units": "mg/kg",
-      "unitCode": "mg/kg",
-      "matrix": "SOIL",
-      "module": "FERTILITY",
-      "status": "active",
-      "decimalPlaces": 2,
-      "isGlobal": true,
-      "validation": {
-        "min": 0,
-        "max": 1000,
-        "decimalPlaces": 2
-      }
     }
   ],
   "methodologies": [
@@ -8452,766 +7769,6 @@
       "isDefault": false,
       "glosisProcedure": "hydrometer-unkdisp-spec",
       "glosisDefinition": "Spectrally predicted based on measurments with the hydrometer (bouyoucos) method unknown dispersion of the primary particles and pretreatment to remove cementing particles (organic matter, carbonates)"
-    },
-    {
-      "id": "SPEC_PARAM_1_SOP_1",
-      "analysisCode": "SPEC_PARAM_1",
-      "name": "Standard Laboratory Determination 1 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 1 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_1_SOP_2",
-      "analysisCode": "SPEC_PARAM_1",
-      "name": "Spectrophotometric Colorimetry 1",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 1"
-    },
-    {
-      "id": "SPEC_PARAM_2_SOP_1",
-      "analysisCode": "SPEC_PARAM_2",
-      "name": "Standard Laboratory Determination 2 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 2 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_2_SOP_2",
-      "analysisCode": "SPEC_PARAM_2",
-      "name": "Spectrophotometric Colorimetry 2",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 2"
-    },
-    {
-      "id": "SPEC_PARAM_3_SOP_1",
-      "analysisCode": "SPEC_PARAM_3",
-      "name": "Standard Laboratory Determination 3 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 3 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_3_SOP_2",
-      "analysisCode": "SPEC_PARAM_3",
-      "name": "Spectrophotometric Colorimetry 3",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 3"
-    },
-    {
-      "id": "SPEC_PARAM_4_SOP_1",
-      "analysisCode": "SPEC_PARAM_4",
-      "name": "Standard Laboratory Determination 4 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 4 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_4_SOP_2",
-      "analysisCode": "SPEC_PARAM_4",
-      "name": "Spectrophotometric Colorimetry 4",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 4"
-    },
-    {
-      "id": "SPEC_PARAM_5_SOP_1",
-      "analysisCode": "SPEC_PARAM_5",
-      "name": "Standard Laboratory Determination 5 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 5 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_5_SOP_2",
-      "analysisCode": "SPEC_PARAM_5",
-      "name": "Spectrophotometric Colorimetry 5",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 5"
-    },
-    {
-      "id": "SPEC_PARAM_6_SOP_1",
-      "analysisCode": "SPEC_PARAM_6",
-      "name": "Standard Laboratory Determination 6 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 6 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_6_SOP_2",
-      "analysisCode": "SPEC_PARAM_6",
-      "name": "Spectrophotometric Colorimetry 6",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 6"
-    },
-    {
-      "id": "SPEC_PARAM_7_SOP_1",
-      "analysisCode": "SPEC_PARAM_7",
-      "name": "Standard Laboratory Determination 7 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 7 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_7_SOP_2",
-      "analysisCode": "SPEC_PARAM_7",
-      "name": "Spectrophotometric Colorimetry 7",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 7"
-    },
-    {
-      "id": "SPEC_PARAM_8_SOP_1",
-      "analysisCode": "SPEC_PARAM_8",
-      "name": "Standard Laboratory Determination 8 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 8 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_8_SOP_2",
-      "analysisCode": "SPEC_PARAM_8",
-      "name": "Spectrophotometric Colorimetry 8",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 8"
-    },
-    {
-      "id": "SPEC_PARAM_9_SOP_1",
-      "analysisCode": "SPEC_PARAM_9",
-      "name": "Standard Laboratory Determination 9 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 9 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_9_SOP_2",
-      "analysisCode": "SPEC_PARAM_9",
-      "name": "Spectrophotometric Colorimetry 9",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 9"
-    },
-    {
-      "id": "SPEC_PARAM_10_SOP_1",
-      "analysisCode": "SPEC_PARAM_10",
-      "name": "Standard Laboratory Determination 10 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 10 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_10_SOP_2",
-      "analysisCode": "SPEC_PARAM_10",
-      "name": "Spectrophotometric Colorimetry 10",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 10"
-    },
-    {
-      "id": "SPEC_PARAM_11_SOP_1",
-      "analysisCode": "SPEC_PARAM_11",
-      "name": "Standard Laboratory Determination 11 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 11 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_11_SOP_2",
-      "analysisCode": "SPEC_PARAM_11",
-      "name": "Spectrophotometric Colorimetry 11",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 11"
-    },
-    {
-      "id": "SPEC_PARAM_12_SOP_1",
-      "analysisCode": "SPEC_PARAM_12",
-      "name": "Standard Laboratory Determination 12 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 12 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_12_SOP_2",
-      "analysisCode": "SPEC_PARAM_12",
-      "name": "Spectrophotometric Colorimetry 12",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 12"
-    },
-    {
-      "id": "SPEC_PARAM_13_SOP_1",
-      "analysisCode": "SPEC_PARAM_13",
-      "name": "Standard Laboratory Determination 13 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 13 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_13_SOP_2",
-      "analysisCode": "SPEC_PARAM_13",
-      "name": "Spectrophotometric Colorimetry 13",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 13"
-    },
-    {
-      "id": "SPEC_PARAM_14_SOP_1",
-      "analysisCode": "SPEC_PARAM_14",
-      "name": "Standard Laboratory Determination 14 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 14 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_14_SOP_2",
-      "analysisCode": "SPEC_PARAM_14",
-      "name": "Spectrophotometric Colorimetry 14",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 14"
-    },
-    {
-      "id": "SPEC_PARAM_15_SOP_1",
-      "analysisCode": "SPEC_PARAM_15",
-      "name": "Standard Laboratory Determination 15 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 15 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_15_SOP_2",
-      "analysisCode": "SPEC_PARAM_15",
-      "name": "Spectrophotometric Colorimetry 15",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 15"
-    },
-    {
-      "id": "SPEC_PARAM_16_SOP_1",
-      "analysisCode": "SPEC_PARAM_16",
-      "name": "Standard Laboratory Determination 16 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 16 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_16_SOP_2",
-      "analysisCode": "SPEC_PARAM_16",
-      "name": "Spectrophotometric Colorimetry 16",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 16"
-    },
-    {
-      "id": "SPEC_PARAM_17_SOP_1",
-      "analysisCode": "SPEC_PARAM_17",
-      "name": "Standard Laboratory Determination 17 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 17 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_17_SOP_2",
-      "analysisCode": "SPEC_PARAM_17",
-      "name": "Spectrophotometric Colorimetry 17",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 17"
-    },
-    {
-      "id": "SPEC_PARAM_18_SOP_1",
-      "analysisCode": "SPEC_PARAM_18",
-      "name": "Standard Laboratory Determination 18 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 18 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_18_SOP_2",
-      "analysisCode": "SPEC_PARAM_18",
-      "name": "Spectrophotometric Colorimetry 18",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 18"
-    },
-    {
-      "id": "SPEC_PARAM_19_SOP_1",
-      "analysisCode": "SPEC_PARAM_19",
-      "name": "Standard Laboratory Determination 19 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 19 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_19_SOP_2",
-      "analysisCode": "SPEC_PARAM_19",
-      "name": "Spectrophotometric Colorimetry 19",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 19"
-    },
-    {
-      "id": "SPEC_PARAM_20_SOP_1",
-      "analysisCode": "SPEC_PARAM_20",
-      "name": "Standard Laboratory Determination 20 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 20 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_20_SOP_2",
-      "analysisCode": "SPEC_PARAM_20",
-      "name": "Spectrophotometric Colorimetry 20",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 20"
-    },
-    {
-      "id": "SPEC_PARAM_21_SOP_1",
-      "analysisCode": "SPEC_PARAM_21",
-      "name": "Standard Laboratory Determination 21 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 21 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_21_SOP_2",
-      "analysisCode": "SPEC_PARAM_21",
-      "name": "Spectrophotometric Colorimetry 21",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 21"
-    },
-    {
-      "id": "SPEC_PARAM_22_SOP_1",
-      "analysisCode": "SPEC_PARAM_22",
-      "name": "Standard Laboratory Determination 22 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 22 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_22_SOP_2",
-      "analysisCode": "SPEC_PARAM_22",
-      "name": "Spectrophotometric Colorimetry 22",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 22"
-    },
-    {
-      "id": "SPEC_PARAM_23_SOP_1",
-      "analysisCode": "SPEC_PARAM_23",
-      "name": "Standard Laboratory Determination 23 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 23 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_23_SOP_2",
-      "analysisCode": "SPEC_PARAM_23",
-      "name": "Spectrophotometric Colorimetry 23",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 23"
-    },
-    {
-      "id": "SPEC_PARAM_24_SOP_1",
-      "analysisCode": "SPEC_PARAM_24",
-      "name": "Standard Laboratory Determination 24 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 24 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_24_SOP_2",
-      "analysisCode": "SPEC_PARAM_24",
-      "name": "Spectrophotometric Colorimetry 24",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 24"
-    },
-    {
-      "id": "SPEC_PARAM_25_SOP_1",
-      "analysisCode": "SPEC_PARAM_25",
-      "name": "Standard Laboratory Determination 25 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 25 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_25_SOP_2",
-      "analysisCode": "SPEC_PARAM_25",
-      "name": "Spectrophotometric Colorimetry 25",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 25"
-    },
-    {
-      "id": "SPEC_PARAM_26_SOP_1",
-      "analysisCode": "SPEC_PARAM_26",
-      "name": "Standard Laboratory Determination 26 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 26 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_26_SOP_2",
-      "analysisCode": "SPEC_PARAM_26",
-      "name": "Spectrophotometric Colorimetry 26",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 26"
-    },
-    {
-      "id": "SPEC_PARAM_27_SOP_1",
-      "analysisCode": "SPEC_PARAM_27",
-      "name": "Standard Laboratory Determination 27 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 27 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_27_SOP_2",
-      "analysisCode": "SPEC_PARAM_27",
-      "name": "Spectrophotometric Colorimetry 27",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 27"
-    },
-    {
-      "id": "SPEC_PARAM_28_SOP_1",
-      "analysisCode": "SPEC_PARAM_28",
-      "name": "Standard Laboratory Determination 28 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 28 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_28_SOP_2",
-      "analysisCode": "SPEC_PARAM_28",
-      "name": "Spectrophotometric Colorimetry 28",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 28"
-    },
-    {
-      "id": "SPEC_PARAM_29_SOP_1",
-      "analysisCode": "SPEC_PARAM_29",
-      "name": "Standard Laboratory Determination 29 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 29 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_29_SOP_2",
-      "analysisCode": "SPEC_PARAM_29",
-      "name": "Spectrophotometric Colorimetry 29",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 29"
-    },
-    {
-      "id": "SPEC_PARAM_30_SOP_1",
-      "analysisCode": "SPEC_PARAM_30",
-      "name": "Standard Laboratory Determination 30 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 30 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_30_SOP_2",
-      "analysisCode": "SPEC_PARAM_30",
-      "name": "Spectrophotometric Colorimetry 30",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 30"
-    },
-    {
-      "id": "SPEC_PARAM_31_SOP_1",
-      "analysisCode": "SPEC_PARAM_31",
-      "name": "Standard Laboratory Determination 31 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 31 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_31_SOP_2",
-      "analysisCode": "SPEC_PARAM_31",
-      "name": "Spectrophotometric Colorimetry 31",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 31"
-    },
-    {
-      "id": "SPEC_PARAM_32_SOP_1",
-      "analysisCode": "SPEC_PARAM_32",
-      "name": "Standard Laboratory Determination 32 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 32 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_32_SOP_2",
-      "analysisCode": "SPEC_PARAM_32",
-      "name": "Spectrophotometric Colorimetry 32",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 32"
-    },
-    {
-      "id": "SPEC_PARAM_33_SOP_1",
-      "analysisCode": "SPEC_PARAM_33",
-      "name": "Standard Laboratory Determination 33 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 33 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_33_SOP_2",
-      "analysisCode": "SPEC_PARAM_33",
-      "name": "Spectrophotometric Colorimetry 33",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 33"
-    },
-    {
-      "id": "SPEC_PARAM_34_SOP_1",
-      "analysisCode": "SPEC_PARAM_34",
-      "name": "Standard Laboratory Determination 34 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 34 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_34_SOP_2",
-      "analysisCode": "SPEC_PARAM_34",
-      "name": "Spectrophotometric Colorimetry 34",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 34"
-    },
-    {
-      "id": "SPEC_PARAM_35_SOP_1",
-      "analysisCode": "SPEC_PARAM_35",
-      "name": "Standard Laboratory Determination 35 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 35 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_35_SOP_2",
-      "analysisCode": "SPEC_PARAM_35",
-      "name": "Spectrophotometric Colorimetry 35",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 35"
-    },
-    {
-      "id": "SPEC_PARAM_36_SOP_1",
-      "analysisCode": "SPEC_PARAM_36",
-      "name": "Standard Laboratory Determination 36 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 36 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_36_SOP_2",
-      "analysisCode": "SPEC_PARAM_36",
-      "name": "Spectrophotometric Colorimetry 36",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 36"
-    },
-    {
-      "id": "SPEC_PARAM_37_SOP_1",
-      "analysisCode": "SPEC_PARAM_37",
-      "name": "Standard Laboratory Determination 37 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 37 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_37_SOP_2",
-      "analysisCode": "SPEC_PARAM_37",
-      "name": "Spectrophotometric Colorimetry 37",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 37"
-    },
-    {
-      "id": "SPEC_PARAM_38_SOP_1",
-      "analysisCode": "SPEC_PARAM_38",
-      "name": "Standard Laboratory Determination 38 (AAS/ICP)",
-      "standard": "ISO 11885:2007",
-      "referenceId": null,
-      "isDefault": true,
-      "glosisProcedure": null,
-      "glosisDefinition": "Standard Laboratory Determination 38 (AAS/ICP)"
-    },
-    {
-      "id": "SPEC_PARAM_38_SOP_2",
-      "analysisCode": "SPEC_PARAM_38",
-      "name": "Spectrophotometric Colorimetry 38",
-      "standard": "FAO Guidelines",
-      "referenceId": null,
-      "isDefault": false,
-      "glosisProcedure": null,
-      "glosisDefinition": "Spectrophotometric Colorimetry 38"
     }
   ]
 }

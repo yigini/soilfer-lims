@@ -1,7 +1,9 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React from 'react';
 import { ClipboardList, FlaskConical, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 const IntakeRequestCard = ({ sample }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     if (!sample || sample.status !== 'RECEIVED') return null;
 
     const checklist = sample.receptionData?.checklist?.items || {};
@@ -69,8 +71,8 @@ const IntakeRequestCard = ({ sample }) => {
                         <div className="text-xs font-bold text-gray-400 uppercase mb-2">Individual Parameters</div>
                         <div className="flex flex-wrap gap-1.5">
                             {sample.requiredAnalyses?.map(code => (
-                                <span key={code} className="px-2 py-1 bg-gray-50 text-gray-600 border border-gray-100 rounded text-xs font-mono">
-                                    {code}
+                                <span key={getAnalysisDisplayName(code)} className="px-2 py-1 bg-gray-50 text-gray-600 border border-gray-100 rounded text-xs font-mono">
+                                    {getAnalysisDisplayName(code)}
                                 </span>
                             )) || <span className="text-gray-400 italic text-sm">No specific analyses listed</span>}
                         </div>

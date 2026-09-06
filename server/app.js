@@ -236,18 +236,8 @@ app.get('/api/audit-final', verifyToken, checkPermission('VIEW_AUDIT'), async (r
 app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
-const analysisController = require('./controllers/analysisController');
-app.get('/api/config/categories', verifyToken, analysisController.getCategories);
-app.get('/api/config/analyses', verifyToken, analysisController.getAnalyses);
-app.get('/api/config/methodologies', verifyToken, analysisController.getMethodologies);
-app.get('/api/config/groups', verifyToken, analysisController.getGroups);
-app.use('/api/config', verifyToken, require('./routes/analysisRoutes'));
+app.use('/api/config', require('./routes/analysisRoutes'));
 
-// Admin Config Routes
-app.post('/api/config/categories', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createCategory);
-app.post('/api/config/analyses', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createAnalysis);
-app.post('/api/config/methodologies', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createMethodology);
-app.post('/api/config/groups', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createGroup);
 app.use('/api/samples', verifyToken, require('./routes/sampleRoutes'));
 app.use('/api/results', verifyToken, require('./routes/resultsRoutes'));
 app.use('/api/data-results', verifyToken, require('./routes/dataResultsRoutes'));

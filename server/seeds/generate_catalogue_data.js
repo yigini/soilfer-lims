@@ -113,7 +113,7 @@ const methodologies = [];
 
 // Helper to register analysis and its methodologies
 function addAnalysis(a, methods = []) {
-    const unitCode = UNIT_MAP[a.units] || 'dimensionless';
+    const unitCode = a.units ? (UNIT_MAP[a.units] || null) : null;
     const isEnv = a.module === 'ENVIRONMENTAL';
     const analysisObj = {
         code: a.code,
@@ -124,7 +124,7 @@ function addAnalysis(a, methods = []) {
         unitCode: unitCode,
         matrix: a.matrix || 'SOIL',
         module: a.module || 'FERTILITY',
-        status: isEnv ? 'inactive' : 'active',
+        status: a.status || (isEnv ? 'inactive' : 'active'),
         decimalPlaces: a.validation?.decimalPlaces ?? 2,
         isGlobal: true,
         validation: a.validation ? {
@@ -633,7 +633,7 @@ addAnalysis({ code: 'WATER_RSC', name: 'Residual Sodium Carbonate in Water (RSC)
     { code: 'EATON_1950_RSC', name: 'Calculated: (CO₃²⁻ + HCO₃⁻) - (Ca²⁺ + Mg²⁺) in meq/L', standard: 'FAO Irrigation Paper 29', isDefault: true }
 ]);
 
-// 11. INGEST REMAINING HARMONIZED GLOSIS/FAO SOIL PROCEDURES TO REACH 214 ANALYSES & 430 METHODOLOGIES
+// 11. INGEST REMAINING HARMONIZED GLOSIS/FAO SOIL PROCEDURES WITHOUT ARTIFICIAL COUNT TARGETS
 // Pull procedures from glosisCatalog
 const proceduresByAttr = {};
 (glosisCatalog.procedures || []).forEach(p => {
@@ -665,13 +665,19 @@ const GLOSIS_CAT_MAP = {
 Object.entries(proceduresByAttr).forEach(([attr, procs]) => {
     // If not already in analyses list
     const existing = analyses.find(a => a.code.toLowerCase() === attr.toLowerCase());
-    const info = GLOSIS_CAT_MAP[attr] || { name: `${attr} Determination`, cat: 'chemical_properties', units: 'mg/kg' };
+    const importedName = require('../data/importedParameterNames.json')[attr];
+    const info = GLOSIS_CAT_MAP[attr] || { name: importedName || attr, cat: null, units: null };
+    if (!existing && !GLOSIS_CAT_MAP[attr] && !importedName) {
+        console.warn('Unmapped GLOSIS measurand requires catalogue curation:', attr);
+        return;
+    }
     
     // Create specialized variants if needed or add procedures
-    if (!existing && analyses.length < 214) {
+    if (!existing) {
         addAnalysis({
             code: attr,
             name: info.name,
+            status: GLOSIS_CAT_MAP[attr] ? 'active' : 'inactive',
             categoryId: info.cat,
             units: info.units,
             matrix: 'SOIL',
@@ -687,47 +693,13 @@ Object.entries(proceduresByAttr).forEach(([attr, procs]) => {
     }
 });
 
-// Expand granular parameters if needed to reach exactly 214 analyses
-let serial = 1;
-while (analyses.length < 214) {
-    const code = `SPEC_PARAM_${serial}`;
-    addAnalysis({
-        code: code,
-        name: `Specialized Agronomic Parameter ${serial}`,
-        categoryId: 'plant_nutrients',
-        units: 'mg/kg',
-        matrix: 'SOIL',
-        module: 'FERTILITY',
-        validation: { min: 0, max: 1000, decimalPlaces: 2 }
-    }, [
-        { code: `${code}_SOP_1`, name: `Standard Laboratory Determination ${serial} (AAS/ICP)`, standard: 'ISO 11885:2007', isDefault: true },
-        { code: `${code}_SOP_2`, name: `Spectrophotometric Colorimetry ${serial}`, standard: 'FAO Guidelines', isDefault: false }
-    ]);
-    serial++;
-}
-
-// Ensure methodologies count is ~430
-let methSerial = 1;
-while (methodologies.length < 430) {
-    const a = analyses[methSerial % analyses.length];
-    methodologies.push({
-        id: `${a.code}_ALT_${methSerial}`,
-        analysisCode: a.code,
-        name: `${a.name} (Alternative SOP ${methSerial})`,
-        standard: 'ISO Standards Library',
-        referenceId: null,
-        isDefault: false,
-        glosisProcedure: null,
-        glosisDefinition: `Alternative validated laboratory procedure for ${a.name}`
-    });
-    methSerial++;
-}
+// Never fabricate parameters or procedures to reach a numerical catalogue target.
 
 console.log(`Generated: ${categories.length} Categories, ${analyses.length} Analyses, ${methodologies.length} Methodologies`);
 
 const cataloguePayload = {
     metadata: {
-        version: '1.0.0',
+        version: '1.1.0',
         generatedAt: new Date().toISOString(),
         totalAnalyses: analyses.length,
         totalMethodologies: methodologies.length,

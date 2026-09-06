@@ -1,3 +1,4 @@
+const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const idGenerator = require('../services/idGenerator');
@@ -310,13 +311,14 @@ exports.processIntake = async (req, res) => {
         let requiredAnalyses = new Set(existingAnalyses);
 
         // Load analysis groups from database
-        const analysisGroupsRaw = await prisma.analysisGroup.findMany();
+        const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { OR: [{ labId: sample.assignedLab || user.labId }, { labId: null }] } });
         const analysisGroups = analysisGroupsRaw.map(g => ({
             id: g.id,
             name: g.name,
             analyses: g.analyses ? JSON.parse(g.analyses) : []
         }));
 
+        if (Array.isArray(analysisGroupIds) && analysisGroupIds.some(id => !analysisGroups.some(g => g.id === id))) return res.status(400).json({ success: false, message: 'An analysis package is unavailable to this laboratory.' });
         if (Array.isArray(analysisGroupIds)) {
             analysisGroupIds.forEach(gid => {
                 const group = analysisGroups.find(g => g.id === gid);
@@ -337,6 +339,9 @@ exports.processIntake = async (req, res) => {
         if (Array.isArray(analysisRemovals)) {
             analysisRemovals.forEach(code => requiredAnalyses.delete(code));
         }
+
+        const selected = await cataloguePolicy.validateSelection(Array.from(requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: existingAnalyses });
+        if (!selected.valid) return res.status(400).json({ success: false, message: selected.error, error: selected.error, issues: selected.issues });
 
         // RC-01: Analytical Mass Sufficiency Check
         const parsedMass = (receivedMass !== undefined && receivedMass !== null && receivedMass !== '')
@@ -1161,6 +1166,13 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         });
         const analysisMap = new Map(allAnalysesDb.map(a => [a.code, a]));
 
+        // Validate every sample before creating the consignment or any sample records.
+        for (const [index, sample] of samples.entries()) {
+            if (sample.status === 'REJECTED') continue;
+            const selected = await cataloguePolicy.validateSelection(sample.requiredAnalyses ?? defaults.requiredAnalyses ?? [], { labId: userLab });
+            if (!selected.valid) return res.status(400).json({ error: selected.error, message: selected.error, row: index + 1, issues: selected.issues });
+        }
+
         // 4. Atomic transaction across consignment and all samples
         const result = await prisma.$transaction(async (tx) => {
             // A. Create Consignment Record (RC-12)
@@ -1215,7 +1227,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 const moisture = s.moistureOnArrival || defaults.moistureOnArrival || 'MOIST';
                 const foreignMat = s.foreignMaterial || defaults.foreignMaterial || [];
                 const photos = s.intakePhotos || [];
-                const reqAnalyses = s.requiredAnalyses || defaults.requiredAnalyses || ['PH_H2O'];
+                const reqAnalyses = s.requiredAnalyses ?? defaults.requiredAnalyses ?? [];
 
                 // Geodesy / Location
                 let lat = null, lng = null, elev = null;

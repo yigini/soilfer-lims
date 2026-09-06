@@ -23,6 +23,9 @@ server/prisma_client/
 # ─── Data & Uploads ───
 server/data/*
 !server/data/adminBoundaries.json
+!server/data/analysisDisplayNames.json
+!server/data/operationalChecklists.json
+!server/data/importedParameterNames.json
 server/uploads/
 server/database.json
 
@@ -54,4 +57,3 @@ server/backups/
 server/prisma/*.bak
 *.bak
 scratch/
-

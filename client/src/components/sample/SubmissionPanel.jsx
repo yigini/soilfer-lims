@@ -1,9 +1,10 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState } from 'react';
 import { Send, ShieldCheck, Check, X, AlertOctagon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getAnalysisDisplayName } from '../../utils/analysisNames';
 
 const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewSubmission, onReviewItem }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const isTech = user.role === 'LAB_TECHNICIAN';
     const isManager = ['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role);
@@ -44,7 +45,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
                                                 : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-300'
                                                 }`}
                                         >
-                                            {item.analysisName || getAnalysisDisplayName(item.analysis)}
+                                            {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                         </button>
                                     ))}
                                 </div>
@@ -100,7 +101,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
                                     {sub.itemsDetails && sub.itemsDetails.map(item => (
                                         <div key={item.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 px-2 -mx-2 rounded">
                                             <div className="flex items-center gap-4">
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">{item.analysisName || getAnalysisDisplayName(item.analysis)}</span>
+                                                <span className="font-medium text-gray-700 dark:text-gray-300">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                                 <span className="font-mono font-bold">{item.result}</span>
                                             </div>
                                             <div className="flex items-center gap-1">

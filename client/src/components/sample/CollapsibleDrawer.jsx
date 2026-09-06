@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useMemo, useState } from 'react';
 import { ChevronRight, ChevronLeft, Clock, Activity, Send, User, RotateCcw, ClipboardCheck, Microscope, ChevronDown, ChevronUp, Truck, X, ShieldCheck } from 'lucide-react';
 
@@ -230,6 +231,7 @@ const CollapsibleDrawer = ({ history = [], isOpen, onToggle }) => {
 
 // Sub-component for individual or grouped items
 const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const [expanded, setExpanded] = useState(false);
 
     if (event.isGroup) {
@@ -266,7 +268,7 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
                                 <div key={i} className="flex flex-col gap-0.5">
                                     <div className="text-[11px] text-gray-700 dark:text-gray-300 font-bold flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                        {member.analysisName || member.analysisCode}
+                                        {getAnalysisDisplayName(member.analysisCode, member.analysisName)}
                                     </div>
                                     {member.decision && (
                                         <div className={`ml-3 px-2 py-0.5 rounded text-[9px] font-extrabold inline-block w-fit ${

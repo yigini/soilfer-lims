@@ -5,6 +5,7 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 
 // Read-Only (any authenticated user)
 router.get('/analyses', verifyToken, analysisController.getAnalyses);
+router.get('/analyses/:code/usage', verifyToken, checkPermission('MANAGE_ANALYSES'), analysisController.getAnalysisUsage);
 router.get('/groups', verifyToken, analysisController.getGroups);
 router.get('/methodologies', verifyToken, analysisController.getMethodologies);
 router.get('/categories', verifyToken, analysisController.getCategories);

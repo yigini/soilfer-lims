@@ -1,3 +1,4 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useMemo } from 'react';
 import { X, Clipboard, Check, AlertTriangle, AlertCircle } from 'lucide-react';
 
@@ -14,10 +15,9 @@ export default function PastePreviewModal({
     currentItems = [],
     analysisCode = ''
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     const [pasteText, setPasteText] = useState('');
     const [previewRows, setPreviewRows] = useState(null);
-
-    if (!isOpen) return null;
 
     const itemLookup = useMemo(() => {
         const map = {};
@@ -27,6 +27,8 @@ export default function PastePreviewModal({
         });
         return map;
     }, [currentItems]);
+
+    if (!isOpen) return null;
 
     const handlePreview = () => {
         const lines = pasteText.split(/\r?\n/).filter(l => l.trim().length > 0);
@@ -54,7 +56,7 @@ export default function PastePreviewModal({
             } else {
                 const item = itemLookup[id];
                 if (!item) {
-                    error = `No matching assigned ${analysisCode} task`;
+                    error = `No matching assigned ${getAnalysisDisplayName(analysisCode)} task`;
                 } else if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) {
                     error = `Item is sealed (${item.status})`;
                 } else if (item.readiness && !item.readiness.isReady) {
@@ -99,7 +101,7 @@ export default function PastePreviewModal({
                     <div className="flex items-center gap-2">
                         <Clipboard className="text-emerald-600 dark:text-emerald-400" size={18} />
                         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                            Batch Paste Preview ({analysisCode})
+                            Batch Paste Preview — {getAnalysisDisplayName(analysisCode)}
                         </h3>
                     </div>
                     <button
