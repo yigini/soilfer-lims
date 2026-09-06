@@ -163,7 +163,12 @@ exports.getThread = async (req, res) => {
                 where: { id: { in: unreadIds } },
                 data: { isRead: true }
             });
+            await prisma.notification.updateMany({
+                where: { userId, senderId: partnerId, type: 'MESSAGE', isRead: false },
+                data: { isRead: true }
+            });
             broadcastToUser(partnerId, 'MESSAGES_READ', { readBy: userId, messageIds: unreadIds });
+            broadcastToUser(userId, 'NOTIFICATION_REFRESH', {});
         }
 
         const enriched = messages.map(m => ({

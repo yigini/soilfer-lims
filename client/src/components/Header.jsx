@@ -8,17 +8,42 @@ import { UserMenu } from './UserMenu';
 
 import { Bell, Menu } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
-
-// ...
+import clsx from 'clsx';
 
 export const Header = ({ onMenuClick }) => {
     const { theme, darkMode } = useTheme();
-    const { unreadCount, toggleDrawer } = useNotifications();
+    const { 
+        unreadCount, 
+        totalUnreadCount, 
+        unreadMessageCount, 
+        hasUnreadMessages, 
+        isDrawerOpen, 
+        openDrawer, 
+        closeDrawer 
+    } = useNotifications();
     const { t } = useLanguage();
 
     const isCustomLogo = theme?.logoUrl && !theme.logoUrl.includes('/assets/img/soilfer-logo') && !theme.logoUrl.includes('/assets/img/logo') && !theme.logoUrl.endsWith('/logo.png') && !theme.logoUrl.includes('fao_logo');
     const defaultSiteLogo = darkMode ? '/assets/img/logo-dark.png' : '/assets/img/logo-light.png';
     const siteLogo = isCustomLogo ? theme.logoUrl : defaultSiteLogo;
+
+    const effectiveUnread = totalUnreadCount ?? unreadCount ?? 0;
+
+    const handleBellClick = () => {
+        if (isDrawerOpen) {
+            closeDrawer();
+        } else if (hasUnreadMessages) {
+            openDrawer('CHATS'); // Direct to message exchange tab!
+        } else {
+            openDrawer('NOTIFICATIONS');
+        }
+    };
+
+    const bellTitle = hasUnreadMessages
+        ? t('header.newMessagesTooltip', '{{count}} new message(s) - Click to open Message Exchange', { count: unreadMessageCount })
+        : effectiveUnread > 0
+            ? t('header.notificationsCount', '{{count}} unread notification(s)', { count: effectiveUnread })
+            : t('header.notifications', 'Notifications');
 
     return (
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 right-0 left-0 z-30 transition-colors duration-300">
@@ -46,14 +71,51 @@ export const Header = ({ onMenuClick }) => {
                 {/* Right: User Controls */}
                 <div className="flex items-center gap-2 md:gap-3">
                     <button
-                        onClick={toggleDrawer}
-                        className="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                        title={t('header.notifications', 'Notifications')}
-                        aria-label={t('header.notifications', 'Notifications')}
+                        onClick={handleBellClick}
+                        className={clsx(
+                            "relative p-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800",
+                            hasUnreadMessages
+                                ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:ring-amber-500 shadow-sm shadow-amber-200/50 dark:shadow-amber-900/30"
+                                : effectiveUnread > 0
+                                    ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 ring-2 ring-blue-400/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 focus:ring-blue-500"
+                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-gray-400"
+                        )}
+                        title={bellTitle}
+                        aria-label={bellTitle}
                     >
-                        <Bell size={20} />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800 animate-pulse" />
+                        <Bell 
+                            size={20} 
+                            className={clsx(
+                                "transition-all duration-300",
+                                effectiveUnread > 0 && "animate-bell-swing",
+                                hasUnreadMessages
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : effectiveUnread > 0
+                                        ? "text-blue-600 dark:text-blue-400"
+                                        : "text-gray-500 dark:text-gray-400"
+                            )} 
+                        />
+                        {effectiveUnread > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center">
+                                {/* Ping radar ripple animation */}
+                                <span 
+                                    className={clsx(
+                                        "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
+                                        hasUnreadMessages ? "bg-rose-500" : "bg-blue-500"
+                                    )} 
+                                />
+                                {/* High-contrast badge pill with count */}
+                                <span 
+                                    className={clsx(
+                                        "relative inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-black text-white shadow-md ring-2 ring-white dark:ring-gray-800",
+                                        hasUnreadMessages
+                                            ? "bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 animate-badge-pulse"
+                                            : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                                    )}
+                                >
+                                    {effectiveUnread > 99 ? '99+' : effectiveUnread}
+                                </span>
+                            </span>
                         )}
                     </button>
                     <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>

@@ -223,4 +223,49 @@
             margin: 0;
         }
     }
+
+    /* Notification Bell & Alert Badge Animations */
+    @keyframes bell-swing {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+        10% {
+            transform: rotate(16deg);
+        }
+        20% {
+            transform: rotate(-14deg);
+        }
+        30% {
+            transform: rotate(12deg);
+        }
+        40% {
+            transform: rotate(-8deg);
+        }
+        50% {
+            transform: rotate(4deg);
+        }
+        60% {
+            transform: rotate(0deg);
+        }
+    }
+
+    .animate-bell-swing {
+        transform-origin: 50% 0%;
+        transform-box: fill-box;
+        animation: bell-swing 2.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+        display: inline-block;
+    }
+
+    @keyframes badge-pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.12);
+        }
+    }
+
+    .animate-badge-pulse {
+        animation: badge-pulse 2s ease-in-out infinite;
+    }
 }

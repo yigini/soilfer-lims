@@ -11,13 +11,16 @@ const NotificationDrawer = () => {
         sendMessage, sendChatMessage, directory, fetchDirectory,
         conversations, fetchConversations,
         activeThread, activeThreadPartner, fetchThread, setActiveThreadPartner,
-        isOnline
+        isOnline,
+        drawerView, setDrawerView,
+        unreadNotificationCount, unreadMessageCount
     } = useNotifications();
     const { t } = useLanguage();
     const navigate = useNavigate();
 
-    // VIEW: NOTIFICATIONS | CHATS | THREAD
-    const [view, setView] = React.useState('NOTIFICATIONS');
+    // VIEW: NOTIFICATIONS | CHATS | THREAD | COMPOSE (synced with context)
+    const view = drawerView || 'NOTIFICATIONS';
+    const setView = setDrawerView;
     const [chatInput, setChatInput] = React.useState('');
     const [sending, setSending] = React.useState(false);
     const [composeData, setComposeData] = React.useState({ toUserId: '', message: '' });
@@ -89,6 +92,14 @@ const NotificationDrawer = () => {
 
     const handleNotifClick = (notif) => {
         if (!notif.read && !notif.isRead) markAsRead(notif.id);
+        if (notif.type === 'MESSAGE' && !notif.link) {
+            if (notif.senderId) {
+                openConversation(notif.senderId);
+            } else {
+                setView('CHATS');
+            }
+            return;
+        }
         if (notif.link) {
             closeDrawer();
             navigate(notif.link);
@@ -205,7 +216,13 @@ const NotificationDrawer = () => {
                                 : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
                         )}
                     >
-                        <Bell size={16} /> {t('ui.notifications', 'Notifications')}
+                        <Bell size={16} />
+                        <span>{t('ui.notifications', 'Notifications')}</span>
+                        {unreadNotificationCount > 0 && (
+                            <span className="px-1.5 py-0.5 text-[11px] font-extrabold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full">
+                                {unreadNotificationCount}
+                            </span>
+                        )}
                     </button>
                     <button
                         onClick={() => setView('CHATS')}
@@ -216,7 +233,13 @@ const NotificationDrawer = () => {
                                 : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
                         )}
                     >
-                        <MessageCircle size={16} /> {t('ui.chats', 'Chats')}
+                        <MessageCircle size={16} />
+                        <span>{t('ui.chats', 'Chats')}</span>
+                        {unreadMessageCount > 0 && (
+                            <span className="px-1.5 py-0.5 text-[11px] font-black bg-rose-500 text-white rounded-full shadow-sm animate-pulse">
+                                {unreadMessageCount}
+                            </span>
+                        )}
                     </button>
                 </>
             )}

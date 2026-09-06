@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { playNoticeChime } from '../utils/audioCues';
 
 export const NotificationContext = createContext();
 
@@ -12,6 +13,7 @@ export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [drawerView, setDrawerView] = useState('NOTIFICATIONS');
 
     // Messaging state (formal messages)
     const [directory, setDirectory] = useState([]);
@@ -135,11 +137,12 @@ export const NotificationProvider = ({ children }) => {
     };
 
     const fetchConversations = useCallback(async () => {
+        if (!user) return;
         try {
             const res = await axios.get('/api/messages/conversations');
             setConversations(res.data);
         } catch (err) { console.error('Failed to fetch conversations', err); }
-    }, []);
+    }, [user]);
 
     useEffect(() => { fetchConversationsRef.current = fetchConversations; }, [fetchConversations]);
 
@@ -149,13 +152,30 @@ export const NotificationProvider = ({ children }) => {
             setActiveThread(res.data);
             setActiveThreadPartner(partnerId);
             fetchConversations();
+            fetchNotifications();
         } catch (err) { console.error('Failed to fetch thread', err); }
-    }, [fetchConversations]);
+    }, [fetchConversations, fetchNotifications]);
 
     // ── Drawer Controls ───────────────────────────────────────────
-    const toggleDrawer = () => setIsDrawerOpen(prev => !prev);
-    const closeDrawer = () => setIsDrawerOpen(false);
-    const openDrawer = () => setIsDrawerOpen(true);
+    const toggleDrawer = useCallback((targetView = null) => {
+        setIsDrawerOpen(prev => {
+            if (!prev && targetView) {
+                setDrawerView(targetView);
+            }
+            return !prev;
+        });
+    }, []);
+
+    const closeDrawer = useCallback(() => {
+        setIsDrawerOpen(false);
+    }, []);
+
+    const openDrawer = useCallback((targetView = null) => {
+        if (targetView) {
+            setDrawerView(targetView);
+        }
+        setIsDrawerOpen(true);
+    }, []);
 
     // ── WebSocket Connection ──────────────────────────────────────
     const handleWebSocketEvent = useCallback((data) => {
@@ -182,6 +202,11 @@ export const NotificationProvider = ({ children }) => {
 
             case 'NEW_MESSAGE': {
                 const msg = data.message;
+
+                // Play chime on incoming message from others
+                if (!msg.isMe) {
+                    playNoticeChime();
+                }
 
                 // Update active thread if chatting with this person
                 if (currentPartner && msg.isChat) {
@@ -238,6 +263,7 @@ export const NotificationProvider = ({ children }) => {
                 if (data.notification) {
                     setNotifications(prev => [data.notification, ...prev]);
                     setUnreadCount(prev => prev + 1);
+                    playNoticeChime();
                 }
                 break;
             }
@@ -349,11 +375,15 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         if (!user) return;
         fetchNotifications();
+        fetchConversations();
         const interval = setInterval(() => {
-            if (!wsConnected.current) fetchNotifications();
+            if (!wsConnected.current) {
+                fetchNotifications();
+                fetchConversations();
+            }
         }, 8000);
         return () => clearInterval(interval);
-    }, [user, fetchNotifications]);
+    }, [user, fetchNotifications, fetchConversations]);
 
     // ── Event Subscription API (for WORKITEM_CHANGED, WORKITEM_UPDATE, etc.) ─────────────────
     const subscribeToEvent = useCallback((eventType, callback) => {
@@ -366,9 +396,27 @@ export const NotificationProvider = ({ children }) => {
         };
     }, []);
 
+    // Unread counts calculation
+    const unreadNotificationCount = notifications.filter(n => (!n.read && !n.isRead) && n.type !== 'MESSAGE').length;
+    const unreadChatCount = (conversations || []).reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+    const unreadFormalMessageCount = notifications.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && n.link).length;
+    const unreadChatNotifs = notifications.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && !n.link).length;
+    const effectiveChatCount = Math.max(unreadChatCount, unreadChatNotifs);
+    const unreadMessageCount = effectiveChatCount + unreadFormalMessageCount;
+    const hasUnreadMessages = unreadMessageCount > 0;
+    const totalUnreadCount = unreadNotificationCount + unreadMessageCount;
+
     return (
         <NotificationContext.Provider value={{
-            notifications, unreadCount,
+            notifications,
+            unreadCount: totalUnreadCount,
+            totalUnreadCount,
+            unreadNotificationCount,
+            unreadMessageCount,
+            unreadChatCount: effectiveChatCount,
+            hasUnreadMessages,
+            drawerView,
+            setDrawerView,
             isDrawerOpen, toggleDrawer, closeDrawer, openDrawer,
             markAsRead, markAllRead, clearAllNotifications,
             refresh: fetchNotifications,
