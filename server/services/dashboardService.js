@@ -92,6 +92,14 @@ async function checkDryingApplicable(labId) {
 async function getDashboardHome(user, options = {}) {
     const actorScope = await resolveActorScope(user, options);
     const role = actorScope.role;
+
+    if (!ALLOWED_ROLE_QUEUES[role]) {
+        const err = new Error(`Access denied: Unrecognized or legacy role '${role}' cannot access dashboard home`);
+        err.statusCode = 403;
+        err.code = 'UNRECOGNIZED_ROLE';
+        throw err;
+    }
+
     const catMap = await getAnalysisCatalogueMap();
     const isDryingApplicable = await checkDryingApplicable(actorScope.activeLabId);
 
@@ -557,6 +565,7 @@ async function getDashboardHome(user, options = {}) {
     return {
         schemaVersion: 1,
         asOf,
+        role,
         scope: {
             key: actorScope.activeLabId || 'global',
             label: actorScope.displayLabel,
