@@ -1,0 +1,51 @@
+{
+  "scope": "Synthetic records in an empty local schema; no production writes",
+  "checks": [
+    {
+      "name": "Reception list lookup versus full draft record",
+      "observed": {
+        "listStatus": 200,
+        "detailStatus": 200,
+        "listHasFieldMetadata": false,
+        "listHasReceptionData": false,
+        "listHasProjectId": false,
+        "detailHasFieldMetadata": true,
+        "detailHasReceptionData": true,
+        "detailHasRecordedCoordinates": true
+      }
+    },
+    {
+      "name": "Reception pending counters include unreceived and closed specimens",
+      "fixture": {
+        "EXPECTED": 1,
+        "DRAFT": 1,
+        "RECEIVED": 1,
+        "APPROVED": 1,
+        "allWithLegacyPendingFlags": true
+      },
+      "observed": {
+        "status": 200,
+        "kpis": {
+          "expectedArrivals": 1,
+          "incompleteDrafts": 1,
+          "receivedToday": 2,
+          "needsAttention": 0,
+          "totalProcessed": 4,
+          "totalRegistered": 4,
+          "pendingDrying": 1,
+          "pendingPreparation": 0,
+          "waitingDrying": 1,
+          "readyPreparation": 0
+        }
+      }
+    },
+    {
+      "name": "Draft save must not regress an approved sample",
+      "expected": "Reject and preserve APPROVED",
+      "observed": {
+        "status": 403,
+        "persistedStatus": "APPROVED"
+      }
+    }
+  ]
+}

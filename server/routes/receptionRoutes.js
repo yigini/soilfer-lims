@@ -86,5 +86,11 @@ router.get('/consignments/:id', checkPermission('RECEIVE_SAMPLE'), receptionCont
 // Institutional client spreadsheet manifest import & validation (RC-15)
 router.post('/parse-manifest', checkPermission('RECEIVE_SAMPLE'), receptionController.parseManifestEndpoint);
 
+// GET /api/reception/sample-context/:id and GET /api/reception/sample-context
+// Scoped, pure read-only intake detail resolver
+router.get('/sample-context/:id', checkPermission('RECEIVE_SAMPLE'), receptionController.getSampleIntakeContext);
+router.get('/sample-context', checkPermission('RECEIVE_SAMPLE'), receptionController.getSampleIntakeContext);
+
 module.exports = router;
+
 

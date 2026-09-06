@@ -118,9 +118,6 @@ const Layout = ({ children }) => {
     // 3. INTAKE
     if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: Package, label: t('nav.reception'), path: '/reception' });
-        if (user?.role === 'SAMPLE_RECEPTION') {
-            navItems.push({ icon: UserPlus, label: t('nav.receptionWalkIn', 'Walk-in Intake'), path: '/reception?mode=WALK_IN' });
-        }
     }
 
     // GENERAL

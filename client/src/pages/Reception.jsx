@@ -18,6 +18,7 @@ import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
 import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAudioEnabled } from '../utils/audioCues';
+import { resolveCoordinates } from '../utils/coordinateResolver';
 
 
 const Reception = () => {
@@ -99,11 +100,11 @@ const Reception = () => {
     const [sampling, setSampling] = useState({
         date: new Date().toISOString().split('T')[0],
         depth: '',
-        depthType: '0-20',
-        depthMin: 0,
-        depthMax: 20,
-        depthTopCm: 0,
-        depthBottomCm: 20,
+        depthType: '',
+        depthMin: null,
+        depthMax: null,
+        depthTopCm: null,
+        depthBottomCm: null,
         location: '',
         coordinates: null, // { lat, lng, accuracy, elevation }
         positionalUncertaintyM: null,
@@ -187,33 +188,16 @@ const Reception = () => {
         fetchData();
     }, []);
 
-    // Stage B: Resolve coordinates across project/walk-in formats (RC-09)
+    // Stage B: Canonical coordinate resolution across all formats (RC-09)
     const resolvedCoordinates = useMemo(() => {
         if (mode === 'WALK_IN' || sampleData?.isNew) {
-            return sampling.coordinates || null;
+            if (!sampling.coordinates) return null;
+            return resolveCoordinates({ coordinates: sampling.coordinates });
         }
-        if (sampleData?.latitude && sampleData?.longitude) {
-            return {
-                lat: sampleData.latitude,
-                lng: sampleData.longitude,
-                accuracy: sampleData.positionalUncertaintyM
-            };
-        }
-        const meta = sampleData?.fieldMetadata || {};
-        if (meta.coordinates && typeof meta.coordinates === 'object') return meta.coordinates;
-        if (meta.latitude && meta.longitude) return { lat: meta.latitude, lng: meta.longitude, accuracy: meta.accuracy };
-        if (typeof meta.gps === 'string') {
-            const parts = meta.gps.trim().split(/\s+/);
-            if (parts.length >= 2) {
-                return {
-                    lat: parseFloat(parts[0]),
-                    lng: parseFloat(parts[1]),
-                    elevation: parts[2] ? parseFloat(parts[2]) : undefined,
-                    accuracy: parts[3] ? parseFloat(parts[3]) : undefined
-                };
-            }
-        }
-        return sampling.coordinates || sampleData?.receptionData?.samplingDetails?.coordinates || null;
+        return resolveCoordinates({
+            ...sampleData,
+            coordinates: sampling.coordinates || undefined
+        });
     }, [sampleData, sampling.coordinates, mode]);
 
     // Stage B: Batch geometry outlier detection (RC-10)
@@ -397,11 +381,11 @@ const Reception = () => {
             setSampling({
                 date: new Date().toISOString().split('T')[0],
                 depth: '',
-                depthType: '0-20',
-                depthMin: 0,
-                depthMax: 20,
-                depthTopCm: 0,
-                depthBottomCm: 20,
+                depthType: '',
+                depthMin: null,
+                depthMax: null,
+                depthTopCm: null,
+                depthBottomCm: null,
                 location: '',
                 coordinates: null,
                 positionalUncertaintyM: null,
@@ -583,19 +567,96 @@ const Reception = () => {
             console.warn('[handleLookup] Duplicate check error:', err);
         }
 
-        try {
-            const res = await axios.get(`/api/samples`, { params: { originalId: trimmedCode, limit: 1 } });
-            if (res.data.data && res.data.data.length > 0) {
-                const found = res.data.data[0];
+        // Reset intermediate form state to prevent stale carryover between samples
+        setDuplicateWarning(null);
+        setGeometryOutlierWarning(null);
+        setReceivedMass('');
+        setMassWarningAcknowledged(false);
+        setMoistureOnArrival('MOIST');
+        setForeignMaterial([]);
+        setIntakePhotos([]);
+        setIsResubmission(false);
+        setChecklistData({ items: {}, nonConformance: false, reason: '' });
+        setIntakeNotes('');
+        setAdditions([]);
+        setRemovals([]);
+        setJustification('');
+        setSelectedGroup('');
+        setCustodyCarrierName('');
+        setCustodyTrackingNumber('');
+        setCustodySenderSignature('');
+        setCustodyHandoverAt(new Date().toISOString().slice(0, 16));
+        setCustodyCounterSigned(true);
+        setSampling({
+            date: new Date().toISOString().split('T')[0],
+            depth: '',
+            depthType: '',
+            depthMin: null,
+            depthMax: null,
+            depthTopCm: null,
+            depthBottomCm: null,
+            location: '',
+            coordinates: null,
+            positionalUncertaintyM: null,
+            locationSource: null,
+            compositeRadiusM: null,
+            captureMethod: 'MAP_PIN',
+            locationConfidence: null,
+            siteName: '',
+            areaVillage: '',
+            district: '',
+            landmark: '',
+            locationUncertaintyReason: '',
+            landUse: '',
+            crop: '',
+            previousCrop: '',
+            management: '',
+            purpose: '',
+            isComposite: false,
+            subsamples: '',
+            urgency: 'Normal'
+        });
 
-                const lockedStatuses = ['ACCEPTED', 'LAB_ID_ASSIGNED', 'PROCESSING', 'COMPLETED', 'APPROVED', 'ARCHIVED', 'DISPOSED'];
+        try {
+            let found = null;
+            try {
+                const contextRes = await axios.get('/api/reception/sample-context', {
+                    params: { originalId: trimmedCode },
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+                if (contextRes.data?.success && contextRes.data?.sample) {
+                    found = contextRes.data.sample;
+                }
+            } catch (ctxErr) {
+                if (ctxErr.response?.status === 403) {
+                    playErrorBuzz();
+                    showDialog({
+                        type: 'error',
+                        title: 'Access Denied',
+                        message: ctxErr.response.data?.message || `Access denied: sample ${trimmedCode} belongs to another laboratory.`
+                    });
+                    setSampleData(null);
+                    setLoading(false);
+                    return;
+                }
+                // Fallback to general lookup if sample-context returns 404 or fails
+                try {
+                    const fallbackRes = await axios.get('/api/samples', { params: { originalId: trimmedCode, limit: 1 } });
+                    if (fallbackRes.data?.data?.length > 0) {
+                        found = fallbackRes.data.data[0];
+                    }
+                } catch { /* ignore fallback error */ }
+            }
+
+            if (found) {
+                const lockedStatuses = ['ACCEPTED', 'LAB_ID_ASSIGNED', 'PROCESSING', 'COMPLETED', 'APPROVED', 'ARCHIVED', 'DISPOSED', 'RECEIVED_REJECTED'];
 
                 if (lockedStatuses.includes(found.status)) {
                     playErrorBuzz();
                     showDialog({
                         type: 'error',
                         title: 'Intake Locked',
-                        message: `Sample ${found.originalId} has already been approved (Status: ${found.status}) and cannot be modified by Reception.`
+                        message: `Sample ${found.originalId} is in status '${found.status}' and cannot be modified by Reception.`
                     });
                     setSampleData(null);
                     setLoading(false);
@@ -618,42 +679,61 @@ const Reception = () => {
                             const isWalkInDraft = found.receptionData?.isWalkIn || (!found.projectId && !found.projectCode);
                             setMode(isWalkInDraft ? 'WALK_IN' : 'PROJECT');
                             if (isWalkInDraft) {
-                                // For walk-ins, clear project context
                                 setSessionProject(null);
                             } else {
                                 setSessionProject(found.projectId || found.projectCode);
                             }
                             setSampleData(found);
+
                             // Populate form from receptionData
                             if (found.receptionData?.submitterDetails) setSubmitter(found.receptionData.submitterDetails);
-                            if (found.receptionData?.samplingDetails) setSampling(found.receptionData.samplingDetails);
+                            if (found.receptionData?.samplingDetails) {
+                                setSampling(prev => ({
+                                    ...prev,
+                                    ...found.receptionData.samplingDetails
+                                }));
+                            }
 
-                            // Also try to extract coordinates from fieldMetadata if not already in samplingDetails
-                            if (!found.receptionData?.samplingDetails?.coordinates && found.fieldMetadata) {
-                                const fm = typeof found.fieldMetadata === 'string' ? JSON.parse(found.fieldMetadata) : found.fieldMetadata;
-                                const lat = fm.latitude?.value || fm.lat?.value || fm.gps_latitude?.value;
-                                const lng = fm.longitude?.value || fm.lng?.value || fm.gps_longitude?.value || fm.lon?.value;
-                                if (lat && lng) {
-                                    setSampling(prev => ({
-                                        ...prev,
-                                        coordinates: { lat: parseFloat(lat), lng: parseFloat(lng) },
-                                        location: fm.location?.value || fm.site?.value || prev.location
-                                    }));
-                                }
+                            // Canonical coordinate resolution
+                            const resolved = resolveCoordinates(found);
+                            if (resolved.isRecorded) {
+                                setSampling(prev => ({
+                                    ...prev,
+                                    coordinates: {
+                                        lat: resolved.lat,
+                                        lng: resolved.lng,
+                                        elevation: resolved.elevation,
+                                        accuracy: resolved.accuracy
+                                    },
+                                    location: resolved.locationDescription || prev.location,
+                                    positionalUncertaintyM: resolved.accuracy || prev.positionalUncertaintyM,
+                                    locationSource: resolved.source || prev.locationSource,
+                                    locationConfidence: resolved.confidence || prev.locationConfidence
+                                }));
                             }
 
                             if (found.receptionData?.checklist) setChecklistData(found.receptionData.checklist);
-                            if (found.receptionData?.notes) setIntakeNotes(found.receptionData.notes);
-                            if (found.custodyCarrierName || found.receptionData?.coc?.deliveredBy) setCustodyCarrierName(found.custodyCarrierName || found.receptionData.coc.deliveredBy);
-                            if (found.custodyTrackingNumber || found.receptionData?.coc?.trackingNumber) setCustodyTrackingNumber(found.custodyTrackingNumber || found.receptionData.coc.trackingNumber);
-                            if (found.custodySenderSignature || found.receptionData?.coc?.senderSignature) setCustodySenderSignature(found.custodySenderSignature || found.receptionData.coc.senderSignature);
-                            if (found.custodyHandoverAt || found.receptionData?.coc?.date) {
-                                const dt = new Date(found.custodyHandoverAt || found.receptionData.coc.date);
+                            if (found.receptionData?.notes || found.notes) setIntakeNotes(found.receptionData?.notes || found.notes || '');
+
+                            // Chain of Custody
+                            const coc = found.receptionData?.coc || {};
+                            if (found.custodyCarrierName || coc.deliveredBy) setCustodyCarrierName(found.custodyCarrierName || coc.deliveredBy);
+                            if (found.custodyTrackingNumber || coc.trackingNumber) setCustodyTrackingNumber(found.custodyTrackingNumber || coc.trackingNumber);
+                            if (found.custodySenderSignature || coc.senderSignature) setCustodySenderSignature(found.custodySenderSignature || coc.senderSignature);
+                            if (found.custodyHandoverAt || coc.date) {
+                                const dt = new Date(found.custodyHandoverAt || coc.date);
                                 if (!isNaN(dt.getTime())) setCustodyHandoverAt(dt.toISOString().slice(0, 16));
                             }
 
-                            // Analysis
-                            if (found.analysisGroupIds?.[0]) setSelectedGroup(found.analysisGroupIds[0]);
+                            // Analysis group, additions, removals, justification
+                            const grp = (Array.isArray(found.analysisGroupIds) && found.analysisGroupIds[0])
+                                || found.receptionData?.analysisGroupIds?.[0]
+                                || (Array.isArray(found.receptionData?.analysisGroupIds) && found.receptionData.analysisGroupIds[0]);
+                            if (grp) setSelectedGroup(grp);
+
+                            if (Array.isArray(found.receptionData?.analysisAdditions)) setAdditions(found.receptionData.analysisAdditions);
+                            if (Array.isArray(found.receptionData?.analysisRemovals)) setRemovals(found.receptionData.analysisRemovals);
+                            if (found.receptionData?.analysisJustification) setJustification(found.receptionData.analysisJustification);
 
                             // Stage A Desk Facts
                             populateDeskFacts(found);
@@ -675,6 +755,24 @@ const Reception = () => {
                     setSampleData(found);
                     populateDeskFacts(found);
 
+                    // Canonical coordinate resolution for EXPECTED
+                    const resolved = resolveCoordinates(found);
+                    if (resolved.isRecorded) {
+                        setSampling(prev => ({
+                            ...prev,
+                            coordinates: {
+                                lat: resolved.lat,
+                                lng: resolved.lng,
+                                elevation: resolved.elevation,
+                                accuracy: resolved.accuracy
+                            },
+                            location: resolved.locationDescription || prev.location,
+                            positionalUncertaintyM: resolved.accuracy || prev.positionalUncertaintyM,
+                            locationSource: resolved.source || prev.locationSource,
+                            locationConfidence: resolved.confidence || prev.locationConfidence
+                        }));
+                    }
+
                     // Auto-apply project bundle if none selected
                     if (!selectedGroup) {
                         const pId = found.projectId || currentProject;
@@ -685,6 +783,21 @@ const Reception = () => {
                     playSuccessChime();
                     setSampleData(found);
                     populateDeskFacts(found);
+
+                    const resolved = resolveCoordinates(found);
+                    if (resolved.isRecorded) {
+                        setSampling(prev => ({
+                            ...prev,
+                            coordinates: {
+                                lat: resolved.lat,
+                                lng: resolved.lng,
+                                elevation: resolved.elevation,
+                                accuracy: resolved.accuracy
+                            },
+                            location: resolved.locationDescription || prev.location
+                        }));
+                    }
+
                     // Also auto-apply bundle for project samples caught in non-project mode
                     if (!selectedGroup && found.projectId) {
                         const proj = availableProjects.find(p => p.id === found.projectId || p.code === found.projectId);
@@ -814,12 +927,18 @@ const Reception = () => {
             setSelectedGroup(proj.defaultAnalysisBundle);
         }
 
-        // If sample has coordinates, we can show them on a map (store for later use)
-        if (sample.coordinates) {
+        // If sample has recorded coordinates, parse via resolveCoordinates
+        const resolved = resolveCoordinates(sample);
+        if (resolved.isRecorded) {
             setSampling(prev => ({
                 ...prev,
-                coordinates: sample.coordinates,
-                location: sample.location || prev.location
+                coordinates: {
+                    lat: resolved.lat,
+                    lng: resolved.lng,
+                    elevation: resolved.elevation,
+                    accuracy: resolved.accuracy
+                },
+                location: resolved.locationDescription || prev.location
             }));
         }
 
