@@ -70,6 +70,11 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             }
 
             for (const item of METHODOLOGY_RECONCILIATION) {
+                db.prepare(`
+                    INSERT OR IGNORE INTO "Analysis" (code, name, isGlobal, status, createdAt, updatedAt)
+                    VALUES (?, ?, 1, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).run(item.analysisCode, item.analysisCode);
+
                 const dep = db.prepare('SELECT id FROM "Methodology" WHERE id = ?').get(item.deprecatedMethodId);
                 if (dep) {
                     db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(item.deprecatedMethodId);
@@ -83,12 +88,19 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
                     db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(item.canonicalMethodId, item.analysisCode, 'Canonical ' + item.canonicalMethodId);
                 }
             }
-            for (const sp of UNRESOLVED_SYNTHETIC_PLACEHOLDERS) {
+            for (let i = 0; i < UNRESOLVED_SYNTHETIC_PLACEHOLDERS.length; i++) {
+                const sp = UNRESOLVED_SYNTHETIC_PLACEHOLDERS[i];
+                const analysisCode = `SPEC_PARAM_${i + 1}`;
+                db.prepare(`
+                    INSERT OR IGNORE INTO "Analysis" (code, name, isGlobal, status, createdAt, updatedAt)
+                    VALUES (?, ?, 1, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `).run(analysisCode, `Specialized Agronomic Parameter ${i + 1}`);
+
                 const existing = db.prepare('SELECT id FROM "Methodology" WHERE id = ?').get(sp);
                 if (existing) {
                     db.prepare('UPDATE "Methodology" SET isDefault = 1 WHERE id = ?').run(sp);
                 } else {
-                    db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(sp, 'SPEC_PARAM_LEGACY', 'Synthetic Placeholder ' + sp);
+                    db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(sp, analysisCode, 'Synthetic Placeholder ' + sp);
                 }
             }
             db.close();

@@ -29,6 +29,17 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
                 status: 'ACTIVE'
             }
         });
+
+        // Ensure ROUTINE_SOIL analysis group exists for intake package resolution
+        await prisma.analysisGroup.upsert({
+            where: { id: 'ROUTINE_SOIL' },
+            update: {},
+            create: {
+                id: 'ROUTINE_SOIL',
+                name: 'Routine Soil Fertility Package',
+                analyses: JSON.stringify(['PH_H2O', 'EC', 'P_OLSEN'])
+            }
+        });
     });
 
     afterAll(async () => {
@@ -46,6 +57,9 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
             }
             await prisma.project.deleteMany({
                 where: { id: testProjectId }
+            });
+            await prisma.analysisGroup.deleteMany({
+                where: { id: 'ROUTINE_SOIL' }
             });
         } catch (e) {
             console.error('Error cleaning up Stage D test artifacts:', e);
