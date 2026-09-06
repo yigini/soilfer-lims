@@ -78,6 +78,57 @@ This walkthrough documents the full verification, regression hardening, database
 
 ---
 
-## 4. Requirements Ledger Status
+---
 
-Requirements **A98** and **A99** are transitioned to **`VERIFIED`** in both `WP/lab-operations-redesign-v3/requirements_ledger.md` and repository artifacts. Requirement **A100** is now active for production deployment.
+## 4. Requirement A100: Production Deployment & Live Read-Only Verification
+
+- **Deployment Date**: 6 September 2026
+- **Release Commit**: [`8a3f41b`](https://github.com/yigini/soilfer-lims/commit/8a3f41b) (merged via PR [#45](https://github.com/yigini/soilfer-lims/pull/45) into `main`)
+- **Immutable Container Image**: `soilfer-lims:v3.0.0-8a3f41b` (`sha256:6ded9a94fc41456aad74a47012db10daa506249578b7c4855ffba72901d41725`)
+- **Target Host**: Production VPS `root@46.19.33.37`
+- **Pre-Cutover Coordinated Snapshot**: `/opt/lims/release_checkpoints/release_v3_8a3f41b_2026_09_06_14_1` (contains online SQLite backup snapshot `dev.db` and asset archive `assets.tar.gz`)
+- **Migration Execution**:
+  - Schema migration: `v3_lab_operations_20260906` applied at `2026-09-06 14:15:52`
+  - Baseline Preservation Invariants (zero unexpected mutations):
+    - **Samples**: 35,190 (zero mutation, 100% matched)
+    - **Results**: 2 (zero mutation, 100% matched)
+    - **Reports**: 0 (zero mutation, 100% matched)
+    - **WorkItems**: 40 (3 unstarted fraction tasks consolidated into 1 unified TEXTURE work item)
+    - **Active Analyses**: 208 active analyses (109 NULL status populated to 'active')
+    - **Default Methodologies**: 181 standard default methodologies (38 synthetic placeholders quarantined to `isDefault = 0`)
+  - Schema additions verified in SQLite:
+    - `Analysis.version` (`INTEGER DEFAULT 1`)
+    - `Methodology.version` (`INTEGER DEFAULT 1`)
+    - `WorkItem.rackPosition` (`INTEGER`)
+    - `Batch.maxCapacity` (`INTEGER DEFAULT 40`)
+    - `Batch.profile` (`TEXT`)
+
+### Live Read-Only Production Verification Receipts
+
+1. **Docker Container Health**:
+   - Container `soilfer-lims` running healthy on `0.0.0.0:3000->3000/tcp` with restart policy `unless-stopped`.
+   - Healthcheck: `wget -q --spider http://localhost:3000/api/health` passing.
+2. **Public / Unauthenticated Endpoints**:
+   - `GET /api/health` -> HTTP 200 `{"status":"ok","uptime":88.99}`
+   - `GET /api/public/i18n/bootstrap` -> HTTP 200 JSON with branding and supported languages.
+   - `GET /` -> HTTP 200 index HTML with strict CSP and security headers.
+3. **Multi-Role Scoped API Access Probes**:
+   - **SUPER_ADMIN**:
+     - `GET /api/config/analyses` -> HTTP 200 (216 analyses returned with version tracking)
+     - `GET /api/config/methodologies` -> HTTP 200 (590 methodologies returned with version tracking)
+   - **LAB_TECHNICIAN**:
+     - `GET /api/workbench/queue` -> HTTP 200
+     - `GET /api/qc/batches` -> HTTP 200
+     - `GET /api/config/analyses` -> HTTP 200
+   - **LAB_MANAGER**:
+     - `GET /api/qc/batches` -> HTTP 200
+     - `GET /api/samples?limit=3` -> HTTP 200
+4. **Representative File & Asset Retrieval**:
+   - `GET /uploads/spectra/spec-1788378128060-ume9b_alpha_mir_sample01_rep1.csv` -> HTTP 200 text/csv (70 bytes, ETag verified).
+
+---
+
+## 5. Requirements Ledger Status
+
+All 100 requirements (**A01 through A100**) are now fully **`VERIFIED`** in both `WP/lab-operations-redesign-v3/requirements_ledger.md` and repository artifacts. The v3 release candidate is successfully integrated and operating in production.
+
