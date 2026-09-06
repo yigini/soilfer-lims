@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
     Plus, Edit, Beaker, CheckCircle2, X, HelpCircle, ChevronDown, ChevronRight,
@@ -464,9 +464,13 @@ const LabFormModal = ({ isOpen, editingLab, formData, setFormData, onSubmit, onC
         { value: 'Europe/London', label: 'Europe/London (UTC+0)' },
         { value: 'Europe/Rome', label: 'Europe/Rome (UTC+1)' },
         { value: 'Europe/Berlin', label: 'Europe/Berlin (UTC+1)' },
+        { value: 'Europe/Istanbul', label: 'Europe/Istanbul (UTC+3)' },
+        { value: 'Africa/Accra', label: 'Africa/Accra (UTC+0)' },
         { value: 'Africa/Nairobi', label: 'Africa/Nairobi (UTC+3)' },
         { value: 'Africa/Lusaka', label: 'Africa/Lusaka (UTC+2)' },
         { value: 'Africa/Johannesburg', label: 'Africa/Johannesburg (UTC+2)' },
+        { value: 'Africa/Tunis', label: 'Africa/Tunis (UTC+1)' },
+        { value: 'Africa/Maputo', label: 'Africa/Maputo (UTC+2)' },
         { value: 'Asia/Tokyo', label: 'Asia/Tokyo (UTC+9)' },
         { value: 'Asia/Shanghai', label: 'Asia/Shanghai (UTC+8)' },
         { value: 'UTC', label: 'UTC' },
@@ -685,6 +689,18 @@ const LabManagement = () => {
         });
         setIsModalOpen(true);
     };
+
+    const [searchParams] = useSearchParams();
+    const queryLabId = searchParams.get('labId');
+
+    useEffect(() => {
+        if (queryLabId && labs.length > 0) {
+            const target = labs.find(l => l.id === queryLabId || l.code === queryLabId);
+            if (target) {
+                openEdit(target);
+            }
+        }
+    }, [queryLabId, labs]);
 
     const toggleActive = async (lab) => {
         const action = lab.isActive ? 'deactivate' : 'activate';

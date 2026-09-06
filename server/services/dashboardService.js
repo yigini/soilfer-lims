@@ -544,14 +544,15 @@ async function getDashboardHome(user, options = {}) {
         priorityQueues = ['admin.configuration', 'admin.labs', 'admin.activity'];
         capabilities = { superAdmin: true, manageLabs: true, manageUsers: true, viewAudit: true };
 
-        const labs = await prisma.lab.findMany({ select: { id: true, name: true, timezone: true } });
-        const invalidTzCount = labs.filter(l => !l.timezone).length;
+        const labs = await prisma.lab.findMany({ select: { id: true, name: true, country: true, timezone: true } });
+        const invalidTzCount = labs.filter(l => !l.timezone || l.timezone === 'null' || l.timezone.trim() === '').length;
         const totalLabs = labs.length;
+        const totalAudit = await prisma.auditLog.count();
 
         metrics = [
             { key: 'admin.configuration', label: 'Configuration issues', value: invalidTzCount, unit: 'issues', availability: 'available', queueKey: 'admin.configuration', tone: invalidTzCount > 0 ? 'problem' : '' },
             { key: 'admin.labs', label: 'Laboratories', value: totalLabs, unit: 'laboratories', availability: 'available', queueKey: 'admin.labs' },
-            { key: 'admin.activity', label: 'Configuration changes', value: 1, unit: 'events', availability: 'available', queueKey: 'admin.activity' }
+            { key: 'admin.activity', label: 'Configuration changes', value: totalAudit, unit: 'events', availability: 'available', queueKey: 'admin.activity' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -1277,6 +1278,144 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             page,
             pageSize,
             hasMore: skip + reports.length < total
+        };
+    }
+
+    // ─── SUPER_ADMIN / GLOBAL ADMIN QUEUES ───
+    if (queueKey === 'admin.configuration') {
+        const labs = await prisma.lab.findMany({
+            orderBy: { name: 'asc' },
+            select: { id: true, name: true, country: true, timezone: true }
+        });
+        const issues = [];
+        for (const lab of labs) {
+            const hasTz = lab.timezone && lab.timezone !== 'null' && lab.timezone.trim() !== '';
+            if (!hasTz) {
+                issues.push({
+                    key: `config-tz-${lab.id}`,
+                    title: lab.name || lab.id,
+                    context: `${lab.id} · ${lab.country || 'National Lab'} · Timezone missing`,
+                    status: 'Timezone not configured',
+                    count: 1,
+                    unit: 'issue',
+                    action: 'Configure laboratory',
+                    route: `/admin/labs?labId=${lab.id}`,
+                    note: 'Configure an IANA timezone before showing this laboratory’s daily metrics.',
+                    tone: 'problem'
+                });
+            }
+        }
+        let filteredIssues = issues;
+        if (search && search.trim()) {
+            const q = search.trim().toLowerCase();
+            filteredIssues = issues.filter(i =>
+                (i.title && i.title.toLowerCase().includes(q)) ||
+                (i.context && i.context.toLowerCase().includes(q)) ||
+                (i.key && i.key.toLowerCase().includes(q))
+            );
+        }
+        const total = filteredIssues.length;
+        const paged = filteredIssues.slice(skip, skip + pageSize);
+        return {
+            queueKey,
+            unit: 'issues',
+            rows: paged,
+            total,
+            page,
+            pageSize,
+            hasMore: skip + paged.length < total
+        };
+    }
+
+    if (queueKey === 'admin.labs') {
+        let where = {};
+        if (search && search.trim()) {
+            const q = search.trim();
+            where = {
+                OR: [
+                    { id: { contains: q } },
+                    { name: { contains: q } },
+                    { country: { contains: q } }
+                ]
+            };
+        }
+        const [total, labs] = await Promise.all([
+            prisma.lab.count({ where }),
+            prisma.lab.findMany({
+                where,
+                orderBy: { name: 'asc' },
+                skip,
+                take: pageSize,
+                select: { id: true, name: true, country: true, timezone: true, isActive: true }
+            })
+        ]);
+        return {
+            queueKey,
+            unit: 'laboratories',
+            rows: labs.map(lab => {
+                const hasTz = lab.timezone && lab.timezone !== 'null' && lab.timezone.trim() !== '';
+                return {
+                    key: lab.id,
+                    title: lab.name || lab.id,
+                    context: `${lab.id} · ${lab.country || 'National Lab'} · ${hasTz ? lab.timezone : 'Timezone missing'}`,
+                    status: hasTz ? 'Operational' : 'Configuration required',
+                    count: 1,
+                    unit: 'laboratory',
+                    action: 'View laboratory',
+                    route: `/admin/labs?labId=${lab.id}`,
+                    note: hasTz ? 'Laboratory active and operational.' : 'Timezone configuration required.',
+                    tone: hasTz ? '' : 'waiting'
+                };
+            }),
+            total,
+            page,
+            pageSize,
+            hasMore: skip + labs.length < total
+        };
+    }
+
+    if (queueKey === 'admin.activity') {
+        let where = {};
+        if (search && search.trim()) {
+            const q = search.trim();
+            where = {
+                OR: [
+                    { entity: { contains: q } },
+                    { action: { contains: q } },
+                    { performedBy: { contains: q } },
+                    { details: { contains: q } }
+                ]
+            };
+        }
+        const [total, events] = await Promise.all([
+            prisma.auditLog.count({ where }),
+            prisma.auditLog.findMany({
+                where,
+                orderBy: { timestamp: 'desc' },
+                skip,
+                take: pageSize,
+                select: { id: true, entity: true, entityId: true, action: true, details: true, performedBy: true, timestamp: true }
+            })
+        ]);
+        return {
+            queueKey,
+            unit: 'events',
+            rows: events.map(ev => ({
+                key: ev.id,
+                title: `${ev.entity} ${ev.action}`,
+                context: `${ev.performedBy || 'System'} · ${ev.timestamp ? new Date(ev.timestamp).toLocaleDateString() + ' ' + new Date(ev.timestamp).toLocaleTimeString() : 'N/A'}`,
+                status: 'Audit recorded',
+                count: 1,
+                unit: 'event',
+                action: 'Inspect audit',
+                route: `/admin/audit?id=${ev.id}`,
+                note: ev.details || `${ev.entity} ${ev.action} performed by ${ev.performedBy}`,
+                tone: ''
+            })),
+            total,
+            page,
+            pageSize,
+            hasMore: skip + events.length < total
         };
     }
 
