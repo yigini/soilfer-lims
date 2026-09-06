@@ -47,8 +47,25 @@ export default function DashboardShell({
     shiftNotes = null, // { title, items: [] }
     shortcuts = [] // [{ label, route, description }]
 }) {
+    const hasSideContent = Boolean((shiftNotes && (shiftNotes.items?.length || shiftNotes.content)) || (shortcuts && shortcuts.length > 0));
+    const [sideRailCollapsed, setSideRailCollapsed] = React.useState(() => {
+        try {
+            return localStorage.getItem('dashboard-siderail-collapsed') === 'true';
+        } catch {
+            return false;
+        }
+    });
+
+    const toggleSideRail = () => {
+        setSideRailCollapsed(prev => {
+            const next = !prev;
+            try { localStorage.setItem('dashboard-siderail-collapsed', String(next)); } catch {}
+            return next;
+        });
+    };
+
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-full 2xl:max-w-[1650px] mx-auto">
             {/* Header */}
             <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-gray-200 dark:border-gray-800">
                 <div>
@@ -117,9 +134,9 @@ export default function DashboardShell({
             />
 
             {/* Main Content Grid (Queue Panel + Side Rail) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Main Queue Column (8 of 12 cols on desktop) */}
-                <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                {/* Main Queue Column */}
+                <div className={hasSideContent && !sideRailCollapsed ? "xl:col-span-8 2xl:col-span-9 col-span-12" : "col-span-12"}>
                     <WorkQueue
                         queueKey={activeQueue}
                         title={queueTitle}
@@ -135,11 +152,15 @@ export default function DashboardShell({
                         isLoading={isQueueLoading}
                         error={queueError}
                         onRetry={onRetryQueue}
+                        sideRailCollapsed={sideRailCollapsed}
+                        onToggleSideRail={toggleSideRail}
+                        hasSideRail={hasSideContent}
                     />
                 </div>
 
-                {/* Side Rail (4 of 12 cols on desktop) */}
-                <aside className="lg:col-span-4 space-y-6">
+                {/* Side Rail */}
+                {hasSideContent && !sideRailCollapsed && (
+                    <aside className="xl:col-span-4 2xl:col-span-3 col-span-12 space-y-6">
                     {/* Shift Notes / Operational Guidance */}
                     {shiftNotes && (
                         <section className="bg-white dark:bg-gray-800/80 p-5 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
@@ -194,6 +215,7 @@ export default function DashboardShell({
                         </section>
                     )}
                 </aside>
+            )}
             </div>
 
             {/* Product Footer Guarantee */}
