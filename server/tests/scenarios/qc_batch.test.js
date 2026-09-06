@@ -50,11 +50,15 @@ describe('Scenario E: QC Batch Management', () => {
     });
 
     it('should fail submission review if Batch fails', async () => {
-        // 1. Fail Batch
-        await request(app)
+        // 1. Fail Batch with evaluated failing QC data
+        const failRes = await request(app)
             .put(`/api/qc/batches/${batchId}`)
             .set('Authorization', `Bearer ${techToken}`)
-            .send({ status: 'QC_FAIL' });
+            .send({
+                blanks: [{ value: 99.0 }]
+            });
+        expect(failRes.status).toBe(200);
+        expect(failRes.body.status).toBe('QC_FAIL');
 
         // 2. Create Submission
         const subRes = await request(app)

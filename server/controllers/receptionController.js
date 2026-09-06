@@ -1,3 +1,4 @@
+const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const idGenerator = require('../services/idGenerator');
@@ -25,6 +26,66 @@ function deriveLocationConfidence(source, uncertaintyM) {
     return 'MEDIUM';
 }
 exports.deriveLocationConfidence = deriveLocationConfidence;
+
+/**
+ * Resolves requested package/group ID against available laboratory analysis groups.
+ * Multi-tier exact-first resolution strategy:
+ * 1. Validates requestedId is a non-empty string.
+ * 2. Checks exact case-sensitive ID match.
+ * 3. Checks exact case-insensitive match (rejects if multiple candidates exist).
+ * 4. Checks normalized punctuation-stripped match (rejects if ambiguous).
+ * Returns { group, canonicalId } or { error, code, message }.
+ */
+function resolveAnalysisGroup(requestedId, analysisGroups) {
+    if (typeof requestedId !== 'string' || !requestedId.trim()) {
+        return {
+            error: 'INVALID_PACKAGE_ID',
+            code: 'INVALID_PACKAGE_ID',
+            message: 'Package ID must be a non-empty string.'
+        };
+    }
+    const cleanId = requestedId.trim();
+
+    // 1. Exact case-sensitive match
+    const exactMatch = analysisGroups.find(g => g.id === cleanId);
+    if (exactMatch) {
+        return { group: exactMatch, canonicalId: exactMatch.id };
+    }
+
+    // 2. Exact case-insensitive match
+    const lower = cleanId.toLowerCase();
+    const caseInsensitiveMatches = analysisGroups.filter(g => g.id.toLowerCase() === lower);
+    if (caseInsensitiveMatches.length === 1) {
+        return { group: caseInsensitiveMatches[0], canonicalId: caseInsensitiveMatches[0].id };
+    } else if (caseInsensitiveMatches.length > 1) {
+        return {
+            error: 'AMBIGUOUS_PACKAGE_ID',
+            code: 'AMBIGUOUS_PACKAGE_ID',
+            message: `Ambiguous package ID '${cleanId}': multiple packages match case-insensitively.`
+        };
+    }
+
+    // 3. Punctuation-stripped normalized match (e.g. routine-soil vs ROUTINE_SOIL)
+    const normalize = s => s.toLowerCase().replace(/[-_\s]/g, '');
+    const norm = normalize(cleanId);
+    const normMatches = analysisGroups.filter(g => normalize(g.id) === norm);
+    if (normMatches.length === 1) {
+        return { group: normMatches[0], canonicalId: normMatches[0].id };
+    } else if (normMatches.length > 1) {
+        return {
+            error: 'AMBIGUOUS_PACKAGE_ID',
+            code: 'AMBIGUOUS_PACKAGE_ID',
+            message: `Ambiguous package ID '${cleanId}': matches multiple distinct packages.`
+        };
+    }
+
+    return {
+        error: 'PACKAGE_NOT_FOUND',
+        code: 'PACKAGE_NOT_FOUND',
+        message: `An analysis package is unavailable to this laboratory: '${cleanId}'.`
+    };
+}
+exports.resolveAnalysisGroup = resolveAnalysisGroup;
 
 exports.processIntake = async (req, res) => {
     const {
@@ -310,20 +371,34 @@ exports.processIntake = async (req, res) => {
         let requiredAnalyses = new Set(existingAnalyses);
 
         // Load analysis groups from database
-        const analysisGroupsRaw = await prisma.analysisGroup.findMany();
+        const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { OR: [{ labId: sample.assignedLab || user.labId }, { labId: null }] } });
         const analysisGroups = analysisGroupsRaw.map(g => ({
             id: g.id,
             name: g.name,
             analyses: g.analyses ? JSON.parse(g.analyses) : []
         }));
 
-        if (Array.isArray(analysisGroupIds)) {
-            analysisGroupIds.forEach(gid => {
-                const group = analysisGroups.find(g => g.id === gid);
-                if (group) {
-                    group.analyses.forEach(code => requiredAnalyses.add(code));
+        const canonicalGroupIds = [];
+        if (analysisGroupIds !== undefined && analysisGroupIds !== null) {
+            if (!Array.isArray(analysisGroupIds)) {
+                return res.status(400).json({
+                    success: false,
+                    code: 'INVALID_PACKAGE_ID',
+                    message: 'analysisGroupIds must be an array of package ID strings.'
+                });
+            }
+            for (const gid of analysisGroupIds) {
+                const resolved = resolveAnalysisGroup(gid, analysisGroups);
+                if (resolved.error) {
+                    return res.status(400).json({
+                        success: false,
+                        code: resolved.code,
+                        message: resolved.message
+                    });
                 }
-            });
+                canonicalGroupIds.push(resolved.canonicalId);
+                resolved.group.analyses.forEach(code => requiredAnalyses.add(code));
+            }
         }
 
         if (Array.isArray(req.body.requiredAnalyses)) {
@@ -337,6 +412,9 @@ exports.processIntake = async (req, res) => {
         if (Array.isArray(analysisRemovals)) {
             analysisRemovals.forEach(code => requiredAnalyses.delete(code));
         }
+
+        const selected = await cataloguePolicy.validateSelection(Array.from(requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: existingAnalyses });
+        if (!selected.valid) return res.status(400).json({ success: false, message: selected.error, error: selected.error, issues: selected.issues });
 
         // RC-01: Analytical Mass Sufficiency Check
         const parsedMass = (receivedMass !== undefined && receivedMass !== null && receivedMass !== '')
@@ -538,7 +616,7 @@ exports.processIntake = async (req, res) => {
             dryingStatus: assignedLabId ? 'PENDING' : null,
             preparationStatus: assignedLabId ? 'PENDING' : null,
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
-            analysisGroupIds: JSON.stringify(analysisGroupIds || []),
+            analysisGroupIds: JSON.stringify([...new Set(canonicalGroupIds)]),
             fieldMetadata: JSON.stringify(currentFieldMeta),
             history: JSON.stringify(history),
             assignedLab: user.labId,
@@ -1161,6 +1239,13 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         });
         const analysisMap = new Map(allAnalysesDb.map(a => [a.code, a]));
 
+        // Validate every sample before creating the consignment or any sample records.
+        for (const [index, sample] of samples.entries()) {
+            if (sample.status === 'REJECTED') continue;
+            const selected = await cataloguePolicy.validateSelection(sample.requiredAnalyses ?? defaults.requiredAnalyses ?? [], { labId: userLab });
+            if (!selected.valid) return res.status(400).json({ error: selected.error, message: selected.error, row: index + 1, issues: selected.issues });
+        }
+
         // 4. Atomic transaction across consignment and all samples
         const result = await prisma.$transaction(async (tx) => {
             // A. Create Consignment Record (RC-12)
@@ -1215,7 +1300,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 const moisture = s.moistureOnArrival || defaults.moistureOnArrival || 'MOIST';
                 const foreignMat = s.foreignMaterial || defaults.foreignMaterial || [];
                 const photos = s.intakePhotos || [];
-                const reqAnalyses = s.requiredAnalyses || defaults.requiredAnalyses || ['PH_H2O'];
+                const reqAnalyses = s.requiredAnalyses ?? defaults.requiredAnalyses ?? [];
 
                 // Geodesy / Location
                 let lat = null, lng = null, elev = null;

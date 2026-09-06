@@ -48,7 +48,7 @@ function parseDeterminationValue(rawInput) {
         const numPart = censorMatch[2].replace(',', '.').trim();
         const numVal = Number(numPart);
 
-        if (isNaN(numVal)) {
+        if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(String(numPart ?? '').trim())) {
             return {
                 isBlank: false,
                 isValid: false,
@@ -77,7 +77,7 @@ function parseDeterminationValue(rawInput) {
     const normalizedStr = str.replace(',', '.');
     const numVal = Number(normalizedStr);
 
-    if (isNaN(numVal)) {
+    if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(normalizedStr)) {
         return {
             isBlank: false,
             isValid: false,
@@ -151,18 +151,45 @@ function validateNumericMethod(value, rules = null) {
 }
 
 /**
- * Validate soil texture fractions (Sand, Silt, Clay) with live closure checking (100% ± 2.0%).
+ * Validate soil texture fractions (Sand, Silt, Clay) with live closure checking.
+ * Supports positional arguments (sand, silt, clay, tolerance) or object/array format ({sand, silt, clay}, tolerance).
  *
- * @param {number|string} sand
- * @param {number|string} silt
- * @param {number|string} clay
- * @param {number} [tolerance=2.0]
+ * @param {number|string|object|Array} sandOrObj
+ * @param {number|string|object} [siltOrTol]
+ * @param {number|string} [clay]
+ * @param {number|object} [tolerance=2.0]
  * @returns {object}
  */
-function validateTextureFractions(sand, silt, clay, tolerance = 2.0) {
+function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
+    let sand = sandOrObj;
+    let silt = siltOrTol;
+    let cVal = clay;
+    let tol = tolerance;
+
+    if (Array.isArray(sandOrObj)) {
+        return {
+            isValid: false,
+            closureError: null,
+            sum: null,
+            className: null,
+            code: null,
+            flags: ['INVALID_FORMAT'],
+            error: 'Fractions must be provided as an object with named fields { sand, silt, clay }, not a positional array'
+        };
+    }
+
+    if (sandOrObj && typeof sandOrObj === 'object') {
+        sand = sandOrObj.sand ?? sandOrObj.SAND ?? sandOrObj.Sand;
+        silt = sandOrObj.silt ?? sandOrObj.SILT ?? sandOrObj.Silt;
+        cVal = sandOrObj.clay ?? sandOrObj.CLAY ?? sandOrObj.Clay;
+        if (siltOrTol !== undefined) {
+            tol = siltOrTol;
+        }
+    }
+
     const pSand = parseDeterminationValue(sand);
     const pSilt = parseDeterminationValue(silt);
-    const pClay = parseDeterminationValue(clay);
+    const pClay = parseDeterminationValue(cVal);
 
     if (pSand.isBlank || pSilt.isBlank || pClay.isBlank) {
         return {
@@ -205,12 +232,14 @@ function validateTextureFractions(sand, silt, clay, tolerance = 2.0) {
     }
 
     const sum = Number((s + si + c).toFixed(2));
-    const textureResult = calculateUsdaTexture(s, si, c, tolerance);
+    const textureResult = calculateUsdaTexture(s, si, c, tol);
 
     const flags = [];
     if (!textureResult.isValid) {
         flags.push('TEXTURE_CLOSURE_FAILED');
     }
+
+    const tolDisplay = (tol && typeof tol === 'object') ? tol.tolerance : tol;
 
     return {
         isValid: textureResult.isValid,
@@ -219,10 +248,9 @@ function validateTextureFractions(sand, silt, clay, tolerance = 2.0) {
         withinTolerance: textureResult.isValid,
         className: textureResult.className,
         code: textureResult.code,
-        normalized: textureResult.normalized,
         fractions: { sand: s, silt: si, clay: c },
         flags,
-        error: textureResult.isValid ? null : `Fractions sum to ${sum}% (closure error ${textureResult.closureError}% exceeds allowed ±${tolerance}%)`
+        error: textureResult.isValid ? null : (textureResult.error || `Soil texture fractions sum to ${sum}%, exceeding closure tolerance of ±${tolDisplay}%`)
     };
 }
 
@@ -252,8 +280,8 @@ function validateOperationalTask(checks, requiredStepCount = 1) {
         };
     }
 
-    const completedSteps = checkList.filter(Boolean).length;
-    const isValid = completedSteps >= requiredStepCount && checkList.length >= requiredStepCount;
+    const completedSteps = checkList.filter(c => c === true).length;
+    const isValid = completedSteps === requiredStepCount && checkList.length === requiredStepCount;
 
     return {
         isValid,

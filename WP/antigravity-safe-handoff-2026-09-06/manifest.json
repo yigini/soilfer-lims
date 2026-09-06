@@ -1,0 +1,1147 @@
+{
+  "formatVersion": 1,
+  "capturedAt": "2026-09-06T10:06:55.032Z",
+  "project": "C:\\Users\\yigin\\Documents\\soilfer-lims",
+  "baselineHead": "33b138b835094fb72d8fda69e541879e47540182",
+  "baselineBranch": "main",
+  "originalAuditHead": "bee0b6e",
+  "scope": "uncommitted source changes, tests, evidence and prior plans; not a full repository or production backup",
+  "exclusions": [
+    "credentials",
+    "environment files",
+    "Git internals",
+    "databases",
+    "uploads/spectra",
+    "dependencies",
+    "build output"
+  ],
+  "counts": {
+    "changedFiles": 68,
+    "newFiles": 19,
+    "modifiedFiles": 49,
+    "packageArtifacts": 115
+  },
+  "changes": [
+    {
+      "path": ".gitignore",
+      "state": "modified",
+      "bytes": 997,
+      "sha256": "02adf4d74b7f0db455cefbf6a800b02dc4b75fe30654ae4b20f3c9dad62cccca",
+      "baselineSha256": "ab66dfbeccf0d86918b65db9d1b3d52a1867eae4ea95a9c6c1b2580f55f17ef4",
+      "snapshot": "source-snapshot/.gitignore"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/README.md",
+      "state": "modified",
+      "bytes": 3880,
+      "sha256": "c04e204935429a9909bae8bb199b32a918a4a7a5e93024d5c414f61e9918c763",
+      "baselineSha256": "6499c7a047d8dc27d56c8f3c5d737ebf6f7fa4c7374f4cd871c8c9fc335c2c29",
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/README.md"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/antigravity-handoff.md",
+      "state": "modified",
+      "bytes": 3406,
+      "sha256": "ca5ad0b68661d4a59b55bb5f07b7509a327089f6d86a0fac186763939920f3a0",
+      "baselineSha256": "0ddb9c4bed32bc303c5a7671f009b45853f33b764e06f67420ca66672a45c718",
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/antigravity-handoff.md"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-admin-verified.png",
+      "state": "new",
+      "bytes": 137882,
+      "sha256": "4b3c4ed5697f944abc0934cb581c51693ae47e4b4cb38bc12a4fcffd674ce80e",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-admin-verified.png"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-blocked-analysis-verified.png",
+      "state": "new",
+      "bytes": 90197,
+      "sha256": "85131b6814a2a20dd6163dcb802ae061d303529151c403802007e4f88e7472bb",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-blocked-analysis-verified.png"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-connections-verified.png",
+      "state": "new",
+      "bytes": 119826,
+      "sha256": "092f61702a64f687528eac8484e099a6baa0fff55df6af911dc71e8405cfd0eb",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-connections-verified.png"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-drying-verified.png",
+      "state": "new",
+      "bytes": 83396,
+      "sha256": "48673f6bc35d6d6c2497c8176e2085b309a34ed58db40441784aa24afa039be0",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-drying-verified.png"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-implementation-update.md",
+      "state": "new",
+      "bytes": 12933,
+      "sha256": "cb58f02974251ab6ea044e326da43197c5cb40948de42594974f1b5f3d635f75",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-implementation-update.md"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-server-test-results.json",
+      "state": "new",
+      "bytes": 25561,
+      "sha256": "5c1ac76f41b231b08428864b67971efe8404038b3c740c3ee1a67e1d1c838fa1",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-server-test-results.json"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/catalogue-ui-results.json",
+      "state": "new",
+      "bytes": 1528,
+      "sha256": "747ed293f6a48d5e79494c24e4ea7c1c9dc12f05b6d0ecd33d4d92476fc6566d",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-ui-results.json"
+    },
+    {
+      "path": "WP/lab-operations-redesign-v3/check-catalogue-ui.cjs",
+      "state": "new",
+      "bytes": 10399,
+      "sha256": "d981c08204b0f6b358045dd714376c10a321271afb672962d7f963a6e38f8e00",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/WP/lab-operations-redesign-v3/check-catalogue-ui.cjs"
+    },
+    {
+      "path": "client/src/components/AnalysisConfig.jsx",
+      "state": "modified",
+      "bytes": 3857,
+      "sha256": "b450bdccbc3ae7ab830ee048e89d50a1de1969ae8e15936fc2580a0c9058095f",
+      "baselineSha256": "9238c565d9da8b82672e0b3c0084d4e74bb47b67107a08bca750c6021316e8ba",
+      "snapshot": "source-snapshot/client/src/components/AnalysisConfig.jsx"
+    },
+    {
+      "path": "client/src/components/admin/AnalysisManager.jsx",
+      "state": "modified",
+      "bytes": 43878,
+      "sha256": "e38db27d3aef410b6dd3a7476013be449486693c1973cc4b84861d755a3288a1",
+      "baselineSha256": "7f9b26754fa37467158097f03523ff32ad9a63894c771abfac942c40ce4f503b",
+      "snapshot": "source-snapshot/client/src/components/admin/AnalysisManager.jsx"
+    },
+    {
+      "path": "client/src/components/admin/CategoryManager.jsx",
+      "state": "modified",
+      "bytes": 10280,
+      "sha256": "18a0c411f773a7d153294f102ce7037f1101acd5e209f138fac02aae7e92f71f",
+      "baselineSha256": "02336d4774354afff7c5a23ca12d754b1a4c41f843004f59c74f0f0f71033938",
+      "snapshot": "source-snapshot/client/src/components/admin/CategoryManager.jsx"
+    },
+    {
+      "path": "client/src/components/admin/GroupManager.jsx",
+      "state": "modified",
+      "bytes": 15087,
+      "sha256": "8025a95591f20455ea4e4e43a07d3a29b214685f53bb78ff7cd23c16bd31573a",
+      "baselineSha256": "d08a34124fd8155f644914dd3c42e0f0390357f860533c8cca68ff359d8ebc74",
+      "snapshot": "source-snapshot/client/src/components/admin/GroupManager.jsx"
+    },
+    {
+      "path": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "state": "modified",
+      "bytes": 18884,
+      "sha256": "573ed5f296e8b626095478bf7c4bd2fea7adbdb0b8608f8f1a6b801b5aa89d62",
+      "baselineSha256": "63940a5a70e38c277a2ccf4cf8c72384701b585e1bbd19ba32e5d729c31f2554",
+      "snapshot": "source-snapshot/client/src/components/equipment/EquipmentDetailDrawer.jsx"
+    },
+    {
+      "path": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "state": "modified",
+      "bytes": 21244,
+      "sha256": "60602bb1889b015d444ac67b35baef88ff36b2e18a42c8dcfba84940d607a22d",
+      "baselineSha256": "ac89823c7ca0a5f36d3860e2fda5cd607ee9c6cd21ddf0954710166e641ef56e",
+      "snapshot": "source-snapshot/client/src/components/sample/AnalysisUpdateModal.jsx"
+    },
+    {
+      "path": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "state": "modified",
+      "bytes": 18366,
+      "sha256": "cd7ff3f9928c3f767a93ca313a13681ba98890aa128654f78769464d12cc6b29",
+      "baselineSha256": "f475425880da46edb8e9d8b40726df2d04e811b2c377f67384e2682d0547c419",
+      "snapshot": "source-snapshot/client/src/components/sample/CollapsibleDrawer.jsx"
+    },
+    {
+      "path": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "state": "modified",
+      "bytes": 12214,
+      "sha256": "27318459f8c8a90494687d6c336e8c27688f424d995e56ddc66b22e383da3e74",
+      "baselineSha256": "505282dad289635d04e666377ef88fae0c02b1aab0140745325a41a7fda119f1",
+      "snapshot": "source-snapshot/client/src/components/sample/EvidenceInspectionModal.jsx"
+    },
+    {
+      "path": "client/src/components/sample/IntakeRequestCard.jsx",
+      "state": "modified",
+      "bytes": 7306,
+      "sha256": "ddd440a5cedd5aee1d02350cb4418bda7aefff6b9b1d62115b5a0bda7c12a8f7",
+      "baselineSha256": "7d6290557c9aaa5d6a7709d1eea906fb1bc34edf79471e9817b2b39bcb152663",
+      "snapshot": "source-snapshot/client/src/components/sample/IntakeRequestCard.jsx"
+    },
+    {
+      "path": "client/src/components/sample/SubmissionPanel.jsx",
+      "state": "modified",
+      "bytes": 10305,
+      "sha256": "4c67ea4702b7bc9e8e7d04755739e89166eb042be87464c935ad60b5a147945c",
+      "baselineSha256": "33630d522ab58f0115818c406325bc409b6c1c152ae4268bc5c001a254e18a62",
+      "snapshot": "source-snapshot/client/src/components/sample/SubmissionPanel.jsx"
+    },
+    {
+      "path": "client/src/components/sample/WorkItemsTable.jsx",
+      "state": "modified",
+      "bytes": 57123,
+      "sha256": "5b417bac1a5fddce016fda04b5b88617b0c8798c4c170cf40ead22309e2d5669",
+      "baselineSha256": "03b5aa1974a4fcb880ff88888e01833b255334a3898395a0ac05d8a405de2fba",
+      "snapshot": "source-snapshot/client/src/components/sample/WorkItemsTable.jsx"
+    },
+    {
+      "path": "client/src/components/samples/SamplesTable.jsx",
+      "state": "modified",
+      "bytes": 45499,
+      "sha256": "cfef92ea880c480fa789e81ecf5cfd79dbc4c5ac35e6003ef030424e29ee4a6f",
+      "baselineSha256": "1e9b7559325741b9fe34e1625d4d5bb464a7b3ce76a6439c5e98e75c0b874273",
+      "snapshot": "source-snapshot/client/src/components/samples/SamplesTable.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/OperationalTaskEditor.jsx",
+      "state": "modified",
+      "bytes": 3423,
+      "sha256": "22262b2d80b945e2e02457906d84b1dd79609c33b7d99804f9d20758b2f833a5",
+      "baselineSha256": "f725459b904ae53adf4f2b1e58f53ea273593e3f4135db707252fe139686f356",
+      "snapshot": "source-snapshot/client/src/components/workbench/OperationalTaskEditor.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/PastePreviewModal.jsx",
+      "state": "modified",
+      "bytes": 10773,
+      "sha256": "5c7ca82384ef1175b1cea1aea220087607fe6793085219743d2db101404cf33e",
+      "baselineSha256": "d1b0fa805e6e7f151656bb81d59a2a72c9578d4e7e0b2cc6624f375d937d06ab",
+      "snapshot": "source-snapshot/client/src/components/workbench/PastePreviewModal.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "state": "modified",
+      "bytes": 10032,
+      "sha256": "ed1c8bf2fda6f7b4aac0f1a670d9975b31a72e2d4d023d681cc1db3a4c3c35f4",
+      "baselineSha256": "9c714f024c073559706ea6156968a6ec3dfb0738f2d950390031e276472ddeb6",
+      "snapshot": "source-snapshot/client/src/components/workbench/ReviewCompletionView.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/WorkbenchInspector.jsx",
+      "state": "modified",
+      "bytes": 12502,
+      "sha256": "738991a2a4c8eaac7669463936ee5ed0c516a985cef6c5087a4b387b87a8fb98",
+      "baselineSha256": "4b7e27037e551f5321a008a6a1951678ef2dd5ecf796a6fa6ce6e7205405fa32",
+      "snapshot": "source-snapshot/client/src/components/workbench/WorkbenchInspector.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "state": "modified",
+      "bytes": 18544,
+      "sha256": "73aa2992e6dd19f08a174ddc975b449c12e379e003cdd5e504255e5fdd04fe01",
+      "baselineSha256": "f8b7b97b9631ac780f35882beccc1273d3b1d28bd65fe11e7ee895b2c6f3b959",
+      "snapshot": "source-snapshot/client/src/components/workbench/WorkbenchQueue.jsx"
+    },
+    {
+      "path": "client/src/components/workbench/WorksheetArea.jsx",
+      "state": "modified",
+      "bytes": 27256,
+      "sha256": "00e1507b5163d944fd9550cf79658e0b2067e421c510592610b7d3df467997e3",
+      "baselineSha256": "80ead117b0adaafa8ca389a4ff6362fb6b66cdb4e14043263dccabc712058bc6",
+      "snapshot": "source-snapshot/client/src/components/workbench/WorksheetArea.jsx"
+    },
+    {
+      "path": "client/src/context/AnalysisCatalogueContext.jsx",
+      "state": "new",
+      "bytes": 2200,
+      "sha256": "9f6225724ac6c2cbd88dd5e81b131b277999a0c1ed14f8143fd6559df90b05fb",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/client/src/context/AnalysisCatalogueContext.jsx"
+    },
+    {
+      "path": "client/src/main.jsx",
+      "state": "modified",
+      "bytes": 2869,
+      "sha256": "cfe175ee523e70fd2e2d71fb516cc4bf79c81288b646abe6268c877d28c351f1",
+      "baselineSha256": "8b458d1419a2617f8f7866079f43d3c7942707bfc0ff9d1333d804b8d22ee0d9",
+      "snapshot": "source-snapshot/client/src/main.jsx"
+    },
+    {
+      "path": "client/src/pages/DataSheet.jsx",
+      "state": "modified",
+      "bytes": 13016,
+      "sha256": "534d49f9d47f526dcd64938390bb2d8366b6b4ca01493ded6c50cb50ff3d2ea4",
+      "baselineSha256": "2c5ef3e753b5ae88e1256ded6b66808079bb41ce57ead58279a969fa13fd6322",
+      "snapshot": "source-snapshot/client/src/pages/DataSheet.jsx"
+    },
+    {
+      "path": "client/src/pages/ManagerQueue.jsx",
+      "state": "modified",
+      "bytes": 20027,
+      "sha256": "49939bcbcd132f18cf9d945b4526a387d129f5f87a5b374c287f7d539aaa5853",
+      "baselineSha256": "0e56475c318562df979f1aeb3dd090c45473c26c84774f2c11843be3d7107ed6",
+      "snapshot": "source-snapshot/client/src/pages/ManagerQueue.jsx"
+    },
+    {
+      "path": "client/src/pages/MyWork.jsx",
+      "state": "modified",
+      "bytes": 25300,
+      "sha256": "9f4739a6088561070934b60130e83acebf238c202e1d9363234700e348459148",
+      "baselineSha256": "7052b2b355f461c5ffe32bfc46e6e05afdad019727fae9b6e30cc41a4d770cde",
+      "snapshot": "source-snapshot/client/src/pages/MyWork.jsx"
+    },
+    {
+      "path": "client/src/pages/Reception.jsx",
+      "state": "modified",
+      "bytes": 134090,
+      "sha256": "e01cc1f0c18469cb446eb2aa084d9243dc8fd6305f4c8de4029231a4ad036ee6",
+      "baselineSha256": "31a9f4de940f108c5068bc9c8e7670ab3365943817b06fd77179655416174adc",
+      "snapshot": "source-snapshot/client/src/pages/Reception.jsx"
+    },
+    {
+      "path": "client/src/pages/SampleDetail.jsx",
+      "state": "modified",
+      "bytes": 94396,
+      "sha256": "143f711efab1d9766c5bdda8b318ca2c200ad2330b5ae4e7c6a77a486d2171c4",
+      "baselineSha256": "16d67ad37dbf777fc5e97d153eed0c31592788d12a696bca937eb07aa2461c1a",
+      "snapshot": "source-snapshot/client/src/pages/SampleDetail.jsx"
+    },
+    {
+      "path": "client/src/pages/admin/LabMethods.jsx",
+      "state": "modified",
+      "bytes": 18834,
+      "sha256": "f998cbe7628308bc5efb826484401981ab5ef095785dd49367b4cf79a2066214",
+      "baselineSha256": "7e7e3d9968f847ea58b4991b4f4946b312100dc5212c35a52a99b446a7b54a6e",
+      "snapshot": "source-snapshot/client/src/pages/admin/LabMethods.jsx"
+    },
+    {
+      "path": "client/src/utils/analysisNames.js",
+      "state": "modified",
+      "bytes": 601,
+      "sha256": "cf77cf733a58a78c22506a49930fb79154823fd15f3da31043c911d51ba624dc",
+      "baselineSha256": "7e19d34661a3f50ab32c0e69e3d79d63d2dc2f4beba37b3100fe667e71bd5d0d",
+      "snapshot": "source-snapshot/client/src/utils/analysisNames.js"
+    },
+    {
+      "path": "client/src/utils/workItemEvidence.js",
+      "state": "new",
+      "bytes": 1061,
+      "sha256": "75332e68bb08be7b09ca483655fd9743d93867e55e354529c8769903969653e3",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/client/src/utils/workItemEvidence.js"
+    },
+    {
+      "path": "server/app.js",
+      "state": "modified",
+      "bytes": 32480,
+      "sha256": "37cfa3b0a5fca76dba78f520ea029da4ce4ada511f0a5c399673a1297da217b0",
+      "baselineSha256": "a604dc2aca97c81aaaeaafb456af08203cfdfc4307e0002b7ef3023821efe0e2",
+      "snapshot": "source-snapshot/server/app.js"
+    },
+    {
+      "path": "server/controllers/analysisController.js",
+      "state": "modified",
+      "bytes": 31463,
+      "sha256": "53979fb5fe9c69c76b2bfb236a73855442982268d8aa6988e908767519ac35e3",
+      "baselineSha256": "2335521f8dadc4c52db5a22204766d9ea48721c7de7d2d83aabd53a356bad242",
+      "snapshot": "source-snapshot/server/controllers/analysisController.js"
+    },
+    {
+      "path": "server/controllers/receptionController.js",
+      "state": "modified",
+      "bytes": 74511,
+      "sha256": "d23d69c8348dd21ddb75d9273778806bb619f7a6ef86ca7477e3aeed4323b0c6",
+      "baselineSha256": "07587a8984f044d5921098dba13cc5a5deb4940a88a8b04162bf8ceb9239854e",
+      "snapshot": "source-snapshot/server/controllers/receptionController.js"
+    },
+    {
+      "path": "server/controllers/resultsController.js",
+      "state": "modified",
+      "bytes": 12172,
+      "sha256": "e4d928b28eac995e9634a412661742e96db8d01812619f5c3ef71ce8ead4e197",
+      "baselineSha256": "bcb9150eb76e817d9049a2d5324397efbf6e79c1b3c7bfc8afa8aa9507504988",
+      "snapshot": "source-snapshot/server/controllers/resultsController.js"
+    },
+    {
+      "path": "server/controllers/sampleController.js",
+      "state": "modified",
+      "bytes": 110811,
+      "sha256": "a3f19136fc7339051967b9f3874a68c4cd8165443fb2a9caab60f805442b685e",
+      "baselineSha256": "5fb4791961d8c37f1e72c04263010a2326d0fb45451c7cbe1c1cecb6d16f9c18",
+      "snapshot": "source-snapshot/server/controllers/sampleController.js"
+    },
+    {
+      "path": "server/controllers/validationController.js",
+      "state": "modified",
+      "bytes": 5802,
+      "sha256": "add58facc87c8ae7cb2b081b8ac0ced0b517589314e734024b14fa39f8b7e588",
+      "baselineSha256": "14439ba0024f249299576085252c2bf01e1fa9fc4edc96b8dddf8e43a43775b2",
+      "snapshot": "source-snapshot/server/controllers/validationController.js"
+    },
+    {
+      "path": "server/controllers/workItemController.js",
+      "state": "modified",
+      "bytes": 73379,
+      "sha256": "f7357af8e16724ff460e8e19cad81d3a77b8d3c4b20bb4120555c704833b7e25",
+      "baselineSha256": "2861732a3e46692c08d00abb18f5f2cbbd0928f48f0255e7069a703910f8b186",
+      "snapshot": "source-snapshot/server/controllers/workItemController.js"
+    },
+    {
+      "path": "server/controllers/workbenchController.js",
+      "state": "modified",
+      "bytes": 70314,
+      "sha256": "1e61b9ac61973704968ebdcb9b963d21b98f4dabbfc3feb990c8f9bdb03888e5",
+      "baselineSha256": "741e5877e9e0e81ac0c684ea9ea623830fd9f6b135969a269f0cd38e6b2b3ab1",
+      "snapshot": "source-snapshot/server/controllers/workbenchController.js"
+    },
+    {
+      "path": "server/data/analysisDisplayNames.json",
+      "state": "new",
+      "bytes": 8812,
+      "sha256": "d711e5f03d7e5b178179d1352a625ac6f1a46f571ef6e620b0c3a7fb9950a438",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/data/analysisDisplayNames.json"
+    },
+    {
+      "path": "server/data/importedParameterNames.json",
+      "state": "new",
+      "bytes": 532,
+      "sha256": "881d7ea9f8dbd30331f27fb6a600a9b552661319b22f6c713383e0a0cbfb4a27",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/data/importedParameterNames.json"
+    },
+    {
+      "path": "server/data/operationalChecklists.json",
+      "state": "new",
+      "bytes": 687,
+      "sha256": "f20b8374225c11ebf567bd65be29e32871939e0b476f9039946511a72da6153e",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/data/operationalChecklists.json"
+    },
+    {
+      "path": "server/routes/analysisRoutes.js",
+      "state": "modified",
+      "bytes": 2719,
+      "sha256": "1b92c0819bb974a9fe85811001609714ce9a5a159cc436d1f8959ed3c2428263",
+      "baselineSha256": "f70a2ceaab3efca8510417763f161fcf0c09e70552c5716c21c7985f1153a095",
+      "snapshot": "source-snapshot/server/routes/analysisRoutes.js"
+    },
+    {
+      "path": "server/seeds/catalogue.js",
+      "state": "modified",
+      "bytes": 10284,
+      "sha256": "98383e38026d630328be8d35f1c4f96b9308374a9ceb18fed085d30b7301e8c6",
+      "baselineSha256": "ca504c4364cfee37b0de95d5fe15851f98a8c397a76662ac55d23a369a9f8b90",
+      "snapshot": "source-snapshot/server/seeds/catalogue.js"
+    },
+    {
+      "path": "server/seeds/data/catalogue.json",
+      "state": "modified",
+      "bytes": 330901,
+      "sha256": "a8649b507d2a0402f026b19ed166ad2c77ba8f0c159760e029b1f354503cf5fc",
+      "baselineSha256": "b86cb0142f97d3faa5f6620ecff5d494424bb016194091aaf9d3e930d6f8773d",
+      "snapshot": "source-snapshot/server/seeds/data/catalogue.json"
+    },
+    {
+      "path": "server/seeds/generate_catalogue_data.js",
+      "state": "modified",
+      "bytes": 63093,
+      "sha256": "5a63ba2bf524631901b7e086958ebf194fa1fc129cc40cd92fce265cf36a3c9e",
+      "baselineSha256": "1b9644ce214ad19978b4ff7c97ad0ad61d5b9753eb527122f93f6b7d804ec19a",
+      "snapshot": "source-snapshot/server/seeds/generate_catalogue_data.js"
+    },
+    {
+      "path": "server/services/analysisService.js",
+      "state": "modified",
+      "bytes": 2423,
+      "sha256": "5c7e00659fcc75ca1544e97986a09086b21ad96e74357a765d2617dcfe49e3f6",
+      "baselineSha256": "7a28d9c911b07587468362e6de28d53251f33a292b7ec53f94269df7f42f97c6",
+      "snapshot": "source-snapshot/server/services/analysisService.js"
+    },
+    {
+      "path": "server/services/cataloguePolicy.js",
+      "state": "new",
+      "bytes": 9045,
+      "sha256": "e215fd294a63fb4e5170b791e85bcb5cdb34fdbbc1868eb5968cbfadd87939c5",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/services/cataloguePolicy.js"
+    },
+    {
+      "path": "server/services/methodResolution.js",
+      "state": "new",
+      "bytes": 2378,
+      "sha256": "90f613675bb9b81a2ce4502aad0eadafbc49cce3548417e4ac4aa46a324ba31d",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/services/methodResolution.js"
+    },
+    {
+      "path": "server/services/resultEntryPolicy.js",
+      "state": "new",
+      "bytes": 3606,
+      "sha256": "254a49cb7438bb213e43e545d435076dbd432d0d4c1b8f3da550d99dcd9f5655",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/services/resultEntryPolicy.js"
+    },
+    {
+      "path": "server/services/workbenchReadinessService.js",
+      "state": "modified",
+      "bytes": 5786,
+      "sha256": "3387b292aa91d0fee95a8206b6e5f3d65ab122d413482e1430ee439785adcda4",
+      "baselineSha256": "d1ead6962c6b6bb5297fda207a30f958cb4325b3d49908bc4748d29b88e6980d",
+      "snapshot": "source-snapshot/server/services/workbenchReadinessService.js"
+    },
+    {
+      "path": "server/services/workbenchValidationService.js",
+      "state": "modified",
+      "bytes": 8078,
+      "sha256": "1e670eab90fc9ede35c1953d05cbb0ea4f07271d2078cce876a1858addb67f77",
+      "baselineSha256": "e0de95b374d60d63e83cd09d62d1f256b8ddc0ce5b23577b39a75883718706ef",
+      "snapshot": "source-snapshot/server/services/workbenchValidationService.js"
+    },
+    {
+      "path": "server/tests/contracts/catalogue_governance.test.js",
+      "state": "new",
+      "bytes": 10873,
+      "sha256": "699a1ffea89f26612beba0dc88e54a762f5c674aa53ffa334d586a59dc7bdf4a",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/tests/contracts/catalogue_governance.test.js"
+    },
+    {
+      "path": "server/tests/contracts/catalogue_result_entry.test.js",
+      "state": "new",
+      "bytes": 4913,
+      "sha256": "7d9d218d0969c79d9a5bd72c02828100d2eb57c3401fa7f36f9fb36aa3cd83dc",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/tests/contracts/catalogue_result_entry.test.js"
+    },
+    {
+      "path": "server/tests/contracts/catalogue_seeder.test.js",
+      "state": "modified",
+      "bytes": 3303,
+      "sha256": "a4a639830c95596df3554861486357e9f6439316e9d5c7ce324876bcc2f357d0",
+      "baselineSha256": "5e61dd488ef445f719cbec75b28c31bab4f727ca25bac7725d2b62c5933ce353",
+      "snapshot": "source-snapshot/server/tests/contracts/catalogue_seeder.test.js"
+    },
+    {
+      "path": "server/tests/contracts/catalogue_work_execution.test.js",
+      "state": "new",
+      "bytes": 7238,
+      "sha256": "297194d41fd7fbc6c245b95c3050651d01b900f248097041f266d8528a5f54b4",
+      "baselineSha256": null,
+      "snapshot": "source-snapshot/server/tests/contracts/catalogue_work_execution.test.js"
+    },
+    {
+      "path": "server/tests/contracts/lab_method_defaults.test.js",
+      "state": "modified",
+      "bytes": 4612,
+      "sha256": "71bf4228c178dd6ec0551d9360ac51b6f452aba9a25a02ded5b57396cadaa728",
+      "baselineSha256": "5fb91c717c20efd92d369ad0727ee4a5fc7ee6db890bdaf8a2fedaa6e90a4336",
+      "snapshot": "source-snapshot/server/tests/contracts/lab_method_defaults.test.js"
+    },
+    {
+      "path": "server/tests/contracts/matrix_validation.test.js",
+      "state": "modified",
+      "bytes": 4990,
+      "sha256": "8a5d6b31c8d3b54c645cd99d626ca22938fdea2d8fce2c32e7a554afea38a37c",
+      "baselineSha256": "1c5a8d4185e160ee57eca0b70584487245ddcbcc9aee97fcba4596918493d640",
+      "snapshot": "source-snapshot/server/tests/contracts/matrix_validation.test.js"
+    },
+    {
+      "path": "server/tests/contracts/result_provenance.test.js",
+      "state": "modified",
+      "bytes": 7604,
+      "sha256": "574cdee74cf167b4a6cc3a21c20742ed6bab98a81cd644047c79a8ea3c81d4df",
+      "baselineSha256": "144f1a15e941b4336fe3b0ebea2fc4543167513406aaaac6c3941c6756ea1115",
+      "snapshot": "source-snapshot/server/tests/contracts/result_provenance.test.js"
+    },
+    {
+      "path": "server/utils/workflowEngine.js",
+      "state": "modified",
+      "bytes": 44381,
+      "sha256": "704b678a494186af4d4328a33bb9125c61fb48815649c80cff61361eaac8c6d8",
+      "baselineSha256": "fcf764ef242f0c6cdf9a6e9fba5936090528d6e11ed5f6d7dea0d14498b37ae3",
+      "snapshot": "source-snapshot/server/utils/workflowEngine.js"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "source-snapshot/.gitignore",
+      "bytes": 997,
+      "sha256": "02adf4d74b7f0db455cefbf6a800b02dc4b75fe30654ae4b20f3c9dad62cccca"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/README.md",
+      "bytes": 3880,
+      "sha256": "c04e204935429a9909bae8bb199b32a918a4a7a5e93024d5c414f61e9918c763"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/antigravity-handoff.md",
+      "bytes": 3406,
+      "sha256": "ca5ad0b68661d4a59b55bb5f07b7509a327089f6d86a0fac186763939920f3a0"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-admin-verified.png",
+      "bytes": 137882,
+      "sha256": "4b3c4ed5697f944abc0934cb581c51693ae47e4b4cb38bc12a4fcffd674ce80e"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-blocked-analysis-verified.png",
+      "bytes": 90197,
+      "sha256": "85131b6814a2a20dd6163dcb802ae061d303529151c403802007e4f88e7472bb"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-connections-verified.png",
+      "bytes": 119826,
+      "sha256": "092f61702a64f687528eac8484e099a6baa0fff55df6af911dc71e8405cfd0eb"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-drying-verified.png",
+      "bytes": 83396,
+      "sha256": "48673f6bc35d6d6c2497c8176e2085b309a34ed58db40441784aa24afa039be0"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-implementation-update.md",
+      "bytes": 12933,
+      "sha256": "cb58f02974251ab6ea044e326da43197c5cb40948de42594974f1b5f3d635f75"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-server-test-results.json",
+      "bytes": 25561,
+      "sha256": "5c1ac76f41b231b08428864b67971efe8404038b3c740c3ee1a67e1d1c838fa1"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/catalogue-ui-results.json",
+      "bytes": 1528,
+      "sha256": "747ed293f6a48d5e79494c24e4ea7c1c9dc12f05b6d0ecd33d4d92476fc6566d"
+    },
+    {
+      "path": "source-snapshot/WP/lab-operations-redesign-v3/check-catalogue-ui.cjs",
+      "bytes": 10399,
+      "sha256": "d981c08204b0f6b358045dd714376c10a321271afb672962d7f963a6e38f8e00"
+    },
+    {
+      "path": "source-snapshot/client/src/components/AnalysisConfig.jsx",
+      "bytes": 3857,
+      "sha256": "b450bdccbc3ae7ab830ee048e89d50a1de1969ae8e15936fc2580a0c9058095f"
+    },
+    {
+      "path": "source-snapshot/client/src/components/admin/AnalysisManager.jsx",
+      "bytes": 43878,
+      "sha256": "e38db27d3aef410b6dd3a7476013be449486693c1973cc4b84861d755a3288a1"
+    },
+    {
+      "path": "source-snapshot/client/src/components/admin/CategoryManager.jsx",
+      "bytes": 10280,
+      "sha256": "18a0c411f773a7d153294f102ce7037f1101acd5e209f138fac02aae7e92f71f"
+    },
+    {
+      "path": "source-snapshot/client/src/components/admin/GroupManager.jsx",
+      "bytes": 15087,
+      "sha256": "8025a95591f20455ea4e4e43a07d3a29b214685f53bb78ff7cd23c16bd31573a"
+    },
+    {
+      "path": "source-snapshot/client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "bytes": 18884,
+      "sha256": "573ed5f296e8b626095478bf7c4bd2fea7adbdb0b8608f8f1a6b801b5aa89d62"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/AnalysisUpdateModal.jsx",
+      "bytes": 21244,
+      "sha256": "60602bb1889b015d444ac67b35baef88ff36b2e18a42c8dcfba84940d607a22d"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/CollapsibleDrawer.jsx",
+      "bytes": 18366,
+      "sha256": "cd7ff3f9928c3f767a93ca313a13681ba98890aa128654f78769464d12cc6b29"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/EvidenceInspectionModal.jsx",
+      "bytes": 12214,
+      "sha256": "27318459f8c8a90494687d6c336e8c27688f424d995e56ddc66b22e383da3e74"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/IntakeRequestCard.jsx",
+      "bytes": 7306,
+      "sha256": "ddd440a5cedd5aee1d02350cb4418bda7aefff6b9b1d62115b5a0bda7c12a8f7"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/SubmissionPanel.jsx",
+      "bytes": 10305,
+      "sha256": "4c67ea4702b7bc9e8e7d04755739e89166eb042be87464c935ad60b5a147945c"
+    },
+    {
+      "path": "source-snapshot/client/src/components/sample/WorkItemsTable.jsx",
+      "bytes": 57123,
+      "sha256": "5b417bac1a5fddce016fda04b5b88617b0c8798c4c170cf40ead22309e2d5669"
+    },
+    {
+      "path": "source-snapshot/client/src/components/samples/SamplesTable.jsx",
+      "bytes": 45499,
+      "sha256": "cfef92ea880c480fa789e81ecf5cfd79dbc4c5ac35e6003ef030424e29ee4a6f"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/OperationalTaskEditor.jsx",
+      "bytes": 3423,
+      "sha256": "22262b2d80b945e2e02457906d84b1dd79609c33b7d99804f9d20758b2f833a5"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/PastePreviewModal.jsx",
+      "bytes": 10773,
+      "sha256": "5c7ca82384ef1175b1cea1aea220087607fe6793085219743d2db101404cf33e"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/ReviewCompletionView.jsx",
+      "bytes": 10032,
+      "sha256": "ed1c8bf2fda6f7b4aac0f1a670d9975b31a72e2d4d023d681cc1db3a4c3c35f4"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/WorkbenchInspector.jsx",
+      "bytes": 12502,
+      "sha256": "738991a2a4c8eaac7669463936ee5ed0c516a985cef6c5087a4b387b87a8fb98"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/WorkbenchQueue.jsx",
+      "bytes": 18544,
+      "sha256": "73aa2992e6dd19f08a174ddc975b449c12e379e003cdd5e504255e5fdd04fe01"
+    },
+    {
+      "path": "source-snapshot/client/src/components/workbench/WorksheetArea.jsx",
+      "bytes": 27256,
+      "sha256": "00e1507b5163d944fd9550cf79658e0b2067e421c510592610b7d3df467997e3"
+    },
+    {
+      "path": "source-snapshot/client/src/context/AnalysisCatalogueContext.jsx",
+      "bytes": 2200,
+      "sha256": "9f6225724ac6c2cbd88dd5e81b131b277999a0c1ed14f8143fd6559df90b05fb"
+    },
+    {
+      "path": "source-snapshot/client/src/main.jsx",
+      "bytes": 2869,
+      "sha256": "cfe175ee523e70fd2e2d71fb516cc4bf79c81288b646abe6268c877d28c351f1"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/DataSheet.jsx",
+      "bytes": 13016,
+      "sha256": "534d49f9d47f526dcd64938390bb2d8366b6b4ca01493ded6c50cb50ff3d2ea4"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/ManagerQueue.jsx",
+      "bytes": 20027,
+      "sha256": "49939bcbcd132f18cf9d945b4526a387d129f5f87a5b374c287f7d539aaa5853"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/MyWork.jsx",
+      "bytes": 25300,
+      "sha256": "9f4739a6088561070934b60130e83acebf238c202e1d9363234700e348459148"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/Reception.jsx",
+      "bytes": 134090,
+      "sha256": "e01cc1f0c18469cb446eb2aa084d9243dc8fd6305f4c8de4029231a4ad036ee6"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/SampleDetail.jsx",
+      "bytes": 94396,
+      "sha256": "143f711efab1d9766c5bdda8b318ca2c200ad2330b5ae4e7c6a77a486d2171c4"
+    },
+    {
+      "path": "source-snapshot/client/src/pages/admin/LabMethods.jsx",
+      "bytes": 18834,
+      "sha256": "f998cbe7628308bc5efb826484401981ab5ef095785dd49367b4cf79a2066214"
+    },
+    {
+      "path": "source-snapshot/client/src/utils/analysisNames.js",
+      "bytes": 601,
+      "sha256": "cf77cf733a58a78c22506a49930fb79154823fd15f3da31043c911d51ba624dc"
+    },
+    {
+      "path": "source-snapshot/client/src/utils/workItemEvidence.js",
+      "bytes": 1061,
+      "sha256": "75332e68bb08be7b09ca483655fd9743d93867e55e354529c8769903969653e3"
+    },
+    {
+      "path": "source-snapshot/server/app.js",
+      "bytes": 32480,
+      "sha256": "37cfa3b0a5fca76dba78f520ea029da4ce4ada511f0a5c399673a1297da217b0"
+    },
+    {
+      "path": "source-snapshot/server/controllers/analysisController.js",
+      "bytes": 31463,
+      "sha256": "53979fb5fe9c69c76b2bfb236a73855442982268d8aa6988e908767519ac35e3"
+    },
+    {
+      "path": "source-snapshot/server/controllers/receptionController.js",
+      "bytes": 74511,
+      "sha256": "d23d69c8348dd21ddb75d9273778806bb619f7a6ef86ca7477e3aeed4323b0c6"
+    },
+    {
+      "path": "source-snapshot/server/controllers/resultsController.js",
+      "bytes": 12172,
+      "sha256": "e4d928b28eac995e9634a412661742e96db8d01812619f5c3ef71ce8ead4e197"
+    },
+    {
+      "path": "source-snapshot/server/controllers/sampleController.js",
+      "bytes": 110811,
+      "sha256": "a3f19136fc7339051967b9f3874a68c4cd8165443fb2a9caab60f805442b685e"
+    },
+    {
+      "path": "source-snapshot/server/controllers/validationController.js",
+      "bytes": 5802,
+      "sha256": "add58facc87c8ae7cb2b081b8ac0ced0b517589314e734024b14fa39f8b7e588"
+    },
+    {
+      "path": "source-snapshot/server/controllers/workItemController.js",
+      "bytes": 73379,
+      "sha256": "f7357af8e16724ff460e8e19cad81d3a77b8d3c4b20bb4120555c704833b7e25"
+    },
+    {
+      "path": "source-snapshot/server/controllers/workbenchController.js",
+      "bytes": 70314,
+      "sha256": "1e61b9ac61973704968ebdcb9b963d21b98f4dabbfc3feb990c8f9bdb03888e5"
+    },
+    {
+      "path": "source-snapshot/server/data/analysisDisplayNames.json",
+      "bytes": 8812,
+      "sha256": "d711e5f03d7e5b178179d1352a625ac6f1a46f571ef6e620b0c3a7fb9950a438"
+    },
+    {
+      "path": "source-snapshot/server/data/importedParameterNames.json",
+      "bytes": 532,
+      "sha256": "881d7ea9f8dbd30331f27fb6a600a9b552661319b22f6c713383e0a0cbfb4a27"
+    },
+    {
+      "path": "source-snapshot/server/data/operationalChecklists.json",
+      "bytes": 687,
+      "sha256": "f20b8374225c11ebf567bd65be29e32871939e0b476f9039946511a72da6153e"
+    },
+    {
+      "path": "source-snapshot/server/routes/analysisRoutes.js",
+      "bytes": 2719,
+      "sha256": "1b92c0819bb974a9fe85811001609714ce9a5a159cc436d1f8959ed3c2428263"
+    },
+    {
+      "path": "source-snapshot/server/seeds/catalogue.js",
+      "bytes": 10284,
+      "sha256": "98383e38026d630328be8d35f1c4f96b9308374a9ceb18fed085d30b7301e8c6"
+    },
+    {
+      "path": "source-snapshot/server/seeds/data/catalogue.json",
+      "bytes": 330901,
+      "sha256": "a8649b507d2a0402f026b19ed166ad2c77ba8f0c159760e029b1f354503cf5fc"
+    },
+    {
+      "path": "source-snapshot/server/seeds/generate_catalogue_data.js",
+      "bytes": 63093,
+      "sha256": "5a63ba2bf524631901b7e086958ebf194fa1fc129cc40cd92fce265cf36a3c9e"
+    },
+    {
+      "path": "source-snapshot/server/services/analysisService.js",
+      "bytes": 2423,
+      "sha256": "5c7e00659fcc75ca1544e97986a09086b21ad96e74357a765d2617dcfe49e3f6"
+    },
+    {
+      "path": "source-snapshot/server/services/cataloguePolicy.js",
+      "bytes": 9045,
+      "sha256": "e215fd294a63fb4e5170b791e85bcb5cdb34fdbbc1868eb5968cbfadd87939c5"
+    },
+    {
+      "path": "source-snapshot/server/services/methodResolution.js",
+      "bytes": 2378,
+      "sha256": "90f613675bb9b81a2ce4502aad0eadafbc49cce3548417e4ac4aa46a324ba31d"
+    },
+    {
+      "path": "source-snapshot/server/services/resultEntryPolicy.js",
+      "bytes": 3606,
+      "sha256": "254a49cb7438bb213e43e545d435076dbd432d0d4c1b8f3da550d99dcd9f5655"
+    },
+    {
+      "path": "source-snapshot/server/services/workbenchReadinessService.js",
+      "bytes": 5786,
+      "sha256": "3387b292aa91d0fee95a8206b6e5f3d65ab122d413482e1430ee439785adcda4"
+    },
+    {
+      "path": "source-snapshot/server/services/workbenchValidationService.js",
+      "bytes": 8078,
+      "sha256": "1e670eab90fc9ede35c1953d05cbb0ea4f07271d2078cce876a1858addb67f77"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/catalogue_governance.test.js",
+      "bytes": 10873,
+      "sha256": "699a1ffea89f26612beba0dc88e54a762f5c674aa53ffa334d586a59dc7bdf4a"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/catalogue_result_entry.test.js",
+      "bytes": 4913,
+      "sha256": "7d9d218d0969c79d9a5bd72c02828100d2eb57c3401fa7f36f9fb36aa3cd83dc"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/catalogue_seeder.test.js",
+      "bytes": 3303,
+      "sha256": "a4a639830c95596df3554861486357e9f6439316e9d5c7ce324876bcc2f357d0"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/catalogue_work_execution.test.js",
+      "bytes": 7238,
+      "sha256": "297194d41fd7fbc6c245b95c3050651d01b900f248097041f266d8528a5f54b4"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/lab_method_defaults.test.js",
+      "bytes": 4612,
+      "sha256": "71bf4228c178dd6ec0551d9360ac51b6f452aba9a25a02ded5b57396cadaa728"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/matrix_validation.test.js",
+      "bytes": 4990,
+      "sha256": "8a5d6b31c8d3b54c645cd99d626ca22938fdea2d8fce2c32e7a554afea38a37c"
+    },
+    {
+      "path": "source-snapshot/server/tests/contracts/result_provenance.test.js",
+      "bytes": 7604,
+      "sha256": "574cdee74cf167b4a6cc3a21c20742ed6bab98a81cd644047c79a8ea3c81d4df"
+    },
+    {
+      "path": "source-snapshot/server/utils/workflowEngine.js",
+      "bytes": 44381,
+      "sha256": "704b678a494186af4d4328a33bb9125c61fb48815649c80cff61361eaac8c6d8"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/acceptance-checklist.md",
+      "bytes": 12715,
+      "sha256": "8c4805c8457854fcbff6b33c2e912ebf37ce75ea12e09ea5908694c5e86b0d3e"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/antigravity-handoff.md",
+      "bytes": 3406,
+      "sha256": "ca5ad0b68661d4a59b55bb5f07b7509a327089f6d86a0fac186763939920f3a0"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/audit-probe-results.json",
+      "bytes": 3011,
+      "sha256": "1e4492cb9bedd0ac29bdb097341f79c5bf4371fb7dc4a96c92addff308f4788e"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/audit-probes.cjs",
+      "bytes": 1795,
+      "sha256": "f35a2be03f85d52d9eba3f45377bdbb85f97759edaf57268fdf903348cdfa6ad"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/build-review-register.cjs",
+      "bytes": 4390,
+      "sha256": "10b462c548dcf94aa1b6584360bdbd2233fec5f69de4de15545169076cdbf862"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-admin-verified.png",
+      "bytes": 137882,
+      "sha256": "4b3c4ed5697f944abc0934cb581c51693ae47e4b4cb38bc12a4fcffd674ce80e"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-blocked-analysis-verified.png",
+      "bytes": 90197,
+      "sha256": "85131b6814a2a20dd6163dcb802ae061d303529151c403802007e4f88e7472bb"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-connections-verified.png",
+      "bytes": 119826,
+      "sha256": "092f61702a64f687528eac8484e099a6baa0fff55df6af911dc71e8405cfd0eb"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-drying-verified.png",
+      "bytes": 83396,
+      "sha256": "48673f6bc35d6d6c2497c8176e2085b309a34ed58db40441784aa24afa039be0"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-implementation-update.md",
+      "bytes": 12933,
+      "sha256": "cb58f02974251ab6ea044e326da43197c5cb40948de42594974f1b5f3d635f75"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-review-register.json",
+      "bytes": 539252,
+      "sha256": "5e9dee9f136cd3aafe72a7e0fa70dd4af704998aa3d2614f37716b947b4b3c9b"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-server-test-results.json",
+      "bytes": 25561,
+      "sha256": "5c1ac76f41b231b08428864b67971efe8404038b3c740c3ee1a67e1d1c838fa1"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/catalogue-ui-results.json",
+      "bytes": 1528,
+      "sha256": "747ed293f6a48d5e79494c24e4ea7c1c9dc12f05b6d0ecd33d4d92476fc6566d"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/check-catalogue-ui.cjs",
+      "bytes": 10399,
+      "sha256": "d981c08204b0f6b358045dd714376c10a321271afb672962d7f963a6e38f8e00"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/check-concept.cjs",
+      "bytes": 4856,
+      "sha256": "0e9d1a4c757202eef82e2b3b26f7cafdaeb74f8c234760caf1dce4bb0e938067"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/concept-batch.png",
+      "bytes": 91128,
+      "sha256": "59e02d79a11a86d0bb028e41acd3a8b14be55db34f6bf9606ea96ed498bd6fab"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/concept-check-results.json",
+      "bytes": 4870,
+      "sha256": "920decb211a348776a3a4628e6bb8d5284e2146ba31cc42e22b3aeec026cadee"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/concept-manager.png",
+      "bytes": 48226,
+      "sha256": "173db2ad9ba1c4b9d53260f6bd03739d22404819d5574aaaef99db47a4477744"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/concept-mobile-dark.png",
+      "bytes": 42655,
+      "sha256": "d16ceacac0e64528a21c7d8a4757146268622b1f355f35a7e880686f593ecfdf"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/concept-texture.png",
+      "bytes": 58276,
+      "sha256": "dd6bfe71daec32cdca2e15b997c39c0650f15f14d80fc89ab4543f166a14ba38"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/implementation-plan.md",
+      "bytes": 29421,
+      "sha256": "691abec625152d5f183b5f8dcdb0d7893dd955d36169f2506ae52fe96f35329d"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/lab-operations-concept-source.html",
+      "bytes": 28088,
+      "sha256": "88595868b60fa7467303e94f8cf4b6c6732bfe4cca29950f0d4905585221fcaa"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/lab-operations-concept.html",
+      "bytes": 76113,
+      "sha256": "f864d200143f231504b0e38981bc3d957798a521c5e45f09a49318494624c4e8"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/README.md",
+      "bytes": 3880,
+      "sha256": "c04e204935429a9909bae8bb199b32a918a4a7a5e93024d5c414f61e9918c763"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/reference-drying-workbench.png",
+      "bytes": 175275,
+      "sha256": "97a95e3d7acc03ac3627f0083920fdb3e72262eced22dff0e3225c07b4cd3286"
+    },
+    {
+      "path": "reference-materials/WP/lab-operations-redesign-v3/source-audit.md",
+      "bytes": 14553,
+      "sha256": "585947df0fc90ba96af3d6aa87b7620d98e3557b24ebbdc5c4ec3819c9746f34"
+    },
+    {
+      "path": "reference-materials/WP/sample-workspace-redesign-v2/README.md",
+      "bytes": 3488,
+      "sha256": "4014ed14701e859085676cfbb70c945b585ed22e840f34d89fe7c1fca0f3e71f"
+    },
+    {
+      "path": "reference-materials/WP/sample-workspace-redesign-v2/reference-current-controls.png",
+      "bytes": 133979,
+      "sha256": "58e35a7df069665060818234bc7b9d61e9e176c06bddab2acbf12a768f28b6e1"
+    },
+    {
+      "path": "reference-materials/WP/sample-workspace-redesign-v2/sample-page-redesign-plan.md",
+      "bytes": 71384,
+      "sha256": "849e4a385a871db0175b6b5d92e60a6a0dfc724a4d10b2a7626651affeb68011"
+    },
+    {
+      "path": "reference-materials/WP/sample-workspace-redesign-v2/sample-workspace-acceptance-checklist.md",
+      "bytes": 19874,
+      "sha256": "c9814999e8bcfd4cb44429ffd69a6ab8f126a1498001d4a1903cc9f1e236a5cf"
+    },
+    {
+      "path": "reference-materials/WP/sample-workspace-redesign-v2/sample-workspace-concept.html",
+      "bytes": 25962,
+      "sha256": "9591afeebeb443adcfe0d08e5464f783b55f3103f34e06df13d7265d8625e854"
+    },
+    {
+      "path": "reference-materials/WP/technician-workbench-implementation-plan.md",
+      "bytes": 41498,
+      "sha256": "c6e8dc8ead16bd7466b94a9d75e6e13e50822e3f452dd55b142ef3026f040af0"
+    },
+    {
+      "path": "reference-materials/WP/technician-workbench-concept.html",
+      "bytes": 36055,
+      "sha256": "35eea19d798f68159e080a8adda7459cdf984eefeed99e85cab2b251a1842827"
+    },
+    {
+      "path": "reference-materials/WP/workflow-map-implementation-plan.md",
+      "bytes": 22400,
+      "sha256": "6269df93afde4d9000fd3c50a6f1718f1390722ef267fe32a2a1fdd9598b282b"
+    },
+    {
+      "path": "reference-materials/WP/lims-workflow-redesign.html",
+      "bytes": 24136,
+      "sha256": "8e427c233b92ec084971f144333141e37f51eb19631a3778b97d173be127386c"
+    },
+    {
+      "path": "reference-materials/WP/spectral-intake-concept.html",
+      "bytes": 20132,
+      "sha256": "7497b5b9acf3d354b6f9a4fe1d5d73134d79ecc015e28c425327bfe590c8131b"
+    },
+    {
+      "path": "reference-materials/WP/reception-plan-v2.md",
+      "bytes": 19788,
+      "sha256": "35f2a1d1d3fad1cce5062ea679d495da2ee3b9cf35ef55d2587d83f1df982ebb"
+    },
+    {
+      "path": "reference-materials/WP/Catalogue Extension.pdf",
+      "bytes": 437829,
+      "sha256": "8568f0f3efdba17be882f2bc744ba4b29770a5be963dc1b93c8e6ce90e4a8359"
+    },
+    {
+      "path": "reference-materials/WP/Soil Lab Readiness Check.pdf",
+      "bytes": 380130,
+      "sha256": "60e8731b83b99962d96b3af149c3342ff6c831229db9fa32d262e2a15e2ce2fc"
+    },
+    {
+      "path": "reference-materials/WP/SoilFER ProDOC Alignment.pdf",
+      "bytes": 438281,
+      "sha256": "1e81b60bd78f84ec29abe966c409ab2f7065d2ca16ee8534bf27b3c332160dba"
+    },
+    {
+      "path": "reference-materials/WP/SoilFER-LIMS Analytical Audit.pdf",
+      "bytes": 920547,
+      "sha256": "2484fa24007d026ed135850dc7a508c0296a7bbca1724507728387b7ca8c5cc3"
+    },
+    {
+      "path": "tracked-changes.patch",
+      "bytes": 676585,
+      "sha256": "f6701c734b8fd04596862f752591dffc5541e4555cca846aacd1764c56f485dc"
+    },
+    {
+      "path": "START-HERE.md",
+      "bytes": 8842,
+      "sha256": "1cba8ea8af6ea715b7202227a671221d8a6ab006b27aea17220c06c6f5e2fc9e"
+    },
+    {
+      "path": "RELEASE-CHECKLIST.md",
+      "bytes": 6793,
+      "sha256": "0824813f33ab071ce3e71b3bbb7217b75adfbd6c598d62d00751bc49d9ab75c0"
+    },
+    {
+      "path": "ANTIGRAVITY-MESSAGE.md",
+      "bytes": 1561,
+      "sha256": "88805166a0816bf07da90fd2d05b409f552055be8fc3e413cebc25f006716cfe"
+    },
+    {
+      "path": "verify-handoff.cjs",
+      "bytes": 1584,
+      "sha256": "fd3cda80bfa575d29ee6f5f4c0881d2c3ac863a05c30b133f4ce00d90dd005a0"
+    },
+    {
+      "path": "capture-handoff.cjs",
+      "bytes": 5386,
+      "sha256": "c9402e9ec4c72631872f2c9f032e7b5dd213136902d3c220370259a5e05e348c"
+    }
+  ]
+}

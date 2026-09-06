@@ -1,0 +1,39 @@
+{
+  "scope": "Empty database created from local schema; synthetic records only; no production connection",
+  "checks": [
+    {
+      "name": "Cross-lab batch details",
+      "expected": "403 or 404",
+      "observed": {
+        "status": 403
+      }
+    },
+    {
+      "name": "Duplicate and QC-reserved rack positions",
+      "expected": "Reject duplicate position 1, reserved for BLANK",
+      "observed": {
+        "status": 400,
+        "rows": []
+      }
+    },
+    {
+      "name": "Mixed replicate/basis legacy fractions",
+      "expected": "Preserve as unresolved; do not invent one recorded attempt",
+      "observed": {
+        "migrationSuccess": true,
+        "attempts": []
+      }
+    },
+    {
+      "name": "Standalone sand order",
+      "expected": "Preserve standalone order unless confirmed grouped texture order exists",
+      "observed": [
+        {
+          "analysis": "SAND",
+          "status": "ASSIGNED",
+          "assignedTo": "review-manager"
+        }
+      ]
+    }
+  ]
+}

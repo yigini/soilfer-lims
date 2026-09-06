@@ -120,7 +120,7 @@ exports.getAnalyticalResults = async (req, res) => {
                     } else if (analysisType === 'WET_CHEM') {
                         if (['SPEC_VIS_NIR', 'SPEC_MIR', 'Vis-NIR Soil Spectra', 'MIR Soil Spectra'].includes(analysisCode)) shouldInclude = false;
                     } else if (analysisType === 'TEXTURE') {
-                        if (!['SAND', 'SILT', 'CLAY'].includes(analysisCode)) shouldInclude = false;
+                        if (!['SAND', 'SILT', 'CLAY', 'TEXTURE'].includes(analysisCode)) shouldInclude = false;
                     } else if (analysisType !== 'ALL') {
                         if (analysisCode !== analysisType) shouldInclude = false;
                     }

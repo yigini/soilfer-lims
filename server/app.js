@@ -236,18 +236,8 @@ app.get('/api/audit-final', verifyToken, checkPermission('VIEW_AUDIT'), async (r
 app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
-const analysisController = require('./controllers/analysisController');
-app.get('/api/config/categories', verifyToken, analysisController.getCategories);
-app.get('/api/config/analyses', verifyToken, analysisController.getAnalyses);
-app.get('/api/config/methodologies', verifyToken, analysisController.getMethodologies);
-app.get('/api/config/groups', verifyToken, analysisController.getGroups);
-app.use('/api/config', verifyToken, require('./routes/analysisRoutes'));
+app.use('/api/config', require('./routes/analysisRoutes'));
 
-// Admin Config Routes
-app.post('/api/config/categories', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createCategory);
-app.post('/api/config/analyses', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createAnalysis);
-app.post('/api/config/methodologies', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createMethodology);
-app.post('/api/config/groups', verifyToken, checkPermission('MANAGE_BRANDING'), analysisController.createGroup);
 app.use('/api/samples', verifyToken, require('./routes/sampleRoutes'));
 app.use('/api/results', verifyToken, require('./routes/resultsRoutes'));
 app.use('/api/data-results', verifyToken, require('./routes/dataResultsRoutes'));
@@ -306,7 +296,7 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
 
             // Work items - Scoped via Scope Guard
             const [unassignedTasks, allWork] = await Promise.all([
-                prisma.workItem.count({ where: { ...workWhere, status: 'PENDING', assignedTo: null } }),
+                prisma.workItem.count({ where: { ...workWhere, status: { in: ['NOT_ASSIGNED', 'PENDING'] }, assignedTo: null } }),
                 prisma.workItem.findMany({ where: workWhere, orderBy: { createdAt: 'desc' }, take: 500 }),
             ]);
 
@@ -314,12 +304,22 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             let awaitingReview = 0;
             let reviewQueue = [];
             try {
-                const submissions = await prisma.submission.findMany({
-                    where: { status: 'PENDING_REVIEW' },
-                    orderBy: { submittedAt: 'desc' },
-                    take: 20,
-                });
-                awaitingReview = submissions.length;
+                const subWhere = { status: 'PENDING_REVIEW' };
+                if (user.role !== 'SUPER_ADMIN' && user.labId) {
+                    subWhere.OR = [
+                        { assignedLab: user.labId },
+                        { labId: user.labId }
+                    ];
+                }
+                const [subCount, submissions] = await Promise.all([
+                    prisma.submission.count({ where: subWhere }),
+                    prisma.submission.findMany({
+                        where: subWhere,
+                        orderBy: { submittedAt: 'desc' },
+                        take: 20,
+                    })
+                ]);
+                awaitingReview = subCount;
                 // Aggregate by sample
                 const reviewGroups = {};
                 submissions.forEach(sub => {

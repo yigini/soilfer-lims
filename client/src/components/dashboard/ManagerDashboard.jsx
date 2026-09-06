@@ -122,7 +122,7 @@ const ManagerDashboard = ({ user }) => {
                     icon={FileInput}
                     color="text-purple-700 dark:text-purple-300"
                     bgColor="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800"
-                    onClick={() => navigate('/manager-queue')}
+                    onClick={() => navigate('/manager-queue?lane=intake')}
                     tooltip="Samples received but not yet accepted by a manager"
                 />
                 <KpiCard
@@ -131,7 +131,7 @@ const ManagerDashboard = ({ user }) => {
                     icon={Users}
                     color="text-blue-700 dark:text-blue-300"
                     bgColor="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800"
-                    onClick={() => navigate('/manager-queue')}
+                    onClick={() => navigate('/manager-queue?lane=assign')}
                     tooltip="Work items not yet assigned to a technician"
                 />
                 <KpiCard
@@ -148,7 +148,7 @@ const ManagerDashboard = ({ user }) => {
                     icon={Eye}
                     color="text-amber-700 dark:text-amber-300"
                     bgColor="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
-                    onClick={() => navigate('/manager-queue')}
+                    onClick={() => navigate('/manager-queue?lane=review')}
                     tooltip="Submissions from technicians pending manager review"
                 />
                 <KpiCard
@@ -179,7 +179,7 @@ const ManagerDashboard = ({ user }) => {
                         <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <FileInput size={18} className="text-purple-500" /> Intake Queue
                         </h3>
-                        <button onClick={() => navigate('/manager-queue')} className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                        <button onClick={() => navigate('/manager-queue?lane=intake')} className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
                             View All <ArrowUpRight size={12} />
                         </button>
                     </div>
@@ -193,7 +193,7 @@ const ManagerDashboard = ({ user }) => {
                                 >
                                     <div className="min-w-0 flex-1">
                                         <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
-                                            {s.labId || s.originalId?.substring(0, 12) || s.id.substring(0, 8)}
+                                             {s.labId || s.originalId?.substring(0, 12) || s.id.substring(0, 8)}
                                         </div>
                                         <div className="text-[10px] text-gray-400 mt-0.5 truncate">
                                             {s.projectCode || 'Unknown'} • {s.receivedBy || 'Intake'} • {new Date(s.receptionDate || s.createdAt).toLocaleDateString()}
@@ -217,7 +217,7 @@ const ManagerDashboard = ({ user }) => {
                         <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <Eye size={18} className="text-amber-500" /> Pending Reviews
                         </h3>
-                        <button onClick={() => navigate('/manager-queue')} className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                        <button onClick={() => navigate('/manager-queue?lane=review')} className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
                             View All <ArrowUpRight size={12} />
                         </button>
                     </div>

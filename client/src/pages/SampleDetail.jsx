@@ -1,3 +1,5 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
+import { workItemEvidenceText } from '../utils/workItemEvidence';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -40,6 +42,7 @@ import {
 } from 'lucide-react';
 
 const SampleDetail = () => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
@@ -302,6 +305,16 @@ const SampleDetail = () => {
         }
     };
 
+    const handleApproveSample = async () => {
+        try {
+            await axios.post(`/api/samples/${id}/approve`, {});
+            showInfo(t('common.success', 'Success'), 'Sample approved successfully.');
+            fetchWorkspaceData(true);
+        } catch (err) {
+            showInfo(t('common.error', 'Approval Failed'), err.response?.data?.error || err.message);
+        }
+    };
+
     const handleArchive = async () => {
         try {
             await axios.post(`/api/samples/${id}/archive`, {});
@@ -331,7 +344,7 @@ const SampleDetail = () => {
             .then(res => {
                 const scans = res.data.data;
                 if (!scans || scans.length === 0) {
-                    showInfo('No Data', `No spectral scan found for ${item.analysisName || item.analysis}.`);
+                    showInfo('No Data', `No spectral scan found for ${getAnalysisDisplayName(item.analysis, item.analysisName)}.`);
                     return;
                 }
                 const scan = scans.find(s => s.workItemId === item.id) || scans[0];
@@ -497,6 +510,18 @@ const SampleDetail = () => {
                                 >
                                     <FileText size={14} />
                                     View report v{currentReleasedReport.version || 1}
+                                </button>
+                            )}
+
+                            {/* Final Approve Sample Button */}
+                            {isManager && identity.status !== 'APPROVED' && (
+                                <button
+                                    onClick={handleApproveSample}
+                                    data-testid="final-approve-sample-btn"
+                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
+                                >
+                                    <ShieldCheck size={14} />
+                                    Final approve sample
                                 </button>
                             )}
 
@@ -871,7 +896,7 @@ const SampleDetail = () => {
                                         <div key={item.id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-gray-900 dark:text-white text-sm">{item.analysisName || item.analysis}</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                                     <span className="text-xs text-gray-400">({item.category || 'Analytical'})</span>
                                                 </div>
                                                 <div className="text-xs text-gray-500 flex flex-wrap gap-3">
@@ -883,7 +908,7 @@ const SampleDetail = () => {
 
                                             <div className="flex items-center gap-3">
                                                 <div className="font-mono font-bold text-base text-gray-900 dark:text-white">
-                                                    {item.result !== null && item.result !== undefined ? String(item.result) : 'Recorded'}
+                                                    {workItemEvidenceText(item)}
                                                 </div>
                                                 <button
                                                     onClick={() => setInspectedItem(item)}

@@ -1,7 +1,10 @@
+const fs = require('fs');
+const path = require('path');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb, submissionsDb } = require('../../db');
+const prisma = require('../../prisma');
 
 describe('8.2 Integration: Golden Path Scenarios', () => {
     let mgrToken, techToken;
@@ -12,11 +15,27 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
     let mgrRedUsername, techRedUsername;
     let mgrBlueToken, techBlueToken;
     let mgrBlueUsername, techBlueUsername;
+    let specEquipId;
 
     beforeAll(async () => {
         const suffix = Date.now();
         mgrUsername = `mgr_gold_${suffix}`;
         techUsername = `tech_gold_${suffix}`;
+
+        specEquipId = `EQ-GOLD-MIR-${suffix}`;
+        await prisma.equipmentAsset.create({
+            data: {
+                id: specEquipId,
+                name: 'Gold MIR Spectrometer',
+                assetType: 'SPECTROMETER',
+                serialNumber: `SN-GOLD-MIR-${suffix}`,
+                model: 'ALPHA-II-MIR',
+                manufacturer: 'Bruker',
+                labId: 'LAB-GOLD',
+                status: 'IN_SERVICE',
+                criticality: 'HIGH'
+            }
+        });
 
         const mgr = usersDb.create({ username: mgrUsername, role: 'LAB_MANAGER', labId: 'LAB-GOLD', countries: ['GLD'] });
         const tech = usersDb.create({ username: techUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-GOLD' });
@@ -68,7 +87,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 originalId: `PROJ-A-${Date.now()}`,
                 receivedBy: mgrUsername,
                 labId: 'LAB-GOLD',
-                requiredAnalyses: ['PH_H2O', 'COND_H2O', 'SPECTRAL_1'],
+                requiredAnalyses: ['PH_H2O', 'EC', 'SOC'],
                 projectCode: 'GOLD-PROJ',
                 isWalkIn: false
             });
@@ -82,7 +101,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         // 3. Assign
         const itemsRes = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId });
         const phItem = itemsRes.body.data.find(i => i.analysis === 'PH_H2O');
-        const condItem = itemsRes.body.data.find(i => i.analysis === 'COND_H2O');
+        const condItem = itemsRes.body.data.find(i => i.analysis === 'EC');
 
         await request(app)
             .post('/api/work/assign')
@@ -114,22 +133,21 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await request(app).put(`/api/work/${condItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '1.5' });
 
         // 8. Full Submission
-        // Need to include SPECTRAL_1 too if it was required. Let's assign and complete it.
-        const specItem = itemsRes.body.data.find(i => i.analysis === 'SPECTRAL_1');
-        await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrToken}`).send({ workItemIds: [specItem.id], assignee: techUsername });
-        await request(app).put(`/api/work/${specItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: 'Spec OK' });
+        const socItem = itemsRes.body.data.find(i => i.analysis === 'SOC');
+        await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrToken}`).send({ workItemIds: [socItem.id], assignee: techUsername });
+        await request(app).put(`/api/work/${socItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '15.0' });
 
         const fullSubRes = await request(app)
             .post('/api/submissions')
             .set('Authorization', `Bearer ${techToken}`)
-            .send({ sampleId, type: 'FULL', workItemIds: [phItem.id, condItem.id, specItem.id] });
+            .send({ sampleId, type: 'FULL', workItemIds: [phItem.id, condItem.id, socItem.id] });
         expect(fullSubRes.status).toBe(201);
 
         // 9. Approve & Archive
         await request(app)
             .post(`/api/submissions/${fullSubRes.body.submission.id}/review`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ decisions: [{ workItemId: phItem.id, decision: 'ACCEPT' }, { workItemId: condItem.id, decision: 'ACCEPT' }, { workItemId: specItem.id, decision: 'ACCEPT' }] });
+            .send({ decisions: [{ workItemId: phItem.id, decision: 'ACCEPT' }, { workItemId: condItem.id, decision: 'ACCEPT' }, { workItemId: socItem.id, decision: 'ACCEPT' }] });
 
         await request(app).post(`/api/samples/${sampleId}/approve`).set('Authorization', `Bearer ${mgrToken}`);
         const archiveRes = await request(app).post(`/api/samples/${sampleId}/archive`).set('Authorization', `Bearer ${mgrToken}`).send({ archiveLocation: 'A1' });
@@ -265,6 +283,160 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const approveRes = await request(app).post(`/api/samples/${sampleId}/approve`).set('Authorization', `Bearer ${mgrBlueToken}`);
         expect(approveRes.status).toBe(200);
         expect(samplesDb.findById(sampleId).status).toBe('APPROVED');
+    });
+
+    afterAll(async () => {
+        try {
+            if (specEquipId) {
+                await prisma.equipmentAsset.deleteMany({ where: { id: specEquipId } });
+            }
+        } catch (e) {}
+    });
+
+    /**
+     * SCENARIO E: Genuine Spectroscopy Integration Lifecycle (Mandatory Correction 5)
+     * Intake SPEC_MIR -> Reject Scalar -> Stage Scan Fixture -> Link Scan -> Submit -> Review -> Zero Pollution
+     */
+    test('Scenario E: Genuine Spectroscopy Integration Lifecycle (Correction 5)', async () => {
+        // 1. Intake sample requesting SPEC_MIR
+        const receiveRes = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', `Bearer ${mgrToken}`)
+            .send({
+                originalId: `PROJ-SPEC-${Date.now()}`,
+                receivedBy: mgrUsername,
+                labId: 'LAB-GOLD',
+                requiredAnalyses: ['SPEC_MIR'],
+                projectCode: 'GOLD-SPEC-PROJ',
+                isWalkIn: false
+            });
+        if (receiveRes.status !== 200) {
+            console.log('DEBUG Scenario E Intake Failure:', receiveRes.body);
+        }
+        expect(receiveRes.status).toBe(200);
+        const sampleId = receiveRes.body.id;
+
+        // 2. Complete prerequisite gates
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE' });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+
+        // 3. Assign to technician
+        const itemsRes = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId });
+        const specItem = itemsRes.body.data.find(i => i.analysis === 'SPEC_MIR');
+        expect(specItem).toBeDefined();
+        await request(app)
+            .post('/api/work/assign')
+            .set('Authorization', `Bearer ${mgrToken}`)
+            .send({ workItemIds: [specItem.id], assignee: techUsername });
+
+        // 4. Verification: Scalar values are strictly rejected on spectral tasks
+        const scalarRes = await request(app)
+            .post('/api/workbench/batch-save')
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({
+                draft: false,
+                entries: [{ workItemId: specItem.id, value: '42.5' }]
+            });
+        expect(scalarRes.body.errors).toBeDefined();
+        expect(scalarRes.body.errors.some(e => e.code === 'SPECTRAL_SCALAR_FORBIDDEN')).toBe(true);
+
+        // 5. Genuine Spectral Workflow: Stage and commit a verified MIR scan fixture
+        const stagingId = `staging-gold-spec-${Date.now()}`;
+        const stagingDir = path.join(__dirname, '../../uploads/staging', stagingId);
+        fs.mkdirSync(stagingDir, { recursive: true });
+
+        const scanFileName = `gold_mir_${Date.now()}.csv`;
+        const csvContent = 'Wavenumber,Absorbance\n4000,0.12\n3500,0.18\n3000,0.25\n2500,0.22\n2000,0.14\n1500,0.09\n1000,0.06\n500,0.03';
+        fs.writeFileSync(path.join(stagingDir, scanFileName), csvContent);
+
+        const manifest = {
+            manifestId: stagingId,
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 7200000).toISOString(),
+            createdBy: techUsername,
+            equipmentId: specEquipId,
+            modality: 'MIR',
+            items: [
+                {
+                    filename: scanFileName,
+                    stagedFilename: scanFileName,
+                    sampleId,
+                    targetWorkItemId: specItem.id,
+                    modality: 'MIR',
+                    axisUnit: 'WAVENUMBER_CM1',
+                    quantity: 'ABSORBANCE',
+                    wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500],
+                    values: [0.12, 0.18, 0.25, 0.22, 0.14, 0.09, 0.06, 0.03],
+                    sha256: 'gold-spec-hash-' + Date.now(),
+                    qcStatus: 'PASS',
+                    qcFlags: []
+                }
+            ]
+        };
+        fs.writeFileSync(path.join(stagingDir, 'manifest.json'), JSON.stringify(manifest));
+
+        // Commit batch linking scan to spectral work item
+        const commitRes = await request(app)
+            .post('/api/spectral/batch/commit')
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({
+                manifestId: stagingId,
+                equipmentId: specEquipId,
+                decisions: {
+                    [scanFileName]: {
+                        decision: 'ADD_REPLICATE',
+                        sampleId,
+                        targetWorkItemId: specItem.id
+                    }
+                }
+            });
+        expect(commitRes.status).toBe(200);
+        expect(commitRes.body.success).toBe(1);
+
+        // 6. Verify zero Result pollution: No scalar row created in Result table
+        const pollutedResults = await prisma.result.findMany({
+            where: { sampleId, param: 'SPEC_MIR' }
+        });
+        expect(pollutedResults.length).toBe(0);
+
+        // Verify SpectralData record exists and is linked
+        const spectralData = await prisma.spectralData.findFirst({
+            where: { sampleId, workItemId: specItem.id }
+        });
+        expect(spectralData).not.toBeNull();
+        expect(spectralData.modality).toBe('MIR');
+        expect(spectralData.status).toBe('VALIDATED');
+
+        // 7. Full Submission by Technician
+        const fullSubRes = await request(app)
+            .post('/api/submissions')
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({ sampleId, type: 'FULL', workItemIds: [specItem.id] });
+        expect(fullSubRes.status).toBe(201);
+        const subId = fullSubRes.body.submission.id;
+
+        // 8. Manager Review & Approval
+        const reviewRes = await request(app)
+            .post(`/api/submissions/${subId}/review`)
+            .set('Authorization', `Bearer ${mgrToken}`)
+            .send({ decisions: [{ workItemId: specItem.id, decision: 'ACCEPT' }] });
+        expect(reviewRes.status).toBe(200);
+
+        const approveRes = await request(app)
+            .post(`/api/samples/${sampleId}/approve`)
+            .set('Authorization', `Bearer ${mgrToken}`);
+        expect(approveRes.status).toBe(200);
+
+        // 9. Verify Report Assembly reflects clean spectral data without fake scalar result
+        const { assembleReport } = require('../../services/reportAssembly');
+        const report = await assembleReport(sampleId, { username: mgrUsername, role: 'LAB_MANAGER', labId: 'LAB-GOLD' });
+        expect(report).toBeDefined();
+        // Check report results contain no fake SPEC_MIR scalar
+        const reportItems = Object.values(report.results || {}).flatMap(cat => cat.items || []);
+        expect(reportItems.some(r => r.param === 'SPEC_MIR')).toBe(false);
+
+        // Cleanup
+        fs.rmSync(stagingDir, { recursive: true, force: true });
     });
 
 });

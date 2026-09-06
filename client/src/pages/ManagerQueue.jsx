@@ -1,6 +1,7 @@
+import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     ShieldCheck, UserPlus, FileText, CheckCircle, AlertOctagon,
     ArrowRight, ArrowLeft, Loader, Clock, Calendar, FlaskConical,
@@ -9,7 +10,6 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
-import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -36,8 +36,13 @@ const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
 
 const ManagerQueue = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState(QUEUE_Tabs.INTAKE);
+
+    const laneParam = (searchParams.get('lane') || searchParams.get('tab') || '').toLowerCase();
+    const initialTab = Object.values(QUEUE_Tabs).includes(laneParam) ? laneParam : QUEUE_Tabs.INTAKE;
+    const [activeTab, setActiveTab] = useState(initialTab);
+    const [userSelected, setUserSelected] = useState(Boolean(laneParam));
 
     // Data States
     const [data, setData] = useState([]);
@@ -50,6 +55,29 @@ const ManagerQueue = () => {
         interval: 15000,
         wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
+
+    const handleTabChange = (newTab) => {
+        setActiveTab(newTab);
+        setUserSelected(true);
+        setSearchParams({ lane: newTab }, { replace: true });
+    };
+
+    // If unparameterized, prioritize highest actionable lane once live data arrives
+    useEffect(() => {
+        if (!laneParam && !userSelected && liveData?.kpis) {
+            const { awaitingReview, unassignedTasks, pendingIntakes } = liveData.kpis;
+            if (awaitingReview > 0) {
+                setActiveTab(QUEUE_Tabs.REVIEW);
+                setUserSelected(true);
+            } else if (unassignedTasks > 0) {
+                setActiveTab(QUEUE_Tabs.ASSIGN);
+                setUserSelected(true);
+            } else if (pendingIntakes > 0) {
+                setActiveTab(QUEUE_Tabs.INTAKE);
+                setUserSelected(true);
+            }
+        }
+    }, [liveData, laneParam, userSelected]);
 
     // Fetch Trigger — now also polls
     const fetchQueueData = useCallback(async (page = 1) => {
@@ -198,7 +226,7 @@ const ManagerQueue = () => {
         const count = tabCounts[id];
         return (
             <button
-                onClick={() => setActiveTab(id)}
+                onClick={() => handleTabChange(id)}
                 className={`flex items-center gap-2 px-6 py-4 border-b-2 font-medium transition-colors relative ${activeTab === id
                     ? 'border-indigo-600 text-indigo-700 bg-indigo-50/50 dark:border-indigo-400 dark:text-indigo-300 dark:bg-indigo-900/20'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30'
@@ -301,6 +329,7 @@ const ManagerQueue = () => {
 
 // Internal Component for Card Rendering
 const QueueCard = ({ item, type, navigate, t }) => {
+    const getAnalysisDisplayName = useAnalysisNames();
     const config = {
         intake: {
             icon: FlaskConical,

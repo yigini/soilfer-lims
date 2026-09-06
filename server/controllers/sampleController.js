@@ -1,3 +1,4 @@
+const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const idGenerator = require('../services/idGenerator');
@@ -479,6 +480,11 @@ exports.updateStatus = async (req, res) => {
             }
         }
 
+        if (updates.requiredAnalyses) {
+            const selected = await cataloguePolicy.validateSelection(JSON.parse(updates.requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: cataloguePolicy.parseJson(sample.requiredAnalyses, []) });
+            if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
+        }
+
         if (status === 'ACCEPTED') {
             updates.dryingStatus = 'PENDING';
             updates.preparationStatus = 'PENDING';
@@ -792,6 +798,8 @@ exports.createWalkInSample = async (req, res) => {
     try {
         // Determine lab from user
         const assignedLab = user.labId || `LAB-${countryCode}`;
+        const selected = await cataloguePolicy.validateSelection(analyses ?? [], { labId: assignedLab });
+        if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
 
         // Automated Short Sample ID for Walk-ins / PT
         const prefix = sampleType === 'PT' ? 'P' : 'W';
@@ -1197,6 +1205,8 @@ exports.getMapState = async (req, res) => {
 
         // Build map-state from engine
         const workflowEngine = require('../utils/workflowEngine');
+        const catalogueDefinitions = await require('../services/analysisService').loadAnalyses();
+        catalogueDefinitions.forEach(definition => workflowEngine.registerAnalysisConfig(definition.code, definition));
         const mapState = workflowEngine.buildMapState(sample, workItems, auditLog);
 
         res.json({
@@ -1753,6 +1763,9 @@ exports.updateSampleAnalyses = async (req, res) => {
 
         // SD-03: Three-way reconcile work items BEFORE mutating requiredAnalyses
         const targetList = Array.isArray(analyses) ? analyses : (sample.requiredAnalyses ? JSON.parse(sample.requiredAnalyses) : []);
+        if (analyses !== undefined && !Array.isArray(analyses) && req.method !== 'GET') return res.status(400).json({ error: 'Analyses must be an array of catalogue selections.' });
+        const selectionCheck = await cataloguePolicy.validateSelection(targetList, { labId: sample.assignedLab || user.labId, existing: currentList });
+        if (!selectionCheck.valid) return res.status(400).json({ error: selectionCheck.error, issues: selectionCheck.issues, code: 'INVALID_ANALYSIS_SELECTION' });
         const reconcileResult = await workItemController.reconcileWorkItemsForSample(sample, targetList, user, effectiveReason);
 
         if (reconcileResult.conflict) {
@@ -2295,6 +2308,9 @@ exports.previewOrderRevision = async (req, res) => {
         }
 
         const targetList = Array.isArray(analyses) ? analyses : (typeof analyses === 'string' ? analyses.split(',') : currentList);
+        if (analyses !== undefined && !Array.isArray(analyses) && req.method !== 'GET') return res.status(400).json({ error: 'Analyses must be an array of catalogue selections.' });
+        const selectionCheck = await cataloguePolicy.validateSelection(targetList, { labId: sample.assignedLab || user.labId, existing: currentList });
+        if (!selectionCheck.valid) return res.status(400).json({ error: selectionCheck.error, issues: selectionCheck.issues, code: 'INVALID_ANALYSIS_SELECTION' });
         const added = targetList.filter(a => !currentList.includes(a));
         const removed = currentList.filter(a => !targetList.includes(a));
         const unchanged = currentList.filter(a => targetList.includes(a));
@@ -2395,6 +2411,9 @@ exports.applyOrderRevision = async (req, res) => {
         }
 
         const targetList = Array.isArray(analyses) ? analyses : currentList;
+        if (analyses !== undefined && !Array.isArray(analyses) && req.method !== 'GET') return res.status(400).json({ error: 'Analyses must be an array of catalogue selections.' });
+        const selectionCheck = await cataloguePolicy.validateSelection(targetList, { labId: sample.assignedLab || user.labId, existing: currentList });
+        if (!selectionCheck.valid) return res.status(400).json({ error: selectionCheck.error, issues: selectionCheck.issues, code: 'INVALID_ANALYSIS_SELECTION' });
         if (targetList.length === currentList.length && targetList.every(a => currentList.includes(a))) {
             const noOpOutcome = {
                 message: 'No changes detected in analyses list.',
@@ -2536,6 +2555,10 @@ exports.createAmendment = async (req, res) => {
 
         if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
             return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        if (!reason || typeof reason !== 'string' || reason.trim() === '') {
+            return res.status(400).json({ error: 'Amendment reason is required and cannot be blank.' });
         }
 
         // If sample is disposed, only clerical / metadata amendments allowed
@@ -2700,5 +2723,4 @@ exports.repairWorkItems = async (req, res) => {
         res.status(500).json({ error: 'Failed to repair work items' });
     }
 };
-
 

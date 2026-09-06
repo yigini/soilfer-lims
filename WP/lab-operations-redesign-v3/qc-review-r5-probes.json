@@ -1,0 +1,74 @@
+{
+  "scope": "Empty schema and synthetic QC records only; no production connection",
+  "checks": [
+    {
+      "name": "Null blank and missing required controls cannot pass QC",
+      "request": {
+        "method": "put",
+        "url": "/api/qc/batches/null-blank",
+        "body": {
+          "qcResults": {
+            "blanks": [
+              {
+                "value": null
+              }
+            ],
+            "duplicates": [],
+            "controls": []
+          }
+        }
+      },
+      "observed": {
+        "httpStatus": 200,
+        "persisted": {
+          "status": "QC_FAIL",
+          "qcResults": "{\"blanks\":[{\"id\":\"BLK-1788700705066\",\"label\":\"Method Blank\",\"type\":\"BLANK\",\"value\":null,\"maxAllowed\":0.05,\"status\":\"FAIL\",\"error\":\"Missing, non-numeric, or non-finite blank value\",\"details\":\"Invalid blank measurement (null, boolean, or non-finite)\"}],\"duplicates\":[],\"controls\":[],\"summary\":{\"totalQcSamples\":1,\"passed\":0,\"failed\":1,\"missingRequired\":[\"CONTROL\",\"DUPLICATE\"],\"incompleteReason\":null,\"evaluatedAt\":\"2026-09-06T13:18:25.066Z\"},\"overallStatus\":\"QC_FAIL\"}"
+        }
+      }
+    },
+    {
+      "name": "Dedicated evaluation cannot alter a CLOSED batch",
+      "request": {
+        "method": "post",
+        "url": "/api/qc/batches/closed-eval/evaluate",
+        "body": {
+          "blanks": [
+            {
+              "value": 1,
+              "maxAllowed": 0.05
+            }
+          ]
+        }
+      },
+      "observed": {
+        "httpStatus": 400,
+        "persisted": {
+          "status": "CLOSED",
+          "qcResults": "{\"overallStatus\":\"QC_PASS\",\"blanks\":[{\"value\":0,\"status\":\"PASS\"}]}"
+        },
+        "error": "Batch is CLOSED and cannot be evaluated or modified."
+      }
+    },
+    {
+      "name": "Clearing QC evidence cannot retain QC_PASS",
+      "request": {
+        "method": "put",
+        "url": "/api/qc/batches/clear-qc",
+        "body": {
+          "qcResults": {
+            "blanks": [],
+            "duplicates": [],
+            "controls": []
+          }
+        }
+      },
+      "observed": {
+        "httpStatus": 200,
+        "persisted": {
+          "status": "OPEN",
+          "qcResults": "{\"blanks\":[],\"duplicates\":[],\"controls\":[],\"summary\":{\"totalQcSamples\":0,\"passed\":0,\"failed\":0,\"missingRequired\":[\"BLANK\",\"CONTROL\",\"DUPLICATE\"],\"incompleteReason\":null,\"evaluatedAt\":\"2026-09-06T13:18:25.103Z\"},\"overallStatus\":\"OPEN\"}"
+        }
+      }
+    }
+  ]
+}

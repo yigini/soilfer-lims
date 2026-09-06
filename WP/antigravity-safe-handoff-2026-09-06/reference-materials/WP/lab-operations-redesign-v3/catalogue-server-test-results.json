@@ -1,0 +1,568 @@
+{
+  "checkedAt": "2026-09-06T09:59:46.628Z",
+  "environment": "isolated test database copy; no production writes",
+  "passed": 120,
+  "failed": 0,
+  "suites": [
+    {
+      "file": "catalogue_result_entry.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Catalogue rules also govern the sample results endpoint DRYING cannot accept a scalar through the alternate endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint PREPARATION cannot accept a scalar through the alternate endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint SPEC_MIR cannot accept a scalar through the alternate endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint SPEC_VIS_NIR cannot accept a scalar through the alternate endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint An unknown parameter cannot be smuggled into an otherwise valid batch",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint A technician cannot record another technician’s work",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint Assigned method and reporting units must match",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint Configured lower bounds are honored when the optional LOQ is null",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint Duplicate replicate keys cannot create two current results",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint Valid assigned measurement is saved and still uses a human parameter name",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint Completed or submitted work cannot be edited through the sample results endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue rules also govern the sample results endpoint The mounted configuration route rejects technician writes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "lab_method_defaults.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "WP-20: Per-Lab Methodology Defaults & Isolation 1. Changing Lab A default to Dumas updates Lab A defaults API without affecting Lab B",
+          "status": "passed"
+        },
+        {
+          "name": "WP-20: Per-Lab Methodology Defaults & Isolation 2. New work items in Lab A receive Dumas while Lab B receives Walkley-Black",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "catalogue_seeder.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract Imported measurands without verified reporting definitions remain inactive without invented units",
+          "status": "passed"
+        },
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract No synthetic count-padding parameters or methodologies ship as laboratory definitions",
+          "status": "passed"
+        },
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract 1. A clean database seeds the configured parameter definitions",
+          "status": "passed"
+        },
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract 2. A database with existing analyses produces a match report and changes nothing without confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract 3. Local hand-created analyses are preserved with isGlobal: false upon confirmed merge",
+          "status": "passed"
+        },
+        {
+          "name": "WP-19: Analysis Catalogue Seeder Contract 4. Environmental module parameters ship disabled (status: inactive)",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "catalogue_governance.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\" \",\"code\":\"X\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"INVALID CODE\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"validation\":{\"min\":20,\"max\":2}}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"validation\":{\"min\":\"2\"}}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"validation\":\"{broken\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"validation\":{\"decimalPlaces\":1.5}}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"matrix\":\"UNKNOWN\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"executionOrder\":\"2x\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"prerequisites\":\"{}\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Rejects unsafe definition {\"name\":\"Valid name\",\"code\":\"X\",\"status\":\"whatever\"}",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections New parameters start inactive, without fabricated numeric limits or units",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Explicit inactive status and matrix survive create and update",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Shared definitions cannot be silently changed by a lab manager",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Manager can create and update their own scoped definition",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Inactive and unknown selections cannot create new orders; existing selections survive retirement",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Placeholders and operational gates are not orderable analyses",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Incorrect mass-concentration defaults and uncurated import labels are flagged for correction",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Duplicate and cross-lab selections are rejected",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Malformed validation in one legacy record does not make the entire catalogue disappear",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections A new package cannot contain inactive or unknown parameters",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Historical results prevent deletion and unit reinterpretation",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections JSON package references and prerequisites prevent deletion",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Unused definitions can be removed with an audit record",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Method default resolves to this lab, never an unrelated lab",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Mixed valid/invalid defaults request makes no partial changes",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Referenced methods cannot be deleted, including non-FK default references",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue governance and connected selections Cross-lab default configuration cannot be read by another manager",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "matrix_validation.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Sample Matrix Cross-Parameter Validation Contract 1. saveResults validates matrix integrity and computes USDA texture & C:N diagnostics",
+          "status": "passed"
+        },
+        {
+          "name": "Sample Matrix Cross-Parameter Validation Contract 2. Emits warning when texture fractions fail 100% closure tolerance",
+          "status": "passed"
+        },
+        {
+          "name": "Sample Matrix Cross-Parameter Validation Contract 3. submitForApproval attaches complete matrix diagnostics to response",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "reconcile_analyses.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "SD-03: Work Item Reconciliation on Analysis List Change Contract 1. Removing an analysis with a recorded result is refused (HTTP 409) naming analysis and result",
+          "status": "passed"
+        },
+        {
+          "name": "SD-03: Work Item Reconciliation on Analysis List Change Contract 2. Removing an in-progress analysis without a reason is rejected (HTTP 400)",
+          "status": "passed"
+        },
+        {
+          "name": "SD-03: Work Item Reconciliation on Analysis List Change Contract 3. Removing an in-progress analysis with a reason marks it WAIVED with audit trail",
+          "status": "passed"
+        },
+        {
+          "name": "SD-03: Work Item Reconciliation on Analysis List Change Contract 4. Removing an unstarted (NOT_ASSIGNED) analysis deletes its work item row",
+          "status": "passed"
+        },
+        {
+          "name": "SD-03: Work Item Reconciliation on Analysis List Change Contract 5. Progress counter immediately matches the reconciled analysis list",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "prerequisite_gate.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "SD-05: Server-Side Prerequisite Gate Contract 1. Assigning a work item on an un-prepared sample succeeds (HTTP 200)",
+          "status": "passed"
+        },
+        {
+          "name": "SD-05: Server-Side Prerequisite Gate Contract 2. Starting work on an un-prepared sample is refused with HTTP 412 Precondition Failed",
+          "status": "passed"
+        },
+        {
+          "name": "SD-05: Server-Side Prerequisite Gate Contract 3. Direct call to saveResults without preparation returns HTTP 412 Precondition Failed",
+          "status": "passed"
+        },
+        {
+          "name": "SD-05: Server-Side Prerequisite Gate Contract 4. Completing preparation allows startWork to succeed (HTTP 200)",
+          "status": "passed"
+        },
+        {
+          "name": "SD-05: Server-Side Prerequisite Gate Contract 5. Saving results now succeeds with preparation completed (HTTP 200)",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "workbench_draft_integrity.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 1. Saving draft writes strictly to WorkItemDraft and produces 0 Result rows",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 2. Downstream reports completely exclude WorkItemDraft data",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 3. Discarding a draft purges draft record and reverts WorkItem to ASSIGNED",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 4. Conflict resolution: server value compare and override retention",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 5. Non-draft batchSave records determinations into Result and purges draft",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Draft Integrity Contract (P0) 6. Replicate 2 does not overwrite Replicate 1 in Result table",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "catalogue_work_execution.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Catalogue to operational work and numeric validation Numeric drafts are blocked before preparation; no Result or draft is written",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Operational queue resolves human names and checklist editors without catalogue numeric entries",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Drying refuses numerical evidence",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Partial checklist saves as draft without opening the drying gate",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Missing confirmations cannot complete drying",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Completing drying saves evidence, clears its draft and opens only drying",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Numeric entry remains blocked until preparation also completes",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Catalogue min/max are enforced at record time without requiring a hidden type field",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input Infinity cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input 0x10 cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input <  cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input >Infinity cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input NaN cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Invalid numeric input 5abc cannot become a result",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Boolean-like strings and surplus confirmations are not valid evidence",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation Ambiguous defaults are reported instead of silently taking the first method",
+          "status": "passed"
+        },
+        {
+          "name": "Catalogue to operational work and numeric validation A display-name-only catalogue update does not remove preparation prerequisites",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "result_provenance.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "WP-31: Result Provenance Tracking 1. Direct prisma create defaults Result.provenance to MEASURED",
+          "status": "passed"
+        },
+        {
+          "name": "WP-31: Result Provenance Tracking 2. resultsController.saveResults preserves specified provenance or defaults to MEASURED",
+          "status": "passed"
+        },
+        {
+          "name": "WP-31: Result Provenance Tracking 3. assembleReport includes provenance for each result item",
+          "status": "passed"
+        },
+        {
+          "name": "WP-31: Result Provenance Tracking 4. WP-40: saveResults accepts chosen basis and stores censoring correctly",
+          "status": "passed"
+        },
+        {
+          "name": "WP-31: Result Provenance Tracking 5. WP-40: saveResults supports multiple replicates without overwriting previous determination",
+          "status": "passed"
+        },
+        {
+          "name": "WP-31: Result Provenance Tracking 6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "workflow_dag.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "WP-25: Catalogue-Driven Workflow Graph and DAG Validation 1. Self-referential prerequisite is refused",
+          "status": "passed"
+        },
+        {
+          "name": "WP-25: Catalogue-Driven Workflow Graph and DAG Validation 2. Two-node cyclic prerequisite is refused",
+          "status": "passed"
+        },
+        {
+          "name": "WP-25: Catalogue-Driven Workflow Graph and DAG Validation 3. Multi-node cyclic prerequisite is refused",
+          "status": "passed"
+        },
+        {
+          "name": "WP-25: Catalogue-Driven Workflow Graph and DAG Validation 4. Valid acyclic DAG dependencies are permitted",
+          "status": "passed"
+        },
+        {
+          "name": "WP-25: Catalogue-Driven Workflow Graph and DAG Validation 5. Work items are generated in order of catalogue executionOrder",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "workbench_readiness_concurrency.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 1. Determination Value Parsing & Formatting Distinguishes blank from zero (0 is valid numeric, empty is blank)",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 1. Determination Value Parsing & Formatting Normalizes locale decimal comma to dot",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 1. Determination Value Parsing & Formatting Detects and standardizes censored values (<LOQ and >Range)",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 1. Determination Value Parsing & Formatting Invalid string formats are caught with INVALID_FORMAT flag",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 2. Numeric Method Range Bounds Validates values within range",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 2. Numeric Method Range Bounds Flags below min and above max as invalid",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 2. Numeric Method Range Bounds Flags values below LOQ with warning flag but valid if within hard bounds",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 3. Soil Texture Closure Validation (100% ± 2.0%) Exact 100% closure produces valid USDA classification",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 3. Soil Texture Closure Validation (100% ± 2.0%) Within ±2.0% tolerance is accepted and normalized",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 3. Soil Texture Closure Validation (100% ± 2.0%) Closure error exceeding 2.0% is blocked with TEXTURE_CLOSURE_FAILED",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 3. Soil Texture Closure Validation (100% ± 2.0%) Incomplete fractions are flagged",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 4. Operational Task Checklist Validation Requires all required steps to be true",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Blocks analytical work when sample is ON_HOLD",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Blocks analytical work when drying is not completed",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Blocks analytical work when preparation is not completed",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Allows DRYING task when sample is ACCEPTED even if dryingStatus is PENDING",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Blocks when required instrument is missing",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Blocks when instrument calibration is OVERDUE",
+          "status": "passed"
+        },
+        {
+          "name": "Workbench Validation & Readiness Engine Contracts (Phase 2) 5. Task Execution Readiness & Equipment Qualification Approves item when all prerequisites and instrument qualification are met",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "workflow_map_redesign.test.js",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Workflow Map Redesign Contract Tests 1. S002 Forensic Reproduction & Denominator Isolation S002 never recommends \"Complete Drying\" when preparation is done",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 1. S002 Forensic Reproduction & Denominator Isolation S002 separates preparation, execution, and review denominators cleanly",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 1. S002 Forensic Reproduction & Denominator Isolation S002 excludes unrequested Physical and Chemical stations from the map",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 1. S002 Forensic Reproduction & Denominator Isolation Vis-NIR carries warn tone without breaking completed execution status",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 2. Blocker Evaluation Order and Root Cause blocked stage has status \"blocked\" and exposes blocking root cause",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 3. Dynamic Stage Pruning for Wet Chemistry Only sample with only pH and EC only renders Chemical Analysis and Preparation",
+          "status": "passed"
+        },
+        {
+          "name": "Workflow Map Redesign Contract Tests 4. Explicit Edge DAG Validity overview and dependency edges have valid source and destination references",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "clientBuild": "passed",
+  "browserChecks": 16
+}

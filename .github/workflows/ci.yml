@@ -24,6 +24,10 @@ jobs:
         run: npm install
         working-directory: server
 
+      - name: Install client dependencies
+        run: npm install
+        working-directory: client
+
       - name: Setup test database and generate Prisma client
         run: |
           npx prisma generate
@@ -42,10 +46,6 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-12345
-
-      - name: Install client dependencies
-        run: npm install
-        working-directory: client
 
       - name: Build client production bundle
         run: npm run build

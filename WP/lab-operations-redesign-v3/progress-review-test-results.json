@@ -1,0 +1,423 @@
+{
+  "checkedAt": "2026-09-06T10:29:42.798Z",
+  "reviewedCheckpoint": "8747b8a",
+  "environment": "Full server suite on an isolated harness copy of the currently reconciled local development database",
+  "passed": 429,
+  "failed": 0,
+  "suites": [
+    {
+      "file": "server/tests/contracts/export_normalization.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reception_regression_stage_f.test.js",
+      "status": "passed",
+      "passed": 18,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/scenarios/golden_path.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/security/lab_isolation.test.js",
+      "status": "passed",
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reception_stage_d.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/security/rbac_enforcement.test.js",
+      "status": "passed",
+      "passed": 53,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/api_key_scoping_isolation.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workspace_projection_p2.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/consignment_stage_c.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/assignment.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/scenarios/qc_batch.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_stage_b.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/submission.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reception_stage_e.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/security/auth_token_invalidation.test.js",
+      "status": "passed",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/scenarios/pt_ilc.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/closure.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/report_pdf.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/review_reports_amendments_p6.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_stage_c.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reception_stage_b.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/sample_detail.test.js",
+      "status": "passed",
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_stage_d.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/qc_controls.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/catalogue_seeder.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reception_stage_a.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_stage_a.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/lab_method_defaults.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/status_contract.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/scenarios/scientific_validation.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/catalogue_result_entry.test.js",
+      "status": "passed",
+      "passed": 12,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/gates_clean.test.js",
+      "status": "passed",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/matrix_validation.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reopen_audit_episodes.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/nsis_exchange.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/catalogue_governance.test.js",
+      "status": "passed",
+      "passed": 27,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/catalogue_work_execution.test.js",
+      "status": "passed",
+      "passed": 17,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_multipart_upload.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/prerequisite_gate.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/controlled_units_interpretation.test.js",
+      "status": "passed",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/sample_transitions.test.js",
+      "status": "passed",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/native_spectral_parsers.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reconcile_analyses.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/reopen_preparation_status.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_stage_e.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/edit_analyses_permission.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/work_item_transition.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/mandatory_reason.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workbench_draft_integrity.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectroscopy_operational_corrections.test.js",
+      "status": "passed",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/security/wiring.test.js",
+      "status": "passed",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/result_provenance.test.js",
+      "status": "passed",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workbench_pipeline_twostep.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/escalation.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workflow_dag.test.js",
+      "status": "passed",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/operational_gates_unification.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/deployment_profiles.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/qc_disposition_flagging.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/proficiency_testing.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/unbaked_constants.test.js",
+      "status": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/legacy_import.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/external_mapping_shelf.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workbench_readiness_concurrency.test.js",
+      "status": "passed",
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/coord_parser.test.js",
+      "status": "passed",
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/workflow_map_redesign.test.js",
+      "status": "passed",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/db_pragmas.test.js",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/rbac_sample_registry.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "server/tests/contracts/spectral_mir_window.test.js",
+      "status": "passed",
+      "passed": 3,
+      "failed": 0
+    }
+  ]
+}

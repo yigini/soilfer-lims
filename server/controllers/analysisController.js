@@ -1,17 +1,18 @@
 const prisma = require('../prisma');
 const crypto = require('crypto');
 const { invalidateCache } = require('../services/analysisService');
+const catalogue = require('../services/cataloguePolicy');
 
 // --- Helpers ---
 
 /**
  * Lab-scope guard — ensures the current user can modify the entity.
  * SUPER_ADMIN can modify anything. Others can only modify entities
- * that belong to their lab or are global (labId === null).
+ * that belong to their lab. Shared definitions are owned centrally.
  */
 const canModify = (user, entity) => {
     if (user.role === 'SUPER_ADMIN') return true;
-    return entity.labId === null || entity.labId === user.labId;
+    return !!user.labId && entity.labId === user.labId;
 };
 
 // --- READ OPERATIONS ---
@@ -26,7 +27,7 @@ exports.getCategories = async (req, res) => {
         }
 
         const categories = await prisma.analysisCategory.findMany({ where });
-        res.json(categories);
+        res.json(categories.map(c => ({ ...c, canEdit: canModify(user, c) })));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch categories' });
     }
@@ -41,12 +42,17 @@ exports.getAnalyses = async (req, res) => {
             where.OR = [{ labId: user.labId }, { labId: null }];
         }
 
-        const analyses = await prisma.analysis.findMany({ where });
-        const parsed = analyses.map(a => ({
-            ...a,
-            validation: typeof a.validation === 'string' ? JSON.parse(a.validation) : a.validation
-        }));
-        res.json(parsed);
+        const analyses = await prisma.analysis.findMany({ where, orderBy: { name: 'asc' } });
+        const defaults = await require('../services/methodResolution').resolveDefaultSelections(analyses.map(a => a.code), user.labId);
+        const parsed = analyses.map(a => {
+            const description = catalogue.describeAnalysis(a);
+            if (defaults.get(a.code)?.error) {
+                description.configurationIssues.push(defaults.get(a.code).error);
+                description.orderable = false;
+            }
+            return { ...description, canEdit: canModify(user, a) };
+        });
+        res.json(req.query.orderable === 'true' ? parsed.filter(a => a.orderable) : parsed);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch analyses' });
     }
@@ -65,7 +71,7 @@ exports.getMethodologies = async (req, res) => {
             where,
             include: { analysis: { select: { name: true, code: true } } }
         });
-        res.json(methodologies);
+        res.json(methodologies.map(m => ({ ...m, canEdit: canModify(user, m) })));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch methodologies' });
     }
@@ -81,9 +87,12 @@ exports.getGroups = async (req, res) => {
         }
 
         const groups = await prisma.analysisGroup.findMany({ where });
-        const parsed = groups.map(g => ({
-            ...g,
-            analyses: typeof g.analyses === 'string' ? JSON.parse(g.analyses) : (g.analyses || [])
+        const parsed = await Promise.all(groups.map(async g => {
+            const stored = catalogue.parseJson(g.analyses, null);
+            if (!Array.isArray(stored) || !stored.length) return { ...g, analyses: [], orderable: false, configurationIssues: [{ reason: 'Package must contain a valid list of parameters.' }], canEdit: canModify(user, g) };
+            const analyses = stored;
+            const selection = await catalogue.validateSelection(analyses, { labId: user.role === 'SUPER_ADMIN' ? g.labId : user.labId });
+            return { ...g, analyses, orderable: selection.valid, configurationIssues: selection.issues, canEdit: canModify(user, g) };
         }));
         res.json(parsed);
     } catch (error) {
@@ -112,185 +121,117 @@ exports.getOperationalGates = async (req, res) => {
 
 // --- ANALYSES CRUD ---
 
+async function validateAnalysisReferences(data, code, labId) {
+    if (data.categoryId) {
+        const category = await prisma.analysisCategory.findUnique({ where: { id: data.categoryId } });
+        if (!category || (category.labId && category.labId !== labId)) return 'Category is unavailable to this laboratory.';
+    }
+    if (data.prerequisites !== undefined) {
+        const all = await prisma.analysis.findMany({ select: { code: true, prerequisites: true, labId: true } });
+        const deps = catalogue.parseJson(data.prerequisites, []);
+        if (deps.some(c => !catalogue.GATE_CODES.has(c) && !all.some(a => a.code === c && (!a.labId || a.labId === labId)))) return 'A prerequisite parameter is unavailable to this laboratory.';
+        const check = require('../utils/workflowEngine').validatePrerequisites(code, deps, all);
+        if (!check.valid) return check.error;
+    }
+    return null;
+}
+
+function auditData(req, entity, entityId, action, details) {
+    return { id: crypto.randomUUID(), entity, entityId, action, details,
+        performedBy: req.user.username, timestamp: new Date() };
+}
+
 exports.createAnalysis = async (req, res) => {
-    const { code, name, description, categoryId, units, validation, executionOrder, prerequisites } = req.body;
-    const user = req.user;
-
-    if (!code || !name) return res.status(400).json({ error: 'Code and Name are required' });
-
+    const checked = catalogue.validateAnalysisInput(req.body);
+    if (checked.error) return res.status(400).json({ error: checked.error });
+    const data = checked.data;
+    const labId = req.user.role === 'SUPER_ADMIN' ? null : req.user.labId;
+    if (req.user.role !== 'SUPER_ADMIN' && !labId) return res.status(403).json({ error: 'A laboratory assignment is required.' });
     try {
-        const existing = await prisma.analysis.findUnique({ where: { code } });
-        if (existing) return res.status(400).json({ error: 'Analysis code already exists' });
-
-        if (prerequisites) {
-            const workflowEngine = require('../utils/workflowEngine');
-            const allAnalyses = await prisma.analysis.findMany({ select: { code: true, prerequisites: true } });
-            const validationResult = workflowEngine.validatePrerequisites(code, prerequisites, allAnalyses);
-            if (!validationResult.valid) {
-                return res.status(400).json({ error: validationResult.error, cycle: validationResult.cycle });
-            }
-        }
-
-        const newAnalysis = await prisma.analysis.create({
-            data: {
-                code,
-                name,
-                description: description || null,
-                categoryId: categoryId || null,
-                units: units || null,
-                status: 'active',
-                executionOrder: executionOrder !== undefined ? parseInt(executionOrder) : 100,
-                prerequisites: prerequisites ? (typeof prerequisites === 'string' ? prerequisites : JSON.stringify(prerequisites)) : null,
-                validation: validation ? (typeof validation === 'string' ? validation : JSON.stringify(validation)) : null,
-                labId: user.role !== 'SUPER_ADMIN' ? user.labId : null
-            }
+        if (await prisma.analysis.findUnique({ where: { code: data.code } })) return res.status(409).json({ error: 'Internal parameter code already exists.' });
+        const referenceError = await validateAnalysisReferences(data, data.code, labId);
+        if (referenceError) return res.status(400).json({ error: referenceError });
+        const created = await prisma.$transaction(async tx => {
+            const a = await tx.analysis.create({ data: { ...data, labId, isGlobal: labId === null } });
+            await tx.auditLog.create({ data: auditData(req, 'ANALYSIS', a.code, 'CREATE', 'Created parameter: ' + a.name) });
+            return a;
         });
-
-        const workflowEngine = require('../utils/workflowEngine');
-        workflowEngine.registerAnalysisConfig(code, newAnalysis);
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'ANALYSIS',
-                entityId: code,
-                action: 'CREATE',
-                details: `Created analysis ${name} (${code})`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
-        });
-
+        require('../utils/workflowEngine').registerAnalysisConfig(created.code, created);
         invalidateCache();
-        res.json(newAnalysis);
+        res.json(catalogue.describeAnalysis(created));
     } catch (error) {
         console.error('[createAnalysis] Error:', error);
-        res.status(500).json({ error: 'Failed to create analysis' });
+        res.status(error.code === 'P2002' ? 409 : 500).json({ error: 'Could not create parameter. Check the code and retry.' });
     }
 };
 
 exports.updateAnalysis = async (req, res) => {
     const { code } = req.params;
-    const updates = req.body;
-    const user = req.user;
-
     try {
         const existing = await prisma.analysis.findUnique({ where: { code } });
-        if (!existing) return res.status(404).json({ error: 'Analysis not found' });
-
-        if (!canModify(user, existing)) {
-            return res.status(403).json({ error: 'You do not have permission to modify this analysis' });
-        }
-
-        if (updates.code && updates.code !== code) {
-            return res.status(400).json({ error: 'Cannot change Analysis Code' });
-        }
-
-        // Whitelist: only allow safe fields to be updated
-        const data = {};
-        const ALLOWED_FIELDS = ['name', 'description', 'categoryId', 'units', 'validation', 'status', 'executionOrder', 'prerequisites'];
-        for (const field of ALLOWED_FIELDS) {
-            if (updates[field] !== undefined) {
-                data[field] = updates[field];
+        if (!existing) return res.status(404).json({ error: 'Parameter not found.' });
+        if (!canModify(req.user, existing)) return res.status(403).json({ error: 'Shared parameters are maintained by the system administrator. Lab managers can maintain their own parameters and local method defaults.' });
+        if (req.body.code !== undefined && req.body.code !== code) return res.status(400).json({ error: 'Internal codes cannot change because orders and results reference them.' });
+        const checked = catalogue.validateAnalysisInput(req.body, existing);
+        if (checked.error) return res.status(400).json({ error: checked.error });
+        const data = checked.data;
+        const referenceError = await validateAnalysisReferences(data, code, existing.labId);
+        if (referenceError) return res.status(400).json({ error: referenceError });
+        const updated = await prisma.$transaction(async tx => {
+            // Check references in the same transaction as the definition change.
+            const current = await tx.analysis.findUnique({ where: { code } });
+            if (['units', 'matrix'].some(k => k in data && data[k] !== current[k])) {
+                const usage = await catalogue.analysisUsage(code, tx);
+                if (usage.workItems || usage.results || usage.orderLines || usage.sampleOrders) return { blocked: true, usage };
             }
-        }
-        if (data.executionOrder !== undefined) {
-            data.executionOrder = parseInt(data.executionOrder);
-        }
-        if (data.prerequisites !== undefined) {
-            const workflowEngine = require('../utils/workflowEngine');
-            const allAnalyses = await prisma.analysis.findMany({ select: { code: true, prerequisites: true } });
-            const validationResult = workflowEngine.validatePrerequisites(code, data.prerequisites, allAnalyses);
-            if (!validationResult.valid) {
-                return res.status(400).json({ error: validationResult.error, cycle: validationResult.cycle });
+            if ('units' in data && data.units !== current.units) {
+                const unit = data.units ? await tx.unit.findUnique({ where: { code: data.units } }) : null;
+                data.unitCode = unit?.code || null;
+                data.qudtUnit = null; // Do not keep an external unit mapping for a different quantity.
             }
-            if (typeof data.prerequisites !== 'string') {
-                data.prerequisites = JSON.stringify(data.prerequisites);
-            }
-        }
-        if (data.validation && typeof data.validation !== 'string') {
-            data.validation = JSON.stringify(data.validation);
-        }
-
-        const updated = await prisma.analysis.update({
-            where: { code },
-            data
+            data.version = (existing.version || 1) + 1;
+            const a = await tx.analysis.update({ where: { code }, data });
+            await tx.auditLog.create({ data: { ...auditData(req, 'ANALYSIS', code, 'UPDATE', 'Updated parameter: ' + a.name), before: JSON.stringify(existing), after: JSON.stringify(a) } });
+            return a;
         });
-
-        const workflowEngine = require('../utils/workflowEngine');
-        workflowEngine.registerAnalysisConfig(code, updated);
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'ANALYSIS',
-                entityId: code,
-                action: 'UPDATE',
-                details: `Updated fields: ${Object.keys(data).join(', ')}`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
-        });
-
+        if (updated.blocked) return res.status(409).json({ error: 'This parameter has recorded work or orders. Create a new parameter definition to change its unit or matrix; existing values must keep their original meaning.', usage: updated.usage });
+        require('../utils/workflowEngine').registerAnalysisConfig(code, updated);
         invalidateCache();
-        res.json(updated);
+        res.json(catalogue.describeAnalysis(updated));
     } catch (error) {
         console.error('[updateAnalysis] Error:', error);
-        res.status(500).json({ error: 'Failed to update analysis' });
+        res.status(500).json({ error: 'Failed to update parameter.' });
     }
+};
+
+exports.getAnalysisUsage = async (req, res) => {
+    try {
+        const analysis = await prisma.analysis.findUnique({ where: { code: req.params.code } });
+        if (!analysis) return res.status(404).json({ error: 'Parameter not found.' });
+        if (!canModify(req.user, analysis)) return res.status(403).json({ error: 'Parameter is outside your configuration scope.' });
+        res.json(await catalogue.analysisUsage(analysis.code));
+    } catch (error) { res.status(500).json({ error: 'Could not check parameter connections.' }); }
 };
 
 exports.deleteAnalysis = async (req, res) => {
     const { code } = req.params;
-    const user = req.user;
-
     try {
         const existing = await prisma.analysis.findUnique({ where: { code } });
-        if (!existing) return res.status(404).json({ error: 'Analysis not found' });
-
-        if (!canModify(user, existing)) {
-            return res.status(403).json({ error: 'You do not have permission to delete this analysis' });
-        }
-
-        // Referential integrity: check if analysis is in active use
-        const activeWorkItems = await prisma.workItem.count({
-            where: { analysis: code, status: { notIn: ['COMPLETED', 'ACCEPTED', 'CANCELLED'] } }
+        if (!existing) return res.status(404).json({ error: 'Parameter not found.' });
+        if (!canModify(req.user, existing)) return res.status(403).json({ error: 'Shared parameters can only be removed by the system administrator.' });
+        const result = await prisma.$transaction(async tx => {
+            const usage = await catalogue.analysisUsage(code, tx);
+            if (Object.values(usage).some(n => n > 0)) return { usage };
+            await tx.analysis.delete({ where: { code } });
+            await tx.auditLog.create({ data: auditData(req, 'ANALYSIS', code, 'DELETE', 'Deleted unused parameter: ' + existing.name) });
+            return { success: true };
         });
-        if (activeWorkItems > 0) {
-            return res.status(409).json({
-                error: `Cannot delete: ${activeWorkItems} active work item(s) reference this analysis`,
-                activeWorkItems
-            });
-        }
-
-        // Check if referenced by any methodologies
-        const methodCount = await prisma.methodology.count({ where: { analysisCode: code } });
-        if (methodCount > 0) {
-            return res.status(409).json({
-                error: `Cannot delete: ${methodCount} methodology(ies) reference this analysis. Delete them first.`,
-                methodCount
-            });
-        }
-
-        await prisma.analysis.delete({ where: { code } });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'ANALYSIS',
-                entityId: code,
-                action: 'DELETE',
-                details: `Deleted analysis ${existing.name}`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
-        });
-
+        if (result.usage) return res.status(409).json({ error: 'This parameter is connected to orders, results or configuration. Set it inactive to stop new orders while preserving those connections.', usage: result.usage });
         invalidateCache();
-        res.json({ success: true, message: 'Analysis deleted' });
+        res.json(result);
     } catch (error) {
         console.error('[deleteAnalysis] Error:', error);
-        res.status(500).json({ error: 'Failed to delete analysis' });
+        res.status(500).json({ error: 'Failed to delete parameter.' });
     }
 };
 
@@ -301,11 +242,15 @@ exports.createGroup = async (req, res) => {
     const user = req.user;
 
     if (!id || !name) return res.status(400).json({ error: 'ID and Name are required' });
+    if (!Array.isArray(analyses) || !analyses.length) return res.status(400).json({ error: 'Select at least one parameter for this package.' });
 
     try {
         const existing = await prisma.analysisGroup.findUnique({ where: { id } });
         if (existing) return res.status(400).json({ error: 'Group ID already exists' });
 
+        const selected = await catalogue.validateSelection(analyses || [], { labId: user.role === 'SUPER_ADMIN' ? null : user.labId });
+        if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
+        if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'A package name is required.' });
         const newGroup = await prisma.analysisGroup.create({
             data: {
                 id,
@@ -348,8 +293,16 @@ exports.updateGroup = async (req, res) => {
         }
 
         const data = {};
-        if (updates.name !== undefined) data.name = updates.name;
-        if (updates.analyses !== undefined) data.analyses = JSON.stringify(updates.analyses);
+        if (updates.name !== undefined) {
+            if (typeof updates.name !== 'string' || !updates.name.trim()) return res.status(400).json({ error: 'A package name is required.' });
+            data.name = updates.name.trim();
+        }
+        if (updates.analyses !== undefined) {
+            if (!Array.isArray(updates.analyses) || !updates.analyses.length) return res.status(400).json({ error: 'Select at least one parameter for this package.' });
+            const selected = await catalogue.validateSelection(updates.analyses, { labId: existing.labId, existing: catalogue.parseJson(existing.analyses, []) });
+            if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
+            data.analyses = JSON.stringify(updates.analyses);
+        }
 
         const updated = await prisma.analysisGroup.update({
             where: { id },
@@ -387,6 +340,8 @@ exports.deleteGroup = async (req, res) => {
             return res.status(403).json({ error: 'You do not have permission to delete this group' });
         }
 
+        const references = await prisma.sample.findMany({ where: { analysisGroupIds: { contains: id } }, select: { analysisGroupIds: true } });
+        if (references.some(s => catalogue.parseJson(s.analysisGroupIds, []).includes(id))) return res.status(409).json({ error: 'This package is referenced by sample orders and cannot be deleted.' });
         await prisma.analysisGroup.delete({ where: { id } });
 
         await prisma.auditLog.create({
@@ -410,136 +365,77 @@ exports.deleteGroup = async (req, res) => {
 
 // --- METHODOLOGIES CRUD ---
 
+function validateMethod(body) {
+    if (body.name !== undefined && (typeof body.name !== 'string' || !body.name.trim())) return 'A descriptive method name is required.';
+    if (body.isDefault !== undefined && typeof body.isDefault !== 'boolean') return 'Default method must be true or false.';
+    if (body.standard != null && typeof body.standard !== 'string') return 'Method reference must be text.';
+    return null;
+}
+
 exports.createMethodology = async (req, res) => {
-    const { analysisCode, name, standard, isDefault } = req.body;
-    const user = req.user;
-
-    if (!analysisCode || !name) {
-        return res.status(400).json({ error: 'Analysis code and method name are required' });
-    }
-
+    const { analysisCode, name, standard, isDefault = false } = req.body;
+    const error = validateMethod(req.body);
+    if (error || !name || !analysisCode) return res.status(400).json({ error: error || 'Parameter and method name are required.' });
+    const labId = req.user.role === 'SUPER_ADMIN' ? null : req.user.labId;
+    if (req.user.role !== 'SUPER_ADMIN' && !labId) return res.status(403).json({ error: 'A laboratory assignment is required.' });
     try {
-        // Verify analysis exists
         const analysis = await prisma.analysis.findUnique({ where: { code: analysisCode } });
-        if (!analysis) return res.status(404).json({ error: `Analysis '${analysisCode}' not found` });
-
-        // If marking as default, unset any existing defaults for this analysis+lab
-        const labId = user.role !== 'SUPER_ADMIN' ? user.labId : null;
-        if (isDefault) {
-            await prisma.methodology.updateMany({
-                where: { analysisCode, labId, isDefault: true },
-                data: { isDefault: false }
-            });
-        }
-
-        const methodology = await prisma.methodology.create({
-            data: {
-                analysisCode,
-                name,
-                standard: standard || null,
-                isDefault: isDefault || false,
-                labId
-            }
+        if (!analysis || (analysis.labId && analysis.labId !== labId)) return res.status(400).json({ error: 'Parameter is unavailable to this laboratory.' });
+        const created = await prisma.$transaction(async tx => {
+            if (isDefault) await tx.methodology.updateMany({ where: { analysisCode, labId, isDefault: true }, data: { isDefault: false } });
+            const m = await tx.methodology.create({ data: { analysisCode, name: name.trim(), standard: standard?.trim() || null, isDefault, labId } });
+            await tx.auditLog.create({ data: auditData(req, 'METHODOLOGY', m.id, 'CREATE', 'Created method: ' + m.name) });
+            return m;
         });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'METHODOLOGY',
-                entityId: methodology.id,
-                action: 'CREATE',
-                details: `Created methodology "${name}" for ${analysisCode}${standard ? ` (${standard})` : ''}`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
-        });
-
-        res.json(methodology);
-    } catch (error) {
-        console.error('[createMethodology] Error:', error);
-        res.status(500).json({ error: 'Failed to create methodology' });
-    }
+        invalidateCache();
+        res.json(created);
+    } catch (error) { console.error('[createMethodology]', error); res.status(500).json({ error: 'Failed to create methodology.' }); }
 };
 
 exports.updateMethodology = async (req, res) => {
+    const error = validateMethod(req.body);
+    if (error) return res.status(400).json({ error });
     const { id } = req.params;
-    const updates = req.body;
-    const user = req.user;
-
     try {
         const existing = await prisma.methodology.findUnique({ where: { id } });
-        if (!existing) return res.status(404).json({ error: 'Methodology not found' });
-
-        if (!canModify(user, existing)) {
-            return res.status(403).json({ error: 'You do not have permission to modify this methodology' });
-        }
-
+        if (!existing) return res.status(404).json({ error: 'Method not found.' });
+        if (!canModify(req.user, existing)) return res.status(403).json({ error: 'Shared methods are maintained centrally. Create a laboratory method or choose a local default.' });
         const data = {};
-        if (updates.name !== undefined) data.name = updates.name;
-        if (updates.standard !== undefined) data.standard = updates.standard;
-        if (updates.isDefault !== undefined) {
-            data.isDefault = updates.isDefault;
-            // If setting as default, unset others for same analysis+lab
-            if (updates.isDefault) {
-                await prisma.methodology.updateMany({
-                    where: { analysisCode: existing.analysisCode, labId: existing.labId, isDefault: true, id: { not: id } },
-                    data: { isDefault: false }
-                });
-            }
-        }
-
-        const updated = await prisma.methodology.update({ where: { id }, data });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'METHODOLOGY',
-                entityId: id,
-                action: 'UPDATE',
-                details: `Updated methodology ${existing.name}`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
+        if (req.body.name !== undefined) data.name = req.body.name.trim();
+        if (req.body.standard !== undefined) data.standard = req.body.standard?.trim() || null;
+        if (req.body.isDefault !== undefined) data.isDefault = req.body.isDefault;
+        const updated = await prisma.$transaction(async tx => {
+            const usage = await require('../services/methodResolution').methodologyUsage(id, tx);
+            if ((usage.workItems || usage.results || usage.orderLines) && ['name', 'standard'].some(k => k in data && data[k] !== existing[k])) return { blocked: true, usage };
+            if (data.isDefault) await tx.methodology.updateMany({ where: { analysisCode: existing.analysisCode, labId: existing.labId, isDefault: true, id: { not: id } }, data: { isDefault: false } });
+            data.version = (existing.version || 1) + 1;
+            const m = await tx.methodology.update({ where: { id }, data });
+            await tx.auditLog.create({ data: { ...auditData(req, 'METHODOLOGY', id, 'UPDATE', 'Updated method: ' + m.name), before: JSON.stringify(existing), after: JSON.stringify(m) } });
+            return m;
         });
-
+        if (updated.blocked) return res.status(409).json({ error: 'This method is already referenced by work or results. Create a revised method to preserve the executed procedure.', usage: updated.usage });
+        invalidateCache();
         res.json(updated);
-    } catch (error) {
-        console.error('[updateMethodology] Error:', error);
-        res.status(500).json({ error: 'Failed to update methodology' });
-    }
+    } catch (error) { console.error('[updateMethodology]', error); res.status(500).json({ error: 'Failed to update methodology.' }); }
 };
 
 exports.deleteMethodology = async (req, res) => {
     const { id } = req.params;
-    const user = req.user;
-
     try {
         const existing = await prisma.methodology.findUnique({ where: { id } });
-        if (!existing) return res.status(404).json({ error: 'Methodology not found' });
-
-        if (!canModify(user, existing)) {
-            return res.status(403).json({ error: 'You do not have permission to delete this methodology' });
-        }
-
-        await prisma.methodology.delete({ where: { id } });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'METHODOLOGY',
-                entityId: id,
-                action: 'DELETE',
-                details: `Deleted methodology ${existing.name} for ${existing.analysisCode}`,
-                performedBy: user.username,
-                timestamp: new Date()
-            }
+        if (!existing) return res.status(404).json({ error: 'Method not found.' });
+        if (!canModify(req.user, existing)) return res.status(403).json({ error: 'Method is outside your configuration scope.' });
+        const result = await prisma.$transaction(async tx => {
+            const usage = await require('../services/methodResolution').methodologyUsage(id, tx);
+            if (Object.values(usage).some(n => n > 0)) return { usage };
+            await tx.methodology.delete({ where: { id } });
+            await tx.auditLog.create({ data: auditData(req, 'METHODOLOGY', id, 'DELETE', 'Deleted unused method: ' + existing.name) });
+            return { success: true };
         });
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('[deleteMethodology] Error:', error);
-        res.status(500).json({ error: 'Failed to delete methodology' });
-    }
+        if (result.usage) return res.status(409).json({ error: 'This method is referenced by work, results or laboratory configuration and cannot be deleted.', usage: result.usage });
+        invalidateCache();
+        res.json(result);
+    } catch (error) { console.error('[deleteMethodology]', error); res.status(500).json({ error: 'Failed to delete methodology.' }); }
 };
 
 // --- CATEGORIES CRUD ---
@@ -691,6 +587,7 @@ exports.getMethodReferences = async (req, res) => {
 
 exports.getLabMethodDefaults = async (req, res) => {
     const { labId } = req.params;
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.labId !== labId) return res.status(403).json({ error: 'Cannot view another laboratory’s configuration.' });
     try {
         const defaults = await prisma.labMethodDefault.findMany({
             where: { labId }
@@ -698,23 +595,28 @@ exports.getLabMethodDefaults = async (req, res) => {
 
         const [analyses, methodologies] = await Promise.all([
             prisma.analysis.findMany({
-                where: { status: { not: 'inactive' } },
-                include: { methodologies: true },
-                orderBy: { code: 'asc' }
+                where: { OR: [{ labId }, { labId: null }] },
+                include: { methodologies: { where: { OR: [{ labId }, { labId: null }] }, orderBy: { name: 'asc' } } },
+                orderBy: { name: 'asc' }
             }),
-            prisma.methodology.findMany()
+            prisma.methodology.findMany({ where: { OR: [{ labId }, { labId: null }] } })
         ]);
 
         const defaultsMap = new Map(defaults.map(d => [d.analysisCode, d.methodologyId]));
 
         const result = analyses.map(a => {
             const chosenMethodId = defaultsMap.get(a.code);
-            const defaultMethod = a.methodologies.find(m => m.isDefault) || a.methodologies[0] || null;
-            const effectiveMethodId = chosenMethodId || defaultMethod?.id || null;
+            const local = a.methodologies.filter(m => m.isDefault && m.labId === labId);
+            const candidates = local.length ? local : a.methodologies.filter(m => m.isDefault && !m.labId);
+            const chosen = a.methodologies.find(m => m.id === chosenMethodId);
+            const configurationError = chosenMethodId && !chosen ? 'Local default no longer belongs to this parameter/laboratory.' : !chosenMethodId && candidates.length > 1 ? 'Multiple default methods: choose one.' : null;
+            const effectiveMethodId = configurationError ? null : chosen?.id || (candidates.length === 1 ? candidates[0].id : null);
 
             return {
                 analysisCode: a.code,
                 analysisName: a.name,
+                orderable: catalogue.describeAnalysis(a).orderable,
+                configurationError,
                 matrix: a.matrix,
                 module: a.module,
                 chosenMethodologyId: chosenMethodId || null,
@@ -739,51 +641,28 @@ exports.getLabMethodDefaults = async (req, res) => {
 exports.updateLabMethodDefaults = async (req, res) => {
     const { labId } = req.params;
     const { defaults } = req.body;
-    const user = req.user;
-
-    if (user.role !== 'SUPER_ADMIN' && user.labId !== labId) {
-        return res.status(403).json({ error: 'Permission denied: Cannot modify defaults for this lab.' });
-    }
-
-    if (!Array.isArray(defaults)) {
-        return res.status(400).json({ error: 'Invalid defaults payload: expected array.' });
-    }
-
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.labId !== labId) return res.status(403).json({ error: 'Cannot modify another laboratory’s defaults.' });
+    if (!Array.isArray(defaults) || defaults.some(d => !d || typeof d.analysisCode !== 'string' || (d.methodologyId != null && typeof d.methodologyId !== 'string')) || new Set(defaults.map(d => d.analysisCode)).size !== defaults.length) return res.status(400).json({ error: 'Supply one valid default selection per parameter.' });
     try {
-        for (const item of defaults) {
-            const { analysisCode, methodologyId } = item;
-            if (!analysisCode) continue;
-
-            if (!methodologyId) {
-                await prisma.labMethodDefault.deleteMany({
-                    where: { labId, analysisCode }
-                });
-            } else {
-                await prisma.labMethodDefault.upsert({
-                    where: {
-                        labId_analysisCode: { labId, analysisCode }
-                    },
-                    update: { methodologyId },
-                    create: { labId, analysisCode, methodologyId }
-                });
+        const result = await prisma.$transaction(async tx => {
+            // Validate the entire request before changing any default.
+            for (const d of defaults) {
+                const a = await tx.analysis.findUnique({ where: { code: d.analysisCode } });
+                if (!a || (a.labId && a.labId !== labId)) return { error: 'A parameter is unavailable to this laboratory.' };
+                if (d.methodologyId) {
+                    const m = await tx.methodology.findUnique({ where: { id: d.methodologyId } });
+                    if (!require('../services/methodResolution').isAvailable(m, d.analysisCode, labId)) return { error: 'Each method must belong to its selected parameter and be shared or owned by this laboratory.' };
+                }
             }
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'LAB_METHOD_DEFAULT',
-                entityId: labId,
-                action: 'UPDATE',
-                details: `Updated ${defaults.length} method defaults for lab ${labId}`,
-                performedBy: user.username,
-                timestamp: new Date()
+            for (const { analysisCode, methodologyId } of defaults) {
+                if (!methodologyId) await tx.labMethodDefault.deleteMany({ where: { labId, analysisCode } });
+                else await tx.labMethodDefault.upsert({ where: { labId_analysisCode: { labId, analysisCode } }, update: { methodologyId }, create: { labId, analysisCode, methodologyId } });
             }
+            await tx.auditLog.create({ data: auditData(req, 'LAB_METHOD_DEFAULT', labId, 'UPDATE', 'Updated ' + defaults.length + ' laboratory method defaults') });
+            return { success: true, count: defaults.length };
         });
-
-        res.json({ success: true, count: defaults.length });
-    } catch (error) {
-        console.error('[updateLabMethodDefaults] Error:', error);
-        res.status(500).json({ error: 'Failed to update lab method defaults' });
-    }
+        if (result.error) return res.status(400).json(result);
+        invalidateCache();
+        res.json(result);
+    } catch (error) { console.error('[updateLabMethodDefaults]', error); res.status(500).json({ error: 'Failed to update defaults. No selections were applied.' }); }
 };

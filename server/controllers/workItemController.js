@@ -1,3 +1,41 @@
+const COMPOUND_ANALYSIS_EXPANSION = {
+    'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
+};
+
+const TEXTURE_ALIASES = new Set([
+    'TEXTURE',
+    'SOIL_PSD_TEXTURE',
+    'SOIL_TEXTURE',
+    'PSA',
+    'pSA',
+    'Particle Size Analysis'
+]);
+
+function normalizeAnalysisCodes(codes) {
+    if (!Array.isArray(codes)) return [];
+    const normalized = [];
+    let hasTexture = false;
+    for (const raw of codes) {
+        if (!raw || typeof raw !== 'string') continue;
+        const trimmed = raw.trim();
+        if (TEXTURE_ALIASES.has(trimmed)) {
+            if (!hasTexture) {
+                normalized.push('TEXTURE');
+                hasTexture = true;
+            }
+        } else if (COMPOUND_ANALYSIS_EXPANSION[trimmed]) {
+            normalized.push(...COMPOUND_ANALYSIS_EXPANSION[trimmed]);
+        } else {
+            normalized.push(trimmed);
+        }
+    }
+    const unique = [...new Set(normalized)];
+    if (hasTexture) {
+        return unique.filter(c => !['SAND', 'SILT', 'CLAY'].includes(c) || c === 'TEXTURE');
+    }
+    return unique;
+}
+
 const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
@@ -11,6 +49,16 @@ const getEffectiveAnalyses = (sample) => {
 };
 
 
+async function preflightDefaults(codes, sample, existingCodes = []) {
+    const resolved = new Map();
+    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId);
+    for (const [analysisCode, selection] of selections) {
+        if (selection.error) throw new Error(selection.error);
+        resolved.set(analysisCode, selection.method?.id || null);
+    }
+    return resolved;
+}
+
 /**
  * Generate Work Items for a Sample (Internal Hook)
  * Called when Sample -> LAB_ID_ASSIGNED or ACCEPTED
@@ -19,6 +67,9 @@ exports.generateWorkItemsForSample = async (sample) => {
     const { id, labId } = sample;
     const requiredAnalyses = getEffectiveAnalyses(sample);
     const workItems = [];
+    const expandedCodes = normalizeAnalysisCodes(requiredAnalyses);
+    const alreadyCreated = await prisma.workItem.findMany({ where: { sampleId: String(id) }, select: { analysis: true } });
+    const defaultMethods = await preflightDefaults(expandedCodes, sample, alreadyCreated.map(i => i.analysis));
 
     // 1. Create OPERATIONAL GATE Work Items (Drying, Prep)
     const opsGates = [
@@ -71,26 +122,10 @@ exports.generateWorkItemsForSample = async (sample) => {
     }
 
     // 2. Create ANALYTICAL Work Items (with compound parameter expansion)
-    const COMPOUND_ANALYSIS_EXPANSION = {
-        'pSA': ['SAND', 'CLAY', 'SILT'],
-        'PSA': ['SAND', 'CLAY', 'SILT'],
-        'TEXTURE': ['SAND', 'CLAY', 'SILT'],
-        'Particle Size Analysis': ['SAND', 'CLAY', 'SILT'],
-        'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
-    };
+
 
     if (requiredAnalyses && Array.isArray(requiredAnalyses)) {
-        // Flatten any compound analyses into discrete physical/chemical determinations
-        const expandedAnalyses = [];
-        for (const code of requiredAnalyses) {
-            if (COMPOUND_ANALYSIS_EXPANSION[code]) {
-                expandedAnalyses.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
-            } else {
-                expandedAnalyses.push(code);
-            }
-        }
-
-        const uniqueAnalyses = [...new Set(expandedAnalyses)];
+        const uniqueAnalyses = normalizeAnalysisCodes(requiredAnalyses);
 
         // WP-25: Drive workflow work item ordering from catalogue executionOrder
         const catalogueRecords = await prisma.analysis.findMany({
@@ -117,24 +152,7 @@ exports.generateWorkItemsForSample = async (sample) => {
             }];
 
             // WP-20: Resolve methodology for this lab and analysis
-            let defaultMethodId = null;
-            const targetLab = sample.assignedLab || sample.labId;
-            if (targetLab) {
-                const labDefault = await prisma.labMethodDefault.findFirst({
-                    where: { labId: targetLab, analysisCode }
-                });
-                if (labDefault) {
-                    defaultMethodId = labDefault.methodologyId;
-                }
-            }
-            if (!defaultMethodId) {
-                const globalDefault = await prisma.methodology.findFirst({
-                    where: { analysisCode, isDefault: true }
-                });
-                if (globalDefault) {
-                    defaultMethodId = globalDefault.id;
-                }
-            }
+            const defaultMethodId = defaultMethods.get(analysisCode) || null;
 
             const wi = await prisma.workItem.create({
                 data: {
@@ -215,23 +233,9 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     const { id, labId } = sample;
     const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
 
-    const COMPOUND_ANALYSIS_EXPANSION = {
-        'pSA': ['SAND', 'CLAY', 'SILT'],
-        'PSA': ['SAND', 'CLAY', 'SILT'],
-        'TEXTURE': ['SAND', 'CLAY', 'SILT'],
-        'Particle Size Analysis': ['SAND', 'CLAY', 'SILT'],
-        'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
-    };
 
-    const expandedTarget = [];
-    for (const code of targetList) {
-        if (COMPOUND_ANALYSIS_EXPANSION[code]) {
-            expandedTarget.push(...COMPOUND_ANALYSIS_EXPANSION[code]);
-        } else {
-            expandedTarget.push(code);
-        }
-    }
-    const uniqueTarget = [...new Set(expandedTarget)];
+
+    const uniqueTarget = normalizeAnalysisCodes(targetList);
     const targetSet = new Set(uniqueTarget);
 
     const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
@@ -290,6 +294,10 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
             error: `A reason is required to remove or waive in-progress analysis '${assignedOrInProgress[0].analysis}'.`
         };
     }
+
+    const existingCodeSet = new Set(existingItems.map(i => i.analysis));
+    const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
+    const defaultMethods = await preflightDefaults(codesToAdd, sample);
 
     const deletedItems = [];
     const waivedItems = [];
@@ -352,8 +360,6 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     }
 
     // 4. Process Additions
-    const existingCodeSet = new Set(existingItems.map(i => i.analysis));
-    const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
 
     if (codesToAdd.length > 0) {
         const catalogueRecords = await prisma.analysis.findMany({
@@ -374,24 +380,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 note: 'Work Item Generated'
             }];
 
-            let defaultMethodId = null;
-            const targetLab = sample.assignedLab || sample.labId;
-            if (targetLab) {
-                const labDefault = await prisma.labMethodDefault.findFirst({
-                    where: { labId: targetLab, analysisCode }
-                });
-                if (labDefault) {
-                    defaultMethodId = labDefault.methodologyId;
-                }
-            }
-            if (!defaultMethodId) {
-                const globalDefault = await prisma.methodology.findFirst({
-                    where: { analysisCode, isDefault: true }
-                });
-                if (globalDefault) {
-                    defaultMethodId = globalDefault.id;
-                }
-            }
+            const defaultMethodId = defaultMethods.get(analysisCode) || null;
 
             const wi = await prisma.workItem.create({
                 data: {
@@ -419,7 +408,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                     performedBy: user?.username || 'SYSTEM',
                     timestamp: new Date(),
                     analysisCode: analysisCode,
-                    labId: targetLab
+                    labId: sample.assignedLab || labId
                 }
             });
 
@@ -1709,5 +1698,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         res.status(500).json({ error: 'Failed to review work items' });
     }
 };
+
+exports.normalizeAnalysisCodes = normalizeAnalysisCodes;
 
 module.exports = exports;

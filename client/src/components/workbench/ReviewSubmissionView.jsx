@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, CheckCircle, ArrowRight, Layers, ArrowLeft } from 'lucide-react';
 
 /**
@@ -18,6 +18,12 @@ export default function ReviewSubmissionView({
     );
     const [confirmed, setConfirmed] = useState(false);
     const [submissionNote, setSubmissionNote] = useState('');
+
+    useEffect(() => {
+        if (eligibleSamples && eligibleSamples.length > 0) {
+            setSelectedSamples(eligibleSamples.map(s => s.sampleId));
+        }
+    }, [eligibleSamples]);
 
     const toggleSample = (sId) => {
         if (selectedSamples.includes(sId)) {
@@ -154,6 +160,7 @@ export default function ReviewSubmissionView({
                         </span>
                         <button
                             type="button"
+                            data-testid="submit-for-review-btn"
                             onClick={handleSubmit}
                             disabled={!confirmed || !selectedSamples.length || isSubmitting}
                             className="px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"

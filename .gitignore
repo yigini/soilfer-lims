@@ -19,10 +19,15 @@ server/prisma/dev - Copy*
 server/prisma_client/
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 
 # ─── Data & Uploads ───
 server/data/*
 !server/data/adminBoundaries.json
+!server/data/analysisDisplayNames.json
+!server/data/operationalChecklists.json
+!server/data/importedParameterNames.json
 server/uploads/
 server/database.json
 
@@ -50,8 +55,10 @@ server/prisma/dev.db-wal
 
 # ─── Deploy archives & Backups ───
 *.tar.gz
+*.zip
 server/backups/
 server/prisma/*.bak
 *.bak
+*pre_reconciliation_bak*
+server/prisma/*pre_reconciliation_bak*
 scratch/
-

@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "executedAt": "2026-09-06T13:59:17.510Z",
+    "targetUrl": "http://127.0.0.1:5059",
+    "sampleCount": 40,
+    "runProfiles": {
+      "run1": {
+        "profile": "RACK_40",
+        "capacity": 40,
+        "qcSlots": 4,
+        "sampleCapacity": 36,
+        "allocated": 36
+      },
+      "run2": {
+        "profile": "RACK_40",
+        "capacity": 40,
+        "qcSlots": 4,
+        "sampleCapacity": 36,
+        "allocated": 4
+      }
+    }
+  },
+  "steps": [
+    {
+      "name": "Profile Capacity Boundary Rejection",
+      "passed": true,
+      "details": {
+        "observedErrorBanner": "Boundary error (HTTP 400): Cannot add item WI-PH-037: No available non-QC rack positions remaining in profile RACK_40 (capacity: 40)",
+        "summary": "37th sample rejected from RACK_40 with on-screen boundary error banner"
+      },
+      "timestamp": "2026-09-06T13:59:26.599Z"
+    },
+    {
+      "name": "Multi-Run 40-Sample Allocation (36 + 4)",
+      "passed": true,
+      "details": {
+        "run1Count": 36,
+        "run2Count": 4,
+        "slot1ReservedForBlank": true,
+        "summary": "40 samples allocated over Run 1 (36) and Run 2 (4) via UI with slot 1 reserved"
+      },
+      "timestamp": "2026-09-06T13:59:34.368Z"
+    },
+    {
+      "name": "Desktop Layout (1440x900)",
+      "passed": true,
+      "details": {
+        "summary": "Workbench shell rendered on desktop viewport"
+      },
+      "timestamp": "2026-09-06T13:59:35.588Z"
+    },
+    {
+      "name": "Responsive Viewport (375x667)",
+      "passed": true,
+      "details": {
+        "width": 375,
+        "height": 667,
+        "summary": "No horizontal overflow or chunk errors"
+      },
+      "timestamp": "2026-09-06T13:59:36.118Z"
+    },
+    {
+      "name": "Method Switching via UI Controls",
+      "passed": true,
+      "details": {
+        "rowFound": true,
+        "saveClicked": true,
+        "dbPersistedMethod": "ISO_10390_H2O",
+        "summary": "Switched PH_H2O to ISO_10390_H2O via dropdown and Save button"
+      },
+      "timestamp": "2026-09-06T13:59:40.101Z"
+    },
+    {
+      "name": "Worksheet Decimal Data Entry",
+      "passed": true,
+      "details": {
+        "enteredValue": "6.45",
+        "summary": "Typed 6.45 into UAT-SMP-001 input with Enter navigation"
+      },
+      "timestamp": "2026-09-06T13:59:45.252Z"
+    },
+    {
+      "name": "Batch Paste Modal Preview & Apply",
+      "passed": true,
+      "details": {
+        "matched": "34 Matched",
+        "excluded": "3 Excluded",
+        "summary": "Parsed tab-separated batch, flagged 3 exclusions, applied 34 matched drafts"
+      },
+      "timestamp": "2026-09-06T13:59:47.423Z"
+    },
+    {
+      "name": "Out-of-Bounds Range Validation",
+      "passed": true,
+      "details": {
+        "blocker": "OUT_OF_RANGE",
+        "reasons": [
+          "Value out of range (ABOVE_MAX). Override reason required."
+        ],
+        "summary": "pH value 99.0 flagged and blocked from completion"
+      },
+      "timestamp": "2026-09-06T13:59:47.432Z"
+    },
+    {
+      "name": "Saved Draft Reload Persistence",
+      "passed": true,
+      "details": {
+        "totalSamplesVerifiedInDom": 40,
+        "missingSamples": [],
+        "sampleValues": [
+          {
+            "sCode": "UAT-SMP-001",
+            "val": "6.45"
+          },
+          {
+            "sCode": "UAT-SMP-002",
+            "val": "6.50"
+          },
+          {
+            "sCode": "UAT-SMP-003",
+            "val": "6.53"
+          }
+        ],
+        "summary": "All 40/40 draft determinations verified intact in DOM after reload"
+      },
+      "timestamp": "2026-09-06T13:59:51.058Z"
+    },
+    {
+      "name": "Texture USDA Classification in UI",
+      "passed": true,
+      "details": {
+        "classifiedAsLoam": true,
+        "sum100Shown": true,
+        "summary": "Sand 45/Silt 35/Clay 20 dynamically computed USDA Loam in UI"
+      },
+      "timestamp": "2026-09-06T13:59:54.117Z"
+    },
+    {
+      "name": "Texture Closure Failure Warning in UI",
+      "passed": true,
+      "details": {
+        "sum115Warned": true,
+        "summary": "Sum 115% triggered on-screen closure warning"
+      },
+      "timestamp": "2026-09-06T13:59:54.117Z"
+    },
+    {
+      "name": "Two-Step Recording & Submission Flow",
+      "passed": true,
+      "details": {
+        "reviewOpened": true,
+        "step1Recorded": true,
+        "step2Submitted": true,
+        "dbPersistedSubmittedCount": 40,
+        "dbSubmissionRecords": 40,
+        "summary": "All 40/40 items confirmed SUBMITTED in database with 40 submission packages"
+      },
+      "timestamp": "2026-09-06T13:59:59.117Z"
+    },
+    {
+      "name": "QC Batch Evaluation & Authorization Guard",
+      "passed": true,
+      "details": {
+        "run1Status": "QC_PASS",
+        "run2Status": "QC_PASS",
+        "techCloseForbiddenBanner": "HTTP 403: Only lab managers can close batches.",
+        "summary": "Runs 1 & 2 passed QC evaluation to QC_PASS in UI; close attempt rejected with 403 banner"
+      },
+      "timestamp": "2026-09-06T14:00:05.209Z"
+    },
+    {
+      "name": "Manager On-Screen Review & Approval",
+      "passed": true,
+      "details": {
+        "acceptedInUi": true,
+        "finalApproveButtonClicked": true,
+        "sampleStatusInDb": "APPROVED",
+        "summary": "Manager accepted determinations, clicked on-screen Final Approve button, sample APPROVED in DB"
+      },
+      "timestamp": "2026-09-06T14:00:26.548Z"
+    },
+    {
+      "name": "Mandatory Amendment Reason Enforcement",
+      "passed": true,
+      "details": {
+        "emptyReasonBlocked": true,
+        "validReasonEnabled": true,
+        "dbPersistedReason": "Client requested verified re-test of soil pH in duplicate",
+        "summary": "Blank reason disabled in UI; amendment with reason committed to database"
+      },
+      "timestamp": "2026-09-06T14:00:30.733Z"
+    },
+    {
+      "name": "Spectroscopy Interface Render",
+      "passed": true,
+      "details": {
+        "summary": "Spectral Library interface mounted cleanly with zero uncaught errors"
+      },
+      "timestamp": "2026-09-06T14:00:32.632Z"
+    }
+  ],
+  "checks": {
+    "Profile Capacity Boundary Rejection": true,
+    "Multi-Run 40-Sample Allocation (36 + 4)": true,
+    "Desktop Layout (1440x900)": true,
+    "Responsive Viewport (375x667)": true,
+    "Method Switching via UI Controls": true,
+    "Worksheet Decimal Data Entry": true,
+    "Batch Paste Modal Preview & Apply": true,
+    "Out-of-Bounds Range Validation": true,
+    "Saved Draft Reload Persistence": true,
+    "Texture USDA Classification in UI": true,
+    "Texture Closure Failure Warning in UI": true,
+    "Two-Step Recording & Submission Flow": true,
+    "QC Batch Evaluation & Authorization Guard": true,
+    "Manager On-Screen Review & Approval": true,
+    "Mandatory Amendment Reason Enforcement": true,
+    "Spectroscopy Interface Render": true
+  },
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/qc/batches/batch-uat-run-01/items"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/qc/batches/batch-uat-tex-01"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:5059/api/reports/sample/UAT-SMP-001"
+      }
+    }
+  ]
+}

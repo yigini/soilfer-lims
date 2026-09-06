@@ -1,0 +1,14 @@
+{
+  "availableWaterHoldingCapacity": "Available water holding capacity",
+  "carbonInorganic": "Soil inorganic carbon",
+  "totalElements": "Elemental analysis",
+  "solubleSalts": "Soluble salts",
+  "textureSum": "Particle size fraction total",
+  "coarseFragments": "Coarse fragments",
+  "pH": "Soil pH",
+  "phosphorusRetention": "Phosphorus retention",
+  "moistureContent": "Soil moisture content",
+  "organicMatter": "Soil organic matter",
+  "hydraulicConductivity": "Hydraulic conductivity",
+  "carbonTotal": "Soil total carbon"
+}

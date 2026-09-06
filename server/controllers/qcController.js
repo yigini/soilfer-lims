@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const { evaluateBatchQc, checkBatchDisposition, flagBatchResults } = require('../services/qcService');
+const scopeGuard = require('../utils/scopeGuard');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -77,15 +78,73 @@ async function syncTypedQcItems(batchId, evaluated) {
     }
 }
 
+const RUN_PROFILES = {
+    // 96-well microplate methods (e.g. spectrophotometric microplate assays)
+    MICROPLATE_96: {
+        profileKey: 'MICROPLATE_96',
+        capacity: 96,
+        name: '96-Well Microplate',
+        qcSlots: [
+            { position: 1, type: 'BLANK', label: 'Reagent Blank' },
+            { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
+            { position: 48, type: 'DUPLICATE', label: 'Mid-plate Duplicate' },
+            { position: 96, type: 'DUPLICATE', label: 'End-plate Duplicate' }
+        ]
+    },
+    // 24-place centrifuge or digestion block
+    CENTRIFUGE_24: {
+        profileKey: 'CENTRIFUGE_24',
+        capacity: 24,
+        name: '24-Place Tube Rack / Digestion Block',
+        qcSlots: [
+            { position: 1, type: 'BLANK', label: 'Method Blank' },
+            { position: 2, type: 'CONTROL', label: 'Reference Soil CRM' },
+            { position: 12, type: 'DUPLICATE', label: 'Mid-run Duplicate' }
+        ]
+    },
+    // 40-place standard sedimentation / pipette / hydrometer rack / carousel (Standard practical UAT profile)
+    RACK_40: {
+        profileKey: 'RACK_40',
+        capacity: 40,
+        name: '40-Place Sedimentation / Carousel Rack',
+        qcSlots: [
+            { position: 1, type: 'BLANK', label: 'Reagent / Hydrometer Blank' },
+            { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
+            { position: 20, type: 'DUPLICATE', label: 'Mid-rack Duplicate' },
+            { position: 40, type: 'DUPLICATE', label: 'End-rack Duplicate' }
+        ]
+    }
+};
+
+function resolveRunProfile(analysis, instrument, requestedCapacity, requestedProfile) {
+    if (requestedProfile && RUN_PROFILES[requestedProfile]) {
+        return { ...RUN_PROFILES[requestedProfile] };
+    }
+    const inst = (instrument || '').toLowerCase();
+    if (inst.includes('microplate') || inst.includes('elisa') || inst.includes('96') || requestedCapacity === 96) {
+        return { ...RUN_PROFILES.MICROPLATE_96 };
+    }
+    if (inst.includes('centrifuge') || inst.includes('digest') || inst.includes('block') || inst.includes('24') || requestedCapacity === 24) {
+        return { ...RUN_PROFILES.CENTRIFUGE_24 };
+    }
+    const base = { ...RUN_PROFILES.RACK_40 };
+    if (typeof requestedCapacity === 'number' && requestedCapacity > 0) {
+        base.capacity = requestedCapacity;
+    }
+    return base;
+}
+
 exports.createBatch = async (req, res) => {
-    const { analysis, instrument, notes } = req.body;
+    const { id, analysis, instrument, notes, profile: reqProfile, capacity: reqCapacity, maxCapacity: reqMaxCap } = req.body;
     const user = req.user;
 
     try {
         if (!analysis) return res.status(400).json({ error: 'Analysis type required' });
 
-        const batchId = `BATCH-${Date.now()}`;
+        const batchId = (typeof id === 'string' && id.trim()) ? id.trim() : `BATCH-${Date.now()}`;
         const now = new Date();
+
+        const runProfile = resolveRunProfile(analysis, instrument, reqMaxCap || reqCapacity, reqProfile);
 
         const newBatch = await prisma.batch.create({
             data: {
@@ -93,6 +152,8 @@ exports.createBatch = async (req, res) => {
                 labId: user.labId,
                 analysis,
                 instrument: instrument || 'Manual',
+                maxCapacity: runProfile.capacity,
+                profile: runProfile.profileKey,
                 status: BATCH_STATES.OPEN,
                 createdBy: user.username,
                 createdAt: now,
@@ -113,13 +174,13 @@ exports.createBatch = async (req, res) => {
                 entity: 'QC_BATCH',
                 entityId: batchId,
                 action: 'CREATE',
-                details: `Batch created for ${analysis}`,
+                details: `Batch created for ${analysis} (${runProfile.name}, max ${runProfile.capacity})`,
                 performedBy: user.username,
                 timestamp: now
             }
         });
 
-        res.status(201).json(newBatch);
+        res.status(201).json({ ...newBatch, runProfile });
     } catch (error) {
         console.error('[createBatch] Error:', error);
         res.status(500).json({ error: 'Failed to create batch' });
@@ -129,23 +190,75 @@ exports.createBatch = async (req, res) => {
 exports.getBatches = async (req, res) => {
     const { status, analysis } = req.query;
     try {
-        // Use Scope Guard for Lab Isolation (Phase 1 Refactor)
-        const scopeGuard = require('../utils/scopeGuard');
-        let where = scopeGuard.buildScopedWhere(req.user, {}, { labField: 'labId' });
+        let where = scopeGuard.buildScopedWhere(req.user, {}, { entityType: 'Generic', labField: 'labId', altLabField: null });
 
         if (status) where.status = status;
         if (analysis) where.analysis = analysis;
 
         const batches = await prisma.batch.findMany({
             where,
-            include: { qcItems: true },
+            include: {
+                qcItems: true,
+                workItems: {
+                    select: {
+                        id: true,
+                        sampleId: true,
+                        analysis: true,
+                        status: true,
+                        rackPosition: true,
+                        sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } }
+                    },
+                    orderBy: { rackPosition: 'asc' }
+                }
+            },
             orderBy: { createdAt: 'desc' }
         });
 
-        res.json({ data: batches });
+        const dataWithProfiles = batches.map(b => ({
+            ...b,
+            runProfile: resolveRunProfile(b.analysis, b.instrument, b.maxCapacity, b.profile)
+        }));
+
+        res.json({ data: dataWithProfiles });
     } catch (error) {
         console.error('[getBatches] Error:', error);
         res.status(500).json({ error: 'Failed to get batches' });
+    }
+};
+
+exports.getBatchById = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+    try {
+        const batch = await prisma.batch.findUnique({
+            where: { id },
+            include: {
+                qcItems: true,
+                workItems: {
+                    select: {
+                        id: true,
+                        sampleId: true,
+                        analysis: true,
+                        status: true,
+                        rackPosition: true,
+                        sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } }
+                    },
+                    orderBy: { rackPosition: 'asc' }
+                }
+            }
+        });
+
+        if (!batch) return res.status(404).json({ error: 'Batch not found' });
+
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        res.json({ data: batch, runProfile });
+    } catch (error) {
+        console.error('[getBatchById] Error:', error);
+        res.status(500).json({ error: 'Failed to get batch' });
     }
 };
 
@@ -158,23 +271,113 @@ exports.updateBatch = async (req, res) => {
         const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
-        const data = { ...updates };
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
+        if (batch.status === BATCH_STATES.CLOSED) {
+            return res.status(400).json({ error: 'Batch is CLOSED and cannot be modified.' });
+        }
+
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+
+        // Restrict updates to explicitly allowed fields; membership & disposition are managed via dedicated routes
+        const data = {};
+        if (updates.notes !== undefined) data.notes = updates.notes;
+        if (updates.instrument !== undefined) data.instrument = updates.instrument;
+
         let evaluated = null;
 
         // Auto-evaluate QC data if provided
-        if (updates.qcResults || updates.blanks || updates.duplicates || updates.controls) {
+        const hasQcPayload = !!(updates.qcResults || updates.blanks || updates.duplicates || updates.controls);
+        if (hasQcPayload) {
             const qcPayload = updates.qcResults || {
                 blanks: updates.blanks,
                 duplicates: updates.duplicates,
                 controls: updates.controls
             };
-            evaluated = evaluateBatchQc(qcPayload);
+            evaluated = evaluateBatchQc(qcPayload, { runProfile });
             data.qcResults = JSON.stringify(evaluated);
-            if (!updates.status && evaluated.overallStatus !== 'OPEN') {
+            if (evaluated.overallStatus === 'OPEN') {
+                // QC evidence was cleared or empty: safely invalidate acceptance and stale dispositions
+                data.status = BATCH_STATES.OPEN;
+                data.disposition = null;
+            } else if (!updates.status) {
                 data.status = evaluated.overallStatus;
+                data.disposition = null; // Clear stale disposition on new measurement evaluation
             }
-        } else if (updates.qcResults && typeof updates.qcResults === 'object') {
-            data.qcResults = JSON.stringify(updates.qcResults);
+        }
+
+        // Validate status transition
+        if (updates.status !== undefined) {
+            const requestedStatus = updates.status;
+            if (!Object.values(BATCH_STATES).includes(requestedStatus)) {
+                return res.status(400).json({ error: `Invalid batch status: '${requestedStatus}'. Allowed: ${Object.values(BATCH_STATES).join(', ')}` });
+            }
+
+            // Status transitions to QC_PASS or QC_FAIL require evaluated QC evidence or authorized disposition
+            if (requestedStatus === BATCH_STATES.QC_PASS || requestedStatus === BATCH_STATES.QC_FAIL) {
+                if (evaluated) {
+                    if (requestedStatus === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.QC_FAIL) {
+                        return res.status(400).json({
+                            error: 'Cannot set status to QC_PASS: evaluated QC data failed acceptance criteria.'
+                        });
+                    }
+                    data.status = evaluated.overallStatus;
+                } else {
+                    // No QC payload in this request; check existing batch QC results
+                    let existingQc = null;
+                    try {
+                        existingQc = typeof batch.qcResults === 'string' ? JSON.parse(batch.qcResults) : batch.qcResults;
+                    } catch (e) {}
+
+                    const hasEvaluatedEvidence = existingQc && (
+                        (Array.isArray(existingQc.blanks) && existingQc.blanks.length > 0) ||
+                        (Array.isArray(existingQc.controls) && existingQc.controls.length > 0) ||
+                        (Array.isArray(existingQc.duplicates) && existingQc.duplicates.length > 0)
+                    );
+
+                    if (!hasEvaluatedEvidence) {
+                        return res.status(400).json({
+                            error: `Cannot set status to '${requestedStatus}' without evaluated QC evidence or authorized disposition.`
+                        });
+                    }
+
+                    if (requestedStatus === BATCH_STATES.QC_PASS && existingQc.overallStatus === BATCH_STATES.QC_FAIL) {
+                        // Only allowed if manager disposition exists with PROCEED_WITH_WARNING
+                        let disposition = null;
+                        try {
+                            disposition = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+                        } catch (e) {}
+
+                        if (!disposition || disposition.decision !== 'PROCEED_WITH_WARNING' || !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+                            return res.status(400).json({
+                                error: 'Cannot set status to QC_PASS: existing QC results are failed and no manager disposition override exists.'
+                            });
+                        }
+                    }
+                    data.status = requestedStatus;
+                }
+            } else if (requestedStatus === BATCH_STATES.CLOSED) {
+                if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+                    return res.status(403).json({ error: 'Only lab managers can close batches.' });
+                }
+                let disposition = null;
+                try {
+                    disposition = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+                } catch (e) {}
+                const canClose = batch.status === BATCH_STATES.QC_PASS ||
+                    (batch.status === BATCH_STATES.QC_FAIL && disposition?.decision === 'PROCEED_WITH_WARNING');
+                if (!canClose) {
+                    return res.status(400).json({
+                        error: 'Cannot close batch: QC must be passed or approved with manager disposition before closing.'
+                    });
+                }
+                data.status = BATCH_STATES.CLOSED;
+            } else if (requestedStatus === BATCH_STATES.OPEN || requestedStatus === BATCH_STATES.RUNNING) {
+                // Technician or manager can move between OPEN and RUNNING
+                data.status = requestedStatus;
+            }
         }
 
         if (data.status && data.status !== batch.status) {
@@ -187,9 +390,6 @@ exports.updateBatch = async (req, res) => {
             data.history = JSON.stringify(history);
         }
 
-        if (updates.workItemIds) data.workItemIds = typeof updates.workItemIds === 'string' ? updates.workItemIds : JSON.stringify(updates.workItemIds);
-        if (updates.disposition) data.disposition = typeof updates.disposition === 'string' ? updates.disposition : JSON.stringify(updates.disposition);
-
         const updatedBatch = await prisma.batch.update({
             where: { id },
             data,
@@ -200,7 +400,9 @@ exports.updateBatch = async (req, res) => {
         if (evaluated) {
             await syncTypedQcItems(id, evaluated);
         }
-        await flagBatchResults(prisma, id, updatedBatch.status, updatedBatch.disposition);
+        if (data.status) {
+            await flagBatchResults(prisma, id, updatedBatch.status, updatedBatch.disposition);
+        }
 
         res.json({
             success: true,
@@ -223,8 +425,17 @@ exports.evaluateBatch = async (req, res) => {
         const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
-        const evaluated = evaluateBatchQc({ blanks, duplicates, controls });
-        const newStatus = evaluated.overallStatus !== 'OPEN' ? evaluated.overallStatus : batch.status;
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
+        if (batch.status === BATCH_STATES.CLOSED) {
+            return res.status(400).json({ error: 'Batch is CLOSED and cannot be evaluated or modified.' });
+        }
+
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const evaluated = evaluateBatchQc({ blanks, duplicates, controls }, { runProfile });
+        const newStatus = evaluated.overallStatus; // 'QC_PASS', 'QC_FAIL', or 'OPEN' (when empty, invalidates QC_PASS)
 
         const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
         if (newStatus !== batch.status) {
@@ -240,14 +451,15 @@ exports.evaluateBatch = async (req, res) => {
             data: {
                 qcResults: JSON.stringify(evaluated),
                 status: newStatus,
-                history: JSON.stringify(history)
+                history: JSON.stringify(history),
+                disposition: null // Clear stale disposition on new evaluation
             },
             include: { qcItems: true }
         });
 
         // WP-29: Sync typed rows and flag results
         await syncTypedQcItems(id, evaluated);
-        await flagBatchResults(prisma, id, newStatus, updatedBatch.disposition);
+        await flagBatchResults(prisma, id, newStatus, null);
 
         res.json({
             success: true,
@@ -263,9 +475,14 @@ exports.evaluateBatch = async (req, res) => {
 
 exports.addItemsToBatch = async (req, res) => {
     const { id } = req.params;
-    const { workItemIds } = req.body;
+    const { workItemIds, rackPositions } = req.body;
+    const user = req.user;
 
     try {
+        if (!workItemIds || !Array.isArray(workItemIds) || workItemIds.length === 0) {
+            return res.status(400).json({ error: 'workItemIds must be a non-empty array' });
+        }
+
         const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
 
@@ -273,25 +490,204 @@ exports.addItemsToBatch = async (req, res) => {
             return res.status(400).json({ error: 'Batch is not OPEN' });
         }
 
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
         const currentIdsArray = typeof batch.workItemIds === 'string' ? JSON.parse(batch.workItemIds) : (batch.workItemIds || []);
         const currentIds = new Set(currentIdsArray);
-        workItemIds.forEach(wid => currentIds.add(wid));
+
+        // Resolve method/instrument profile capacity and reserved QC slots
+        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const capacity = batch.maxCapacity || runProfile.capacity;
+
+        const qcSlotMap = new Map();
+        (runProfile.qcSlots || []).forEach(slot => {
+            qcSlotMap.set(slot.position, slot);
+        });
+
+        // Enforce total capacity
+        const newIdsToAdd = workItemIds.filter(wid => !currentIds.has(wid));
+        if (currentIds.size + newIdsToAdd.length > capacity) {
+            return res.status(400).json({
+                error: `Adding ${newIdsToAdd.length} items exceeds maximum batch capacity of ${capacity} (current: ${currentIds.size})`,
+                capacity,
+                currentSize: currentIds.size,
+                profile: runProfile.profileKey
+            });
+        }
+
+        // Validate work items exist and match batch scope & analysis
+        const items = await prisma.workItem.findMany({
+            where: { id: { in: workItemIds } },
+            include: { sample: true }
+        });
+
+        if (items.length !== workItemIds.length) {
+            return res.status(404).json({ error: 'One or more work items not found' });
+        }
+
+        const TEXTURE_ALIASES = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'];
+        const isTextureBatch = TEXTURE_ALIASES.includes(batch.analysis);
+
+        for (const item of items) {
+            if (item.sample && user && !scopeGuard.canAccessEntity(user, item.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+                return res.status(403).json({ error: `Item ${item.id} is outside your laboratory scope.` });
+            }
+            const isMatch = isTextureBatch
+                ? TEXTURE_ALIASES.includes(item.analysis)
+                : item.analysis === batch.analysis;
+            if (!isMatch) {
+                return res.status(400).json({ error: `Item ${item.id} analysis (${item.analysis}) does not match batch analysis (${batch.analysis})` });
+            }
+            if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) {
+                return res.status(400).json({ error: `Item ${item.id} is already sealed (${item.status})` });
+            }
+        }
+
+        // Query existing batch item positions
+        const existingBatchItems = await prisma.workItem.findMany({
+            where: { batchId: id },
+            select: { id: true, rackPosition: true }
+        });
+        const occupiedPositions = new Map();
+        for (const ex of existingBatchItems) {
+            if (ex.rackPosition != null) {
+                occupiedPositions.set(ex.rackPosition, ex.id);
+            }
+        }
+
+        const explicitPositions = (rackPositions && typeof rackPositions === 'object') ? rackPositions : {};
+        const seenInPayload = new Map();
+
+        // 1. Strict validation of all explicit rack positions
+        for (const wid of workItemIds) {
+            if (explicitPositions[wid] !== undefined) {
+                const rawPos = explicitPositions[wid];
+                const pos = Number(rawPos);
+                if (!Number.isInteger(pos) || isNaN(pos)) {
+                    return res.status(400).json({ error: `Rack position for ${wid} must be an integer (got: ${rawPos})` });
+                }
+                if (pos < 1 || pos > capacity) {
+                    return res.status(400).json({ error: `Rack position ${pos} for ${wid} is out of bounds (1..${capacity})` });
+                }
+                if (qcSlotMap.has(pos)) {
+                    const qcSlot = qcSlotMap.get(pos);
+                    return res.status(400).json({
+                        error: `Rack position ${pos} is reserved for QC slot (${qcSlot.type}: ${qcSlot.label || qcSlot.type})`,
+                        reservedSlot: qcSlot
+                    });
+                }
+                if (seenInPayload.has(pos)) {
+                    return res.status(400).json({
+                        error: `Duplicate rack position ${pos} requested for ${wid} and ${seenInPayload.get(pos)}`
+                    });
+                }
+                if (occupiedPositions.has(pos) && occupiedPositions.get(pos) !== wid) {
+                    return res.status(400).json({
+                        error: `Rack position ${pos} is already occupied in this batch by item ${occupiedPositions.get(pos)}`
+                    });
+                }
+                seenInPayload.set(pos, wid);
+            }
+        }
+
+        // 2. Assign positions: honor explicit or auto-assign lowest available non-QC position
+        const finalPositions = {};
+        let candidatePos = 1;
+        for (const wid of workItemIds) {
+            if (explicitPositions[wid] !== undefined) {
+                finalPositions[wid] = Number(explicitPositions[wid]);
+            } else {
+                while (candidatePos <= capacity && (qcSlotMap.has(candidatePos) || occupiedPositions.has(candidatePos) || seenInPayload.has(candidatePos))) {
+                    candidatePos++;
+                }
+                if (candidatePos > capacity) {
+                    return res.status(400).json({
+                        error: `Cannot add item ${wid}: No available non-QC rack positions remaining in profile ${runProfile.profileKey} (capacity: ${capacity})`
+                    });
+                }
+                finalPositions[wid] = candidatePos;
+                seenInPayload.set(candidatePos, wid);
+                candidatePos++;
+            }
+        }
+
+        const workItemUpdates = [];
+        for (const wid of workItemIds) {
+            currentIds.add(wid);
+            workItemUpdates.push(
+                prisma.workItem.update({
+                    where: { id: wid },
+                    data: {
+                        batchId: id,
+                        rackPosition: finalPositions[wid]
+                    }
+                })
+            );
+        }
 
         await prisma.$transaction([
             prisma.batch.update({
                 where: { id },
                 data: { workItemIds: JSON.stringify(Array.from(currentIds)) }
             }),
-            prisma.workItem.updateMany({
-                where: { id: { in: workItemIds } },
-                data: { batchId: id }
-            })
+            ...workItemUpdates
         ]);
 
-        res.json({ success: true, count: workItemIds.length });
+        res.json({
+            success: true,
+            count: workItemIds.length,
+            capacity,
+            runProfile: runProfile.profileKey,
+            positions: finalPositions
+        });
     } catch (error) {
         console.error('[addItemsToBatch] Error:', error);
         res.status(500).json({ error: 'Failed to add items to batch' });
+    }
+};
+
+exports.removeItemsFromBatch = async (req, res) => {
+    const { id } = req.params;
+    const { workItemIds } = req.body;
+    const user = req.user;
+
+    try {
+        if (!workItemIds || !Array.isArray(workItemIds) || workItemIds.length === 0) {
+            return res.status(400).json({ error: 'workItemIds must be a non-empty array' });
+        }
+
+        const batch = await prisma.batch.findUnique({ where: { id } });
+        if (!batch) return res.status(404).json({ error: 'Batch not found' });
+
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
+
+        if (batch.status !== 'OPEN') {
+            return res.status(400).json({ error: 'Batch is not OPEN' });
+        }
+
+        const currentIdsArray = typeof batch.workItemIds === 'string' ? JSON.parse(batch.workItemIds) : (batch.workItemIds || []);
+        const toRemove = new Set(workItemIds);
+        const remainingIds = currentIdsArray.filter(wid => !toRemove.has(wid));
+
+        await prisma.$transaction([
+            prisma.batch.update({
+                where: { id },
+                data: { workItemIds: JSON.stringify(remainingIds) }
+            }),
+            prisma.workItem.updateMany({
+                where: { id: { in: workItemIds }, batchId: id },
+                data: { batchId: null, rackPosition: null }
+            })
+        ]);
+
+        res.json({ success: true, removed: workItemIds.length, remaining: remainingIds.length });
+    } catch (error) {
+        console.error('[removeItemsFromBatch] Error:', error);
+        res.status(500).json({ error: 'Failed to remove items from batch' });
     }
 };
 
@@ -332,12 +728,20 @@ exports.dispositionBatch = async (req, res) => {
     const user = req.user;
 
     try {
+        if (!decision || !reason) {
+            return res.status(400).json({ error: 'Decision and reason are required' });
+        }
+
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
             return res.status(403).json({ error: 'Manager only' });
         }
 
         const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
+
+        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
+        }
 
         if (batch.status !== 'QC_FAIL') {
             return res.status(400).json({ error: 'Batch is not in QC_FAIL state' });
@@ -364,3 +768,6 @@ exports.dispositionBatch = async (req, res) => {
         res.status(500).json({ error: 'Failed to disposition batch' });
     }
 };
+
+exports.RUN_PROFILES = RUN_PROFILES;
+exports.resolveRunProfile = resolveRunProfile;

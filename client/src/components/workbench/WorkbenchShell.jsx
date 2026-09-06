@@ -24,7 +24,11 @@ import SpectralIntakeModal from './SpectralIntakeModal';
 export default function WorkbenchShell({ initialAnalysis = null, initialSampleId = null }) {
     const { user } = useAuth();
     const { t } = useLanguage();
-    const { addToast } = useNotifications();
+    const [toast, setToast] = useState(null);
+    const addToast = useCallback((message, type = 'info') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    }, []);
 
     const [activeTab, setActiveTab] = useState('queue'); // queue | worksheet | review | activity
     const [reviewSubView, setReviewSubView] = useState('completion'); // completion | submission
@@ -283,7 +287,7 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
             await fetchReceipts();
 
             // Transition to Submission review
-            handleOpenSubmissionReview();
+            await handleOpenSubmissionReview();
         } catch (err) {
             console.error('[workbench] Failed to commit determinations:', err);
             addToast(err.response?.data?.error || 'Failed to record determinations', 'error');
@@ -448,6 +452,7 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                             setSelectedSpectralItem(item);
                             setIsSpectralModalOpen(true);
                         }}
+                        onBatchUpdated={fetchQueue}
                     />
                 )}
 
@@ -492,6 +497,17 @@ export default function WorkbenchShell({ initialAnalysis = null, initialSampleId
                 modality={selectedSpectralItem?.analysis || 'SPEC_MIR'}
                 eligibleEquipment={currentGroup?.eligibleEquipment || []}
             />
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className={`fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-lg shadow-lg text-xs font-medium border flex items-center gap-2 ${
+                    toast.type === 'error' ? 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300' :
+                    toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300' :
+                    'bg-slate-800 text-white border-slate-700'
+                }`}>
+                    <span>{toast.message}</span>
+                </div>
+            )}
         </div>
     );
 }

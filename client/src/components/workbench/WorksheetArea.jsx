@@ -1,13 +1,15 @@
+import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Filter, Search, Clipboard, ArrowRight, CheckCircle2,
-    AlertTriangle, Sparkles, Check
+    AlertTriangle, Sparkles, Check, Layers
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import WorkbenchInspector from './WorkbenchInspector';
 import PastePreviewModal from './PastePreviewModal';
+import BatchModal from './BatchModal';
 
 /**
  * WorksheetArea
@@ -26,8 +28,10 @@ export default function WorksheetArea({
     onResolveConflict,
     onReviewRecord,
     onOpenSpectralIntake,
+    onBatchUpdated,
     isDiscarding = false
 }) {
+    const getAnalysisDisplayName = useAnalysisNames();
     const items = activeGroup?.items || [];
     const [selectedItemId, setSelectedItemId] = useState(() => {
         if (initialSampleId && items.length > 0) {
@@ -39,6 +43,7 @@ export default function WorksheetArea({
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRows, setSelectedRows] = useState(new Set());
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
     useEffect(() => {
         if (initialSampleId && items.length > 0) {
@@ -47,20 +52,30 @@ export default function WorksheetArea({
         }
     }, [initialSampleId, items]);
 
-    const isTexture = activeGroup?.analysis === 'TEXTURE';
+    const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'TEXTURE');
     const isOperationalGate = activeGroup?.category === 'Operational Gates';
     const isSpectral = ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'SPECTRAL');
 
-    // Filter items by search
+    // Filter items by search and sort stably by rackPosition
     const filteredItems = useMemo(() => {
-        if (!searchQuery) return items;
-        const q = searchQuery.toLowerCase();
-        return items.filter(i =>
-            (i.sampleDisplayId && i.sampleDisplayId.toLowerCase().includes(q)) ||
-            (i.labId && i.labId.toLowerCase().includes(q)) ||
-            (i.sampleId && i.sampleId.toLowerCase().includes(q)) ||
-            (i.originalId && i.originalId.toLowerCase().includes(q))
-        );
+        let list = items;
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            list = list.filter(i =>
+                (i.sampleDisplayId && i.sampleDisplayId.toLowerCase().includes(q)) ||
+                (i.labId && i.labId.toLowerCase().includes(q)) ||
+                (i.sampleId && i.sampleId.toLowerCase().includes(q)) ||
+                (i.originalId && i.originalId.toLowerCase().includes(q))
+            );
+        }
+        return [...list].sort((a, b) => {
+            const posA = typeof a.rackPosition === 'number' ? a.rackPosition : null;
+            const posB = typeof b.rackPosition === 'number' ? b.rackPosition : null;
+            if (posA !== null && posB !== null) return posA - posB;
+            if (posA !== null) return -1;
+            if (posB !== null) return 1;
+            return 0;
+        });
     }, [items, searchQuery]);
 
     // Active inspected item
@@ -113,7 +128,7 @@ export default function WorksheetArea({
             <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        <span>Analysis Method:</span>
+                        <span>Work type:</span>
                         <select
                             value={activeGroup?.analysis || ''}
                             onChange={(e) => onSelectGroup(e.target.value)}
@@ -121,21 +136,33 @@ export default function WorksheetArea({
                         >
                             {allGroups.map(g => (
                                 <option key={g.analysis} value={g.analysis}>
-                                    {g.analysisName || g.analysis} ({g.items.length})
+                                    {getAnalysisDisplayName(g.analysis, g.analysisName)} ({g.items.length})
                                 </option>
                             ))}
                         </select>
                     </label>
 
                     {!isSpectral && !isOperationalGate && (
-                        <button
-                            type="button"
-                            onClick={() => setIsPasteModalOpen(true)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
-                        >
-                            <Clipboard size={13} />
-                            <span>Paste Values</span>
-                        </button>
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setIsPasteModalOpen(true)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                            >
+                                <Clipboard size={13} />
+                                <span>Paste Values</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsBatchModalOpen(true)}
+                                data-testid="open-batch-modal-btn"
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                            >
+                                <Layers size={13} />
+                                <span>Batch & QC Runs</span>
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -155,10 +182,7 @@ export default function WorksheetArea({
             <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                        <span>{activeGroup?.analysisName || activeGroup?.analysis}</span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {activeGroup?.analysis}
-                        </span>
+                        <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
                     </h3>
                     <p className="text-slate-500 text-[11px] mt-0.5">
                         {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
@@ -197,7 +221,7 @@ export default function WorksheetArea({
                                     <th className="py-2.5 px-3 font-semibold min-w-[130px]">Sample</th>
                                     <th className="py-2.5 px-3 font-semibold min-w-[220px]">
                                         {isTexture ? 'Fractions (Sand / Silt / Clay %)' :
-                                         isOperationalGate ? 'SOP Verification' :
+                                         isOperationalGate ? 'Completion checklist' :
                                          isSpectral ? 'Spectra Acquisition Status' :
                                          `Determination (${activeGroup?.unit || 'value'})`}
                                     </th>
@@ -235,6 +259,15 @@ export default function WorksheetArea({
 
                                             <td className="py-3 px-3">
                                                 <div className="flex items-center gap-1.5">
+                                                    {item.rackPosition != null && (
+                                                        <span
+                                                            data-testid={`rack-pos-${item.workItemId}`}
+                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0"
+                                                            title={`Rack Position ${item.rackPosition}${item.batchId ? ` (Batch: ${item.batchId})` : ''}`}
+                                                        >
+                                                            #{item.rackPosition}
+                                                        </span>
+                                                    )}
                                                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                                                         {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
                                                     </span>
@@ -254,13 +287,16 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 {isTexture ? (
                                                     <TextureEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         values={draft?.values || []}
+                                                        tolerance={activeGroup?.validation?.tolerance ?? null}
                                                         onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
                                                         sampleId={item.sampleId}
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                     />
                                                 ) : isOperationalGate ? (
                                                     <OperationalTaskEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         analysis={item.analysis}
                                                         checks={draft?.checks || [false, false, false]}
                                                         onChange={(chk) => onDraftChange(item.workItemId, null, { checks: chk })}
@@ -298,6 +334,7 @@ export default function WorksheetArea({
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
+                                                                    disabled={!item.readiness?.isReady || isRecorded}
                                                                     className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
                                                                 >
                                                                     Upload spectra →
@@ -307,6 +344,7 @@ export default function WorksheetArea({
                                                     </div>
                                                 ) : (
                                                     <NumericEditor
+                                                        disabled={!item.readiness?.isReady || isRecorded}
                                                         value={draft?.value ?? item.currentResult ?? ''}
                                                         onChange={(val) => onDraftChange(item.workItemId, val)}
                                                         unit={activeGroup?.unit || ''}
@@ -418,6 +456,15 @@ export default function WorksheetArea({
                 onApply={handlePasteApply}
                 currentItems={items}
                 analysisCode={activeGroup?.analysis || ''}
+            />
+
+            {/* Batch & QC Modal */}
+            <BatchModal
+                isOpen={isBatchModalOpen}
+                onClose={() => setIsBatchModalOpen(false)}
+                analysisCode={activeGroup?.analysis || ''}
+                selectedWorkItemIds={Array.from(selectedRows)}
+                onBatchUpdated={onBatchUpdated}
             />
         </div>
     );

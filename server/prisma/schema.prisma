@@ -256,6 +256,7 @@ model WorkItem {
   // QC Batch Link
   batchId        String?
   batch          Batch?      @relation(fields: [batchId], references: [id])
+  rackPosition   Int?
 
   // Review status
   reanalysisReason      String?
@@ -314,6 +315,8 @@ model Batch {
   notes       String?
   qcResults   String?  // JSON string: { blanks: [], controls: [], duplicates: [] }
   workItemIds String?  // JSON string: Array of strings
+  maxCapacity Int?     @default(40)
+  profile     String?
   disposition String?  // JSON string: { decision, reason, by, at }
   history     String?  // JSON string: Array of events
 
@@ -915,6 +918,7 @@ model Analysis {
   methodDefinition   String?           // Procedure description
   methodCitation     String?           // Procedure scientific reference / standard
   sampleMassRequired Float?            @default(10.0) // Sample mass required in grams (RC-01)
+  version            Int?              @default(1)
   methodologies      Methodology[]
 }
 
@@ -954,6 +958,7 @@ model Methodology {
   uncertainty      Float?
   isDefault        Boolean          @default(false)
   labId            String?
+  version          Int?             @default(1)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 

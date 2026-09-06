@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-09-06T10:14:35.737Z",
+  "mode": "production build, fixture APIs, no production data",
+  "passed": 16,
+  "checks": [
+    "Parameter count is derived from the catalogue",
+    "Package count reflects real groups",
+    "Placeholder warning is visible",
+    "Needs-review filter isolates the invalid definition",
+    "New parameter has no invented reporting unit",
+    "New parameter has no invented numerical limits",
+    "New parameter starts inactive",
+    "Used parameters cannot silently change reporting units",
+    "Workbench uses the live catalogue name even when queue metadata contains only a code",
+    "Operational names are readable without fake catalogue analyses",
+    "Drying opens a checklist rather than a numerical result field",
+    "Drying does not ask for numeric result basis or replicate metadata",
+    "Checklist progress reflects partial evidence",
+    "Analytical input is disabled while preparation is incomplete",
+    "No runtime page errors occurred",
+    "No external endpoint received a request"
+  ],
+  "errors": [],
+  "apiPaths": [
+    "GET /api/public/i18n/bootstrap",
+    "GET /api/admin/settings",
+    "GET /api/notifications",
+    "GET /api/config/analyses",
+    "GET /api/auth/me",
+    "GET /api/admin/languages",
+    "GET /api/config/categories",
+    "GET /api/config/methodologies",
+    "GET /api/config/groups",
+    "GET /api/config/analyses/CAT_PH/usage",
+    "GET /api/workbench/queue",
+    "GET /api/workbench/v2/receipts",
+    "POST /api/workbench/batch-save"
+  ]
+}

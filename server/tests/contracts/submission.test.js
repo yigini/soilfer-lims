@@ -23,7 +23,7 @@ describe('8.1 Section D: Submission Rules', () => {
         const createRes = await request(app)
             .post('/api/samples/walkin')
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ submitter: 'Sub Tester', analyses: ['PH_H2O', 'COND_H2O'], countryCode: 'SUB' });
+            .send({ submitter: 'Sub Tester', analyses: ['PH_H2O', 'EC'], countryCode: 'SUB' });
 
         expect(createRes.status).toBe(201);
         sampleId = createRes.body.sample.id;
@@ -31,7 +31,7 @@ describe('8.1 Section D: Submission Rules', () => {
         await request(app)
             .post(`/api/samples/${sampleId}/accept`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ analyses: ['PH_H2O', 'COND_H2O'] });
+            .send({ analyses: ['PH_H2O', 'EC'] });
 
         const itemsRes = await request(app)
             .get('/api/work')
@@ -39,7 +39,7 @@ describe('8.1 Section D: Submission Rules', () => {
             .query({ sampleId });
 
         const ph = itemsRes.body.data.find(i => i.analysis === 'PH_H2O');
-        const cond = itemsRes.body.data.find(i => i.analysis === 'COND_H2O');
+        const cond = itemsRes.body.data.find(i => i.analysis === 'EC');
 
         expect(ph).toBeDefined();
         phItemId = ph.id;

@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const validationController = require('./validationController');
+const { validateResultEntries } = require('../services/resultEntryPolicy');
 
 exports.getResults = async (req, res) => {
     const { sampleId } = req.params;
@@ -42,12 +43,12 @@ exports.getResults = async (req, res) => {
         const analysisMap = {};
         analyses.forEach(a => analysisMap[a.code] = a);
 
-        const enriched = results.map(r => ({
+        const enriched = await Promise.all(results.map(async r => ({
             ...r,
-            paramName: analysisMap[r.param]?.name || r.param,
+            paramName: await require('../services/analysisService').getAnalysisName(r.param),
             decimalPlaces: analysisMap[r.param]?.decimalPlaces ?? 2,
             flags: typeof r.flags === 'string' ? JSON.parse(r.flags) : (r.flags || {})
-        }));
+        })));
 
         res.json(enriched);
     } catch (error) {
@@ -111,9 +112,18 @@ exports.saveResults = async (req, res) => {
         if (sample.preparationStatus !== 'DONE') {
             return res.status(412).json({ error: 'Sample preparation has not been completed' });
         }
+        if (sample.dryingStatus !== 'DONE') {
+            return res.status(412).json({ error: 'Sample drying has not been completed' });
+        }
+
+        const entryError = await validateResultEntries(prisma, sample, measurements, user);
+        if (entryError) return res.status(400).json({ error: entryError });
 
         // Validate
         const validatedMeasurements = await validationController.validateBatch(measurements);
+        if (validatedMeasurements.some(m => m.value == null || String(m.value).trim() === '' || m.validation.flags.includes('INVALID_FORMAT'))) {
+            return res.status(400).json({ error: 'Every measurement must contain a valid numeric value or supported censoring qualifier.' });
+        }
 
         const operations = [];
         const now = new Date();
@@ -131,7 +141,7 @@ exports.saveResults = async (req, res) => {
             const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
 
             // Supersede previous active result ONLY for the matching replicate number
-            operations.push(prisma.result.updateMany({
+            operations.push(db => db.result.updateMany({
                 where: {
                     sampleId,
                     param: m.param,
@@ -145,7 +155,7 @@ exports.saveResults = async (req, res) => {
             }));
 
             // Create new immutable record
-            operations.push(prisma.result.create({
+            operations.push(db => db.result.create({
                 data: {
                     id: newResultId,
                     sampleId,
@@ -171,7 +181,7 @@ exports.saveResults = async (req, res) => {
             }));
         }
 
-        operations.push(prisma.auditLog.create({
+        operations.push(db => db.auditLog.create({
             data: {
                 id: `audit-res-up-${Date.now()}`,
                 entity: 'RESULTS',
@@ -183,11 +193,62 @@ exports.saveResults = async (req, res) => {
             }
         }));
 
-        await prisma.$transaction(operations);
+        await prisma.$transaction(async tx => {
+            const current = await tx.sample.findUnique({ where: { id: sampleId } });
+            if (!current || current.status !== sample.status || current.dryingStatus !== 'DONE' || current.preparationStatus !== 'DONE') {
+                throw Object.assign(new Error('Sample readiness changed. Refresh before saving.'), { statusCode: 409 });
+            }
+            const conflict = await validateResultEntries(tx, current, measurements, user);
+            if (conflict) throw Object.assign(new Error(conflict), { statusCode: 409 });
+            for (const operation of operations) await operation(tx);
+        });
 
         if (sample.status === 'PROCESSING' || sample.status === 'ANALYSIS') {
             const { transitionSample } = require('../services/sampleStateService');
             await transitionSample(sampleId, 'SUBMITTED_PARTIAL', user, 'Partial results saved').catch(() => {});
+        }
+
+        // Auto-derive USDA Texture Class if all 3 fractions (SAND, SILT, CLAY) are present
+        try {
+            const curResults = await prisma.result.findMany({
+                where: { sampleId, isCurrent: true, param: { in: ['SAND', 'SILT', 'CLAY'] } }
+            });
+            const sandR = curResults.find(r => r.param === 'SAND');
+            const siltR = curResults.find(r => r.param === 'SILT');
+            const clayR = curResults.find(r => r.param === 'CLAY');
+            if (sandR && siltR && clayR) {
+                const { calculateUsdaTexture } = require('../utils/soilCalculations');
+                const tex = calculateUsdaTexture(sandR.numericValue ?? sandR.value, siltR.numericValue ?? siltR.value, clayR.numericValue ?? clayR.value);
+                if (tex.isValid) {
+                    const texResultId = `res-tex-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+                    await prisma.result.updateMany({
+                        where: { sampleId, param: 'TEXTURE', isCurrent: true },
+                        data: { isCurrent: false, supersededBy: texResultId }
+                    });
+                    await prisma.result.create({
+                        data: {
+                            id: texResultId,
+                            sampleId,
+                            param: 'TEXTURE',
+                            value: tex.className,
+                            numericValue: null,
+                            unit: '',
+                            isValid: true,
+                            censoring: 'NONE',
+                            basis: 'AIR_DRY',
+                            replicateNo: 1,
+                            isCurrent: true,
+                            provenance: 'DERIVED',
+                            enteredBy: user ? user.username : 'SYSTEM_CALC',
+                            analysedAt: now,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    });
+                }
+            }
+        } catch (texErr) {
+            console.error('[saveResults] Auto-derivation of texture failed:', texErr);
         }
 
         // Compute cross-parameter sample matrix diagnostics
@@ -205,6 +266,7 @@ exports.saveResults = async (req, res) => {
 
     } catch (error) {
         console.error('[saveResults] Error:', error);
+        if (error.statusCode) return res.status(error.statusCode).json({ error: error.message });
         res.status(500).json({ error: 'Failed to save results' });
     }
 };
