@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@xyflow/react": "^12.10.0",
-    "axios": "^1.13.2",
+    "axios": "^1.18.0",
     "clsx": "^2.1.1",
     "dagre": "^0.8.5",
     "date-fns": "^3.6.0",
