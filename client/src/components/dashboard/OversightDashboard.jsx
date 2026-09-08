@@ -54,7 +54,7 @@ const OversightDashboard = ({ user }) => {
             {/* ─── Header ─── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100">
+                    <h2 className="text-2xl font-black text-sf-text">
                         Oversight Dashboard
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1.5">
@@ -63,7 +63,7 @@ const OversightDashboard = ({ user }) => {
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
-                    <button onClick={refresh} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now">
+                    <button onClick={refresh} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title="Refresh now">
                         <RefreshCw size={16} className="text-gray-400" />
                     </button>
                 </div>
@@ -102,7 +102,7 @@ const OversightDashboard = ({ user }) => {
             {/* ─── Trends Chart ─── */}
             <div className="card-base rounded-xl shadow-sm border p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h3 className="text-lg font-black text-sf-text flex items-center gap-2">
                         <BarChart3 size={18} className="text-blue-500" /> 7-Day Intake Trend
                     </h3>
                     <div className="text-[10px] text-gray-400 font-mono uppercase">Daily Received Samples</div>
@@ -153,7 +153,7 @@ const OversightDashboard = ({ user }) => {
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-48 flex items-center justify-center text-gray-400 text-sm border border-dashed rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="h-48 flex items-center justify-center text-gray-400 text-sm border border-dashed rounded-lg bg-sf-canvas">
                         No trend data available
                     </div>
                 )}
@@ -162,14 +162,14 @@ const OversightDashboard = ({ user }) => {
             {/* ─── Recent Activity ─── */}
             <div className="card-base rounded-xl shadow-sm border p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h3 className="text-lg font-black text-sf-text flex items-center gap-2">
                         <Clock size={18} className="text-blue-500" /> Recent Activity
                     </h3>
                 </div>
                 {recentActivity.length > 0 ? (
                     <div className="space-y-1">
                         {recentActivity.map((log, idx) => (
-                            <div key={log.id || idx} className="flex gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors items-start">
+                            <div key={log.id || idx} className="flex gap-3 p-2.5 rounded-lg hover:bg-sf-raised/30 transition-colors items-start">
                                 <div className={`p-1.5 rounded-lg mt-0.5 shrink-0 ${log.action?.includes('CREATE') ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40' :
                                     log.action?.includes('DELETE') ? 'bg-red-100 text-red-600 dark:bg-red-900/40' :
                                         'bg-blue-100 text-blue-600 dark:bg-blue-900/40'
@@ -177,7 +177,7 @@ const OversightDashboard = ({ user }) => {
                                     <Activity size={12} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{log.details}</p>
+                                    <p className="text-xs font-bold text-sf-muted truncate">{log.details}</p>
                                     <span className="text-[10px] text-gray-400 font-mono">{log.action?.split('_').join(' ')}</span>
                                 </div>
                                 <span className="text-[10px] text-gray-400 shrink-0 whitespace-nowrap">

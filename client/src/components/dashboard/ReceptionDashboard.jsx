@@ -111,7 +111,7 @@ const ReceptionDashboard = ({ user }) => {
             {/* ─── Header ─── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100">
+                    <h2 className="text-2xl font-black text-sf-text">
                         {t('reception.consoleTitle', 'Reception Console')}
                     </h2>
                     <p className="text-xs text-gray-500 mt-0.5">
@@ -122,7 +122,7 @@ const ReceptionDashboard = ({ user }) => {
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
                     <button
                         onClick={refresh}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="p-2 rounded-lg hover:bg-sf-raised transition-colors"
                         title={t('common.refresh', 'Refresh now')}
                     >
                         <RefreshCw size={16} className="text-gray-400" />
@@ -171,12 +171,12 @@ const ReceptionDashboard = ({ user }) => {
                     }`}
                 >
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                        <span className="text-xs font-bold uppercase tracking-wider text-sf-emerald">
                             {t('reception.incompleteDrafts', 'Incomplete Drafts')}
                         </span>
                         <FileEdit size={18} className="text-indigo-500 opacity-70" />
                     </div>
-                    <span className="text-3xl font-black text-indigo-700 dark:text-indigo-300">{incompleteDrafts}</span>
+                    <span className="text-3xl font-black text-sf-emerald">{incompleteDrafts}</span>
                     <span className="text-[11px] text-gray-400 block mt-0.5">
                         {t('reception.savedDrafts', 'intake drafts in progress')}
                     </span>
@@ -226,9 +226,9 @@ const ReceptionDashboard = ({ user }) => {
             </div>
 
             {/* ─── Actionable Work Queues (Tabs) ─── */}
-            <div className="card-base rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
+            <div className="card-base rounded-xl shadow-sm border border-sf-divider overflow-hidden bg-sf-surface">
                 {/* Tab Navigation */}
-                <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-850 px-4 pt-2 gap-1 overflow-x-auto">
+                <div className="flex border-b border-sf-divider bg-gray-50/70 dark:bg-gray-850 px-4 pt-2 gap-1 overflow-x-auto">
                     {[
                         { id: 'ATTENTION', label: t('reception.tabAttention', 'Needs Attention'), count: attentionQueue.length, color: 'text-rose-600' },
                         { id: 'DRAFTS', label: t('reception.tabDrafts', 'Incomplete Drafts'), count: draftQueue.length, color: 'text-indigo-600' },
@@ -242,8 +242,8 @@ const ReceptionDashboard = ({ user }) => {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2.5 font-bold text-xs rounded-t-lg transition-all border-b-2 cursor-pointer ${
                                     isActive
-                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-blue-600 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 hover:border-gray-300'
+                                        ? 'bg-sf-surface text-sf-text border-blue-600 shadow-sm'
+                                        : 'text-sf-muted border-transparent hover:text-gray-700 hover:border-gray-300'
                                 }`}
                             >
                                 <span>{tab.label}</span>
@@ -265,25 +265,25 @@ const ReceptionDashboard = ({ user }) => {
                     {activeTab === 'ATTENTION' && (
                         <div>
                             {attentionQueue.length > 0 ? (
-                                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div className="divide-y divide-sf-divider">
                                     {attentionQueue.map(s => (
                                         <div key={s.id} className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-750 rounded-lg px-2 transition">
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                                                    <span className="font-bold text-sm text-sf-text">
                                                         {s.originalId || s.labId}
                                                     </span>
                                                     <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
                                                         {s.status}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                <p className="text-xs text-sf-muted mt-0.5">
                                                     Project: {s.projectCode || s.projectId || 'Walk-in'} &middot; {s.rejectionReason ? `Reason: ${s.rejectionReason}` : 'Pending intake manager review'}
                                                 </p>
                                             </div>
                                             <button
                                                 onClick={() => navigate(`/samples/${s.id}`)}
-                                                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0"
+                                                className="px-3 py-1.5 bg-sf-raised hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0"
                                             >
                                                 Inspect <ChevronRight size={14} />
                                             </button>
@@ -293,7 +293,7 @@ const ReceptionDashboard = ({ user }) => {
                             ) : (
                                 <div className="py-10 text-center text-gray-400">
                                     <CheckCircle2 size={32} className="mx-auto text-emerald-400 mb-2" />
-                                    <p className="font-medium text-sm text-gray-600 dark:text-gray-300">No items need attention</p>
+                                    <p className="font-medium text-sm text-sf-muted">No items need attention</p>
                                     <p className="text-xs text-gray-400 mt-1">All intaken samples are in good standing.</p>
                                 </div>
                             )}
@@ -304,19 +304,19 @@ const ReceptionDashboard = ({ user }) => {
                     {activeTab === 'DRAFTS' && (
                         <div>
                             {draftQueue.length > 0 ? (
-                                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div className="divide-y divide-sf-divider">
                                     {draftQueue.map(s => (
                                         <div key={s.id} className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-750 rounded-lg px-2 transition">
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                                                    <span className="font-bold text-sm text-sf-text">
                                                         {s.originalId || s.labId}
                                                     </span>
                                                     <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
                                                         DRAFT
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                <p className="text-xs text-sf-muted mt-0.5">
                                                     Project: {s.projectCode || s.projectId || 'Walk-in'} &middot; Saved by: {s.receivedBy || 'Intake'} &middot; {new Date(s.updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                                 </p>
                                             </div>
@@ -332,7 +332,7 @@ const ReceptionDashboard = ({ user }) => {
                             ) : (
                                 <div className="py-10 text-center text-gray-400">
                                     <FileEdit size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                    <p className="font-medium text-sm text-gray-600 dark:text-gray-300">No active drafts</p>
+                                    <p className="font-medium text-sm text-sf-muted">No active drafts</p>
                                     <p className="text-xs text-gray-400 mt-1">Start a new intake to create a draft.</p>
                                 </div>
                             )}
@@ -343,7 +343,7 @@ const ReceptionDashboard = ({ user }) => {
                     {activeTab === 'EXPECTED' && (
                         <div>
                             {expectedQueue.length > 0 ? (
-                                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div className="divide-y divide-sf-divider">
                                     {expectedQueue.map(s => {
                                         const hasCoords = Boolean(
                                             s.hasCoordinates ||
@@ -359,7 +359,7 @@ const ReceptionDashboard = ({ user }) => {
                                             <div key={s.id} className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-750 rounded-lg px-2 transition">
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                                                        <span className="font-bold text-sm text-sf-text">
                                                             {s.originalId}
                                                         </span>
                                                         <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
@@ -371,7 +371,7 @@ const ReceptionDashboard = ({ user }) => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <p className="text-xs text-sf-muted mt-0.5">
                                                         Project: {s.projectCode || s.projectId || 'Unassigned'} &middot; Logged: {new Date(s.createdAt).toLocaleDateString()}
                                                     </p>
                                                 </div>
@@ -388,7 +388,7 @@ const ReceptionDashboard = ({ user }) => {
                             ) : (
                                 <div className="py-10 text-center text-gray-400">
                                     <PackageCheck size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                    <p className="font-medium text-sm text-gray-600 dark:text-gray-300">No expected arrivals pending</p>
+                                    <p className="font-medium text-sm text-sf-muted">No expected arrivals pending</p>
                                     <p className="text-xs text-gray-400 mt-1">All manifest samples have been processed or none are expected.</p>
                                 </div>
                             )}
@@ -399,7 +399,7 @@ const ReceptionDashboard = ({ user }) => {
                     {activeTab === 'RECENT' && (
                         <div>
                             {recentIntakes.length > 0 ? (
-                                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div className="divide-y divide-sf-divider">
                                     {recentIntakes.map(s => {
                                         const statusColor = s.status === 'RECEIVED' ? 'bg-blue-100 text-blue-700'
                                             : s.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700'
@@ -409,20 +409,20 @@ const ReceptionDashboard = ({ user }) => {
                                             <div key={s.id} className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-750 rounded-lg px-2 transition">
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                                                        <span className="font-bold text-sm text-sf-text">
                                                             {s.labId || s.originalId}
                                                         </span>
                                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${statusColor}`}>
                                                             {s.status?.replace('_', ' ')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <p className="text-xs text-sf-muted mt-0.5">
                                                         Project: {s.projectCode || s.projectId || 'Walk-in'} &middot; Received by: {s.receivedBy || 'Intake'} &middot; {new Date(s.receptionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
                                                 </div>
                                                 <button
                                                     onClick={() => navigate(`/samples/${s.id}`)}
-                                                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0"
+                                                    className="px-3 py-1.5 bg-sf-raised hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0"
                                                 >
                                                     View Record <ChevronRight size={14} />
                                                 </button>
@@ -433,7 +433,7 @@ const ReceptionDashboard = ({ user }) => {
                             ) : (
                                 <div className="py-10 text-center text-gray-400">
                                     <FlaskConical size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                    <p className="font-medium text-sm text-gray-600 dark:text-gray-300">No samples received today</p>
+                                    <p className="font-medium text-sm text-sf-muted">No samples received today</p>
                                     <p className="text-xs text-gray-400 mt-1">Use "New Intake" above to record arriving samples.</p>
                                 </div>
                             )}
@@ -443,10 +443,10 @@ const ReceptionDashboard = ({ user }) => {
             </div>
 
             {/* ─── Laboratory Operational Handoff (Clearly separate from today's intake) ─── */}
-            <div className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 space-y-3">
+            <div className="p-5 rounded-xl border border-sf-divider bg-sf-canvas space-y-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
                             <Database size={16} className="text-blue-500" />
                             {t('reception.handoffTitle', 'Laboratory Operational Handoff')}
                         </h3>
@@ -494,12 +494,12 @@ const ReceptionDashboard = ({ user }) => {
                     {/* Total Registered */}
                     <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 dark:bg-gray-800/80 dark:border-gray-700">
                         <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
                                 Total Registered
                             </span>
                             <Database size={16} className="text-gray-400 opacity-70" />
                         </div>
-                        <span className="text-2xl font-black text-gray-800 dark:text-gray-200">{totalRegistered}</span>
+                        <span className="text-2xl font-black text-sf-text">{totalRegistered}</span>
                         <span className="text-[10px] text-gray-500 block mt-0.5">
                             all registered samples in lab
                         </span>

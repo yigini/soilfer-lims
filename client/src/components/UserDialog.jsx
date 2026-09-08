@@ -80,18 +80,18 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 relative">
+            <div className="bg-sf-surface rounded-xl shadow-xl w-full max-w-md p-6 relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                     <X size={20} />
                 </button>
 
-                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                <h2 className="text-xl font-bold mb-4 text-sf-text">
                     {isEdit ? t('users.editUser', 'Edit User') : t('users.addUser', 'Add User')}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.name', 'Full Name')}</label>
+                        <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.name', 'Full Name')}</label>
                         <input
                             name="name"
                             value={formData.name}
@@ -102,7 +102,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.email', 'Email Address')}</label>
+                        <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.email', 'Email Address')}</label>
                         <input
                             name="email"
                             type="email"
@@ -115,7 +115,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.username', 'Username')}</label>
+                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.username', 'Username')}</label>
                             <input
                                 name="username"
                                 value={formData.username}
@@ -126,7 +126,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.role', 'Role')}</label>
+                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.role', 'Role')}</label>
                             <select
                                 name="role"
                                 value={formData.role}
@@ -143,10 +143,10 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                     {/* Project Selection (Admin Only) */}
                     {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'MASTER_USER') && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.assignedProjects', 'Assigned Projects')}</label>
+                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.assignedProjects', 'Assigned Projects')}</label>
                             <div className="flex flex-wrap gap-2 border dark:border-gray-600 p-2 rounded-lg max-h-32 overflow-y-auto">
                                 {availableProjects.map(p => (
-                                    <label key={p.code} className="flex items-center gap-2 text-sm cursor-pointer p-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-gray-800 dark:text-gray-200">
+                                    <label key={p.code} className="flex items-center gap-2 text-sm cursor-pointer p-1 hover:bg-sf-raised rounded text-sf-text">
                                         <input
                                             type="checkbox"
                                             checked={formData.projects.includes(p.code)}
@@ -171,7 +171,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
 
                     {!isEdit && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.password', 'Password')}</label>
+                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.password', 'Password')}</label>
                             <input
                                 name="password"
                                 type="password"
@@ -181,14 +181,14 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                                 placeholder={t('users.tempPassword', 'Min. 8 characters')}
                                 required
                             />
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('users.tempPasswordHint', 'Temporary password. User will be asked to change on first login.')}</p>
+                            <p className="text-xs text-sf-muted mt-1">{t('users.tempPasswordHint', 'Temporary password. User will be asked to change on first login.')}</p>
                         </div>
                     )}
 
                     {/* Scoping Fields */}
                     {canEditLab ? (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users.lab', 'Assigned Laboratory')}</label>
+                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('users.lab', 'Assigned Laboratory')}</label>
                             <input
                                 name="labId"
                                 value={formData.labId || ''}
@@ -198,7 +198,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                             />
                         </div>
                     ) : (
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded text-sm text-gray-600 dark:text-gray-300 border dark:border-gray-600">
+                        <div className="p-3 bg-sf-canvas/50 rounded text-sm text-sf-muted border dark:border-gray-600">
                             {t('users.lab', 'Assigned Laboratory')}: <strong>{currentUserLabId}</strong>
                         </div>
                     )}
@@ -207,7 +207,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            className="px-4 py-2 text-sf-muted hover:bg-sf-raised rounded-lg"
                         >
                             {t('common.cancel', 'Cancel')}
                         </button>

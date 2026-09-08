@@ -125,7 +125,7 @@ const Users = () => {
         <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('users.title', 'Laboratory Staff')}</h1>
+                    <h1 className="text-3xl font-bold text-sf-text">{t('users.title', 'Laboratory Staff')}</h1>
                     <p className="text-gray-700 dark:text-gray-400">{t('users.subtitle', 'Manage laboratory personnel and access')}</p>
                 </div>
                 <button
@@ -139,7 +139,7 @@ const Users = () => {
             {/* Filters */}
             <div className="card-base p-4 rounded-lg shadow-sm border mb-6 flex gap-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-sf-muted" size={18} />
                     <input
                         type="text"
                         placeholder={t('users.searchPlaceholder', 'Search users by name, username, or email...')}
@@ -153,7 +153,7 @@ const Users = () => {
             {/* Table */}
             <div className="card-base rounded-lg shadow-sm border overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-600">
+                    <thead className="bg-sf-canvas text-sf-muted font-semibold border-b dark:border-gray-600">
                         <tr>
                             <th className="p-4">{t('users.name', 'User')}</th>
                             <th className="p-4">{t('users.role', 'Role')}</th>
@@ -163,20 +163,20 @@ const Users = () => {
                     </thead>
                     <tbody className="divide-y dark:divide-gray-700">
                         {loading ? (
-                            <tr><td colSpan="4" className="p-8 text-center text-gray-500 dark:text-gray-400">{t('common.loading', 'Loading...')}</td></tr>
+                            <tr><td colSpan="4" className="p-8 text-center text-sf-muted">{t('common.loading', 'Loading...')}</td></tr>
                         ) : users.length === 0 ? (
                             <tr><td colSpan="4" className="p-8 text-center text-gray-400">{t('common.noRecords', 'No users found.')}</td></tr>
                         ) : (
                             users.map(u => (
-                                <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <tr key={u.id} className="hover:bg-sf-raised/30 transition-colors">
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
+                                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sf-muted font-bold">
                                                 {u.name ? u.name.charAt(0) : '?'}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-gray-900 dark:text-gray-100">{u.name}</div>
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">{u.email}</div>
+                                                <div className="font-bold text-sf-text">{u.name}</div>
+                                                <div className="text-sm text-sf-muted">{u.email}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -188,7 +188,7 @@ const Users = () => {
                                             {t(`roles.${u.role}`, u.role.replace('_', ' '))}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
+                                    <td className="p-4 text-sm text-sf-muted">
                                         {u.labId ? (
                                             <div className="flex items-center gap-1"><MapPin size={14} /> {u.labId}</div>
                                         ) : (
@@ -239,11 +239,11 @@ const Users = () => {
             </div>
 
             {/* Pagination settings */}
-            <div className="mt-5 flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs">
+            <div className="mt-5 flex justify-between items-center bg-sf-surface p-4 rounded-xl border border-sf-divider shadow-xs">
                 <button
                     disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                     <ChevronLeft size={16} />
                     {t('common.previous', 'Previous')}
@@ -256,7 +256,7 @@ const Users = () => {
                 <button
                     disabled={page === totalPages || totalPages === 0}
                     onClick={() => setPage(p => p + 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                     {t('common.next', 'Next')}
                     <ChevronRight size={16} />

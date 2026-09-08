@@ -435,15 +435,15 @@ export default function Dashboard() {
     const roleConfig = ROLE_CONFIGS[user.role];
     if (!roleConfig) {
         return (
-            <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm text-center">
+            <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-sf-surface border border-sf-divider shadow-sm text-center">
                 <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl font-bold text-sf-text">
                     Unrecognized Access Role
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                <p className="text-sm text-sf-muted mt-2">
                     Your assigned account role (<code className="font-mono text-rose-600">{user.role || 'NONE'}</code>) is not registered in the canonical SoilFER LIMS RBAC matrix.
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                <p className="text-xs text-sf-muted mt-3">
                     Please contact your system administrator to assign an authorized operational role.
                 </p>
             </div>
@@ -453,12 +453,12 @@ export default function Dashboard() {
     // Loading error state on initial bundle
     if (homeError && !homeData) {
         return (
-            <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 shadow-sm text-center">
+            <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-sf-surface border border-red-200 dark:border-red-800 shadow-sm text-center">
                 <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl font-bold text-sf-text">
                     Unable to load dashboard
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                <p className="text-sm text-sf-muted mt-2">
                     {homeError?.response?.data?.error || homeError?.response?.data?.message || homeError?.message || 'An error occurred while loading the dashboard data.'}
                 </p>
                 <button

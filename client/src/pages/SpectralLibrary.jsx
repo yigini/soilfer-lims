@@ -10,6 +10,18 @@ import { useNotifications } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const SpectralLibrary = () => {
+    // Dismiss viewer modal on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && selectedScan) {
+                setSelectedScan(null);
+                setOverlayScans(null);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedScan]);
+
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
@@ -402,24 +414,24 @@ const SpectralLibrary = () => {
             <div className="mb-8">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                        <h1 className="text-3xl font-black text-sf-text flex items-center gap-3">
                             <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/25">
                                 <Activity className="text-white" size={24} />
                             </div>
                             {t('spectral.title', 'Spectral Library')}
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1 ml-14">
+                        <p className="text-sf-muted mt-1 ml-14">
                             {t('spectral.subtitle', 'Manage and explore Vis-NIR and MIR spectral assets')}
                         </p>
                     </div>
 
                     {/* Tab Buttons */}
-                    <div className="flex gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="flex gap-2 bg-sf-surface p-1 rounded-xl shadow-sm border border-sf-divider">
                         <button
                             onClick={() => { setActiveTab('EXPLORER'); setFilters(prev => ({ ...prev, status: '' })); }}
                             className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${activeTab === 'EXPLORER' && !isTrashView
                                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                : 'text-sf-muted hover:bg-sf-raised'
                                 }`}
                         >
                             <Database size={16} />
@@ -429,7 +441,7 @@ const SpectralLibrary = () => {
                             onClick={() => setActiveTab('UPLOAD')}
                             className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${activeTab === 'UPLOAD'
                                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                : 'text-sf-muted hover:bg-sf-raised'
                                 }`}
                         >
                             <Upload size={16} />
@@ -440,7 +452,7 @@ const SpectralLibrary = () => {
                                 onClick={() => { setActiveTab('EXPLORER'); setFilters(prev => ({ ...prev, status: 'DELETED' })); }}
                                 className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${isTrashView
                                     ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md shadow-red-500/30'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    : 'text-sf-muted hover:bg-sf-raised'
                                     }`}
                             >
                                 <Trash2 size={16} />
@@ -453,18 +465,18 @@ const SpectralLibrary = () => {
                 {/* Stats Cards */}
                 {!isTrashView && (
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mt-6">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-sf-divider shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                    <BarChart3 size={18} className="text-gray-600 dark:text-gray-400" />
+                                <div className="p-2 bg-sf-raised rounded-lg">
+                                    <BarChart3 size={18} className="text-sf-muted" />
                                 </div>
                                 <div>
-                                    <div className="text-2xl font-black text-gray-900 dark:text-white">{stats.total}</div>
+                                    <div className="text-2xl font-black text-sf-text">{stats.total}</div>
                                     <div className="text-xs text-gray-500 uppercase tracking-wide">{t('spectral.totalSpectra', 'Total Spectra')}</div>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-100 dark:border-blue-900/30 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-blue-100 dark:border-blue-900/30 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                     <Sparkles size={18} className="text-blue-600" />
@@ -475,7 +487,7 @@ const SpectralLibrary = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                                     <Sparkles size={18} className="text-emerald-600" />
@@ -486,9 +498,9 @@ const SpectralLibrary = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-sf-divider shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                <div className="p-2 bg-sf-raised rounded-lg">
                                     <Clock size={18} className="text-gray-600" />
                                 </div>
                                 <div>
@@ -497,7 +509,7 @@ const SpectralLibrary = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-100 dark:border-amber-900/30 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-amber-100 dark:border-amber-900/30 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                                     <ClipboardCheck size={18} className="text-amber-600" />
@@ -508,7 +520,7 @@ const SpectralLibrary = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-green-100 dark:border-green-900/30 shadow-sm">
+                        <div className="bg-sf-surface rounded-xl p-4 border border-green-100 dark:border-green-900/30 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                                     <CheckCircle size={18} className="text-green-600" />
@@ -525,7 +537,7 @@ const SpectralLibrary = () => {
 
             {/* TAB: EXPLORER / TRASH */}
             {activeTab === 'EXPLORER' && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="bg-sf-surface rounded-2xl shadow-xl border border-sf-divider overflow-hidden">
                     {/* Trash header */}
                     {isTrashView && (
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-800 flex items-center gap-3">
@@ -537,7 +549,7 @@ const SpectralLibrary = () => {
                     )}
 
                     {/* Toolbar */}
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 items-center bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
+                    <div className="p-4 border-b border-sf-divider flex flex-wrap gap-4 items-center bg-sf-surface">
                         <div className="relative">
                             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                             <input
@@ -605,7 +617,7 @@ const SpectralLibrary = () => {
                             </button>
                             <button
                                 onClick={() => setSelectedIds(new Set())}
-                                className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
+                                className="px-3 py-1.5 text-sf-muted hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
                             >
                                 Clear
                             </button>
@@ -631,11 +643,11 @@ const SpectralLibrary = () => {
                     {/* Table */}
                     <div className="overflow-auto max-h-[55vh]">
                         <table className="w-full text-left">
-                            <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
+                            <thead className="bg-sf-canvas/50 sticky top-0 z-10">
                                 <tr>
                                     {/* Checkbox column for managers */}
                                     {isManager && !isTrashView && (
-                                        <th className="pl-4 pr-2 py-4 border-b border-gray-100 dark:border-gray-700 w-10">
+                                        <th className="pl-4 pr-2 py-4 border-b border-sf-divider w-10">
                                             <Tip label="Select all reviewable spectra">
                                                 <input
                                                     type="checkbox"
@@ -646,25 +658,25 @@ const SpectralLibrary = () => {
                                             </Tip>
                                         </th>
                                     )}
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider">
                                         Sample Lab ID
                                         <InfoTooltip text="The sample's unique laboratory identifier. Linked IDs are clickable." />
                                     </th>
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider">
                                         Modality
                                     </th>
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider">
                                         QC Status
                                         <InfoTooltip text="Quality control result from automated validation checks." />
                                     </th>
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider">
                                         Workflow Status
                                         <InfoTooltip text="PENDING: Needs QC. VALIDATED: QC passed, awaiting manager approval. APPROVED: Ready for use. REJECTED: Manager rejected (can be undone)." />
                                     </th>
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider">
                                         Date
                                     </th>
-                                    <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 text-right">
+                                    <th className="px-6 py-4 font-bold text-xs text-sf-muted uppercase tracking-wider border-b border-sf-divider text-right">
                                         Actions
                                     </th>
                                 </tr>
@@ -731,7 +743,7 @@ const SpectralLibrary = () => {
                                                     )}
                                                     <td className={`px-6 py-4 ${indent ? 'pl-14' : ''}`}>
                                                         {indent ? (
-                                                            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                                            <span className="text-xs text-sf-muted font-mono">
                                                                 v{scan.metadata?.scanVersion || '1'} — {scan.filename}
                                                             </span>
                                                         ) : hasLinkedSample ? (
@@ -744,7 +756,7 @@ const SpectralLibrary = () => {
                                                             </a>
                                                         ) : (
                                                             <Tip label="Not linked to a sample record">
-                                                                <span className="font-mono font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <span className="font-mono font-bold text-sf-muted flex items-center gap-1.5">
                                                                     {getDisplayLabId(scan)}
                                                                     <AlertTriangle size={13} className="text-amber-500" />
                                                                 </span>
@@ -782,7 +794,7 @@ const SpectralLibrary = () => {
                                                     <td className="px-6 py-4">
                                                         {getStatusBadge(scan.status)}
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                    <td className="px-6 py-4 text-sm text-sf-muted">
                                                         {formatDate(scan.metadata?.scanDate || scan.timestamp)}
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
@@ -903,7 +915,7 @@ const SpectralLibrary = () => {
                                                             ))}
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                    <td className="px-6 py-3 text-sm text-sf-muted">
                                                         {formatDate(group.latestDate)}
                                                     </td>
                                                     <td className="px-6 py-3 text-right">
@@ -935,7 +947,7 @@ const SpectralLibrary = () => {
                         </table>
                     </div>
                     {/* Pagination Bar (SL-04) */}
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="px-6 py-4 bg-sf-canvas/50 border-t border-sf-divider flex flex-wrap items-center justify-between gap-4 text-xs text-sf-muted">
                         <div className="flex items-center gap-2">
                             <span>Showing {spectraList.length} of {totalRecords} scans</span>
                             <span className="text-gray-300 dark:text-gray-600">|</span>
@@ -943,7 +955,7 @@ const SpectralLibrary = () => {
                             <select
                                 value={pageSize}
                                 onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
-                                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs"
+                                className="bg-white dark:bg-gray-700 border border-sf-divider rounded px-2 py-1 text-xs"
                             >
                                 <option value={25}>25</option>
                                 <option value={50}>50</option>
@@ -956,14 +968,14 @@ const SpectralLibrary = () => {
                             <button
                                 disabled={page <= 1 || loading}
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
+                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-sf-divider disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
                             >
                                 Previous
                             </button>
                             <button
                                 disabled={page >= totalPages || loading}
                                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
+                                className="px-3 py-1 rounded bg-white dark:bg-gray-700 border border-sf-divider disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium"
                             >
                                 Next
                             </button>
@@ -974,7 +986,7 @@ const SpectralLibrary = () => {
 
             {/* TAB: UPLOAD */}
             {activeTab === 'UPLOAD' && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 flex justify-center items-center min-h-[500px]">
+                <div className="bg-sf-surface rounded-2xl shadow-xl border border-sf-divider p-8 flex justify-center items-center min-h-[500px]">
                     <div className="w-full max-w-2xl">
                         <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                             <p className="text-amber-800 dark:text-amber-300 text-sm flex items-center gap-2">
@@ -997,17 +1009,17 @@ const SpectralLibrary = () => {
             {/* VIEWER MODAL */}
             {selectedScan && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col overflow-hidden border border-sf-divider">
                         {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
+                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface">
                             <div className="flex items-center gap-4">
                                 <div>
-                                    <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                                    <h2 className="text-xl font-black text-sf-text flex items-center gap-3">
                                         <span className={`px-3 py-1 rounded-lg text-sm ${selectedScan.modality === 'NIR' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
                                             }`}>{selectedScan.modality}</span>
                                         {selectedScan.labId}
                                     </h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">{selectedScan.id}</p>
+                                    <p className="text-xs text-sf-muted mt-1 font-mono">{selectedScan.id}</p>
                                 </div>
                                 {getStatusBadge(selectedScan.status)}
                             </div>
@@ -1017,7 +1029,7 @@ const SpectralLibrary = () => {
                                         <Download size={20} />
                                     </button>
                                 </Tip>
-                                <button onClick={() => { setSelectedScan(null); setOverlayScans(null); }} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                <button onClick={() => { setSelectedScan(null); setOverlayScans(null); }} className="p-2.5 hover:bg-sf-raised rounded-xl text-gray-500 transition-colors">
                                     <XCircle size={24} />
                                 </button>
                             </div>
@@ -1025,33 +1037,33 @@ const SpectralLibrary = () => {
 
                         <div className="flex-1 flex overflow-hidden">
                             {/* Chart Area */}
-                            <div className={`flex-1 p-6 overflow-hidden flex flex-col bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ${overlayScans ? '' : ''}`}>
+                            <div className={`flex-1 p-6 overflow-hidden flex flex-col bg-sf-canvas ${overlayScans ? '' : ''}`}>
                                 <SpectraViewer data={selectedScan} overlayData={overlayScans} />
                             </div>
 
                             {/* Sidebar Info - hidden in overlay mode */}
                             {!overlayScans && (
-                                <div className="w-80 border-l border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 overflow-y-auto">
-                                    <h3 className="font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                <div className="w-80 border-l border-sf-divider bg-sf-surface p-6 overflow-y-auto">
+                                    <h3 className="font-bold text-sf-muted mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                                         <FileText size={16} /> Metadata
                                     </h3>
                                     <div className="space-y-4 text-sm">
-                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                        <div className="p-3 bg-sf-canvas/50 rounded-xl">
                                             <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Cpu size={12} /> Instrument</label>
-                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{getInstrumentDisplay(selectedScan)}</div>
+                                            <div className="font-bold text-sf-text mt-1">{getInstrumentDisplay(selectedScan)}</div>
                                         </div>
-                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                        <div className="p-3 bg-sf-canvas/50 rounded-xl">
                                             <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><Calendar size={12} /> Scan Date</label>
-                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{formatDate(selectedScan.metadata?.scanDate || selectedScan.timestamp)}</div>
+                                            <div className="font-bold text-sf-text mt-1">{formatDate(selectedScan.metadata?.scanDate || selectedScan.timestamp)}</div>
                                         </div>
-                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                        <div className="p-3 bg-sf-canvas/50 rounded-xl">
                                             <label className="text-xs text-gray-400 uppercase flex items-center gap-1"><User size={12} /> Operator</label>
-                                            <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.metadata?.operator || selectedScan.uploadedBy || 'System'}</div>
+                                            <div className="font-bold text-sf-text mt-1">{selectedScan.metadata?.operator || selectedScan.uploadedBy || 'System'}</div>
                                         </div>
 
-                                        <hr className="border-gray-200 dark:border-gray-700" />
+                                        <hr className="border-sf-divider" />
 
-                                        <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                        <h3 className="font-bold text-sf-muted flex items-center gap-2 text-sm uppercase tracking-wider">
                                             <CheckCircle size={16} /> QC Report
                                         </h3>
                                         <div className={`p-4 rounded-xl border ${selectedScan.qcStatus === 'PASS' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
@@ -1069,7 +1081,7 @@ const SpectralLibrary = () => {
                                             </div>
                                             {selectedScan.qcFlags && selectedScan.qcFlags.length > 0 ? (
                                                 <ul className="list-disc pl-4 text-xs space-y-1">
-                                                    {selectedScan.qcFlags.map(f => <li key={f} className="text-gray-700 dark:text-gray-300">{f}</li>)}
+                                                    {selectedScan.qcFlags.map(f => <li key={f} className="text-sf-muted">{f}</li>)}
                                                 </ul>
                                             ) : (
                                                 <div className="text-xs text-green-600 dark:text-green-400">✓ All quality checks passed</div>
@@ -1079,13 +1091,13 @@ const SpectralLibrary = () => {
                                         {/* Approval section */}
                                         {selectedScan.reviewedBy && (
                                             <>
-                                                <hr className="border-gray-200 dark:border-gray-700" />
-                                                <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                                <hr className="border-sf-divider" />
+                                                <h3 className="font-bold text-sf-muted flex items-center gap-2 text-sm uppercase tracking-wider">
                                                     <Shield size={16} /> Manager Review
                                                 </h3>
-                                                <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                                                <div className="p-3 bg-sf-canvas/50 rounded-xl">
                                                     <div className="text-xs text-gray-400 uppercase">Reviewed By</div>
-                                                    <div className="font-bold text-gray-900 dark:text-white mt-1">{selectedScan.reviewedBy}</div>
+                                                    <div className="font-bold text-sf-text mt-1">{selectedScan.reviewedBy}</div>
                                                     <div className="text-xs text-gray-500 mt-1">{formatDate(selectedScan.reviewedAt)}</div>
                                                 </div>
                                             </>

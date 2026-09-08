@@ -106,14 +106,14 @@ const DataSheet = () => {
     });
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="h-full flex flex-col bg-sf-canvas p-6">
             {/* Header / Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <ClipboardList className="text-blue-600 dark:text-blue-400" /> Data Sheet Entry
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    <p className="text-sf-muted text-sm">
                         Batch result entry for assigned analysis tasks.
                     </p>
                 </div>
@@ -130,7 +130,7 @@ const DataSheet = () => {
 
             {/* Filters */}
             <div className="card-base p-4 rounded-lg shadow-sm border mb-6 flex flex-wrap gap-4 items-center">
-                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+                <div className="flex items-center gap-2 text-sf-muted font-medium">
                     <Filter size={18} /> Filters:
                 </div>
 
@@ -144,7 +144,7 @@ const DataSheet = () => {
                 </select>
 
                 <div className="relative">
-                    <Search className="absolute left-3 top-2.5 text-gray-400 dark:text-gray-500" size={16} />
+                    <Search className="absolute left-3 top-2.5 text-sf-muted" size={16} />
                     <input
                         type="text"
                         placeholder="Search Lab ID..."
@@ -154,7 +154,7 @@ const DataSheet = () => {
                     />
                 </div>
 
-                <div className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+                <div className="ml-auto text-sm text-sf-muted">
                     Showing {filteredItems.length} tasks
                 </div>
             </div>
@@ -163,20 +163,20 @@ const DataSheet = () => {
             <div className="card-base rounded-xl shadow border flex-1 overflow-hidden flex flex-col">
                 <div className="overflow-x-auto overflow-y-auto flex-1">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10 shadow-sm">
+                        <thead className="bg-sf-canvas sticky top-0 z-10 shadow-sm">
                             <tr>
-                                <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b dark:border-gray-600">Lab ID</th>
-                                <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b dark:border-gray-600">Analysis</th>
-                                <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b dark:border-gray-600">Status</th>
-                                <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b dark:border-gray-600 w-48">Result Value</th>
-                                <th className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b dark:border-gray-600 text-right">Action</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-sm uppercase tracking-wider border-b dark:border-gray-600">Lab ID</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-sm uppercase tracking-wider border-b dark:border-gray-600">Analysis</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-sm uppercase tracking-wider border-b dark:border-gray-600">Status</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-sm uppercase tracking-wider border-b dark:border-gray-600 w-48">Result Value</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-sm uppercase tracking-wider border-b dark:border-gray-600 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody className="divide-y divide-sf-divider">
                             {filteredItems.map(item => (
-                                <tr key={item.id} className={`group transition-colors ${item.status === 'COMPLETED' ? 'bg-gray-50/50 dark:bg-gray-800/50' : 'hover:bg-blue-50/30 dark:hover:bg-blue-900/20'}`}>
-                                    <td className="px-6 py-3 font-mono text-gray-700 dark:text-gray-300 font-medium">{item.labId}</td>
-                                    <td className="px-6 py-3 font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                <tr key={item.id} className={`group transition-colors ${item.status === 'COMPLETED' ? 'bg-sf-canvas' : 'hover:bg-blue-50/30 dark:hover:bg-blue-900/20'}`}>
+                                    <td className="px-6 py-3 font-mono text-sf-muted font-medium">{item.labId}</td>
+                                    <td className="px-6 py-3 font-bold text-sf-text flex items-center gap-2">
                                         <div className="w-1.5 h-6 bg-blue-500 dark:bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                                         {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                     </td>
@@ -194,7 +194,7 @@ const DataSheet = () => {
                                             value={inputs[item.id] !== undefined ? inputs[item.id] : (item.result || '')}
                                             onChange={e => handleInputChange(item.id, e.target.value)}
                                             placeholder="Enter result..."
-                                            className={`input-base w-full border rounded px-3 py-2 text-sm focus:ring-2 outline-none transition-all ${item.status === 'COMPLETED' ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-transparent' : 'border-gray-300 dark:border-gray-600 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 dark:focus:border-blue-500 font-bold'
+                                            className={`input-base w-full border rounded px-3 py-2 text-sm focus:ring-2 outline-none transition-all ${item.status === 'COMPLETED' ? 'bg-sf-raised text-sf-muted border-transparent' : 'border-sf-divider focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 dark:focus:border-blue-500 font-bold'
                                                 }`}
                                         />
                                     </td>

@@ -14,7 +14,7 @@ const READINESS_COLORS = {
     READY: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
     WARNING: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20',
     BLOCKED: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20',
-    NOT_CONFIGURED: 'text-gray-500 bg-gray-100 dark:bg-gray-800'
+    NOT_CONFIGURED: 'text-gray-500 bg-sf-raised'
 };
 
 const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) => {
@@ -71,7 +71,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
 
     return (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
-            <div className="w-full max-w-2xl bg-white dark:bg-gray-800 h-full overflow-y-auto shadow-2xl animate-slide-in-right font-sans" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-2xl bg-sf-surface h-full overflow-y-auto shadow-2xl animate-slide-in-right font-sans" onClick={e => e.stopPropagation()}>
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-gray-400"><RefreshCw className="animate-spin mr-2" /> Loading...</div>
                 ) : !asset ? (
@@ -85,7 +85,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                                     <Monitor size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{asset.name}</h3>
+                                    <h3 className="text-xl font-bold text-sf-text">{asset.name}</h3>
                                     <p className="text-xs text-gray-400 font-mono tracking-wider">{asset.internalAssetTag} • {asset.assetType}</p>
                                 </div>
                             </div>
@@ -94,7 +94,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                                     <button
                                         onClick={() => setShowEdit(true)}
                                         title="Edit Item Details"
-                                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-blue-600"
+                                        className="p-2 rounded-lg hover:bg-sf-raised transition-colors text-blue-600"
                                     >
                                         <Settings size={20} />
                                     </button>
@@ -102,11 +102,11 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                                 <button
                                     onClick={handleExportHistory}
                                     title="Export History"
-                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500"
+                                    className="p-2 rounded-lg hover:bg-sf-raised transition-colors text-gray-500"
                                 >
                                     <Download size={20} />
                                 </button>
-                                <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <button onClick={onClose} className="p-2 rounded-lg hover:bg-sf-raised transition-colors">
                                     <X size={24} />
                                 </button>
                             </div>
@@ -134,8 +134,8 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                         </div>
 
                         {/* Quick Actions (Sticky Bottom) */}
-                        <div className="sticky bottom-0 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 grid grid-cols-2 gap-3">
-                            <button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-white dark:bg-gray-800 hover:bg-gray-50 transition-colors">
+                        <div className="sticky bottom-0 border-t dark:border-gray-700 bg-sf-canvas p-4 grid grid-cols-2 gap-3">
+                            <button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-sf-surface hover:bg-gray-50 transition-colors">
                                 <Wrench size={16} /> Log Maintenance
                             </button>
                             <button onClick={() => setLogModal('CALIBRATION')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm">
@@ -179,19 +179,19 @@ const OverviewTab = ({ asset }) => (
         <section>
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2"><Info size={14} /> Specifications</h4>
             <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700">
+                <div className="p-3 rounded-xl bg-sf-canvas/40 border dark:border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Manufacturer</div>
                     <div className="font-bold text-sm">{asset.manufacturer || '—'}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700">
+                <div className="p-3 rounded-xl bg-sf-canvas/40 border dark:border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Model / System</div>
                     <div className="font-bold text-sm">{asset.model || '—'}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700">
+                <div className="p-3 rounded-xl bg-sf-canvas/40 border dark:border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Serial Number</div>
                     <div className="font-bold font-mono text-sm">{asset.serialNumber || '—'}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700">
+                <div className="p-3 rounded-xl bg-sf-canvas/40 border dark:border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Criticality</div>
                     <div className={`font-bold text-sm ${asset.criticality === 'CRITICAL' ? 'text-red-600' : 'text-blue-600'}`}>{asset.criticality}</div>
                 </div>
@@ -265,7 +265,7 @@ const MaintenanceTab = ({ asset, onAction }) => (
 const HistoryTab = ({ events = [] }) => (
     <div className="space-y-4">
         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Audit Log & Event History</h4>
-        <div className="relative border-l-2 border-gray-100 dark:border-gray-700 ml-3 pl-6 space-y-6">
+        <div className="relative border-l-2 border-sf-divider ml-3 pl-6 space-y-6">
             {events.map((e, idx) => (
                 <div key={e.id} className="relative">
                     <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-blue-600 outline outline-4 outline-white dark:outline-gray-800" />
@@ -273,7 +273,7 @@ const HistoryTab = ({ events = [] }) => (
                         <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 px-2 py-0.5 rounded uppercase">{e.eventType}</span>
                         <span className="text-[10px] text-gray-400 flex items-center gap-1"><Clock size={10} /> {new Date(e.ts).toLocaleString()}</span>
                     </div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{e.summary}</div>
+                    <div className="text-sm font-medium text-sf-text">{e.summary}</div>
                     <div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><User size={10} /> {e.userId} • Outcome: <span className={e.outcome === 'PASS' ? 'text-emerald-500' : e.outcome === 'FAIL' ? 'text-red-500' : ''}>{e.outcome}</span></div>
                 </div>
             ))}
@@ -321,7 +321,7 @@ const EligibilityTab = ({ asset }) => {
                         {mappings.map(m => (
                             <div key={m.id} className="p-3 rounded-lg border dark:border-gray-700 flex justify-between items-center text-sm">
                                 <span className="font-bold">{getAnalysisDisplayName(m.analysisCode)}</span>
-                                <span className={`text-xs px-2 py-0.5 rounded ${m.isRequired ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                <span className={`text-xs px-2 py-0.5 rounded ${m.isRequired ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-sf-raised'}`}>
                                     {m.isRequired ? 'MANDATORY' : 'OPTIONAL'}
                                 </span>
                             </div>

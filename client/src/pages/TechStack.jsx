@@ -177,7 +177,7 @@ const TechStack = () => {
             <div className="flex items-center justify-between">
                 <Link
                     to="/"
-                    className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
+                    className="inline-flex items-center gap-2 text-sm text-sf-muted hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
                 >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     {t('common.back', 'Back to Dashboard')}
@@ -239,13 +239,13 @@ const TechStack = () => {
                         {techStack.map((group) => (
                             <div
                                 key={group.category}
-                                className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200/80 dark:border-gray-700 shadow-sm space-y-4"
+                                className="bg-sf-surface rounded-3xl p-6 border border-gray-200/80 dark:border-gray-700 shadow-sm space-y-4"
                             >
-                                <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-3 pb-3 border-b border-sf-divider">
                                     <div className={`p-2 rounded-xl bg-gradient-to-r ${group.color} text-white shadow-sm`}>
                                         <group.icon size={18} />
                                     </div>
-                                    <h3 className="font-bold text-base text-gray-900 dark:text-white">
+                                    <h3 className="font-bold text-base text-sf-text">
                                         {group.category}
                                     </h3>
                                 </div>
@@ -254,21 +254,21 @@ const TechStack = () => {
                                     {group.items.map((item) => (
                                         <div
                                             key={item.name}
-                                            className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all flex items-start justify-between gap-3 group"
+                                            className="p-3 rounded-xl bg-sf-canvas/50 border border-sf-divider hover:border-emerald-300 dark:hover:border-emerald-700 transition-all flex items-start justify-between gap-3 group"
                                         >
                                             <div className="space-y-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-base">{item.icon}</span>
-                                                    <span className="font-bold text-sm text-gray-900 dark:text-white">
+                                                    <span className="font-bold text-sm text-sf-text">
                                                         {item.name}
                                                     </span>
                                                     {item.version && (
-                                                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">
+                                                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-sf-muted font-semibold">
                                                             {item.version}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                                <p className="text-xs text-sf-muted leading-relaxed">
                                                     {item.desc}
                                                 </p>
                                             </div>
@@ -294,11 +294,11 @@ const TechStack = () => {
                     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-gray-800 dark:to-gray-800/80 rounded-3xl p-8 border border-emerald-200/60 dark:border-gray-700 shadow-sm space-y-4">
                         <div className="flex items-center gap-3">
                             <Layers size={22} className="text-emerald-700 dark:text-emerald-400" />
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                            <h3 className="text-lg font-bold text-sf-text">
                                 System Architecture & ISO 17025 Principles
                             </h3>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                        <p className="text-sm text-sf-muted leading-relaxed">
                             The SoilFER LIMS architecture adheres to the Global Soil Laboratory Network (GLOSOLAN) governance model. It guarantees strict chain-of-custody tracking from field sampling points (integrated with KoboToolbox mobile surveys) through wet-chemical extraction, automated spectrophotometry/titration, and FTIR diffuse reflectance spectroscopy. Results undergo cryptographic verification before entering National Soil Information Systems (NSIS).
                         </p>
                     </div>
@@ -315,21 +315,21 @@ const TechStack = () => {
                                 <div className="absolute -left-[31px] md:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-emerald-600 border-4 border-white dark:border-gray-900 shadow-md"></div>
 
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                                    <h3 className="text-xl font-black text-sf-text">
                                         {release.version}
                                     </h3>
                                     <span className={`text-xs font-bold px-3 py-0.5 rounded-full border ${release.badgeColor}`}>
                                         {release.tag}
                                     </span>
-                                    <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                                    <span className="text-xs text-sf-muted font-medium">
                                         {release.date}
                                     </span>
                                 </div>
 
-                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-2">
+                                <div className="bg-sf-surface rounded-2xl p-5 border border-sf-divider shadow-sm space-y-2">
                                     <ul className="space-y-2">
                                         {release.changes.map((change, i) => (
-                                            <li key={i} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                            <li key={i} className="flex items-start gap-2.5 text-xs text-sf-muted leading-relaxed">
                                                 <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                                                 <span>{change}</span>
                                             </li>

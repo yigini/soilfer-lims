@@ -39,7 +39,7 @@ export default function WorkflowAnalysisList({
                         className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
                             filter === f
                                 ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent font-medium'
-                                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                : 'border-sf-divider text-sf-muted hover:bg-sf-raised'
                         }`}
                     >
                         {f === 'ALL' && `All (${nodes.length})`}
@@ -72,7 +72,7 @@ export default function WorkflowAnalysisList({
                                 onClick={() => onSelect(node)}
                             >
                                 <span>
-                                    <span className="font-semibold text-slate-800 dark:text-slate-200">{node.title}</span>
+                                    <span className="font-semibold text-sf-text">{node.title}</span>
                                     <small>{node.sub || node.category}</small>
                                 </span>
                                 <span className={`sf-pill sf-${node.tone}`}>

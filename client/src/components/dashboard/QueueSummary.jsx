@@ -14,7 +14,7 @@ export default function QueueSummary({
 
     const getToneClasses = (tone, isActive) => {
         if (isActive) {
-            return 'ring-2 ring-emerald-600 dark:ring-emerald-400 bg-white dark:bg-gray-800 shadow-md border-emerald-500/50';
+            return 'ring-2 ring-emerald-600 dark:ring-emerald-400 bg-sf-surface shadow-md border-emerald-500/50';
         }
         if (tone === 'problem') {
             return 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/60 hover:border-rose-400 dark:hover:border-rose-700';
@@ -22,13 +22,13 @@ export default function QueueSummary({
         if (tone === 'warn') {
             return 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700';
         }
-        return 'bg-white dark:bg-gray-800/80 border-gray-200 dark:border-gray-700/80 hover:border-gray-300 dark:hover:border-gray-600';
+        return 'bg-sf-surface/80 border-sf-divider/80 hover:border-gray-300 dark:hover:border-gray-600';
     };
 
     const getValueColor = (tone) => {
         if (tone === 'problem') return 'text-rose-700 dark:text-rose-400';
         if (tone === 'warn') return 'text-amber-700 dark:text-amber-400';
-        return 'text-gray-900 dark:text-white';
+        return 'text-sf-text';
     };
 
     return (
@@ -58,14 +58,14 @@ export default function QueueSummary({
                                 {displayValue}
                             </span>
                             {metric.unit && (
-                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                <span className="text-xs font-medium text-sf-muted truncate">
                                     {metric.unit}
                                 </span>
                             )}
                         </div>
 
                         <div className="mt-2.5">
-                            <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 leading-snug">
+                            <div className="text-xs font-semibold text-sf-muted leading-snug">
                                 {metric.label}
                             </div>
                             {metric.tone === 'problem' && displayValue > 0 && (

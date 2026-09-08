@@ -169,9 +169,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
     if (loading) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-white dark:bg-gray-800 p-12 rounded-xl shadow-2xl flex flex-col items-center gap-4">
+                <div className="bg-sf-surface p-12 rounded-xl shadow-2xl flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">Loading translation catalog…</p>
+                    <p className="text-sf-muted font-medium">Loading translation catalog…</p>
                 </div>
             </div>
         );
@@ -179,19 +179,19 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-xl w-[95vw] max-w-7xl h-[90vh] flex flex-col shadow-2xl border border-gray-200 dark:border-gray-700">
+            <div className="bg-sf-surface rounded-xl w-[95vw] max-w-7xl h-[90vh] flex flex-col shadow-2xl border border-sf-divider">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-sf-divider bg-sf-canvas rounded-t-xl">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-sf-text flex items-center gap-2">
                                 Translation Editor — {language.name}
                                 <span className="text-sm font-mono text-gray-500 bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">
                                     {language.code}
                                 </span>
                             </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="text-sm text-sf-muted mt-0.5">
                                 Translate from English → {language.name}
                             </p>
                         </div>
@@ -213,7 +213,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                 </div>
 
                 {/* Toolbar */}
-                <div className="flex items-center gap-4 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <div className="flex items-center gap-4 px-6 py-3 border-b border-sf-divider bg-sf-surface">
                     {/* Progress bar */}
                     <div className="flex items-center gap-3 min-w-[200px]">
                         <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -222,7 +222,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                 style={{ width: `${stats.pct}%` }}
                             />
                         </div>
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        <span className="text-xs font-medium text-sf-muted whitespace-nowrap">
                             {stats.translated}/{stats.total} ({stats.pct}%)
                         </span>
                     </div>
@@ -235,7 +235,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                         <input
                             type="text"
                             placeholder="Search keys, English text, or translations…"
-                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            className="w-full pl-9 pr-3 py-2 text-sm border border-sf-divider rounded-lg bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -246,7 +246,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                         onClick={() => setMissingOnly(!missingOnly)}
                         className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${missingOnly
                             ? 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400'
-                            : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            : 'border-sf-divider text-sf-muted hover:bg-sf-raised'
                             }`}
                     >
                         <Filter size={14} />
@@ -280,14 +280,14 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                     {/* Section Header */}
                                     <button
                                         onClick={() => toggleSection(section.label)}
-                                        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-150 dark:hover:bg-gray-700 transition-colors group"
+                                        className="w-full flex items-center gap-3 px-4 py-3 bg-sf-raised/50 rounded-lg hover:bg-gray-150 dark:hover:bg-gray-700 transition-colors group"
                                     >
                                         {isCollapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                                         <span className="text-lg">{section.icon}</span>
-                                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                                        <span className="font-semibold text-sf-text">
                                             {section.label}
                                         </span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        <span className="text-xs text-sf-muted">
                                             ({section.keys.length} keys)
                                         </span>
                                         <div className="ml-auto flex items-center gap-2">
@@ -313,12 +313,12 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                             {section.keys.map(item => (
                                                 <div
                                                     key={item.key}
-                                                    className={`grid grid-cols-12 gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors ${!(edits[item.key] || '').trim() ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
+                                                    className={`grid grid-cols-12 gap-3 px-4 py-2.5 rounded-lg hover:bg-sf-raised/30 transition-colors ${!(edits[item.key] || '').trim() ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
                                                         }`}
                                                 >
                                                     {/* Key */}
                                                     <div className="col-span-3 flex items-start pt-2">
-                                                        <code className="text-xs font-mono text-gray-500 dark:text-gray-400 break-all leading-tight">
+                                                        <code className="text-xs font-mono text-sf-muted break-all leading-tight">
                                                             {item.key}
                                                             {item.isDynamic && (
                                                                 <span className="ml-1.5 inline-flex px-1 py-0.5 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 text-[10px] rounded font-sans font-medium">
@@ -330,7 +330,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
 
                                                     {/* English Source */}
                                                     <div className="col-span-4 flex items-start pt-2">
-                                                        <div className="text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded border border-blue-100 dark:border-blue-800/50 w-full">
+                                                        <div className="text-sm text-sf-muted bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded border border-blue-100 dark:border-blue-800/50 w-full">
                                                             {item.en || <span className="text-gray-400 italic">—</span>}
                                                         </div>
                                                     </div>
@@ -339,9 +339,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                                     <div className="col-span-5">
                                                         <input
                                                             type="text"
-                                                            className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${!(edits[item.key] || '').trim()
+                                                            className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-colors bg-white dark:bg-gray-700 text-sf-text ${!(edits[item.key] || '').trim()
                                                                 ? 'border-amber-300 dark:border-amber-700 focus:ring-2 focus:ring-amber-400'
-                                                                : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500'
+                                                                : 'border-sf-divider focus:ring-2 focus:ring-blue-500'
                                                                 }`}
                                                             value={edits[item.key] || ''}
                                                             onChange={e => handleChange(item.key, e.target.value)}
@@ -359,14 +359,14 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-sf-divider bg-sf-canvas rounded-b-xl">
+                    <div className="text-sm text-sf-muted">
                         💡 Leave fields empty to fall back to English
                     </div>
                     <div className="flex items-center gap-3">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="px-4 py-2 text-sf-muted hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             Cancel
                         </button>

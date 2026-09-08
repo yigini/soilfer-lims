@@ -61,15 +61,15 @@ const GroupManager = () => {
         return (
             <div className="flex flex-col items-center justify-center p-16 space-y-3">
                 <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading Analysis Packages...</p>
+                <p className="text-sm font-medium text-sf-muted">Loading Analysis Packages...</p>
             </div>
         );
     }
 
     if (editingGroup) {
         return (
-            <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 max-w-3xl mx-auto space-y-6 font-sans animate-in fade-in duration-200">
-                <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-4">
+            <div className="bg-sf-surface p-6 md:p-8 rounded-2xl shadow-sm border border-sf-divider max-w-3xl mx-auto space-y-6 font-sans animate-in fade-in duration-200">
+                <div className="flex justify-between items-center border-b border-sf-divider pb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 rounded-xl">
                             <Layers size={20} />
@@ -78,14 +78,14 @@ const GroupManager = () => {
                             <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
                                 Package Definition
                             </span>
-                            <h2 className="text-xl font-black text-gray-900 dark:text-white">
+                            <h2 className="text-xl font-black text-sf-text">
                                 {editingGroup._isNew ? 'New Analysis Package' : `Edit Package: ${editingGroup.name}`}
                             </h2>
                         </div>
                     </div>
                     <button
                         onClick={() => setEditingGroup(null)}
-                        className="px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-bold transition-colors"
+                        className="px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-sf-raised text-xs font-bold transition-colors"
                     >
                         Cancel
                     </button>
@@ -94,11 +94,11 @@ const GroupManager = () => {
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                                 Package ID (Code)
                             </label>
                             <input
-                                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-white uppercase outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500"
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-bold text-sf-text uppercase outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500"
                                 value={editingGroup.id}
                                 disabled={!editingGroup._isNew}
                                 onChange={e => setEditingGroup({ ...editingGroup, id: e.target.value.toUpperCase() })}
@@ -106,11 +106,11 @@ const GroupManager = () => {
                             />
                         </div>
                         <div className="sm:col-span-2">
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                                 Package Display Name
                             </label>
                             <input
-                                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-surface text-sm font-semibold text-sf-text outline-none focus:border-emerald-500"
                                 value={editingGroup.name}
                                 onChange={e => setEditingGroup({ ...editingGroup, name: e.target.value })}
                                 placeholder="e.g. Routine Soil Fertility & Texture Suite"
@@ -119,10 +119,10 @@ const GroupManager = () => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-2">
                             Select Included Analytical Parameters ({editingGroup.analyses?.length || 0})
                         </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto border border-gray-200 dark:border-gray-700 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto border border-sf-divider p-3 rounded-2xl bg-sf-canvas/50">
                             {analyses.map(a => {
                                 const isChecked = editingGroup.analyses?.includes(a.code);
                                 return (
@@ -131,7 +131,7 @@ const GroupManager = () => {
                                         className={`flex items-start gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
                                             isChecked
                                                 ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 shadow-sm'
-                                                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
+                                                : 'bg-sf-surface border-sf-divider text-sf-muted hover:border-gray-300'
                                         }`}
                                     >
                                         <input
@@ -149,7 +149,7 @@ const GroupManager = () => {
                                         />
                                         <div className="min-w-0 flex-1">
                                             <div className="font-bold text-xs tracking-wide">{getAnalysisDisplayName(a.code, a.name)}</div>
-                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{a.orderable ? a.units || a.matrix : "Unavailable for new orders"}</div>
+                                            <div className="text-[11px] text-sf-muted truncate">{a.orderable ? a.units || a.matrix : "Unavailable for new orders"}</div>
                                         </div>
                                     </label>
                                 );
@@ -157,10 +157,10 @@ const GroupManager = () => {
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                    <div className="pt-4 border-t border-sf-divider flex justify-end gap-3">
                         <button
                             onClick={() => setEditingGroup(null)}
-                            className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 transition-colors"
+                            className="px-4 py-2 hover:bg-sf-raised rounded-xl text-xs font-bold text-sf-muted transition-colors"
                         >
                             Cancel
                         </button>
@@ -178,10 +178,10 @@ const GroupManager = () => {
 
     return (
         <div className="space-y-4 font-sans w-full min-w-0">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-sf-surface p-5 rounded-2xl border border-sf-divider shadow-sm">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Analysis Packages & Suites</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pre-configured bundles of analyses for streamlined sample intake and job dispatch.</p>
+                    <h2 className="text-xl font-bold text-sf-text">Analysis Packages & Suites</h2>
+                    <p className="text-xs text-sf-muted mt-0.5">Pre-configured bundles of analyses for streamlined sample intake and job dispatch.</p>
                 </div>
                 <button
                     onClick={() => setEditingGroup({ id: '', name: '', analyses: [], _isNew: true })}
@@ -193,11 +193,11 @@ const GroupManager = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.map(g => (
-                    <div key={g.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                    <div key={g.id} className="bg-sf-surface border border-sf-divider rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
                         <div>
                             <div className="flex justify-between items-start mb-3">
                                 <div className="min-w-0 flex-1 pr-2">
-                                    <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate">{g.name}</h3>
+                                    <h3 className="font-bold text-sm text-sf-text truncate">{g.name}</h3>
                                     <span className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded-md border border-slate-200 dark:border-slate-700 mt-1">
                                         {g.id}
                                     </span>
@@ -222,13 +222,13 @@ const GroupManager = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/60">
+                            <div className="space-y-2 mt-3 pt-3 border-t border-sf-divider/60">
                                 <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                                     {g.analyses?.length || 0} Analyses Included
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 max-h-28 overflow-hidden">
                                     {g.analyses?.slice(0, 8).map(code => (
-                                        <span key={getAnalysisDisplayName(code)} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-semibold rounded-md border border-gray-200 dark:border-gray-600">
+                                        <span key={getAnalysisDisplayName(code)} className="px-2 py-0.5 bg-sf-raised text-sf-muted text-[11px] font-semibold rounded-md border border-sf-divider">
                                             {getAnalysisDisplayName(code)}
                                         </span>
                                     ))}

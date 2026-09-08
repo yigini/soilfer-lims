@@ -71,7 +71,7 @@ export default function WorkflowInspector({
                 {sub && (
                     <div className="sf-detail-row">
                         <span>Context</span>
-                        <span className="text-right text-xs text-slate-500 dark:text-slate-400">{sub}</span>
+                        <span className="text-right text-xs text-sf-muted">{sub}</span>
                     </div>
                 )}
             </div>
@@ -94,7 +94,7 @@ export default function WorkflowInspector({
                         ))}
                     </div>
                 ) : (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    <p className="text-xs text-sf-muted mt-2">
                         Submission, QC evidence, and manager approval must be confirmed prior to proceeding.
                     </p>
                 )}
@@ -151,12 +151,12 @@ export default function WorkflowInspector({
                                     <span className="font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">{log.action || 'Event'}</span>
                                     <span>{log.timestamp ? new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
                                 </div>
-                                <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-snug line-clamp-2">
+                                <p className="text-sf-text text-[11px] leading-snug line-clamp-2">
                                     {log.details || 'Workflow event recorded'}
                                 </p>
                                 {log.username && (
                                     <div className="text-[10px] text-slate-400 mt-0.5">
-                                        by <span className="text-slate-500 dark:text-slate-400 font-medium">{log.username}</span>
+                                        by <span className="text-sf-muted font-medium">{log.username}</span>
                                     </div>
                                 )}
                             </div>

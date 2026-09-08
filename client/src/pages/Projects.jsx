@@ -91,12 +91,12 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
     const isOverdue = project.deliveryDeadline && new Date(project.deliveryDeadline) < new Date() && project.status === 'ACTIVE';
 
     return (
-        <div className={`fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl z-[60] transform transition-transform duration-300 border-l border-gray-200 dark:border-gray-700 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed inset-y-0 right-0 w-full max-w-md bg-sf-surface shadow-2xl z-[60] transform transition-transform duration-300 border-l border-sf-divider ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="h-full flex flex-col">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                <div className="p-6 border-b border-sf-divider flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
                     <div>
                         <h2 className="text-xl font-bold font-mono text-blue-600 dark:text-blue-400">{project.code}</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{project.name}</p>
+                        <p className="text-sm text-sf-muted font-medium">{project.name}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors truncate">
                         <X size={20} />
@@ -130,13 +130,13 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Expected Samples</label>
-                            <p className="text-lg font-black text-gray-900 dark:text-white">{project.expectedSampleCount || '—'}</p>
+                            <p className="text-lg font-black text-sf-text">{project.expectedSampleCount || '—'}</p>
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Deadline</label>
                             <div className="flex items-center gap-2">
                                 <Calendar size={16} className={isOverdue ? 'text-red-500' : 'text-gray-400'} />
-                                <p className={`text-md font-bold ${isOverdue ? 'text-red-600 animate-pulse' : 'text-gray-900 dark:text-white'}`}>
+                                <p className={`text-md font-bold ${isOverdue ? 'text-red-600 animate-pulse' : 'text-sf-text'}`}>
                                     {project.deliveryDeadline ? new Date(project.deliveryDeadline).toLocaleDateString() : 'None'}
                                 </p>
                             </div>
@@ -145,7 +145,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
 
                     <div className="space-y-3">
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lab Instructions / Notes</label>
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                        <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider text-sm leading-relaxed text-sf-muted">
                             {project.notes || "No special instructions provided."}
                         </div>
                     </div>
@@ -188,7 +188,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                         </div>
                     )}
                     {project.projectType === 'TEMPLATE_PREDEFINED_IDS' && (
-                        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+                        <div className="pt-4 border-t border-sf-divider space-y-4">
                             <div className="flex justify-between items-center">
                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manifest Management</label>
                                 {project.totalCount > 0 && (
@@ -244,7 +244,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                         </div>
                     )}
                     {/* Pre-Delivery Historical Analysis Backfill Card */}
-                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                    <div className="pt-4 border-t border-sf-divider space-y-3">
                         <div className="p-4 rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-amber-50/50 dark:bg-amber-950/20">
                             <div className="flex items-start gap-2.5">
                                 <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-700 dark:text-amber-300 flex-shrink-0 mt-0.5">
@@ -252,14 +252,14 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                        <h4 className="text-xs font-bold text-gray-900 dark:text-white">
+                                        <h4 className="text-xs font-bold text-sf-text">
                                             Pre-Platform Historical Analysis
                                         </h4>
                                         <span className="text-[9px] font-black uppercase tracking-wider bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded">
                                             Backward Compatibility
                                         </span>
                                     </div>
-                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                                    <p className="text-[11px] text-sf-muted mt-1 leading-snug">
                                         Were samples for this project analysed before platform deployment? Bulk backfill historical wet chemistry, spectroscopy, and certificates.
                                     </p>
                                 </div>
@@ -268,7 +268,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                                 <button
                                     type="button"
                                     onClick={() => onOpenLegacyBackfill && onOpenLegacyBackfill(project)}
-                                    className="px-3 py-1.5 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-900/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
+                                    className="px-3 py-1.5 bg-sf-surface hover:bg-amber-50 dark:hover:bg-amber-900/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
                                 >
                                     <span>Backfill Historical Data</span>
                                     <ArrowRight size={13} />
@@ -278,7 +278,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                <div className="p-6 border-t border-sf-divider space-y-3">
                     <div className="flex gap-3">
                         {canEdit && (
                             <button
@@ -290,7 +290,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                         )}
                         <button
                             onClick={onClose}
-                            className="px-6 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl font-bold bg-white dark:bg-gray-800 hover:bg-gray-50 transition active:scale-95"
+                            className="px-6 py-2.5 border border-sf-divider rounded-xl font-bold bg-sf-surface hover:bg-gray-50 transition active:scale-95"
                         >
                             Close
                         </button>
@@ -325,7 +325,7 @@ const ProjectDrawer = ({ project, isOpen, onClose, onEdit, canEdit, canDelete, h
                             )}
                             {project.status !== 'DELETED' && !canDelete && (
                                 <div
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-400 text-[10px] font-black uppercase cursor-not-allowed opacity-60"
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-sf-divider text-gray-400 text-[10px] font-black uppercase cursor-not-allowed opacity-60"
                                     title="Only System Administrators can delete this project"
                                 >
                                     <Lock size={12} /> Admin Only
@@ -343,10 +343,10 @@ const SampleManifestModal = ({ isOpen, project, samples, loading, onClose }) => 
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/30 dark:bg-gray-900/30">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-sf-divider animate-in fade-in zoom-in duration-200">
+                <div className="p-6 border-b border-sf-divider flex justify-between items-center bg-gray-50/30 dark:bg-gray-900/30">
                     <div>
-                        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                        <h2 className="text-xl font-black text-sf-text uppercase tracking-tight flex items-center gap-2">
                             <PackageCheck className="text-blue-600" size={24} />
                             Project Manifest: {project?.code}
                         </h2>
@@ -364,7 +364,7 @@ const SampleManifestModal = ({ isOpen, project, samples, loading, onClose }) => 
                             <p className="font-bold uppercase tracking-widest text-xs">Loading Manifest Data...</p>
                         </div>
                     ) : samples.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl">
+                        <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-sf-divider rounded-3xl">
                             <FileSearch size={48} className="mb-4 opacity-20" />
                             <p className="font-bold uppercase tracking-widest text-xs">No samples found in this manifest.</p>
                         </div>
@@ -382,7 +382,7 @@ const SampleManifestModal = ({ isOpen, project, samples, loading, onClose }) => 
                                             {s.status}
                                         </span>
                                     </div>
-                                    <p className="text-xs font-mono font-bold text-gray-900 dark:text-white truncate">{s.id}</p>
+                                    <p className="text-xs font-mono font-bold text-sf-text truncate">{s.id}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <Calendar size={10} className="text-gray-300" />
                                         <span className="text-[9px] text-gray-400">{new Date(s.createdAt).toLocaleDateString()}</span>
@@ -393,7 +393,7 @@ const SampleManifestModal = ({ isOpen, project, samples, loading, onClose }) => 
                     )}
                 </div>
 
-                <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30 flex justify-between items-center">
+                <div className="p-6 border-t border-sf-divider bg-gray-50/30 dark:bg-gray-900/30 flex justify-between items-center">
                     <div className="flex gap-4">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-white border border-gray-200" />
@@ -417,17 +417,17 @@ const SuccessModal = ({ isOpen, message, onClose }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100 dark:border-gray-700 animate-in zoom-in duration-300">
+            <div className="bg-sf-surface rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-sf-divider animate-in zoom-in duration-300">
                 <div className="p-8 flex flex-col items-center text-center">
                     <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 animate-bounce">
                         <CheckCircle2 size={48} className="text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">Success!</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-relaxed px-4">
+                    <h3 className="text-2xl font-black text-sf-text uppercase tracking-tight mb-2">Success!</h3>
+                    <p className="text-sf-muted text-sm font-medium leading-relaxed px-4">
                         {message}
                     </p>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+                <div className="p-4 bg-sf-canvas/50 border-t border-sf-divider">
                     <button
                         onClick={onClose}
                         className="w-full py-4 bg-gray-900 dark:bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-black dark:hover:bg-blue-700 transition-all shadow-lg active:scale-95"
@@ -863,8 +863,8 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto p-6 relative min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{t('projects.title', 'Projects')}</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">{t('projects.subtitle', 'Operational management of soil research projects')}</p>
+                    <h1 className="text-3xl font-black text-sf-text tracking-tight">{t('projects.title', 'Projects')}</h1>
+                    <p className="text-sf-muted mt-1">{t('projects.subtitle', 'Operational management of soil research projects')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -891,49 +891,49 @@ const Projects = () => {
 
             {/* QUICK STATS CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                <div className="bg-sf-surface p-5 rounded-2xl shadow-sm border border-sf-divider flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                         <Database size={24} />
                     </div>
                     <div>
-                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.total}</div>
+                        <div className="text-2xl font-black text-sf-text uppercase tracking-tighter">{stats.total}</div>
                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('common.total', 'Total')} {t('projects.title', 'Projects')}</div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                <div className="bg-sf-surface p-5 rounded-2xl shadow-sm border border-sf-divider flex items-center gap-4">
                     <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                         <PackageCheck size={24} />
                     </div>
                     <div>
-                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.active}</div>
+                        <div className="text-2xl font-black text-sf-text uppercase tracking-tighter">{stats.active}</div>
                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.active', 'Active')}</div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                <div className="bg-sf-surface p-5 rounded-2xl shadow-sm border border-sf-divider flex items-center gap-4">
                     <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center text-red-600 dark:text-red-400">
                         <AlertTriangle size={24} />
                     </div>
                     <div>
-                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.overdue}</div>
+                        <div className="text-2xl font-black text-sf-text uppercase tracking-tighter">{stats.overdue}</div>
                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.overdue', 'Overdue')}</div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700/40 rounded-xl flex items-center justify-center text-gray-400">
+                <div className="bg-sf-surface p-5 rounded-2xl shadow-sm border border-sf-divider flex items-center gap-4">
+                    <div className="w-12 h-12 bg-sf-canvas/40 rounded-xl flex items-center justify-center text-gray-400">
                         <Archive size={24} />
                     </div>
                     <div>
-                        <div className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{stats.deleted}</div>
+                        <div className="text-2xl font-black text-sf-text uppercase tracking-tighter">{stats.deleted}</div>
                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{t('projects.archived', 'Archived')}</div>
                     </div>
                 </div>
             </div>
 
             {/* CONTROLS BAR */}
-            <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center mb-6 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center mb-6 bg-sf-surface p-4 rounded-2xl border border-sf-divider shadow-sm">
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
@@ -941,14 +941,14 @@ const Projects = () => {
                         placeholder={t('projects.searchPlaceholder', 'Search projects by name, code, or country...')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 outline-none"
+                        className="w-full pl-11 pr-4 py-2.5 bg-sf-canvas border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 text-sf-text outline-none"
                     />
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
                     <select
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="text-sm font-bold bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 outline-none"
+                        className="text-sm font-bold bg-white dark:bg-gray-700 border border-sf-divider rounded-lg px-3 py-2 outline-none"
                     >
                         <option value="ALL">All Status</option>
                         <option value="ACTIVE">Active</option>
@@ -960,7 +960,7 @@ const Projects = () => {
                     <select
                         value={filterType}
                         onChange={e => setFilterType(e.target.value)}
-                        className="text-sm font-bold bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 outline-none"
+                        className="text-sm font-bold bg-white dark:bg-gray-700 border border-sf-divider rounded-lg px-3 py-2 outline-none"
                     >
                         <option value="ALL">All Types</option>
                         <option value="TEMPLATE">Template</option>
@@ -968,24 +968,24 @@ const Projects = () => {
                         <option value="OPEN">Open Intake</option>
                     </select>
                     {user?.role !== 'PROJECT_MANAGER' && (
-                        <label className="flex items-center gap-2 ml-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-100 transition-colors">
+                        <label className="flex items-center gap-2 ml-2 px-3 py-2 bg-sf-canvas rounded-lg border border-sf-divider cursor-pointer hover:bg-gray-100 transition-colors">
                             <input
                                 type="checkbox"
                                 checked={showOnlyMyLab}
                                 onChange={e => setShowOnlyMyLab(e.target.checked)}
                                 className="rounded text-blue-600 focus:ring-blue-500"
                             />
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">My Lab Only</span>
+                            <span className="text-xs font-bold text-sf-muted whitespace-nowrap">My Lab Only</span>
                         </label>
                     )}
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-2xl shadow-xl border border-sf-divider overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <tr className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-sf-divider">
                                 <th className="p-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     <div className="flex items-center gap-1">
                                         Project
@@ -1020,11 +1020,11 @@ const Projects = () => {
                                 <tr>
                                     <td colSpan="5" className="p-20 text-center">
                                         <div className="max-w-xs mx-auto space-y-4">
-                                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                                            <div className="w-16 h-16 bg-sf-raised rounded-full flex items-center justify-center mx-auto text-gray-400">
                                                 <Database size={32} />
                                             </div>
                                             <div>
-                                                <p className="text-lg font-bold text-gray-900 dark:text-white">No matches found</p>
+                                                <p className="text-lg font-bold text-sf-text">No matches found</p>
                                                 <p className="text-sm text-gray-500">Try adjusting your filters or search keywords.</p>
                                             </div>
                                         </div>
@@ -1054,7 +1054,7 @@ const Projects = () => {
                                                             {p.code}
                                                             {!p.labId && <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[9px] uppercase font-black">Global</span>}
                                                         </div>
-                                                        <div className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">{p.name}</div>
+                                                        <div className="text-sm font-bold text-sf-text mt-0.5">{p.name}</div>
                                                         {/* Show assigned labs for global projects */}
                                                         {!p.labId && (() => {
                                                             const labs = getProjectLabIds(p);
@@ -1088,7 +1088,7 @@ const Projects = () => {
                                             <td className="p-5">
                                                 <div className="flex flex-col gap-1.5 min-w-[120px]">
                                                     <div className="flex justify-between items-end mb-0.5">
-                                                        <div className="font-black text-gray-900 dark:text-white leading-none">
+                                                        <div className="font-black text-sf-text leading-none">
                                                             {p.receivedCount || 0}
                                                             {p.projectType === 'TEMPLATE_PREDEFINED_IDS' && p.totalCount > 0 && (
                                                                 <span className="text-gray-400 font-bold text-xs ml-1.5">/ {p.totalCount}</span>
@@ -1100,7 +1100,7 @@ const Projects = () => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden flex">
+                                                    <div className="w-full bg-sf-raised h-1.5 rounded-full overflow-hidden flex">
                                                         <div
                                                             className={`h-full transition-all duration-500 ${p.status === 'ACTIVE' ? 'bg-blue-500' : 'bg-gray-400'}`}
                                                             style={{ width: `${Math.min(100, calculatePercentage(p.receivedCount, p.totalCount || p.receivedCount))}%` }}
@@ -1112,7 +1112,7 @@ const Projects = () => {
                                                 </div>
                                             </td>
                                             <td className="p-5">
-                                                <div className={`flex items-center gap-2 font-bold ${isOverdue ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                <div className={`flex items-center gap-2 font-bold ${isOverdue ? 'text-red-500' : 'text-sf-muted'}`}>
                                                     {isOverdue ? <AlertTriangle size={14} className="animate-pulse" /> : <Clock size={14} />}
                                                     <span className="text-sm">
                                                         {p.deliveryDeadline ? new Date(p.deliveryDeadline).toLocaleDateString() : '—'}
@@ -1271,13 +1271,13 @@ const Projects = () => {
 
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-sf-surface rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-sf-divider animate-in fade-in zoom-in duration-200">
                         <div className="flex items-center gap-3 text-red-600 mb-4">
                             <AlertTriangle size={24} />
                             <h3 className="text-lg font-bold">Delete Project?</h3>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 mb-6">
-                            Are you sure you want to move <span className="font-bold text-gray-900 dark:text-gray-100">{deleteTarget.name}</span> to the trash?
+                        <p className="text-sf-muted mb-6">
+                            Are you sure you want to move <span className="font-bold text-sf-text">{deleteTarget.name}</span> to the trash?
                             Samples from this project will be temporarily unlinked and moved to the <span className="font-bold">Restore Pool</span> until the project is restored or purged.
                         </p>
                         <div className="flex justify-end gap-3">
@@ -1301,18 +1301,18 @@ const Projects = () => {
             {/* Stats Modal */}
             {statsProject && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-200 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-start">
+                    <div className="bg-sf-surface rounded-xl shadow-2xl w-full max-w-2xl border border-sf-divider animate-in fade-in zoom-in duration-200 overflow-hidden">
+                        <div className="p-6 border-b border-sf-divider flex justify-between items-start">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <h2 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                                     <BarChart2 className="text-blue-600" />
                                     {statsProject.name}
                                 </h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono">{statsProject.code}</p>
+                                <p className="text-sm text-sf-muted mt-1 font-mono">{statsProject.code}</p>
                             </div>
                             <button
                                 onClick={() => setStatsProject(null)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-sf-raised p-2 rounded-full"
                             >
                                 <X size={20} />
                             </button>
@@ -1331,13 +1331,13 @@ const Projects = () => {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <div className="h-4 w-1 bg-blue-500 rounded-full" />
-                                            <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lab Workflow Status</h3>
+                                            <h3 className="text-sm font-bold text-sf-muted uppercase tracking-wider">Lab Workflow Status</h3>
                                         </div>
 
                                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                            <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-xl border border-gray-100 dark:border-gray-700 transition-hover hover:border-blue-200">
+                                            <div className="bg-sf-canvas/30 p-4 rounded-xl border border-sf-divider transition-hover hover:border-blue-200">
                                                 <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Expected</p>
-                                                <p className="text-2xl font-black text-gray-900 dark:text-white">{(statsData.expected || 0).toLocaleString()}</p>
+                                                <p className="text-2xl font-black text-sf-text">{(statsData.expected || 0).toLocaleString()}</p>
                                                 <p className="text-[9px] text-gray-400 mt-1 italic leading-tight">(In transit or pending)</p>
                                             </div>
                                             <div className="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-100 dark:border-purple-800/30 transition-hover hover:border-purple-200">
@@ -1377,10 +1377,10 @@ const Projects = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+                        <div className="bg-sf-canvas/50 p-4 border-t border-sf-divider flex justify-end">
                             <button
                                 onClick={() => setStatsProject(null)}
-                                className="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm font-medium"
+                                className="px-6 py-2 bg-sf-surface border border-sf-divider rounded-lg text-sf-muted hover:bg-sf-raised transition shadow-sm font-medium"
                             >
                                 Close
                             </button>
@@ -1411,9 +1411,9 @@ const Projects = () => {
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[95vh]">
+                    <div className="bg-sf-surface p-6 rounded-xl shadow-2xl w-full max-w-2xl border border-sf-divider animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[95vh]">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{editing ? 'Edit Project' : 'New Project'}</h2>
+                            <h2 className="text-xl font-bold text-sf-text">{editing ? 'Edit Project' : 'New Project'}</h2>
                             <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                                 <X size={24} />
                             </button>
@@ -1422,11 +1422,11 @@ const Projects = () => {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Project Code *</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Project Code *</label>
                                     <input
                                         value={formData.code}
                                         onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '-') })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white font-mono"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white font-mono"
                                         disabled={!!editing}
                                         required
                                         placeholder="e.g. SOILFER-USA"
@@ -1434,11 +1434,11 @@ const Projects = () => {
                                     <p className="text-[10px] text-gray-500 mt-1">Permanent unique identifier</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Project Name *</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Project Name *</label>
                                     <input
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                         required
                                         placeholder="Display Name"
                                     />
@@ -1447,11 +1447,11 @@ const Projects = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Project Type *</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Project Type *</label>
                                     <select
                                         value={formData.projectType}
                                         onChange={e => setFormData({ ...formData, projectType: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                         required
                                     >
                                         <option value="OPEN_INTAKE">🚪 Open Intake (Walk-in Samples)</option>
@@ -1509,7 +1509,7 @@ const Projects = () => {
                                         />
                                         <label
                                             htmlFor="modal-manifest-upload"
-                                            className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 border-dashed border-emerald-300 dark:border-emerald-700 bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all active:scale-[0.98]"
+                                            className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 border-dashed border-emerald-300 dark:border-emerald-700 bg-sf-surface text-emerald-700 dark:text-emerald-300 text-xs font-bold cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all active:scale-[0.98]"
                                         >
                                             {formData.sampleIds.length > 0 ? (
                                                 <>
@@ -1538,7 +1538,7 @@ const Projects = () => {
                                                         <X size={10} /> Clear
                                                     </button>
                                                 </div>
-                                                <div className="max-h-[60px] overflow-y-auto bg-white dark:bg-gray-800 rounded-lg border border-emerald-100 dark:border-emerald-800 p-2">
+                                                <div className="max-h-[60px] overflow-y-auto bg-sf-surface rounded-lg border border-emerald-100 dark:border-emerald-800 p-2">
                                                     <div className="flex flex-wrap gap-1">
                                                         {formData.sampleIds.slice(0, 20).map(id => (
                                                             <span key={id} className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-[9px] font-mono font-bold">
@@ -1571,7 +1571,7 @@ const Projects = () => {
                                             <h3 className="text-xs font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">Kobo Configuration</h3>
                                             <InfoTooltip text="Connect this project to a KoboToolbox form. Samples will be automatically synced from Kobo field submissions." />
                                             {editing && !koboCanEdit && (
-                                                <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
+                                                <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-gray-500 bg-sf-raised px-2 py-1 rounded-md">
                                                     <Lock size={10} /> Managed by Admin
                                                 </span>
                                             )}
@@ -1581,20 +1581,20 @@ const Projects = () => {
                                             <div className="grid grid-cols-1 gap-3">
                                                 <div>
                                                     <label className="block text-[10px] font-bold mb-1 text-gray-500 uppercase tracking-wide">Server URL</label>
-                                                    <div className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-mono text-gray-600 dark:text-gray-400">
+                                                    <div className="w-full px-3 py-2 bg-sf-raised border border-sf-divider rounded-lg text-sm font-mono text-sf-muted">
                                                         {formData.koboServerUrl || '—'}
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div>
                                                         <label className="block text-[10px] font-bold mb-1 text-gray-500 uppercase tracking-wide">Form ID</label>
-                                                        <div className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-mono text-gray-600 dark:text-gray-400">
+                                                        <div className="w-full px-3 py-2 bg-sf-raised border border-sf-divider rounded-lg text-sm font-mono text-sf-muted">
                                                             {formData.koboFormId || '—'}
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <label className="block text-[10px] font-bold mb-1 text-gray-500 uppercase tracking-wide">API Token</label>
-                                                        <div className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-mono text-gray-600 dark:text-gray-400">
+                                                        <div className="w-full px-3 py-2 bg-sf-raised border border-sf-divider rounded-lg text-sm font-mono text-sf-muted">
                                                             {formData.koboApiToken || '—'}
                                                         </div>
                                                     </div>
@@ -1607,33 +1607,33 @@ const Projects = () => {
                                             /* EDITABLE VIEW for admins and new projects */
                                             <div className="grid grid-cols-1 gap-3">
                                                 <div>
-                                                    <label className="block text-[10px] font-bold mb-1 text-gray-600 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                                                    <label className="block text-[10px] font-bold mb-1 text-sf-muted uppercase tracking-wide flex items-center gap-1">
                                                         Server URL
                                                         <InfoTooltip text="The KoboToolbox server URL. Use the default unless your organization hosts a private Kobo instance." />
                                                     </label>
                                                     <input
                                                         value={formData.koboServerUrl}
                                                         onChange={e => { setFormData({ ...formData, koboServerUrl: e.target.value }); setKoboTestStatus(null); }}
-                                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
+                                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
                                                         placeholder="https://kf.kobotoolbox.org"
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="block text-[10px] font-bold mb-1 text-gray-600 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                                                        <label className="block text-[10px] font-bold mb-1 text-sf-muted uppercase tracking-wide flex items-center gap-1">
                                                             Form ID (Asset UID) *
                                                             <InfoTooltip text="Found in your Kobo form URL: kf.kobotoolbox.org/#/forms/[THIS_ID]. It's a long alphanumeric string like aYU8RNGWtCtwTJh2ph6FdM." />
                                                         </label>
                                                         <input
                                                             value={formData.koboFormId}
                                                             onChange={e => { setFormData({ ...formData, koboFormId: e.target.value.trim() }); setKoboTestStatus(null); }}
-                                                            className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
+                                                            className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
                                                             placeholder="e.g. aYU8RNGWtCtwTJh2ph6FdM"
                                                             required
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[10px] font-bold mb-1 text-gray-600 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                                                        <label className="block text-[10px] font-bold mb-1 text-sf-muted uppercase tracking-wide flex items-center gap-1">
                                                             API Token *
                                                             <InfoTooltip text="Go to KoboToolbox → Account Settings → Security → API Key. Copy the full token string." />
                                                         </label>
@@ -1641,7 +1641,7 @@ const Projects = () => {
                                                             type="password"
                                                             value={formData.koboApiToken}
                                                             onChange={e => { setFormData({ ...formData, koboApiToken: e.target.value.trim() }); setKoboTestStatus(null); }}
-                                                            className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
+                                                            className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all dark:text-white text-sm font-mono"
                                                             placeholder={editing && koboConfigLoaded ? 'Leave blank to keep current token' : 'Your Kobo API token'}
                                                             required={!editing || !koboConfigLoaded}
                                                         />
@@ -1689,12 +1689,12 @@ const Projects = () => {
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Expected Samples</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Expected Samples</label>
                                     <input
                                         type="number"
                                         value={formData.expectedSampleCount}
                                         onChange={e => setFormData({ ...formData, expectedSampleCount: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                         min="0"
                                     />
                                 </div>
@@ -1702,21 +1702,21 @@ const Projects = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Delivery Deadline</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Delivery Deadline</label>
                                     <input
                                         type="date"
                                         value={formData.deliveryDeadline}
                                         onChange={e => setFormData({ ...formData, deliveryDeadline: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                     />
                                     <p className="text-[10px] text-gray-500 mt-1">Internal turnaround goal</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Priority</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Priority</label>
                                     <select
                                         value={formData.priority}
                                         onChange={e => setFormData({ ...formData, priority: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                     >
                                         <option value="LOW">Low</option>
                                         <option value="NORMAL">Normal</option>
@@ -1730,7 +1730,7 @@ const Projects = () => {
                                     <select
                                         value={formData.defaultAnalysisBundle}
                                         onChange={e => setFormData({ ...formData, defaultAnalysisBundle: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                     >
                                         <option value="">-- No Default Bundle --</option>
                                         {groups.map(g => (
@@ -1740,11 +1740,11 @@ const Projects = () => {
                                     <p className="text-[10px] text-gray-500 mt-1">Applied automatically during intake</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Status</label>
+                                    <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Status</label>
                                     <select
                                         value={formData.status}
                                         onChange={e => setFormData({ ...formData, status: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                     >
                                         <option value="ACTIVE">Active</option>
                                         <option value="PAUSED">Paused</option>
@@ -1756,11 +1756,11 @@ const Projects = () => {
                             {(user.role === 'SUPER_ADMIN' || user.role === 'MASTER_USER') && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide text-blue-600 dark:text-blue-400">Ownership: Main Lab</label>
+                                        <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide text-blue-600 dark:text-blue-400">Ownership: Main Lab</label>
                                         <select
                                             value={formData.labId || ''}
                                             onChange={e => setFormData({ ...formData, labId: e.target.value })}
-                                            className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                            className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white"
                                         >
                                             <option value="">Global Project (Managed by Super Admin)</option>
                                             {labs.map(lab => (
@@ -1778,7 +1778,7 @@ const Projects = () => {
                                             </label>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
                                                 {labs.map(lab => (
-                                                    <label key={lab.id} className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-blue-300 transition-colors group">
+                                                    <label key={lab.id} className="flex items-center gap-2 p-2 rounded-lg bg-sf-surface border border-sf-divider cursor-pointer hover:border-blue-300 transition-colors group">
                                                         <input
                                                             type="checkbox"
                                                             checked={formData.assignedLabIds.includes(lab.id)}
@@ -1790,7 +1790,7 @@ const Projects = () => {
                                                             }}
                                                             className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 transition-all cursor-pointer"
                                                         />
-                                                        <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate group-hover:text-blue-600 transition-colors">
+                                                        <span className="text-[11px] font-bold text-sf-muted truncate group-hover:text-blue-600 transition-colors">
                                                             {lab.id}
                                                         </span>
                                                     </label>
@@ -1814,20 +1814,20 @@ const Projects = () => {
                             )}
 
                             <div>
-                                <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 uppercase tracking-wide">Lab Instructions / Notes</label>
+                                <label className="block text-xs font-bold mb-1.5 text-sf-muted uppercase tracking-wide">Lab Instructions / Notes</label>
                                 <textarea
                                     value={formData.notes}
                                     onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white min-h-[100px]"
+                                    className="w-full px-3 py-2 bg-sf-surface border border-sf-divider rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white min-h-[100px]"
                                     placeholder="Specific protocols, handling notes..."
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-sf-divider">
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-sf-muted hover:bg-sf-raised rounded-lg transition-colors"
                                 >
                                     Cancel
                                 </button>

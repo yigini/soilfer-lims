@@ -34,8 +34,8 @@ export default function UpdateStatus({
     };
 
     return (
-        <div className="flex items-center gap-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3 text-xs font-medium text-sf-muted">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sf-raised/80 border border-sf-divider">
                 <span className={`w-2 h-2 rounded-full ring-2 ${getIndicatorColor()}`} />
                 <span className="font-sans">{getFreshnessLabel()}</span>
             </div>

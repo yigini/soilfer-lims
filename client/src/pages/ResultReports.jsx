@@ -30,6 +30,18 @@ const ResultReports = () => {
     const [shareLoading, setShareLoading] = useState(false);
     const [expiryDays, setExpiryDays] = useState(30);
 
+    // Escape key listener for active modals
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (shareModal) setShareModal(null);
+                else if (selectedReport) setSelectedReport(null);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [shareModal, selectedReport]);
+
     const isManager = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role);
     const canGenerate = ['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION'].includes(user?.role);
 
@@ -145,16 +157,16 @@ const ResultReports = () => {
     // ─── RENDER ──────────────────────────────────────────
 
     return (
-        <div className="p-6 lg:p-8 h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+        <div className="p-6 lg:p-8 h-full bg-sf-canvas overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                <h1 className="text-2xl font-black text-sf-text flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                         <FileText size={20} className="text-white" />
                     </div>
                     Result Reports
                 </h1>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-sf-muted">
                     {pagination.total} report{pagination.total !== 1 ? 's' : ''} found
                 </span>
             </div>
@@ -168,16 +180,16 @@ const ResultReports = () => {
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         placeholder="Search by name, phone, project, sample ID, or lab ID..."
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
+                        className="w-full pl-12 pr-4 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
                     />
-                    <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors">
+                    <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sf-emerald text-white rounded-lg text-sm font-bold hover:bg-sf-emerald-hover transition-colors">
                         Search
                     </button>
                 </div>
             </form>
 
             {/* Results Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-2xl shadow-xl border border-sf-divider overflow-hidden">
                 {loading ? (
                     <div className="flex items-center justify-center py-20 text-gray-400">
                         <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mr-3" />
@@ -193,7 +205,7 @@ const ResultReports = () => {
                     <>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wider">
+                                <thead className="bg-sf-canvas/50 border-b border-sf-divider text-xs uppercase text-sf-muted tracking-wider">
                                     <tr>
                                         <th className="px-6 py-3">Sample / Lab ID</th>
                                         <th className="px-6 py-3">Client</th>
@@ -204,27 +216,27 @@ const ResultReports = () => {
                                         <th className="px-6 py-3 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tbody className="divide-y divide-sf-divider">
                                     {reports.map(r => (
-                                        <tr key={r.id} className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors">
+                                        <tr key={r.id} className="hover:bg-sf-raised/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                                <div className="font-mono font-bold text-sf-emerald">
                                                     {r.sampleLabId || r.sampleId?.slice(0, 8)}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900 dark:text-white">{getClientName(r)}</div>
+                                                <div className="font-medium text-sf-text">{getClientName(r)}</div>
                                                 {r.phone && <div className="text-xs text-gray-400 mt-0.5">{r.phone}</div>}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-gray-700 dark:text-gray-300">{r.projectName || r.projectCode || '—'}</div>
+                                                <div className="text-sf-text">{r.projectName || r.projectCode || '—'}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-sf-raised text-sf-muted">
                                                     v{r.version}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-sm">
+                                            <td className="px-6 py-4 text-sf-muted text-sm">
                                                 <div>{formatDate(r.generatedAt)}</div>
                                                 <div className="text-xs text-gray-400">{r.generatedBy}</div>
                                             </td>
@@ -241,7 +253,7 @@ const ResultReports = () => {
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     <button
                                                         onClick={() => viewReport(r.id)}
-                                                        className="p-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 transition-colors"
+                                                        className="p-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-sf-emerald transition-colors"
                                                         title="View report"
                                                     >
                                                         <Eye size={16} />
@@ -265,7 +277,7 @@ const ResultReports = () => {
 
                         {/* Pagination */}
                         {pagination.pages > 1 && (
-                            <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div className="px-6 py-3 bg-sf-canvas/50 border-t border-sf-divider flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     Page {pagination.page} of {pagination.pages} ({pagination.total} total)
                                 </span>
@@ -273,14 +285,14 @@ const ResultReports = () => {
                                     <button
                                         onClick={() => fetchReports(pagination.page - 1)}
                                         disabled={pagination.page <= 1}
-                                        className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 transition-colors"
+                                        className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >
                                         <ChevronLeft size={16} />
                                     </button>
                                     <button
                                         onClick={() => fetchReports(pagination.page + 1)}
                                         disabled={pagination.page >= pagination.pages}
-                                        className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 transition-colors"
+                                        className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >
                                         <ChevronRight size={16} />
                                     </button>
@@ -294,27 +306,27 @@ const ResultReports = () => {
             {/* ─── REPORT VIEWER MODAL ─── */}
             {selectedReport && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
                         {/* Header */}
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800 no-print">
+                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface no-print">
                             <div>
-                                <h2 className="text-xl font-black text-gray-900 dark:text-white">
+                                <h2 className="text-xl font-black text-sf-text">
                                     Report — {selectedReport.sampleLabId || selectedReport.sampleId?.slice(0, 8)}
                                 </h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Version {selectedReport.version} • Generated {formatDate(selectedReport.generatedAt)} by {selectedReport.generatedBy}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 transition-colors" title="Print / Save as PDF">
+                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-sf-emerald transition-colors" title="Print / Save as PDF">
                                     <Printer size={20} />
                                 </button>
-                                <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-sf-raised rounded-xl text-gray-500 transition-colors">
                                     <XCircle size={24} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Report Content */}
-                        <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-gray-900">
+                        <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
                             {selectedReport.content ? (
                                 <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content} showActions />
                             ) : (
@@ -328,20 +340,20 @@ const ResultReports = () => {
             {/* ─── SHARE LINK MODAL ─── */}
             {shareModal && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden">
+                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center">
+                            <h3 className="font-bold text-sf-text flex items-center gap-2">
                                 <Share2 size={18} className="text-purple-600" /> Manage Share Links
                             </h3>
-                            <button onClick={() => setShareModal(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button onClick={() => setShareModal(null)} className="p-2 hover:bg-sf-raised rounded-lg">
                                 <XCircle size={20} className="text-gray-400" />
                             </button>
                         </div>
 
                         <div className="p-6 space-y-4">
                             {/* Create new link */}
-                            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                                <h4 className="text-sm font-bold text-indigo-800 dark:text-indigo-300 mb-3">Create Public Link</h4>
+                            <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider">
+                                <h4 className="text-sm font-bold text-sf-text mb-3">Create Public Link</h4>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1">
                                         <label className="text-xs text-gray-500 mb-1 block">Expires in (days)</label>
@@ -351,13 +363,13 @@ const ResultReports = () => {
                                             onChange={e => setExpiryDays(parseInt(e.target.value) || 30)}
                                             min="1"
                                             max="365"
-                                            className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700"
+                                            className="w-full border border-sf-divider rounded-lg px-3 py-2 text-sm bg-sf-surface text-sf-text"
                                         />
                                     </div>
                                     <button
                                         onClick={createShareLink}
                                         disabled={shareLoading}
-                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2 mt-5"
+                                        className="px-4 py-2 bg-sf-emerald text-white rounded-lg font-bold text-sm hover:bg-sf-emerald-hover transition-colors disabled:opacity-50 flex items-center gap-2 mt-5"
                                     >
                                         <Plus size={14} /> Generate
                                     </button>
@@ -366,7 +378,7 @@ const ResultReports = () => {
 
                             {/* Existing links */}
                             <div>
-                                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Existing Links</h4>
+                                <h4 className="text-sm font-bold text-sf-text mb-2">Existing Links</h4>
                                 {shareLoading ? (
                                     <div className="py-6 text-center text-gray-400 text-sm">Loading...</div>
                                 ) : shareLinks.length === 0 ? (

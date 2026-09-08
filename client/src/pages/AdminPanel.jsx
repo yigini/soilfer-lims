@@ -185,9 +185,9 @@ const AdminPanel = () => {
 
     return (
         <div className="flex flex-col h-full font-sans">
-            <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-5">{t('admin.title', 'Administration Panel')}</h1>
+            <h1 className="text-2xl font-black text-sf-text mb-5">{t('admin.title', 'Administration Panel')}</h1>
 
-            <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-px">
+            <div className="flex gap-1 mb-6 border-b border-sf-divider overflow-x-auto pb-px">
                 {canManageBranding && (
                     <>
                         <button
@@ -238,7 +238,7 @@ const AdminPanel = () => {
                 )}
             </div>
 
-            <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6'}`}>
+            <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-sf-divider p-6'}`}>
 
                 {activeTab === 'branding' && <BrandingManager />}
 
@@ -257,17 +257,17 @@ const AdminPanel = () => {
                         </div>
 
                         <table className="w-full text-left border dark:border-gray-700 rounded-lg overflow-hidden">
-                            <thead className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                            <thead className="bg-sf-canvas border-b dark:border-gray-600">
                                 <tr>
-                                    <th className="p-3 font-semibold text-gray-600 dark:text-gray-300">Code</th>
-                                    <th className="p-3 font-semibold text-gray-600 dark:text-gray-300">Name</th>
-                                    <th className="p-3 font-semibold text-gray-600 dark:text-gray-300">Status</th>
-                                    <th className="p-3 font-semibold text-gray-600 dark:text-gray-300 text-right">Actions</th>
+                                    <th className="p-3 font-semibold text-sf-muted">Code</th>
+                                    <th className="p-3 font-semibold text-sf-muted">Name</th>
+                                    <th className="p-3 font-semibold text-sf-muted">Status</th>
+                                    <th className="p-3 font-semibold text-sf-muted text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {languages.map(l => (
-                                    <tr key={l.code} className="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <tr key={l.code} className="border-b dark:border-gray-700 last:border-0 hover:bg-sf-raised">
                                         <td className="p-3 font-mono text-sm">{l.code}</td>
                                         <td className="p-3 font-medium">{l.name}</td>
                                         <td className="p-3">

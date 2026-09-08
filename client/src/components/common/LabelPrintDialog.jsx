@@ -14,6 +14,14 @@ import { Printer, X, Tag, CheckSquare, Square, Check, SlidersHorizontal, Eye } f
  * - Auto-print trigger support
  */
 const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false }) => {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
     const [branding, setBranding] = useState(null);
     const [format, setFormat] = useState('STANDARD'); // 'STANDARD' (101x54mm) | 'COMPACT' (50x25mm)
     const [qrDataUrls, setQrDataUrls] = useState({});
@@ -141,18 +149,18 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 no-print overflow-y-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 dark:border-gray-700 my-8">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-sf-divider my-8">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/75 dark:bg-gray-800/75">
+                <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-gray-50/75 dark:bg-gray-800/75">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-sf-emerald flex items-center justify-center font-bold">
                             <Printer size={20} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-base">
+                            <h3 className="font-bold text-sf-text flex items-center gap-2 text-base">
                                 {isBatch ? `Print Batch Labels (${printableSamples.length} of ${sampleList.length})` : 'Print Sample Label'}
                             </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-sf-muted">
                                 Thermal printer formatted with instant offline 2D matrix QR codes
                             </p>
                         </div>
@@ -167,18 +175,18 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                 </div>
 
                 {/* Format & Batch Controls */}
-                <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="px-6 py-3 bg-sf-canvas/40 border-b border-sf-divider flex flex-wrap items-center justify-between gap-3 text-xs">
                     {/* Format Toggle */}
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-600 dark:text-gray-300">Format:</span>
-                        <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 p-0.5 bg-white dark:bg-gray-800">
+                        <span className="font-semibold text-sf-muted">Format:</span>
+                        <div className="inline-flex rounded-lg border border-sf-divider p-0.5 bg-sf-surface">
                             <button
                                 type="button"
                                 onClick={() => setFormat('STANDARD')}
                                 className={`px-2.5 py-1 rounded-md font-bold transition-all ${
                                     format === 'STANDARD'
                                         ? 'bg-indigo-600 text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
+                                        : 'text-sf-muted hover:text-gray-900'
                                 }`}
                             >
                                 Standard (101×54mm / 4"×2")
@@ -189,7 +197,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                                 className={`px-2.5 py-1 rounded-md font-bold transition-all ${
                                     format === 'COMPACT'
                                         ? 'bg-indigo-600 text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
+                                        : 'text-sf-muted hover:text-gray-900'
                                 }`}
                             >
                                 Vial / Tube (50×25mm)
@@ -210,7 +218,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                             <button
                                 type="button"
                                 onClick={handleSelectAll}
-                                className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded font-semibold hover:bg-gray-200 transition-colors"
+                                className="px-2 py-1 bg-sf-raised text-sf-text rounded font-semibold hover:bg-gray-200 transition-colors"
                             >
                                 Select All ({sampleList.length})
                             </button>
@@ -227,7 +235,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
 
                 {/* Batch Checklist (Collapsible / Scrollable if batch) */}
                 {isBatch && (
-                    <div className="px-6 py-3 max-h-36 overflow-y-auto border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 divide-y dark:divide-gray-700 text-xs">
+                    <div className="px-6 py-3 max-h-36 overflow-y-auto border-b border-sf-divider bg-sf-surface divide-y dark:divide-gray-700 text-xs">
                         {sampleList.map((s, idx) => {
                             const key = s.id || s.labId || s.originalId;
                             const isSelected = selectedIds.has(key);
@@ -246,7 +254,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                                             onChange={() => toggleSampleSelect(key)}
                                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                         />
-                                        <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
+                                        <span className="font-mono font-bold text-sf-text">
                                             {s.labId || s.originalId}
                                         </span>
                                         {s.originalId && s.originalId !== s.labId && (
@@ -269,10 +277,10 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
 
                 {/* Live Visual Print Preview */}
                 <div className="p-6 bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center gap-4">
-                    <div className="flex items-center justify-between w-full max-w-lg text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="flex items-center justify-between w-full max-w-lg text-[11px] font-bold text-sf-muted uppercase tracking-wider">
                         <span>Print Preview ({format === 'STANDARD' ? '101mm × 54mm' : '50mm × 25mm'})</span>
                         {isBatch && (
-                            <span className="text-indigo-600 dark:text-indigo-400">
+                            <span className="text-sf-emerald">
                                 Showing 1 of {printableSamples.length} queued
                             </span>
                         )}
@@ -299,8 +307,8 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                 </div>
 
                 {/* Actions Footer */}
-                <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/75 dark:bg-gray-800/75">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="p-4 border-t border-sf-divider flex justify-between items-center bg-gray-50/75 dark:bg-gray-800/75">
+                    <div className="text-xs text-sf-muted">
                         {printableSamples.length === 0 ? (
                             <span className="text-rose-600 font-semibold">Please select at least 1 label to print.</span>
                         ) : (
@@ -312,7 +320,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-5 py-2 text-gray-600 dark:text-gray-400 font-bold hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors text-xs"
+                            className="px-5 py-2 text-sf-muted font-bold hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors text-xs"
                         >
                             Cancel
                         </button>

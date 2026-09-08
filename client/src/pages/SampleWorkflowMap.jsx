@@ -115,8 +115,8 @@ export default function SampleWorkflowMap() {
                 <div className="p-4 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 mb-4">
                     <AlertTriangle className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">No Sample Specified</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6">
+                <h3 className="text-lg font-semibold text-sf-text">No Sample Specified</h3>
+                <p className="text-sm text-sf-muted max-w-md mt-1 mb-6">
                     A sample ID is required to display the workflow map.
                 </p>
                 <button
@@ -135,8 +135,8 @@ export default function SampleWorkflowMap() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[460px] p-8 text-center">
                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
-                <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Loading Workflow Map</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Retrieving verified sample stage graph and prerequisite state...</p>
+                <h3 className="text-base font-semibold text-sf-text">Loading Workflow Map</h3>
+                <p className="text-xs text-sf-muted mt-1">Retrieving verified sample stage graph and prerequisite state...</p>
             </div>
         );
     }
@@ -148,15 +148,15 @@ export default function SampleWorkflowMap() {
                 <div className="p-4 rounded-full bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 mb-4">
                     <AlertTriangle className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Workflow Unavailable</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6">
+                <h3 className="text-lg font-semibold text-sf-text">Workflow Unavailable</h3>
+                <p className="text-sm text-sf-muted max-w-md mt-1 mb-6">
                     {error}
                 </p>
                 <div className="flex gap-3">
                     <button
                         type="button"
                         onClick={() => navigate('/samples')}
-                        className="px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="px-4 py-2 text-sm font-medium border border-sf-divider rounded-lg hover:bg-sf-raised transition-colors"
                     >
                         Return to Samples
                     </button>
@@ -226,7 +226,7 @@ export default function SampleWorkflowMap() {
             </div>
 
             {/* Footnote */}
-            <div className="sf-top text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800">
+            <div className="sf-top text-xs text-sf-muted border-t border-sf-divider">
                 <span>Path shown reflects assigned determinations for this sample. Keyboard shortcuts: [1] Overview, [2] Dependencies, [3] Analysis list.</span>
                 <span>SoilFER LIMS v1.4.0</span>
             </div>

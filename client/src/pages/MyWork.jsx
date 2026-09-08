@@ -21,7 +21,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
             {isStale ? 'Stale' : 'Live'}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated)}</span>
         )}
     </div>
 );
@@ -153,7 +153,7 @@ const MyWork = () => {
         return (
             <div className="flex items-center justify-center h-64 gap-3">
                 <RefreshCw size={20} className="animate-spin text-blue-500" />
-                <span className="text-gray-400 dark:text-gray-500 font-medium">Loading your work...</span>
+                <span className="text-sf-muted font-medium">Loading your work...</span>
             </div>
         );
     }
@@ -163,13 +163,13 @@ const MyWork = () => {
             {/* ─── Header ─── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100">My Work</h1>
+                    <h1 className="text-2xl font-black text-sf-text">My Work</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user.name || user.username}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
-                    <button onClick={fetchMyWork} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now">
-                        <RefreshCw size={16} className="text-gray-400 dark:text-gray-500" />
+                    <button onClick={fetchMyWork} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title="Refresh now">
+                        <RefreshCw size={16} className="text-sf-muted" />
                     </button>
                 </div>
             </div>
@@ -211,7 +211,7 @@ const MyWork = () => {
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${totalRedo > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>Needs Redo</span>
                         <Zap size={14} className={`opacity-60 ${totalRedo > 0 ? 'text-red-500' : 'text-gray-400'}`} />
                     </div>
-                    <span className={`text-2xl font-black ${totalRedo > 0 ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'}`}>{totalRedo}</span>
+                    <span className={`text-2xl font-black ${totalRedo > 0 ? 'text-red-700 dark:text-red-300' : 'text-sf-muted'}`}>{totalRedo}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800">
                     <div className="flex items-center justify-between mb-1">
@@ -225,16 +225,16 @@ const MyWork = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Waived</span>
                         <Filter size={14} className="text-gray-400 opacity-60" />
                     </div>
-                    <span className="text-2xl font-black text-gray-600 dark:text-gray-400">{totalWaived}</span>
+                    <span className="text-2xl font-black text-sf-muted">{totalWaived}</span>
                 </div>
             </div>
 
             {/* ─── Canonical Tabs ─── */}
-            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 w-fit overflow-x-auto">
+            <div className="flex gap-1 bg-sf-raised rounded-lg p-1 w-fit overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('active')}
                     className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'active'
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
@@ -252,7 +252,7 @@ const MyWork = () => {
                 <button
                     onClick={() => setActiveTab('review')}
                     className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'review'
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
@@ -279,7 +279,7 @@ const MyWork = () => {
                 <button
                     onClick={() => setActiveTab('waived')}
                     className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'waived'
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
@@ -309,7 +309,7 @@ const MyWork = () => {
                                         navigate(`/samples/${group.sampleId}`);
                                     }
                                 }}
-                                className="w-full flex items-center justify-between p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all text-left group cursor-pointer"
+                                className="w-full flex items-center justify-between p-4 rounded-xl bg-sf-surface border border-sf-divider hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all text-left group cursor-pointer"
                             >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                     {/* Priority/Status indicator */}
@@ -330,7 +330,7 @@ const MyWork = () => {
                                     {/* Sample info */}
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
+                                            <span className="font-bold text-sm text-sf-text truncate">
                                                 {group.labId || group.sampleId.substring(0, 12)}
                                             </span>
                                             <button
@@ -345,7 +345,7 @@ const MyWork = () => {
                                                 Details
                                             </button>
                                         </div>
-                                        <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                                        <div className="text-[10px] text-sf-muted mt-0.5 truncate">
                                             {group.analyses?.map(a => getAnalysisDisplayName(a)).join(', ')}
                                         </div>
                                     </div>
@@ -363,7 +363,7 @@ const MyWork = () => {
                                                     style={{ width: `${progress}%` }}
                                                 />
                                             </div>
-                                            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 w-8 text-right">{group.completedCount}/{group.totalCount}</span>
+                                            <span className="text-[10px] font-bold text-sf-muted w-8 text-right">{group.completedCount}/{group.totalCount}</span>
                                         </div>
                                     </div>
 
@@ -389,7 +389,7 @@ const MyWork = () => {
                         );
                     })
                 ) : (
-                    <div className="text-center py-16 text-gray-400 dark:text-gray-500 text-sm border border-dashed rounded-xl bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="text-center py-16 text-sf-muted text-sm border border-dashed rounded-xl bg-sf-canvas">
                         <CheckCircle size={32} className="mx-auto mb-3 text-emerald-400" />
                         <p className="font-bold text-base">{activeTab === 'active' ? 'All clear!' : 'Nothing completed yet'}</p>
                         <p className="text-[11px] mt-1">{activeTab === 'active' ? 'No active work items — check back soon' : 'Completed work will appear here'}</p>
@@ -402,10 +402,10 @@ const MyWork = () => {
                 <div className="flex items-center justify-between pt-4">
                     <span className="text-sm text-gray-500">Page {page} of {meta.totalPages}</span>
                     <div className="flex gap-2">
-                        <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                        <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-2 border rounded-lg hover:bg-sf-raised disabled:opacity-50">
                             <ArrowLeft size={16} />
                         </button>
-                        <button disabled={page >= meta.totalPages} onClick={() => setPage(p => p + 1)} className="p-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                        <button disabled={page >= meta.totalPages} onClick={() => setPage(p => p + 1)} className="p-2 border rounded-lg hover:bg-sf-raised disabled:opacity-50">
                             <ArrowRight size={16} />
                         </button>
                     </div>

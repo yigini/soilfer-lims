@@ -31,8 +31,8 @@ const StatCard = ({ icon: Icon, label, value, sub, color }) => (
             <Icon size={20} className="text-white" />
         </div>
         <div>
-            <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">{label}</div>
+            <div className="text-2xl font-black text-sf-text">{value}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-sf-muted">{label}</div>
             {sub && <div className="text-[10px] text-gray-400">{sub}</div>}
         </div>
     </div>
@@ -52,13 +52,13 @@ const SuccessModal = ({ isOpen, labName, staff, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700 animate-in zoom-in duration-300">
+            <div className="bg-sf-surface rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-sf-divider animate-in zoom-in duration-300">
                 <div className="p-8 flex flex-col items-center text-center">
                     <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6">
                         <CheckCircle2 size={48} className="text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">Lab Created!</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">
+                    <h3 className="text-2xl font-black text-sf-text uppercase tracking-tight mb-2">Lab Created!</h3>
+                    <p className="text-sf-muted text-sm font-medium mb-6">
                         <strong>"{labName}"</strong> is now online with {staff?.length || 0} staff accounts.
                     </p>
 
@@ -70,19 +70,19 @@ const SuccessModal = ({ isOpen, labName, staff, onClose }) => {
                                     <Copy size={12} /> {copied ? 'Copied!' : 'Copy All'}
                                 </button>
                             </div>
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className="bg-sf-canvas/50 rounded-xl border border-sf-divider overflow-hidden">
                                 <table className="w-full text-xs">
                                     <thead>
-                                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                                            <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-gray-400">Role</th>
-                                            <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-gray-400">Username</th>
-                                            <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-gray-400">Password</th>
+                                        <tr className="border-b border-sf-divider">
+                                            <th className="px-3 py-2 text-left font-bold text-sf-muted">Role</th>
+                                            <th className="px-3 py-2 text-left font-bold text-sf-muted">Username</th>
+                                            <th className="px-3 py-2 text-left font-bold text-sf-muted">Password</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {staff.map((s, i) => (
-                                            <tr key={i} className="border-b last:border-0 border-gray-100 dark:border-gray-700/50">
-                                                <td className="px-3 py-2 font-medium text-gray-700 dark:text-gray-300">{s.name || s.role}</td>
+                                            <tr key={i} className="border-b last:border-0 border-sf-divider/50">
+                                                <td className="px-3 py-2 font-medium text-sf-muted">{s.name || s.role}</td>
                                                 <td className="px-3 py-2 font-mono text-blue-600 dark:text-blue-400">{s.username}</td>
                                                 <td className="px-3 py-2 font-mono text-amber-600 dark:text-amber-400">{s.password}</td>
                                             </tr>
@@ -98,7 +98,7 @@ const SuccessModal = ({ isOpen, labName, staff, onClose }) => {
                         </div>
                     )}
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+                <div className="p-4 bg-sf-canvas/50 border-t border-sf-divider">
                     <button
                         onClick={onClose}
                         className="w-full py-4 bg-gray-900 dark:bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-black dark:hover:bg-blue-700 transition-all shadow-lg active:scale-95"
@@ -153,8 +153,8 @@ const StaffTab = ({ labId, labName }) => {
                     const RIcon = rd.icon;
                     return (
                         <div key={user.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${user.isActive
-                            ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                            : 'bg-gray-50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60'}`}
+                            ? 'bg-sf-surface border-sf-divider'
+                            : 'bg-sf-canvas/50 border-sf-divider opacity-60'}`}
                         >
                             <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-lg ${rd.color}`}>
@@ -162,7 +162,7 @@ const StaffTab = ({ labId, labName }) => {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{user.name || user.username}</span>
+                                        <span className="font-bold text-sm text-sf-text">{user.name || user.username}</span>
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${rd.color}`}>
                                             {rd.label}
                                         </span>
@@ -210,14 +210,14 @@ const ProjectsTab = ({ projects }) => {
                 <Link
                     key={proj.code}
                     to="/projects"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-sf-surface border border-sf-divider hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all group"
                 >
                     <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${proj.isOwned ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-blue-100 dark:bg-blue-900/40'}`}>
                             <FolderOpen size={16} className={proj.isOwned ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'} />
                         </div>
                         <div>
-                            <div className="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <div className="font-bold text-sm text-sf-text group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {proj.name || proj.code}
                             </div>
                             <div className="text-xs text-gray-400 font-mono">{proj.code}</div>
@@ -262,14 +262,14 @@ const InfoTab = ({ lab }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {fields.map(f => (
-                <div key={f.label} className="flex items-start gap-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <div key={f.label} className="flex items-start gap-3 p-3 rounded-xl bg-sf-surface border border-sf-divider">
                     <f.icon size={14} className="text-gray-400 mt-0.5 shrink-0" />
                     <div className="min-w-0">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{f.label}</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">{f.label}</div>
                         {f.isLink ? (
                             <a href={f.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate block">{f.value}</a>
                         ) : (
-                            <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{f.value}</div>
+                            <div className="text-sm font-medium text-sf-text">{f.value}</div>
                         )}
                     </div>
                 </div>
@@ -312,12 +312,12 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
 
                 {/* Lab ID */}
                 <td className="px-4 py-4">
-                    <div className="font-mono font-black text-sm text-gray-800 dark:text-gray-200">{lab.id}</div>
+                    <div className="font-mono font-black text-sm text-sf-text">{lab.id}</div>
                 </td>
 
                 {/* Name + Country + Contact */}
                 <td className="px-4 py-4">
-                    <div className="font-bold text-gray-800 dark:text-gray-200">{lab.name}</div>
+                    <div className="font-bold text-sf-text">{lab.name}</div>
                     <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
                         <MapPin size={10} />{lab.country}{lab.city && ` · ${lab.city}`}
                     </div>
@@ -344,7 +344,7 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
                             ? lab.projects.slice(0, 3).map(proj => (
                                 <div key={proj.code} className="flex items-center gap-1.5">
                                     <FolderOpen size={11} className={proj.isOwned ? 'text-emerald-500 shrink-0' : 'text-blue-500 shrink-0'} />
-                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[180px]" title={`${proj.name} (${proj.code})`}>
+                                    <span className="text-xs font-semibold text-sf-muted truncate max-w-[180px]" title={`${proj.name} (${proj.code})`}>
                                         {proj.name || proj.code}
                                     </span>
                                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${proj.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
@@ -368,7 +368,7 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1">
                             <Users size={13} className="text-gray-400" />
-                            <span className="font-bold text-sm text-gray-700 dark:text-gray-300">{lab.staffCount || 0}</span>
+                            <span className="font-bold text-sm text-sf-muted">{lab.staffCount || 0}</span>
                         </div>
                         {lab.staffCount > 0 && (
                             <span className={`text-[10px] mt-0.5 ${lab.activeStaffCount < lab.staffCount ? 'text-amber-500' : 'text-emerald-500'}`}>
@@ -383,7 +383,7 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
                     <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1">
                             <FlaskConical size={13} className="text-gray-400" />
-                            <span className="font-bold text-sm text-gray-700 dark:text-gray-300">{lab.sampleCount || 0}</span>
+                            <span className="font-bold text-sm text-sf-muted">{lab.sampleCount || 0}</span>
                         </div>
                         {lab.sampleCount > 0 && (
                             <span className="text-[10px] text-emerald-500 mt-0.5">
@@ -409,9 +409,9 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
             {isExpanded && (
                 <tr>
                     <td colSpan={8} className="px-0 py-0">
-                        <div className="mx-4 mb-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 overflow-hidden">
+                        <div className="mx-4 mb-4 rounded-xl border border-sf-divider bg-sf-canvas overflow-hidden">
                             {/* Tab Bar */}
-                            <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                            <div className="flex border-b border-sf-divider bg-sf-surface">
                                 {[
                                     { key: 'staff', label: 'Staff', icon: Users, count: lab.staffCount },
                                     { key: 'projects', label: 'Projects', icon: FolderOpen, count: lab.projects?.length },
@@ -428,7 +428,7 @@ const LabRow = ({ lab, isExpanded, onToggle, onEdit, onToggleActive }) => {
                                         <tab.icon size={14} />
                                         {tab.label}
                                         {tab.count !== undefined && (
-                                            <span className="px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-[10px] font-bold text-gray-600 dark:text-gray-300 ml-1">
+                                            <span className="px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-[10px] font-bold text-sf-muted ml-1">
                                                 {tab.count}
                                             </span>
                                         )}
@@ -476,18 +476,18 @@ const LabFormModal = ({ isOpen, editingLab, formData, setFormData, onSubmit, onC
         { value: 'UTC', label: 'UTC' },
     ];
 
-    const inputCls = "w-full border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-300 dark:placeholder-gray-500";
-    const labelCls = "block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1";
+    const inputCls = "w-full border border-sf-divider rounded-xl p-3 bg-sf-canvas text-sf-text focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-300 dark:placeholder-gray-500";
+    const labelCls = "block text-[10px] font-black uppercase tracking-widest text-sf-muted mb-1";
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div className="bg-sf-surface rounded-3xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div className="p-6 border-b border-sf-divider flex items-center justify-between">
                     <h2 className="text-xl font-black text-gray-800 dark:text-white flex items-center gap-2">
                         <Beaker size={20} className="text-blue-500" />
                         {editingLab ? 'Edit Laboratory' : 'Onboard New Laboratory'}
                     </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all">
+                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition-all">
                         <X size={18} className="text-gray-400" />
                     </button>
                 </div>
@@ -594,9 +594,9 @@ const LabFormModal = ({ isOpen, editingLab, formData, setFormData, onSubmit, onC
                         </div>
                     )}
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-sf-divider">
                         <button type="button" onClick={onClose}
-                            className="px-6 py-3 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl font-black uppercase tracking-widest text-[10px] transition">
+                            className="px-6 py-3 text-gray-500 hover:bg-sf-raised rounded-xl font-black uppercase tracking-widest text-[10px] transition">
                             Cancel
                         </button>
                         <button type="submit"
@@ -733,7 +733,7 @@ const LabManagement = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                    <h1 className="text-2xl font-black text-sf-text flex items-center gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
                             <Beaker size={22} className="text-blue-600 dark:text-blue-400" />
                         </div>
@@ -763,26 +763,26 @@ const LabManagement = () => {
                     placeholder="Search labs by ID, name, code, or country…"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-sf-divider bg-sf-surface text-sf-text text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500"
                 />
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+                    <thead className="bg-sf-canvas/80 border-b border-sf-divider">
                         <tr>
                             <th className="pl-4 pr-1 py-3 w-8"></th>
-                            <th className="px-3 py-3 w-12 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500"></th>
-                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Lab ID</th>
-                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Name</th>
-                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Projects</th>
-                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 text-center">Staff</th>
-                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 text-center">Samples</th>
+                            <th className="px-3 py-3 w-12 text-[10px] font-black uppercase tracking-widest text-sf-muted"></th>
+                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-sf-muted">Lab ID</th>
+                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-sf-muted">Name</th>
+                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-sf-muted">Projects</th>
+                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-sf-muted text-center">Staff</th>
+                            <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-sf-muted text-center">Samples</th>
                             <th className="px-4 py-3 w-16"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody className="divide-y divide-sf-divider">
                         {loading ? (
                             <tr><td colSpan={8} className="py-16 text-center text-gray-400 text-sm">Loading laboratories…</td></tr>
                         ) : filteredLabs.length === 0 ? (

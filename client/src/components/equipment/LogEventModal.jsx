@@ -47,12 +47,12 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden font-sans" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden font-sans" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         {isCalibration ? <ClipboardCheck className="text-blue-600" size={20} /> : <Wrench className="text-indigo-600" size={20} />}
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('equipment.logEvent', 'Log Event')}: {form.eventType.replace(/_/g, ' ')}</h3>
+                        <h3 className="text-lg font-bold text-sf-text">{t('equipment.logEvent', 'Log Event')}: {form.eventType.replace(/_/g, ' ')}</h3>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
@@ -60,9 +60,9 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {error && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm flex items-center gap-2"><ShieldAlert size={14} /> {error}</div>}
 
-                    <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border dark:border-gray-700 text-xs">
+                    <div className="p-3 rounded-xl bg-sf-canvas/40 border dark:border-gray-700 text-xs">
                         <div className="text-gray-400 mb-1">{t('equipment.assetName', 'Target Instrument')}</div>
-                        <div className="font-bold text-gray-900 dark:text-gray-100">{asset.name} <span className="font-mono ml-2 text-blue-600">{asset.internalAssetTag}</span></div>
+                        <div className="font-bold text-sf-text">{asset.name} <span className="font-mono ml-2 text-blue-600">{asset.internalAssetTag}</span></div>
                     </div>
 
                     <div>
@@ -83,14 +83,14 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                                 <button
                                     type="button"
                                     onClick={() => setForm({ ...form, outcome: 'PASS' })}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all ${form.outcome === 'PASS' ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'border-gray-200 dark:border-gray-700'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all ${form.outcome === 'PASS' ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'border-sf-divider'}`}
                                 >
                                     <CheckCircle size={14} /> PASS
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setForm({ ...form, outcome: 'FAIL' })}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all ${form.outcome === 'FAIL' ? 'bg-red-50 border-red-500 text-red-700 font-bold' : 'border-gray-200 dark:border-gray-700'}`}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all ${form.outcome === 'FAIL' ? 'bg-red-50 border-red-500 text-red-700 font-bold' : 'border-sf-divider'}`}
                                 >
                                     <XCircle size={14} /> FAIL
                                 </button>

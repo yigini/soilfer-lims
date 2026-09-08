@@ -140,15 +140,15 @@ const LabMethods = () => {
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                 <div>
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
                             <FlaskConical className="w-6 h-6" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Laboratory Methodology Defaults</h1>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure standard operating procedures and default methods for work items</p>
+                            <h1 className="text-2xl font-bold text-sf-text">Laboratory Methodology Defaults</h1>
+                            <p className="text-sm text-sf-muted">Configure standard operating procedures and default methods for work items</p>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@ const LabMethods = () => {
                             <select
                                 value={selectedLabId}
                                 onChange={(e) => setSelectedLabId(e.target.value)}
-                                className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                                className="px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm font-medium text-sf-text focus:ring-2 focus:ring-emerald-500"
                             >
                                 {labs.map(l => (
                                     <option key={l.id} value={l.id}>{l.name || l.id} ({l.code || l.id})</option>
@@ -200,8 +200,8 @@ const LabMethods = () => {
                         <div className="flex items-center gap-3">
                             <Sparkles className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Laboratory Method Onboarding Wizard</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                <h3 className="text-lg font-bold text-sf-text">Laboratory Method Onboarding Wizard</h3>
+                                <p className="text-sm text-sf-muted">
                                     This laboratory does not currently have custom methodology overrides. Default FAO GLOSOLAN SOPs are active. 
                                     Review the table below, customize any methods matching your laboratory instruments, and confirm the list.
                                 </p>
@@ -218,13 +218,13 @@ const LabMethods = () => {
             )}
 
             {/* Filter Bar */}
-            <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-wrap items-center gap-4 bg-sf-surface p-4 rounded-xl border border-sf-divider shadow-sm">
                 <input
                     type="text"
                     placeholder="Search analyses..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 min-w-[200px] px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                    className="flex-1 min-w-[200px] px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm text-sf-text"
                 />
 
                 <div className="flex items-center gap-2">
@@ -232,7 +232,7 @@ const LabMethods = () => {
                     <select
                         value={filterMatrix}
                         onChange={(e) => setFilterMatrix(e.target.value)}
-                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                        className="px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm text-sf-text"
                     >
                         <option value="ALL">All Matrices</option>
                         <option value="SOIL">Soil</option>
@@ -247,7 +247,7 @@ const LabMethods = () => {
                     <select
                         value={filterModule}
                         onChange={(e) => setFilterModule(e.target.value)}
-                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                        className="px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm text-sf-text"
                     >
                         <option value="ALL">All Modules</option>
                         <option value="FERTILITY">Fertility</option>
@@ -259,7 +259,7 @@ const LabMethods = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm overflow-hidden">
                 {loading ? (
                     <div className="p-12 text-center text-gray-500 flex flex-col items-center gap-3">
                         <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
@@ -272,7 +272,7 @@ const LabMethods = () => {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 uppercase text-xs font-semibold border-b border-gray-200 dark:border-gray-700">
+                            <thead className="bg-sf-canvas/50 text-sf-muted uppercase text-xs font-semibold border-b border-sf-divider">
                                 <tr>
                                     <th className="px-6 py-4">Parameter</th>
                                     <th className="px-6 py-4">Matrix / Module</th>
@@ -280,17 +280,17 @@ const LabMethods = () => {
                                     <th className="px-6 py-4">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody className="divide-y divide-sf-divider">
                                 {filteredDefaults.map(item => {
                                     return (
                                         <tr key={item.analysisCode} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="font-semibold text-gray-900 dark:text-white">{item.analysisName}</div>
+                                                <div className="font-semibold text-sf-text">{item.analysisName}</div>
                                                 <div className="text-xs text-mono text-gray-400">{item.analysisCode}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-1.5">
-                                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-sf-raised text-sf-muted">
                                                         {item.matrix}
                                                     </span>
                                                     <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
@@ -304,7 +304,7 @@ const LabMethods = () => {
                                                     <select
                                                         value={item.effectiveMethodologyId || ''}
                                                         onChange={(e) => handleMethodChange(item.analysisCode, e.target.value)}
-                                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                                                        className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm text-sf-text focus:ring-2 focus:ring-emerald-500"
                                                     >
                                                         <option value="">Choose a method / use a valid shared default</option>
                                                         {item.methodologies.map(m => (
@@ -323,7 +323,7 @@ const LabMethods = () => {
                                                         <ShieldCheck className="w-3.5 h-3.5" /> Lab Choice
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sf-raised text-sf-muted">
                                                         GLOSOLAN Standard
                                                     </span>
                                                 )}

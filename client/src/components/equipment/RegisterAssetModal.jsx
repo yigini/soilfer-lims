@@ -71,12 +71,12 @@ const RegisterAssetModal = ({ show, onClose, onSuccess, asset = null }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden font-sans" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden font-sans" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         {asset ? <Monitor className="text-blue-600" size={20} /> : <Plus className="text-blue-600" size={20} />}
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        <h3 className="text-lg font-bold text-sf-text">
                             {asset ? t('equipment.editAsset', 'Edit Instrument Details') : t('equipment.registerAsset', 'Register New Instrument')}
                         </h3>
                     </div>

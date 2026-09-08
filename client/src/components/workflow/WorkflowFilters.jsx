@@ -29,14 +29,14 @@ export default function WorkflowFilters({ filters, onChange, assignees = [], t }
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3 p-3 bg-sf-surface rounded-xl border border-sf-divider shadow-sm">
             <Filter size={16} className="text-gray-400" />
 
             {/* Status */}
             <select
                 value={filters.status || ''}
                 onChange={e => onChange({ ...filters, status: e.target.value })}
-                className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sf-text focus:ring-2 focus:ring-indigo-500 outline-none"
             >
                 {STATUS_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>
@@ -49,7 +49,7 @@ export default function WorkflowFilters({ filters, onChange, assignees = [], t }
             <select
                 value={filters.category || ''}
                 onChange={e => onChange({ ...filters, category: e.target.value })}
-                className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sf-text focus:ring-2 focus:ring-indigo-500 outline-none"
             >
                 {CATEGORY_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>
@@ -63,7 +63,7 @@ export default function WorkflowFilters({ filters, onChange, assignees = [], t }
                 <select
                     value={filters.assignee || ''}
                     onChange={e => onChange({ ...filters, assignee: e.target.value })}
-                    className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sf-text focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                     <option value="">{t ? t('workflow.filters.allAssignees') : 'All Assignees'}</option>
                     {assignees.map(a => (

@@ -125,11 +125,11 @@ const BrandingManager = () => {
         <div className="max-w-6xl mx-auto">
             <div className="mb-8 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <h2 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <Palette className="text-blue-600" size={28} />
                         Branding & Identity
                     </h2>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-sf-muted mt-1">
                         Customize the look and feel of your laboratory information management system.
                     </p>
                 </div>
@@ -148,9 +148,9 @@ const BrandingManager = () => {
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* Visual Identity Section */}
-                    <div className="card-base bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="card-base bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
+                        <div className="p-6 border-b border-sf-divider bg-sf-canvas">
+                            <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Layout size={20} className="text-gray-500" />
                                 Visual Identity
                             </h3>
@@ -159,7 +159,7 @@ const BrandingManager = () => {
                             {/* Logo */}
                             <div className="flex items-start gap-6">
                                 <div
-                                    className="w-32 h-32 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 group hover:border-blue-500 transition-colors cursor-pointer relative overflow-hidden"
+                                    className="w-32 h-32 rounded-2xl bg-sf-raised flex items-center justify-center border-2 border-dashed border-sf-divider group hover:border-blue-500 transition-colors cursor-pointer relative overflow-hidden"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {formData.logoUrl ? (
@@ -185,11 +185,11 @@ const BrandingManager = () => {
                                     />
                                 </div>
                                 <div className="flex-1 space-y-3">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Laboratory Logo</label>
+                                    <label className="block text-sm font-medium text-sf-muted">Laboratory Logo</label>
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                            className="px-4 py-2 bg-white dark:bg-gray-700 border border-sf-divider rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                                         >
                                             Upload New
                                         </button>
@@ -207,10 +207,10 @@ const BrandingManager = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-sf-divider">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primary Color</label>
-                                    <div className="flex items-center gap-2 p-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
+                                    <label className="block text-sm font-medium text-sf-muted mb-2">Primary Color</label>
+                                    <div className="flex items-center gap-2 p-1.5 border border-sf-divider rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
                                         <input
                                             type="color"
                                             value={formData.colors.primary}
@@ -226,8 +226,8 @@ const BrandingManager = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secondary Color</label>
-                                    <div className="flex items-center gap-2 p-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
+                                    <label className="block text-sm font-medium text-sf-muted mb-2">Secondary Color</label>
+                                    <div className="flex items-center gap-2 p-1.5 border border-sf-divider rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
                                         <input
                                             type="color"
                                             value={formData.colors.secondary}
@@ -247,9 +247,9 @@ const BrandingManager = () => {
                     </div>
 
                     {/* Lab Info Section */}
-                    <div className="card-base bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="card-base bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
+                        <div className="p-6 border-b border-sf-divider bg-sf-canvas">
+                            <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Type size={20} className="text-gray-500" />
                                 Organization Details
                             </h3>
@@ -257,20 +257,20 @@ const BrandingManager = () => {
                         <div className="p-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Lab Name (App Title)</label>
+                                    <label className="text-sm font-medium text-sf-muted">Lab Name (App Title)</label>
                                     <input
                                         type="text"
-                                        className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         placeholder="e.g. SoilFER LIMS"
                                         value={formData.title}
                                         onChange={(e) => handleChange('title', e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Organization Legal Name</label>
+                                    <label className="text-sm font-medium text-sf-muted">Organization Legal Name</label>
                                     <input
                                         type="text"
-                                        className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         placeholder="e.g. National Soil Institute"
                                         value={formData.organization}
                                         onChange={(e) => handleChange('organization', e.target.value)}
@@ -279,10 +279,10 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tagline / Subtitle</label>
+                                <label className="text-sm font-medium text-sf-muted">Tagline / Subtitle</label>
                                 <input
                                     type="text"
-                                    className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="e.g. Advanced Analysis & Research Platform"
                                     value={formData.tagline}
                                     onChange={(e) => handleChange('tagline', e.target.value)}
@@ -290,12 +290,12 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact Email</label>
+                                <label className="text-sm font-medium text-sf-muted">Contact Email</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                     <input
                                         type="email"
-                                        className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full h-10 pl-9 pr-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         placeholder="support@lab.com"
                                         value={formData.contactEmail}
                                         onChange={(e) => handleChange('contactEmail', e.target.value)}
@@ -304,10 +304,10 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Footer Text</label>
+                                <label className="text-sm font-medium text-sf-muted">Footer Text</label>
                                 <textarea
                                     rows="2"
-                                    className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                    className="w-full p-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                                     placeholder="© 2026 Your Laboratory. All rights reserved."
                                     value={formData.footerText}
                                     onChange={(e) => handleChange('footerText', e.target.value)}
@@ -317,9 +317,9 @@ const BrandingManager = () => {
                     </div>
 
                     {/* Regional Settings */}
-                    <div className="card-base bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="card-base bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
+                        <div className="p-6 border-b border-sf-divider bg-sf-canvas">
+                            <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Globe size={20} className="text-gray-500" />
                                 Localization
                             </h3>
@@ -327,9 +327,9 @@ const BrandingManager = () => {
                         <div className="p-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Language</label>
+                                    <label className="text-sm font-medium text-sf-muted">Default Language</label>
                                     <select
-                                        className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                        className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500"
                                         value={formData.defaultLanguage}
                                         onChange={(e) => handleChange('defaultLanguage', e.target.value)}
                                     >
@@ -343,9 +343,9 @@ const BrandingManager = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Format</label>
+                                    <label className="text-sm font-medium text-sf-muted">Date Format</label>
                                     <select
-                                        className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                        className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500"
                                         value={formData.dateFormat}
                                         onChange={(e) => handleChange('dateFormat', e.target.value)}
                                     >
@@ -369,22 +369,22 @@ const BrandingManager = () => {
                     </div>
 
                     {/* Integrations */}
-                    <div className="card-base bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="card-base bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
+                        <div className="p-6 border-b border-sf-divider bg-sf-canvas">
+                            <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Globe size={20} className="text-gray-500" />
                                 Integrations
                             </h3>
                         </div>
                         <div className="p-6 space-y-5">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Cesium Ion Access Token</label>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                <label className="text-sm font-medium text-sf-muted">Cesium Ion Access Token</label>
+                                <p className="text-xs text-sf-muted mb-1">
                                     Used for the 3D Globe sample location viewer. Get your token from <a href="https://ion.cesium.com/tokens" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ion.cesium.com/tokens</a>
                                 </p>
                                 <input
                                     type="text"
-                                    className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-xs"
+                                    className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-xs"
                                     placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                                     value={formData.cesiumToken || ''}
                                     onChange={(e) => handleChange('cesiumToken', e.target.value)}
@@ -407,13 +407,13 @@ const BrandingManager = () => {
                 {/* Right Column: Preview */}
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
-                        <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-sf-muted uppercase tracking-wider mb-4 flex items-center gap-2">
                             <Eye size={16} /> Live Preview
                         </h4>
 
-                        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all duration-300">
+                        <div className="bg-sf-surface rounded-xl shadow-lg border border-sf-divider overflow-hidden transform transition-all duration-300">
                             {/* Mock Header */}
-                            <div className="h-16 flex items-center px-4 border-b border-gray-200 dark:border-gray-800"
+                            <div className="h-16 flex items-center px-4 border-b border-sf-divider"
                                 style={{ borderTop: `4px solid ${formData.colors.primary}` }}
                             >
                                 <div className="flex items-center gap-3">
@@ -424,20 +424,20 @@ const BrandingManager = () => {
                                             <div className="w-4 h-4 rounded-full bg-gray-400"></div>
                                         )}
                                     </div>
-                                    <span className="font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+                                    <span className="font-bold text-sf-text truncate max-w-[150px]">
                                         {formData.title || 'LIMS'}
                                     </span>
                                 </div>
                                 <div className="ml-auto flex gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800"></div>
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800"></div>
+                                    <div className="w-8 h-8 rounded-full bg-sf-raised"></div>
+                                    <div className="w-8 h-8 rounded-full bg-sf-raised"></div>
                                 </div>
                             </div>
 
                             {/* Mock Sidebar & Content Layout */}
                             <div className="flex h-64">
                                 {/* Mock Sidebar */}
-                                <div className="w-16 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4 gap-4">
+                                <div className="w-16 bg-sf-canvas border-r border-sf-divider flex flex-col items-center py-4 gap-4">
                                     <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: formData.colors.primary }}></div>
                                     <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
                                     <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
@@ -445,10 +445,10 @@ const BrandingManager = () => {
 
                                 {/* Mock Main Content */}
                                 <div className="flex-1 p-4 bg-gray-50/50 dark:bg-black/20">
-                                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
-                                    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 mb-4">
+                                    <h1 className="text-xl font-bold text-sf-text mb-2">Dashboard</h1>
+                                    <div className="p-4 bg-sf-surface rounded-lg shadow-sm border border-sf-divider mb-4">
                                         <p className="text-sm text-gray-500 mb-1">Welcome back,</p>
-                                        <p className="font-medium text-gray-900 dark:text-white">{formData.organization || 'Organization Name'}</p>
+                                        <p className="font-medium text-sf-text">{formData.organization || 'Organization Name'}</p>
                                     </div>
 
                                     <button className="px-4 py-2 rounded text-white text-sm font-medium w-full" style={{ backgroundColor: formData.colors.primary }}>
@@ -461,7 +461,7 @@ const BrandingManager = () => {
                             </div>
 
                             {/* Mock Footer */}
-                            <div className="py-2 px-4 bg-gray-100 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 text-[10px] text-center text-gray-500">
+                            <div className="py-2 px-4 bg-gray-100 dark:bg-gray-950 border-t border-sf-divider text-[10px] text-center text-gray-500">
                                 {formData.footerText || '© 2026 LIMS'}
                             </div>
                         </div>

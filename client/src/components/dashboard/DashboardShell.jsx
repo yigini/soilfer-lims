@@ -67,18 +67,18 @@ export default function DashboardShell({
     return (
         <div className="space-y-6 max-w-full 2xl:max-w-[1650px] mx-auto">
             {/* Header */}
-            <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-gray-200 dark:border-gray-800">
+            <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-sf-divider">
                 <div>
                     {eyebrow && (
                         <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
                             {eyebrow}
                         </div>
                     )}
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-sf-text tracking-tight">
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">
+                        <p className="text-sm text-sf-muted mt-1 max-w-2xl">
                             {subtitle}
                         </p>
                     )}
@@ -98,7 +98,7 @@ export default function DashboardShell({
             </header>
 
             {/* Status & Scope Control Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-sf-canvas/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                 <ScopeSelector
                     scope={scope}
                     userRole={role}
@@ -112,7 +112,7 @@ export default function DashboardShell({
 
                 <div className="flex items-center justify-between sm:justify-end gap-4">
                     {statusDate && (
-                        <span className="text-gray-500 dark:text-gray-400 font-medium">
+                        <span className="text-sf-muted font-medium">
                             {statusDate}
                         </span>
                     )}
@@ -163,15 +163,15 @@ export default function DashboardShell({
                     <aside className="xl:col-span-4 2xl:col-span-3 col-span-12 space-y-6">
                     {/* Shift Notes / Operational Guidance */}
                     {shiftNotes && (
-                        <section className="bg-white dark:bg-gray-800/80 p-5 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
-                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                        <section className="bg-sf-surface/80 p-5 rounded-xl border border-sf-divider/80 shadow-sm">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sf-muted mb-2">
                                 <BookOpen className="w-3.5 h-3.5" />
                                 <span>Shift Notes</span>
                             </div>
-                            <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            <h2 className="text-sm font-bold text-sf-text mb-2">
                                 {shiftNotes.title || 'Role Responsibilities'}
                             </h2>
-                            <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2 leading-relaxed">
+                            <div className="text-xs text-sf-muted space-y-2 leading-relaxed">
                                 {Array.isArray(shiftNotes.items) ? (
                                     <ul className="list-disc pl-4 space-y-1.5">
                                         {shiftNotes.items.map((item, idx) => (
@@ -187,8 +187,8 @@ export default function DashboardShell({
 
                     {/* Shortcuts / Continue Elsewhere */}
                     {shortcuts && shortcuts.length > 0 && (
-                        <section className="bg-white dark:bg-gray-800/80 p-5 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
-                            <div className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">
+                        <section className="bg-sf-surface/80 p-5 rounded-xl border border-sf-divider/80 shadow-sm">
+                            <div className="text-xs font-bold uppercase tracking-wider text-sf-muted mb-3">
                                 Continue elsewhere
                             </div>
                             <div className="space-y-2">
@@ -196,14 +196,14 @@ export default function DashboardShell({
                                     <Link
                                         key={idx}
                                         to={sc.route}
-                                        className="flex items-center justify-between p-2.5 rounded-lg border border-gray-100 dark:border-gray-700/60 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-all group"
+                                        className="flex items-center justify-between p-2.5 rounded-lg border border-sf-divider/60 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-all group"
                                     >
                                         <div>
-                                            <div className="text-xs font-semibold text-gray-800 dark:text-gray-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                                            <div className="text-xs font-semibold text-sf-text group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                                 {sc.label}
                                             </div>
                                             {sc.description && (
-                                                <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                                <div className="text-[11px] text-sf-muted mt-0.5">
                                                     {sc.description}
                                                 </div>
                                             )}
@@ -219,7 +219,7 @@ export default function DashboardShell({
             </div>
 
             {/* Product Footer Guarantee */}
-            <footer className="pt-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-500 font-sans">
+            <footer className="pt-6 border-t border-sf-divider text-center text-xs text-sf-muted font-sans">
                 The source record is checked again when you open or act on work.
             </footer>
         </div>

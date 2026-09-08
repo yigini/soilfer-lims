@@ -87,7 +87,7 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
     if (!show) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 flex justify-between items-center">
                     <h3 className="font-bold flex items-center gap-2"><MinusCircle size={18} className="text-blue-600" /> Quick Consume</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
@@ -97,8 +97,8 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
                         !lot ? <div className="text-center py-4 text-red-500 text-sm">No available lots with stock for this item.</div> : (
                             <>
                                 <div className="text-sm">
-                                    <p className="text-gray-500 mb-1">Item: <b className="text-gray-900 dark:text-gray-100">{item.name}</b></p>
-                                    <div className="p-2 rounded bg-gray-50 dark:bg-gray-700/50 border dark:border-gray-600">
+                                    <p className="text-gray-500 mb-1">Item: <b className="text-sf-text">{item.name}</b></p>
+                                    <div className="p-2 rounded bg-sf-canvas/50 border dark:border-gray-600">
                                         <p className="flex justify-between"><span>Auto-selected Lot:</span> <b className="font-mono text-xs">{lot.lotNumber}</b></p>
                                         <p className="flex justify-between"><span>Available:</span> <b>{lot.currentQuantity} {item.unitOfMeasure}</b></p>
                                         {lot.expiryDate && <p className="flex justify-between text-amber-600"><span>Expires:</span> <b>{new Date(lot.expiryDate).toLocaleDateString()}</b></p>}
@@ -113,7 +113,7 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
                             </>
                         )}
                 </div>
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex justify-end gap-2">
+                <div className="px-6 py-4 bg-sf-canvas/50 border-t dark:border-gray-700 flex justify-end gap-2">
                     <button onClick={onClose} className="px-4 py-2 text-sm">Cancel</button>
                     <button onClick={handleConsume} disabled={!lot || !quantity || saving}
                         className="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40">
@@ -154,13 +154,13 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
     if (!show) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
                     <div className="flex items-center gap-2">
                         <PlusCircle className="text-emerald-600" size={20} />
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Receive Stock</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">Step {step}/3</span>
+                        <h3 className="text-lg font-bold text-sf-text">Receive Stock</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-sf-muted">Step {step}/3</span>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={20} /></button>
                 </div>
@@ -169,9 +169,9 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                     {error && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
 
                     {step === 1 && (<>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Item *</label>
+                        <label className="block text-sm font-medium text-sf-muted">Select Item *</label>
                         <select value={form.inventoryItemId} onChange={e => setForm(f => ({ ...f, inventoryItemId: e.target.value }))}
-                            className="w-full px-3 py-2.5 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
+                            className="w-full px-3 py-2.5 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="">— Choose item —</option>
                             {items.filter(i => i.isActive).map(i => <option key={i.id} value={i.id}>{i.name} ({i.itemType})</option>)}
                         </select>
@@ -181,42 +181,42 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                     {step === 2 && (<>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Lot Number *</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">Lot Number *</label>
                                 <input value={form.lotNumber} onChange={e => setForm(f => ({ ...f, lotNumber: e.target.value }))} placeholder="e.g. LOT-2026-001"
-                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Quantity *</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">Quantity *</label>
                                 <input type="number" min="0.01" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
                                     placeholder={selectedItem?.unitOfMeasure || 'qty'}
-                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Expiry Date</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">Expiry Date</label>
                                 <input type="date" value={form.expiryDate} onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Storage Location</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">Storage Location</label>
                                 <select value={form.locationId} onChange={e => setForm(f => ({ ...f, locationId: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                                     <option value="">Default</option>
                                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Concentration / Notes</label>
+                            <label className="block text-xs font-medium text-sf-muted mb-1">Concentration / Notes</label>
                             <input value={form.concentration} onChange={e => setForm(f => ({ ...f, concentration: e.target.value }))} placeholder="e.g. 1000 ppm"
-                                className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                                className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                         </div>
                     </>)}
 
                     {step === 3 && (<>
-                        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 space-y-2 text-sm">
-                            <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2">📋 Confirm Receipt</h4>
+                        <div className="p-4 rounded-xl bg-sf-canvas/50 space-y-2 text-sm">
+                            <h4 className="font-bold text-sf-text mb-2">📋 Confirm Receipt</h4>
                             <p><span className="text-gray-500">Item:</span> <b>{selectedItem?.name}</b></p>
                             <p><span className="text-gray-500">Lot:</span> <b>{form.lotNumber}</b></p>
                             <p><span className="text-gray-500">Quantity:</span> <b>{form.quantity} {selectedItem?.unitOfMeasure}</b></p>
@@ -226,8 +226,8 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                     </>)}
                 </div>
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <button onClick={() => step > 1 ? setStep(s => s - 1) : onClose()} className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                <div className="flex items-center justify-between px-6 py-4 border-t dark:border-gray-700 bg-sf-canvas/50">
+                    <button onClick={() => step > 1 ? setStep(s => s - 1) : onClose()} className="px-4 py-2 text-sm font-medium text-sf-muted hover:text-gray-900 dark:hover:text-gray-200">
                         {step > 1 ? '← Back' : 'Cancel'}
                     </button>
                     {step < 3 ? (
@@ -289,21 +289,21 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
 
     return (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
-            <div className="w-full max-w-2xl bg-white dark:bg-gray-800 h-full overflow-y-auto shadow-2xl animate-slide-in-right" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-2xl bg-sf-surface h-full overflow-y-auto shadow-2xl animate-slide-in-right" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-sf-text flex items-center gap-2">
                             {React.createElement(TYPE_ICONS[item.itemType] || Package, { size: 18 })}
                             {item.name}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-sm text-sf-muted mt-0.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[item.itemType] || TYPE_COLORS.OTHER}`}>{item.itemType}</span>
                             {item.shortCode && <span className="ml-2 font-mono text-xs">{item.shortCode}</span>}
                             {item.grade && <span className="ml-2">• {item.grade}</span>}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"><X size={20} /></button>
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-sf-raised"><X size={20} /></button>
                 </div>
 
                 {/* Summary Cards */}
@@ -325,7 +325,7 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 {/* Details */}
                 {(item.hazardClass || item.sopLink || item.preferredVendor || item.notes) && (
                     <div className="px-6 pb-3">
-                        <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 text-sm space-y-1">
+                        <div className="p-3 rounded-xl bg-sf-canvas/40 text-sm space-y-1">
                             {item.hazardClass && <p>⚠️ <b>Hazard:</b> {item.hazardClass}</p>}
                             {item.preferredVendor && <p>🏪 <b>Vendor:</b> {item.preferredVendor}</p>}
                             {item.reorderPoint > 0 && <p>📦 <b>Reorder at:</b> {item.reorderPoint} {item.unitOfMeasure}</p>}
@@ -337,26 +337,26 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
 
                 {/* Lots Table */}
                 <div className="px-6 pb-6">
-                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-sf-muted mb-2 flex items-center gap-2">
                         <Archive size={14} /> Lots ({(item.lots || []).length})
                     </h4>
                     <div className="rounded-xl border dark:border-gray-700 overflow-hidden">
                         <table className="w-full text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-700/60">
+                            <thead className="bg-sf-canvas/60">
                                 <tr>
-                                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Lot #</th>
-                                    <th className="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400">Status</th>
-                                    <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Qty</th>
-                                    <th className="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400">Expiry</th>
-                                    <th className="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400">Location</th>
-                                    <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Actions</th>
+                                    <th className="px-3 py-2 text-left text-xs font-semibold text-sf-muted">Lot #</th>
+                                    <th className="px-3 py-2 text-xs font-semibold text-sf-muted">Status</th>
+                                    <th className="px-3 py-2 text-right text-xs font-semibold text-sf-muted">Qty</th>
+                                    <th className="px-3 py-2 text-xs font-semibold text-sf-muted">Expiry</th>
+                                    <th className="px-3 py-2 text-xs font-semibold text-sf-muted">Location</th>
+                                    <th className="px-3 py-2 text-right text-xs font-semibold text-sf-muted">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y dark:divide-gray-700">
                                 {(item.lots || []).map(lot => {
                                     const isExpired = lot.expiryDate && new Date(lot.expiryDate) < new Date();
                                     return (
-                                        <tr key={lot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                        <tr key={lot.id} className="hover:bg-sf-raised/30">
                                             <td className="px-3 py-2 font-mono text-xs">{lot.lotNumber}</td>
                                             <td className="px-3 py-2 text-center">
                                                 <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGES[lot.status] || ''}`}>{lot.status}</span>
@@ -406,26 +406,26 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 {/* Action Sub-Modal */}
                 {actionModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setActionModal(null)}>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm mx-4 p-5" onClick={e => e.stopPropagation()}>
-                            <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3 capitalize">{actionModal.type} Lot</h4>
+                        <div className="bg-sf-surface rounded-xl shadow-xl w-full max-w-sm mx-4 p-5" onClick={e => e.stopPropagation()}>
+                            <h4 className="font-bold text-sf-text mb-3 capitalize">{actionModal.type} Lot</h4>
                             {actionError && <div className="mb-3 p-2 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{actionError}</div>}
                             {needsQty && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{actionModal.type === 'adjust' ? 'Delta (+/-)' : 'Quantity'} *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">{actionModal.type === 'adjust' ? 'Delta (+/-)' : 'Quantity'} *</label>
                                     <input type="number" step="0.01" value={actionForm.quantity} onChange={e => setActionForm(f => ({ ...f, quantity: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             )}
                             {needsReason && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Reason *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">Reason *</label>
                                     <textarea value={actionForm.reason} onChange={e => setActionForm(f => ({ ...f, reason: e.target.value }))} rows={2}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             )}
                             {needsLocation && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">New Location *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">New Location *</label>
                                     <select value={actionForm.locationId} onChange={e => setActionForm(f => ({ ...f, locationId: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="">— Select —</option>
@@ -466,9 +466,9 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
     if (!show) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Plus size={18} /> New Catalog Item</h3>
+                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2"><Plus size={18} /> New Catalog Item</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
                 <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
@@ -586,15 +586,15 @@ const Inventory = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <Package className="text-blue-600 dark:text-blue-400" size={24} /> {t('inventory.title', 'Inventory & Reagents')}
                     </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('inventory.subtitle', 'Track laboratory consumables, certified reference materials, and expiration alerts')}</p>
+                    <p className="text-sm text-sf-muted">{t('inventory.subtitle', 'Track laboratory consumables, certified reference materials, and expiration alerts')}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     {canManage && (
                         <>
-                            <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-sf-divider text-sf-muted hover:bg-sf-raised transition-colors">
                                 <Plus size={14} /> {t('inventory.addItem', 'New Item')}
                             </button>
                             <button onClick={() => { setInitialReceiveItemId(null); setShowReceive(true); }} className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">
@@ -603,14 +603,14 @@ const Inventory = () => {
                         </>
                     )}
                     <div className="relative">
-                        <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 relative">
+                        <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg border dark:border-gray-600 hover:bg-sf-raised relative">
                             <Download size={16} className="text-gray-500" />
                         </button>
                         {showExportMenu && (
-                            <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 py-1 z-30">
+                            <div className="absolute right-0 top-full mt-1 w-44 bg-sf-surface rounded-lg shadow-xl border dark:border-gray-700 py-1 z-30">
                                 {['stock', 'expiry', 'transactions'].map(type => (
                                     <button key={type} onClick={() => { handleExport(type); setShowExportMenu(false); }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 capitalize">{type} Report</button>
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-sf-raised capitalize">{type} Report</button>
                                 ))}
                             </div>
                         )}
@@ -631,14 +631,14 @@ const Inventory = () => {
                 <div className="relative flex-1 max-w-md">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('inventory.searchPlaceholder', 'Search items by name or code...')}
-                        className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500" />
+                        className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-sf-text outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="flex card-base rounded-lg border p-0.5 overflow-x-auto">
                     {ITEM_TYPES.map(type => (
                         <button key={type} onClick={() => setTypeFilter(type)}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${typeFilter === type
                                 ? 'bg-slate-700 dark:bg-slate-600 text-white shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
+                                : 'text-sf-muted hover:text-gray-900 dark:hover:text-gray-200'}`}>
                             {type === 'ALL' ? t('common.all', 'ALL') : type}
                         </button>
                     ))}
@@ -655,21 +655,21 @@ const Inventory = () => {
                     </div>
                 ) : (
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-700/60 border-b dark:border-gray-600 sticky top-0">
+                        <thead className="bg-sf-canvas/60 border-b dark:border-gray-600 sticky top-0">
                             <tr>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('inventory.itemName', 'Item')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('inventory.category', 'Type')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">{t('inventory.currentStock', 'Total Stock')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">{t('inventory.expiryDate', 'Nearest Expiry')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">Status</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">{t('common.actions', 'Actions')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase">{t('inventory.itemName', 'Item')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase">{t('inventory.category', 'Type')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-right">{t('inventory.currentStock', 'Total Stock')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-center">{t('inventory.expiryDate', 'Nearest Expiry')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-center">Status</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-right">{t('common.actions', 'Actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y dark:divide-gray-700">
                             {items.filter(item => !alertFilter || (alertFilter === 'LOW_STOCK' && item.isLowStock)).map(item => (
                                 <tr key={item.id} onClick={() => openItem(item)} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 cursor-pointer transition-colors group">
                                     <td className="px-4 py-3">
-                                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                                        <div className="font-bold text-sf-text group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                                             {item.name}
                                         </div>
                                         {item.shortCode && <div className="text-xs text-gray-400 font-mono">{item.shortCode}</div>}
@@ -681,7 +681,7 @@ const Inventory = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <span className={`font-bold ${item.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                                        <span className={`font-bold ${item.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-sf-text'}`}>
                                             {item.totalStock?.toFixed(1) || '0.0'}
                                         </span>
                                         <span className="text-xs text-gray-400 ml-1">{item.unitOfMeasure}</span>

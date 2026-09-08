@@ -77,7 +77,7 @@ const PublicReport = () => {
                 </div>
 
                 {/* Report Document */}
-                <div style={{ padding: '32px 40px' }} className="print-body">
+                <div style={{ padding: '32px 40px' }} className="print-body" data-surface="paper">
                     <ReportContent data={report?.content} />
                 </div>
             </div>

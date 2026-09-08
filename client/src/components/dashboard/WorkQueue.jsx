@@ -45,7 +45,7 @@ export default function WorkQueue({
         if (!status) return null;
         const s = status.toLowerCase();
 
-        let badgeClass = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700';
+        let badgeClass = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-sf-divider';
         if (s.includes('ready') || s.includes('accepted') || s.includes('passed') || s.includes('done') || s.includes('published') || s.includes('operational')) {
             badgeClass = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
         } else if (s.includes('fail') || s.includes('problem') || s.includes('rejected') || s.includes('conflict') || s.includes('missing') || s.includes('unconfigured')) {
@@ -62,15 +62,15 @@ export default function WorkQueue({
     };
 
     return (
-        <section aria-label="Work queue panel" className="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden flex flex-col">
+        <section aria-label="Work queue panel" className="bg-sf-surface/80 rounded-xl border border-sf-divider/80 shadow-sm overflow-hidden flex flex-col">
             {/* Queue Header & Search */}
-            <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 border-b border-sf-divider/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-lg font-bold text-sf-text">
                         {title || 'Current Work Queue'}
                     </h2>
                     {subtitle && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-sf-muted mt-0.5">
                             {subtitle}
                         </p>
                     )}
@@ -81,7 +81,7 @@ export default function WorkQueue({
                         <button
                             type="button"
                             onClick={onToggleSideRail}
-                            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors whitespace-nowrap shadow-sm"
+                            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-sf-divider bg-sf-canvas/60 text-sf-muted hover:bg-sf-raised transition-colors whitespace-nowrap shadow-sm"
                             title={sideRailCollapsed ? "Show side notes panel" : "Expand table to full width"}
                         >
                             <PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-emerald-600' : 'text-gray-400'}`} />
@@ -95,7 +95,7 @@ export default function WorkQueue({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Filter this queue…"
-                            className="w-full pl-9 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-canvas/60 border border-sf-divider rounded-lg text-sf-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default function WorkQueue({
 
             {/* Queue Selector Lanes / Tabs */}
             {availableQueues && availableQueues.length > 1 && (
-                <div className="px-4 sm:px-5 py-2.5 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center gap-2">
+                <div className="px-4 sm:px-5 py-2.5 bg-gray-50/70 dark:bg-gray-900/40 border-b border-sf-divider/60 flex flex-wrap items-center gap-2">
                     {availableQueues.map((q) => {
                         const isSelected = q.key === queueKey;
                         return (
@@ -114,13 +114,13 @@ export default function WorkQueue({
                                 className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
                                     isSelected
                                         ? 'bg-emerald-700 text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-700/60'
+                                        : 'text-sf-muted hover:bg-gray-200/60 dark:hover:bg-gray-700/60'
                                 }`}
                             >
                                 <span>{q.label}</span>
                                 {q.count !== undefined && (
                                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                                        isSelected ? 'bg-emerald-800 text-emerald-100' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        isSelected ? 'bg-emerald-800 text-emerald-100' : 'bg-gray-200 dark:bg-gray-700 text-sf-muted'
                                     }`}>
                                         {q.count}
                                     </span>
@@ -163,37 +163,37 @@ export default function WorkQueue({
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr className="border-b border-gray-200 dark:border-gray-700/80 text-gray-500 dark:text-gray-400 font-semibold">
+                                <tr className="border-b border-sf-divider/80 text-sf-muted font-semibold">
                                     <th className="pb-3 pr-4">Work / Item</th>
                                     <th className="pb-3 px-3">State</th>
                                     <th className="pb-3 px-3 text-right">Count</th>
                                     <th className="pb-3 pl-3 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                            <tbody className="divide-y divide-sf-divider">
                                 {filteredRows.map((row) => (
                                     <tr
                                         key={row.key || row.id}
                                         className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group"
                                     >
                                         <td className="py-3 pr-4">
-                                            <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                                            <div className="font-semibold text-sf-text text-sm">
                                                 {row.title}
                                             </div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                                            <div className="text-xs text-sf-muted mt-0.5 flex items-center gap-2 flex-wrap">
                                                 {row.key && (
-                                                    <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                                                    <span className="text-[11px] font-mono text-sf-muted bg-sf-raised px-1.5 py-0.5 rounded">
                                                         {row.key}
                                                     </span>
                                                 )}
                                                 {row.context && (
-                                                    <span className="font-medium text-gray-600 dark:text-gray-300">
+                                                    <span className="font-medium text-sf-muted">
                                                         {row.context}
                                                     </span>
                                                 )}
                                             </div>
                                             {row.note && (
-                                                <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 italic line-clamp-2">
+                                                <div className="text-[11px] text-sf-muted mt-1 italic line-clamp-2">
                                                     {row.note}
                                                 </div>
                                             )}
@@ -202,11 +202,11 @@ export default function WorkQueue({
                                             {getStatusBadge(row.status)}
                                         </td>
                                         <td className="py-3 px-3 text-right whitespace-nowrap">
-                                            <span className="font-bold text-gray-900 dark:text-white text-sm">
+                                            <span className="font-bold text-sf-text text-sm">
                                                 {row.count !== undefined ? row.count : 1}
                                             </span>
                                             {row.unit && (
-                                                <span className="text-gray-500 dark:text-gray-400 ml-1 text-xs">
+                                                <span className="text-sf-muted ml-1 text-xs">
                                                     {row.unit}
                                                 </span>
                                             )}
@@ -234,10 +234,10 @@ export default function WorkQueue({
                 )}
 
                 {/* Pagination Controls */}
-                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-4">
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-sf-muted mt-4">
                     <div>
-                        Showing <span className="font-semibold text-gray-700 dark:text-gray-300">{filteredRows.length}</span> of{' '}
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{total || filteredRows.length}</span> items
+                        Showing <span className="font-semibold text-sf-muted">{filteredRows.length}</span> of{' '}
+                        <span className="font-semibold text-sf-muted">{total || filteredRows.length}</span> items
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function WorkQueue({
                             type="button"
                             onClick={() => onPageChange && onPageChange(page - 1)}
                             disabled={page <= 1 || isLoading}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             aria-label="Previous page"
                         >
                             <ChevronLeft className="w-3.5 h-3.5" />
@@ -258,7 +258,7 @@ export default function WorkQueue({
                             type="button"
                             onClick={() => onPageChange && onPageChange(page + 1)}
                             disabled={!hasMore || isLoading}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             aria-label="Next page"
                         >
                             <span>Next</span>

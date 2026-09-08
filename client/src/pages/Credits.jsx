@@ -129,7 +129,7 @@ const Credits = () => {
             {/* Categories */}
             <div className="space-y-6">
                 {techStack.map((category) => (
-                    <div key={category.category} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div key={category.category} className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm overflow-hidden">
                         {/* Category header */}
                         <div className={`px-5 py-3.5 bg-gradient-to-r ${category.color} flex items-center gap-3`}>
                             <category.icon size={18} className="text-white" />
@@ -138,20 +138,20 @@ const Credits = () => {
                         </div>
 
                         {/* Items grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-100 dark:bg-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-sf-raised">
                             {category.items.map((item) => (
-                                <div key={item.name} className="bg-white dark:bg-gray-800 p-4 flex items-start gap-3 group hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                                <div key={item.name} className="bg-sf-surface p-4 flex items-start gap-3 group hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                                     <span className="text-xl flex-shrink-0 mt-0.5">{item.icon}</span>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-bold text-gray-900 dark:text-white">{item.name}</span>
+                                            <span className="text-sm font-bold text-sf-text">{item.name}</span>
                                             {item.version && (
-                                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md font-mono font-bold">
+                                                <span className="text-[10px] px-1.5 py-0.5 bg-sf-raised text-sf-muted rounded-md font-mono font-bold">
                                                     v{item.version}
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{item.desc}</p>
+                                        <p className="text-xs text-sf-muted mt-0.5 leading-relaxed">{item.desc}</p>
                                     </div>
                                     {item.url && (
                                         <a href={item.url} target="_blank" rel="noopener noreferrer"
@@ -169,9 +169,9 @@ const Credits = () => {
 
             {/* Bottom attribution */}
             <div className="mt-8 mb-4 text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-sf-raised rounded-xl border border-sf-divider">
                     <Heart size={14} className="text-red-400" fill="currentColor" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    <span className="text-xs text-sf-muted font-medium">
                         Thank you to all the open-source contributors who make these projects possible.
                     </span>
                 </div>

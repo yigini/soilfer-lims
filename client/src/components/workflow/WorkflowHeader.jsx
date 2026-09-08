@@ -65,7 +65,7 @@ export default function WorkflowHeader({
                     <button
                         type="button"
                         onClick={() => navigate(`/samples/${sample?.id}`)}
-                        className="hover:text-emerald-600 transition-colors font-medium text-slate-800 dark:text-slate-200"
+                        className="hover:text-emerald-600 transition-colors font-medium text-sf-text"
                     >
                         {sampleId}
                     </button>
@@ -79,7 +79,7 @@ export default function WorkflowHeader({
                         type="button"
                         onClick={onRefresh}
                         disabled={refreshing}
-                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50"
+                        className="p-1 rounded hover:bg-sf-raised transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50"
                         title="Refresh workflow state"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
@@ -87,7 +87,7 @@ export default function WorkflowHeader({
                     <button
                         type="button"
                         onClick={() => window.print()}
-                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        className="p-1 rounded hover:bg-sf-raised transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                         title="Print workflow summary"
                     >
                         <Printer className="w-3.5 h-3.5" />
@@ -164,7 +164,7 @@ export default function WorkflowHeader({
                     </button>
                 </div>
 
-                <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-xs text-sf-muted">
                     {activeView === 'overview' && 'Only relevant stations · Parallel branches aggregated'}
                     {activeView === 'dependencies' && 'Parallel tests remain parallel · Prerequisites vs handoffs'}
                     {activeView === 'list' && 'Complete assigned tasks · Sortable by status and owner'}

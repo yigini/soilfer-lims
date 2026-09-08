@@ -11,6 +11,16 @@ import { getStatusColor, getDisplayName, getRoom, ROOM_CONFIG } from '../../util
  * Full Dark Mode support, comprehensive parameter breakdown, and direct technician action triggers.
  */
 export default function WorkflowDetailDrawer({
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
+    isOpen,
+    onClose,
     selectedRoom,
     stageSummary,
     blockerGraph = [],
@@ -57,7 +67,7 @@ export default function WorkflowDetailDrawer({
                 aria-hidden="true"
             />
             <aside
-                className="wf-drawer fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-out"
+                className="wf-drawer fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col transition-transform duration-300 ease-out"
                 role="dialog"
                 aria-label={`${selectedRoom} station details`}
             >
@@ -67,21 +77,21 @@ export default function WorkflowDetailDrawer({
                     style={{ borderTop: `4px solid ${accent}` }}
                 >
                     <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-2xl shrink-0 p-2 rounded-xl bg-white dark:bg-slate-800 shadow-xs border border-slate-200 dark:border-slate-700">
+                        <span className="text-2xl shrink-0 p-2 rounded-xl bg-sf-surface shadow-xs border border-sf-divider">
                             {config.emoji || '🔬'}
                         </span>
                         <div className="min-w-0">
-                            <div className="text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                            <div className="text-base font-extrabold text-sf-text tracking-tight truncate">
                                 {selectedRoom}
                             </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                            <div className="text-xs text-sf-muted font-medium truncate mt-0.5">
                                 {config.description || 'Analytical Station'}
                             </div>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-sf-raised transition-colors"
                         aria-label="Close drawer"
                     >
                         <X size={18} />
@@ -93,11 +103,11 @@ export default function WorkflowDetailDrawer({
                     {/* Quick Workbench Action Banner */}
                     <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-emerald-500/10 border border-indigo-500/20 flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                                <FlaskConical size={14} className="text-indigo-600 dark:text-indigo-400" />
+                            <div className="text-xs font-bold text-sf-text flex items-center gap-1.5">
+                                <FlaskConical size={14} className="text-sf-emerald" />
                                 <span>Technician Workbench</span>
                             </div>
-                            <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                            <div className="text-[11px] text-sf-muted mt-0.5">
                                 Jump to active queue for this station
                             </div>
                         </div>
@@ -119,8 +129,8 @@ export default function WorkflowDetailDrawer({
                             Station Overview
                         </div>
                         <div className="grid grid-cols-4 gap-2">
-                            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/60 text-center">
-                                <div className="text-base font-black text-slate-900 dark:text-slate-100">{totalCount}</div>
+                            <div className="p-3 bg-sf-canvas/60 rounded-xl border border-slate-200/60 dark:border-slate-700/60 text-center">
+                                <div className="text-base font-black text-sf-text">{totalCount}</div>
                                 <div className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mt-0.5">Total</div>
                             </div>
                             <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/60 dark:border-emerald-800/60 text-center">
@@ -174,13 +184,13 @@ export default function WorkflowDetailDrawer({
                                     return (
                                         <div
                                             key={idx}
-                                            className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-2xs hover:border-indigo-400/60 dark:hover:border-indigo-500/60 transition-colors"
+                                            className="p-3 rounded-xl bg-sf-canvas/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-2xs hover:border-indigo-400/60 dark:hover:border-indigo-500/60 transition-colors"
                                         >
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                                <div className="text-xs font-bold text-sf-text truncate">
                                                     {getDisplayName(wi.analysis)}
                                                 </div>
-                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                                <div className="text-[10px] text-sf-muted flex items-center gap-2 mt-0.5">
                                                     <span className="font-mono">{wi.analysis}</span>
                                                     {wi.assignedTo ? (
                                                         <span className="flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300">
@@ -224,7 +234,7 @@ export default function WorkflowDetailDrawer({
                                 {stageSummary.staff.map((name, i) => (
                                     <div
                                         key={i}
-                                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200"
+                                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-sf-divider flex items-center gap-2 text-xs font-semibold text-sf-text"
                                     >
                                         <div
                                             className="w-5 h-5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-xs"
@@ -254,14 +264,14 @@ export default function WorkflowDetailDrawer({
                                             style={{ backgroundColor: accent }}
                                         />
                                         <div className="min-w-0 flex-1">
-                                            <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            <div className="text-xs font-bold text-sf-text">
                                                 {ev.action?.replace(/_/g, ' ')}
                                             </div>
                                             <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                                                 {formatDate(ev.timestamp)} {ev.performedBy && `• by ${ev.performedBy}`}
                                             </div>
                                             {ev.details && (
-                                                <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                                                <div className="text-[11px] text-sf-muted mt-1 p-2 rounded-lg bg-sf-canvas/40 border border-slate-200/50 dark:border-slate-700/50">
                                                     {ev.details}
                                                 </div>
                                             )}
@@ -276,7 +286,7 @@ export default function WorkflowDetailDrawer({
                     {roomItems.length === 0 && relevantAudit.length === 0 && (
                         <div className="py-12 text-center text-slate-400 dark:text-slate-500">
                             <ShieldCheck size={36} className="mx-auto mb-3 opacity-40" />
-                            <div className="text-sm font-bold text-slate-700 dark:text-slate-300">Station on Standby</div>
+                            <div className="text-sm font-bold text-sf-text">Station on Standby</div>
                             <div className="text-xs mt-1">No active tests or log history for this sample at this station.</div>
                         </div>
                     )}

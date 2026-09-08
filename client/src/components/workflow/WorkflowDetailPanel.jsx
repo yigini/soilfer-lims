@@ -10,10 +10,10 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
     const colors = getStatusColor(data.status);
 
     return (
-        <div className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 z-50 animate-in slide-in-from-right duration-300 overflow-y-auto">
+        <div className="fixed right-0 top-0 h-full w-96 bg-sf-surface shadow-2xl border-l border-sf-divider z-50 animate-in slide-in-from-right duration-300 overflow-y-auto">
             {/* Header */}
             <div
-                className="p-5 border-b border-gray-200 dark:border-gray-700"
+                className="p-5 border-b border-sf-divider"
                 style={{ backgroundColor: `${colors.bg}` }}
             >
                 <div className="flex items-center justify-between mb-3">
@@ -47,8 +47,8 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                         <Tag size={16} className="text-gray-500" />
                     </div>
                     <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{t ? t('workflow.detail.category') : 'Category'}</p>
-                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{data.category}</p>
+                        <p className="text-xs text-sf-muted">{t ? t('workflow.detail.category') : 'Category'}</p>
+                        <p className="text-sm font-semibold text-sf-text">{data.category}</p>
                     </div>
                 </div>
 
@@ -59,8 +59,8 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                             <User size={16} className="text-gray-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{t ? t('workflow.detail.assignee') : 'Assignee'}</p>
-                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{wi.assignedTo || 'Unassigned'}</p>
+                            <p className="text-xs text-sf-muted">{t ? t('workflow.detail.assignee') : 'Assignee'}</p>
+                            <p className="text-sm font-semibold text-sf-text">{wi.assignedTo || 'Unassigned'}</p>
                         </div>
                     </div>
                 )}
@@ -73,8 +73,8 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                                 <Clock size={16} className="text-gray-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{t ? t('workflow.detail.created') : 'Created'}</p>
-                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                <p className="text-xs text-sf-muted">{t ? t('workflow.detail.created') : 'Created'}</p>
+                                <p className="text-sm font-semibold text-sf-text">
                                     {wi.createdAt ? new Date(wi.createdAt).toLocaleString() : '—'}
                                 </p>
                             </div>
@@ -84,8 +84,8 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                                 <Clock size={16} className="text-gray-500" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{t ? t('workflow.detail.updated') : 'Last Updated'}</p>
-                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                <p className="text-xs text-sf-muted">{t ? t('workflow.detail.updated') : 'Last Updated'}</p>
+                                <p className="text-sm font-semibold text-sf-text">
                                     {wi.updatedAt ? new Date(wi.updatedAt).toLocaleString() : '—'}
                                 </p>
                             </div>
@@ -100,8 +100,8 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                             <FileText size={16} className="text-gray-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{t ? t('workflow.detail.result') : 'Result'}</p>
-                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{wi.result} {wi.unit || ''}</p>
+                            <p className="text-xs text-sf-muted">{t ? t('workflow.detail.result') : 'Result'}</p>
+                            <p className="text-sm font-semibold text-sf-text">{wi.result} {wi.unit || ''}</p>
                         </div>
                     </div>
                 )}
@@ -109,15 +109,15 @@ export default function WorkflowDetailPanel({ node, onClose, t }) {
                 {/* Remarks */}
                 {wi?.remarks && (
                     <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t ? t('workflow.detail.remarks') : 'Remarks'}</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{wi.remarks}</p>
+                        <p className="text-xs text-sf-muted mb-1">{t ? t('workflow.detail.remarks') : 'Remarks'}</p>
+                        <p className="text-sm text-sf-muted">{wi.remarks}</p>
                     </div>
                 )}
 
                 {/* Work Item History */}
                 {wi?.history && Array.isArray(wi.history) && wi.history.length > 0 && (
                     <div>
-                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                        <p className="text-xs font-semibold text-sf-muted uppercase mb-2">
                             {t ? t('workflow.detail.history') : 'Status History'}
                         </p>
                         <div className="space-y-2">

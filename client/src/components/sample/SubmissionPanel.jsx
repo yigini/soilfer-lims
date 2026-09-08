@@ -26,7 +26,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
 
             {/* TECHNICIAN: Create Submission */}
             {isTech && (
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                     <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                         <Send size={18} className="text-indigo-600" /> Submit Results for Approval
                     </h3>
@@ -88,7 +88,7 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
                     </h3>
                     <div className="space-y-4">
                         {pendingReview.map(sub => (
-                            <div key={sub.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-purple-100 dark:border-purple-700">
+                            <div key={sub.id} className="bg-sf-surface p-4 rounded-lg shadow-sm border border-purple-100 dark:border-purple-700">
                                 <div className="flex justify-between items-center mb-3">
                                     <div>
                                         <span className="font-bold text-sm">{sub.type} Submission</span>
@@ -99,9 +99,9 @@ const SubmissionPanel = ({ submissions, workItems, onCreateSubmission, onReviewS
 
                                 <div className="space-y-1 mb-4">
                                     {sub.itemsDetails && sub.itemsDetails.map(item => (
-                                        <div key={item.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 px-2 -mx-2 rounded">
+                                        <div key={item.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-sf-raised/50 px-2 -mx-2 rounded">
                                             <div className="flex items-center gap-4">
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
+                                                <span className="font-medium text-sf-muted">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                                 <span className="font-mono font-bold">{item.result}</span>
                                             </div>
                                             <div className="flex items-center gap-1">

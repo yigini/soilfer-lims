@@ -7,6 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 
 export default function LegacyBackfillModal({ isOpen, onClose, preselectedProject = null, projects = [] }) {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
     const navigate = useNavigate();
     const [selectedProjectId, setSelectedProjectId] = useState(preselectedProject?.id || (projects[0]?.id || ''));
     const [analysisScope, setAnalysisScope] = useState({
@@ -61,30 +69,30 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[80] animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col border border-sf-divider overflow-hidden">
                 {/* Modal Header */}
-                <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-start bg-gradient-to-r from-amber-50/80 via-white to-emerald-50/40 dark:from-amber-950/20 dark:via-gray-800 dark:to-emerald-950/10">
+                <div className="p-5 sm:p-6 border-b border-sf-divider flex justify-between items-start bg-gradient-to-r from-amber-50/80 via-white to-emerald-50/40 dark:from-amber-950/20 dark:via-gray-800 dark:to-emerald-950/10">
                     <div className="flex items-start gap-3.5">
                         <div className="p-3 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-xl shadow-sm">
                             <History size={24} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                <h2 className="text-xl font-bold text-sf-text">
                                     Pre-Platform Historical Analysis Backfill
                                 </h2>
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/60">
                                     Backward Compatibility
                                 </span>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-sf-muted mt-1">
                                 Ingest project samples and analytical certificates completed prior to SoilFER LIMS platform deployment.
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-sf-raised rounded-full transition-colors"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -106,14 +114,14 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
 
                     {/* Step 1: Target Project */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-sf-muted flex items-center justify-between">
                             <span>1. Target Research Project</span>
                             <span className="text-[11px] font-normal text-gray-400">Where backfilled samples will be assigned</span>
                         </label>
                         <select
                             value={selectedProjectId}
                             onChange={(e) => setSelectedProjectId(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none shadow-sm"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-surface text-sm font-semibold text-sf-text focus:ring-2 focus:ring-amber-500 outline-none shadow-sm"
                         >
                             {projects.map((p) => (
                                 <option key={p.id} value={p.id}>
@@ -125,7 +133,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
 
                     {/* Step 2: Ingestion Mode Selector */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        <label className="text-xs font-bold uppercase tracking-wider text-sf-muted">
                             2. Backfill Ingestion Pipeline
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -134,14 +142,14 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                 onClick={() => setIngestionMode('direct_results')}
                                 className={`p-3 rounded-xl border text-left transition-all ${ingestionMode === 'direct_results'
                                     ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 shadow-sm'
-                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40 text-gray-700 dark:text-gray-300'
+                                    : 'border-sf-divider hover:bg-sf-raised/40 text-sf-muted'
                                     }`}
                             >
                                 <div className="font-bold text-xs flex items-center gap-1.5">
                                     <CheckCircle2 size={14} className={ingestionMode === 'direct_results' ? 'text-amber-600' : 'text-gray-400'} />
                                     <span>Direct Results</span>
                                 </div>
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                                <p className="text-[11px] text-sf-muted mt-1 leading-snug">
                                     Inject validated results (pH, Carbon, Mehlich-3) straight into final approval.
                                 </p>
                             </button>
@@ -151,14 +159,14 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                 onClick={() => setIngestionMode('manifest_completed')}
                                 className={`p-3 rounded-xl border text-left transition-all ${ingestionMode === 'manifest_completed'
                                     ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 shadow-sm'
-                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40 text-gray-700 dark:text-gray-300'
+                                    : 'border-sf-divider hover:bg-sf-raised/40 text-sf-muted'
                                     }`}
                             >
                                 <div className="font-bold text-xs flex items-center gap-1.5">
                                     <Database size={14} className={ingestionMode === 'manifest_completed' ? 'text-amber-600' : 'text-gray-400'} />
                                     <span>Sample Manifest</span>
                                 </div>
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                                <p className="text-[11px] text-sf-muted mt-1 leading-snug">
                                     Register sample identifiers with completed status & retroactive receipt dates.
                                 </p>
                             </button>
@@ -168,14 +176,14 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                 onClick={() => setIngestionMode('workbook_sync')}
                                 className={`p-3 rounded-xl border text-left transition-all ${ingestionMode === 'workbook_sync'
                                     ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 shadow-sm'
-                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40 text-gray-700 dark:text-gray-300'
+                                    : 'border-sf-divider hover:bg-sf-raised/40 text-sf-muted'
                                     }`}
                             >
                                 <div className="font-bold text-xs flex items-center gap-1.5">
                                     <FileSpreadsheet size={14} className={ingestionMode === 'workbook_sync' ? 'text-amber-600' : 'text-gray-400'} />
                                     <span>Bench Workbook</span>
                                 </div>
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                                <p className="text-[11px] text-sf-muted mt-1 leading-snug">
                                     Upload multi-tab Excel sheets from legacy bench balances and spectrometers.
                                 </p>
                             </button>
@@ -184,7 +192,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
 
                     {/* Step 3: Analytical Scope Toggles */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        <label className="text-xs font-bold uppercase tracking-wider text-sf-muted">
                             3. Historical Analytical Scope
                         </label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -198,7 +206,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                     key={item.key}
                                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${analysisScope[item.key]
                                         ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300'
-                                        : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                                        : 'bg-sf-surface border-sf-divider text-sf-muted'
                                         }`}
                                 >
                                     <input
@@ -216,7 +224,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                     {/* Step 4: Template Download & Upload Dropzone */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                            <label className="text-xs font-bold uppercase tracking-wider text-sf-muted">
                                 4. Historical Dataset Ingestion (CSV)
                             </label>
                             <button
@@ -232,19 +240,19 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                         <div
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleFileDrop}
-                            className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center hover:border-amber-400 dark:hover:border-amber-600 transition-colors bg-gray-50/50 dark:bg-gray-900/30"
+                            className="border-2 border-dashed border-sf-divider rounded-2xl p-6 text-center hover:border-amber-400 dark:hover:border-amber-600 transition-colors bg-gray-50/50 dark:bg-gray-900/30"
                         >
                             <div className="max-w-xs mx-auto space-y-2">
                                 <div className="w-10 h-10 mx-auto rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                                     <Upload size={20} />
                                 </div>
-                                <div className="text-xs font-semibold text-gray-900 dark:text-white">
+                                <div className="text-xs font-semibold text-sf-text">
                                     {uploadedFile ? uploadedFile.name : 'Drop historical CSV file here'}
                                 </div>
                                 <p className="text-[11px] text-gray-500">
                                     {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB — Ready to parse` : 'Active importer accepts standard comma-separated values (.csv)'}
                                 </p>
-                                <label className="inline-block mt-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 cursor-pointer shadow-sm">
+                                <label className="inline-block mt-2 px-3 py-1.5 bg-sf-surface border border-sf-divider rounded-lg text-xs font-bold text-sf-muted hover:bg-gray-50 cursor-pointer shadow-sm">
                                     <span>Browse Files</span>
                                     <input
                                         type="file"
@@ -258,9 +266,9 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                     </div>
 
                     {/* Quality Attestation Check */}
-                    <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 flex items-start gap-3">
+                    <div className="p-3.5 rounded-xl border border-sf-divider bg-sf-surface/50 flex items-start gap-3">
                         <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                        <label className="text-xs text-gray-600 dark:text-gray-300 cursor-pointer">
+                        <label className="text-xs text-sf-muted cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={complianceChecked}
@@ -273,10 +281,10 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="p-4 sm:p-5 border-t border-sf-divider bg-sf-canvas/40 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-blue-500" />
-                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <span className="text-xs font-semibold text-sf-muted">
                             Ingestion Engine available in Admin Panel (`/admin/legacy-import`)
                         </span>
                     </div>
@@ -288,7 +296,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                                 onClose();
                                 navigate('/admin/legacy-import');
                             }}
-                            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm"
+                            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-sf-emerald bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm"
                         >
                             <span>Open Legacy Importer</span>
                             <ArrowRight size={14} />
@@ -297,7 +305,7 @@ export default function LegacyBackfillModal({ isOpen, onClose, preselectedProjec
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors shadow-sm"
+                            className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold text-sf-muted bg-sf-surface hover:bg-sf-raised border border-sf-divider transition-colors shadow-sm"
                         >
                             Close
                         </button>

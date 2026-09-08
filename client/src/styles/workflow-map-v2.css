@@ -18,17 +18,17 @@
 }
 
 .dark {
-    --wf-bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #0b1120 100%);
+    --wf-bg-gradient: linear-gradient(135deg, #111418 0%, #1b2028 50%, #242b35 100%);
     --wf-canvas-dot: rgba(255, 255, 255, 0.12);
-    --wf-top-strip-bg: rgba(15, 23, 42, 0.85);
-    --wf-top-strip-border: rgba(51, 65, 85, 0.7);
-    --wf-node-bg: rgba(17, 24, 39, 0.92);
-    --wf-node-border: rgba(51, 65, 85, 0.8);
+    --wf-top-strip-bg: rgba(27, 32, 40, 0.88);
+    --wf-top-strip-border: rgba(43, 53, 66, 0.8);
+    --wf-node-bg: rgba(27, 32, 40, 0.95);
+    --wf-node-border: rgba(43, 53, 66, 0.85);
     --wf-node-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    --wf-future-border: #334155;
-    --wf-text-muted: #94a3b8;
-    --wf-icon-bg-future: #1e293b;
-    --wf-edge-inactive: #334155;
+    --wf-future-border: #2b3542;
+    --wf-text-muted: #8b98a5;
+    --wf-icon-bg-future: #242b35;
+    --wf-edge-inactive: #3c4654;
 }
 
 /* ─── Layout Shell ─── */

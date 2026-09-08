@@ -166,7 +166,7 @@ const AnalysisManager = () => {
         return (
             <div className="flex flex-col items-center justify-center p-16 space-y-3">
                 <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading Master Analysis Catalogue...</p>
+                <p className="text-sm font-medium text-sf-muted">Loading Master Analysis Catalogue...</p>
             </div>
         );
     }
@@ -174,8 +174,8 @@ const AnalysisManager = () => {
     // ─── MODAL: Edit/Add Analysis ───
     if (editingItem) {
         return (
-            <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 max-w-4xl mx-auto space-y-6 font-sans animate-in fade-in duration-200">
-                <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-4">
+            <div className="bg-sf-surface p-6 md:p-8 rounded-2xl shadow-sm border border-sf-divider max-w-4xl mx-auto space-y-6 font-sans animate-in fade-in duration-200">
+                <div className="flex justify-between items-center border-b border-sf-divider pb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 rounded-xl">
                             <FlaskConical size={20} />
@@ -184,14 +184,14 @@ const AnalysisManager = () => {
                             <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
                                 Parameter Specification
                             </span>
-                            <h2 className="text-xl font-black text-gray-900 dark:text-white">
+                            <h2 className="text-xl font-black text-sf-text">
                                 {editingItem._isNew ? 'New Laboratory Analysis Parameter' : `Edit: ${editingItem.name}`}
                             </h2>
                         </div>
                     </div>
                     <button
                         onClick={() => { setEditingItem(null); setError(null); }}
-                        className="px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-bold transition-colors"
+                        className="px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-sf-raised text-xs font-bold transition-colors"
                     >
                         Cancel
                     </button>
@@ -207,19 +207,19 @@ const AnalysisManager = () => {
                 {editingItem.canEdit === false && <p className="text-sm text-amber-800 dark:text-amber-200">Shared definition — maintained by the system administrator. Local method defaults are configured per laboratory.</p>}
                 {!editingItem._isNew && usage && <div className="text-sm bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl" role="status">Connected records: {Object.entries(usage).filter(([,count]) => count > 0).map(([key,count]) => `${count} ${key}`).join(' · ') || 'No references yet'}. Inactivating preserves existing work; deletion is allowed only for unused definitions.</div>}
                 <fieldset disabled={editingItem.canEdit === false || saving} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Sample matrix
-                        <select aria-label="Sample matrix" className="block w-full mt-2 p-2.5 rounded-xl border dark:border-gray-700 bg-white dark:bg-gray-900" value={editingItem.matrix || 'SOIL'} disabled={!editingItem._isNew && (!usage || usage.workItems + usage.results + usage.orderLines + usage.sampleOrders > 0)} onChange={e => setEditingItem({ ...editingItem, matrix: e.target.value })}>
+                    <label className="text-xs font-bold text-sf-muted">Sample matrix
+                        <select aria-label="Sample matrix" className="block w-full mt-2 p-2.5 rounded-xl border dark:border-gray-700 bg-sf-surface" value={editingItem.matrix || 'SOIL'} disabled={!editingItem._isNew && (!usage || usage.workItems + usage.results + usage.orderLines + usage.sampleOrders > 0)} onChange={e => setEditingItem({ ...editingItem, matrix: e.target.value })}>
                             {['SOIL', 'PLANT', 'WATER', 'AMENDMENT', 'FERTILIZER', 'LIMING'].map(matrix => <option key={matrix} value={matrix}>{matrix.charAt(0) + matrix.slice(1).toLowerCase()}</option>)}
                         </select>
                     </label>
                     <p className="text-xs text-gray-500 self-center">Category organizes the list. It does not define result capture or sample preparation. A method must specify the procedure, evidence, applicable matrix and reporting basis.</p>
                     {/* Analysis Code */}
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                             Parameter Code / ID <span className="text-red-500">*</span>
                         </label>
                         <input
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm font-bold text-gray-900 dark:text-white uppercase focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-bold text-sf-text uppercase focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                             value={editingItem.code}
                             disabled={!editingItem._isNew}
                             onChange={e => setEditingItem({ ...editingItem, code: e.target.value.toUpperCase() })}
@@ -230,11 +230,11 @@ const AnalysisManager = () => {
 
                     {/* Display Name */}
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                             Display Name <span className="text-red-500">*</span>
                         </label>
                         <input
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-surface text-sm font-semibold text-sf-text focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                             value={editingItem.name}
                             onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                             placeholder="e.g. Soil pH (1:2.5 H2O potentiometric)"
@@ -244,11 +244,11 @@ const AnalysisManager = () => {
 
                     {/* Category */}
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                             Analytical Domain / Category
                         </label>
                         <select
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-surface text-sm font-medium text-sf-text focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                             value={editingItem.categoryId || ''}
                             onChange={e => setEditingItem({ ...editingItem, categoryId: e.target.value })}
                         >
@@ -259,11 +259,11 @@ const AnalysisManager = () => {
 
                     {/* Units */}
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                             Reporting Unit
                         </label>
                         <input
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-semibold text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider bg-sf-surface text-sm font-semibold text-sf-text focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                             value={editingItem.units || ''}
                             disabled={!editingItem._isNew && (!usage || usage.workItems + usage.results + usage.orderLines + usage.sampleOrders > 0)}
                             onChange={e => setEditingItem({ ...editingItem, units: e.target.value })}
@@ -273,13 +273,13 @@ const AnalysisManager = () => {
                     </div>
 
                     {/* Validation Range */}
-                    <div className="col-span-1 md:col-span-2 p-4 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="col-span-1 md:col-span-2 p-4 bg-sf-canvas/60 rounded-xl border border-sf-divider grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Plausible Minimum</label>
+                            <label className="block text-xs font-bold text-sf-muted mb-1">Plausible Minimum</label>
                             <input
                                 type="number"
                                 step="any"
-                                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white outline-none"
+                                className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium text-sf-text outline-none"
                                 value={editingItem.validation?.min ?? ''}
                                 onChange={e => setEditingItem({
                                     ...editingItem,
@@ -289,11 +289,11 @@ const AnalysisManager = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Plausible Maximum</label>
+                            <label className="block text-xs font-bold text-sf-muted mb-1">Plausible Maximum</label>
                             <input
                                 type="number"
                                 step="any"
-                                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white outline-none"
+                                className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium text-sf-text outline-none"
                                 value={editingItem.validation?.max ?? ''}
                                 onChange={e => setEditingItem({
                                     ...editingItem,
@@ -303,12 +303,12 @@ const AnalysisManager = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Display Decimals</label>
+                            <label className="block text-xs font-bold text-sf-muted mb-1">Display Decimals</label>
                             <input
                                 type="number"
                                 min="0"
                                 max="4"
-                                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white outline-none"
+                                className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium text-sf-text outline-none"
                                 value={editingItem.validation?.decimalPlaces ?? ''}
                                 onChange={e => setEditingItem({
                                     ...editingItem,
@@ -320,11 +320,11 @@ const AnalysisManager = () => {
 
                     {/* Description */}
                     <div className="col-span-1 md:col-span-2">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">
                             Analytical Description & Principles
                         </label>
                         <textarea
-                            className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 h-20 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-sans"
+                            className="w-full p-3 rounded-xl border border-sf-divider bg-sf-surface text-xs text-sf-text h-20 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-sans"
                             value={editingItem.description || ''}
                             onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
                             placeholder="Analytical summary, sample extraction ratio, instrument specifications, or QA instructions..."
@@ -333,11 +333,11 @@ const AnalysisManager = () => {
                 </fieldset>
 
                 {/* Footer Actions */}
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="border-t border-sf-divider pt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-gray-500">Status:</span>
                         <select
-                            className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-2.5 py-1 text-xs font-bold text-gray-800 dark:text-gray-200"
+                            className="border border-sf-divider bg-sf-surface rounded-lg px-2.5 py-1 text-xs font-bold text-sf-text"
                             value={editingItem.status || 'active'}
                             disabled={editingItem.canEdit === false || saving}
                             onChange={e => setEditingItem({ ...editingItem, status: e.target.value })}
@@ -349,7 +349,7 @@ const AnalysisManager = () => {
                     <div className="flex gap-3 w-full sm:w-auto">
                         <button
                             onClick={() => { setEditingItem(null); setError(null); }}
-                            className="flex-1 sm:flex-none px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 transition-colors"
+                            className="flex-1 sm:flex-none px-4 py-2 hover:bg-sf-raised rounded-xl text-xs font-bold text-sf-muted transition-colors"
                         >
                             Cancel
                         </button>
@@ -372,10 +372,10 @@ const AnalysisManager = () => {
             {loadError && <div role="alert" className="p-4 rounded-xl bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200">{loadError} <button className="underline font-bold" onClick={fetchData}>Retry</button></div>}
             <div className="p-3 rounded-xl bg-blue-50 text-blue-900 dark:bg-blue-950/30 dark:text-blue-100 text-sm">{analyses.filter(a => a.orderable).length} available for new orders · {analyses.filter(a => a.status !== 'active').length} inactive · {analyses.filter(a => a.configurationIssues?.length || a.scientificWarnings?.length).length} need configuration review. Existing orders and historical results retain their parameter links.</div>
             {/* Header & Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-sf-surface p-5 rounded-2xl border border-sf-divider shadow-sm">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Master Analysis Catalogue</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Laboratory physical, chemical, and nutrient test parameters & standard methods.</p>
+                    <h2 className="text-xl font-bold text-sf-text">Master Analysis Catalogue</h2>
+                    <p className="text-xs text-sf-muted mt-0.5">Laboratory physical, chemical, and nutrient test parameters & standard methods.</p>
                 </div>
                 <button
                     onClick={handleStartNew}
@@ -387,34 +387,34 @@ const AnalysisManager = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-3 bg-sf-surface p-3 rounded-2xl border border-sf-divider shadow-sm">
                 <div className="flex-1 relative">
                     <Search className="absolute left-3.5 top-3 text-gray-400" size={15} />
                     <input
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-medium text-gray-800 dark:text-gray-200 focus:outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-medium text-sf-text focus:outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                         placeholder="Search by code, parameter name, description, or units..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <select
-                    className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 rounded-xl text-xs text-gray-700 dark:text-gray-300 font-medium sm:w-64 focus:outline-none focus:border-emerald-500 transition-all"
+                    className="border border-sf-divider bg-sf-canvas px-3 py-2.5 rounded-xl text-xs text-sf-muted font-medium sm:w-64 focus:outline-none focus:border-emerald-500 transition-all"
                     value={filterCat}
                     onChange={e => setFilterCat(e.target.value)}
                 >
                     <option value="all">All Categories ({analyses.length})</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                <select aria-label="Parameter availability" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="p-2 rounded-xl border dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+                <select aria-label="Parameter availability" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="p-2 rounded-xl border dark:border-gray-700 bg-sf-surface text-sm">
                     <option value="all">All availability</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="review">Needs configuration review</option>
                 </select>
             </div>
 
             {/* Master Table Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+            <div className="bg-sf-surface rounded-2xl border border-sf-divider overflow-hidden shadow-sm">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full text-left text-xs min-w-[840px]">
-                        <thead className="bg-gray-50/90 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-gray-500 dark:text-gray-400 font-extrabold text-[11px]">
+                        <thead className="bg-gray-50/90 dark:bg-gray-900/70 border-b border-sf-divider uppercase tracking-wider text-sf-muted font-extrabold text-[11px]">
                             <tr>
                                 <th className="py-3.5 px-4 w-[35%]">Parameter Name</th>
                                 <th className="py-3.5 px-5 w-[15%]">Internal code</th>
@@ -424,7 +424,7 @@ const AnalysisManager = () => {
                                 <th className="py-3.5 px-5 w-[8%] text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
+                        <tbody className="divide-y divide-sf-divider/60">
                             {filtered.map(a => {
                                 const methods = methodologies.filter(m => m.analysisCode === a.code);
                                 const catName = categories.find(c => c.id === a.categoryId)?.name || a.categoryId || 'General';
@@ -433,10 +433,10 @@ const AnalysisManager = () => {
                                     <tr key={a.code} className="hover:bg-emerald-50/40 dark:hover:bg-gray-700/40 transition-colors group">
                                         {/* Parameter Name */}
                                         <td className="py-3.5 px-4 align-middle">
-                                            <div className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-snug">
+                                            <div className="font-bold text-sf-text text-sm leading-snug">
                                                 {a.name}
                                             </div>
-                                            <div className="text-[11px] mt-1 text-gray-600 dark:text-gray-300">{a.matrix} · {a.orderable ? 'Available for new orders' : 'Unavailable for new orders'} · {a.labId ? 'Laboratory definition' : 'Shared definition'}</div>
+                                            <div className="text-[11px] mt-1 text-sf-muted">{a.matrix} · {a.orderable ? 'Available for new orders' : 'Unavailable for new orders'} · {a.labId ? 'Laboratory definition' : 'Shared definition'}</div>
                                             {a.configurationIssues?.map(issue => <p key={issue} className="text-xs text-amber-800 dark:text-amber-300 mt-1">{issue}</p>)}
                                             {a.scientificWarnings?.map(warning => <p key={warning} className="text-xs text-amber-800 dark:text-amber-300 mt-1">Scientific review: {warning}</p>)}
                                             {a.description && (
@@ -446,18 +446,18 @@ const AnalysisManager = () => {
                                             )}
                                         </td>
 
-                                        <td className="py-3.5 px-5 align-middle text-xs text-gray-500 dark:text-gray-400 break-all">{a.code}</td>
+                                        <td className="py-3.5 px-5 align-middle text-xs text-sf-muted break-all">{a.code}</td>
 
                                         {/* Category */}
                                         <td className="py-3.5 px-4 align-middle">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 whitespace-nowrap">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sf-raised text-sf-muted border border-sf-divider whitespace-nowrap">
                                                 {catName}
                                             </span>
                                         </td>
 
                                         {/* Units */}
                                         <td className="py-3.5 px-4 align-middle">
-                                            <span className="inline-block px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-900 font-semibold text-gray-700 dark:text-gray-300 text-xs border border-gray-200/80 dark:border-gray-700">
+                                            <span className="inline-block px-2.5 py-1 rounded-md bg-sf-canvas font-semibold text-sf-muted text-xs border border-gray-200/80 dark:border-gray-700">
                                                 {a.units || '—'}
                                             </span>
                                         </td>
@@ -502,7 +502,7 @@ const AnalysisManager = () => {
                     </table>
                 </div>
 
-                <div className="p-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 text-center border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                <div className="p-3.5 text-xs font-semibold text-sf-muted text-center border-t border-sf-divider bg-gray-50/50 dark:bg-gray-900/30">
                     Showing {filtered.length} of {analyses.length} configured parameters across all sample matrices
                 </div>
             </div>
@@ -510,14 +510,14 @@ const AnalysisManager = () => {
             {/* ─── METHODOLOGIES DRAWER / MODAL ─── */}
             {activeMethodAnalysis && (
                 <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 font-sans animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-700 pb-4">
+                    <div className="bg-sf-surface rounded-3xl shadow-2xl border border-sf-divider w-full max-w-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-start border-b border-sf-divider pb-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 rounded-xl">
                                     <FlaskConical size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                    <h3 className="text-lg font-bold text-sf-text">
                                         Standard Methods for {activeMethodAnalysis.name}
                                     </h3>
                                     <p className="text-xs text-gray-500 font-semibold mt-0.5">Parameter Code: {activeMethodAnalysis.code}</p>
@@ -525,7 +525,7 @@ const AnalysisManager = () => {
                             </div>
                             <button
                                 onClick={() => { setActiveMethodAnalysis(null); setEditingMethod(null); }}
-                                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-sf-raised transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -534,9 +534,9 @@ const AnalysisManager = () => {
                         {/* Method list */}
                         <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
                             {methodologies.filter(m => m.analysisCode === activeMethodAnalysis.code).map(m => (
-                                <div key={m.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                                <div key={m.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-sf-divider bg-sf-canvas/50">
                                     <div>
-                                        <div className="font-bold text-xs text-gray-900 dark:text-white flex items-center gap-2">
+                                        <div className="font-bold text-xs text-sf-text flex items-center gap-2">
                                             {m.name}
                                             {m.isDefault && (
                                                 <span className="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-[10px] font-bold rounded-full flex items-center gap-1">
@@ -545,7 +545,7 @@ const AnalysisManager = () => {
                                             )}
                                         </div>
                                         {m.standard && (
-                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">Standard: {m.standard}</div>
+                                            <div className="text-[11px] text-sf-muted font-medium mt-0.5">Standard: {m.standard}</div>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -568,9 +568,9 @@ const AnalysisManager = () => {
                             ))}
 
                             {methodologies.filter(m => m.analysisCode === activeMethodAnalysis.code).length === 0 && (
-                                <div className="text-center py-6 px-4 bg-gray-50 dark:bg-gray-900/40 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                                <div className="text-center py-6 px-4 bg-sf-canvas/40 rounded-2xl border border-dashed border-sf-divider">
                                     <FlaskConical className="mx-auto text-gray-400 mb-2 opacity-60" size={24} />
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">No specific analytical methodologies recorded for this parameter.</p>
+                                    <p className="text-xs text-sf-muted font-medium">No specific analytical methodologies recorded for this parameter.</p>
                                 </div>
                             )}
                         </div>
@@ -578,23 +578,23 @@ const AnalysisManager = () => {
                         {/* Add / Edit Form */}
                         {error && <p role="alert" className="p-3 rounded-xl bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200 text-sm">{error}</p>}
                         {editingMethod ? (
-                            <div className="p-4 bg-gray-50 dark:bg-gray-900/70 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3">
-                                <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            <div className="p-4 bg-sf-canvas/70 rounded-2xl border border-sf-divider space-y-3">
+                                <h4 className="text-xs font-bold text-sf-muted uppercase tracking-wider">
                                     {editingMethod._isNew ? 'Add Analytical Method' : 'Edit Method'}
                                 </h4>
                                 <div>
-                                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Method Name</label>
+                                    <label className="block text-[11px] font-bold text-sf-muted mb-1">Method Name</label>
                                     <input
-                                        className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+                                        className="w-full p-2.5 rounded-xl border border-sf-divider text-xs font-semibold bg-sf-surface text-sf-text outline-none focus:border-emerald-500"
                                         value={editingMethod.name || ''}
                                         onChange={e => setEditingMethod({ ...editingMethod, name: e.target.value })}
                                         placeholder="e.g. Walkley-Black Wet Oxidation, Mehlich-3 Extraction"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Standard / Citation Reference (Optional)</label>
+                                    <label className="block text-[11px] font-bold text-sf-muted mb-1">Standard / Citation Reference (Optional)</label>
                                     <input
-                                        className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-medium bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+                                        className="w-full p-2.5 rounded-xl border border-sf-divider text-xs font-medium bg-sf-surface text-sf-text outline-none focus:border-emerald-500"
                                         value={editingMethod.standard || ''}
                                         onChange={e => setEditingMethod({ ...editingMethod, standard: e.target.value })}
                                         placeholder="e.g. ISO 14235:1998, FAO GLOSOLAN SOP 01"
@@ -608,14 +608,14 @@ const AnalysisManager = () => {
                                         onChange={e => setEditingMethod({ ...editingMethod, isDefault: e.target.checked })}
                                         className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                     />
-                                    <label htmlFor="isDefaultMethod" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    <label htmlFor="isDefaultMethod" className="text-xs font-medium text-sf-muted cursor-pointer">
                                         Set as Laboratory Default Method
                                     </label>
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
                                     <button
                                         onClick={() => setEditingMethod(null)}
-                                        className="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        className="px-3 py-1.5 text-xs font-bold text-sf-muted hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -631,7 +631,7 @@ const AnalysisManager = () => {
                         ) : (
                             <button
                                 onClick={() => setEditingMethod({ _isNew: true, name: '', standard: '', isDefault: false })}
-                                className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-500 hover:text-emerald-700 hover:border-emerald-400 dark:hover:border-emerald-700 flex items-center justify-center gap-2 transition-all"
+                                className="w-full py-3 border-2 border-dashed border-sf-divider rounded-2xl text-xs font-bold text-gray-500 hover:text-emerald-700 hover:border-emerald-400 dark:hover:border-emerald-700 flex items-center justify-center gap-2 transition-all"
                             >
                                 <Plus size={15} /> Add Analytical Methodology
                             </button>

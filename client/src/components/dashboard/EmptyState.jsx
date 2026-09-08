@@ -17,10 +17,10 @@ export default function EmptyState({
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center bg-rose-50/50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/50 my-4">
                 <AlertCircle className="w-10 h-10 text-rose-500 mb-3" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-base font-semibold text-sf-text">
                     {title || 'Unable to load queue'}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-sm">
+                <p className="text-sm text-sf-muted mt-1 max-w-sm">
                     {message || 'A network error or access restriction prevented loading records.'}
                 </p>
                 {onRetry && (
@@ -39,12 +39,12 @@ export default function EmptyState({
 
     if (type === 'search') {
         return (
-            <div className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/60 my-4">
-                <SearchX className="w-10 h-10 text-gray-400 dark:text-gray-500 mb-3" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-sf-canvas/40 rounded-xl border border-sf-divider/60 my-4">
+                <SearchX className="w-10 h-10 text-sf-muted mb-3" />
+                <h3 className="text-base font-semibold text-sf-text">
                     {title || 'No matching records'}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-sm">
+                <p className="text-sm text-sf-muted mt-1 max-w-sm">
                     {message || `No records in this queue match "${searchTerm}".`}
                 </p>
                 {onClearSearch && (
@@ -62,12 +62,12 @@ export default function EmptyState({
 
     // Default: True zero
     return (
-        <div className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700/60 my-4">
+        <div className="flex flex-col items-center justify-center p-8 text-center bg-sf-surface/60 rounded-xl border border-sf-divider/60 my-4">
             <CheckCircle2 className="w-10 h-10 text-emerald-500/80 mb-3" />
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-base font-semibold text-sf-text">
                 {title || 'No work waiting'}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">
+            <p className="text-sm text-sf-muted mt-1 max-w-sm">
                 {message || 'This queue is clear. New incoming samples or assigned tasks will appear here.'}
             </p>
         </div>

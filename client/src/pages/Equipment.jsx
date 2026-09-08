@@ -111,15 +111,15 @@ const Equipment = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <Monitor className="text-blue-600 dark:text-blue-400" size={24} /> {t('equipment.title', 'Equipment Registry')}
                     </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('equipment.subtitle', 'Track instrument calibration and maintenance logs')}</p>
+                    <p className="text-sm text-sf-muted">{t('equipment.subtitle', 'Track instrument calibration and maintenance logs')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleExportCSV}
-                        className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold rounded-lg bg-sf-surface text-sf-muted border dark:border-gray-700 hover:bg-sf-raised transition-colors shadow-sm"
                     >
                         <Download size={16} /> {t('equipment.exportCSV', 'Export')}
                     </button>
@@ -136,29 +136,29 @@ const Equipment = () => {
                 <div className="p-3 rounded-xl card-base border flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600"><Monitor size={20} /></div>
                     <div>
-                        <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('equipment.title', 'Instruments')}</div>
+                        <div className="text-xl font-bold text-sf-text">{stats.total}</div>
+                        <div className="text-xs text-sf-muted">{t('equipment.title', 'Instruments')}</div>
                     </div>
                 </div>
                 <div className="p-3 rounded-xl card-base border flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600"><CheckCircle size={20} /></div>
                     <div>
-                        <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{stats.ready}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('equipment.ready', 'Ready for Use')}</div>
+                        <div className="text-xl font-bold text-sf-text">{stats.ready}</div>
+                        <div className="text-xs text-sf-muted">{t('equipment.ready', 'Ready for Use')}</div>
                     </div>
                 </div>
                 <div className="p-3 rounded-xl card-base border flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600"><Settings size={20} /></div>
                     <div>
-                        <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{stats.maintenance}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('equipment.maintenance', 'In Maintenance')}</div>
+                        <div className="text-xl font-bold text-sf-text">{stats.maintenance}</div>
+                        <div className="text-xs text-sf-muted">{t('equipment.maintenance', 'In Maintenance')}</div>
                     </div>
                 </div>
                 <div className="p-3 rounded-xl card-base border flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600"><ShieldAlert size={20} /></div>
                     <div>
-                        <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{stats.blocked}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('equipment.blocked', 'Blocked / Overdue')}</div>
+                        <div className="text-xl font-bold text-sf-text">{stats.blocked}</div>
+                        <div className="text-xs text-sf-muted">{t('equipment.blocked', 'Blocked / Overdue')}</div>
                     </div>
                 </div>
             </div>
@@ -168,14 +168,14 @@ const Equipment = () => {
                 <div className="relative w-full lg:w-80 flex-shrink-0">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('equipment.searchPlaceholder', 'Search by name, tag, SN...')}
-                        className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500" />
+                        className="w-full pl-9 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-sf-text outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="flex flex-wrap items-center gap-1 card-base rounded-lg border p-1">
                     {ASSET_TYPES.map(type => (
                         <button key={type} onClick={() => setTypeFilter(type)}
                             className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${typeFilter === type
                                 ? 'bg-slate-700 dark:bg-slate-600 text-white shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
+                                : 'text-sf-muted hover:text-gray-900 dark:hover:text-gray-200'}`}>
                             {type === 'ALL' ? t('common.all', 'ALL') : t(`dynamic.equipmentType.${type}.label`, type)}
                         </button>
                     ))}
@@ -193,14 +193,14 @@ const Equipment = () => {
                     </div>
                 ) : (
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-700/60 border-b dark:border-gray-600 sticky top-0">
+                        <thead className="bg-sf-canvas/60 border-b dark:border-gray-600 sticky top-0">
                             <tr>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('equipment.assetName', 'Instrument')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('equipment.model', 'Specification')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">{t('equipment.status', 'Status')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-center">{t('equipment.readiness', 'Readiness')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{t('equipment.lastCalibration', 'Last Calib.')}</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase text-right">{t('common.actions', 'Actions')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase">{t('equipment.assetName', 'Instrument')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase">{t('equipment.model', 'Specification')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-center">{t('equipment.status', 'Status')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-center">{t('equipment.readiness', 'Readiness')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase">{t('equipment.lastCalibration', 'Last Calib.')}</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-sf-muted uppercase text-right">{t('common.actions', 'Actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y dark:divide-gray-700">
@@ -212,13 +212,13 @@ const Equipment = () => {
                                                 {React.createElement(TYPE_ICONS[asset.assetType] || Tag, { size: 18 })}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-gray-900 dark:text-gray-100">{asset.name}</div>
+                                                <div className="font-bold text-sf-text">{asset.name}</div>
                                                 <div className="text-xs text-gray-400 font-mono">{asset.internalAssetTag}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="text-xs text-gray-600 dark:text-gray-300">{asset.manufacturer} {asset.model}</div>
+                                        <div className="text-xs text-sf-muted">{asset.manufacturer} {asset.model}</div>
                                         <div className="text-[10px] text-gray-400 uppercase tracking-tighter">SN: {asset.serialNumber}</div>
                                     </td>
                                     <td className="px-4 py-3 text-center">
@@ -233,7 +233,7 @@ const Equipment = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        <div className="text-xs text-sf-muted">
                                             {asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : t('common.never', 'Never')}
                                         </div>
                                         <div className="text-[10px] text-amber-600 font-medium">

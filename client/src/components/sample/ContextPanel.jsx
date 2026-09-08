@@ -8,7 +8,7 @@ const ContextPanel = ({ sample, isActive, onToggleDrawer }) => {
     return (
         <div className="space-y-6">
             {/* Origin & Ownership */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                 <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                     <User size={18} /> Origin & Ownership
                 </h3>
@@ -36,7 +36,7 @@ const ContextPanel = ({ sample, isActive, onToggleDrawer }) => {
                             </div>
                         </>
                     )}
-                    <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
+                    <div className="h-px bg-sf-raised my-2" />
                     <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                             <span className="block text-gray-500">Collection Date</span>
@@ -51,7 +51,7 @@ const ContextPanel = ({ sample, isActive, onToggleDrawer }) => {
             </div>
 
             {/* Map - Stub for now, lazy load ideally */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                 <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                     <MapPin size={18} /> Location
                 </h3>
@@ -61,15 +61,15 @@ const ContextPanel = ({ sample, isActive, onToggleDrawer }) => {
             </div>
 
             {/* Chain of Custody Summary */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                 <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                     <Truck size={18} /> Chain of Custody
                 </h3>
-                <div className="space-y-4 relative pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                <div className="space-y-4 relative pl-4 border-l-2 border-sf-divider">
                     {/* Reverse order history or key events */}
                     <div className="relative">
                         <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white dark:ring-gray-800" />
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">Current Location</p>
+                        <p className="text-sm font-bold text-sf-text">Current Location</p>
                         <p className="text-xs text-gray-500">Lab Storage - B2</p>
                     </div>
                 </div>

@@ -85,7 +85,7 @@ export default function WorkflowTopStrip({
             case 'DRAFT':
                 return 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20';
             default:
-                return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
+                return 'bg-slate-500/10 text-sf-text border-slate-500/20';
         }
     };
 
@@ -120,7 +120,7 @@ export default function WorkflowTopStrip({
                             Sample
                         </span>
                         {sample?.projectCode && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-sf-divider">
                                 {sample.projectCode}
                             </span>
                         )}
@@ -130,7 +130,7 @@ export default function WorkflowTopStrip({
                             </span>
                         )}
                     </div>
-                    <div className="text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-1.5">
+                    <div className="text-sm font-extrabold text-sf-text tracking-tight flex items-center gap-1.5">
                         {sample?.labId || sample?.sampleId || sample?.id || '—'}
                     </div>
                 </div>
@@ -149,7 +149,7 @@ export default function WorkflowTopStrip({
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Station</span>
                     </div>
-                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px] sm:max-w-[180px]">
+                    <div className="text-xs font-bold text-sf-text truncate max-w-[140px] sm:max-w-[180px]">
                         {currentRoom || 'Intake Station'}
                     </div>
                 </div>
@@ -158,7 +158,7 @@ export default function WorkflowTopStrip({
                 <div className="wf-metric-pill min-w-[130px]">
                     <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Progress</span>
-                        <span className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400">{progressPct}%</span>
+                        <span className="text-[11px] font-extrabold text-sf-emerald">{progressPct}%</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -167,7 +167,7 @@ export default function WorkflowTopStrip({
                                 style={{ width: `${progressPct}%` }}
                             />
                         </div>
-                        <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                        <span className="text-[10px] font-medium text-sf-muted">
                             {doneItems}/{totalItems || '—'}
                         </span>
                     </div>
@@ -180,7 +180,7 @@ export default function WorkflowTopStrip({
                         <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
                             {ownerInitials}
                         </div>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[110px]">
+                        <span className="text-xs font-medium text-sf-text truncate max-w-[110px]">
                             {owner || 'Unassigned'}
                         </span>
                     </div>
@@ -232,7 +232,7 @@ export default function WorkflowTopStrip({
                 {/* Jump to Workbench */}
                 <button
                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || sample?.labId}`)}
-                    className="wf-action-btn hidden md:inline-flex text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 border-indigo-200 dark:border-indigo-800"
+                    className="wf-action-btn hidden md:inline-flex text-sf-emerald bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 border-indigo-200 dark:border-indigo-800"
                     title="Open in Analytical Workbench"
                     aria-label="Open in Workbench"
                 >
@@ -243,7 +243,7 @@ export default function WorkflowTopStrip({
                 {/* Deep Link to Sample Page */}
                 <button
                     onClick={() => navigate(`/samples/${sample?.id || sample?.labId}`)}
-                    className="wf-action-btn text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="wf-action-btn text-sf-text hover:bg-sf-raised border-sf-divider"
                     title="Open Full Sample Details"
                     aria-label="Sample Details"
                 >
@@ -254,7 +254,7 @@ export default function WorkflowTopStrip({
                 {/* Print Label */}
                 <button
                     onClick={() => window.print()}
-                    className="wf-action-btn text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="wf-action-btn text-sf-text hover:bg-sf-raised border-sf-divider"
                     title="Print Workflow Summary / Label"
                     aria-label="Print Label"
                 >
@@ -264,7 +264,7 @@ export default function WorkflowTopStrip({
                 {/* Refresh Live State */}
                 <button
                     onClick={handleRefreshClick}
-                    className="wf-action-btn text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="wf-action-btn text-sf-text hover:bg-sf-raised border-sf-divider"
                     title="Live Refresh Data"
                     aria-label="Refresh data"
                 >
@@ -274,7 +274,7 @@ export default function WorkflowTopStrip({
                 {/* Fullscreen Mode */}
                 <button
                     onClick={onFullscreen}
-                    className="wf-action-btn text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="wf-action-btn text-sf-text hover:bg-sf-raised border-sf-divider"
                     title="Toggle Fullscreen Canvas (Shortcut: F)"
                     aria-label="Toggle Fullscreen"
                 >

@@ -112,7 +112,7 @@ function WorkflowStageNode({ data }) {
                     >
                         {room}
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                    <div className="text-[10px] text-sf-muted font-medium truncate mt-0.5">
                         {config?.description || 'Analytical Station'}
                     </div>
                 </div>
@@ -134,11 +134,11 @@ function WorkflowStageNode({ data }) {
             {/* Reception Station: Sample Information Card */}
             {sampleInfo && (
                 <div className="px-3.5 pb-2">
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
-                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100 tracking-tight">
+                    <div className="p-2.5 rounded-xl bg-sf-canvas/80 border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
+                        <div className="font-extrabold text-sm text-sf-text tracking-tight">
                             {sampleInfo.labId}
                         </div>
-                        <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                        <div className="text-[10px] font-semibold text-sf-muted mt-0.5 flex items-center gap-1.5">
                             <span>{sampleInfo.projectCode || 'LIMS Project'}</span>
                             {sampleInfo.matrix && (
                                 <>
@@ -157,7 +157,7 @@ function WorkflowStageNode({ data }) {
             {/* Progress Meter Bar */}
             {total > 0 && (
                 <div className="px-3.5 pb-2">
-                    <div className="flex items-center justify-between text-[9px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="flex items-center justify-between text-[9px] font-bold text-sf-muted mb-1">
                         <span>Completion</span>
                         <span style={{ color: accent }}>{pct}%</span>
                     </div>
@@ -187,7 +187,7 @@ function WorkflowStageNode({ data }) {
                         </span>
                     )}
                     {queuedCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-sf-divider">
                             {queuedCount} Queued
                         </span>
                     )}
@@ -234,7 +234,7 @@ function WorkflowStageNode({ data }) {
 
                     {analyses.length > 3 && (
                         <div className="pt-0.5 text-center">
-                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline inline-flex items-center gap-0.5">
+                            <span className="text-[10px] font-bold text-sf-emerald group-hover:underline inline-flex items-center gap-0.5">
                                 +{analyses.length - 3} more parameters <ChevronRight size={10} />
                             </span>
                         </div>

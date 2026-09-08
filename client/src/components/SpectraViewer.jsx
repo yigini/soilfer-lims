@@ -120,17 +120,17 @@ const SpectraViewer = ({ data, overlayData }) => {
         const xLabel = isWavenumber ? 'Wavenumber (cm⁻¹)' : 'Wavelength (nm)';
 
         return (
-            <div className="w-full h-96 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="w-full h-96 bg-sf-surface p-4 rounded-lg shadow-sm border border-sf-divider">
                 <div className="flex items-center justify-between mb-3">
                     <div>
-                        <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                        <h4 className="text-sm font-bold text-sf-text">
                             Overlay Comparison — {overlayData.length} scans
                         </h4>
                         <p className="text-xs text-gray-400">
                             Continuous common-grid display {isWavenumber ? '(4000 → 400 cm⁻¹)' : ''}
                         </p>
                     </div>
-                    <span className="text-xs text-gray-400 font-mono px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                    <span className="text-xs text-gray-400 font-mono px-2 py-1 bg-sf-raised dark:bg-gray-700 rounded">
                         {modality} • {yLabel}
                     </span>
                 </div>
@@ -192,23 +192,23 @@ const SpectraViewer = ({ data, overlayData }) => {
     const dataKey = data.chartData[0]?.value !== undefined ? 'value' : 'absorbance';
 
     return (
-        <div className="w-full h-80 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="w-full h-80 bg-sf-surface p-4 rounded-lg shadow-sm border border-sf-divider">
             <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                <h4 className="text-sm font-bold text-sf-text">
                     Spectral Analysis ({data.instrument || data.metadata?.instrument || modality}) - {data.scanDate ? new Date(data.scanDate).toLocaleDateString() : (data.timestamp ? new Date(data.timestamp).toLocaleDateString() : '')}
                 </h4>
                 <div className="flex items-center gap-2">
                     <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-mono">
                         {isWavenumber ? 'IR Convention (4000 → 400 cm⁻¹)' : 'VNIR (Ascending)'}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 font-medium">
+                    <span className="text-xs px-2 py-0.5 rounded bg-sf-raised text-gray-600 dark:bg-gray-700 dark:text-gray-300 font-medium">
                         {yLabel}
                     </span>
                 </div>
             </div>
             <ResponsiveContainer width="100%" height="88%">
                 <LineChart data={data.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-divider, #e2e8f0)" />
                     <XAxis
                         dataKey="wavelength"
                         label={{ value: xLabel, position: 'insideBottomRight', offset: -5 }}

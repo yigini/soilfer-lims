@@ -4,6 +4,14 @@ import { Download, FileDown, Loader2, CheckCircle2, X, FileSpreadsheet, AlertCir
 import { useAuth } from '../../context/AuthContext';
 
 const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
     const { user, token } = useAuth();
     const [step, setStep] = useState('CONFIGURE'); // CONFIGURE, GENERATING, DONE, ERROR
     const [config, setConfig] = useState({
@@ -82,20 +90,20 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700" onClick={e => e.stopPropagation()}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-sf-divider" onClick={e => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-sf-emerald">
                             <FileDown size={24} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Export Data</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Generate CSV reports</p>
+                            <h3 className="text-lg font-bold text-sf-text">Export Data</h3>
+                            <p className="text-xs text-sf-muted">Generate CSV reports</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-1.5 hover:bg-sf-raised rounded-lg transition-colors">
                         <X size={20} className="text-gray-500" />
                     </button>
                 </div>
@@ -105,32 +113,32 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
                     {step === 'CONFIGURE' && (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Export Type</label>
+                                <label className="block text-sm font-bold text-sf-muted mb-2">Export Type</label>
                                 <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg text-sf-emerald">
                                             <FileSpreadsheet size={20} />
                                         </div>
                                         <div>
-                                            <div className="font-bold text-gray-900 dark:text-white">Current List View</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">Export currently visible columns and rows</div>
+                                            <div className="font-bold text-sf-text">Current List View</div>
+                                            <div className="text-xs text-sf-muted">Export currently visible columns and rows</div>
                                         </div>
                                     </div>
-                                    <div className="text-[11px] text-gray-500 dark:text-gray-400 pl-[52px]">
+                                    <div className="text-[11px] text-sf-muted pl-[52px]">
                                         Based on active filters: {searchQuery ? `"${searchQuery}"` : 'No search text'}, {Object.keys(currentFilters || {}).length} active filters.
                                     </div>
                                 </div>
                             </div>
 
                             {['LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role) && (
-                                <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <label className="flex items-center gap-3 p-3 rounded-xl border border-sf-divider cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <input
                                         type="checkbox"
                                         checked={config.includeUnapproved}
                                         onChange={e => setConfig({ ...config, includeUnapproved: e.target.checked })}
                                         className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                                     />
-                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <div className="text-sm font-medium text-sf-muted">
                                         Include Unapproved Results
                                         <div className="text-[10px] text-orange-500 font-normal">Use with caution</div>
                                     </div>
@@ -142,7 +150,7 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
                     {step === 'GENERATING' && (
                         <div className="py-8 text-center">
                             <Loader2 size={48} className="animate-spin text-indigo-600 mx-auto mb-4" />
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-1">Generating Export...</h4>
+                            <h4 className="font-bold text-sf-text mb-1">Generating Export...</h4>
                             <p className="text-sm text-gray-500">Processing records and results</p>
                         </div>
                     )}
@@ -152,8 +160,8 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
                             <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <CheckCircle2 size={24} />
                             </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-1">Export Ready!</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <h4 className="font-bold text-sf-text mb-1">Export Ready!</h4>
+                            <p className="text-sm text-sf-muted mb-4">
                                 Generated {result?.meta?.recordCount} records
                             </p>
                             <button
@@ -171,7 +179,7 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
                             <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <AlertCircle size={24} />
                             </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-1">Export Failed</h4>
+                            <h4 className="font-bold text-sf-text mb-1">Export Failed</h4>
                             <p className="text-sm text-red-600 dark:text-red-400 px-4">
                                 {error}
                             </p>
@@ -180,7 +188,7 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-sf-divider">
                     <button
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors"

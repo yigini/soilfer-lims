@@ -226,7 +226,7 @@ const DataResults = () => {
         if (value && typeof value === 'object' && value.status === 'DRAFT') {
             return (
                 <div className="flex items-center justify-end gap-1.5">
-                    <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{value.value}</span>
+                    <span className="font-mono font-medium text-sf-text">{value.value}</span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300" title={`Draft by ${value.assignedTo}`}>
                         draft
                     </span>
@@ -238,7 +238,7 @@ const DataResults = () => {
         if (value && typeof value === 'object' && value.status === 'SUBMITTED') {
             return (
                 <div className="flex items-center justify-end gap-1.5">
-                    <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{value.value}</span>
+                    <span className="font-mono font-medium text-sf-text">{value.value}</span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" title={`Submitted by ${value.assignedTo} — pending review`}>
                         pending review
                     </span>
@@ -288,18 +288,18 @@ const DataResults = () => {
             );
         }
 
-        return <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{value}</span>;
+        return <span className="font-mono font-medium text-sf-text">{value}</span>;
     };
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+        <div className="h-full flex flex-col bg-sf-canvas p-4 md:p-6">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <Table className="text-emerald-600" /> Analytical Results Master
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    <p className="text-sf-muted text-sm">
                         Master view of all analytical results (Approved & Pending).
                     </p>
                 </div>
@@ -308,15 +308,15 @@ const DataResults = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowColumnMenu(!showColumnMenu)}
-                            className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
+                            className="bg-sf-surface text-sf-text border border-sf-divider hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
                         >
                             <Filter size={16} /> Columns
                         </button>
                         {showColumnMenu && (
-                            <div className="absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-lg z-50 p-2">
+                            <div className="absolute right-0 top-12 w-48 bg-sf-surface border dark:border-gray-700 shadow-lg rounded-lg z-50 p-2">
                                 <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-2">Metadata Columns</h4>
                                 {columns.filter(c => !c.isResult && !c.frozen && !['country', 'collectionDate', 'receptionDate'].includes(c.key)).map(col => (
-                                    <label key={col.key} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer text-sm">
+                                    <label key={col.key} className="flex items-center gap-2 px-2 py-1 hover:bg-sf-raised rounded cursor-pointer text-sm">
                                         <input
                                             type="checkbox"
                                             checked={!!visibleColumns[col.key]}
@@ -329,7 +329,7 @@ const DataResults = () => {
                             </div>
                         )}
                     </div>
-                    <button onClick={() => handleExport('csv')} className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
+                    <button onClick={() => handleExport('csv')} className="bg-sf-surface text-sf-text border border-sf-divider hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
                         <Download size={16} /> CSV
                     </button>
                     <button onClick={() => handleExport('xlsx')} className="bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
@@ -339,8 +339,8 @@ const DataResults = () => {
             </div>
 
             {/* Filters */}
-            <div className="card-base p-4 rounded-lg shadow-sm border mb-4 flex flex-wrap gap-4 items-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+            <div className="card-base p-4 rounded-lg shadow-sm border mb-4 flex flex-wrap gap-4 items-center bg-sf-surface border-sf-divider">
+                <div className="flex items-center gap-2 text-sf-muted font-medium">
                     <Filter size={18} /> Filters:
                 </div>
 
@@ -368,7 +368,7 @@ const DataResults = () => {
             </div>
 
             {/* Data Table */}
-            <div className="card-base rounded-xl shadow border flex-1 overflow-hidden flex flex-col bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <div className="card-base rounded-xl shadow border flex-1 overflow-hidden flex flex-col bg-sf-surface border-sf-divider">
                 <div className="overflow-auto flex-1 relative">
                     {loading ? (
                         <div className="flex items-center justify-center h-full text-gray-400">Loading Master Data...</div>
@@ -377,17 +377,17 @@ const DataResults = () => {
                             <thead className="bg-gray-100 dark:bg-gray-750 sticky top-0 z-10 shadow-sm">
                                 <tr>
                                     {columns.filter(c => !['country', 'collectionDate', 'receptionDate'].includes(c.key)).filter(c => isColVisible(c.key, c.isResult)).map((col) => (
-                                        <th key={col.key} className={`px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider border-b dark:border-gray-600 whitespace-nowrap ${col.frozen ? 'sticky left-0 z-20 bg-gray-100 dark:bg-gray-750 border-r shadow-sm' : ''} ${col.isResult ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`} style={col.frozen ? { left: 0 } : {}}>
+                                        <th key={col.key} className={`px-4 py-3 font-semibold text-sf-muted uppercase tracking-wider border-b dark:border-gray-600 whitespace-nowrap ${col.frozen ? 'sticky left-0 z-20 bg-gray-100 dark:bg-gray-750 border-r shadow-sm' : ''} ${col.isResult ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`} style={col.frozen ? { left: 0 } : {}}>
                                             {col.label}
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tbody className="divide-y divide-sf-divider">
                                 {paginatedData.map((row) => (
-                                    <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <tr key={row.id} className="hover:bg-sf-raised/50 transition-colors">
                                         {columns.filter(c => !['country', 'collectionDate', 'receptionDate'].includes(c.key)).filter(c => isColVisible(c.key, c.isResult)).map((col) => (
-                                            <td key={`${row.id}-${col.key}`} className={`px-4 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap ${col.frozen ? 'sticky left-0 z-10 bg-white dark:bg-gray-800 font-medium border-r border-gray-100 dark:border-gray-700' : ''} ${col.isResult ? 'text-right' : ''}`} style={col.frozen ? { left: 0 } : {}}>
+                                            <td key={`${row.id}-${col.key}`} className={`px-4 py-2 text-sf-muted whitespace-nowrap ${col.frozen ? 'sticky left-0 z-10 bg-sf-surface font-medium border-r border-sf-divider' : ''} ${col.isResult ? 'text-right' : ''}`} style={col.frozen ? { left: 0 } : {}}>
                                                 {col.isResult ? renderCellContent(row[col.key], col, row) : (
                                                     (col.key === 'labId' || col.key === 'originalId') ? (
                                                         <Link to={`/samples/${row.id}`} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline font-medium">
@@ -404,8 +404,8 @@ const DataResults = () => {
                     )}
                 </div>
                 {/* Footer */}
-                <div className="p-3 border-t dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
-                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div className="p-3 border-t dark:border-gray-700 flex items-center justify-between bg-sf-canvas">
+                    <div className="flex items-center gap-4 text-sm text-sf-muted">
                         <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))} className="bg-white dark:bg-gray-700 border rounded px-2 py-1">
                             <option value={50}>50</option>
                             <option value={100}>100</option>

@@ -48,14 +48,14 @@ const TechnicianDashboard = ({ user }) => {
             {/* ─── Header ─── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100">
+                    <h2 className="text-2xl font-black text-sf-text">
                         My Workspace
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user.name || user.username}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
-                    <button onClick={refresh} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now">
+                    <button onClick={refresh} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title="Refresh now">
                         <RefreshCw size={16} className="text-gray-400" />
                     </button>
                 </div>
@@ -111,7 +111,7 @@ const TechnicianDashboard = ({ user }) => {
                             }`}>Reanalysis</span>
                         <Zap size={16} className={`opacity-60 ${kpis.reanalysisRequired > 0 ? 'text-red-500' : 'text-gray-400'}`} />
                     </div>
-                    <span className={`text-3xl font-black ${kpis.reanalysisRequired > 0 ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'
+                    <span className={`text-3xl font-black ${kpis.reanalysisRequired > 0 ? 'text-red-700 dark:text-red-300' : 'text-sf-muted'
                         }`}>{kpis.reanalysisRequired || 0}</span>
                 </div>
             </div>
@@ -127,10 +127,10 @@ const TechnicianDashboard = ({ user }) => {
                             <button
                                 key={r.id}
                                 onClick={() => navigate(`/samples/${r.sampleId}`)}
-                                className="w-full flex items-center justify-between p-3 rounded-lg bg-white dark:bg-gray-800 border border-red-100 dark:border-red-900/40 hover:border-red-300 hover:shadow-sm transition-all text-left group"
+                                className="w-full flex items-center justify-between p-3 rounded-lg bg-sf-surface border border-red-100 dark:border-red-900/40 hover:border-red-300 hover:shadow-sm transition-all text-left group"
                             >
                                 <div className="min-w-0 flex-1">
-                                    <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
+                                    <div className="font-bold text-sm text-sf-text truncate">
                                         {r.labId || r.sampleId?.substring(0, 12)}
                                     </div>
                                     <div className="text-[10px] text-gray-400 mt-0.5">
@@ -147,7 +147,7 @@ const TechnicianDashboard = ({ user }) => {
             {/* ─── My Active Queue ─── */}
             <div className="card-base rounded-xl shadow-sm border p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <h3 className="text-lg font-black text-sf-text flex items-center gap-2">
                         <FlaskConical size={18} className="text-blue-500" /> My Active Queue
                     </h3>
                     <button onClick={() => navigate('/my-work')} className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
@@ -161,14 +161,14 @@ const TechnicianDashboard = ({ user }) => {
                             <button
                                 key={group.sampleId}
                                 onClick={() => navigate(`/samples/${group.sampleId}`)}
-                                className="w-full flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all text-left group"
+                                className="w-full flex items-center justify-between p-4 rounded-lg bg-sf-surface border border-sf-divider hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all text-left group"
                             >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                     {group.priority === 'URGENT' && (
                                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
                                     )}
                                     <div className="min-w-0 flex-1">
-                                        <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">
+                                        <div className="font-bold text-sm text-sf-text truncate">
                                             {group.labId || group.sampleId.substring(0, 12)}
                                         </div>
                                         <div className="text-[10px] text-gray-400 mt-0.5 truncate">
@@ -194,7 +194,7 @@ const TechnicianDashboard = ({ user }) => {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-gray-400 text-sm border border-dashed rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="text-center py-12 text-gray-400 text-sm border border-dashed rounded-lg bg-sf-canvas">
                         <CheckCircle size={32} className="mx-auto mb-3 text-emerald-400" />
                         <p className="font-bold">All clear!</p>
                         <p className="text-[11px] mt-0.5">No active work items assigned to you</p>

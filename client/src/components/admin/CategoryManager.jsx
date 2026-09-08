@@ -56,17 +56,17 @@ const CategoryManager = () => {
         return (
             <div className="flex flex-col items-center justify-center p-16 space-y-3">
                 <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading Property Categories...</p>
+                <p className="text-sm font-medium text-sf-muted">Loading Property Categories...</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-4 font-sans w-full min-w-0">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-sf-surface p-5 rounded-2xl border border-sf-divider shadow-sm">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Analysis & Property Categories</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Organize test parameters into standard analytical domains (Physical, Chemical, Biological, Spectral).</p>
+                    <h2 className="text-xl font-bold text-sf-text">Analysis & Property Categories</h2>
+                    <p className="text-xs text-sf-muted mt-0.5">Organize test parameters into standard analytical domains (Physical, Chemical, Biological, Spectral).</p>
                 </div>
                 <button
                     onClick={() => setEditingItem({ id: '', name: '', _isNew: true })}
@@ -85,14 +85,14 @@ const CategoryManager = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {categories.map(c => (
-                    <div key={c.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                    <div key={c.id} className="bg-sf-surface border border-sf-divider rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                         <div className="flex items-center gap-3.5 min-w-0 pr-2">
                             <div className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 p-2.5 rounded-xl flex-shrink-0">
                                 <Tag size={18} />
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate">{c.name}</h3>
-                                <span className="inline-block text-[11px] font-semibold text-gray-500 dark:text-gray-400 truncate">
+                                <h3 className="font-bold text-sm text-sf-text truncate">{c.name}</h3>
+                                <span className="inline-block text-[11px] font-semibold text-sf-muted truncate">
                                     {c.id}
                                 </span>
                             </div>
@@ -122,14 +122,14 @@ const CategoryManager = () => {
             {/* Inline edit modal */}
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-7 w-full max-w-md space-y-5 animate-in zoom-in-95 duration-200 font-sans">
-                        <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <div className="bg-sf-surface rounded-3xl shadow-2xl border border-sf-divider p-6 sm:p-7 w-full max-w-md space-y-5 animate-in zoom-in-95 duration-200 font-sans">
+                        <div className="flex justify-between items-center border-b border-sf-divider pb-3">
+                            <h3 className="text-lg font-bold text-sf-text">
                                 {editingItem._isNew ? 'New Property Category' : 'Edit Category'}
                             </h3>
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-sf-raised transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -138,9 +138,9 @@ const CategoryManager = () => {
                         <div className="space-y-4">
                             {editingItem._isNew && (
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">Category ID</label>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">Category ID</label>
                                     <input
-                                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500"
+                                        className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider text-sm font-semibold bg-sf-canvas text-sf-text outline-none focus:bg-white dark:focus:bg-gray-950 focus:border-emerald-500"
                                         value={editingItem.id}
                                         onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
                                         placeholder="e.g. routine_chemical"
@@ -148,9 +148,9 @@ const CategoryManager = () => {
                                 </div>
                             )}
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">Category Name</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted mb-1.5">Category Name</label>
                                 <input
-                                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-sf-divider text-sm font-semibold bg-sf-surface text-sf-text outline-none focus:border-emerald-500"
                                     value={editingItem.name}
                                     onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                                     placeholder="e.g. Routine Chemical Properties & Acidity"
@@ -158,10 +158,10 @@ const CategoryManager = () => {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex justify-end gap-3 pt-3 border-t border-sf-divider">
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-xl transition-colors"
                             >
                                 Cancel
                             </button>

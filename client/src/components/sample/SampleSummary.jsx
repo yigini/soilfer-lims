@@ -34,28 +34,28 @@ const SampleSummary = ({
     const submitter = sample.fieldMetadata?.submitterName?.value || sample.receptionData?.submitterDetails?.name || 'N/A';
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col mb-6 relative z-50 overflow-hidden transition-all hover:shadow-md">
+        <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider flex flex-col mb-6 relative z-50 overflow-hidden transition-all hover:shadow-md">
 
             {/* TOP: ID & BASIC INFO */}
-            <div className="p-6 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+            <div className="p-6 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-sf-divider bg-gray-50/50 dark:bg-gray-800/50">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition text-gray-500 dark:text-gray-400 group">
+                    <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 transition text-sf-muted group">
                         <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
                     </button>
 
                     <div className="flex flex-col">
-                        <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-2">
+                        <div className="text-[10px] font-black text-sf-emerald uppercase tracking-[0.2em] mb-1.5 flex items-center gap-2">
                             <span className="px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/40 rounded border border-indigo-100 dark:border-indigo-800">
                                 Lab sample code: {sample.labId || 'Not assigned'}
                             </span>
                             {sample.assignedLab && (
-                                <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-600">
+                                <span className="px-1.5 py-0.5 bg-sf-raised text-sf-muted rounded border border-gray-200 dark:border-gray-600">
                                     Lab: {sample.assignedLab}
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="font-mono font-black text-3xl text-gray-900 dark:text-white tracking-tight leading-none">
+                            <h1 className="font-mono font-black text-3xl text-sf-text tracking-tight leading-none">
                                 {sample.labId || sample.originalId}
                             </h1>
                             <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide border shadow-sm ${sample.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
@@ -69,7 +69,7 @@ const SampleSummary = ({
                             {isApproved && <CheckCircle size={20} className="text-green-600 drop-shadow-sm" />}
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs text-gray-500 dark:text-gray-400 font-bold">
+                            <span className="font-mono text-xs text-sf-muted font-bold">
                                 Field ID: {sample.originalId}
                             </span>
                         </div>
@@ -89,7 +89,7 @@ const SampleSummary = ({
                     )}
                     <button
                         onClick={onPrintLabel}
-                        className="p-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl shadow-sm transition-all"
+                        className="p-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sf-emerald hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl shadow-sm transition-all"
                         title="Print Label"
                     >
                         <Printer size={20} />
@@ -105,7 +105,7 @@ const SampleSummary = ({
                     {hasReport ? (
                         <button
                             onClick={onViewReport}
-                            className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl shadow-sm transition-all"
+                            className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 text-sf-emerald hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl shadow-sm transition-all"
                             title="View Report"
                         >
                             <FileText size={20} />
@@ -124,11 +124,11 @@ const SampleSummary = ({
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border shadow-sm text-xs font-bold ${
                             drawerOpen
                                 ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
-                                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:text-emerald-700 dark:hover:text-emerald-300'
+                                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-sf-muted hover:bg-gray-50 dark:hover:bg-gray-600 hover:text-emerald-700 dark:hover:text-emerald-300'
                         }`}
                         title="View Defensible Audit Log"
                     >
-                        <Clock size={16} className={drawerOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'} />
+                        <Clock size={16} className={drawerOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-sf-muted'} />
                         <span className="hidden sm:inline">Audit Log</span>
                     </button>
                 </div>
@@ -137,35 +137,35 @@ const SampleSummary = ({
             {/* MIDDLE: METADATA GRID */}
             <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-sf-muted uppercase tracking-[0.1em]">
                         <Building size={11} /> Project
                     </div>
-                    <div className="text-base font-black text-gray-800 dark:text-gray-100 truncate max-w-[150px]" title={sample.projectCode}>
+                    <div className="text-base font-black text-sf-text truncate max-w-[150px]" title={sample.projectCode}>
                         {sample.projectCode || 'N/A'}
                     </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-sf-muted uppercase tracking-[0.1em]">
                         <Activity size={11} /> Sample Type
                     </div>
-                    <div className="text-base font-black text-gray-800 dark:text-gray-100">{sample.sampleType || 'Soil'}</div>
+                    <div className="text-base font-black text-sf-text">{sample.sampleType || 'Soil'}</div>
                 </div>
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-sf-muted uppercase tracking-[0.1em]">
                         <Clock size={11} /> Date Received
                     </div>
-                    <div className="text-base font-black text-gray-800 dark:text-gray-100">
+                    <div className="text-base font-black text-sf-text">
                         {sample.receptionDate ? new Date(sample.receptionDate).toLocaleDateString('en-GB') :
                             (sample.status === 'EXPECTED' ? 'Not yet received' : (sample.createdAt ? new Date(sample.createdAt).toLocaleDateString('en-GB') : 'Not recorded'))}
                     </div>
                     {sample.createdAt && (
-                        <div className="text-[10px] text-gray-400 dark:text-gray-500">
+                        <div className="text-[10px] text-sf-muted">
                             Created: {new Date(sample.createdAt).toLocaleDateString('en-GB')}
                         </div>
                     )}
                 </div>
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-sf-muted uppercase tracking-[0.1em]">
                         <Activity size={11} /> Priority
                     </div>
                     {sample.fieldMetadata?.urgency?.value || sample.priority ? (
@@ -180,12 +180,12 @@ const SampleSummary = ({
             </div>
 
             {/* BOTTOM: ACTIONS */}
-            <div className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-6">
+            <div className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/20 border-t border-sf-divider flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-5">
                     {/* Gates Status */}
                     {(dryingStatus || prepStatus) && (
                         <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] border-r border-gray-200 dark:border-gray-700 pr-4">Gates</span>
+                            <span className="text-[10px] font-black text-sf-muted uppercase tracking-[0.2em] border-r border-sf-divider pr-4">Gates</span>
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col gap-1 items-center">
                                     <div className={`w-2 h-2 rounded-full ${dryingStatus === 'COMPLETED' || dryingStatus === 'ACCEPTED' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300 dark:bg-gray-600'}`} />

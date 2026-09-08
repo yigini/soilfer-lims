@@ -19,7 +19,7 @@ const CollapsibleDrawer = ({ history = [], isOpen, onToggle }) => {
         if (action.includes('ASSIGN')) return <User size={14} className="text-blue-600 dark:text-blue-400" />;
         if (action.includes('SUBMIT')) return <Send size={14} className="text-purple-600 dark:text-purple-400" />;
         if (action.includes('REVIEW') || action.includes('DECISION')) return <ClipboardCheck size={14} className="text-emerald-600 dark:text-emerald-400" />;
-        if (action.includes('RECEIVED') || action.includes('SYNC')) return <Truck size={14} className="text-indigo-600 dark:text-indigo-400" />;
+        if (action.includes('RECEIVED') || action.includes('SYNC')) return <Truck size={14} className="text-sf-emerald" />;
         if (action.includes('REANALYSIS') || action.includes('REJECT')) return <RotateCcw size={14} className="text-red-600 dark:text-red-400" />;
         if (action.includes('DRYING') || action.includes('PREP')) return <Activity size={14} className="text-amber-600 dark:text-amber-400" />;
         if (action.includes('RESULT')) return <Microscope size={14} className="text-teal-600 dark:text-teal-400" />;
@@ -151,7 +151,7 @@ const CollapsibleDrawer = ({ history = [], isOpen, onToggle }) => {
             {!isOpen && (
                 <button
                     onClick={onToggle}
-                    className="fixed right-0 top-36 z-40 flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 px-3.5 py-2.5 rounded-l-2xl shadow-xl border-y border-l border-gray-200 dark:border-gray-700 hover:border-emerald-300 font-bold text-xs transition-all hover:translate-x-[-3px] group font-sans"
+                    className="fixed right-0 top-36 z-40 flex items-center gap-2 bg-sf-surface text-sf-muted hover:text-emerald-700 dark:hover:text-emerald-300 px-3.5 py-2.5 rounded-l-2xl shadow-xl border-y border-l border-sf-divider hover:border-emerald-300 font-bold text-xs transition-all hover:translate-x-[-3px] group font-sans"
                     title="Open Sample Audit Trail & History"
                 >
                     <Clock size={16} className="text-emerald-600 group-hover:rotate-45 transition-transform" />
@@ -172,7 +172,7 @@ const CollapsibleDrawer = ({ history = [], isOpen, onToggle }) => {
 
             {/* 3. Slide-in Drawer Container */}
             <div
-                className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-[100] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out font-sans ${
+                className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-sf-surface border-l border-gray-200 dark:border-gray-800 z-[100] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out font-sans ${
                     isOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}
             >
@@ -183,10 +183,10 @@ const CollapsibleDrawer = ({ history = [], isOpen, onToggle }) => {
                             <ShieldCheck size={20} />
                         </div>
                         <div>
-                            <h2 className="font-black text-gray-900 dark:text-white text-base leading-tight">
+                            <h2 className="font-black text-sf-text text-base leading-tight">
                                 Sample Audit Trail
                             </h2>
-                            <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                            <p className="text-[11px] text-sf-muted font-medium">
                                 ISO/IEC 17025 Defensible Event Log
                             </p>
                         </div>
@@ -238,7 +238,7 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
         return (
             <div className="relative pl-7">
                 {/* Timeline Dot */}
-                <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-white dark:bg-gray-900 border-[3px] border-emerald-600 z-10 shadow-sm"></div>
+                <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-sf-surface border-[3px] border-emerald-600 z-10 shadow-sm"></div>
 
                 <div className="flex flex-col gap-1.5 p-3.5 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-100/60 dark:border-emerald-900/40 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all">
                     <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">{formatTime(event.timestamp)}</span>
@@ -249,12 +249,12 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
                         onClick={() => setExpanded(!expanded)}
                     >
                         <span>{event.label}</span>
-                        <div className="p-1 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xs">
+                        <div className="p-1 rounded-lg bg-sf-surface border border-sf-divider shadow-xs">
                             {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </div>
                     </div>
 
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5 pt-0.5">
+                    <div className="text-[11px] text-sf-muted font-semibold flex items-center gap-1.5 pt-0.5">
                         <div className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-[9px] font-bold">
                             {event.performedByName?.charAt(0) || 'U'}
                         </div>
@@ -266,7 +266,7 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
                         <div className="mt-2.5 pl-3 border-l-2 border-emerald-200 dark:border-emerald-800 space-y-2 animate-in fade-in duration-200">
                             {event.members.map((member, i) => (
                                 <div key={i} className="flex flex-col gap-0.5">
-                                    <div className="text-[11px] text-gray-700 dark:text-gray-300 font-bold flex items-center gap-1.5">
+                                    <div className="text-[11px] text-sf-muted font-bold flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                                         {getAnalysisDisplayName(member.analysisCode, member.analysisName)}
                                     </div>
@@ -289,12 +289,12 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
     return (
         <div className="relative pl-7 group">
             {/* Timeline Icon */}
-            <div className="absolute -left-3 top-0.5 p-1 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl z-10 shadow-sm transition-all group-hover:border-emerald-500 group-hover:scale-105">
+            <div className="absolute -left-3 top-0.5 p-1 bg-sf-surface border-2 border-sf-divider rounded-xl z-10 shadow-sm transition-all group-hover:border-emerald-500 group-hover:scale-105">
                 {getIcon(event.action)}
             </div>
 
             <div className="flex flex-col gap-1 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
-                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 transition-colors">
+                <span className="text-[10px] font-bold text-sf-muted group-hover:text-emerald-600 transition-colors">
                     {formatTime(event.timestamp)}
                 </span>
 
@@ -311,7 +311,7 @@ const TimelineItem = ({ event, humanizeAction, getIcon, formatTime }) => {
 
                 {/* Extra Details / Reason */}
                 {(event.reason || (event.details && !humanizeAction(event).includes(event.details))) && (
-                    <div className="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div className="mt-1.5 text-[11px] text-sf-muted bg-sf-canvas p-2.5 rounded-xl border border-sf-divider">
                         {event.reason && (
                             <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold mb-1 text-[10px] uppercase tracking-wider">
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>

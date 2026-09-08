@@ -51,8 +51,8 @@ const SampleTimeline = ({ currentStatus, history = [], episodes = [], className 
     };
 
     return (
-        <div className={`bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-y-auto ${className}`}>
-            <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
+        <div className={`bg-sf-surface p-6 rounded-xl border border-sf-divider overflow-y-auto ${className}`}>
+            <h3 className="font-bold text-sf-text mb-6 flex items-center gap-2">
                 <Clock size={16} /> Workflow Timeline
             </h3>
 
@@ -86,7 +86,7 @@ const SampleTimeline = ({ currentStatus, history = [], episodes = [], className 
 
             <div className="space-y-0 relative">
                 {/* Vertical Line */}
-                <div className="absolute top-4 bottom-4 left-3.5 w-0.5 bg-gray-100 dark:bg-gray-700 -z-10" />
+                <div className="absolute top-4 bottom-4 left-3.5 w-0.5 bg-sf-raised -z-10" />
 
                 {STEPS.map((step, idx) => {
                     const { entry, isCurrent, isPassed } = getStepStatus(step.id, idx);
@@ -99,10 +99,10 @@ const SampleTimeline = ({ currentStatus, history = [], episodes = [], className 
                         <div key={step.id} className={`relative flex gap-4 pb-8 ${isPassed && !entry ? 'opacity-50' : ''}`}>
                             {/* Node */}
                             <div className={`
-                                w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 z-10 transition-colors bg-white dark:bg-gray-800
+                                w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 z-10 transition-colors bg-sf-surface
                                 ${isCurrent ? 'border-blue-600 text-blue-600 shadow-lg ring-4 ring-blue-50 dark:ring-blue-900/30' :
                                     isPassed ? (entry ? 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950/20' : 'border-gray-300 text-gray-300') :
-                                        'border-gray-200 dark:border-gray-700 text-gray-200 dark:text-gray-600'}
+                                        'border-sf-divider text-gray-200 dark:text-gray-600'}
                             `}>
                                 {isCurrent ? <ArrowDown size={14} className="animate-bounce" /> :
                                     isPassed ? (entry ? <CheckCircle size={14} /> : <Circle size={14} />) :
@@ -112,17 +112,17 @@ const SampleTimeline = ({ currentStatus, history = [], episodes = [], className 
                             {/* Content */}
                             <div className={`flex-1 pt-1 ${isCurrent ? 'scale-[1.02] origin-left' : ''}`}>
                                 <div className="flex justify-between items-start">
-                                    <span className={`text-xs font-bold uppercase tracking-wider ${isCurrent ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                                    <span className={`text-xs font-bold uppercase tracking-wider ${isCurrent ? 'text-blue-700 dark:text-blue-400' : 'text-sf-muted'}`}>
                                         {step.group}
                                     </span>
                                     {step.role && (
-                                        <span className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full font-medium">
+                                        <span className="text-[10px] px-2 py-0.5 bg-sf-raised text-gray-500 dark:text-gray-300 rounded-full font-medium">
                                             {step.role}
                                         </span>
                                     )}
                                 </div>
 
-                                <h4 className={`font-bold mt-1 ${isCurrent ? 'text-gray-900 dark:text-gray-100 text-base' : 'text-gray-700 dark:text-gray-300'}`}>
+                                <h4 className={`font-bold mt-1 ${isCurrent ? 'text-gray-900 dark:text-gray-100 text-base' : 'text-sf-muted'}`}>
                                     {step.label}
                                 </h4>
 
@@ -131,16 +131,16 @@ const SampleTimeline = ({ currentStatus, history = [], episodes = [], className 
                                     <div className={`mt-2 p-3 rounded-lg border text-sm ${isCurrent ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900' : 'bg-gray-50 dark:bg-gray-700/50 border-transparent'}`}>
                                         {entry ? (
                                             <>
-                                                <div className="flex items-center gap-2 mb-1 text-gray-700 dark:text-gray-200 font-medium">
+                                                <div className="flex items-center gap-2 mb-1 text-sf-text font-medium">
                                                     <User size={12} /> {entry.performedBy || entry.changedBy || 'System'}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                <div className="flex items-center gap-2 text-xs text-sf-muted">
                                                     <Clock size={12} /> {new Date(entry.timestamp).toLocaleString(undefined, {
                                                         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                                     })}
                                                 </div>
                                                 {entry.reason && (
-                                                    <div className="mt-2 text-xs italic text-gray-600 dark:text-gray-300 border-l-2 border-gray-300 dark:border-gray-600 pl-2">
+                                                    <div className="mt-2 text-xs italic text-sf-muted border-l-2 border-sf-divider pl-2">
                                                         "{entry.reason}"
                                                     </div>
                                                 )}

@@ -66,12 +66,12 @@ export default function WorkflowTimeline({ snapshots, currentIndex, onIndexChang
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+        <div className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm p-4">
             <div className="flex items-center gap-4">
                 {/* Play/Pause */}
                 <button
                     onClick={() => playing ? stop() : play()}
-                    className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                    className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-sf-emerald hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
                 >
                     {playing ? <Pause size={16} /> : <Play size={16} />}
                 </button>
@@ -114,8 +114,8 @@ export default function WorkflowTimeline({ snapshots, currentIndex, onIndexChang
             {/* Current event label */}
             {current && (
                 <div className="mt-2 flex items-center justify-between text-xs">
-                    <span className="text-gray-500 dark:text-gray-400">{formatTime(current.timestamp)}</span>
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400 truncate ml-4">{current.label}</span>
+                    <span className="text-sf-muted">{formatTime(current.timestamp)}</span>
+                    <span className="font-medium text-sf-emerald truncate ml-4">{current.label}</span>
                     <span className="text-gray-400 ml-auto">{currentIndex + 1}/{total}</span>
                 </div>
             )}
