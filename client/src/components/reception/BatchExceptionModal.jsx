@@ -12,6 +12,14 @@ const PRESET_REASONS = [
 ];
 
 const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
+    const [status, setStatus] = useState(sample?.status || 'ACCEPTED');
+    const [rejectionReason, setRejectionReason] = useState(sample?.rejectionReason || '');
+    const [receivedMass, setReceivedMass] = useState(sample?.receivedMass !== undefined && sample?.receivedMass !== null ? sample.receivedMass : '');
+    const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || 'MOIST');
+    const [notes, setNotes] = useState(sample?.notes || '');
+    const [photos, setPhotos] = useState(sample?.intakePhotos || []);
+    const [uploading, setUploading] = useState(false);
+
     React.useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e) => {
@@ -22,14 +30,6 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
     }, [isOpen, onClose]);
 
     if (!isOpen || !sample) return null;
-
-    const [status, setStatus] = useState(sample.status || 'ACCEPTED');
-    const [rejectionReason, setRejectionReason] = useState(sample.rejectionReason || '');
-    const [receivedMass, setReceivedMass] = useState(sample.receivedMass !== undefined && sample.receivedMass !== null ? sample.receivedMass : '');
-    const [moistureOnArrival, setMoistureOnArrival] = useState(sample.moistureOnArrival || 'MOIST');
-    const [notes, setNotes] = useState(sample.notes || '');
-    const [photos, setPhotos] = useState(sample.intakePhotos || []);
-    const [uploading, setUploading] = useState(false);
 
     const handlePhotoUpload = async (e) => {
         const files = Array.from(e.target.files || []);

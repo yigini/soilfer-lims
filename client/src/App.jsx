@@ -176,25 +176,26 @@ const Layout = ({ children }) => {
 
             {/* Sidebar */}
             <aside className={`
-                ${sidebarWidth} bg-sf-surface flex flex-col fixed h-full z-50 transition-all duration-300 border-r border-sf-divider shadow-sm font-sans
+                ${sidebarWidth} bg-[var(--sf-sidebar)] text-[var(--sf-side-text)] flex flex-col fixed h-full z-50 transition-all duration-300 border-r border-black/20 shadow-md font-sans
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
-                <div className="h-16 flex items-center justify-between px-4 border-b border-sf-divider">
+                <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
                     {sidebarCollapsed ? (
                         <img 
-                            src="/assets/img/soilfer-logo.png" 
+                            src="/assets/img/soilfer-logo-white.png" 
                             alt="SoilFER" 
                             className="h-8 w-8 object-contain mx-auto" 
+                            onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/soilfer-logo.png'; }}
                         />
                     ) : (
                         <img 
-                            src={siteLogo} 
+                            src={isCustomLogo ? theme.logoUrl : '/assets/img/logo-dark.png'} 
                             alt="SoilFER LIMS" 
                             className="h-10 w-auto object-contain transition-all duration-200" 
-                            onError={(e) => { e.target.onerror = null; e.target.src = defaultSiteLogo; }} 
+                            onError={(e) => { e.target.onerror = null; e.target.src = '/assets/img/logo-dark.png'; }} 
                         />
                     )}
-                    <button className="md:hidden p-2 text-sf-muted hover:text-sf-text" onClick={() => setIsSidebarOpen(false)}>
+                    <button className="md:hidden p-2 text-[var(--sf-side-muted)] hover:text-[var(--sf-side-text)]" onClick={() => setIsSidebarOpen(false)}>
                         <X size={20} />
                     </button>
                 </div>
@@ -208,27 +209,29 @@ const Layout = ({ children }) => {
                                 onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5'} py-2.5 rounded-lg text-sm transition-all ${
                                     isActive
-                                        ? 'bg-sf-primary text-sf-on-primary font-semibold shadow-sm'
-                                        : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
+                                        ? 'bg-[var(--sf-side-active)] text-[var(--sf-side-text)] font-semibold shadow-[inset_3px_0_0_var(--sf-primary)]'
+                                        : 'text-[var(--sf-side-muted)] hover:text-[var(--sf-side-text)] hover:bg-[var(--sf-side-active)]/60'
                                 }`}
                                 title={sidebarCollapsed ? item.label : undefined}
                             >
-                                <item.icon size={19} />
+                                <item.icon size={19} className={isActive ? 'text-[var(--sf-primary)]' : 'text-[var(--sf-side-muted)]'} />
                                 {!sidebarCollapsed && <span className="font-medium truncate">{item.label}</span>}
                             </Link>
                         );
                     })}
                 </nav>
                 {/* Collapse toggle (desktop only) */}
-                <div className="hidden md:block border-t border-sf-divider p-2">
+                <div className="hidden md:block border-t border-white/10 p-2">
                     <button
                         onClick={toggleCollapse}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-all text-xs font-semibold"
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[var(--sf-side-muted)] hover:text-[var(--sf-side-text)] hover:bg-[var(--sf-side-active)]/50 transition-all text-xs font-semibold"
                         title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                     >
                         {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <><PanelLeftClose size={18} /><span>Collapse</span></>}
                     </button>
                 </div>
+                {/* Decorative Soil-Band Branding (Signature Identity) */}
+                <div className="sf-soil-bands w-full" aria-hidden="true" />
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0">

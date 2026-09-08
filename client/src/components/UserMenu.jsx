@@ -17,14 +17,14 @@ export const UserMenu = () => {
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sf-hover text-sf-text transition-colors"
                 title="User Menu"
             >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-[var(--sf-earth-bg)] text-[var(--sf-earth)] flex items-center justify-center font-bold text-sm shadow-sm border border-sf-divider">
                     {user?.name?.charAt(0) || 'U'}
                 </div>
                 <div className="hidden md:block text-left">
                     <div className="text-sm font-semibold text-sf-text">
                         {user?.name || 'User'}
                     </div>
-                    <div className="text-xs text-sf-muted">
+                    <div className="text-[11px] text-sf-muted font-medium tracking-wide">
                         {user?.role?.replace(/_/g, ' ')}
                     </div>
                 </div>
@@ -49,9 +49,9 @@ export const UserMenu = () => {
                     {/* Dropdown */}
                     <div className="absolute right-0 mt-2 w-64 bg-sf-surface rounded-xl shadow-xl z-50 border border-sf-divider overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                         {/* User Info */}
-                        <div className="p-4 border-b border-sf-divider bg-sf-raised/40">
+                        <div className="p-4 border-b border-sf-divider bg-sf-inset">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-md">
+                                <div className="w-12 h-12 rounded-full bg-[var(--sf-earth-bg)] text-[var(--sf-earth)] flex items-center justify-center font-bold text-lg shadow-sm border border-sf-divider">
                                     {user?.name?.charAt(0) || 'U'}
                                 </div>
                                 <div className="flex-1 min-w-0">

@@ -461,7 +461,7 @@ export default function WorkbenchShell({
         <div className="flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans">
             {/* Top Ribbon */}
             <div className="flex items-center justify-between text-[11px] text-sf-muted border-b border-sf-divider pb-2">
-                <span>SoilFER LIMS / Technician Workspace</span>
+                <span className="sf-kicker">SoilFER LIMS / Technician Workspace</span>
                 <span>Role: {user?.role} · Lab: {user?.labId || 'Default'}</span>
             </div>
 
@@ -479,19 +479,19 @@ export default function WorkbenchShell({
                 {/* Save / Sync Status Pill */}
                 <div className="flex items-center gap-2">
                     {syncStatus === 'saving' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">
                             <RefreshCw size={12} className="animate-spin" /> Saving drafts...
                         </span>
                     ) : syncStatus === 'conflict' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border border-[var(--sf-warning)]/20">
                             <AlertTriangle size={12} /> {conflictCount} Conflict{conflictCount === 1 ? '' : 's'} to compare
                         </span>
                     ) : syncStatus === 'offline' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-700 dark:text-red-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border border-[var(--sf-danger)]/20">
                             Offline · Local edits preserved
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-success-bg)] text-[var(--sf-success)] border border-[var(--sf-success)]/20">
                             <CheckCircle2 size={12} /> ✓ Drafts saved
                         </span>
                     )}
@@ -534,7 +534,7 @@ export default function WorkbenchShell({
                         }}
                         className={`px-4 py-2.5 border-b-2 transition-colors ${
                             activeTab === tab.id
-                                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 font-bold'
+                                ? 'border-sf-primary text-sf-primary font-bold'
                                 : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >

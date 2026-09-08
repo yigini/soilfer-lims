@@ -14,20 +14,20 @@ export default function QueueSummary({
 
     const getToneClasses = (tone, isActive) => {
         if (isActive) {
-            return 'ring-2 ring-emerald-600 dark:ring-emerald-400 bg-sf-surface shadow-md border-emerald-500/50';
+            return 'border-sf-primary bg-[var(--sf-selected)] shadow-[inset_0_-3px_var(--sf-primary)]';
         }
         if (tone === 'problem') {
-            return 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/60 hover:border-rose-400 dark:hover:border-rose-700';
+            return 'bg-[var(--sf-danger-bg)] border-[var(--sf-danger)]/30 hover:border-[var(--sf-danger)]/60';
         }
         if (tone === 'warn') {
-            return 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700';
+            return 'bg-[var(--sf-warning-bg)] border-[var(--sf-warning)]/30 hover:border-[var(--sf-warning)]/60';
         }
-        return 'bg-sf-surface/80 border-sf-divider/80 hover:border-gray-300 dark:hover:border-gray-600';
+        return 'bg-sf-surface border-sf-divider hover:border-sf-control hover:bg-sf-hover/30';
     };
 
     const getValueColor = (tone) => {
-        if (tone === 'problem') return 'text-rose-700 dark:text-rose-400';
-        if (tone === 'warn') return 'text-amber-700 dark:text-amber-400';
+        if (tone === 'problem') return 'text-[var(--sf-danger)]';
+        if (tone === 'warn') return 'text-[var(--sf-warning)]';
         return 'text-sf-text';
     };
 

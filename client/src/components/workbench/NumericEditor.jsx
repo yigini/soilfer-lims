@@ -42,13 +42,13 @@ export default function NumericEditor({
                 placeholder={placeholder}
                 aria-label={ariaLabel}
                 aria-invalid={isInvalid}
-                className={`w-28 px-2.5 py-1.5 text-sm font-mono rounded-md border transition-colors
+                className={`w-28 px-2.5 py-1.5 text-sm font-mono tabular-nums rounded-md border transition-colors
                     bg-sf-surface text-sf-text placeholder:text-sf-muted
                     ${isInvalid
-                        ? 'border-rose-500 focus:ring-rose-400 focus:border-rose-500'
-                        : 'border-sf-divider focus:ring-sf-primary focus:border-sf-primary'
+                        ? 'border-[var(--sf-danger)] focus:ring-[var(--sf-danger)] focus:border-[var(--sf-danger)]'
+                        : 'border-sf-control focus:ring-sf-primary focus:border-sf-primary'
                     }
-                    ${disabled ? 'opacity-60 bg-sf-raised cursor-not-allowed' : ''}
+                    ${disabled ? 'opacity-70 bg-sf-inset text-sf-muted cursor-not-allowed' : ''}
                     focus:outline-none focus:ring-1`}
             />
             {unit && (

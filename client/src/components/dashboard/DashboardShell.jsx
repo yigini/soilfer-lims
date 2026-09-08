@@ -70,7 +70,7 @@ export default function DashboardShell({
             <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-sf-divider">
                 <div>
                     {eyebrow && (
-                        <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
+                        <div className="sf-kicker mb-1.5">
                             {eyebrow}
                         </div>
                     )}
@@ -78,7 +78,7 @@ export default function DashboardShell({
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-sm text-sf-muted mt-1 max-w-2xl">
+                        <p className="text-sm text-sf-muted mt-1 max-w-2xl leading-relaxed">
                             {subtitle}
                         </p>
                     )}
@@ -88,7 +88,7 @@ export default function DashboardShell({
                     <div className="flex-shrink-0">
                         <Link
                             to={primaryAction.route}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-sf-primary text-sf-on-primary hover:brightness-95 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-sf-focus focus:ring-offset-2"
                         >
                             <span>{primaryAction.label}</span>
                             <ArrowUpRight className="w-4 h-4" />
@@ -98,7 +98,7 @@ export default function DashboardShell({
             </header>
 
             {/* Status & Scope Control Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-sf-canvas/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-sf-surface p-3.5 rounded-xl border border-sf-divider shadow-sm">
                 <ScopeSelector
                     scope={scope}
                     userRole={role}
@@ -161,19 +161,19 @@ export default function DashboardShell({
                 {/* Side Rail */}
                 {hasSideContent && !sideRailCollapsed && (
                     <aside className="xl:col-span-4 2xl:col-span-3 col-span-12 space-y-6">
-                    {/* Shift Notes / Operational Guidance */}
+                    {/* Shift Notes / Operational Guidance (Warm Ochre SoilFER Signature) */}
                     {shiftNotes && (
-                        <section className="bg-sf-surface/80 p-5 rounded-xl border border-sf-divider/80 shadow-sm">
-                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sf-muted mb-2">
+                        <section className="sf-instructions-box p-5 shadow-sm">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--sf-ochre)] mb-2">
                                 <BookOpen className="w-3.5 h-3.5" />
                                 <span>Shift Notes</span>
                             </div>
                             <h2 className="text-sm font-bold text-sf-text mb-2">
                                 {shiftNotes.title || 'Role Responsibilities'}
                             </h2>
-                            <div className="text-xs text-sf-muted space-y-2 leading-relaxed">
+                            <div className="text-xs text-sf-text space-y-2 leading-relaxed">
                                 {Array.isArray(shiftNotes.items) ? (
-                                    <ul className="list-disc pl-4 space-y-1.5">
+                                    <ul className="list-disc pl-4 space-y-1.5 marker:text-[var(--sf-ochre)]">
                                         {shiftNotes.items.map((item, idx) => (
                                             <li key={idx}>{item}</li>
                                         ))}
@@ -187,7 +187,7 @@ export default function DashboardShell({
 
                     {/* Shortcuts / Continue Elsewhere */}
                     {shortcuts && shortcuts.length > 0 && (
-                        <section className="bg-sf-surface/80 p-5 rounded-xl border border-sf-divider/80 shadow-sm">
+                        <section className="bg-sf-surface p-5 rounded-xl border border-sf-divider shadow-sm">
                             <div className="text-xs font-bold uppercase tracking-wider text-sf-muted mb-3">
                                 Continue elsewhere
                             </div>
@@ -196,10 +196,10 @@ export default function DashboardShell({
                                     <Link
                                         key={idx}
                                         to={sc.route}
-                                        className="flex items-center justify-between p-2.5 rounded-lg border border-sf-divider/60 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-all group"
+                                        className="flex items-center justify-between p-2.5 rounded-lg border border-sf-divider hover:border-sf-primary/40 hover:bg-sf-hover transition-all group"
                                     >
                                         <div>
-                                            <div className="text-xs font-semibold text-sf-text group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                                            <div className="text-xs font-semibold text-sf-text group-hover:text-sf-primary transition-colors">
                                                 {sc.label}
                                             </div>
                                             {sc.description && (
@@ -208,7 +208,7 @@ export default function DashboardShell({
                                                 </div>
                                             )}
                                         </div>
-                                        <ArrowUpRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                                        <ArrowUpRight className="w-3.5 h-3.5 text-sf-muted group-hover:text-sf-primary transition-colors" />
                                     </Link>
                                 ))}
                             </div>
