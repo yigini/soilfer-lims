@@ -220,7 +220,7 @@ class TranslationService {
 
         // 1. Add all Dynamic Keys
         Object.entries(dynamicKeys).forEach(([key, enValue]) => {
-            const val = dbOverrides[key] !== undefined ? dbOverrides[key] : (targetStatic[key] || '');
+            const val = dbOverrides[key] !== undefined ? dbOverrides[key] : (targetStatic[key] || (targetCode === 'en' ? enValue : ''));
             const classification = classifyTerminologyKey(key);
             catalog[key] = {
                 group: 'Dynamic',
