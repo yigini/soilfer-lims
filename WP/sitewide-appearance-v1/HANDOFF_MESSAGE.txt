@@ -1,0 +1,37 @@
+Please proceed with the approved site-wide appearance redesign for SoilFER LIMS. The project owner reviewed the interactive mockup and asked Codex to give you all instructions directly in this chat. This is the current task; do not resume the earlier documentation or director-tutorial work.
+
+Correct project: LIMSI / LIMS Dev. Correct working folder: C:\Users\yigin\Documents\soilfer-lims. The complete local package is C:\Users\yigin\Documents\soilfer-lims\WP\sitewide-appearance-v1. Read the full implementation plan and acceptance checklist from disk, not just this message. The package is currently untracked: preserve it and include the relevant handoff assets with your work.
+
+# Antigravity implementation brief
+
+Work in **LIMSI / LIMS Dev**, folder `C:\Users\yigin\Documents\soilfer-lims`.
+
+Read this complete package before modifying the application:
+
+1. `WP/sitewide-appearance-v1/IMPLEMENTATION_PLAN.md`
+2. `WP/sitewide-appearance-v1/ACCEPTANCE_CHECKLIST.md`
+3. `WP/sitewide-appearance-v1/SOURCE_INVENTORY.md` and `source-inventory.json`
+4. Open `WP/sitewide-appearance-v1/appearance-preview.html` in a browser. Try Appearance → Dark, Profile → Appearance → save Dark, New session, temporary Light, and the worksheet/sample/map/equipment/dialog views.
+5. Read `tokens.json` and the mockup-only QA results/screenshots.
+
+The required behavior is explicit: **light everywhere by default; header switching lasts for the current tab/session; an explicit Profile save is permanent for that account until changed.** No OS-theme default, no permanent localStorage toggle, no preference leaking between shared-computer users. Dark must be a sleek graphite gray using the same semantic palette throughout the app.
+
+The mockup is a visual and interaction reference, not a replacement application or production code patch. Preserve existing routes, role restrictions, workflows, data entry, translations and approved branding. It demonstrates theme states using fictional data only. Do not copy its fake save/login behavior into production.
+
+Implement in the plan's phases, starting with the preference resolver/API and semantic tokens, then shared components, laboratory workflows, specialized chart/map/print adapters, and all remaining routes. Resolve the actual CSS causes; do not use inversion, broad palette-selector overrides or blanket `!important` to conceal missing themes. Do not remount pages on a theme toggle or lose unsaved data.
+
+Use the source inventory as a review candidate list, not a proven bug list. Cover every route, role, overlay and state in the acceptance matrix. Keep white paper reports/labels explicitly scoped while theming their surrounding UI. Validate the final rendered contrast, not just color swatches.
+
+Use an isolated feature branch and focused commits. The appearance preference requires an additive schema migration and authenticated self-service API. Never reset/reseed production. Build and test in local/staging fixtures; preserve the existing release process, backup before production migration, and deploy only the verified commit when proceeding with the already-authorized application release. Do not claim deployed until the live revision and read-only smoke tests confirm it.
+
+Keep updates brief and friendly: what you found, what you fixed, what remains. At completion report the PR/commit, test evidence, route/theme/state coverage, migration and rollback result, screenshots, intentional white-content exceptions and any remaining blockers. Do not promise zero defects or call uninspected areas complete.
+
+
+Additional completion instructions:
+- The user approved the graphite design baseline. You may proceed with implementation; give a short acknowledgement after reading the files and state your first phase. Do not stop at drafting another plan.
+- The palette must reach every real component and state, including all roles, shared dialogs, admin tabs, spectral graphs, workflow nodes and edges, menus, notifications, and public viewer chrome. A white printed document is a deliberate scoped exception. The mockup sidebar is only a preview selector, not a replacement for the product navigation.
+- Explicitly test refresh, logout, expired authentication, another user on the same workstation, saved profile defaults, temporary overrides, API failure, and switching while a technician has unsaved entries. Handle actual authentication expiry separately from an ordinary permission-denied 403.
+- The 11 interaction checks, 60 layout cases, and 82 contrast pairs in this package validate the mockup only. They are not evidence that the real LIMS is already fixed. Do not weaken lint rules or remove tests just to obtain green output.
+- Use the existing GitHub and safe release process: focused branch and PR, passing relevant checks, online database backup before additive migration, verified merge/commit, then production deployment under the existing authorization. Preserve all lab data and result/approval rules. Create/update issues and close only the ones whose acceptance checks actually pass.
+- First finish the scope matrix; do not stop after changing ThemeContext and a few common styles. Report uninspected screens or remaining blockers honestly.
+- Use friendly, short plain-English updates: what you found, what you fixed, and what happens next. At the end provide the PR/commit, deployed revision, screenshots, test evidence, route/state coverage, and any intentional exceptions.

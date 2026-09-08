@@ -19,6 +19,7 @@ model User {
   name               String?
   labId             String?
   language          String?    // 'en', 'es', etc. Preference override
+  themePreference   String     @default("light")
   countries          String?    // JSON string: Array of country codes: ["GTM", "HND"]
   projects           String?    // JSON string: Array of project codes: ["SoilFER-USA"]
   isActive           Boolean    @default(true)

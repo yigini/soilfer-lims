@@ -1,0 +1,2685 @@
+{
+  "revision": "64be170c3a25ab8b0157e209e81146cfc2f51331",
+  "note": "Static candidates, not confirmed visual defects. Class counts include correctly paired light/dark utilities. Inspect each actual rendered state.",
+  "files": [
+    {
+      "file": "client/src/App.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 28,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 63,
+          "excerpt": "<span className=\"text-xs font-bold text-gray-400 uppercase tracking-widest\">Loading View...</span>"
+        },
+        {
+          "line": 179,
+          "excerpt": "${sidebarWidth} bg-white dark:bg-gray-800 flex flex-col fixed h-full z-50 transition-all duration-300 border-r border-gray-200 dark:border-gray-700 shadow-lg font-sans"
+        },
+        {
+          "line": 209,
+          "excerpt": "className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-all ${isActive ? 'bg-emerald-700 dark:bg-emerald-800 text-white "
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 250,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 169,
+          "excerpt": "<p className=\"text-sm font-medium text-gray-500 dark:text-gray-400\">Loading Master Analysis Catalogue...</p>"
+        },
+        {
+          "line": 177,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 max-w-4xl mx-auto space-y-6 font-sans animate-in fade-in dura"
+        },
+        {
+          "line": 194,
+          "excerpt": "className=\"px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-bold transitio"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 274,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 282,
+          "excerpt": ": 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+        },
+        {
+          "line": 292,
+          "excerpt": ": 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+        },
+        {
+          "line": 302,
+          "excerpt": ": 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "colorLiteralOccurrences": 3,
+      "paletteUtilityOccurrences": 231,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 18,
+          "excerpt": "colors: { primary: '#047857', secondary: '#111827', accent: '#D97706' },"
+        },
+        {
+          "line": 132,
+          "excerpt": "<p className=\"text-gray-600 dark:text-gray-400 mt-1\">"
+        },
+        {
+          "line": 151,
+          "excerpt": "<div className=\"card-base bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/CategoryManager.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 62,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 59,
+          "excerpt": "<p className=\"text-sm font-medium text-gray-500 dark:text-gray-400\">Loading Property Categories...</p>"
+        },
+        {
+          "line": 66,
+          "excerpt": "<div className=\"flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 sh"
+        },
+        {
+          "line": 69,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400 mt-0.5\">Organize test parameters into standard analytical domains (Physical, Chemical, Biological, Spectral).</p>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/GroupManager.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 90,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 64,
+          "excerpt": "<p className=\"text-sm font-medium text-gray-500 dark:text-gray-400\">Loading Analysis Packages...</p>"
+        },
+        {
+          "line": 71,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 max-w-3xl mx-auto space-y-6 font-sans animate-in fade-in dura"
+        },
+        {
+          "line": 88,
+          "excerpt": "className=\"px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-bold transitio"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/MethodologyManager.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 15,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 63,
+          "excerpt": "<div className=\"bg-white p-6 rounded shadow-sm border max-w-2xl mx-auto\">"
+        },
+        {
+          "line": 142,
+          "excerpt": "<div key={m.id || m.name + m.analysisCode} className=\"bg-white border p-4 rounded flex justify-between items-center hover:shadow-sm\">"
+        },
+        {
+          "line": 152,
+          "excerpt": "<button onClick={() => setEditingItem({ ...m, _isNew: false })} className=\"text-gray-400 hover:text-blue-600\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/AnalysisConfig.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 19,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 42,
+          "excerpt": "? 'bg-white dark:bg-gray-700 text-emerald-800 dark:text-emerald-300 shadow-sm border border-gray-200/80 dark:border-gray-600'"
+        },
+        {
+          "line": 43,
+          "excerpt": ": 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'"
+        },
+        {
+          "line": 46,
+          "excerpt": "<Icon size={16} className={isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-400'} />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/common/ExportModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 45,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 85,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border border-gray-200 dark:border-gray-700\" onClick={e => e"
+        },
+        {
+          "line": 95,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">Generate CSV reports</p>"
+        },
+        {
+          "line": 116,
+          "excerpt": "<div className=\"text-xs text-gray-500 dark:text-gray-400\">Export currently visible columns and rows</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/common/InfoTooltip.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 6,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 61,
+          "excerpt": "<HelpCircle size={14} className=\"text-gray-400 hover:text-blue-500 cursor-help transition-colors\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 97,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 66,
+          "excerpt": "color: { dark: '#000000', light: '#ffffff' },"
+        },
+        {
+          "line": 144,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 dark:border-gray-700 my-8\">"
+        },
+        {
+          "line": 155,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/common/QRScanner.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 12,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 35,
+          "excerpt": "<div className=\"bg-white rounded-2xl w-full max-w-md overflow-hidden relative\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 40,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 81,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-2xl\">"
+        },
+        {
+          "line": 115,
+          "excerpt": "<span className=\"text-gray-500 dark:text-gray-400 font-medium\">"
+        },
+        {
+          "line": 166,
+          "excerpt": "<section className=\"bg-white dark:bg-gray-800/80 p-5 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/EmptyState.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 23,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 23,
+          "excerpt": "<p className=\"text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-sm\">"
+        },
+        {
+          "line": 43,
+          "excerpt": "<SearchX className=\"w-10 h-10 text-gray-400 dark:text-gray-500 mb-3\" />"
+        },
+        {
+          "line": 47,
+          "excerpt": "<p className=\"text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-sm\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 100,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 22,
+          "excerpt": "<span className=\"text-[10px] text-gray-400\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 83,
+          "excerpt": "<span className=\"text-gray-400 font-medium\">Loading dashboard...</span>"
+        },
+        {
+          "line": 109,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/OversightDashboard.jsx",
+      "colorLiteralOccurrences": 11,
+      "paletteUtilityOccurrences": 40,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 22,
+          "excerpt": "<span className=\"text-[10px] text-gray-400\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 38,
+          "excerpt": "<span className=\"text-gray-400 font-medium\">Loading oversight dashboard...</span>"
+        },
+        {
+          "line": 67,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/QueueSummary.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 14,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 17,
+          "excerpt": "return 'ring-2 ring-emerald-600 dark:ring-emerald-400 bg-white dark:bg-gray-800 shadow-md border-emerald-500/50';"
+        },
+        {
+          "line": 25,
+          "excerpt": "return 'bg-white dark:bg-gray-800/80 border-gray-200 dark:border-gray-700/80 hover:border-gray-300 dark:hover:border-gray-600';"
+        },
+        {
+          "line": 61,
+          "excerpt": "<span className=\"text-xs font-medium text-gray-500 dark:text-gray-400 truncate\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 157,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 22,
+          "excerpt": "<span className=\"text-[10px] text-gray-400\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 41,
+          "excerpt": "<span className=\"text-gray-400 font-medium\">{t('reception.loading', 'Loading reception console...')}</span>"
+        },
+        {
+          "line": 128,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/ScopeSelector.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 16,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 26,
+          "excerpt": "<div className=\"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 27,
+          "excerpt": "<Building2 className=\"w-3.5 h-3.5 text-gray-400\" />"
+        },
+        {
+          "line": 54,
+          "excerpt": "<div className=\"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 54,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 20,
+          "excerpt": "<span className=\"text-[10px] text-gray-400\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 36,
+          "excerpt": "<span className=\"text-gray-400 font-medium\">Loading your workspace...</span>"
+        },
+        {
+          "line": 59,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/UpdateStatus.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 6,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 37,
+          "excerpt": "<div className=\"flex items-center gap-3 text-xs font-medium text-gray-500 dark:text-gray-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 93,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 65,
+          "excerpt": "<section aria-label=\"Work queue panel\" className=\"bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden flex flex-col\">"
+        },
+        {
+          "line": 73,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400 mt-0.5\">"
+        },
+        {
+          "line": 87,
+          "excerpt": "<PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-emerald-600' : 'text-gray-400'}`} />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 95,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 74,
+          "excerpt": "<div className=\"w-full max-w-2xl bg-white dark:bg-gray-800 h-full overflow-y-auto shadow-2xl animate-slide-in-right font-sans\" onClick={e => e.stopPropagation()}>"
+        },
+        {
+          "line": 76,
+          "excerpt": "<div className=\"flex items-center justify-center h-full text-gray-400\"><RefreshCw className=\"animate-spin mr-2\" /> Loading...</div>"
+        },
+        {
+          "line": 78,
+          "excerpt": "<div className=\"p-10 text-center text-gray-400\">Asset not found</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/equipment/LogEventModal.jsx",
+      "colorLiteralOccurrences": 1,
+      "paletteUtilityOccurrences": 42,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 50,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden font-sans\" onClick={e => e.stopPropagation()}>"
+        },
+        {
+          "line": 57,
+          "excerpt": "<button onClick={onClose} className=\"text-gray-400 hover:text-gray-600\"><X size={20} /></button>"
+        },
+        {
+          "line": 64,
+          "excerpt": "<div className=\"text-gray-400 mb-1\">{t('equipment.assetName', 'Target Instrument')}</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/equipment/RegisterAssetModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 56,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 74,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden font-sans\" onClick={e => e.stopPropagation()}>"
+        },
+        {
+          "line": 83,
+          "excerpt": "<button onClick={onClose} className=\"text-gray-400 hover:text-gray-600\"><X size={20} /></button>"
+        },
+        {
+          "line": 97,
+          "excerpt": "className=\"w-full px-4 py-2.5 rounded-xl border dark:border-gray-600 bg-white dark:bg-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition-shadow\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/Footer.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 20,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 11,
+          "excerpt": "<footer className=\"mt-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 backdrop-blur-sm\">"
+        },
+        {
+          "line": 15,
+          "excerpt": "<div className=\"flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500\">"
+        },
+        {
+          "line": 16,
+          "excerpt": "<span className=\"font-semibold text-gray-500 dark:text-gray-400\">LIMS</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/ForcePasswordChangeModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 18,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 61,
+          "excerpt": "<div className=\"bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300 border border-emerald-100 dark:border"
+        },
+        {
+          "line": 65,
+          "excerpt": "<div className=\"absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/5 rounded-full blur-2xl\"></div>"
+        },
+        {
+          "line": 66,
+          "excerpt": "<div className=\"w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/20 shadow-xl\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/Header.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 30,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 49,
+          "excerpt": "<header className=\"h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 right-0 left-0 z-30 transition-colors duration-300\">"
+        },
+        {
+          "line": 81,
+          "excerpt": ": \"text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-gray-400\""
+        },
+        {
+          "line": 95,
+          "excerpt": ": \"text-gray-500 dark:text-gray-400\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/LanguageSwitcher.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 12,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 28,
+          "excerpt": "className=\"p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors\""
+        },
+        {
+          "line": 35,
+          "excerpt": "<div className=\"absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/messaging/MessagingCenter.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 219,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 247,
+          "excerpt": "<div className=\"text-xs text-gray-500 dark:text-gray-400 line-clamp-1\">{msg.body}</div>"
+        },
+        {
+          "line": 256,
+          "excerpt": "<div className=\"flex flex-col items-center justify-center h-full text-center text-gray-400 p-8\">"
+        },
+        {
+          "line": 259,
+          "excerpt": "<p className=\"text-xs mt-2 text-gray-400\">Start a new chat from the notification drawer</p>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 166,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 203,
+          "excerpt": "<p className=\"text-xs text-gray-400\">{t('ui.offline', 'offline')}</p>"
+        },
+        {
+          "line": 216,
+          "excerpt": ": \"text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200\""
+        },
+        {
+          "line": 233,
+          "excerpt": ": \"text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 102,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 64,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col border border-gray-100 dark:border-gray-700 overflow-hidden\">"
+        },
+        {
+          "line": 80,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400 mt-1\">"
+        },
+        {
+          "line": 87,
+          "excerpt": "className=\"p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/BatchExceptionModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 82,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 76,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]\">"
+        },
+        {
+          "line": 80,
+          "excerpt": "<div className=\"text-xs text-slate-400 font-bold uppercase tracking-wider\">Sample Exception Override (Item #{index + 1})</div>"
+        },
+        {
+          "line": 83,
+          "excerpt": "<button onClick={onClose} className=\"text-slate-400 hover:text-white p-1 rounded-lg transition-colors\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 211,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 221,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden text-center p-8\">"
+        },
+        {
+          "line": 235,
+          "excerpt": "<div className=\"text-xs text-gray-400 font-bold uppercase tracking-wider\">Consignment Identifier</div>"
+        },
+        {
+          "line": 303,
+          "excerpt": "<div className=\"text-xs text-slate-400 font-bold uppercase tracking-wider\">Archetype B / C Intake</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/ComplianceChecklist.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 62,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 170,
+          "excerpt": "<span className={`font-medium text-sm truncate ${isFail ? 'text-red-800 dark:text-red-400' : isNA ? 'text-gray-500 dark:text-gray-400' : isPending ? 'text-amber-900 dark:text-amber"
+        },
+        {
+          "line": 183,
+          "excerpt": ": 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:h"
+        },
+        {
+          "line": 193,
+          "excerpt": ": 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/FieldProvenanceCard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 65,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 53,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden\">"
+        },
+        {
+          "line": 64,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 71,
+          "excerpt": "<span className=\"font-mono text-xs font-bold px-2.5 py-1 bg-white dark:bg-gray-750 border rounded-lg text-gray-700 dark:text-gray-300\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/KeyboardShortcutsModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 36,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 37,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700\">"
+        },
+        {
+          "line": 48,
+          "excerpt": "<p className=\"text-[11px] text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 55,
+          "excerpt": "className=\"p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-400 hover:text-gray-600\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 91,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 237,
+          "excerpt": "color: '#2563eb',"
+        },
+        {
+          "line": 238,
+          "excerpt": "fillColor: '#3b82f6',"
+        },
+        {
+          "line": 413,
+          "excerpt": "<label className=\"block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 113,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 179,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]\">"
+        },
+        {
+          "line": 188,
+          "excerpt": "<div className=\"text-xs text-slate-400\">Institutional Delivery Manifests (CSV / XLSX)</div>"
+        },
+        {
+          "line": 191,
+          "excerpt": "<button onClick={onClose} className=\"text-slate-400 hover:text-white p-1 rounded-lg transition-colors\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/SampleMap.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 8,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 54,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1\">"
+        },
+        {
+          "line": 88,
+          "excerpt": "color: '#2563eb',"
+        },
+        {
+          "line": 89,
+          "excerpt": "fillColor: '#3b82f6',"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/WalkInForm.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 143,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 94,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 179,
+          "excerpt": ": 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'"
+        },
+        {
+          "line": 190,
+          "excerpt": ": 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/WedgeModeBar.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 34,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 45,
+          "excerpt": "<span className=\"text-slate-400\">Standard Desk Typing Mode</span>"
+        },
+        {
+          "line": 54,
+          "excerpt": "<span className=\"text-slate-400 text-[11px] font-medium\">Suffix:</span>"
+        },
+        {
+          "line": 75,
+          "excerpt": ": 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/report/ReportContent.css",
+      "colorLiteralOccurrences": 62,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 13,
+          "excerpt": "color: #1a1a1a;"
+        },
+        {
+          "line": 14,
+          "excerpt": "background: #fff;"
+        },
+        {
+          "line": 29,
+          "excerpt": "border-bottom: 3px solid #1e3a5f;"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "colorLiteralOccurrences": 14,
+      "paletteUtilityOccurrences": 4,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 24,
+          "excerpt": "critical: { symbol: '\u25bc\u25bc', color: '#dc2626', label: 'Critical' },"
+        },
+        {
+          "line": 25,
+          "excerpt": "attention: { symbol: '!', color: '#d97706', label: 'Attention' },"
+        },
+        {
+          "line": 26,
+          "excerpt": "low: { symbol: '\u25bc', color: '#d97706', label: 'Low' },"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 89,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 129,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-gray-200 dark:border-gray-700 overflow-hidden\">"
+        },
+        {
+          "line": 146,
+          "excerpt": "<X size={20} className=\"text-gray-400\" />"
+        },
+        {
+          "line": 236,
+          "excerpt": "<Search size={18} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 61,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 26,
+          "excerpt": "return <Activity size={14} className=\"text-gray-400\" />;"
+        },
+        {
+          "line": 154,
+          "excerpt": "className=\"fixed right-0 top-36 z-40 flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 px-3.5 py"
+        },
+        {
+          "line": 175,
+          "excerpt": "className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-[100] flex flex-col shadow-2xl transition-tra"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/ContextPanel.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 40,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 11,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 54,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 58,
+          "excerpt": "<div className=\"aspect-video bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center text-gray-400 text-xs\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 66,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 20,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh] overflow-hidden\">"
+        },
+        {
+          "line": 28,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400 mt-0.5\">"
+        },
+        {
+          "line": 32,
+          "excerpt": "<button onClick={onClose} className=\"p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-gray-600 transition-colors\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "colorLiteralOccurrences": 9,
+      "paletteUtilityOccurrences": 86,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 13,
+          "excerpt": "<path d=\"M16 0C7.2 0 0 7.2 0 16c0 12 16 26 16 26s16-14 16-26C32 7.2 24.8 0 16 0z\" fill=\"#2563eb\" stroke=\"#fff\" stroke-width=\"2\"/>"
+        },
+        {
+          "line": 14,
+          "excerpt": "<circle cx=\"16\" cy=\"15\" r=\"6\" fill=\"#fff\"/>"
+        },
+        {
+          "line": 15,
+          "excerpt": "<circle cx=\"16\" cy=\"15\" r=\"3\" fill=\"#2563eb\"/>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "colorLiteralOccurrences": 4,
+      "paletteUtilityOccurrences": 99,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 34,
+          "excerpt": "<div className=\"text-[11px] text-gray-400 font-medium uppercase tracking-wider\">{label}</div>"
+        },
+        {
+          "line": 36,
+          "excerpt": "{subtitle && <div className=\"text-xs text-gray-400 mt-0.5\">{subtitle}</div>}"
+        },
+        {
+          "line": 47,
+          "excerpt": "{Icon && <Icon size={14} className=\"text-gray-400\" />}"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/FieldSummary.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 13,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 26,
+          "excerpt": "<div className=\"bg-white border border-gray-200 rounded-lg p-3 mb-4 shadow-sm flex flex-wrap items-center justify-between gap-4\">"
+        },
+        {
+          "line": 33,
+          "excerpt": "<span className=\"block text-xs text-gray-400 uppercase tracking-wider\">Project</span>"
+        },
+        {
+          "line": 40,
+          "excerpt": "<Building className=\"w-4 h-4 text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/IntakeRequestCard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 33,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 48,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-100 dark:border-gray-700 overflow-hidden\">"
+        },
+        {
+          "line": 59,
+          "excerpt": "<div className=\"text-xs font-bold text-gray-400 uppercase mb-2\">Bundles</div>"
+        },
+        {
+          "line": 71,
+          "excerpt": "<div className=\"text-xs font-bold text-gray-400 uppercase mb-2\">Individual Parameters</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/MetadataEditorModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 23,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 103,
+          "excerpt": "className=\"w-full p-2 border border-gray-300 rounded-lg text-sm bg-white\""
+        },
+        {
+          "line": 113,
+          "excerpt": "<div className=\"bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/SampleSummary.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 116,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 37,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col mb-6 relative z-50 overflow-hidden transition-all hover:sh"
+        },
+        {
+          "line": 42,
+          "excerpt": "<button onClick={() => navigate(-1)} className=\"p-2.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl shadow-sm border border-gray-200 dark:border-gra"
+        },
+        {
+          "line": 72,
+          "excerpt": "<span className=\"font-mono text-xs text-gray-500 dark:text-gray-400 font-bold\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/StorageMovementModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 35,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 46,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700\">"
+        },
+        {
+          "line": 57,
+          "excerpt": "<div className=\"mb-4 text-xs text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 99,
+          "excerpt": "className=\"px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/SubmissionPanel.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 29,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 29,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 45,
+          "excerpt": ": 'bg-white text-gray-600 border-gray-300 hover:border-indigo-300'"
+        },
+        {
+          "line": 69,
+          "excerpt": "className=\"btn-secondary px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded font-bold text-sm hover:bg-indigo-50\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/WorkflowProgressBar.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 22,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 29,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-4\">"
+        },
+        {
+          "line": 38,
+          "excerpt": "<span className=\"text-sm font-medium text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 54,
+          "excerpt": "<span className=\"text-xs text-gray-500 dark:text-gray-400 font-medium\">Next:</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 170,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 239,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 relative flex flex-col h-full\">"
+        },
+        {
+          "line": 254,
+          "excerpt": ": 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'"
+        },
+        {
+          "line": 344,
+          "excerpt": "<thead className=\"bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SampleProgressBar.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 17,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 72,
+          "excerpt": "className={`w-8 h-8 rounded-full flex items-center justify-center border-2 z-10 bg-white transition-all cursor-help"
+        },
+        {
+          "line": 94,
+          "excerpt": "<User size={10} className=\"text-gray-400\" />"
+        },
+        {
+          "line": 98,
+          "excerpt": "<Clock size={10} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 66,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 56,
+          "excerpt": "<div className=\"sticky top-0 z-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-3 mb-4 shadow-sm px-4\">"
+        },
+        {
+          "line": 62,
+          "excerpt": "<Search className=\"absolute left-3 top-1/2 -translate-y-1/2 text-gray-400\" size={16} />"
+        },
+        {
+          "line": 73,
+          "excerpt": "className=\"absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterDrawer.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 43,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 56,
+          "excerpt": "<div className=\"relative w-full max-w-sm bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col h-full transform transition-transform dura"
+        },
+        {
+          "line": 82,
+          "excerpt": "<span className=\"text-sm text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors\">"
+        },
+        {
+          "line": 108,
+          "excerpt": "<span className=\"text-sm text-gray-600 dark:text-gray-400\">{p.name}</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesHeader.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 30,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 64,
+          "excerpt": "<div className=\"flex items-center gap-1 p-1 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/10 ml-2\">"
+        },
+        {
+          "line": 70,
+          "excerpt": "className=\"p-2 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200\""
+        },
+        {
+          "line": 81,
+          "excerpt": "className=\"p-2 rounded-lg text-gray-500 hover:text-purple-500 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 158,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 27,
+          "excerpt": "'DISPOSED': { icon: Trash, color: 'text-gray-400', bg: 'bg-gray-100', label: 'Disposed' },"
+        },
+        {
+          "line": 37,
+          "excerpt": "const WI_STATUS_COLOR = { 'NOT_ASSIGNED': 'text-gray-400', 'ASSIGNED': 'text-blue-400', 'IN_PROGRESS': 'text-amber-400', 'COMPLETED': 'text-emerald-400', 'ACCEPTED': 'text-emerald-"
+        },
+        {
+          "line": 47,
+          "excerpt": "'Other': { bar: 'bg-gray-500', text: 'text-gray-400', label: 'Other' }"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SampleStepper.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 13,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 39,
+          "excerpt": "<div className=\"w-full flex items-center justify-between px-4 py-4 bg-white border-b border-gray-100\">"
+        },
+        {
+          "line": 50,
+          "excerpt": "status === 'current' ? 'bg-white border-blue-600 text-blue-600 ring-4 ring-blue-50' :"
+        },
+        {
+          "line": 51,
+          "excerpt": "'bg-white border-gray-200 text-gray-300'}"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SampleTimeline.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 48,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 54,
+          "excerpt": "<div className={`bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-y-auto ${className}`}>"
+        },
+        {
+          "line": 102,
+          "excerpt": "w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 z-10 transition-colors bg-white dark:bg-gray-800"
+        },
+        {
+          "line": 115,
+          "excerpt": "<span className={`text-xs font-bold uppercase tracking-wider ${isCurrent ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "colorLiteralOccurrences": 3,
+      "paletteUtilityOccurrences": 73,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 394,
+          "excerpt": "className=\"w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-blue-500 outline-none\""
+        },
+        {
+          "line": 421,
+          "excerpt": "className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition-colors ${modality === 'NIR' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-"
+        },
+        {
+          "line": 428,
+          "excerpt": "className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition-colors ${modality === 'MIR' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 b"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SpectraUpload.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 16,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 98,
+          "excerpt": "<div className=\"border-2 border-dashed border-gray-300 rounded-lg h-36 flex flex-col items-center justify-center cursor-pointer hover:bg-white hover:border-blue-400 transition-colo"
+        },
+        {
+          "line": 107,
+          "excerpt": "<span className=\"text-xs text-gray-400 mt-1\">Supports JCAMP-DX (.dx, .jcamp), CSV, OPUS, SPC, ASD</span>"
+        },
+        {
+          "line": 111,
+          "excerpt": "<div className=\"flex items-center gap-3 bg-white p-3 rounded border\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SpectraViewer.jsx",
+      "colorLiteralOccurrences": 13,
+      "paletteUtilityOccurrences": 25,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 6,
+          "excerpt": "'#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',"
+        },
+        {
+          "line": 7,
+          "excerpt": "'#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'"
+        },
+        {
+          "line": 123,
+          "excerpt": "<div className=\"w-full h-96 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/ThemeToggle.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 4,
+      "hasDarkSelector": true,
+      "examples": []
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 99,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 172,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-12 rounded-xl shadow-2xl flex flex-col items-center gap-4\">"
+        },
+        {
+          "line": 182,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl w-[95vw] max-w-7xl h-[90vh] flex flex-col shadow-2xl border border-gray-200 dark:border-gray-700\">"
+        },
+        {
+          "line": 194,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400 mt-0.5\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/UserDialog.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 67,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 83,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 relative\">"
+        },
+        {
+          "line": 84,
+          "excerpt": "<button onClick={onClose} className=\"absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200\">"
+        },
+        {
+          "line": 167,
+          "excerpt": "{availableProjects.length === 0 && <span className=\"text-gray-400 text-sm\">{t('projects.noProjects', 'No projects available')}</span>}"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/UserMenu.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 38,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 27,
+          "excerpt": "<div className=\"text-xs text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 32,
+          "excerpt": "className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}"
+        },
+        {
+          "line": 50,
+          "excerpt": "<div className=\"absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-50 border border-gray-200 dark:border-gray-700 overflow-hidden\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/ActivityReceiptsView.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 45,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 81,
+          "excerpt": "<Search size={14} className=\"absolute left-2.5 top-2.5 text-slate-400\" />"
+        },
+        {
+          "line": 87,
+          "excerpt": "className=\"pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:"
+        },
+        {
+          "line": 119,
+          "excerpt": ": 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 144,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 185,
+          "excerpt": "<div className=\"bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 durat"
+        },
+        {
+          "line": 196,
+          "excerpt": "<p className=\"text-xs text-slate-500 dark:text-slate-400\">"
+        },
+        {
+          "line": 203,
+          "excerpt": "className=\"p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/ConflictComparePanel.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 27,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 39,
+          "excerpt": "<div className=\"grid grid-cols-2 gap-2 p-2.5 rounded bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/40 mb-3 text-xs\">"
+        },
+        {
+          "line": 41,
+          "excerpt": "<span className=\"block text-[10px] uppercase font-bold text-slate-400\">Your Local Draft</span>"
+        },
+        {
+          "line": 47,
+          "excerpt": "<span className=\"block text-[10px] uppercase font-bold text-slate-400\">Server Value</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/NumericEditor.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 10,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 46,
+          "excerpt": "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+        },
+        {
+          "line": 55,
+          "excerpt": "<span className=\"text-xs text-slate-500 dark:text-slate-400 select-none whitespace-nowrap\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/OperationalTaskEditor.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 7,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 82,
+          "excerpt": "<div className=\"text-[10px] text-slate-500 dark:text-slate-400 mt-1 border-t border-emerald-200/60 dark:border-emerald-800/40 pt-1\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 46,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 98,
+          "excerpt": "<div className=\"w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden\">"
+        },
+        {
+          "line": 109,
+          "excerpt": "className=\"text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors\""
+        },
+        {
+          "line": 118,
+          "excerpt": "<p className=\"text-slate-600 dark:text-slate-400 mb-2 leading-relaxed\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 47,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 85,
+          "excerpt": "<div className=\"divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto bg-white dark:bg-slate-900\">"
+        },
+        {
+          "line": 92,
+          "excerpt": "<span className=\"text-slate-400 mx-2\">\u00b7</span>"
+        },
+        {
+          "line": 96,
+          "excerpt": "<span className=\"text-slate-400 text-[11px] ml-2\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/ReviewSubmissionView.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 54,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 75,
+          "excerpt": "<div className=\"divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto bg-white dark:bg-slate-900\">"
+        },
+        {
+          "line": 98,
+          "excerpt": "<span className=\"text-slate-400 ml-2\">({group.originalId})</span>"
+        },
+        {
+          "line": 122,
+          "excerpt": "<div className=\"p-6 text-center text-xs text-slate-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "colorLiteralOccurrences": 7,
+      "paletteUtilityOccurrences": 167,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 333,
+          "excerpt": "<div className=\"w-full h-40 border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950 flex items-center justify-center text-slate-400 text-xs\">"
+        },
+        {
+          "line": 370,
+          "excerpt": "<svg className=\"w-full h-40 border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950\" viewBox={`0 0 ${width} ${height}`}>"
+        },
+        {
+          "line": 371,
+          "excerpt": "<line x1={padX} y1={padY} x2={padX} y2={height - padY} stroke=\"#94a3b8\" strokeWidth=\"1\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/TextureEditor.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 28,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 74,
+          "excerpt": "<span className=\"text-[11px] text-slate-500 dark:text-slate-400 font-medium\">Sand:</span>"
+        },
+        {
+          "line": 91,
+          "excerpt": "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500\""
+        },
+        {
+          "line": 93,
+          "excerpt": "<span className=\"text-[10px] text-slate-400\">%</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchInspector.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 66,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 30,
+          "excerpt": "<aside className=\"w-full lg:w-64 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 text-xs flex items-center justify-center min"
+        },
+        {
+          "line": 62,
+          "excerpt": "<aside className=\"w-full lg:w-64 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col gap-4 text-xs\">"
+        },
+        {
+          "line": 65,
+          "excerpt": "<span className=\"text-[10px] uppercase font-bold tracking-wider text-slate-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 47,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 99,
+          "excerpt": "<Search size={14} className=\"absolute left-2.5 top-2.5 text-slate-400\" />"
+        },
+        {
+          "line": 105,
+          "excerpt": "className=\"pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:"
+        },
+        {
+          "line": 111,
+          "excerpt": "<div className=\"rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 25,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 463,
+          "excerpt": "<div className=\"flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 88,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 136,
+          "excerpt": "className=\"px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-emerald-50"
+        },
+        {
+          "line": 171,
+          "excerpt": "<Search size={14} className=\"absolute left-2.5 top-2.5 text-slate-400\" />"
+        },
+        {
+          "line": 177,
+          "excerpt": "className=\"pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/LabFloorPlan.jsx",
+      "colorLiteralOccurrences": 27,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 39,
+          "excerpt": "if (!r || !r.hasItems) return '#e2e8f0';"
+        },
+        {
+          "line": 41,
+          "excerpt": "if (r.status === 'ACCEPTED') return '#86efac';"
+        },
+        {
+          "line": 42,
+          "excerpt": "if (r.status === 'IN_PROGRESS') return '#fcd34d';"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowAnalysisList.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 13,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 42,
+          "excerpt": ": 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+        },
+        {
+          "line": 57,
+          "excerpt": "<div className=\"py-8 text-center text-xs text-slate-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "colorLiteralOccurrences": 1,
+      "paletteUtilityOccurrences": 80,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 26,
+          "excerpt": "const accent = config?.accent || '#6366f1';"
+        },
+        {
+          "line": 60,
+          "excerpt": "className=\"wf-drawer fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transitio"
+        },
+        {
+          "line": 70,
+          "excerpt": "<span className=\"text-2xl shrink-0 p-2 rounded-xl bg-white dark:bg-slate-800 shadow-xs border border-slate-200 dark:border-slate-700\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailPanel.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 54,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 13,
+          "excerpt": "<div className=\"fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 z-50 animate-in slide-in-from-right duration-300 "
+        },
+        {
+          "line": 50,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">{t ? t('workflow.detail.category') : 'Category'}</p>"
+        },
+        {
+          "line": 62,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">{t ? t('workflow.detail.assignee') : 'Assignee'}</p>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowEdge.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 28,
+          "excerpt": "stroke: '#e5e7eb',"
+        },
+        {
+          "line": 39,
+          "excerpt": "stroke: '#94a3b8',"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowExport.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 16,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 11,
+          "excerpt": "backgroundColor: '#f9fafb',"
+        },
+        {
+          "line": 33,
+          "excerpt": "backgroundColor: '#ffffff',"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowFilters.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 27,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 32,
+          "excerpt": "<div className=\"flex flex-wrap items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 33,
+          "excerpt": "<Filter size={16} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowHeader.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 15,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 167,
+          "excerpt": "<div className=\"text-xs text-slate-500 dark:text-slate-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowInspector.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 15,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 23,
+          "excerpt": "<div className=\"text-center py-12 text-slate-400\">"
+        },
+        {
+          "line": 74,
+          "excerpt": "<span className=\"text-right text-xs text-slate-500 dark:text-slate-400\">{sub}</span>"
+        },
+        {
+          "line": 97,
+          "excerpt": "<p className=\"text-xs text-slate-500 dark:text-slate-400 mt-2\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 12,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 37,
+          "excerpt": "<div className=\"absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10 blur-xl\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowNode.jsx",
+      "colorLiteralOccurrences": 37,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 15,
+          "excerpt": "NOT_ASSIGNED: { color: '#cbd5e1', Icon: Circle },"
+        },
+        {
+          "line": 16,
+          "excerpt": "ASSIGNED: { color: '#60a5fa', Icon: Circle },"
+        },
+        {
+          "line": 17,
+          "excerpt": "IN_PROGRESS: { color: '#f59e0b', Icon: Loader2 },"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageCard.jsx",
+      "colorLiteralOccurrences": 16,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 4,
+          "excerpt": "const STAFF_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#8b5cf6', '#14b8a6', '#ef4444'];"
+        },
+        {
+          "line": 35,
+          "excerpt": "style={{ '--stage-accent': config?.accent || '#94a3b8' }}"
+        },
+        {
+          "line": 68,
+          "excerpt": "<div style={{ fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{sampleInfo.labId}</div>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageLane.jsx",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 77,
+          "excerpt": "<div style={{ width: 2, height: 20, background: `${getPhase('QA Review') === 'future' ? '#e2e8f0' : '#86efac'}`, borderRadius: 1 }} />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "colorLiteralOccurrences": 12,
+      "paletteUtilityOccurrences": 47,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 22,
+          "excerpt": "NOT_ASSIGNED: { color: '#94a3b8', Icon: Circle },"
+        },
+        {
+          "line": 23,
+          "excerpt": "ASSIGNED: { color: '#3b82f6', Icon: Circle },"
+        },
+        {
+          "line": 24,
+          "excerpt": "IN_PROGRESS: { color: '#f59e0b', Icon: Loader2 },"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTimeline.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 22,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 69,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4\">"
+        },
+        {
+          "line": 89,
+          "excerpt": "<div className=\"flex justify-between text-[10px] text-gray-400 mt-1\">"
+        },
+        {
+          "line": 117,
+          "excerpt": "<span className=\"text-gray-500 dark:text-gray-400\">{formatTime(current.timestamp)}</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 63,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 119,
+          "excerpt": "<span className=\"text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider\">"
+        },
+        {
+          "line": 150,
+          "excerpt": "<span className=\"text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase\">Station</span>"
+        },
+        {
+          "line": 160,
+          "excerpt": "<span className=\"text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase\">Progress</span>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/context/DialogContext.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 32,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 56,
+          "excerpt": "<div className=\"bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-200\">"
+        },
+        {
+          "line": 76,
+          "excerpt": "<p className=\"text-slate-600 dark:text-slate-400 leading-relaxed mb-4\">{dialog.message}</p>"
+        },
+        {
+          "line": 96,
+          "excerpt": "className=\"px-5 py-2.5 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-xl font-semibold transition-all\""
+        }
+      ]
+    },
+    {
+      "file": "client/src/context/ThemeContext.jsx",
+      "colorLiteralOccurrences": 3,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 10,
+          "excerpt": "primary: '#047857',"
+        },
+        {
+          "line": 11,
+          "excerpt": "secondary: '#111827',"
+        },
+        {
+          "line": 12,
+          "excerpt": "accent: '#D97706'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/index.css",
+      "colorLiteralOccurrences": 2,
+      "paletteUtilityOccurrences": 81,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 16,
+          "excerpt": "@apply bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700;"
+        },
+        {
+          "line": 21,
+          "excerpt": "@apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500;"
+        },
+        {
+          "line": 35,
+          "excerpt": "@apply bg-white dark:bg-gray-800;"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 194,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 18,
+          "excerpt": "className=\"inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group\""
+        },
+        {
+          "line": 83,
+          "excerpt": "<p className=\"text-gray-600 dark:text-gray-400 text-sm\">"
+        },
+        {
+          "line": 90,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-200/80 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all relative overflow-hidden flex flex"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 258,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 29,
+          "excerpt": "<div className=\"flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-sm\">"
+        },
+        {
+          "line": 35,
+          "excerpt": "<div className=\"text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500\">{label}</div>"
+        },
+        {
+          "line": 36,
+          "excerpt": "{sub && <div className=\"text-[10px] text-gray-400\">{sub}</div>}"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 82,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 143,
+          "excerpt": "<div className=\"flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm\">"
+        },
+        {
+          "line": 151,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400\">Configure standard operating procedures and default methods for work items</p>"
+        },
+        {
+          "line": 160,
+          "excerpt": "<Building2 className=\"w-4 h-4 text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 36,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 202,
+          "excerpt": "<div className=\"bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4\">"
+        },
+        {
+          "line": 212,
+          "excerpt": "className=\"text-sm border border-gray-300 rounded-md p-1 bg-white\""
+        },
+        {
+          "line": 260,
+          "excerpt": "<div className=\"bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 62,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 195,
+          "excerpt": "className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'branding' ? 'border-emerald-600 text-emerald-700 dark:t"
+        },
+        {
+          "line": 201,
+          "excerpt": "className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'languages' ? 'border-emerald-600 text-emerald-700 dark:"
+        },
+        {
+          "line": 210,
+          "excerpt": "className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'lab-config' ? 'border-emerald-600 text-emerald-700 dark"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 59,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 74,
+          "excerpt": "? 'bg-white text-indigo-600 shadow-sm'"
+        },
+        {
+          "line": 84,
+          "excerpt": "<div className=\"bg-white p-2 rounded-lg border shadow-sm flex items-center gap-2 flex-1 md:w-64\">"
+        },
+        {
+          "line": 85,
+          "excerpt": "<Search size={18} className=\"text-gray-400\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "colorLiteralOccurrences": 10,
+      "paletteUtilityOccurrences": 65,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 44,
+          "excerpt": "'RECEIVED': { pin: '#3b82f6', label: 'Received' },"
+        },
+        {
+          "line": 45,
+          "excerpt": "'IN_PROGRESS': { pin: '#f59e0b', label: 'In Progress' },"
+        },
+        {
+          "line": 46,
+          "excerpt": "'COMPLETED': { pin: '#10b981', label: 'Completed' },"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/CountryData.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 56,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 41,
+          "excerpt": "<p className=\"text-gray-500 dark:text-gray-400 text-sm mt-1\">Real-time sampling data for {selectedCountry}</p>"
+        },
+        {
+          "line": 50,
+          "excerpt": "className=\"p-2 border rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold\""
+        },
+        {
+          "line": 61,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Credits.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 48,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 107,
+          "excerpt": "<div className=\"p-2.5 bg-white/10 backdrop-blur rounded-xl border border-white/10\">"
+        },
+        {
+          "line": 117,
+          "excerpt": "<div className=\"flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg border border-white/10\">"
+        },
+        {
+          "line": 121,
+          "excerpt": "<div className=\"flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur rounded-lg border border-white/10\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 19,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 428,
+          "excerpt": "<span className=\"text-xs font-bold uppercase tracking-widest text-gray-400\">Authenticating\u2026</span>"
+        },
+        {
+          "line": 438,
+          "excerpt": "<div className=\"max-w-xl mx-auto my-12 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm text-center\">"
+        },
+        {
+          "line": 446,
+          "excerpt": "<p className=\"text-xs text-gray-400 dark:text-gray-500 mt-3\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/DataResults.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 95,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 302,
+          "excerpt": "<p className=\"text-gray-500 dark:text-gray-400 text-sm\">"
+        },
+        {
+          "line": 311,
+          "excerpt": "className=\"bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex ite"
+        },
+        {
+          "line": 316,
+          "excerpt": "<div className=\"absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-lg z-50 p-2\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/DataSheet.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 64,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 116,
+          "excerpt": "<p className=\"text-gray-500 dark:text-gray-400 text-sm\">"
+        },
+        {
+          "line": 147,
+          "excerpt": "<Search className=\"absolute left-3 top-2.5 text-gray-400 dark:text-gray-500\" size={16} />"
+        },
+        {
+          "line": 157,
+          "excerpt": "<div className=\"ml-auto text-sm text-gray-500 dark:text-gray-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 83,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 31,
+          "excerpt": "NOT_CONFIGURED: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'"
+        },
+        {
+          "line": 38,
+          "excerpt": "DECOMMISSIONED: 'text-gray-400'"
+        },
+        {
+          "line": 117,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400\">{t('equipment.subtitle', 'Track instrument calibration and maintenance logs')}</p>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 313,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 24,
+          "excerpt": "OTHER: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+        },
+        {
+          "line": 90,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden\" onClick={e => e.stopPropagation()}>"
+        },
+        {
+          "line": 93,
+          "excerpt": "<button onClick={onClose} className=\"text-gray-400 hover:text-gray-600\"><X size={18} /></button>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 87,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 115,
+          "excerpt": "className=\"flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 backdrop-blur-md transition-all duration-200 g"
+        },
+        {
+          "line": 118,
+          "excerpt": "<div className=\"w-14 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden bg-white/95 border border-white/40 p-1\">"
+        },
+        {
+          "line": 141,
+          "excerpt": "className=\"flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 backdrop-blur-md transition-all duration-200 g"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 66,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 32,
+          "excerpt": "<span className=\"text-[10px] text-gray-400 dark:text-gray-500\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 283,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400\" />"
+        },
+        {
+          "line": 288,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px] flex flex-col\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 99,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 24,
+          "excerpt": "<span className=\"text-[10px] text-gray-400 dark:text-gray-500\">{formatLastUpdated(lastUpdated)}</span>"
+        },
+        {
+          "line": 156,
+          "excerpt": "<span className=\"text-gray-400 dark:text-gray-500 font-medium\">Loading your work...</span>"
+        },
+        {
+          "line": 172,
+          "excerpt": "<RefreshCw size={16} className=\"text-gray-400 dark:text-gray-500\" />"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/NotFound.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 19,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 12,
+          "excerpt": "<div className=\"max-w-md w-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl p-8 text-center space-y-6\">"
+        },
+        {
+          "line": 24,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400 leading-relaxed\">"
+        },
+        {
+          "line": 47,
+          "excerpt": "<div className=\"pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 74,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 75,
+          "excerpt": "<div className=\"flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 97,
+          "excerpt": ": 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+        },
+        {
+          "line": 106,
+          "excerpt": ": 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 531,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 94,
+          "excerpt": "<div className={`fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl z-[60] transform transition-transform duration-300 border-l border-gray-200 dark:borde"
+        },
+        {
+          "line": 99,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400 font-medium\">{project.name}</p>"
+        },
+        {
+          "line": 132,
+          "excerpt": "<label className=\"text-[10px] font-bold text-gray-400 uppercase tracking-widest\">Expected Samples</label>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/PublicReport.jsx",
+      "colorLiteralOccurrences": 18,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 37,
+          "excerpt": "<div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>"
+        },
+        {
+          "line": 38,
+          "excerpt": "<div style={{ textAlign: 'center', color: '#888' }}>"
+        },
+        {
+          "line": 39,
+          "excerpt": "<div style={{ width: 32, height: 32, border: '3px solid #1e3a5f', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }}"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 126,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 95,
+          "excerpt": "<p className=\"text-sm text-gray-500 dark:text-gray-400 mt-1\">"
+        },
+        {
+          "line": 105,
+          "excerpt": "className=\"inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:bord"
+        },
+        {
+          "line": 122,
+          "excerpt": "<div className=\"p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 370,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 1301,
+          "excerpt": "<button onClick={() => setMode('PROJECT')} className=\"p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl g"
+        },
+        {
+          "line": 1310,
+          "excerpt": "<p className=\"text-xs text-gray-500 dark:text-gray-400\">Scheduled samples (SoilFER campaigns)</p>"
+        },
+        {
+          "line": 1320,
+          "excerpt": "}} className=\"p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 43,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 128,
+          "excerpt": "<div className=\"bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2 space-y-6\">"
+        },
+        {
+          "line": 177,
+          "excerpt": "<div className=\"bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6 h-fit\">"
+        },
+        {
+          "line": 247,
+          "excerpt": "<div className=\"bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 93,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 157,
+          "excerpt": "<span className=\"text-sm text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 165,
+          "excerpt": "<Search size={18} className=\"absolute left-4 top-1/2 -translate-y-1/2 text-gray-400\" />"
+        },
+        {
+          "line": 171,
+          "excerpt": "className=\"w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 422,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 438,
+          "excerpt": "<div className=\"flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 458,
+          "excerpt": "<header className=\"bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700\">"
+        },
+        {
+          "line": 482,
+          "excerpt": "<div className=\"text-xs text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-2 pt-0.5\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 36,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 308,
+          "excerpt": "className=\"text-gray-400 hover:text-white transition-colors text-sm font-medium px-2\""
+        },
+        {
+          "line": 362,
+          "excerpt": "<span className=\"text-sm text-gray-500 dark:text-gray-400\">"
+        },
+        {
+          "line": 397,
+          "excerpt": "<div className=\"bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SampleWorkflowMap.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 27,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 119,
+          "excerpt": "<p className=\"text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6\">"
+        },
+        {
+          "line": 139,
+          "excerpt": "<p className=\"text-xs text-slate-500 dark:text-slate-400 mt-1\">Retrieving verified sample stage graph and prerequisite state...</p>"
+        },
+        {
+          "line": 152,
+          "excerpt": "<p className=\"text-sm text-slate-600 dark:text-slate-400 max-w-md mt-1 mb-6\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 267,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 382,
+          "excerpt": "return <span className=\"inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400\"><Trash2 size={12} /"
+        },
+        {
+          "line": 411,
+          "excerpt": "<p className=\"text-gray-500 dark:text-gray-400 mt-1 ml-14\">"
+        },
+        {
+          "line": 417,
+          "excerpt": "<div className=\"flex gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 67,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 180,
+          "excerpt": "className=\"inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group\""
+        },
+        {
+          "line": 221,
+          "excerpt": "className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'stack' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white/10 text-gray-3"
+        },
+        {
+          "line": 227,
+          "excerpt": "className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'changelog' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white/10 text-gr"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/TechWorkbench.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 4,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 22,
+          "excerpt": "<div className=\"min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100\">"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "colorLiteralOccurrences": 0,
+      "paletteUtilityOccurrences": 54,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 129,
+          "excerpt": "<p className=\"text-gray-700 dark:text-gray-400\">{t('users.subtitle', 'Manage laboratory personnel and access')}</p>"
+        },
+        {
+          "line": 142,
+          "excerpt": "<Search className=\"absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500\" size={18} />"
+        },
+        {
+          "line": 166,
+          "excerpt": "<tr><td colSpan=\"4\" className=\"p-8 text-center text-gray-500 dark:text-gray-400\">{t('common.loading', 'Loading...')}</td></tr>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/styles/workflow-map-v2.css",
+      "colorLiteralOccurrences": 59,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": true,
+      "examples": [
+        {
+          "line": 7,
+          "excerpt": "--wf-bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%);"
+        },
+        {
+          "line": 14,
+          "excerpt": "--wf-future-border: #e2e8f0;"
+        },
+        {
+          "line": 15,
+          "excerpt": "--wf-text-muted: #64748b;"
+        }
+      ]
+    },
+    {
+      "file": "client/src/utils/reportUtils.js",
+      "colorLiteralOccurrences": 1,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 55,
+          "excerpt": "<Interior ss:Color=\"#C0C0C0\" ss:Pattern=\"Solid\"/>"
+        }
+      ]
+    },
+    {
+      "file": "client/src/utils/workflowMapper.js",
+      "colorLiteralOccurrences": 30,
+      "paletteUtilityOccurrences": 0,
+      "hasDarkSelector": false,
+      "examples": [
+        {
+          "line": 17,
+          "excerpt": "[ROOMS.RECEPTION]: { icon: 'PackageCheck', accent: '#6366f1', description: 'Sample Login' },"
+        },
+        {
+          "line": 18,
+          "excerpt": "[ROOMS.PREP_ROOM]: { icon: 'Filter', accent: '#f59e0b', description: 'Drying & Sieving' },"
+        },
+        {
+          "line": 19,
+          "excerpt": "[ROOMS.PHYSICAL_LAB]: { icon: 'Ruler', accent: '#10b981', description: 'Physical Properties' },"
+        }
+      ]
+    }
+  ]
+}

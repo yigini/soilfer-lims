@@ -1,0 +1,426 @@
+{
+  "scope": "Standalone mockup only; no application or backend tests performed",
+  "checks": [
+    {
+      "name": "Starts light",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Changing theme preserves draft input",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Temporary dark resets in a new demo session",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Selecting profile radio does not retheme or save",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Explicit profile save changes appearance",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Saved dark survives a new demo session",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Temporary light does not replace saved dark",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Sign out clears appearance to anonymous light",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Demo login applies saved preference",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Native review dialog opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes review dialog",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "layouts": [
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "light",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1280,
+      "appearance": "dark",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "light",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 1024,
+      "appearance": "dark",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "light",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 768,
+      "appearance": "dark",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "light",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 390,
+      "appearance": "dark",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "light",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "workbench",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "sample",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "workflow",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "equipment",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "components",
+      "horizontalPageOverflow": false
+    },
+    {
+      "width": 320,
+      "appearance": "dark",
+      "screen": "profile",
+      "horizontalPageOverflow": false
+    }
+  ],
+  "consoleErrors": [],
+  "networkRequests": [],
+  "contrastFailures": [],
+  "pass": true
+}

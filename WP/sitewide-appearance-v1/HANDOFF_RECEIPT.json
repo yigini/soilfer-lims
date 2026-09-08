@@ -1,0 +1,18 @@
+{
+  "sentAt": "2026-09-08T07:14:35.128Z",
+  "destination": {
+    "app": "Antigravity",
+    "project": "LIMSI",
+    "chat": "LIMS Dev",
+    "folder": "C:/Users/yigin/Documents/soilfer-lims"
+  },
+  "messageFile": "HANDOFF_MESSAGE.txt",
+  "messageCharacters": 5444,
+  "status": "Sent and observed in conversation; Antigravity working",
+  "observedReads": [
+    "WP/sitewide-appearance-v1",
+    "tokens.json",
+    "ACCEPTANCE_CHECKLIST.md"
+  ],
+  "scope": "Site-wide light/default and graphite dark appearance implementation; session/profile behavior; full testing and safe existing release process"
+}

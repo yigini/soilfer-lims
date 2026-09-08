@@ -14,6 +14,7 @@ const sanitizeUser = (user) => {
     const { password: _, ...safeUser } = user;
     return {
         ...safeUser,
+        themePreference: user.themePreference || 'light',
         countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
         projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
         permissions: getPermissionsForRole(user.role)
@@ -182,5 +183,54 @@ exports.impersonate = async (req, res) => {
     } catch (err) {
         console.error('[AUTH] Impersonate Error:', err);
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to impersonate user');
+    }
+};
+
+exports.updatePreferences = async (req, res) => {
+    if (!req.user || !req.user.id) {
+        return error(res, 401, 'AUTH.UNAUTHORIZED', 'Authentication required');
+    }
+
+    // Impersonated sessions must not alter the real user's profile preferences
+    if (req.isImpersonating || req.user.isImpersonated || req.actor) {
+        return error(res, 403, 'AUTH.IMPERSONATION_PREFERENCE_BLOCKED', 'Preferences cannot be modified during an impersonation session.');
+    }
+
+    const allowedKeys = ['themePreference'];
+    const bodyKeys = Object.keys(req.body || {});
+
+    // Reject unknown fields or attempts to inject roles, permissions, passwords, or target IDs
+    const invalidKeys = bodyKeys.filter(k => !allowedKeys.includes(k));
+    if (invalidKeys.length > 0) {
+        return error(res, 400, 'AUTH.INVALID_PREFERENCE_FIELDS', `Unexpected fields in preference update: ${invalidKeys.join(', ')}`);
+    }
+
+    const { themePreference } = req.body || {};
+
+    if (!themePreference || typeof themePreference !== 'string') {
+        return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be a valid string');
+    }
+
+    if (!['light', 'dark'].includes(themePreference)) {
+        return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be strictly "light" or "dark"');
+    }
+
+    try {
+        const updated = await prisma.user.update({
+            where: { id: String(req.user.id) },
+            data: { themePreference },
+            select: {
+                id: true,
+                username: true,
+                themePreference: true
+            }
+        });
+
+        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, {
+            themePreference: updated.themePreference
+        });
+    } catch (err) {
+        console.error('[AUTH] Update Preferences Error:', err);
+        return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');
     }
 };

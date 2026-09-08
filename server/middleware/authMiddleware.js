@@ -47,8 +47,12 @@ const verifyToken = async (req, res, next) => {
 
         // Sanitize and Parse JSON fields for SQLite
         const { password: _, ...safeUser } = user;
+        req.isImpersonating = !!decoded.act;
+        req.actor = decoded.act || null;
         req.user = {
             ...safeUser,
+            themePreference: user.themePreference || 'light',
+            isImpersonated: !!decoded.act,
             countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
             projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
             permissions: getPermissionsForRole(user.role)
