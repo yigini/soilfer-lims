@@ -19,6 +19,7 @@ import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
 import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAudioEnabled } from '../utils/audioCues';
 import { resolveCoordinates } from '../utils/coordinateResolver';
+import { recordSyncOperation } from '../services/offline/syncEngine';
 
 
 const Reception = () => {
@@ -31,6 +32,7 @@ const Reception = () => {
     // --- MODE SELECTION ---
     const [mode, setMode] = useState(null); // 'PROJECT' | 'WALK_IN' | null
     const [sessionProject, setSessionProject] = useState(null);
+    const [mobileStep, setMobileStep] = useState('identify'); // 'identify' | 'condition' | 'analyses' | 'receipt'
 
     // --- STAGE D: HARDWARE WEDGE SCANNER & DESK ERGONOMICS (RC-16, RC-17, RC-18) ---
     const [isWedgeMode, setIsWedgeMode] = useState(() => localStorage.getItem('lims_wedge_mode') === 'true');
@@ -375,6 +377,7 @@ const Reception = () => {
     const resetForm = () => {
         setScanCode('');
         setSampleData(null);
+        setMobileStep('identify');
         setChecklistData({ items: {}, nonConformance: false, reason: '' });
         setRemovals([]);
         setAdditions([]);
@@ -1251,6 +1254,37 @@ const Reception = () => {
                 localStorage.removeItem(AUTOSAVE_KEY);
             }
         } catch (err) {
+            // Offline outbox fallback if disconnected or server unreachable
+            if (!navigator.onLine || !err.response) {
+                try {
+                    await recordSyncOperation({
+                        type: 'RECORD_INTAKE',
+                        target: { originalId: scanCode },
+                        payload
+                    });
+                    playNoticeChime();
+                    setResult({
+                        success: true,
+                        labId: 'OFFLINE-' + scanCode,
+                        originalId: scanCode,
+                        status: 'RECEIVED_OFFLINE',
+                        custodyHandoverAt: payload.custodyHandoverAt,
+                        custodyCarrierName: payload.custodyCarrierName,
+                        custodyTrackingNumber: payload.custodyTrackingNumber,
+                        receivingOfficerName: user.name || user.username
+                    });
+                    showDialog({
+                        type: 'info',
+                        title: 'Offline Intake Queued',
+                        message: `Intake for sample ${scanCode} queued locally in offline storage. It will synchronize automatically when online.`
+                    });
+                    localStorage.removeItem(AUTOSAVE_KEY);
+                    setLoading(false);
+                    return;
+                } catch (queueErr) {
+                    console.error('Failed to queue offline intake operation', queueErr);
+                }
+            }
             playErrorBuzz();
             setResult({ success: false, message: err.response?.data?.message || 'Intake failed' });
         }
@@ -1279,18 +1313,20 @@ const Reception = () => {
 
     if (!mode) {
         return (
-            <div className="p-6 max-w-6xl mx-auto min-h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
-                <WedgeModeBar
-                    isWedgeMode={isWedgeMode}
-                    onToggleWedgeMode={handleToggleWedgeMode}
-                    wedgeSuffix={wedgeSuffix}
-                    onChangeSuffix={handleChangeSuffix}
-                    soundEnabled={soundEnabled}
-                    onToggleSound={handleToggleSound}
-                    onOpenShortcuts={() => setIsShortcutsOpen(true)}
-                    autoRefocus={autoRefocus}
-                    onToggleAutoRefocus={handleToggleAutoRefocus}
-                />
+            <div className="p-4 md:p-6 max-w-6xl mx-auto min-h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
+                <div className="hidden md:block">
+                    <WedgeModeBar
+                        isWedgeMode={isWedgeMode}
+                        onToggleWedgeMode={handleToggleWedgeMode}
+                        wedgeSuffix={wedgeSuffix}
+                        onChangeSuffix={handleChangeSuffix}
+                        soundEnabled={soundEnabled}
+                        onToggleSound={handleToggleSound}
+                        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+                        autoRefocus={autoRefocus}
+                        onToggleAutoRefocus={handleToggleAutoRefocus}
+                    />
+                </div>
 
                 <div className="text-center mb-6 md:mb-10">
                     <h1 className="text-2xl md:text-4xl font-bold text-sf-text mb-2">Reception Console</h1>
@@ -1385,11 +1421,11 @@ const Reception = () => {
                                                 e.stopPropagation();
                                                 handleDiscard(d.id);
                                             }}
-                                            className="text-sf-muted hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-sf-divider hover:border-red-200 dark:hover:border-red-700 shadow-sm"
+                                            className="text-sf-muted hover:text-red-600 font-bold text-sm md:opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-sf-divider hover:border-red-200 dark:hover:border-red-700 shadow-sm touch-target"
                                         >
                                             Discard
                                         </button>
-                                        <button className="text-blue-600 dark:text-blue-400 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm">
+                                        <button className="text-blue-600 dark:text-blue-400 font-bold text-sm md:opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm touch-target">
                                             Resume
                                         </button>
                                     </div>
@@ -1463,23 +1499,25 @@ const Reception = () => {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            {/* STAGE D: WEDGE SCANNER TOOLBAR (RC-16) */}
-            <WedgeModeBar
-                isWedgeMode={isWedgeMode}
-                onToggleWedgeMode={handleToggleWedgeMode}
-                wedgeSuffix={wedgeSuffix}
-                onChangeSuffix={handleChangeSuffix}
-                soundEnabled={soundEnabled}
-                onToggleSound={handleToggleSound}
-                onOpenShortcuts={() => setIsShortcutsOpen(true)}
-                autoRefocus={autoRefocus}
-                onToggleAutoRefocus={handleToggleAutoRefocus}
-            />
+        <div className="p-3 sm:p-6 max-w-7xl mx-auto">
+            {/* STAGE D: WEDGE SCANNER TOOLBAR (RC-16) - Desktop Workstations */}
+            <div className="hidden md:block">
+                <WedgeModeBar
+                    isWedgeMode={isWedgeMode}
+                    onToggleWedgeMode={handleToggleWedgeMode}
+                    wedgeSuffix={wedgeSuffix}
+                    onChangeSuffix={handleChangeSuffix}
+                    soundEnabled={soundEnabled}
+                    onToggleSound={handleToggleSound}
+                    onOpenShortcuts={() => setIsShortcutsOpen(true)}
+                    autoRefocus={autoRefocus}
+                    onToggleAutoRefocus={handleToggleAutoRefocus}
+                />
+            </div>
 
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-6 bg-sf-raised border border-sf-divider text-sf-text p-4 rounded-xl shadow-md">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 mb-4 sm:mb-6 bg-sf-raised border border-sf-divider text-sf-text p-3 sm:p-4 rounded-xl shadow-md">
+                <div className="flex items-center gap-3 sm:gap-4">
                     <button onClick={() => {
                         showDialog({
                             type: 'confirm',
@@ -1492,25 +1530,25 @@ const Reception = () => {
                                 resetForm();
                             }
                         });
-                    }} className="bg-sf-surface hover:bg-sf-canvas border border-sf-divider p-2 rounded-lg transition-colors text-sf-text">
+                    }} className="bg-sf-surface hover:bg-sf-canvas border border-sf-divider p-2 rounded-lg transition-colors text-sf-text touch-target">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="text-xs text-sf-muted uppercase font-bold tracking-wider">{t('reception.sessionActive', 'Session Active')}</div>
-                        <div className="text-lg font-bold flex items-center gap-2">
+                        <div className="text-[10px] sm:text-xs text-sf-muted uppercase font-bold tracking-wider">{t('reception.sessionActive', 'Session Active')}</div>
+                        <div className="text-base sm:text-lg font-bold flex items-center gap-2">
                             {mode === 'PROJECT' || sessionProject ? <><Layers size={18} /> {t('common.project', 'Project')}: {sessionProject}</> : <><User size={18} /> {t('reception.walkInReception', 'Walk-in Reception')}</>}
                         </div>
                     </div>
                 </div>
-                <div className="text-right">
-                    <div className="text-xs text-sf-muted">{t('reception.operator', 'Operator')} ({user.labId || 'Global'})</div>
-                    <div className="font-medium">{user.name || user.username}</div>
+                <div className="text-right shrink-0">
+                    <div className="text-[10px] sm:text-xs text-sf-muted">{t('reception.operator', 'Operator')} ({user.labId || 'Global'})</div>
+                    <div className="text-sm sm:text-base font-medium">{user.name || user.username}</div>
                 </div>
             </div>
 
             {/* LOOKUP with Autocomplete */}
-            <div className="bg-sf-surface p-6 rounded-xl shadow-sm border border-sf-divider mb-6 relative">
-                <div className="flex gap-4">
+            <div className="bg-sf-surface p-4 sm:p-6 rounded-xl shadow-sm border border-sf-divider mb-4 sm:mb-6 relative">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div className="flex-1 relative">
                         <input
                             ref={scanInputRef}
@@ -1585,21 +1623,23 @@ const Reception = () => {
                             </div>
                         )}
                     </div>
-                    <button
-                        onClick={() => setShowScanner(true)}
-                        className="bg-sf-surface text-sf-muted hover:text-sf-text p-3 rounded-lg hover:bg-sf-canvas transition-colors border border-sf-divider flex items-center gap-2"
-                        title={t('reception.scan', 'Scan')}
-                    >
-                        <Camera size={20} />
-                        <span className="hidden sm:inline font-bold">{t('reception.scan', 'Scan')}</span>
-                    </button>
-                    <button
-                        onClick={() => { setShowAutocomplete(false); handleLookup(); }}
-                        disabled={!scanCode}
-                        className="bg-blue-600 text-white px-8 rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    >
-                        {t('reception.lookUp', 'Look Up')}
-                    </button>
+                    <div className="flex gap-2 shrink-0">
+                        <button
+                            onClick={() => setShowScanner(true)}
+                            className="flex-1 sm:flex-none justify-center bg-sf-surface text-sf-muted hover:text-sf-text p-3 rounded-lg hover:bg-sf-canvas transition-colors border border-sf-divider flex items-center gap-2 touch-target"
+                            title={t('reception.scan', 'Scan')}
+                        >
+                            <Camera size={20} />
+                            <span className="font-bold">{t('reception.scan', 'Scan')}</span>
+                        </button>
+                        <button
+                            onClick={() => { setShowAutocomplete(false); handleLookup(); }}
+                            disabled={!scanCode}
+                            className="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-5 sm:px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 touch-target"
+                        >
+                            {t('reception.lookUp', 'Look Up')}
+                        </button>
+                    </div>
                 </div>
 
                 {mode === 'PROJECT' && (
@@ -1691,61 +1731,106 @@ const Reception = () => {
             )}
 
             {sampleData && !result && (
-                <div className="grid lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
+                <>
+                    {/* MOBILE STEP NAVIGATION (Phone viewports < md) */}
+                    <div className="md:hidden flex items-center justify-between gap-1 p-1 bg-sf-raised rounded-xl border border-sf-divider mb-4 sticky top-14 z-20 shadow-sm">
+                        {[
+                            { id: 'identify', label: '1. ID & Field', icon: Layers },
+                            { id: 'condition', label: '2. Condition', icon: Scale },
+                            { id: 'analyses', label: '3. Analyses', icon: FileText },
+                            { id: 'receipt', label: '4. Handover', icon: ShieldCheck }
+                        ].map(step => {
+                            const Icon = step.icon;
+                            const isActive = mobileStep === step.id;
+                            return (
+                                <button
+                                    key={step.id}
+                                    type="button"
+                                    onClick={() => setMobileStep(step.id)}
+                                    className={`flex-1 py-2 px-1 rounded-lg text-xs font-bold transition-all text-center flex flex-col items-center gap-0.5 touch-target ${
+                                        isActive
+                                            ? 'bg-blue-600 text-white shadow-sm'
+                                            : 'text-sf-muted hover:text-sf-text hover:bg-sf-surface'
+                                    }`}
+                                >
+                                    <Icon size={14} />
+                                    <span className="text-[10px] leading-tight truncate">{step.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                    {/* LEFT COLUMN: SAMPLE DATA */}
-                    <div className="space-y-6">
-                        {/* Map View - Persistent for Project mode (RC-09) */}
-                        {mode !== 'WALK_IN' && !sampleData?.isNew && (
-                            <div className="bg-sf-surface p-4 rounded-xl border border-sf-divider shadow-sm animate-in fade-in slide-in-from-top-2">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-bold text-sf-text flex items-center gap-2 text-sm">
-                                        <MapPin size={16} /> Location Preview
-                                    </h3>
-                                    {resolvedCoordinates && (
-                                        <span className="text-[11px] font-mono text-sf-muted">
-                                            {parseFloat(resolvedCoordinates.lat).toFixed(4)}&deg;, {parseFloat(resolvedCoordinates.lng).toFixed(4)}&deg;
-                                        </span>
-                                    )}
+                    <div className="grid lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
+
+                        {/* LEFT COLUMN: SAMPLE DATA */}
+                        <div className="space-y-6">
+                            {/* STEP 1: IDENTIFY & FIELD PROVENANCE */}
+                            <div className={`${mobileStep === 'identify' ? 'block space-y-6' : 'hidden'} md:block md:space-y-6`}>
+                                {/* Map View - Persistent for Project mode (RC-09) */}
+                                {mode !== 'WALK_IN' && !sampleData?.isNew && (
+                                    <div className="bg-sf-surface p-4 rounded-xl border border-sf-divider shadow-sm animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="font-bold text-sf-text flex items-center gap-2 text-sm">
+                                                <MapPin size={16} /> Location Preview
+                                            </h3>
+                                            {resolvedCoordinates && (
+                                                <span className="text-[11px] font-mono text-sf-muted">
+                                                    {parseFloat(resolvedCoordinates.lat).toFixed(4)}&deg;, {parseFloat(resolvedCoordinates.lng).toFixed(4)}&deg;
+                                                </span>
+                                            )}
+                                        </div>
+                                        <SampleMap
+                                            coordinates={resolvedCoordinates}
+                                            title={sampleData?.originalId || 'Sample Site'}
+                                            uncertaintyM={resolvedCoordinates?.accuracy || resolvedCoordinates?.positionalUncertaintyM}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Batch Geometry Outlier Warning Alert (RC-10) */}
+                                {geometryOutlierWarning && (
+                                    <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200 shadow-sm">
+                                        <AlertTriangle size={18} className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <strong className="block font-bold mb-0.5">Spatial Outlier Detected (RC-10)</strong>
+                                            <p className="leading-relaxed">{geometryOutlierWarning}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Show Manual Form for Walk-ins OR Field Provenance Card for Project Samples (RC-09) */}
+                                {(mode === 'WALK_IN' || sampleData?.isNew) ? (
+                                    <WalkInForm
+                                        submitter={submitter} setSubmitter={setSubmitter}
+                                        sampling={sampling} setSampling={setSampling}
+                                        groups={groups}
+                                        onPurposeSelect={handlePurposeSelect}
+                                        errors={validationErrors}
+                                    />
+                                ) : (
+                                    <FieldProvenanceCard
+                                        sampleData={sampleData}
+                                        coordinates={resolvedCoordinates}
+                                    />
+                                )}
+
+                                {/* Mobile Next Action */}
+                                <div className="md:hidden pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileStep('condition')}
+                                        className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 touch-target"
+                                    >
+                                        <span>Next: Condition & Evidence</span>
+                                        <span>&rarr;</span>
+                                    </button>
                                 </div>
-                                <SampleMap
-                                    coordinates={resolvedCoordinates}
-                                    title={sampleData?.originalId || 'Sample Site'}
-                                    uncertaintyM={resolvedCoordinates?.accuracy || resolvedCoordinates?.positionalUncertaintyM}
-                                />
                             </div>
-                        )}
 
-                        {/* Batch Geometry Outlier Warning Alert (RC-10) */}
-                        {geometryOutlierWarning && (
-                            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200 shadow-sm">
-                                <AlertTriangle size={18} className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                                <div>
-                                    <strong className="block font-bold mb-0.5">Spatial Outlier Detected (RC-10)</strong>
-                                    <p className="leading-relaxed">{geometryOutlierWarning}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Show Manual Form for Walk-ins OR Field Provenance Card for Project Samples (RC-09) */}
-                        {(mode === 'WALK_IN' || sampleData?.isNew) ? (
-                            <WalkInForm
-                                submitter={submitter} setSubmitter={setSubmitter}
-                                sampling={sampling} setSampling={setSampling}
-                                groups={groups}
-                                onPurposeSelect={handlePurposeSelect}
-                                errors={validationErrors}
-                            />
-                        ) : (
-                            <FieldProvenanceCard
-                                sampleData={sampleData}
-                                coordinates={resolvedCoordinates}
-                            />
-                        )}
-
-                        {/* ANALYSIS SELECTION */}
-                        <div
-                            ref={analysisSectionRef}
+                            {/* STEP 3: ANALYSIS SELECTION */}
+                            <div className={`${mobileStep === 'analyses' ? 'block' : 'hidden'} md:block`}>
+                                <div
+                                    ref={analysisSectionRef}
                             className={`bg-sf-surface p-6 rounded-xl border shadow-sm transition-all duration-500 ${analysisHighlight
                                 ? 'border-blue-400 ring-2 ring-blue-200 shadow-blue-100 shadow-lg'
                                 : validationErrors.some(e => e.key === 'analyses')
@@ -1816,10 +1901,33 @@ const Reception = () => {
                                 />
                             )}
                         </div>
-                    </div>
 
-                    {/* RIGHT COLUMN: DESK FACTS, COMPLIANCE & SUBMIT */}
-                    <div className="space-y-6">
+                        {/* Mobile Step 3 Navigation */}
+                        <div className="md:hidden pt-4 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setMobileStep('condition')}
+                                className="py-3 px-4 bg-sf-surface border border-sf-divider text-sf-text font-bold rounded-xl hover:bg-sf-canvas transition-colors touch-target"
+                            >
+                                &larr; Back
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMobileStep('receipt')}
+                                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2 touch-target"
+                            >
+                                <span>Next: Custody & Submit</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT COLUMN: DESK FACTS, COMPLIANCE & SUBMIT */}
+                <div className="space-y-6">
+
+                    {/* STEP 2: CONDITION, FACTS & COMPLIANCE */}
+                    <div className={`${mobileStep === 'condition' ? 'block space-y-6' : 'hidden'} md:block md:space-y-6`}>
 
                         {/* PHYSICAL ARRIVAL STATE & DESK FACTS (RC-01, RC-02, RC-03) */}
                         <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm space-y-5">
@@ -2056,6 +2164,39 @@ const Reception = () => {
                             />
                         </div>
 
+                        {/* Mobile Step 2 Navigation */}
+                        <div className="md:hidden pt-2 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setMobileStep('identify')}
+                                className="py-3 px-4 bg-sf-surface border border-sf-divider text-sf-text font-bold rounded-xl hover:bg-sf-canvas transition-colors touch-target"
+                            >
+                                &larr; Back
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMobileStep('analyses')}
+                                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2 touch-target"
+                            >
+                                <span>Next: Analyses Selection</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* STEP 4: CHAIN OF CUSTODY, NOTES & SUBMIT */}
+                    <div className={`${mobileStep === 'receipt' ? 'block space-y-6' : 'hidden'} md:block md:space-y-6`}>
+                        {/* Mobile Back to Analyses button */}
+                        <div className="md:hidden pb-1">
+                            <button
+                                type="button"
+                                onClick={() => setMobileStep('analyses')}
+                                className="text-xs text-sf-muted hover:text-sf-text font-semibold flex items-center gap-1 touch-target"
+                            >
+                                &larr; Return to Step 3: Analyses
+                            </button>
+                        </div>
+
                         {/* STAGE E: CHAIN OF CUSTODY & VERIFICATION (RC-19) */}
                         <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-sf-divider pb-3">
@@ -2170,33 +2311,36 @@ const Reception = () => {
                                 </p>
                             </div>
                         )}
-                        <div className="sticky bottom-4 z-10 bg-sf-surface/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-sf-divider">
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => handleDiscard()}
-                                    disabled={loading}
-                                    className="py-3 px-5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-all flex items-center justify-center gap-2 active:scale-95"
-                                >
-                                    <XCircle size={18} /> {t('reception.discard', 'Discard')}
-                                </button>
+                        {/* Sticky Bottom Submit Bar */}
+                        <div className="sticky bottom-[calc(4.5rem+var(--sf-sab))] md:bottom-4 z-10 bg-sf-surface/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-sf-divider">
+                            <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    <button
+                                        onClick={() => handleDiscard()}
+                                        disabled={loading}
+                                        className="flex-1 sm:flex-none py-3 px-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-target text-xs"
+                                    >
+                                        <XCircle size={16} /> {t('reception.discard', 'Discard')}
+                                    </button>
 
-                                <button
-                                    onClick={() => handleSubmit('ACCEPTED', true)}
-                                    disabled={loading}
-                                    className="py-3 px-5 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-all flex items-center justify-center gap-2 active:scale-95"
-                                >
-                                    <FileText size={18} /> {t('reception.saveDraft', 'Save Draft')}
-                                </button>
+                                    <button
+                                        onClick={() => handleSubmit('ACCEPTED', true)}
+                                        disabled={loading}
+                                        className="flex-1 sm:flex-none py-3 px-4 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-target text-xs"
+                                    >
+                                        <FileText size={16} /> {t('reception.saveDraft', 'Save Draft')}
+                                    </button>
+                                </div>
 
                                 {checklistData.nonConformance && (
                                     <button
                                         type="button"
                                         onClick={() => handleSubmit('REJECTED')}
                                         disabled={loading || !checklistData.reason}
-                                        className="py-3 px-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                        className="w-full sm:w-auto py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 active:scale-95 touch-target text-xs"
                                         title="Reject sample due to non-conformance"
                                     >
-                                        <AlertTriangle size={18} />
+                                        <AlertTriangle size={16} />
                                         <span>Reject Sample</span>
                                     </button>
                                 )}
@@ -2204,7 +2348,7 @@ const Reception = () => {
                                 <button
                                     onClick={() => handleSubmit('ACCEPTED')}
                                     disabled={loading || (checklistData.nonConformance && !checklistData.reason) || (removals.length > 0 && !justification)}
-                                    className="flex-1 py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight transition-all active:scale-[0.98]"
+                                    className="w-full sm:flex-1 py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight transition-all active:scale-[0.98] touch-target"
                                 >
                                     <div className="flex items-center gap-2">
                                         <CheckCircle size={18} />
@@ -2216,7 +2360,9 @@ const Reception = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
+        </>
+    )}
 
             {/* RESULT MODAL */}
             {result && (

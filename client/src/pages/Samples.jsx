@@ -422,7 +422,7 @@ const Samples = () => {
 
             {/* Undo Toast */}
             {deletingIds.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50">
+                <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50">
                     {deletingIds.map(id => (
                         <div key={id} className="bg-sf-raised text-sf-text border border-sf-divider px-4 py-3 rounded-lg shadow-lg flex items-center gap-4 animate-in slide-in-from-bottom duration-300">
                             <span>{t('samples.sampleDeleted', 'Sample deleted.')}</span>

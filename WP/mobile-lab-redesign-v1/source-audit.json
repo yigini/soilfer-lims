@@ -1,0 +1,3808 @@
+{
+  "summary": {
+    "at": "2026-09-08T14:22:14.850Z",
+    "revision": "e5fa3baea7f0056481a615b0eed4a76572946962",
+    "dirtyState": [
+      "M client/src/App.jsx",
+      " M client/src/components/UserMenu.jsx",
+      " M client/src/components/dashboard/DashboardShell.jsx",
+      " M client/src/components/dashboard/QueueSummary.jsx",
+      " M client/src/components/dashboard/WorkQueue.jsx",
+      " M client/src/components/workbench/NumericEditor.jsx",
+      " M client/src/components/workbench/WorkbenchInspector.jsx",
+      " M client/src/components/workbench/WorkbenchShell.jsx",
+      " M client/src/components/workbench/WorksheetArea.jsx",
+      " M client/src/index.css",
+      " M client/src/pages/SampleDetail.jsx",
+      " M client/src/styles/appearance-tokens.css",
+      " M client/tailwind.config.js",
+      "?? WP/mobile-lab-redesign-v1/",
+      "?? WP/soil-lab-visual-identity-v1/IMPLEMENT_NOW.md"
+    ],
+    "scope": "Read-only checked-out source. Visual work is concurrently in progress. Candidate counts are review signals, not proven defects. No app files or database records changed by this script.",
+    "sourceFiles": 168,
+    "routes": 35,
+    "candidates": 509,
+    "byKind": {
+      "fixedWidth": 37,
+      "viewportHeight": 20,
+      "tables": 61,
+      "grid": 63,
+      "hoverOnly": 151,
+      "overlay": 76,
+      "storage": 82,
+      "offline": 15,
+      "touch": 4
+    },
+    "publicManifestOrWorkerCandidates": [],
+    "htmlManifestLink": false,
+    "pwaDependency": false
+  },
+  "routes": [
+    "/login",
+    "/",
+    "/samples",
+    "/samples/:id",
+    "/samples/:id/map",
+    "/workflow-map",
+    "/my-work",
+    "/workbench",
+    "/manager-queue",
+    "/reception",
+    "/inventory",
+    "/equipment",
+    "/users",
+    "/projects",
+    "/admin",
+    "/admin/methods",
+    "/lab-methods",
+    "/admin/audit",
+    "/admin/labs",
+    "/admin/legacy-import",
+    "/datasheet",
+    "/maps",
+    "/qa",
+    "/spectral-library",
+    "/spectral",
+    "/data-results",
+    "/result-reports",
+    "/reports",
+    "/report/:token",
+    "/profile",
+    "/about",
+    "/techstack",
+    "/tech-stack",
+    "/credits",
+    "*"
+  ],
+  "candidates": [
+    {
+      "file": "client/src/App.jsx",
+      "line": 87,
+      "kind": "storage",
+      "text": "const saved = localStorage.getItem('sidebar-collapsed');"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 95,
+      "kind": "storage",
+      "text": "try { localStorage.setItem('sidebar-collapsed', String(next)); } catch { }"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 168,
+      "kind": "viewportHeight",
+      "text": "<div className=\"flex h-screen bg-sf-canvas overflow-hidden text-sf-text font-sans\">"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 172,
+      "kind": "overlay",
+      "text": "className=\"fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm\""
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 241,
+      "kind": "viewportHeight",
+      "text": "<div className={`p-4 md:p-8 ${marginClass} transition-all duration-300 min-h-[calc(100vh-8rem)]`}>"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 271,
+      "kind": "viewportHeight",
+      "text": "<div className=\"filter blur-sm pointer-events-none select-none h-screen overflow-hidden\">"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 306,
+      "kind": "viewportHeight",
+      "text": "<Route path=\"/samples/:id/map\" element={<RequireAuth><React.Suspense fallback={<div className=\"h-screen flex items-center justify-center\">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />"
+    },
+    {
+      "file": "client/src/App.jsx",
+      "line": 307,
+      "kind": "viewportHeight",
+      "text": "<Route path=\"/workflow-map\" element={<RequireAuth><React.Suspense fallback={<div className=\"h-screen flex items-center justify-center\">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "line": 276,
+      "kind": "grid",
+      "text": "<div className=\"col-span-1 md:col-span-2 p-4 bg-sf-canvas/60 rounded-xl border border-sf-divider grid grid-cols-1 sm:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "line": 415,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto w-full\">"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "line": 416,
+      "kind": "fixedWidth",
+      "text": "<table className=\"w-full text-left text-xs min-w-[840px]\">"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "line": 416,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs min-w-[840px]\">"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "line": 512,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 font-sans animate-in fade-in duration-150\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 347,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto rounded-2xl border border-sf-divider bg-sf-surface shadow-sm\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 348,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 666,
+      "kind": "hoverOnly",
+      "text": "className=\"w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 709,
+      "kind": "tables",
+      "text": "<pre className=\"p-3.5 bg-black/40 rounded-2xl font-mono text-xs text-blue-300 overflow-x-auto leading-relaxed max-h-48\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 754,
+      "kind": "tables",
+      "text": "<pre className=\"p-4 bg-gray-950 text-emerald-400 rounded-2xl font-mono text-xs overflow-x-auto max-h-96 leading-relaxed border border-gray-900 select-all\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 779,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in\">"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 876,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "line": 888,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in zoom-in-95\">"
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "line": 139,
+      "kind": "hoverOnly",
+      "text": "className=\"flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-lg shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "line": 146,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 lg:grid-cols-3 gap-8\">"
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "line": 169,
+      "kind": "hoverOnly",
+      "text": "className=\"w-20 h-20 object-contain group-hover:opacity-100 transition-opacity\""
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "line": 176,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity\">"
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "line": 427,
+      "kind": "fixedWidth",
+      "text": "<span className=\"font-bold text-sf-text truncate max-w-[150px]\">"
+    },
+    {
+      "file": "client/src/components/admin/CategoryManager.jsx",
+      "line": 86,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/admin/CategoryManager.jsx",
+      "line": 100,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity flex-shrink-0\">"
+    },
+    {
+      "file": "client/src/components/admin/CategoryManager.jsx",
+      "line": 124,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150\">"
+    },
+    {
+      "file": "client/src/components/admin/GroupManager.jsx",
+      "line": 95,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/admin/GroupManager.jsx",
+      "line": 194,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/admin/GroupManager.jsx",
+      "line": 205,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity flex-shrink-0\">"
+    },
+    {
+      "file": "client/src/components/common/ExportModal.jsx",
+      "line": 92,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/common/InfoTooltip.jsx",
+      "line": 58,
+      "kind": "hoverOnly",
+      "text": "onMouseEnter={() => setIsVisible(true)}"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "line": 56,
+      "kind": "offline",
+      "text": "// Generate offline QR data URLs for all samples"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "line": 79,
+      "kind": "offline",
+      "text": "console.warn(`Failed to generate offline QR for ${key}:`, e);"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "line": 151,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 no-print overflow-y-auto\">"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "line": 164,
+      "kind": "offline",
+      "text": "Thermal printer formatted with instant offline 2D matrix QR codes"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "line": 331,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center gap-2 text-xs\""
+    },
+    {
+      "file": "client/src/components/common/QRScanner.jsx",
+      "line": 34,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "line": 53,
+      "kind": "storage",
+      "text": "return localStorage.getItem('dashboard-siderail-collapsed') === 'true';"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "line": 62,
+      "kind": "storage",
+      "text": "try { localStorage.setItem('dashboard-siderail-collapsed', String(next)); } catch {}"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "line": 68,
+      "kind": "fixedWidth",
+      "text": "<div className=\"space-y-6 max-w-full 2xl:max-w-[1650px] mx-auto\">"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "line": 202,
+      "kind": "hoverOnly",
+      "text": "<div className=\"text-xs font-semibold text-sf-text group-hover:text-sf-primary transition-colors\">"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "line": 211,
+      "kind": "hoverOnly",
+      "text": "<ArrowUpRight className=\"w-3.5 h-3.5 text-sf-muted group-hover:text-sf-primary transition-colors\" />"
+    },
+    {
+      "file": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "line": 118,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3\">"
+    },
+    {
+      "file": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "line": 202,
+      "kind": "hoverOnly",
+      "text": "<ArrowRight size={14} className=\"text-gray-300 group-hover:text-purple-500 transition-colors shrink-0 ml-2\" />"
+    },
+    {
+      "file": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "line": 242,
+      "kind": "hoverOnly",
+      "text": "<ArrowRight size={14} className=\"text-gray-300 group-hover:text-amber-500 transition-colors\" />"
+    },
+    {
+      "file": "client/src/components/dashboard/OversightDashboard.jsx",
+      "line": 73,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/dashboard/QueueSummary.jsx",
+      "line": 35,
+      "kind": "grid",
+      "text": "<section aria-label=\"Work summaries\" className=\"grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6\">"
+    },
+    {
+      "file": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "line": 142,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 lg:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "line": 231,
+      "kind": "tables",
+      "text": "<div className=\"flex border-b border-sf-divider bg-gray-50/70 dark:bg-gray-850 px-4 pt-2 gap-1 overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "line": 465,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1\">"
+    },
+    {
+      "file": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "line": 83,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "line": 140,
+      "kind": "hoverOnly",
+      "text": "<ArrowRight size={14} className=\"text-gray-300 group-hover:text-red-500 transition-colors shrink-0 ml-2\" />"
+    },
+    {
+      "file": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "line": 191,
+      "kind": "hoverOnly",
+      "text": "<ArrowRight size={14} className=\"text-gray-300 group-hover:text-blue-500 transition-colors\" />"
+    },
+    {
+      "file": "client/src/components/dashboard/UpdateStatus.jsx",
+      "line": 48,
+      "kind": "hoverOnly",
+      "text": "className=\"inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:underline\""
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "line": 163,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "line": 164,
+      "kind": "tables",
+      "text": "<table className=\"min-w-full text-left text-xs border-collapse\">"
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "line": 248,
+      "kind": "hoverOnly",
+      "text": "className=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "line": 261,
+      "kind": "hoverOnly",
+      "text": "className=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "line": 73,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "line": 116,
+      "kind": "tables",
+      "text": "<div className=\"px-6 border-b dark:border-gray-700 flex gap-6 overflow-x-auto no-scrollbar\">"
+    },
+    {
+      "file": "client/src/components/equipment/LogEventModal.jsx",
+      "line": 49,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/equipment/LogEventModal.jsx",
+      "line": 136,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95\""
+    },
+    {
+      "file": "client/src/components/equipment/RegisterAssetModal.jsx",
+      "line": 73,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/equipment/RegisterAssetModal.jsx",
+      "line": 189,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95\""
+    },
+    {
+      "file": "client/src/components/ForcePasswordChangeModal.jsx",
+      "line": 60,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300\">"
+    },
+    {
+      "file": "client/src/components/Header.jsx",
+      "line": 64,
+      "kind": "fixedWidth",
+      "text": "className=\"h-8 w-auto max-w-[150px] object-contain\""
+    },
+    {
+      "file": "client/src/components/Header.jsx",
+      "line": 99,
+      "kind": "fixedWidth",
+      "text": "<span className=\"absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center\">"
+    },
+    {
+      "file": "client/src/components/Header.jsx",
+      "line": 110,
+      "kind": "fixedWidth",
+      "text": "\"relative inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-black text-white shadow-md ring-2 ring-sf-surface\","
+    },
+    {
+      "file": "client/src/components/messaging/MessagingCenter.jsx",
+      "line": 334,
+      "kind": "offline",
+      "text": "<p className=\"text-xs text-gray-400\">offline</p>"
+    },
+    {
+      "file": "client/src/components/messaging/MessagingCenter.jsx",
+      "line": 396,
+      "kind": "grid",
+      "text": "className=\"absolute bottom-full left-4 mb-2 bg-sf-surface border border-sf-divider rounded-2xl shadow-xl p-2 z-50 grid grid-cols-6 gap-1 animate-in zoom-in-95\""
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 203,
+      "kind": "offline",
+      "text": "<p className=\"text-xs text-sf-muted\">{t('ui.offline', 'offline')}</p>"
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 279,
+      "kind": "hoverOnly",
+      "text": "? \"bg-sf-surface border-sf-divider opacity-75 hover:opacity-100 hover:bg-sf-hover/40\""
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 294,
+      "kind": "hoverOnly",
+      "text": "{notif.link && <span className=\"flex items-center gap-1 text-sf-primary font-medium group-hover:underline\">{t('ui.view', 'View')} <ExternalLink size={10} /></span>}"
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 495,
+      "kind": "grid",
+      "text": "className=\"absolute bottom-full left-3 mb-2 bg-sf-surface border border-sf-divider rounded-2xl shadow-xl p-2 z-50 grid grid-cols-6 gap-1 animate-in zoom-in-95\""
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 562,
+      "kind": "overlay",
+      "text": "className=\"fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]\""
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "line": 568,
+      "kind": "fixedWidth",
+      "text": "<div className={`fixed inset-y-0 right-0 w-full md:w-[420px] bg-sf-surface shadow-2xl transform transition-transform duration-300 ease-in-out z-[70] flex flex-col border-l border-sf-divider"
+    },
+    {
+      "file": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "line": 71,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[80] animate-in fade-in duration-200\">"
+    },
+    {
+      "file": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "line": 139,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-3 gap-3\">"
+    },
+    {
+      "file": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "line": 198,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-4 gap-2\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchExceptionModal.jsx",
+      "line": 43,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/components/reception/BatchExceptionModal.jsx",
+      "line": 84,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchExceptionModal.jsx",
+      "line": 208,
+      "kind": "hoverOnly",
+      "text": "className=\"absolute inset-0 bg-red-600/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity\""
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 243,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 326,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-4 gap-4 text-xs\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 502,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 523,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 590,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 632,
+      "kind": "fixedWidth",
+      "text": "<div className=\"text-red-600 dark:text-red-400 font-medium text-[11px] truncate max-w-[200px]\" title={s.rejectionReason}>"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "line": 677,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/reception/ComplianceChecklist.jsx",
+      "line": 314,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-4 gap-2 pt-1\">"
+    },
+    {
+      "file": "client/src/components/reception/ComplianceChecklist.jsx",
+      "line": 322,
+      "kind": "hoverOnly",
+      "text": "className=\"absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow\""
+    },
+    {
+      "file": "client/src/components/reception/FieldProvenanceCard.jsx",
+      "line": 111,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs\">"
+    },
+    {
+      "file": "client/src/components/reception/KeyboardShortcutsModal.jsx",
+      "line": 45,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[250] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200\">"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 145,
+      "kind": "offline",
+      "text": "// Fetch offline admin units for dropdown picker"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 149,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 164,
+      "kind": "storage",
+      "text": "// Sync localStorage on explicit coordinate values only (do not copy viewport/default center)"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 168,
+      "kind": "storage",
+      "text": "localStorage.setItem('lastIntakeLocation', JSON.stringify({"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 374,
+      "kind": "storage",
+      "text": "const saved = localStorage.getItem('lastIntakeLocation');"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 507,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-2 text-xs shadow cursor-pointer disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "line": 557,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "line": 42,
+      "kind": "storage",
+      "text": "const saved = localStorage.getItem(PROFILE_STORAGE_KEY);"
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "line": 108,
+      "kind": "storage",
+      "text": "localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated));"
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "line": 186,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200\">"
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "line": 327,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/components/reception/WalkInForm.jsx",
+      "line": 33,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4\">"
+    },
+    {
+      "file": "client/src/components/reception/WalkInForm.jsx",
+      "line": 101,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4\">"
+    },
+    {
+      "file": "client/src/components/reception/WalkInForm.jsx",
+      "line": 385,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "line": 141,
+      "kind": "tables",
+      "text": "<table className=\"report-ref-table\">"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "line": 169,
+      "kind": "tables",
+      "text": "<table className=\"report-info-table\">"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "line": 198,
+      "kind": "tables",
+      "text": "<table className=\"report-info-table\">"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "line": 249,
+      "kind": "tables",
+      "text": "<table className=\"report-results-table\">"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "line": 327,
+      "kind": "tables",
+      "text": "<table className=\"report-methods-table\">"
+    },
+    {
+      "file": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "line": 137,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4\">"
+    },
+    {
+      "file": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "line": 363,
+      "kind": "hoverOnly",
+      "text": "<CheckCircle size={18} className=\"group-hover:translate-x-1 transition-transform\" />"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 157,
+      "kind": "hoverOnly",
+      "text": "<Clock size={16} className=\"text-emerald-600 group-hover:rotate-45 transition-transform\" />"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 168,
+      "kind": "overlay",
+      "text": "className=\"fixed inset-0 bg-black/30 backdrop-blur-xs z-[99] transition-opacity duration-200\""
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 175,
+      "kind": "fixedWidth",
+      "text": "className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-sf-surface border-l border-gray-200 dark:border-gray-800 z-[100] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out font-sans ${"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 175,
+      "kind": "overlay",
+      "text": "className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-sf-surface border-l border-gray-200 dark:border-gray-800 z-[100] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out font-sans ${"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 292,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute -left-3 top-0.5 p-1 bg-sf-surface border-2 border-sf-divider rounded-xl z-10 shadow-sm transition-all group-hover:border-emerald-500 group-hover:scale-105\">"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "line": 297,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-[10px] font-bold text-sf-muted group-hover:text-emerald-600 transition-colors\">"
+    },
+    {
+      "file": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "line": 28,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4\">"
+    },
+    {
+      "file": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "line": 62,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 bg-sf-canvas rounded-xl border border-sf-divider/60\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 79,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 115,
+      "kind": "fixedWidth",
+      "text": "<div className=\"absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001] w-[340px] max-h-[80%] bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/15 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 147,
+      "kind": "hoverOnly",
+      "text": "alt={dir} className=\"w-full h-full object-cover group-hover:scale-110 transition-transform duration-300\" loading=\"lazy\" />"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 163,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-3 gap-1.5\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 170,
+      "kind": "hoverOnly",
+      "text": "alt={photo.category} className=\"w-full h-full object-cover group-hover:scale-110 transition-transform duration-300\" loading=\"lazy\" />"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 186,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-3 gap-1.5\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 193,
+      "kind": "hoverOnly",
+      "text": "alt={photo.category || 'photo'} className=\"w-full h-full object-cover group-hover:scale-110 transition-transform duration-300\" loading=\"lazy\" />"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "line": 552,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[9999] bg-black\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 142,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[9999] flex flex-col\" style={{ background: 'rgba(0,0,0,0.92)' }}>"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 174,
+      "kind": "fixedWidth",
+      "text": "className=\"text-white/50 hover:text-white text-xs font-mono px-2 py-1 rounded-md hover:bg-white/10 transition-all min-w-[48px] text-center\""
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 241,
+      "kind": "hoverOnly",
+      "text": "onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.18)'}"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 250,
+      "kind": "hoverOnly",
+      "text": "onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.18)'}"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 278,
+      "kind": "tables",
+      "text": "className=\"shrink-0 flex justify-center gap-2 py-3 px-4 overflow-x-auto\""
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 296,
+      "kind": "hoverOnly",
+      "text": "onMouseEnter={e => { if (i !== currentIndex) e.currentTarget.style.opacity = '0.75'; }}"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 391,
+      "kind": "hoverOnly",
+      "text": "alt={`${d} view`} className=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-300\" />"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 407,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-4 gap-1.5\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 419,
+      "kind": "hoverOnly",
+      "text": "className=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-300\""
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 421,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors\" />"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 482,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 612,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "line": 651,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/components/sample/FieldSummary.jsx",
+      "line": 43,
+      "kind": "fixedWidth",
+      "text": "<span className=\"font-medium text-gray-900 truncate max-w-[200px]\">{site}</span>"
+    },
+    {
+      "file": "client/src/components/sample/MetadataEditorModal.jsx",
+      "line": 112,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4 backdrop-blur-sm\">"
+    },
+    {
+      "file": "client/src/components/sample/SampleSummary.jsx",
+      "line": 43,
+      "kind": "hoverOnly",
+      "text": "<ArrowLeft size={20} className=\"group-hover:-translate-x-0.5 transition-transform\" />"
+    },
+    {
+      "file": "client/src/components/sample/SampleSummary.jsx",
+      "line": 138,
+      "kind": "grid",
+      "text": "<div className=\"p-6 grid grid-cols-2 md:grid-cols-4 gap-8\">"
+    },
+    {
+      "file": "client/src/components/sample/SampleSummary.jsx",
+      "line": 143,
+      "kind": "fixedWidth",
+      "text": "<div className=\"text-base font-black text-sf-text truncate max-w-[150px]\" title={sample.projectCode}>"
+    },
+    {
+      "file": "client/src/components/sample/StorageMovementModal.jsx",
+      "line": 54,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200\">"
+    },
+    {
+      "file": "client/src/components/sample/StorageMovementModal.jsx",
+      "line": 115,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 282,
+      "kind": "hoverOnly",
+      "text": "className=\"bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded disabled:opacity-50 transition-colors shadow-sm\""
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 343,
+      "kind": "fixedWidth",
+      "text": "<table className=\"w-full text-left border-collapse relative min-w-[800px]\">"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 343,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left border-collapse relative min-w-[800px]\">"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 493,
+      "kind": "hoverOnly",
+      "text": "className={`bg-transparent border-none text-xs text-sf-muted focus:ring-0 cursor-pointer hover:bg-sf-raised rounded px-1 -ml-1 w-full ${assigning === item.id ? 'opacity-30' : ''}`}"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 689,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "line": 761,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/components/SampleProgressBar.jsx",
+      "line": 46,
+      "kind": "tables",
+      "text": "<div className=\"w-full overflow-x-auto pb-4\">"
+    },
+    {
+      "file": "client/src/components/SampleProgressBar.jsx",
+      "line": 49,
+      "kind": "fixedWidth",
+      "text": "<div className=\"flex items-center justify-between min-w-[800px] relative mt-4 px-4\">"
+    },
+    {
+      "file": "client/src/components/SampleProgressBar.jsx",
+      "line": 89,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute bottom-full mb-2 hidden group-hover:block z-20 w-48 p-3 bg-gray-800 text-white text-xs rounded shadow-xl\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "line": 119,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-sf-raised text-sf-text text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 whitespace-nowr"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "line": 157,
+      "kind": "hoverOnly",
+      "text": "className=\"p-1 rounded-md text-sf-muted hover:text-sf-text hover:bg-sf-surface disabled:opacity-30 disabled:hover:bg-transparent transition-all\""
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "line": 161,
+      "kind": "fixedWidth",
+      "text": "<span className=\"text-[10px] font-black text-sf-muted min-w-[30px] text-center select-none\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "line": 167,
+      "kind": "hoverOnly",
+      "text": "className=\"p-1 rounded-md text-sf-muted hover:text-sf-text hover:bg-sf-surface disabled:opacity-30 disabled:hover:bg-transparent transition-all\""
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterDrawer.jsx",
+      "line": 61,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex justify-end\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterDrawer.jsx",
+      "line": 92,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-sm text-sf-muted group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 58,
+      "kind": "hoverOnly",
+      "text": "<div className={`flex items-center justify-center p-2 rounded-xl transition-all duration-300 ease-out border-2 border-transparent group-hover:border-current group-hover:bg-current/10 ${config.bg} ${config.color}`}>"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 59,
+      "kind": "hoverOnly",
+      "text": "<Icon size={18} className=\"transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12\" />"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 241,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex justify-end\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 304,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute -left-3 top-0 p-1.5 bg-sf-surface border-2 border-sf-divider rounded-xl z-10 shadow-sm transition-all group-hover:border-indigo-400 group-hover:scale-110 group-hover:shadow-md\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 308,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-[10px] font-mono font-bold text-sf-muted group-hover:text-indigo-400 transition-colors\">{formatTime(event.timestamp)}</span>"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 349,
+      "kind": "tables",
+      "text": "<div className=\"bg-sf-surface rounded-lg shadow border border-sf-divider overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 350,
+      "kind": "fixedWidth",
+      "text": "<table className=\"w-full text-sm text-left min-w-[700px]\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 350,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-sm text-left min-w-[700px]\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 387,
+      "kind": "hoverOnly",
+      "text": "className={`border-b border-sf-divider hover:bg-sf-canvas cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${selected.includes(sample.id) ? 'bg-emerald-50/30 dark:bg-emerald-950/20' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 423,
+      "kind": "fixedWidth",
+      "text": "<span className=\"truncate max-w-[120px]\">{sample.projectCode}</span>"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 477,
+      "kind": "fixedWidth",
+      "text": "<div className=\"group/prog relative flex items-center gap-2.5 min-w-[110px]\">"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 492,
+      "kind": "fixedWidth",
+      "text": "<div className={`absolute left-1/2 -translate-x-1/2 px-3 py-2.5 bg-sf-raised text-sf-text text-[10px] rounded-lg opacity-0 group-hover/prog:opacity-100 pointer-events-none z-50 transition-all duration-300 shadow-xl whitespace-nowrap border border-sf-divider min-w-[180px] ${rowIdx < 2 && data.length > 3 ? 'top-full mt-2"
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "line": 500,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2\""
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "line": 651,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "line": 783,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2\""
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "line": 803,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-3 gap-4 text-sm mb-6 max-w-md mx-auto\">"
+    },
+    {
+      "file": "client/src/components/SpectraUpload.jsx",
+      "line": 131,
+      "kind": "hoverOnly",
+      "text": "className=\"w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex justify-center items-center gap-2\""
+    },
+    {
+      "file": "client/src/components/ThemeToggle.jsx",
+      "line": 109,
+      "kind": "overlay",
+      "text": "role=\"dialog\""
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 415,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-xs\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 427,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-xs font-sans\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 611,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 633,
+      "kind": "hoverOnly",
+      "text": "<div className=\"p-3 rounded-xl bg-sf-raised text-sf-primary group-hover:bg-sf-primary/10 transition-colors\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 652,
+      "kind": "hoverOnly",
+      "text": "<h4 className=\"text-sm font-bold text-sf-text group-hover:text-sf-primary transition-colors\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 847,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 flex items-center justify-center z-60 backdrop-blur-xs\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 865,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 1015,
+      "kind": "hoverOnly",
+      "text": "className=\"text-[11px] text-sf-primary hover:underline disabled:opacity-30 disabled:no-underline\""
+    },
+    {
+      "file": "client/src/components/UserDialog.jsx",
+      "line": 82,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4\">"
+    },
+    {
+      "file": "client/src/components/UserMenu.jsx",
+      "line": 45,
+      "kind": "overlay",
+      "text": "className=\"fixed inset-0 z-40\""
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "line": 184,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto\">"
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "line": 315,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all\""
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "line": 393,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all shrink-0\""
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "line": 442,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-3 gap-3\">"
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "line": 525,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all\""
+    },
+    {
+      "file": "client/src/components/workbench/NumericEditor.jsx",
+      "line": 37,
+      "kind": "touch",
+      "text": "inputMode=\"decimal\""
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "line": 97,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in\">"
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "line": 136,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 rounded-lg text-xs font-semibold bg-sf-raised text-sf-text border border-sf-divider hover:bg-sf-hover transition-colors disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "line": 203,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors\""
+    },
+    {
+      "file": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "line": 169,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5\""
+    },
+    {
+      "file": "client/src/components/workbench/ReviewSubmissionView.jsx",
+      "line": 166,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5\""
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 391,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in\">"
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 604,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 lg:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 628,
+      "kind": "fixedWidth",
+      "text": "<span className=\"font-mono font-bold text-sf-text truncate max-w-[200px]\">"
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 787,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-1\""
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 799,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1\""
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "line": 810,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1\""
+    },
+    {
+      "file": "client/src/components/workbench/TextureEditor.jsx",
+      "line": 78,
+      "kind": "touch",
+      "text": "inputMode=\"decimal\""
+    },
+    {
+      "file": "client/src/components/workbench/TextureEditor.jsx",
+      "line": 101,
+      "kind": "touch",
+      "text": "inputMode=\"decimal\""
+    },
+    {
+      "file": "client/src/components/workbench/TextureEditor.jsx",
+      "line": 124,
+      "kind": "touch",
+      "text": "inputMode=\"decimal\""
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "line": 112,
+      "kind": "tables",
+      "text": "<table className=\"w-full border-collapse text-left text-xs\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "line": 211,
+      "kind": "fixedWidth",
+      "text": "<p className=\"text-[10px] text-sf-muted mt-0.5 max-w-[180px] truncate\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "line": 62,
+      "kind": "offline",
+      "text": "const [syncStatus, setSyncStatus] = useState('saved'); // saving | saved | conflict | offline"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "line": 108,
+      "kind": "offline",
+      "text": "setSyncStatus('offline');"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "line": 269,
+      "kind": "offline",
+      "text": "setSyncStatus('offline');"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "line": 489,
+      "kind": "offline",
+      "text": ") : syncStatus === 'offline' ? ("
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "line": 629,
+      "kind": "overlay",
+      "text": "<div className={`fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-lg shadow-lg text-xs font-medium border flex items-center gap-2 ${"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 206,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 lg:grid-cols-4 gap-4 items-start\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 209,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 210,
+      "kind": "tables",
+      "text": "<table className=\"w-full border-collapse text-left text-xs\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 222,
+      "kind": "fixedWidth",
+      "text": "<th className=\"py-2.5 px-3 font-semibold min-w-[130px]\">Sample</th>"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 223,
+      "kind": "fixedWidth",
+      "text": "<th className=\"py-2.5 px-3 font-semibold min-w-[220px]\">"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 229,
+      "kind": "fixedWidth",
+      "text": "<th className=\"py-2.5 px-3 font-semibold min-w-[120px]\">Readiness & State</th>"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 460,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5\""
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "line": 470,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "line": 65,
+      "kind": "overlay",
+      "text": "className=\"wf-drawer-backdrop fixed inset-0 z-40 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity duration-300\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "line": 70,
+      "kind": "overlay",
+      "text": "className=\"wf-drawer fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col transition-transform duration-300 ease-out\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "line": 71,
+      "kind": "overlay",
+      "text": "role=\"dialog\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "line": 131,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-4 gap-2\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowHeader.jsx",
+      "line": 82,
+      "kind": "hoverOnly",
+      "text": "className=\"p-1 rounded hover:bg-sf-raised transition-colors text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "line": 15,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "line": 30,
+      "kind": "hoverOnly",
+      "text": "<Icon size={18} className=\"text-white/80 group-hover:text-white transition-colors\" />"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "line": 33,
+      "kind": "hoverOnly",
+      "text": "<p className=\"text-xs font-medium text-white/80 group-hover:text-white truncate\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowNode.jsx",
+      "line": 328,
+      "kind": "hoverOnly",
+      "text": "onMouseEnter={e => e.currentTarget.style.backgroundColor = `${accent}06`}"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "line": 93,
+      "kind": "hoverOnly",
+      "text": "className=\"w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-sm\""
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "line": 237,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-[10px] font-bold text-sf-emerald group-hover:underline inline-flex items-center gap-0.5\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "line": 280,
+      "kind": "hoverOnly",
+      "text": "<div className=\"px-3.5 py-1.5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800/80 rounded-b-[19px] flex items-center justify-between text-[9px] font-bold text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "line": 282,
+      "kind": "hoverOnly",
+      "text": "<ChevronRight size={11} className=\"transition-transform group-hover:translate-x-0.5\" />"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "line": 152,
+      "kind": "fixedWidth",
+      "text": "<div className=\"text-xs font-bold text-sf-text truncate max-w-[140px] sm:max-w-[180px]\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "line": 158,
+      "kind": "fixedWidth",
+      "text": "<div className=\"wf-metric-pill min-w-[130px]\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "line": 183,
+      "kind": "fixedWidth",
+      "text": "<span className=\"text-xs font-medium text-sf-text truncate max-w-[110px]\">"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "line": 223,
+      "kind": "fixedWidth",
+      "text": "<span className=\"font-medium truncate max-w-[220px]\">"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 44,
+      "kind": "storage",
+      "text": "return localStorage.getItem('token') || null;"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 51,
+      "kind": "storage",
+      "text": "const storedToken = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 55,
+      "kind": "storage",
+      "text": "return JSON.parse(localStorage.getItem('user')) || null;"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 63,
+      "kind": "storage",
+      "text": "const storedToken = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 70,
+      "kind": "storage",
+      "text": "localStorage.setItem('user', JSON.stringify(freshUser));"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 72,
+      "kind": "storage",
+      "text": "const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 89,
+      "kind": "storage",
+      "text": "const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 101,
+      "kind": "storage",
+      "text": "localStorage.setItem('token', newToken);"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 102,
+      "kind": "storage",
+      "text": "localStorage.setItem('user', JSON.stringify(userData));"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 116,
+      "kind": "storage",
+      "text": "sessionStorage.removeItem('soilfer_locale_override');"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 118,
+      "kind": "storage",
+      "text": "localStorage.removeItem('token');"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 119,
+      "kind": "storage",
+      "text": "localStorage.removeItem('user');"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 141,
+      "kind": "storage",
+      "text": "localStorage.setItem('user', JSON.stringify(updated));"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "line": 175,
+      "kind": "offline",
+      "text": "// Fallback for offline cache / initial render"
+    },
+    {
+      "file": "client/src/context/DialogContext.jsx",
+      "line": 68,
+      "kind": "overlay",
+      "text": "className=\"fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200\""
+    },
+    {
+      "file": "client/src/context/DialogContext.jsx",
+      "line": 69,
+      "kind": "overlay",
+      "text": "role=\"dialog\""
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 48,
+      "kind": "storage",
+      "text": "const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 49,
+      "kind": "storage",
+      "text": "const storedLocale = typeof window !== 'undefined' ? localStorage.getItem('locale') : null;"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 98,
+      "kind": "storage",
+      "text": "const hasSessionOverride = typeof window !== 'undefined' && sessionStorage.getItem('soilfer_locale_override');"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 99,
+      "kind": "storage",
+      "text": "const hasStoredLocale = typeof window !== 'undefined' && localStorage.getItem('locale');"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 139,
+      "kind": "storage",
+      "text": "sessionStorage.setItem('soilfer_locale_override', canonical);"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 140,
+      "kind": "storage",
+      "text": "localStorage.setItem('locale', canonical);"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "line": 196,
+      "kind": "viewportHeight",
+      "text": "{loading ? <div className=\"h-screen flex items-center justify-center text-sf-muted font-medium\">Loading LIMS...</div> : children}"
+    },
+    {
+      "file": "client/src/context/NotificationContext.jsx",
+      "line": 11,
+      "kind": "storage",
+      "text": "const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;"
+    },
+    {
+      "file": "client/src/context/NotificationContext.jsx",
+      "line": 298,
+      "kind": "storage",
+      "text": "const currentToken = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/context/ThemeContext.jsx",
+      "line": 38,
+      "kind": "storage",
+      "text": "// Clear legacy unapproved localStorage key"
+    },
+    {
+      "file": "client/src/context/ThemeContext.jsx",
+      "line": 40,
+      "kind": "storage",
+      "text": "// Check sessionStorage for anonymous or pre-existing session override"
+    },
+    {
+      "file": "client/src/context/ThemeContext.jsx",
+      "line": 96,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 7,
+      "kind": "storage",
+      "text": "* 3. Legacy localStorage.darkMode is NEVER used or migrated into profile preferences."
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 19,
+      "kind": "storage",
+      "text": "// In-memory fallback if sessionStorage is blocked or throws"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 63,
+      "kind": "storage",
+      "text": "* Safely reads the session override for the given subjectId from sessionStorage (or memory fallback)."
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 71,
+      "kind": "storage",
+      "text": "if (typeof window !== 'undefined' && window.sessionStorage) {"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 72,
+      "kind": "storage",
+      "text": "raw = window.sessionStorage.getItem(STORAGE_KEY_SESSION_V1);"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 120,
+      "kind": "storage",
+      "text": "if (typeof window !== 'undefined' && window.sessionStorage) {"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 121,
+      "kind": "storage",
+      "text": "window.sessionStorage.setItem(STORAGE_KEY_SESSION_V1, payload);"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 130,
+      "kind": "storage",
+      "text": "* Clears the session override from sessionStorage and memory."
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 134,
+      "kind": "storage",
+      "text": "if (typeof window !== 'undefined' && window.sessionStorage) {"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 135,
+      "kind": "storage",
+      "text": "window.sessionStorage.removeItem(STORAGE_KEY_SESSION_V1);"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 144,
+      "kind": "storage",
+      "text": "* Cleans up legacy darkMode localStorage key to prevent unapproved defaults."
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 148,
+      "kind": "storage",
+      "text": "if (typeof window !== 'undefined' && window.localStorage) {"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "line": 149,
+      "kind": "storage",
+      "text": "window.localStorage.removeItem(LEGACY_STORAGE_KEY);"
+    },
+    {
+      "file": "client/src/main.jsx",
+      "line": 18,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/main.jsx",
+      "line": 31,
+      "kind": "storage",
+      "text": "if (!isAuthEndpoint && localStorage.getItem('token')) {"
+    },
+    {
+      "file": "client/src/main.jsx",
+      "line": 32,
+      "kind": "storage",
+      "text": "localStorage.removeItem('token');"
+    },
+    {
+      "file": "client/src/main.jsx",
+      "line": 33,
+      "kind": "storage",
+      "text": "localStorage.removeItem('user');"
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "line": 20,
+      "kind": "hoverOnly",
+      "text": "<ArrowLeft size={16} className=\"group-hover:-translate-x-1 transition-transform\" />"
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "line": 53,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-emerald-800/60\">"
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "line": 221,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-6\">"
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "line": 335,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 54,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 74,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-xs\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 220,
+      "kind": "hoverOnly",
+      "text": "<div className=\"font-bold text-sm text-sf-text group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 234,
+      "kind": "hoverOnly",
+      "text": "<ArrowUpRight size={14} className=\"text-gray-300 group-hover:text-blue-500 transition-colors\" />"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 263,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 347,
+      "kind": "fixedWidth",
+      "text": "<span className=\"text-xs font-semibold text-sf-muted truncate max-w-[180px]\" title={`${proj.name} (${proj.code})`}>"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 483,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 519,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-4\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 751,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "line": 772,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 28,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 51,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 96,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 176,
+      "kind": "hoverOnly",
+      "text": "className=\"flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 227,
+      "kind": "fixedWidth",
+      "text": "className=\"flex-1 min-w-[200px] px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm text-sf-text\""
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 273,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 274,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "line": 301,
+      "kind": "fixedWidth",
+      "text": "<td className=\"px-6 py-4 min-w-[320px]\">"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 29,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 76,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 149,
+      "kind": "storage",
+      "text": "const token = localStorage.getItem('token');"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 251,
+      "kind": "hoverOnly",
+      "text": "className=\"inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 290,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 291,
+      "kind": "tables",
+      "text": "<table className=\"min-w-full divide-y divide-gray-200 text-sm\">"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "line": 367,
+      "kind": "hoverOnly",
+      "text": "className=\"inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm disabled:opacity-50 text-sm\""
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "line": 190,
+      "kind": "tables",
+      "text": "<div className=\"flex gap-1 mb-6 border-b border-sf-divider overflow-x-auto pb-px\">"
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "line": 259,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left border dark:border-gray-700 rounded-lg overflow-hidden\">"
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "line": 308,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\">"
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "line": 98,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "line": 99,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left\">"
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "line": 192,
+      "kind": "hoverOnly",
+      "text": "className=\"p-2 border rounded hover:bg-gray-50 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "line": 199,
+      "kind": "hoverOnly",
+      "text": "className=\"p-2 border rounded hover:bg-gray-50 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "line": 258,
+      "kind": "viewportHeight",
+      "text": "<div className=\"flex items-center justify-center h-screen bg-slate-950\">"
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "line": 275,
+      "kind": "viewportHeight",
+      "text": "<div className=\"relative w-full h-screen bg-slate-950 overflow-hidden\">"
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "line": 318,
+      "kind": "fixedWidth",
+      "text": "className=\"px-3 py-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-xl text-white text-xs font-medium appearance-none cursor-pointer min-w-[140px]\""
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "line": 328,
+      "kind": "fixedWidth",
+      "text": "className=\"px-3 py-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-xl text-white text-xs font-medium appearance-none cursor-pointer min-w-[140px]\""
+    },
+    {
+      "file": "client/src/pages/CountryData.jsx",
+      "line": 60,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-6\">"
+    },
+    {
+      "file": "client/src/pages/Credits.jsx",
+      "line": 95,
+      "kind": "hoverOnly",
+      "text": "<ArrowLeft size={16} className=\"group-hover:-translate-x-1 transition-transform\" />"
+    },
+    {
+      "file": "client/src/pages/Credits.jsx",
+      "line": 158,
+      "kind": "hoverOnly",
+      "text": "className=\"flex-shrink-0 p-1.5 rounded-md text-gray-300 dark:text-gray-600 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all opacity-0 group-hover:opacity-100\""
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "line": 207,
+      "kind": "storage",
+      "text": "const token = ctxToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null) || '';"
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "line": 245,
+      "kind": "storage",
+      "text": "const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);"
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "line": 261,
+      "kind": "storage",
+      "text": "const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);"
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "line": 321,
+      "kind": "storage",
+      "text": "const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);"
+    },
+    {
+      "file": "client/src/pages/DataResults.jsx",
+      "line": 376,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left border-collapse text-sm\">"
+    },
+    {
+      "file": "client/src/pages/DataResults.jsx",
+      "line": 437,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/DataSheet.jsx",
+      "line": 164,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto overflow-y-auto flex-1\">"
+    },
+    {
+      "file": "client/src/pages/DataSheet.jsx",
+      "line": 165,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left border-collapse\">"
+    },
+    {
+      "file": "client/src/pages/DataSheet.jsx",
+      "line": 180,
+      "kind": "hoverOnly",
+      "text": "<div className=\"w-1.5 h-6 bg-blue-500 dark:bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity\" />"
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "line": 135,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 lg:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "line": 195,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "line": 244,
+      "kind": "hoverOnly",
+      "text": "<ChevronRight size={16} className=\"text-gray-400 group-hover:text-blue-500 transition-colors inline-block\" />"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 89,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 119,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 156,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 236,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 241,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 291,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 310,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-3 gap-3 p-6 pb-3\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 344,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-sm\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 408,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/40\" onClick={() => setActionModal(null)}>"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 439,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 468,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm\" onClick={onClose}>"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 502,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 636,
+      "kind": "tables",
+      "text": "<div className=\"flex card-base rounded-lg border p-0.5 overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 657,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 672,
+      "kind": "hoverOnly",
+      "text": "<div className=\"font-bold text-sf-text group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "line": 719,
+      "kind": "hoverOnly",
+      "text": "<ChevronRight size={16} className=\"text-gray-400 group-hover:text-blue-500 transition-colors\" />"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 57,
+      "kind": "viewportHeight",
+      "text": "<div className=\"min-h-screen w-full flex bg-sf-canvas text-sf-text overflow-hidden font-sans\">"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 126,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-white text-xs sm:text-sm font-bold leading-snug group-hover:text-amber-200 transition-colors truncate\">"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 133,
+      "kind": "hoverOnly",
+      "text": "<ExternalLink size={14} className=\"text-white/40 group-hover:text-white ml-auto flex-shrink-0 transition-colors\" />"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 152,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-white text-xs sm:text-sm font-bold leading-snug group-hover:text-amber-200 transition-colors truncate\">"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 159,
+      "kind": "hoverOnly",
+      "text": "<ExternalLink size={14} className=\"text-white/40 group-hover:text-white ml-auto flex-shrink-0 transition-colors\" />"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 192,
+      "kind": "fixedWidth",
+      "text": "<div className=\"max-w-[440px] w-full\">"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "line": 314,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 text-left font-sans\">"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 290,
+      "kind": "tables",
+      "text": "<div className=\"flex border-b border-sf-divider overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 318,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4\">"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 335,
+      "kind": "hoverOnly",
+      "text": "className=\"p-2 border rounded hover:bg-sf-raised disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 342,
+      "kind": "hoverOnly",
+      "text": "className=\"p-2 border rounded hover:bg-sf-raised disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 453,
+      "kind": "hoverOnly",
+      "text": "<div className=\"px-5 py-3 border-t border-sf-divider bg-sf-canvas flex justify-between items-center group-hover:bg-sf-raised transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "line": 458,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex items-center gap-1 text-xs font-bold text-sf-emerald opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300\">"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "line": 187,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "line": 233,
+      "kind": "tables",
+      "text": "<div className=\"flex gap-1 bg-sf-raised rounded-lg p-1 w-fit overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "line": 381,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex items-center gap-1 text-xs font-semibold text-gray-400 group-hover:text-blue-500 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "line": 405,
+      "kind": "hoverOnly",
+      "text": "<button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className=\"p-2 border rounded-lg hover:bg-sf-raised disabled:opacity-50\">"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "line": 408,
+      "kind": "hoverOnly",
+      "text": "<button disabled={page >= meta.totalPages} onClick={() => setPage(p => p + 1)} className=\"p-2 border rounded-lg hover:bg-sf-raised disabled:opacity-50\">"
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "line": 365,
+      "kind": "grid",
+      "text": "<div className=\"h-28 rounded-lg border border-[#D6DFDA] overflow-hidden grid grid-cols-4 bg-[#F4F6F5] select-none pointer-events-none\">"
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "line": 414,
+      "kind": "grid",
+      "text": "<div className=\"h-28 rounded-lg border border-[#515B61] overflow-hidden grid grid-cols-4 bg-[#25282B] select-none pointer-events-none\">"
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "line": 441,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 226,
+      "kind": "hoverOnly",
+      "text": "className={`flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-blue-600 text-white text-xs font-bold cursor-pointer hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 active:scale-95 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 345,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[70]\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 372,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 419,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-in fade-in duration-300\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 863,
+      "kind": "viewportHeight",
+      "text": "<div className=\"max-w-7xl mx-auto p-6 relative min-h-screen\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 893,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 947,
+      "kind": "tables",
+      "text": "<div className=\"flex items-center gap-2 overflow-x-auto pb-1 md:pb-0\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 985,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 986,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left border-collapse\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1043,
+      "kind": "hoverOnly",
+      "text": "className={`hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-all cursor-pointer group ${isDeleting ? 'opacity-40 grayscale pointer-events-none' : ''}`}"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1089,
+      "kind": "fixedWidth",
+      "text": "<div className=\"flex flex-col gap-1.5 min-w-[120px]\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1124,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex justify-center gap-1 opacity-10 sm:opacity-0 group-hover:opacity-100 transition-opacity\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1177,
+      "kind": "hoverOnly",
+      "text": "className=\"p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed\""
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1273,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1303,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1337,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 lg:grid-cols-4 gap-3\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1394,
+      "kind": "overlay",
+      "text": "<div className=\"fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1413,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1674,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2\""
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1779,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1793,
+      "kind": "hoverOnly",
+      "text": "<span className=\"text-[11px] font-bold text-sf-muted truncate group-hover:text-blue-600 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "line": 1836,
+      "kind": "hoverOnly",
+      "text": "className=\"px-6 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none\""
+    },
+    {
+      "file": "client/src/pages/PublicReport.jsx",
+      "line": 37,
+      "kind": "viewportHeight",
+      "text": "<div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>"
+    },
+    {
+      "file": "client/src/pages/PublicReport.jsx",
+      "line": 48,
+      "kind": "viewportHeight",
+      "text": "<div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>"
+    },
+    {
+      "file": "client/src/pages/PublicReport.jsx",
+      "line": 60,
+      "kind": "viewportHeight",
+      "text": "<div style={{ minHeight: '100vh', background: '#f0f0f0', padding: '24px 16px' }} className=\"print-reset\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 121,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-4 gap-4\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 217,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 218,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 270,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 271,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 319,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "line": 320,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-xs\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 36,
+      "kind": "storage",
+      "text": "const [isWedgeMode, setIsWedgeMode] = useState(() => localStorage.getItem('lims_wedge_mode') === 'true');"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 37,
+      "kind": "storage",
+      "text": "const [wedgeSuffix, setWedgeSuffix] = useState(() => localStorage.getItem('lims_wedge_suffix') || 'ENTER');"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 39,
+      "kind": "storage",
+      "text": "const [autoRefocus, setAutoRefocus] = useState(() => localStorage.getItem('lims_wedge_refocus') !== 'false');"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 235,
+      "kind": "storage",
+      "text": "localStorage.setItem('lims_wedge_mode', String(enabled));"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 243,
+      "kind": "storage",
+      "text": "localStorage.setItem('lims_wedge_suffix', suffix);"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 253,
+      "kind": "storage",
+      "text": "localStorage.setItem('lims_wedge_refocus', String(enabled));"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 264,
+      "kind": "overlay",
+      "text": "const isDialogOrModal = active && active.closest && (active.closest('.fixed') || active.closest('[role=\"dialog\"]'));"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 436,
+      "kind": "storage",
+      "text": "localStorage.removeItem(AUTOSAVE_KEY); // Clear local autosave when resetting/discarding"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 454,
+      "kind": "storage",
+      "text": "const saved = localStorage.getItem(AUTOSAVE_KEY);"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 461,
+      "kind": "storage",
+      "text": "localStorage.removeItem(AUTOSAVE_KEY);"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 488,
+      "kind": "storage",
+      "text": "localStorage.removeItem(AUTOSAVE_KEY);"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 518,
+      "kind": "storage",
+      "text": "localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1251,
+      "kind": "storage",
+      "text": "localStorage.removeItem(AUTOSAVE_KEY);"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1300,
+      "kind": "grid",
+      "text": "<div className=\"grid md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1302,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1306,
+      "kind": "hoverOnly",
+      "text": "<div className=\"bg-blue-100 dark:bg-blue-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1321,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1325,
+      "kind": "hoverOnly",
+      "text": "<div className=\"bg-purple-100 dark:bg-purple-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1334,
+      "kind": "hoverOnly",
+      "text": "<div className=\"absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1338,
+      "kind": "hoverOnly",
+      "text": "<div className=\"bg-emerald-100 dark:bg-emerald-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1388,
+      "kind": "hoverOnly",
+      "text": "className=\"text-sf-muted hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-sf-divider hover:border-red-200 dark:hover:border-red-700 shadow-sm\""
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1392,
+      "kind": "hoverOnly",
+      "text": "<button className=\"text-blue-600 dark:text-blue-400 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1441,
+      "kind": "hoverOnly",
+      "text": "<span className=\"font-bold text-lg text-sf-text group-hover:text-blue-700 dark:group-hover:text-blue-400\">{p.name || p.id}</span>"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1599,
+      "kind": "hoverOnly",
+      "text": "className=\"bg-blue-600 text-white px-8 rounded-lg font-bold hover:bg-blue-700 transition-colors disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 1936,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-4 gap-2\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2025,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-4 gap-2 pt-1\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2032,
+      "kind": "hoverOnly",
+      "text": "className=\"absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow\""
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2207,
+      "kind": "hoverOnly",
+      "text": "className=\"flex-1 py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight transition-all active:scale-[0.98]\""
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2223,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300 no-print\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2339,
+      "kind": "hoverOnly",
+      "text": "<div className=\"p-2 bg-indigo-50 dark:bg-indigo-900/40 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60 transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "line": 2349,
+      "kind": "hoverOnly",
+      "text": "<div className=\"p-2 bg-sf-canvas rounded-lg group-hover:bg-sf-surface transition-colors\">"
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "line": 126,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-1 lg:grid-cols-3 gap-8\">"
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "line": 220,
+      "kind": "hoverOnly",
+      "text": "className=\"w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "line": 228,
+      "kind": "hoverOnly",
+      "text": "className=\"bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "line": 235,
+      "kind": "hoverOnly",
+      "text": "className=\"bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "line": 248,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 206,
+      "kind": "tables",
+      "text": "<div className=\"overflow-x-auto\">"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 207,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left text-sm\">"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 288,
+      "kind": "hoverOnly",
+      "text": "className=\"p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors\""
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 295,
+      "kind": "hoverOnly",
+      "text": "className=\"p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors\""
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 308,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 342,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "line": 372,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 bg-sf-emerald text-white rounded-lg font-bold text-sm hover:bg-sf-emerald-hover transition-colors disabled:opacity-50 flex items-center gap-2 mt-5\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 394,
+      "kind": "viewportHeight",
+      "text": "return <div className=\"p-12 text-center text-sf-muted bg-sf-canvas min-h-screen\">{t('sampleDetail.loading', 'Loading sample workspace...')}</div>;"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 452,
+      "kind": "viewportHeight",
+      "text": "<div className=\"min-h-screen bg-sf-canvas p-3 sm:p-6 text-left transition-colors duration-200\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 638,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-4 border-t border-sf-divider\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 773,
+      "kind": "tables",
+      "text": "<nav className=\"flex items-center gap-1 border-b border-sf-divider overflow-x-auto\" aria-label=\"Sample sections\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 929,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 sm:grid-cols-6 gap-3 text-center\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1074,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow transition-colors\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1274,
+      "kind": "hoverOnly",
+      "text": "className=\"px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md transition-all\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1360,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1375,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1403,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1428,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1439,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1471,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1482,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1533,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1544,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[140] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 1568,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4\">"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 284,
+      "kind": "fixedWidth",
+      "text": "<div className=\"p-6 max-w-[1600px] mx-auto min-h-screen relative\">"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 284,
+      "kind": "viewportHeight",
+      "text": "<div className=\"p-6 max-w-[1600px] mx-auto min-h-screen relative\">"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 287,
+      "kind": "overlay",
+      "text": "<div className=\"fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-8 duration-300 w-[calc(100%-2rem)] max-w-lg md:w-auto md:max-w-none\">"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 300,
+      "kind": "hoverOnly",
+      "text": "className=\"flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed group\""
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 302,
+      "kind": "hoverOnly",
+      "text": "<Trash2 size={18} className=\"transition-transform group-hover:scale-110\" />"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 396,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm\">"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "line": 425,
+      "kind": "overlay",
+      "text": "<div className=\"fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50\">"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 412,
+      "kind": "viewportHeight",
+      "text": "<div className=\"p-6 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800\">"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 467,
+      "kind": "grid",
+      "text": "<div className=\"grid grid-cols-2 md:grid-cols-6 gap-4 mt-6\">"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 605,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 613,
+      "kind": "hoverOnly",
+      "text": "className=\"px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50\""
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 645,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left\">"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 801,
+      "kind": "hoverOnly",
+      "text": "<div className=\"flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity\">"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "line": 1011,
+      "kind": "overlay",
+      "text": "<div className=\"fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4\">"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "line": 56,
+      "kind": "offline",
+      "text": "{ name: 'SQLite / Better-SQLite3', url: 'https://github.com/WiseLibs/better-sqlite3', icon: '📦', desc: 'High-speed embedded database engine for offline/local field deployments' },"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "line": 94,
+      "kind": "offline",
+      "text": "'Universal Geodesy & Offline Boundaries (RC-05, RC-08): Parsing Decimal Degrees, DMS, and UTM with Zone/Hemisphere; reverse geocoding proxy with offline boundary fallback.',"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "line": 98,
+      "kind": "offline",
+      "text": "'Offline Thermal Label Printing (RC-17): 100% offline client-side vector QR thermal label printing for sample bags (101x54mm) and cryovials (50x25mm) with continuous roll printing.',"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "line": 182,
+      "kind": "hoverOnly",
+      "text": "<ArrowLeft size={16} className=\"group-hover:-translate-x-1 transition-transform\" />"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "line": 280,
+      "kind": "hoverOnly",
+      "text": "className=\"text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity\""
+    },
+    {
+      "file": "client/src/pages/TechWorkbench.jsx",
+      "line": 22,
+      "kind": "viewportHeight",
+      "text": "<div className=\"min-h-[calc(100vh-4rem)] bg-sf-canvas text-sf-text\">"
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "line": 104,
+      "kind": "storage",
+      "text": "localStorage.setItem('token', token);"
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "line": 105,
+      "kind": "storage",
+      "text": "localStorage.setItem('user', JSON.stringify(userData));"
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "line": 155,
+      "kind": "tables",
+      "text": "<table className=\"w-full text-left\">"
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "line": 246,
+      "kind": "hoverOnly",
+      "text": "className=\"flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all\""
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "line": 259,
+      "kind": "hoverOnly",
+      "text": "className=\"flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all\""
+    },
+    {
+      "file": "client/src/services/reportService.js",
+      "line": 68,
+      "kind": "storage",
+      "text": "doc.text(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).name : 'Lab Manager', 45, finalY + 20);"
+    },
+    {
+      "file": "client/src/styles/workflow-map-v2.css",
+      "line": 39,
+      "kind": "viewportHeight",
+      "text": "height: calc(100vh - 64px);"
+    },
+    {
+      "file": "client/src/styles/workflow-map-v2.css",
+      "line": 40,
+      "kind": "viewportHeight",
+      "text": "max-height: calc(100dvh - 64px);"
+    },
+    {
+      "file": "client/src/utils/audioCues.js",
+      "line": 2,
+      "kind": "offline",
+      "text": "// 100% offline, zero network requests, zero audio file assets"
+    },
+    {
+      "file": "client/src/utils/audioCues.js",
+      "line": 22,
+      "kind": "storage",
+      "text": "const stored = localStorage.getItem('lims_sound_enabled');"
+    },
+    {
+      "file": "client/src/utils/audioCues.js",
+      "line": 28,
+      "kind": "storage",
+      "text": "localStorage.setItem('lims_sound_enabled', String(enabled));"
+    },
+    {
+      "file": "client/src/utils/timezone.js",
+      "line": 8,
+      "kind": "storage",
+      "text": "return localStorage.getItem('locale') || navigator.language || 'en';"
+    }
+  ],
+  "hashes": [
+    {
+      "file": "client/src/App.jsx",
+      "sha256": "f657ef692c2333c4204674195cdb0156fcbd43bf551d8c02215714ef5632ebb7"
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "sha256": "2525b11b788bdf622221b011719a93c4b9b11f49237b8c91ca1028a1fbbc0e19"
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "sha256": "b9324380652e61accece25c80295e28b57e752873fc25956ac2ce9a27cbd5df5"
+    },
+    {
+      "file": "client/src/components/admin/BrandingManager.jsx",
+      "sha256": "a83755c3db423756854bc9d4f3789acc0e457c9be65dd725f5477cf51ffd0f3e"
+    },
+    {
+      "file": "client/src/components/admin/CategoryManager.jsx",
+      "sha256": "2dcfc9accc662cb7c71e6908fe50424a88ff57c9f790da1e39b3af1e6ba2be31"
+    },
+    {
+      "file": "client/src/components/admin/GroupManager.jsx",
+      "sha256": "6e0b0793998fd80925fe45a1816c4352966ec45ef908cad34d07ed4afeb07736"
+    },
+    {
+      "file": "client/src/components/admin/MethodologyManager.jsx",
+      "sha256": "6a809a5040f7076b9293c6d0333aa72820476eba252fe434f6119ce948c8e1fd"
+    },
+    {
+      "file": "client/src/components/AnalysisConfig.jsx",
+      "sha256": "79670e3ffdfeca40efc0d9ad3ce97ac6ec1e6b0a01e04d39015dc5b5508444e0"
+    },
+    {
+      "file": "client/src/components/AuthenticatedAppearanceBridge.jsx",
+      "sha256": "cb6865aae27a23f8b232535e59802d3bc868b2c51d8c6c06e1ae1d3a574d6a3b"
+    },
+    {
+      "file": "client/src/components/common/ExportModal.jsx",
+      "sha256": "f2eb678df95b0ea0975bc3716cadf5bbb7c2c9b82e2cf32ef9d8c2133d4c18be"
+    },
+    {
+      "file": "client/src/components/common/InfoTooltip.jsx",
+      "sha256": "17e9002dbbbed41464521e9c7e5bfdbf09f61ee16a0e644060ff017537f0eba8"
+    },
+    {
+      "file": "client/src/components/common/LabelPrintDialog.jsx",
+      "sha256": "a52ce5bc4745f4afa251b329284e662484ed96ab187f8b4e1e16ad0b17ab9d18"
+    },
+    {
+      "file": "client/src/components/common/QRScanner.jsx",
+      "sha256": "fbb22800243a66663ce76963c5f044addf99b47b7a9d10329a3435e91ec8aed4"
+    },
+    {
+      "file": "client/src/components/dashboard/DashboardShell.jsx",
+      "sha256": "e4a8a58a5f033ec5ed42d9bb2f17e6d2101a64ea0717258715a4ff7f40090d40"
+    },
+    {
+      "file": "client/src/components/dashboard/EmptyState.jsx",
+      "sha256": "a8deeaac2ed17d42ae5a812942aab36fbc6e768d4b7e23f951f632efd8f6ec88"
+    },
+    {
+      "file": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "sha256": "e90117f2c73c0a685c472a2585caafd7ae8ce8d6cc412193ee28928e87c85ec4"
+    },
+    {
+      "file": "client/src/components/dashboard/OversightDashboard.jsx",
+      "sha256": "39f9099b297ba5827adafcbd7aaf763ac387dbaa040e376b6b0581ae45b80fbd"
+    },
+    {
+      "file": "client/src/components/dashboard/QueueSummary.jsx",
+      "sha256": "fceeb8e90a2dbb26a48fe49976eb4f5f4020f9685caea070b856a2cc069f18f8"
+    },
+    {
+      "file": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "sha256": "bd5587e0be92f6569650db1e5a349c9016721e090066ba4a89a603d6d560f990"
+    },
+    {
+      "file": "client/src/components/dashboard/ScopeSelector.jsx",
+      "sha256": "a1f1c92ddc1760299372de9bdbac2ed09afa28d891f7901e5f0d2d2bc5c8c76a"
+    },
+    {
+      "file": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "sha256": "b58135d4df5e3b89470cdd044912830cc6a5a9609c31a807e0dfae4b8f094cdc"
+    },
+    {
+      "file": "client/src/components/dashboard/UpdateStatus.jsx",
+      "sha256": "0616da4ce96c4410a7da06b417600e984a71df70bb0d14d1b8082d294156350b"
+    },
+    {
+      "file": "client/src/components/dashboard/WorkQueue.jsx",
+      "sha256": "465b98e73e75be9fb5835f1e598ce429acfe15cebf24770cad0e4e0850a3b99e"
+    },
+    {
+      "file": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "sha256": "59e51791a679c230620e0eac195f7e645e8113a2e2fdf49a77bab9ba13e81a5b"
+    },
+    {
+      "file": "client/src/components/equipment/LogEventModal.jsx",
+      "sha256": "b428faff7835855d1b5c4038288f9f49432dc535d9adc173c1cbb8782ec353ce"
+    },
+    {
+      "file": "client/src/components/equipment/RegisterAssetModal.jsx",
+      "sha256": "e2a2b295a5d0b4434c1e14ea386585c1951b46365e1321feef7d6a4a2b5644d6"
+    },
+    {
+      "file": "client/src/components/Footer.jsx",
+      "sha256": "3b5519de7ef819e999763ef7b75ccc2783cc2c0b86cbb279bf3550b6545e2dd5"
+    },
+    {
+      "file": "client/src/components/ForcePasswordChangeModal.jsx",
+      "sha256": "0d35612a99ee2209ec73ab4767488d0b1b3dfbd397f3f4d2f7a82ee6391c5888"
+    },
+    {
+      "file": "client/src/components/Header.jsx",
+      "sha256": "d3006bb84fdf0e06f0f20513df4bb3906d75b17a2e7b0365cd32bdf44401432b"
+    },
+    {
+      "file": "client/src/components/LanguageSwitcher.jsx",
+      "sha256": "69dcbca3f6caa66b7078d1c5f5002a9cabff11771667f651bf75eacee16ae1c5"
+    },
+    {
+      "file": "client/src/components/messaging/MessagingCenter.jsx",
+      "sha256": "0e3940621b84c516cac28553f31980bcb6cd8ba96f0af79298e26db02f67942c"
+    },
+    {
+      "file": "client/src/components/NotificationDrawer.jsx",
+      "sha256": "84ba779fb832c8c62ef9421e102d253e1cbe707bec4f3b3a5880dc55c638de3b"
+    },
+    {
+      "file": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "sha256": "0333d1562c0ebcf29f148474c30f00d8a95b7f4499538ea3acb6e4edff3ac57e"
+    },
+    {
+      "file": "client/src/components/reception/BatchExceptionModal.jsx",
+      "sha256": "ab99e9804526055e068fefd29ba0405b15e44dcb38d2a37ffce85f20c518cda4"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "sha256": "641ee4958108ea50f720e4fa76622f88ba672d21d313a633e5ac189f1f793edd"
+    },
+    {
+      "file": "client/src/components/reception/ComplianceChecklist.jsx",
+      "sha256": "1f6d76177657ce05440982c41e7cce0c9db6781ee487a450e96e359cb7927a66"
+    },
+    {
+      "file": "client/src/components/reception/FieldProvenanceCard.jsx",
+      "sha256": "b04701020bc40f34439bceb119be4d88556e94e3c61a67560882f701a158bdcb"
+    },
+    {
+      "file": "client/src/components/reception/KeyboardShortcutsModal.jsx",
+      "sha256": "057a9136ebb5b56f31d38d31ecbf3377c99d9d2d0c80a2823de110c0c7ca7f1d"
+    },
+    {
+      "file": "client/src/components/reception/LocationPicker.jsx",
+      "sha256": "016dbe5e6d7aa7315085c3caa0e53cb8ef5261cc324eb7bc6d02cd6c2c3a3a93"
+    },
+    {
+      "file": "client/src/components/reception/ManifestImportModal.jsx",
+      "sha256": "69fa484f28a1f72f3ad0678deb1bc9968eb0108d2544c1499274d5b00cb24704"
+    },
+    {
+      "file": "client/src/components/reception/SampleMap.jsx",
+      "sha256": "79d6b07522c83dd4c71953056e92a5964039a92f90c92c1fbdf354c043d3e0f7"
+    },
+    {
+      "file": "client/src/components/reception/WalkInForm.jsx",
+      "sha256": "31ae8232d6ccec5619bd7764ea7f78aaaadbe1eb63e4d9344cf3a832faed212a"
+    },
+    {
+      "file": "client/src/components/reception/WedgeModeBar.jsx",
+      "sha256": "a391ec3aba29ca2e3f6770338ded0507043785661177a2f3f170f5f54d7e97c7"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.css",
+      "sha256": "adf9172f7245daa31fcc980d9ae3486989de9cc606a56714f266dd3a1683fc38"
+    },
+    {
+      "file": "client/src/components/report/ReportContent.jsx",
+      "sha256": "883a6ed487979c96369a5a024460c3e869b7d333e3235fcc89e9119a8b01be23"
+    },
+    {
+      "file": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "sha256": "f218fe6b2b74df1482178c5cf56f62b1a271ab30bc4928840a96dd2abe9d0dec"
+    },
+    {
+      "file": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "sha256": "5910be33f4826925bab8d7135b3bd5f51ed0087af73589884d392aa12643c789"
+    },
+    {
+      "file": "client/src/components/sample/ContextPanel.jsx",
+      "sha256": "77f836461d34a5e491af26700863d878537a451e4db7bb9f5037d1a5dd71de94"
+    },
+    {
+      "file": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "sha256": "634ec7b997fbfe001f678eacfc6934e897b7eecd4e0dd9762fc81b6b7c4df984"
+    },
+    {
+      "file": "client/src/components/sample/FieldMap.jsx",
+      "sha256": "c10a7e7d55c1184a35d9ce6cd09ac6d735430326d838c7b81ac0961b6c63b3d3"
+    },
+    {
+      "file": "client/src/components/sample/FieldMetadataCard.jsx",
+      "sha256": "8e55620327b6c406dc6b157e2629ddef54922e0f1bf758169f9c9b21a2c97961"
+    },
+    {
+      "file": "client/src/components/sample/FieldSummary.jsx",
+      "sha256": "fe5029515a809715f371c1118a7d00c2c56c1f99542af39236aef4d3e07fa9ba"
+    },
+    {
+      "file": "client/src/components/sample/IntakeRequestCard.jsx",
+      "sha256": "4cb4d42b6a726a9db019cb28c43d9c85b4fd64015fe6010c3a04de20421c57e4"
+    },
+    {
+      "file": "client/src/components/sample/MetadataEditorModal.jsx",
+      "sha256": "721ecc7c36efee39c7578bb2bc2f441a38b9b0278ba067600e1d3ae85224155f"
+    },
+    {
+      "file": "client/src/components/sample/SampleSummary.jsx",
+      "sha256": "13fed06f14eabc9fedbfd191eebf35b8b33f9db389de0473df17375df82d05f2"
+    },
+    {
+      "file": "client/src/components/sample/StorageMovementModal.jsx",
+      "sha256": "d8cd1e3f2f5a89e767602550f746dca088a3a28514bab52396eadbae4962dfd3"
+    },
+    {
+      "file": "client/src/components/sample/SubmissionPanel.jsx",
+      "sha256": "2298889e5bdb00598f4f3d930e7af6c9153292baca856d486f965b16ead88717"
+    },
+    {
+      "file": "client/src/components/sample/WorkflowProgressBar.jsx",
+      "sha256": "53cb28155febd6bf699567484256be6ee448cc40cd3fd3dff901e5af22fac16b"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "sha256": "f758f949981006d6315bdfa9d2f7c55957226c2c765f03ce9880a1c10b561e96"
+    },
+    {
+      "file": "client/src/components/SampleProgressBar.jsx",
+      "sha256": "5707aba9259ea65f1104f93e673ed924c406fa7b3f27a70ceb692a92836d14ca"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterBar.jsx",
+      "sha256": "75bd9adde6c04228626adb7eefa7b2a71c3424578082ec58be761e5644507ea2"
+    },
+    {
+      "file": "client/src/components/samples/SamplesFilterDrawer.jsx",
+      "sha256": "ad85a1bc1b0ec09d24382f93340843431911728ac8ee125ea38d79a9c21b6983"
+    },
+    {
+      "file": "client/src/components/samples/SamplesHeader.jsx",
+      "sha256": "9bc95c66e722192f56026c0c371fa0987c9ac7c88ae962422964e5204bbab6c4"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "sha256": "1ac62ea7d032816bae8b7e966285de3ea1a6b2da3c246a0dea5652fc8e7974f8"
+    },
+    {
+      "file": "client/src/components/SampleStepper.jsx",
+      "sha256": "43a6fb0c5855746dd70d884140e64e6899e6b6194bda714a70e9bd2157a5c339"
+    },
+    {
+      "file": "client/src/components/SampleTimeline.jsx",
+      "sha256": "d051095ca4c5d4305d92250dd98b408bf142f2bd53ba5412834a1beac1afcea3"
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "sha256": "da973a2a1abb6cb1af8bbd6dde21f7e6f8db8de3966fe369caa03ee72f7c59ec"
+    },
+    {
+      "file": "client/src/components/SpectraUpload.jsx",
+      "sha256": "fb8b9f2304eac3ab6418cf2e7c6ec00b49eb90200ef656d508e88c5383d70ede"
+    },
+    {
+      "file": "client/src/components/SpectraViewer.jsx",
+      "sha256": "a51ef7aaf7a34b4cc3e4c50e49e5430f3ee0244a10367ef7aa20359a8cf3c3d6"
+    },
+    {
+      "file": "client/src/components/ThemeToggle.jsx",
+      "sha256": "cf651c860cee17109c9d673ecfa368f301fdeb1e344d6c67aa1fd1c97aaa5d6f"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "sha256": "6a73c9157f86fc8fdbb2966f14197ed328c860564094aebf06316549ed653b31"
+    },
+    {
+      "file": "client/src/components/UserDialog.jsx",
+      "sha256": "d2be5bbb0229ac8b39cb4eaa1d4dfb77f70107d36387e4ddd94f9168944b8300"
+    },
+    {
+      "file": "client/src/components/UserMenu.jsx",
+      "sha256": "303bae1715481f58e993de9fe2898cc0dbed28e221e003660764b63ddf0d1b79"
+    },
+    {
+      "file": "client/src/components/workbench/ActivityReceiptsView.jsx",
+      "sha256": "1a394d2361cc5233d3ebe9ff9446de2acb8424476c91bd550d5c62f11ebb170e"
+    },
+    {
+      "file": "client/src/components/workbench/BatchModal.jsx",
+      "sha256": "47667bef2611d82e60dbb94e0a995233000a0f90df27fb17e554541ac6d000b4"
+    },
+    {
+      "file": "client/src/components/workbench/ConflictComparePanel.jsx",
+      "sha256": "05450865a959cc8643082b310709135689b9b802090fc61706044138bcbde93a"
+    },
+    {
+      "file": "client/src/components/workbench/NumericEditor.jsx",
+      "sha256": "32987293c711d6a29064b47fb0c98ed03cc6f081e828780d426c3527816e7b95"
+    },
+    {
+      "file": "client/src/components/workbench/OperationalTaskEditor.jsx",
+      "sha256": "d1856cc913f3bd1b2b4fe25c1c6b9fc24f955996d1e2bb8c99455118a9ccd80b"
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "sha256": "f9aecdf6868eb7c01b224b6b20cd1f994e67e710b1dd5393f84d985049a8110f"
+    },
+    {
+      "file": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "sha256": "7d35ffd76337e2058a4bcd1bc324e4b69476571f16f911ca5226b396e4024feb"
+    },
+    {
+      "file": "client/src/components/workbench/ReviewSubmissionView.jsx",
+      "sha256": "3eb4223d0634a7e577317385b9af7e3bc90250bec729ec93bcfd4015e2e3cb74"
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "sha256": "1651533ae5c31a828ae5f4fdd557a44ab333b5e1ed645533986b24901076dd5a"
+    },
+    {
+      "file": "client/src/components/workbench/TextureEditor.jsx",
+      "sha256": "e2a0b7dcc3f65b78eb4233de2adf22b080cde490774813a24e73ebc4ebea48d0"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchInspector.jsx",
+      "sha256": "f9a5bf9afef92316cbd4178371272e7aa4227e0e55be32c14ae8a6c076166947"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "sha256": "968057cfb6027530eb83e1c79b4681fb17203678585e55304050b69804d87898"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "sha256": "1993fc5f398e28720c77bc754b97a53ce587078bf7419e72f59a1e6abd26483a"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "sha256": "ffd6a5db2e3ff9b56956fe5fab565370cec1ec3ebef367b10971a1eb62bfe89e"
+    },
+    {
+      "file": "client/src/components/workflow/LabFloorPlan.jsx",
+      "sha256": "5a91dfcc6e950d7d940beae360826727c099b0dd849626542a5b96368edd2767"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowAnalysisList.jsx",
+      "sha256": "cca573baae89088d171b4779fe82fc62b59816d105ee7eb7e61a1f7d95ae6ec6"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDependencyGraph.jsx",
+      "sha256": "3ec7ec533efa93621da2bfaec83a4f9dc5d1d034ab16be4617d3e5f458dafcc9"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "sha256": "d75780f7fee828d4d20a0ea6c6b78b43810a5495eb157cd0914d82c877a1d454"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowDetailPanel.jsx",
+      "sha256": "ac7daa039acce9e3465c2b56190f44390b977fb9e8e43b389156ab5c5b9d8051"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowEdge.jsx",
+      "sha256": "e5611b1f6d0019956124938405291839974cf42ed42dd935a15890a77298e19d"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowExport.jsx",
+      "sha256": "8bcfb5ceb9f5af310cf5d070b3ee8d740cbabd094c894e7780ad833f5b97c0c1"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowFilters.jsx",
+      "sha256": "af88043cc5d750cbc6d6f9f25b77a76ab7aac3934c342f8428230cd248a83f21"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowHeader.jsx",
+      "sha256": "ed429b80d3baeffca1c54e4f14e2ceb686f8a1e9a7d185273956396d69c0091d"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowInspector.jsx",
+      "sha256": "8dc712f12fcd0f7a40f982941cac8437ef9289a404e0e3ac6d7b4eb6c9e85a08"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "sha256": "f2957c74b5cc2eaa59a492aa2de57e4579ffbe4ea5a8104e6d7c8753116e785c"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowNode.jsx",
+      "sha256": "834dfe4db66400f263af9eaa6fa55b46cd3e5d6391dee7e38c8a277f355af4a4"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowOverviewGraph.jsx",
+      "sha256": "dec69a6c7383941e38e03cebd0befc3a9f97ae0b0d7ac328f27c38d4eeca7edd"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageCard.jsx",
+      "sha256": "0e20df2cdddd8348d105044968c0d06d930f263166181816a0732e58082991ef"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageLane.jsx",
+      "sha256": "ad04a39fa25747632e3b9a5554f6f75f497831a0dd9d0c96403a10cd30164f51"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "sha256": "6a7bdc5bcda57eab291af19481ef56ebe8b6c82b79e3c083ec3e8d7121f0253b"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTimeline.jsx",
+      "sha256": "14a8fe8d36c3512fff06d1cb71a31c7abbc3d59131ffd5fa1876867951743cb8"
+    },
+    {
+      "file": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "sha256": "62bc17b7659b73be6b4534d6b80ff8e560d57ecbc42e261ba494ab7fede65629"
+    },
+    {
+      "file": "client/src/context/AnalysisCatalogueContext.jsx",
+      "sha256": "d736267f8989059ec278b7e0925091074293801f659f836885ecf6fa2db78092"
+    },
+    {
+      "file": "client/src/context/AuthContext.jsx",
+      "sha256": "99f2597365005e2eaa88c312de08502a8c3694396e2538bd6960b71c97c2d9ea"
+    },
+    {
+      "file": "client/src/context/DialogContext.jsx",
+      "sha256": "1513072fe9ff0556c3de13acd3cf9e1ecdffe1ee8d189152dab582b62f8a6c78"
+    },
+    {
+      "file": "client/src/context/LanguageContext.jsx",
+      "sha256": "baf10c87d393d089caa7c50cc3e465538d012c61ec4d67bb88874252660d3f4a"
+    },
+    {
+      "file": "client/src/context/NotificationContext.jsx",
+      "sha256": "ae8c47ba8794d7f006b1f55e9a4c828a9a73830ab45bea6bc6e956e077fa630c"
+    },
+    {
+      "file": "client/src/context/ThemeContext.jsx",
+      "sha256": "260325ccc574f1c436c7dcbb948875ed56ba961f66f767f725dbd1f32a36e969"
+    },
+    {
+      "file": "client/src/hooks/useFocusTrap.js",
+      "sha256": "96e6e09f0a96204fc123761ba5203f5823d7cfb4b2d34e4a9702461ff621b3d7"
+    },
+    {
+      "file": "client/src/hooks/useRealtimeData.js",
+      "sha256": "609983f8fe3516bb1c1df652b1a6e392d24a8b45c1304b92eda13f36b1611634"
+    },
+    {
+      "file": "client/src/hooks/useSampleWorkflow.js",
+      "sha256": "682702b212caac76d85428a1ec71b17701ead061aabf04205eb125f9ef0eba3b"
+    },
+    {
+      "file": "client/src/index.css",
+      "sha256": "dbd12eaae7829b76791881acf4a311a57116fe89f92c9659f6119009f447d738"
+    },
+    {
+      "file": "client/src/lib/appearance.js",
+      "sha256": "e83646668cf3359e706b5bbe5b611195068658b3231a5264ddc4ba6e7b822dfb"
+    },
+    {
+      "file": "client/src/lib/localeResolver.js",
+      "sha256": "ae5389d7deeb809796d6761ef8893ec85c0c6bb5b152828c587084a3b622ba0c"
+    },
+    {
+      "file": "client/src/lib/terminologyRegistry.js",
+      "sha256": "9420b0409bbed4252c2d01e1b3fb7a6473031ad2d2b894b57390438725b67e60"
+    },
+    {
+      "file": "client/src/main.jsx",
+      "sha256": "274703186c2421c7bcb51d27107a33a66e1f0e5d354017f7f9e146c51309aea7"
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "sha256": "5b0cd56847020a1744ecc47162bc4f472b005dc1bf1d3eb07758e9c062557c7c"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "sha256": "9daf8b70673c4fadd4c49039c035fce2f33748e209e11d0605332e4540d7c2dc"
+    },
+    {
+      "file": "client/src/pages/admin/LabMethods.jsx",
+      "sha256": "6822b190a157370d536c02b1324a3ed3c887b407c11c42240f5419094a14aff5"
+    },
+    {
+      "file": "client/src/pages/admin/LegacyImport.jsx",
+      "sha256": "8b4cc3b891e9d7087d43724d585abc7e14f0009b90b5101207f7c99c1ed22b88"
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "sha256": "04946d68cfce0d7c5aefc3b645230e09e0d855730d82efb1d5037fbd70155945"
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "sha256": "8e40282f6cb21416c251449de312c4af488416b5e291918844d3c54da18cdd1a"
+    },
+    {
+      "file": "client/src/pages/CesiumGlobe.jsx",
+      "sha256": "df31540a149403aea594f8782e29a38307431438ebe4477747c94906f82cc281"
+    },
+    {
+      "file": "client/src/pages/CountryData.jsx",
+      "sha256": "307ef103fa015a45ad0f9f726988bd378759e417dde2cb8a0dbce15f1f376f95"
+    },
+    {
+      "file": "client/src/pages/Credits.jsx",
+      "sha256": "4cdb71e59e1fee0cc7519e5c9c11ca59ae9c2f612884fd385dfbaf160b8fd59d"
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "sha256": "d8e2f4d41e5f4b36c5743627757d45dde718a58f511759e4a4e18fe4cb6e9feb"
+    },
+    {
+      "file": "client/src/pages/DataResults.jsx",
+      "sha256": "63d29a0fbe109ef5a9de5d9b4876c5fe3ecf0de39b07d7fb2bd21b9c12452629"
+    },
+    {
+      "file": "client/src/pages/DataSheet.jsx",
+      "sha256": "eb1df37e591d12342696af90c023539f39a48ed276a4544c55e36f438d95cec7"
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "sha256": "8fbcc621f1938430373edd93dbfca3ae6cf76c732a9805dffc67da286418c42d"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "sha256": "8b8f18ca1122e927276866cb294c8d5929389e41c0a9ea19c8ec4faa60fe703c"
+    },
+    {
+      "file": "client/src/pages/Login.jsx",
+      "sha256": "1517e93dd7073d42e5cb347e6dbc6a787edc470decccee57d3fa772a4f422219"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "sha256": "4fdeaaf3a5ece188343be5a39725e214f0713c7df2e2e092907b24eb56ba2757"
+    },
+    {
+      "file": "client/src/pages/MyWork.jsx",
+      "sha256": "5bcb950c18cc88a030f1d5b079820c073c843376c1f13c719d6e6cd3c58c4300"
+    },
+    {
+      "file": "client/src/pages/NotFound.jsx",
+      "sha256": "1cbd85e9cdfdf6f8509fd84bf65a3d759622d5908d9abd4bb2c2ea165302b14d"
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "sha256": "010b062f940f04baad653ae14aa8b25f6dd41c43d82aca5d2e145ba31bf2a647"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "sha256": "12d15b9d3cf775993033b052932b25d8b05e3bb71ca6b817b8180e81e0ec711d"
+    },
+    {
+      "file": "client/src/pages/PublicReport.jsx",
+      "sha256": "11071ea603766e095ef8beb6e5c5a409bbc1339365bd12ca4a00820d15edfc40"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "sha256": "3557657cb5101c0a3f42364530fbc52d8eaa2c316996c132f2ac7a0f6527e824"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "sha256": "383ef195caa03204cde91dc227cbff09ceee315984f803b27fc69e5730746d27"
+    },
+    {
+      "file": "client/src/pages/Reports.jsx",
+      "sha256": "05013d005ac35cc5ca45ef50be19daf7ccbeef85818440f05bae85ffb59c59bc"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "sha256": "6ae8d1e037923cdc768216023eb92abf20ba9415025b34c6dec28af37d1f0702"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "sha256": "0e3a51f68fd580519b841166926839b71dd23654734e306faee2da8db2b7a533"
+    },
+    {
+      "file": "client/src/pages/Samples.jsx",
+      "sha256": "87f86bf56e0a652e403cb122091e0ab8f9b124dbeb8e425b878d27d6c7f8156b"
+    },
+    {
+      "file": "client/src/pages/SampleWorkflowMap.jsx",
+      "sha256": "3e096787074a554f40db5592e6f6a5f9624cec00853f4ef01d7962784051df8c"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "sha256": "8f59c4665df4c96bd6c1b900da1d3fffde00f2728db1409de725a36b90d757d3"
+    },
+    {
+      "file": "client/src/pages/TechStack.jsx",
+      "sha256": "1f39d78e1e1762002e301389ed38a0e1d13f11b2af0e39edb26e8ce16b860bec"
+    },
+    {
+      "file": "client/src/pages/TechWorkbench.jsx",
+      "sha256": "30056a743d952bd9f58b54f579c2e7bde39333a5b494e3551e7abd69067bf215"
+    },
+    {
+      "file": "client/src/pages/TempPages.jsx",
+      "sha256": "595a6963aa933804d208092104826b87fd16739734857742a44313292e801a7b"
+    },
+    {
+      "file": "client/src/pages/Users.jsx",
+      "sha256": "cfe1ab53f7d7fbaf94387635b5fbfa867cfe61f535d9a68364d17e3a95d527fc"
+    },
+    {
+      "file": "client/src/services/reportService.js",
+      "sha256": "6ff8d9821415213833313d65d7b550087b6fe689a66c5cf3b5e8d7e4ccfe70c3"
+    },
+    {
+      "file": "client/src/styles/appearance-tokens.css",
+      "sha256": "dd9ab200e92f2fe635dbb30828f321d263a0ed423573c58639cf53510931745a"
+    },
+    {
+      "file": "client/src/styles/workflow-map-v2.css",
+      "sha256": "39e789493baf58ff240e03854003c45de3d07bb2ac7488ca1c4408b7d4d5b04f"
+    },
+    {
+      "file": "client/src/utils/analysisNames.js",
+      "sha256": "a87a002354bfdd05efe14012ffab158eefe6972fbb5057dc078344bf1229d07a"
+    },
+    {
+      "file": "client/src/utils/audioCues.js",
+      "sha256": "0fe4846a2df321dae765fe5766affe8653874f59c70b5ca68cbf8a85c332102d"
+    },
+    {
+      "file": "client/src/utils/coordinateResolver.js",
+      "sha256": "136e580410b8ef082e9288ebc44c724752764903f5ee804fddd0aeccb2751c3b"
+    },
+    {
+      "file": "client/src/utils/coordParser.js",
+      "sha256": "976a0835a7f0fce0125e5184e41ef48edcbec501b124c838e0de770fa2a0b807"
+    },
+    {
+      "file": "client/src/utils/dateUtils.js",
+      "sha256": "4ab6c068a1b3a51aacb6e2f00e5e0c464abfb1b901ba980d51e4204cc215d808"
+    },
+    {
+      "file": "client/src/utils/i18nHelper.js",
+      "sha256": "0f5caeb6f0d4c9a1aed6dfe9d0167118c3c323019a18b0e84d76fe08a75194f6"
+    },
+    {
+      "file": "client/src/utils/messageFormatter.js",
+      "sha256": "6c82c81afc1f69d006cdef2fea0bd9bbf75c0850da026ab07db7849fa6b7e14a"
+    },
+    {
+      "file": "client/src/utils/reportUtils.js",
+      "sha256": "055a7a9b18e1d8815b2d42bd24085d6c7bf336562bc0ac4cd6b0c17dabebb8e5"
+    },
+    {
+      "file": "client/src/utils/soilCalculations.js",
+      "sha256": "ce7e2e1c62d37e4a26b5309aeec83c30ff5fedcee144e2bb4a712d37f3cd63ca"
+    },
+    {
+      "file": "client/src/utils/timezone.js",
+      "sha256": "8ba60a9628a1c1a02c888d80c9389a7cd156e32520b652b558a7d2ce4d2dec29"
+    },
+    {
+      "file": "client/src/utils/workflowContract.js",
+      "sha256": "24ca2a3675e41bf2519386250592433812db5c79212287f1b40fba5e6a5138a7"
+    },
+    {
+      "file": "client/src/utils/workflowMapper.js",
+      "sha256": "3e014f1c25b19b0970b978638aa176210647b3081360ee6ee031a553bbe6d3cb"
+    },
+    {
+      "file": "client/src/utils/workItemEvidence.js",
+      "sha256": "9900bae20d31bd57af688a5a91a5afc2835804763d5be58b29c6c3dedb47ab3b"
+    }
+  ]
+}

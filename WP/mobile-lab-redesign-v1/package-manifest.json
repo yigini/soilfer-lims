@@ -1,0 +1,177 @@
+{
+  "createdAt": "2026-09-08T15:13:15.302Z",
+  "scope": "Planning and isolated prototype only",
+  "sourceAuditRevision": "e5fa3baea7f0056481a615b0eed4a76572946962",
+  "routes": 35,
+  "prototypeChecks": 26,
+  "layoutCases": 54,
+  "images": [
+    {
+      "file": "mockup-phone-home.png",
+      "width": 366,
+      "height": 940
+    },
+    {
+      "file": "mockup-phone-entry.png",
+      "width": 366,
+      "height": 795
+    },
+    {
+      "file": "mockup-tablet-run.png",
+      "width": 780,
+      "height": 931
+    },
+    {
+      "file": "mockup-phone-sync.png",
+      "width": 366,
+      "height": 1137
+    },
+    {
+      "file": "mockup-phone-conflict-graphite.png",
+      "width": 366,
+      "height": 758
+    },
+    {
+      "file": "mockup-phone-reception.png",
+      "width": 366,
+      "height": 749
+    },
+    {
+      "file": "mockup-phone-manager.png",
+      "width": 366,
+      "height": 902
+    }
+  ],
+  "files": [
+    {
+      "file": "ACCEPTANCE_TESTS.md",
+      "bytes": 13163,
+      "sha256": "f16ae7dc49ea8b33b233cbf3d106bb9977fecc324c1ecd6ca84187deed03e2fc"
+    },
+    {
+      "file": "ANTIGRAVITY_PROMPT.md",
+      "bytes": 6441,
+      "sha256": "601d125d8462d7cfcea70967542935ad66855ac755342ac161383553ca9d532d"
+    },
+    {
+      "file": "audit-mobile.cjs",
+      "bytes": 2551,
+      "sha256": "155a56fd51b448b6d887697fe6a43fd9e78a7eca36f9f5eda592972939607793"
+    },
+    {
+      "file": "AUDIT_FINDINGS.md",
+      "bytes": 7940,
+      "sha256": "e1666d41b77f964085bbfaa745090b075610dd635ca40efd65e38c49f8134e16"
+    },
+    {
+      "file": "build-preview.cjs",
+      "bytes": 3788,
+      "sha256": "97f5190288397ff624bb87e206e181ed032c2a5fd26be7e6838c9a17c78bcb6f"
+    },
+    {
+      "file": "HANDOFF_STATUS.md",
+      "bytes": 884,
+      "sha256": "cf579885c9e9506f580abd84b9db38090e08a2568bbcdde2b5ef3a7418a6f282"
+    },
+    {
+      "file": "IMPLEMENTATION_PLAN.md",
+      "bytes": 18035,
+      "sha256": "df6cb4e219c16a4d1a5994846255443b3788f05430058cb6615d768f1e6ae67c"
+    },
+    {
+      "file": "IMPLEMENT_NOW.md",
+      "bytes": 6124,
+      "sha256": "81ca975e46007a0ea5bfbddb327e5d7f8c4a048e1bb83b56cd594a753300ec6d"
+    },
+    {
+      "file": "mobile-lab.fragment.html",
+      "bytes": 44267,
+      "sha256": "064c17914b04168960e10c22f37ef7febb44e74b6ca5cd7191e80090f7d99480"
+    },
+    {
+      "file": "mockup-phone-conflict-graphite.png",
+      "bytes": 38444,
+      "sha256": "dcb908a90883d5273a310cf70e2fe002f821d048bfcf3aa4666dd4d3798b1713"
+    },
+    {
+      "file": "mockup-phone-entry.png",
+      "bytes": 38139,
+      "sha256": "f9c1e708a9cb657890281e84eeb44156ad485a57635be120eecb9dca353057ed"
+    },
+    {
+      "file": "mockup-phone-home.png",
+      "bytes": 48694,
+      "sha256": "0a37c6ecf47376f99432beec03f233c4058b335ae08f38f02c5739d1ad1d871a"
+    },
+    {
+      "file": "mockup-phone-manager.png",
+      "bytes": 41263,
+      "sha256": "935cd6dd07c62a18bd18d94a0a89cc69e9e338986bd1f71acce34339fd3bf5ff"
+    },
+    {
+      "file": "mockup-phone-reception.png",
+      "bytes": 41072,
+      "sha256": "0f47e459c3996be59e448452c96cac64634829e20aa1fa9aa1da3143f0c8729a"
+    },
+    {
+      "file": "mockup-phone-sync.png",
+      "bytes": 49456,
+      "sha256": "9d46fd00bcae1401ea641231d52d7b29b7366c5f2b4da5a8025a074c6b178c8f"
+    },
+    {
+      "file": "mockup-tablet-run.png",
+      "bytes": 55867,
+      "sha256": "9e383f4cfe8a423b4f92132be36b12815686b01999b638e3dd5d19fc15fc73fe"
+    },
+    {
+      "file": "OFFLINE_SYNC_CONTRACT.md",
+      "bytes": 18752,
+      "sha256": "01f812d34513ba2591f39773a36a68378be8398aa4d81328762627aa846f2cb9"
+    },
+    {
+      "file": "prototype-qa.json",
+      "bytes": 11889,
+      "sha256": "25d08717c557f4d9ca988995e33d1a76e02edb8fc782c50bc8b9d4e4574148b8"
+    },
+    {
+      "file": "README.md",
+      "bytes": 4520,
+      "sha256": "f02d8abbf7fbfd6af6804b2cfe39938f0564c867313f9a9e7e576951b9e39679"
+    },
+    {
+      "file": "RESEARCH.md",
+      "bytes": 6444,
+      "sha256": "7d6f10b95acfba5906867f8f04e2723880c3476286bf36abcbc8075c1b7e2c86"
+    },
+    {
+      "file": "review-preview.html",
+      "bytes": 57096,
+      "sha256": "8c6b4738260d860f618ffab7c4f6f0046262a6dfbffc24bdb208b94589c17020"
+    },
+    {
+      "file": "ROUTE_COVERAGE.md",
+      "bytes": 6385,
+      "sha256": "d968f16e95393d9884e96689bc69bf63e1f0e970c6e5751d6912907d3c299476"
+    },
+    {
+      "file": "SCREEN_SPECIFICATIONS.md",
+      "bytes": 14255,
+      "sha256": "073ad2616d68e5a8d82b4e98524579bf94d8f4d6951f8c5926096562a6fbb37f"
+    },
+    {
+      "file": "source-audit.json",
+      "bytes": 145619,
+      "sha256": "671069b845a81e643d97cda127c3b87cd027acd13ce9857aadd69589652eaa3a"
+    },
+    {
+      "file": "verify-package.cjs",
+      "bytes": 2715,
+      "sha256": "a1093b0344a3b27b0a53882d5cc17789881e598fff1baddd5de7b59d0c1c6d3b"
+    },
+    {
+      "file": "verify-prototype.cjs",
+      "bytes": 9160,
+      "sha256": "2373736c22f538bc6f4ef55481676d58a22f7772b2d1ed746eed60e32d873d38"
+    }
+  ]
+}

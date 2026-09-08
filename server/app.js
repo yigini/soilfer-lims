@@ -249,6 +249,8 @@ app.use('/api/spectral', spectralRoutes);
 app.use('/api/reception', verifyToken, require('./routes/receptionRoutes'));
 app.use('/api/work', verifyToken, require('./routes/workRoutes'));
 app.use('/api/workbench', verifyToken, require('./routes/workbenchRoutes'));
+app.use('/api/sync', require('./routes/syncRoutes'));
+app.use('/api/offline', require('./routes/offlineRoutes'));
 app.use('/api/labs', verifyToken, require('./routes/labRoutes'));
 app.use('/api/exports', verifyToken, require('./routes/exportRoutes'));
 app.use('/api/import', require('./routes/importRoutes'));

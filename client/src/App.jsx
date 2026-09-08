@@ -55,6 +55,7 @@ const SampleWorkflowMap = React.lazy(() => import('./pages/SampleWorkflowMap'));
 const LabMethods = React.lazy(() => import('./pages/admin/LabMethods'));
 const LegacyImport = React.lazy(() => import('./pages/admin/LegacyImport'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
+const ScanPage = React.lazy(() => import('./pages/ScanPage'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -68,8 +69,13 @@ const LazyFallback = () => (
 import { useTheme } from './context/ThemeContext';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
+import { SyncProvider } from './context/SyncContext';
 import { Header } from './components/Header';
 import Footer from './components/Footer';
+import { MobileHeader } from './components/mobile/MobileHeader';
+import { MobileNavBar } from './components/mobile/MobileNavBar';
+import { MobileMoreSheet } from './components/mobile/MobileMoreSheet';
+import { SyncCentreModal } from './components/mobile/SyncCentreModal';
 
 // --- Layout Component ---
 const Layout = ({ children }) => {
@@ -78,6 +84,7 @@ const Layout = ({ children }) => {
     const { t } = useLanguage();
     const { theme, darkMode } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isMoreSheetOpen, setIsMoreSheetOpen] = React.useState(false);
 
     // Determine site logo: custom lab logo or official SoilFER LIMS brand logo (light/dark)
     const isCustomLogo = theme?.logoUrl && !theme.logoUrl.includes('/assets/img/soilfer-logo') && !theme.logoUrl.includes('/assets/img/logo') && !theme.logoUrl.endsWith('/logo.png') && !theme.logoUrl.includes('fao_logo');
@@ -235,16 +242,31 @@ const Layout = ({ children }) => {
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0">
-                <Header onMenuClick={() => setIsSidebarOpen(true)} />
+                {/* Desktop Top Header (hidden on mobile) */}
+                <div className="hidden md:block">
+                    <Header onMenuClick={() => setIsSidebarOpen(true)} />
+                </div>
 
-                <main className="flex-1 overflow-auto bg-sf-canvas md:ml-0 pt-16 mt-0">
-                    <div className={`p-4 md:p-8 ${marginClass} transition-all duration-300 min-h-[calc(100vh-8rem)]`}>
+                {/* Mobile Top Header (hidden on desktop) */}
+                <MobileHeader onMenuClick={() => setIsMoreSheetOpen(true)} />
+
+                <main className="flex-1 overflow-auto bg-sf-canvas md:ml-0 pt-14 md:pt-16 mt-0">
+                    <div className={`p-3 md:p-8 ${marginClass} transition-all duration-300 min-h-[calc(100vh-8rem)] pb-24 md:pb-8`}>
                         {children}
                     </div>
-                    <div className={marginClass}>
+                    <div className={`${marginClass} hidden md:block`}>
                         <Footer />
                     </div>
                 </main>
+
+                {/* Mobile Bottom Navigation Bar (hidden on desktop) */}
+                <MobileNavBar onMoreClick={() => setIsMoreSheetOpen(true)} />
+
+                {/* Mobile Full-Height Drawer (hidden on desktop) */}
+                <MobileMoreSheet isOpen={isMoreSheetOpen} onClose={() => setIsMoreSheetOpen(false)} />
+
+                {/* Laboratory Sync Centre Modal */}
+                <SyncCentreModal />
             </div>
         </div>
     );
@@ -286,12 +308,14 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
 
     return (
         <NotificationProvider>
-            <Layout>
-                <React.Suspense fallback={<LazyFallback />}>
-                    {children}
-                </React.Suspense>
-                <NotificationDrawer />
-            </Layout>
+            <SyncProvider>
+                <Layout>
+                    <React.Suspense fallback={<LazyFallback />}>
+                        {children}
+                    </React.Suspense>
+                    <NotificationDrawer />
+                </Layout>
+            </SyncProvider>
         </NotificationProvider>
     );
 };
@@ -303,6 +327,7 @@ function App() {
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
             <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
+            <Route path="/scan" element={<RequireAuth><React.Suspense fallback={<LazyFallback />}><ScanPage /></React.Suspense></RequireAuth>} />
             <Route path="/samples/:id/map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
             <Route path="/workflow-map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
 

@@ -65,6 +65,12 @@
     --sf-radius-md: 8px;
     --sf-radius-lg: 12px;
 
+    /* Mobile Safe Area Inset Tokens */
+    --sf-sat: env(safe-area-inset-top, 0px);
+    --sf-sab: env(safe-area-inset-bottom, 0px);
+    --sf-sal: env(safe-area-inset-left, 0px);
+    --sf-sar: env(safe-area-inset-right, 0px);
+
     color-scheme: light;
 }
 
@@ -150,3 +156,16 @@
 .sf-paper .text-muted {
     color: #555555 !important;
 }
+
+/* Mobile Safe Area & Touch Target Helpers */
+.pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+}
+.pt-safe {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+}
+.touch-target {
+    min-height: 48px;
+    min-width: 48px;
+}
+

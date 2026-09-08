@@ -1,0 +1,609 @@
+{
+  "testedAt": "2026-09-08T14:57:48.026Z",
+  "scope": "Isolated HTML design study only; no real device/offline/backend certification",
+  "checks": [
+    {
+      "name": "Empty result is rejected",
+      "passed": true
+    },
+    {
+      "name": "Save advances to S002 and labels local draft",
+      "passed": true
+    },
+    {
+      "name": "Previous sample preserves draft",
+      "passed": true
+    },
+    {
+      "name": "Sample detail matches current run item",
+      "passed": true
+    },
+    {
+      "name": "Tablet exposes run list",
+      "passed": true
+    },
+    {
+      "name": "Invalid texture sum is blocked",
+      "passed": true
+    },
+    {
+      "name": "Texture is saved as one panel",
+      "passed": true
+    },
+    {
+      "name": "Preparation requires all checklist items",
+      "passed": true
+    },
+    {
+      "name": "Preparation does not bypass independent verification",
+      "passed": true
+    },
+    {
+      "name": "Preparation confirmation survives navigation",
+      "passed": true
+    },
+    {
+      "name": "Drying has checklist confirmation",
+      "passed": true
+    },
+    {
+      "name": "Scan cannot navigate to arbitrary URL",
+      "passed": true
+    },
+    {
+      "name": "Manual sample lookup opens the expected record",
+      "passed": true
+    },
+    {
+      "name": "Simulated sync preserves conflict",
+      "passed": true
+    },
+    {
+      "name": "Conflict review needs a reason",
+      "passed": true
+    },
+    {
+      "name": "Review note survives appearance change",
+      "passed": true
+    },
+    {
+      "name": "Review request retains previous conflict without claiming accepted result",
+      "passed": true
+    },
+    {
+      "name": "Role preview does not show another account queue",
+      "passed": true
+    },
+    {
+      "name": "Reception condition checks cannot be skipped",
+      "passed": true
+    },
+    {
+      "name": "Offline receipt has provisional identity",
+      "passed": true
+    },
+    {
+      "name": "Manager approval is disabled offline",
+      "passed": true
+    },
+    {
+      "name": "Manager review note survives reconnect",
+      "passed": true
+    },
+    {
+      "name": "Online simulated review is explicit",
+      "passed": true
+    },
+    {
+      "name": "Technician result view exposes no manager decision controls",
+      "passed": true
+    },
+    {
+      "name": "No script runtime errors",
+      "passed": true
+    },
+    {
+      "name": "No network requests",
+      "passed": true
+    }
+  ],
+  "layouts": [
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "home",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "work",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "samples",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "more",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "sync",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "run",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "texture",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "prep",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "screen": "drying",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "home",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "work",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "samples",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "more",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "sync",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "run",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "texture",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "prep",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "screen": "drying",
+      "w": 296,
+      "scroll": 296,
+      "device": 296,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "home",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "work",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "samples",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "more",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "sync",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "run",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "texture",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "prep",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "screen": "drying",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "home",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "work",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "samples",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "more",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "sync",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "run",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "texture",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "prep",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "screen": "drying",
+      "w": 366,
+      "scroll": 366,
+      "device": 366,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "home",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "work",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "samples",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "more",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "sync",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "run",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "texture",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "prep",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "screen": "drying",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "home",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "work",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "samples",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "more",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "sync",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "run",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "texture",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "prep",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    },
+    {
+      "width": 768,
+      "theme": "graphite",
+      "screen": "drying",
+      "w": 744,
+      "scroll": 744,
+      "device": 410,
+      "unrenderedIcons": 0
+    }
+  ],
+  "errors": [],
+  "networkRequests": [],
+  "screenshots": [
+    "mockup-phone-home.png",
+    "mockup-phone-entry.png",
+    "mockup-tablet-run.png",
+    "mockup-phone-sync.png",
+    "mockup-phone-conflict-graphite.png",
+    "mockup-phone-reception.png",
+    "mockup-phone-manager.png"
+  ]
+}

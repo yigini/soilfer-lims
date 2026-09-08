@@ -2,7 +2,7 @@ import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Filter, Search, Clipboard, ArrowRight, CheckCircle2,
-    AlertTriangle, Sparkles, Check, Layers
+    AlertTriangle, Sparkles, Check, Layers, LayoutList, Table as TableIcon
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import TextureEditor from './TextureEditor';
@@ -10,6 +10,7 @@ import OperationalTaskEditor from './OperationalTaskEditor';
 import WorkbenchInspector from './WorkbenchInspector';
 import PastePreviewModal from './PastePreviewModal';
 import BatchModal from './BatchModal';
+import SingleSampleEditor from './SingleSampleEditor';
 
 /**
  * WorksheetArea
@@ -45,6 +46,7 @@ export default function WorksheetArea({
     const [selectedRows, setSelectedRows] = useState(new Set());
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768) ? 'single' : 'table');
 
     useEffect(() => {
         if (initialSampleId && items.length > 0) {
@@ -167,15 +169,27 @@ export default function WorksheetArea({
                     )}
                 </div>
 
-                <div className="relative">
-                    <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Find sample ID..."
-                        className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-56"
-                    />
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setViewMode(prev => prev === 'single' ? 'table' : 'single')}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
+                        title={viewMode === 'single' ? 'Switch to Batch Table' : 'Switch to Single Sample Card'}
+                    >
+                        {viewMode === 'single' ? <TableIcon size={13} /> : <LayoutList size={13} />}
+                        <span>{viewMode === 'single' ? 'Table View' : 'Card View'}</span>
+                    </button>
+
+                    <div className="relative">
+                        <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Find sample ID..."
+                            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-44 sm:w-56"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -202,10 +216,23 @@ export default function WorksheetArea({
                 </div>
             </div>
 
-            {/* Main Work Area: Table + Docked 240px Inspector */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-                {/* Worksheet Table (3 cols) */}
-                <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
+            {viewMode === 'single' ? (
+                <SingleSampleEditor
+                    activeGroup={activeGroup}
+                    items={filteredItems}
+                    currentIndex={Math.max(0, filteredItems.findIndex(i => i.workItemId === inspectedItem?.workItemId))}
+                    onIndexChange={(idx) => {
+                        if (filteredItems[idx]) setSelectedItemId(filteredItems[idx].workItemId);
+                    }}
+                    onDraftChange={onDraftChange}
+                    onConfirmOperation={onConfirmOperation}
+                    onOpenSpectralIntake={onOpenSpectralIntake}
+                />
+            ) : (
+                /* Main Work Area: Table + Docked 240px Inspector */
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                    {/* Worksheet Table (3 cols) */}
+                    <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-xs">
                             <thead>
@@ -487,6 +514,7 @@ export default function WorksheetArea({
                     isDiscarding={isDiscarding}
                 />
             </div>
+            )}
 
             {/* Paste Preview Modal */}
             <PastePreviewModal
