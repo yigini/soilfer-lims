@@ -10,18 +10,6 @@ import { useNotifications } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const SpectralLibrary = () => {
-    // Dismiss viewer modal on Escape key
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && selectedScan) {
-                setSelectedScan(null);
-                setOverlayScans(null);
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedScan]);
-
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
@@ -34,6 +22,18 @@ const SpectralLibrary = () => {
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [batchLoading, setBatchLoading] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState(new Set());
+
+    // Dismiss viewer modal on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && selectedScan) {
+                setSelectedScan(null);
+                setOverlayScans(null);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedScan]);
 
     // Group scans by sampleId for collapsible display
     const groupedData = useMemo(() => {
