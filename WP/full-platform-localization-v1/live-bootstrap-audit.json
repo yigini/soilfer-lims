@@ -1,0 +1,239 @@
+{
+  "url": "https://lims.yigini.net/api/public/i18n/bootstrap",
+  "readAt": "2026-09-08T10:38:55.560Z",
+  "status": 200,
+  "bytes": 226971,
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "isDefault": true,
+      "isActive": true
+    },
+    {
+      "code": "es",
+      "name": "Español",
+      "isDefault": false,
+      "isActive": true
+    },
+    {
+      "code": "fr",
+      "name": "Français",
+      "isDefault": false,
+      "isActive": true
+    },
+    {
+      "code": "pt",
+      "name": "Português",
+      "isDefault": false,
+      "isActive": true
+    },
+    {
+      "code": "es-419",
+      "name": "Español (Latinoamérica)",
+      "isDefault": false,
+      "isActive": true
+    }
+  ],
+  "brandingDefaultLanguage": "en",
+  "locales": [
+    {
+      "locale": "en",
+      "totalKeys": 622,
+      "dynamicAnalysisNames": 216,
+      "dynamicNamesIdenticalToEnglish": null,
+      "examples": [
+        {
+          "key": "dynamic.analysis.pH.name",
+          "text": "Soil pH",
+          "english": "Soil pH"
+        },
+        {
+          "key": "dynamic.analysis.electricalConductivity.name",
+          "text": "Electrical Conductivity (EC)",
+          "english": "Electrical Conductivity (EC)"
+        },
+        {
+          "key": "dynamic.analysis.carbonOrganic.name",
+          "text": "Soil Organic Carbon (SOC)",
+          "english": "Soil Organic Carbon (SOC)"
+        },
+        {
+          "key": "dynamic.analysis.nitrogenTotal.name",
+          "text": "Total Nitrogen",
+          "english": "Total Nitrogen"
+        },
+        {
+          "key": "dynamic.analysis.extractableElements.name",
+          "text": "Extractable Elements (P, K, Micronutrients)",
+          "english": "Extractable Elements (P, K, Micronutrients)"
+        },
+        {
+          "key": "dynamic.analysis.exchangeableBases.name",
+          "text": "Exchangeable Bases (Ca, Mg, K, Na)",
+          "english": "Exchangeable Bases (Ca, Mg, K, Na)"
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "totalKeys": 666,
+      "dynamicAnalysisNames": 260,
+      "dynamicNamesIdenticalToEnglish": 194,
+      "examples": [
+        {
+          "key": "dynamic.analysis.pH.name",
+          "text": "Soil pH",
+          "english": "Soil pH"
+        },
+        {
+          "key": "dynamic.analysis.electricalConductivity.name",
+          "text": "Electrical Conductivity (EC)",
+          "english": "Electrical Conductivity (EC)"
+        },
+        {
+          "key": "dynamic.analysis.carbonOrganic.name",
+          "text": "Soil Organic Carbon (SOC)",
+          "english": "Soil Organic Carbon (SOC)"
+        },
+        {
+          "key": "dynamic.analysis.nitrogenTotal.name",
+          "text": "Total Nitrogen",
+          "english": "Total Nitrogen"
+        },
+        {
+          "key": "dynamic.analysis.extractableElements.name",
+          "text": "Extractable Elements (P, K, Micronutrients)",
+          "english": "Extractable Elements (P, K, Micronutrients)"
+        },
+        {
+          "key": "dynamic.analysis.exchangeableBases.name",
+          "text": "Exchangeable Bases (Ca, Mg, K, Na)",
+          "english": "Exchangeable Bases (Ca, Mg, K, Na)"
+        }
+      ]
+    },
+    {
+      "locale": "es-419",
+      "totalKeys": 513,
+      "dynamicAnalysisNames": 260,
+      "dynamicNamesIdenticalToEnglish": 194,
+      "examples": [
+        {
+          "key": "dynamic.analysis.pH.name",
+          "text": "Soil pH",
+          "english": "Soil pH"
+        },
+        {
+          "key": "dynamic.analysis.electricalConductivity.name",
+          "text": "Electrical Conductivity (EC)",
+          "english": "Electrical Conductivity (EC)"
+        },
+        {
+          "key": "dynamic.analysis.carbonOrganic.name",
+          "text": "Soil Organic Carbon (SOC)",
+          "english": "Soil Organic Carbon (SOC)"
+        },
+        {
+          "key": "dynamic.analysis.nitrogenTotal.name",
+          "text": "Total Nitrogen",
+          "english": "Total Nitrogen"
+        },
+        {
+          "key": "dynamic.analysis.extractableElements.name",
+          "text": "Extractable Elements (P, K, Micronutrients)",
+          "english": "Extractable Elements (P, K, Micronutrients)"
+        },
+        {
+          "key": "dynamic.analysis.exchangeableBases.name",
+          "text": "Exchangeable Bases (Ca, Mg, K, Na)",
+          "english": "Exchangeable Bases (Ca, Mg, K, Na)"
+        }
+      ]
+    },
+    {
+      "locale": "fr",
+      "totalKeys": 666,
+      "dynamicAnalysisNames": 260,
+      "dynamicNamesIdenticalToEnglish": 194,
+      "examples": [
+        {
+          "key": "dynamic.analysis.pH.name",
+          "text": "Soil pH",
+          "english": "Soil pH"
+        },
+        {
+          "key": "dynamic.analysis.electricalConductivity.name",
+          "text": "Electrical Conductivity (EC)",
+          "english": "Electrical Conductivity (EC)"
+        },
+        {
+          "key": "dynamic.analysis.carbonOrganic.name",
+          "text": "Soil Organic Carbon (SOC)",
+          "english": "Soil Organic Carbon (SOC)"
+        },
+        {
+          "key": "dynamic.analysis.nitrogenTotal.name",
+          "text": "Total Nitrogen",
+          "english": "Total Nitrogen"
+        },
+        {
+          "key": "dynamic.analysis.extractableElements.name",
+          "text": "Extractable Elements (P, K, Micronutrients)",
+          "english": "Extractable Elements (P, K, Micronutrients)"
+        },
+        {
+          "key": "dynamic.analysis.exchangeableBases.name",
+          "text": "Exchangeable Bases (Ca, Mg, K, Na)",
+          "english": "Exchangeable Bases (Ca, Mg, K, Na)"
+        }
+      ]
+    },
+    {
+      "locale": "pt",
+      "totalKeys": 666,
+      "dynamicAnalysisNames": 260,
+      "dynamicNamesIdenticalToEnglish": 194,
+      "examples": [
+        {
+          "key": "dynamic.analysis.pH.name",
+          "text": "Soil pH",
+          "english": "Soil pH"
+        },
+        {
+          "key": "dynamic.analysis.electricalConductivity.name",
+          "text": "Electrical Conductivity (EC)",
+          "english": "Electrical Conductivity (EC)"
+        },
+        {
+          "key": "dynamic.analysis.carbonOrganic.name",
+          "text": "Soil Organic Carbon (SOC)",
+          "english": "Soil Organic Carbon (SOC)"
+        },
+        {
+          "key": "dynamic.analysis.nitrogenTotal.name",
+          "text": "Total Nitrogen",
+          "english": "Total Nitrogen"
+        },
+        {
+          "key": "dynamic.analysis.extractableElements.name",
+          "text": "Extractable Elements (P, K, Micronutrients)",
+          "english": "Extractable Elements (P, K, Micronutrients)"
+        },
+        {
+          "key": "dynamic.analysis.exchangeableBases.name",
+          "text": "Exchangeable Bases (Ca, Mg, K, Na)",
+          "english": "Exchangeable Bases (Ca, Mg, K, Na)"
+        }
+      ]
+    }
+  ],
+  "dynamicEntityCounts": {
+    "analysis": 432,
+    "gate": 6,
+    "category": 19,
+    "equipmentType": 5,
+    "status": 7,
+    "methodology": 0
+  }
+}

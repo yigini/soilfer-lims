@@ -196,7 +196,7 @@ exports.updatePreferences = async (req, res) => {
         return error(res, 403, 'AUTH.IMPERSONATION_PREFERENCE_BLOCKED', 'Preferences cannot be modified during an impersonation session.');
     }
 
-    const allowedKeys = ['themePreference'];
+    const allowedKeys = ['themePreference', 'language'];
     const bodyKeys = Object.keys(req.body || {});
 
     // Reject unknown fields or attempts to inject roles, permissions, passwords, or target IDs
@@ -205,30 +205,57 @@ exports.updatePreferences = async (req, res) => {
         return error(res, 400, 'AUTH.INVALID_PREFERENCE_FIELDS', `Unexpected fields in preference update: ${invalidKeys.join(', ')}`);
     }
 
-    const { themePreference } = req.body || {};
+    const { themePreference, language } = req.body || {};
 
-    if (!themePreference || typeof themePreference !== 'string') {
-        return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be a valid string');
+    if (bodyKeys.length === 0) {
+        return error(res, 400, 'AUTH.EMPTY_PREFERENCES', 'At least one preference field must be provided');
     }
 
-    if (!['light', 'dark'].includes(themePreference)) {
-        return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be strictly "light" or "dark"');
+    const updateData = {};
+    const responseData = {};
+
+    if (themePreference !== undefined) {
+        if (!themePreference || typeof themePreference !== 'string') {
+            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be a valid string');
+        }
+        if (!['light', 'dark'].includes(themePreference)) {
+            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be strictly "light" or "dark"');
+        }
+        updateData.themePreference = themePreference;
+    }
+
+    if (language !== undefined) {
+        const { matchSupportedLocale } = require('../utils/localeResolver');
+        if (!language || typeof language !== 'string') {
+            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', 'Language must be a valid string');
+        }
+        const matched = matchSupportedLocale(language);
+        if (!matched) {
+            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', `Unsupported language: ${language}`);
+        }
+        updateData.language = matched;
     }
 
     try {
         const updated = await prisma.user.update({
             where: { id: String(req.user.id) },
-            data: { themePreference },
+            data: updateData,
             select: {
                 id: true,
                 username: true,
-                themePreference: true
+                themePreference: true,
+                language: true
             }
         });
 
-        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, {
-            themePreference: updated.themePreference
-        });
+        if (themePreference !== undefined) {
+            responseData.themePreference = updated.themePreference;
+        }
+        if (language !== undefined) {
+            responseData.language = updated.language;
+        }
+
+        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, responseData);
     } catch (err) {
         console.error('[AUTH] Update Preferences Error:', err);
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');

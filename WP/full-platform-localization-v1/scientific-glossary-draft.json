@@ -1,0 +1,545 @@
+{
+  "note": "Draft concepts, not directly importable operational catalogue renames. Every term needs review of the actual method context before publication.",
+  "entries": [
+    {
+      "concept": "pH in water",
+      "translations": {
+        "en": "Soil pH in water",
+        "fr": "pH du sol dans l’eau",
+        "es": "pH del suelo en agua",
+        "es-419": "pH del suelo en agua",
+        "pt": "pH do solo em água"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Electrical conductivity",
+      "translations": {
+        "en": "Electrical conductivity",
+        "fr": "Conductivité électrique",
+        "es": "Conductividad eléctrica",
+        "es-419": "Conductividad eléctrica",
+        "pt": "Condutividade elétrica"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Organic carbon",
+      "translations": {
+        "en": "Soil organic carbon",
+        "fr": "Carbone organique du sol",
+        "es": "Carbono orgánico del suelo",
+        "es-419": "Carbono orgánico del suelo",
+        "pt": "Carbono orgânico do solo"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Organic matter",
+      "translations": {
+        "en": "Soil organic matter",
+        "fr": "Matière organique du sol",
+        "es": "Materia orgánica del suelo",
+        "es-419": "Materia orgánica del suelo",
+        "pt": "Matéria orgânica do solo"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Total nitrogen",
+      "translations": {
+        "en": "Total nitrogen",
+        "fr": "Azote total",
+        "es": "Nitrógeno total",
+        "es-419": "Nitrógeno total",
+        "pt": "Azoto total"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "CEC",
+      "translations": {
+        "en": "Cation exchange capacity",
+        "fr": "Capacité d’échange cationique",
+        "es": "Capacidad de intercambio catiónico",
+        "es-419": "Capacidad de intercambio catiónico",
+        "pt": "Capacidade de troca catiónica"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_24981?clang=ca",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Effective CEC",
+      "translations": {
+        "en": "Effective cation exchange capacity",
+        "fr": "Capacité d’échange cationique effective",
+        "es": "Capacidad de intercambio catiónico efectiva",
+        "es-419": "Capacidad de intercambio catiónico efectiva",
+        "pt": "Capacidade de troca catiónica efetiva"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_24981?clang=ca",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Olsen P",
+      "translations": {
+        "en": "Extractable phosphorus — Olsen method",
+        "fr": "Phosphore extractible — méthode Olsen",
+        "es": "Fósforo extraíble — método Olsen",
+        "es-419": "Fósforo extraíble — método Olsen",
+        "pt": "Fósforo extraível — método Olsen"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Exchangeable acidity",
+      "translations": {
+        "en": "Exchangeable acidity",
+        "fr": "Acidité échangeable",
+        "es": "Acidez intercambiable",
+        "es-419": "Acidez intercambiable",
+        "pt": "Acidez de troca"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Texture panel",
+      "translations": {
+        "en": "Particle-size analysis: sand, silt and clay",
+        "fr": "Analyse granulométrique : sable, limon et argile",
+        "es": "Análisis granulométrico: arena, limo y arcilla",
+        "es-419": "Análisis granulométrico: arena, limo y arcilla",
+        "pt": "Análise granulométrica: areia, silte e argila"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_7199",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Sand",
+      "translations": {
+        "en": "Sand fraction",
+        "fr": "Fraction sableuse",
+        "es": "Fracción de arena",
+        "es-419": "Fracción de arena",
+        "pt": "Fração de areia"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_7199",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Silt",
+      "translations": {
+        "en": "Silt fraction",
+        "fr": "Fraction limoneuse",
+        "es": "Fracción de limo",
+        "es-419": "Fracción de limo",
+        "pt": "Fração de silte"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_7199",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Clay",
+      "translations": {
+        "en": "Clay fraction",
+        "fr": "Fraction argileuse",
+        "es": "Fracción de arcilla",
+        "es-419": "Fracción de arcilla",
+        "pt": "Fração de argila"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_7199",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Derived texture",
+      "translations": {
+        "en": "USDA textural class",
+        "fr": "Classe texturale USDA",
+        "es": "Clase textural USDA",
+        "es-419": "Clase textural USDA",
+        "pt": "Classe textural USDA"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://agrovoc.fao.org/browse/agrovoc/en/page/c_7199",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Bulk density",
+      "translations": {
+        "en": "Soil bulk density",
+        "fr": "Masse volumique apparente du sol",
+        "es": "Densidad aparente del suelo",
+        "es-419": "Densidad aparente del suelo",
+        "pt": "Massa volúmica aparente do solo"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Gravimetric water",
+      "translations": {
+        "en": "Gravimetric water content",
+        "fr": "Teneur en eau gravimétrique",
+        "es": "Contenido gravimétrico de agua",
+        "es-419": "Contenido gravimétrico de agua",
+        "pt": "Teor gravimétrico de água"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Drying",
+      "translations": {
+        "en": "Sample drying",
+        "fr": "Séchage de l’échantillon",
+        "es": "Secado de la muestra",
+        "es-419": "Secado de la muestra",
+        "pt": "Secagem da amostra"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Preparation",
+      "translations": {
+        "en": "Sample preparation",
+        "fr": "Préparation de l’échantillon",
+        "es": "Preparación de la muestra",
+        "es-419": "Preparación de la muestra",
+        "pt": "Preparação da amostra"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "MIR",
+      "translations": {
+        "en": "Mid-infrared spectroscopy",
+        "fr": "Spectroscopie dans le moyen infrarouge",
+        "es": "Espectroscopia de infrarrojo medio",
+        "es-419": "Espectroscopia de infrarrojo medio",
+        "pt": "Espectroscopia no infravermelho médio"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Vis–NIR",
+      "translations": {
+        "en": "Visible and near-infrared spectroscopy",
+        "fr": "Spectroscopie dans le visible et le proche infrarouge",
+        "es": "Espectroscopia del visible y del infrarrojo cercano",
+        "es-419": "Espectroscopia del visible y del infrarrojo cercano",
+        "pt": "Espectroscopia no visível e no infravermelho próximo"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Reflectance",
+      "translations": {
+        "en": "Reflectance",
+        "fr": "Réflectance",
+        "es": "Reflectancia",
+        "es-419": "Reflectancia",
+        "pt": "Refletância"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Absorbance",
+      "translations": {
+        "en": "Absorbance",
+        "fr": "Absorbance",
+        "es": "Absorbancia",
+        "es-419": "Absorbancia",
+        "pt": "Absorvância"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Wavenumber",
+      "translations": {
+        "en": "Wavenumber",
+        "fr": "Nombre d’onde",
+        "es": "Número de onda",
+        "es-419": "Número de onda",
+        "pt": "Número de onda"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Wavelength",
+      "translations": {
+        "en": "Wavelength",
+        "fr": "Longueur d’onde",
+        "es": "Longitud de onda",
+        "es-419": "Longitud de onda",
+        "pt": "Comprimento de onda"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "Reference result",
+      "translations": {
+        "en": "Reference laboratory result",
+        "fr": "Résultat de laboratoire de référence",
+        "es": "Resultado de laboratorio de referencia",
+        "es-419": "Resultado de laboratorio de referencia",
+        "pt": "Resultado laboratorial de referência"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Predicted result",
+      "translations": {
+        "en": "Predicted value",
+        "fr": "Valeur prédite",
+        "es": "Valor predicho",
+        "es-419": "Valor predicho",
+        "pt": "Valor previsto"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers13-06/010056055.pdf",
+        "https://www.embrapa.br/en/web/solos/busca-de-solucoes-tecnologicas/-/produto-servico/8668/specsolo"
+      ]
+    },
+    {
+      "concept": "QC",
+      "translations": {
+        "en": "Quality control",
+        "fr": "Contrôle qualité",
+        "es": "Control de calidad",
+        "es-419": "Control de calidad",
+        "pt": "Controlo da qualidade"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "Blank",
+      "translations": {
+        "en": "Analytical blank",
+        "fr": "Blanc analytique",
+        "es": "Blanco analítico",
+        "es-419": "Blanco analítico",
+        "pt": "Branco analítico"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "CRM",
+      "translations": {
+        "en": "Certified reference material",
+        "fr": "Matériau de référence certifié",
+        "es": "Material de referencia certificado",
+        "es-419": "Material de referencia certificado",
+        "pt": "Material de referência certificado"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    },
+    {
+      "concept": "LOQ",
+      "translations": {
+        "en": "Limit of quantification",
+        "fr": "Limite de quantification",
+        "es": "Límite de cuantificación",
+        "es-419": "Límite de cuantificación",
+        "pt": "Limite de quantificação"
+      },
+      "status": "draft_requires_scientific_and_locale_review",
+      "reviewer": null,
+      "sourceType": "Proposed wording informed by the research register; not an exact published translation for every term.",
+      "lockedContext": "Preserve configured method, matrix, units, qualifiers, reporting basis and scientific identity.",
+      "sources": [
+        "https://docs.isric.org/globaldata/wosis/faq-wosis.html",
+        "https://www.infoteca.cnptia.embrapa.br/handle/doc/1085209"
+      ]
+    }
+  ]
+}

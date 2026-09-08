@@ -1,0 +1,573 @@
+{
+  "date": "2026-09-08T10:38:55.906Z",
+  "revision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "scope": "Read-only local source + unauthenticated production translation bootstrap. No authenticated production actions, DB edits, or implementation changes.",
+  "locales": [
+    {
+      "locale": "en",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 0,
+      "extra": 0,
+      "placeholderMismatch": 0
+    },
+    {
+      "locale": "es",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 6,
+      "extra": 0,
+      "placeholderMismatch": 0
+    },
+    {
+      "locale": "es-419",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 5,
+      "extra": 0,
+      "placeholderMismatch": 0
+    },
+    {
+      "locale": "fr",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 23,
+      "extra": 0,
+      "placeholderMismatch": 0
+    },
+    {
+      "locale": "pt",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 9,
+      "extra": 0,
+      "placeholderMismatch": 0
+    }
+  ],
+  "duplicateProperties": 0,
+  "sourceFiles": 225,
+  "parseErrors": 0,
+  "candidates": 4171,
+  "jsxCandidates": 2509,
+  "candidateFiles": 182,
+  "staticTranslationKeysUsed": 377,
+  "usedKeysMissingEnglish": 0,
+  "dynamicTranslationCalls": 14,
+  "routes": 35,
+  "catalogue": {
+    "analyses": 176,
+    "methods": 467,
+    "categories": 10,
+    "translatableFields": 1296
+  },
+  "topCandidateFiles": [
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "jsx": 137,
+      "displayProperties": 11,
+      "total": 148,
+      "examples": [
+        {
+          "line": 47,
+          "text": "Processing file..."
+        },
+        {
+          "line": 63,
+          "text": "No valid Sample IDs found in first column."
+        },
+        {
+          "line": 86,
+          "text": "File read error"
+        },
+        {
+          "line": 125,
+          "text": "Priority"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "jsx": 91,
+      "displayProperties": 45,
+      "total": 136,
+      "examples": [
+        {
+          "line": 467,
+          "text": "Restore Draft?"
+        },
+        {
+          "line": 468,
+          "text": "Found an unfinished intake form. Would you like to restore it?"
+        },
+        {
+          "line": 659,
+          "text": "Access Denied"
+        },
+        {
+          "line": 682,
+          "text": "Intake Locked"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "jsx": 130,
+      "displayProperties": 4,
+      "total": 134,
+      "examples": [
+        {
+          "line": 198,
+          "text": "Sample is outside your authorized laboratory scope."
+        },
+        {
+          "line": 280,
+          "text": "Bulk Review"
+        },
+        {
+          "line": 445,
+          "text": "View sample workspace"
+        },
+        {
+          "line": 446,
+          "text": "VIEW"
+        }
+      ]
+    },
+    {
+      "file": "server/controllers/sampleController.js",
+      "jsx": 0,
+      "displayProperties": 130,
+      "total": 130,
+      "examples": [
+        {
+          "line": 440,
+          "text": "Insufficient permissions"
+        },
+        {
+          "line": 504,
+          "text": "STATUS_CHANGE"
+        },
+        {
+          "line": 542,
+          "text": "Access Denied: You cannot update phases for samples from another lab."
+        },
+        {
+          "line": 549,
+          "text": "Invalid phase. Must be DRYING or PREPARATION"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/ApiKeyManager.jsx",
+      "jsx": 111,
+      "displayProperties": 17,
+      "total": 128,
+      "examples": [
+        {
+          "line": 48,
+          "text": "All Countries (*)"
+        },
+        {
+          "line": 49,
+          "text": "Guatemala (GTM)"
+        },
+        {
+          "line": 50,
+          "text": "Honduras (HND)"
+        },
+        {
+          "line": 51,
+          "text": "Kenya (KEN)"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Dashboard.jsx",
+      "jsx": 8,
+      "displayProperties": 100,
+      "total": 108,
+      "examples": [
+        {
+          "line": 16,
+          "text": "Sample reception desk"
+        },
+        {
+          "line": 17,
+          "text": "Physical intake, custody verification, label generation, and specimen registration."
+        },
+        {
+          "line": 18,
+          "text": "Receive incoming shipment"
+        },
+        {
+          "line": 20,
+          "text": "Intake & Reception Policy"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "jsx": 50,
+      "displayProperties": 47,
+      "total": 97,
+      "examples": [
+        {
+          "line": 16,
+          "text": "Lab Manager"
+        },
+        {
+          "line": 17,
+          "text": "Intake Officer"
+        },
+        {
+          "line": 18,
+          "text": "Technician"
+        },
+        {
+          "line": 19,
+          "text": "Auditor"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "jsx": 60,
+      "displayProperties": 30,
+      "total": 90,
+      "examples": [
+        {
+          "line": 116,
+          "text": "Error"
+        },
+        {
+          "line": 116,
+          "text": "Failed to load spectral library"
+        },
+        {
+          "line": 134,
+          "text": "Move to Trash"
+        },
+        {
+          "line": 140,
+          "text": "Moved to Trash"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/SpectraBatchUpload.jsx",
+      "jsx": 81,
+      "displayProperties": 4,
+      "total": 85,
+      "examples": [
+        {
+          "line": 95,
+          "text": "The file appears to be empty. Please check your CSV file."
+        },
+        {
+          "line": 114,
+          "text": "Wide-format detected but fewer than 10 valid wavelength columns found in header."
+        },
+        {
+          "line": 197,
+          "text": "No valid numeric data found."
+        },
+        {
+          "line": 267,
+          "text": "Verifying sample matches..."
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "jsx": 78,
+      "displayProperties": 1,
+      "total": 79,
+      "examples": [
+        {
+          "line": 40,
+          "text": "expired"
+        },
+        {
+          "line": 41,
+          "text": "expiring soon"
+        },
+        {
+          "line": 42,
+          "text": "low stock"
+        },
+        {
+          "line": 43,
+          "text": "quarantined"
+        }
+      ]
+    },
+    {
+      "file": "server/controllers/analysisController.js",
+      "jsx": 0,
+      "displayProperties": 72,
+      "total": 72,
+      "examples": [
+        {
+          "line": 32,
+          "text": "Failed to fetch categories"
+        },
+        {
+          "line": 45,
+          "text": "asc"
+        },
+        {
+          "line": 57,
+          "text": "Failed to fetch analyses"
+        },
+        {
+          "line": 76,
+          "text": "Failed to fetch methodologies"
+        }
+      ]
+    },
+    {
+      "file": "server/services/dashboardService.js",
+      "jsx": 0,
+      "displayProperties": 71,
+      "total": 71,
+      "examples": [
+        {
+          "line": 145,
+          "text": "Needs attention"
+        },
+        {
+          "line": 146,
+          "text": "My drafts"
+        },
+        {
+          "line": 147,
+          "text": "Expected samples"
+        },
+        {
+          "line": 147,
+          "text": "Field records awaiting receipt; not a processing backlog"
+        }
+      ]
+    },
+    {
+      "file": "server/controllers/spectralController.js",
+      "jsx": 0,
+      "displayProperties": 70,
+      "total": 70,
+      "examples": [
+        {
+          "line": 248,
+          "text": "Scan not found"
+        },
+        {
+          "line": 252,
+          "text": "Security Violation: Access denied to spectral data outside of your lab context."
+        },
+        {
+          "line": 261,
+          "text": "Corrupt spectral data"
+        },
+        {
+          "line": 301,
+          "text": "labIds array required"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/admin/AnalysisManager.jsx",
+      "jsx": 69,
+      "displayProperties": 0,
+      "total": 69,
+      "examples": [
+        {
+          "line": 169,
+          "text": "Loading Master Analysis Catalogue..."
+        },
+        {
+          "line": 184,
+          "text": "Parameter Specification"
+        },
+        {
+          "line": 195,
+          "text": "Cancel"
+        },
+        {
+          "line": 207,
+          "text": "Shared definition — maintained by the system administrator. Local method defaults are configured per laboratory."
+        }
+      ]
+    },
+    {
+      "file": "server/services/interpretationService.js",
+      "jsx": 0,
+      "displayProperties": 69,
+      "total": 69,
+      "examples": [
+        {
+          "line": 138,
+          "text": "Extremely Acidic"
+        },
+        {
+          "line": 139,
+          "text": "Strongly Acidic"
+        },
+        {
+          "line": 140,
+          "text": "Moderately Acidic"
+        },
+        {
+          "line": 141,
+          "text": "Neutral (Optimal)"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "jsx": 65,
+      "displayProperties": 0,
+      "total": 65,
+      "examples": [
+        {
+          "line": 226,
+          "text": "Consignment Received Successfully"
+        },
+        {
+          "line": 229,
+          "text": "All samples have been processed and registered into the laboratory database."
+        },
+        {
+          "line": 235,
+          "text": "Consignment Identifier"
+        },
+        {
+          "line": 237,
+          "text": "Waybill:"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/About.jsx",
+      "jsx": 59,
+      "displayProperties": 0,
+      "total": 59,
+      "examples": [
+        {
+          "line": 25,
+          "text": "Global Flagship Initiative"
+        },
+        {
+          "line": 38,
+          "text": "SoilFER"
+        },
+        {
+          "line": 39,
+          "text": "LIMS"
+        },
+        {
+          "line": 67,
+          "text": "ISO 17025"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "jsx": 22,
+      "displayProperties": 36,
+      "total": 58,
+      "examples": [
+        {
+          "line": 16,
+          "text": "Expected"
+        },
+        {
+          "line": 17,
+          "text": "Received"
+        },
+        {
+          "line": 18,
+          "text": "Collected"
+        },
+        {
+          "line": 19,
+          "text": "Accepted"
+        }
+      ]
+    }
+  ],
+  "live": {
+    "languages": [
+      {
+        "code": "en",
+        "name": "English",
+        "isDefault": true,
+        "isActive": true
+      },
+      {
+        "code": "es",
+        "name": "Español",
+        "isDefault": false,
+        "isActive": true
+      },
+      {
+        "code": "fr",
+        "name": "Français",
+        "isDefault": false,
+        "isActive": true
+      },
+      {
+        "code": "pt",
+        "name": "Português",
+        "isDefault": false,
+        "isActive": true
+      },
+      {
+        "code": "es-419",
+        "name": "Español (Latinoamérica)",
+        "isDefault": false,
+        "isActive": true
+      }
+    ],
+    "locales": [
+      {
+        "locale": "en",
+        "totalKeys": 622,
+        "dynamicAnalysisNames": 216,
+        "dynamicNamesIdenticalToEnglish": null
+      },
+      {
+        "locale": "es",
+        "totalKeys": 666,
+        "dynamicAnalysisNames": 260,
+        "dynamicNamesIdenticalToEnglish": 194
+      },
+      {
+        "locale": "es-419",
+        "totalKeys": 513,
+        "dynamicAnalysisNames": 260,
+        "dynamicNamesIdenticalToEnglish": 194
+      },
+      {
+        "locale": "fr",
+        "totalKeys": 666,
+        "dynamicAnalysisNames": 260,
+        "dynamicNamesIdenticalToEnglish": 194
+      },
+      {
+        "locale": "pt",
+        "totalKeys": 666,
+        "dynamicAnalysisNames": 260,
+        "dynamicNamesIdenticalToEnglish": 194
+      }
+    ]
+  }
+}

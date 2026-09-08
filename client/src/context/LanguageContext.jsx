@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import enTranslations from '../translations/en.json';
 import frTranslations from '../translations/fr.json';
 import esTranslations from '../translations/es.json';
 import es419Translations from '../translations/es-419.json';
 import ptTranslations from '../translations/pt.json';
+import { resolveLocale, CANONICAL_LOCALES, getLocaleMetadata } from '../lib/localeResolver';
+import { formatMessage, parseLaboratoryNumber } from '../utils/messageFormatter';
 
 const LanguageContext = createContext();
 
@@ -37,43 +39,47 @@ const DEFAULT_TRANSLATIONS = {
 const DEFAULT_LANG_LIST = [
     { code: 'en', name: 'English' },
     { code: 'es', name: 'Español' },
-    { code: 'es-419', name: 'Español (Latinoamérica)' },
+    { code: 'es-419', name: 'Español (América Latina)' },
     { code: 'fr', name: 'Français' },
     { code: 'pt', name: 'Português' }
 ];
 
-const normalizeLocale = (code) => {
-    if (!code) return 'en';
-    const lower = code.toLowerCase();
-    if (DEFAULT_TRANSLATIONS[lower]) return lower;
-    const short = lower.split('-')[0];
-    return DEFAULT_TRANSLATIONS[short] ? short : 'en';
-};
-
-const applyParams = (value, params = {}) => {
-    if (typeof value !== 'string') return value;
-    return value.replace(/{{\s*(\w+)\s*}}/g, (_, key) =>
-        params[key] !== undefined && params[key] !== null ? String(params[key]) : ''
-    );
+const getInitialLocale = () => {
+    const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;
+    const storedLocale = typeof window !== 'undefined' ? localStorage.getItem('locale') : null;
+    return resolveLocale({
+        sessionOverride,
+        userPreference: storedLocale,
+        acceptLanguage: typeof navigator !== 'undefined' ? navigator.language : null,
+        fallbackLocale: 'en'
+    });
 };
 
 // --- Provider -------------------------------------------------------------
 export const LanguageProvider = ({ children }) => {
-    const [locale, setLocale] = useState(normalizeLocale(localStorage.getItem('locale') || 'en'));
+    const [locale, setLocale] = useState(getInitialLocale);
     const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS);
     const [loading, setLoading] = useState(true);
     const [availableLanguages, setAvailableLanguages] = useState(DEFAULT_LANG_LIST);
+
+    // Sync html attributes and axios header on locale change
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = locale;
+            document.documentElement.dir = 'ltr';
+        }
+        if (typeof axios !== 'undefined' && axios.defaults) {
+            axios.defaults.headers.common['X-App-Locale'] = locale;
+        }
+    }, [locale]);
 
     useEffect(() => {
         fetchLanguages();
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem('locale', locale);
-    }, [locale]);
-
     const mergeLocale = (code, incoming) => {
-        const base = DEFAULT_TRANSLATIONS[code] || DEFAULT_TRANSLATIONS[normalizeLocale(code)] || DEFAULT_TRANSLATIONS.en;
+        const canonical = resolveLocale({ rawInput: code });
+        const base = DEFAULT_TRANSLATIONS[canonical] || DEFAULT_TRANSLATIONS.en;
         const incomingFlat = buildLocale(incoming || {}).flat;
         return {
             nested: base.nested,
@@ -89,15 +95,18 @@ export const LanguageProvider = ({ children }) => {
 
             if (languages.length > 0) {
                 setAvailableLanguages(languages);
-                const defaultFromBranding = normalizeLocale(brandingDefaultLanguage);
-                if (!localStorage.getItem('locale')) {
-                    setLocale(defaultFromBranding);
+                const hasSessionOverride = typeof window !== 'undefined' && sessionStorage.getItem('soilfer_locale_override');
+                const hasStoredLocale = typeof window !== 'undefined' && localStorage.getItem('locale');
+                if (!hasSessionOverride && !hasStoredLocale && brandingDefaultLanguage) {
+                    const resolvedDefault = resolveLocale({ rawInput: brandingDefaultLanguage });
+                    setLocale(resolvedDefault);
                 }
             }
 
             const merged = { ...DEFAULT_TRANSLATIONS };
             Object.entries(payload).forEach(([code, nestedObj]) => {
-                merged[code] = mergeLocale(code, nestedObj);
+                const canonical = resolveLocale({ rawInput: code });
+                merged[canonical] = mergeLocale(canonical, nestedObj);
             });
             setTranslations(merged);
         } catch (e) {
@@ -110,7 +119,8 @@ export const LanguageProvider = ({ children }) => {
                     setAvailableLanguages(langList.map(l => ({ code: l.code, name: l.name, isDefault: l.isDefault })));
                 }
                 langList.forEach(l => {
-                    merged[l.code] = mergeLocale(l.code, l.translations || {});
+                    const canonical = resolveLocale({ rawInput: l.code });
+                    merged[canonical] = mergeLocale(canonical, l.translations || {});
                 });
                 setTranslations(merged);
             } catch (inner) {
@@ -123,12 +133,17 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
+    const changeLanguage = useCallback((lang, options = {}) => {
+        const canonical = resolveLocale({ rawInput: lang });
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('soilfer_locale_override', canonical);
+            localStorage.setItem('locale', canonical);
+        }
+        setLocale(canonical);
+    }, []);
+
     const t = useMemo(() => {
         return (key, paramsOrFallback = {}, maybeFallback = null) => {
-            // Support:
-            // 1. t('key', 'Fallback')
-            // 2. t('key', { param: 'val' })
-            // 3. t('key', { param: 'val' }, 'Fallback {{param}}')
             let fallback = null;
             let params = {};
 
@@ -141,32 +156,44 @@ export const LanguageProvider = ({ children }) => {
                 }
             }
 
-            const normalized = normalizeLocale(locale);
-            const localePack = translations[normalized];
-            const fallbackPack = translations.en;
-            if (!localePack) return fallback ? applyParams(fallback, params) : key;
+            const current = resolveLocale({ rawInput: locale });
+            const localePack = translations[current];
+            const fallbackEsPack = current === 'es-419' ? translations['es'] : null;
+            const fallbackEnPack = translations['en'];
 
-            const foundVal = localePack.flat[key] ?? fallbackPack.flat[key];
+            let foundVal = localePack?.flat?.[key];
+            if ((foundVal === undefined || foundVal === null) && fallbackEsPack) {
+                foundVal = fallbackEsPack?.flat?.[key];
+            }
+            if (foundVal === undefined || foundVal === null) {
+                foundVal = fallbackEnPack?.flat?.[key];
+            }
 
             if (foundVal !== undefined && foundVal !== null) {
-                return applyParams(foundVal, params);
+                return formatMessage(foundVal, params, current);
             }
 
             if (fallback) {
-                return applyParams(fallback, params);
+                return formatMessage(fallback, params, current);
             }
 
             return key;
         };
     }, [locale, translations]);
 
-    const changeLanguage = (lang) => {
-        setLocale(normalizeLocale(lang));
-    };
+    const localeMeta = useMemo(() => getLocaleMetadata(locale), [locale]);
 
     return (
-        <LanguageContext.Provider value={{ locale, t, changeLanguage, reloadLanguages: fetchLanguages, availableLanguages }}>
-            {loading ? <div className="h-screen flex items-center justify-center">Loading LIMS...</div> : children}
+        <LanguageContext.Provider value={{
+            locale,
+            t,
+            changeLanguage,
+            reloadLanguages: fetchLanguages,
+            availableLanguages,
+            parseNumber: parseLaboratoryNumber,
+            localeMeta
+        }}>
+            {loading ? <div className="h-screen flex items-center justify-center text-sf-muted font-medium">Loading LIMS...</div> : children}
         </LanguageContext.Provider>
     );
 };

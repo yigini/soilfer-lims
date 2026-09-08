@@ -69,7 +69,10 @@ export const AuthProvider = ({ children }) => {
                         setUser(freshUser);
                         localStorage.setItem('user', JSON.stringify(freshUser));
                         if (freshUser.language) {
-                            changeLanguage(freshUser.language);
+                            const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;
+                            if (!sessionOverride) {
+                                changeLanguage(freshUser.language);
+                            }
                         }
                     }
                 })
@@ -83,9 +86,12 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (user && user.language) {
-            changeLanguage(user.language);
+            const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;
+            if (!sessionOverride) {
+                changeLanguage(user.language);
+            }
         }
-    }, [user]);
+    }, [user?.language]);
 
     const login = async (username, password) => {
         try {
@@ -106,6 +112,9 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         clearStoredSessionOverride();
+        try {
+            sessionStorage.removeItem('soilfer_locale_override');
+        } catch {}
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
@@ -113,10 +122,21 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    const updateUserPreferences = (themePreference) => {
+    const updateUserPreferences = (preferencesOrTheme, maybeLang) => {
         setUser(prev => {
             if (!prev) return prev;
-            const updated = { ...prev, themePreference };
+            let newTheme = prev.themePreference;
+            let newLang = prev.language;
+
+            if (typeof preferencesOrTheme === 'object' && preferencesOrTheme !== null) {
+                if (preferencesOrTheme.themePreference !== undefined) newTheme = preferencesOrTheme.themePreference;
+                if (preferencesOrTheme.language !== undefined) newLang = preferencesOrTheme.language;
+            } else if (typeof preferencesOrTheme === 'string') {
+                newTheme = preferencesOrTheme;
+                if (maybeLang) newLang = maybeLang;
+            }
+
+            const updated = { ...prev, themePreference: newTheme, language: newLang };
             try {
                 localStorage.setItem('user', JSON.stringify(updated));
             } catch {

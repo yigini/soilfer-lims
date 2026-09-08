@@ -355,6 +355,18 @@ const AdminPanel = () => {
                     </div>
                 )}
             </div>
+
+            {/* Translation Editor Modal */}
+            {editorOpen && activeLang && (
+                <TranslationEditor
+                    language={activeLang}
+                    onSave={handleSaveTranslations}
+                    onClose={() => {
+                        setEditorOpen(false);
+                        setActiveLang(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

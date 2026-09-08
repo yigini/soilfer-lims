@@ -11,7 +11,7 @@ import MessagingCenter from '../components/messaging/MessagingCenter';
 const Profile = () => {
     const { user, logout, updateUserPreferences } = useAuth();
     const { savedAppearance, setSavedAppearance } = useTheme();
-    const { t } = useLanguage();
+    const { locale, changeLanguage, availableLanguages, t } = useLanguage();
     const { showDialog } = useDialog();
     const [searchParams] = useSearchParams();
 
@@ -19,10 +19,19 @@ const Profile = () => {
     const initialTab = searchParams.get('tab') || 'overview';
     const [activeTab, setActiveTab] = useState(initialTab);
 
-    // Appearance State
+    // Appearance & Language State
     const [selectedPref, setSelectedPref] = useState(user?.themePreference || savedAppearance || 'light');
+    const [selectedLang, setSelectedLang] = useState(user?.language || locale || 'en');
     const [savingPref, setSavingPref] = useState(false);
     const [appearanceStatus, setAppearanceStatus] = useState({ type: null, text: '' });
+
+    useEffect(() => {
+        if (user?.language) {
+            setSelectedLang(user.language);
+        } else if (locale) {
+            setSelectedLang(locale);
+        }
+    }, [user?.language, locale]);
 
     useEffect(() => {
         if (user?.themePreference) {
@@ -37,22 +46,27 @@ const Profile = () => {
         setAppearanceStatus({ type: null, text: '' });
         try {
             const res = await axios.patch('/api/auth/preferences', {
-                themePreference: selectedPref
+                themePreference: selectedPref,
+                language: selectedLang
             });
             const newPref = res.data?.data?.themePreference || selectedPref;
+            const newLang = res.data?.data?.language || selectedLang;
             if (updateUserPreferences) {
-                updateUserPreferences(newPref);
+                updateUserPreferences({ themePreference: newPref, language: newLang });
             }
             setSavedAppearance(newPref);
+            if (changeLanguage) {
+                changeLanguage(newLang);
+            }
             setAppearanceStatus({
                 type: 'success',
-                text: t('appearance.savedSuccess', 'Appearance saved to your profile.')
+                text: t('appearance.savedSuccess', 'Preferences saved to your profile.')
             });
         } catch (err) {
-            console.error('Failed to save appearance preference:', err);
+            console.error('Failed to save preferences:', err);
             setAppearanceStatus({
                 type: 'error',
-                text: t('appearance.savedError', 'Could not save. Your saved appearance is unchanged.')
+                text: t('appearance.savedError', 'Could not save. Your preferences are unchanged.')
             });
         } finally {
             setSavingPref(false);
@@ -168,7 +182,7 @@ const Profile = () => {
                         : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                 >
-                    <Sun size={18} /> {t('appearance.title', 'Appearance')}
+                    <Sun size={18} /> {t('appearance.title', 'Appearance & Language')}
                 </button>
             </div>
 
@@ -414,7 +428,55 @@ const Profile = () => {
                                 </label>
                             </div>
 
-                            <div className="pt-2 flex items-center gap-4">
+                            {/* Preferred Language Section */}
+                            <div className="pt-4 border-t border-sf-divider space-y-3">
+                                <div>
+                                    <h4 className="text-base font-bold text-sf-text mb-1">
+                                        {t('appearance.languageHeading', 'Preferred Language')}
+                                    </h4>
+                                    <p className="text-sm text-sf-muted">
+                                        {t('appearance.languageDescription', 'Choose the language used across your session and default communications.')}
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {(availableLanguages || [
+                                        { code: 'en', name: 'English' },
+                                        { code: 'es', name: 'Español' },
+                                        { code: 'es-419', name: 'Español (América Latina)' },
+                                        { code: 'fr', name: 'Français' },
+                                        { code: 'pt', name: 'Português' }
+                                    ]).map(l => (
+                                        <label
+                                            key={l.code}
+                                            className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                                                selectedLang === l.code
+                                                    ? 'border-sf-primary bg-sf-selected/40 shadow-sm'
+                                                    : 'border-sf-divider bg-sf-surface hover:border-sf-control'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2.5">
+                                                <input
+                                                    type="radio"
+                                                    name="language-preference"
+                                                    value={l.code}
+                                                    checked={selectedLang === l.code}
+                                                    onChange={() => {
+                                                        setSelectedLang(l.code);
+                                                        setAppearanceStatus({ type: null, text: '' });
+                                                    }}
+                                                    className="accent-sf-primary w-4 h-4"
+                                                />
+                                                <span className="font-semibold text-sf-text text-sm">{l.name}</span>
+                                            </div>
+                                            <span className="font-mono text-xs text-sf-muted uppercase bg-sf-raised px-1.5 py-0.5 rounded">
+                                                {l.code}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex items-center gap-4">
                                 <button
                                     type="button"
                                     onClick={handleSaveAppearance}
@@ -422,14 +484,14 @@ const Profile = () => {
                                     className="btn-primary flex items-center gap-2"
                                 >
                                     {savingPref ? (
-                                        t('appearance.saving', 'Saving appearance...')
+                                        t('appearance.saving', 'Saving preferences...')
                                     ) : (
-                                        t('appearance.saveButton', 'Save appearance')
+                                        t('appearance.saveButton', 'Save preferences')
                                     )}
                                 </button>
-                                {selectedPref !== savedAppearance && (
+                                {(selectedPref !== savedAppearance || selectedLang !== (user?.language || locale)) && (
                                     <span className="text-xs text-sf-muted">
-                                        Unsaved selection: {selectedPref === 'dark' ? 'Dark' : 'Light'}
+                                        Unsaved changes
                                     </span>
                                 )}
                             </div>

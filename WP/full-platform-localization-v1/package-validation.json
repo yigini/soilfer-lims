@@ -1,0 +1,84 @@
+{
+  "verifiedAt": "2026-09-08T10:39:48.435Z",
+  "scope": "Package structure, evidence consistency and explicit draft status only. This does not certify translations or execute application workflow, RBAC, report, or deployment tests.",
+  "baselineRevision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "passed": true,
+  "checks": [
+    {
+      "name": "JSON parses: audit-summary.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: catalogue-translation-review-matrix.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: live-bootstrap-audit.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: live-database-language-backup.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: live-public-analysis-names.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: live-ui-spot-check.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: locale-pack-audit.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: scientific-glossary-draft.json",
+      "pass": true
+    },
+    {
+      "name": "JSON parses: source-text-inventory.json",
+      "pass": true
+    },
+    {
+      "name": "Source inventory counts match audit summary",
+      "pass": true
+    },
+    {
+      "name": "Local and live inventories contain exactly the five configured locales",
+      "pass": true
+    },
+    {
+      "name": "Catalogue matrix contains all counted fields",
+      "pass": true
+    },
+    {
+      "name": "Catalogue translations are explicitly unreviewed; no fabricated target translations",
+      "pass": true
+    },
+    {
+      "name": "Catalogue row identities are unique within the seed review matrix",
+      "pass": true
+    },
+    {
+      "name": "Glossary has 30 unique concepts and five nonempty locale proposals per concept",
+      "pass": true
+    },
+    {
+      "name": "Glossary never claims scientific approval",
+      "pass": true
+    },
+    {
+      "name": "Route register contains every audited route, all pending runtime verification",
+      "pass": true
+    },
+    {
+      "name": "Required handoff documents exist and are nonempty",
+      "pass": true
+    },
+    {
+      "name": "Local Markdown links resolve",
+      "pass": true
+    }
+  ]
+}

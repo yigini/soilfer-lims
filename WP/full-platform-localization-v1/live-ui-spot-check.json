@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-08",
+  "scope": "Read-only existing SUPER_ADMIN browser session; no saved translation, default, preference, sample or result changes.",
+  "observations": [
+    {"route":"/admin","view":"Languages","locales":["en","es","fr","pt","es-419"],"defaultShown":"en"},
+    {"route":"/admin","view":"Portuguese Translation Editor","filled":48,"total":469,"displayedPercentage":10,"dynamicAnalysisFields":432,"dynamicAnalysisDisplayedPercentage":5,"checkedInput":"dynamic.analysis.pH.name","targetValue":"","englishPlaceholder":"Soil pH"},
+    {"route":"/data-results","view":"Analytical Results Master","observation":"Existing English administrator view inspected, including filter/export captions. No result values or human message content copied into this evidence."}
+  ],
+  "interpretation":"The live editor and the checked-out static resources have different catalog sizes. Deployed resource packaging/version/merge behavior must be reconciled; the exact cause was not verified.",
+  "cleanup":"Dedicated audit tab closed. Claimed existing data-results tab left open. No language changes or save actions performed.",
+  "notVerified":"All-role/five-locale rendered journeys, backend write authorization at runtime, scientific certification and production deployment internals."
+}

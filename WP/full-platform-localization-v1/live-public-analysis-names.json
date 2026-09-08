@@ -1,0 +1,870 @@
+{
+  "readAt": "2026-09-08T10:38:55.560Z",
+  "source": "https://lims.yigini.net/api/public/i18n/bootstrap",
+  "names": [
+    {
+      "key": "dynamic.analysis.pH.name",
+      "name": "Soil pH"
+    },
+    {
+      "key": "dynamic.analysis.electricalConductivity.name",
+      "name": "Electrical Conductivity (EC)"
+    },
+    {
+      "key": "dynamic.analysis.carbonOrganic.name",
+      "name": "Soil Organic Carbon (SOC)"
+    },
+    {
+      "key": "dynamic.analysis.nitrogenTotal.name",
+      "name": "Total Nitrogen"
+    },
+    {
+      "key": "dynamic.analysis.extractableElements.name",
+      "name": "Extractable Elements (P, K, Micronutrients)"
+    },
+    {
+      "key": "dynamic.analysis.exchangeableBases.name",
+      "name": "Exchangeable Bases (Ca, Mg, K, Na)"
+    },
+    {
+      "key": "dynamic.analysis.cationExchangeCapacitySoil.name",
+      "name": "Cation Exchange Capacity (CEC)"
+    },
+    {
+      "key": "dynamic.analysis.effectiveCec.name",
+      "name": "Effective CEC (ECEC)"
+    },
+    {
+      "key": "dynamic.analysis.acidityExchangeable.name",
+      "name": "Exchangeable Acidity (Al + H)"
+    },
+    {
+      "key": "dynamic.analysis.pSA.name",
+      "name": "Particle Size Analysis (PSA / Texture)"
+    },
+    {
+      "key": "dynamic.analysis.bulkDensityWholeSoil.name",
+      "name": "Bulk Density (Whole Soil)"
+    },
+    {
+      "key": "dynamic.analysis.bulkDensityFineEarth.name",
+      "name": "Bulk Density (Fine Earth)"
+    },
+    {
+      "key": "dynamic.analysis.carbonInorganic.name",
+      "name": "Inorganic Carbon"
+    },
+    {
+      "key": "dynamic.analysis.carbonTotal.name",
+      "name": "Total Carbon"
+    },
+    {
+      "key": "dynamic.analysis.organicMatter.name",
+      "name": "Soil Organic Matter (SOM)"
+    },
+    {
+      "key": "dynamic.analysis.totalCarbonateEquivalent.name",
+      "name": "Total Carbonate Equivalent (CaCO3)"
+    },
+    {
+      "key": "dynamic.analysis.moistureContent.name",
+      "name": "Volumetric Moisture Content"
+    },
+    {
+      "key": "dynamic.analysis.availableWaterHoldingCapacity.name",
+      "name": "Available Water Holding Capacity (AWHC)"
+    },
+    {
+      "key": "dynamic.analysis.hydraulicConductivity.name",
+      "name": "Saturated Hydraulic Conductivity (Ksat)"
+    },
+    {
+      "key": "dynamic.analysis.gypsum.name",
+      "name": "Gypsum (CaSO4·2H2O)"
+    },
+    {
+      "key": "dynamic.analysis.baseSaturation.name",
+      "name": "Base Saturation Percentage (%)"
+    },
+    {
+      "key": "dynamic.analysis.phosphorusRetention.name",
+      "name": "Phosphorus Retention / Fixation"
+    },
+    {
+      "key": "dynamic.analysis.totalElements.name",
+      "name": "Total Elements & Spectroscopy"
+    },
+    {
+      "key": "dynamic.analysis.solubleSalts.name",
+      "name": "Soluble Salts (SAR / TDS)"
+    },
+    {
+      "key": "dynamic.analysis.porosity.name",
+      "name": "Total Porosity"
+    },
+    {
+      "key": "dynamic.analysis.textureSum.name",
+      "name": "Texture Sum"
+    },
+    {
+      "key": "dynamic.analysis.coarseFragments.name",
+      "name": "Coarse Fragments (>2 mm)"
+    },
+    {
+      "key": "dynamic.analysis.SAND.name",
+      "name": "Sand Fraction (0.05 – 2.0 mm)"
+    },
+    {
+      "key": "dynamic.analysis.SILT.name",
+      "name": "Silt Fraction (0.002 – 0.05 mm)"
+    },
+    {
+      "key": "dynamic.analysis.CLAY.name",
+      "name": "Clay Fraction (< 0.002 mm)"
+    },
+    {
+      "key": "dynamic.analysis.TEXTURE.name",
+      "name": "Soil Texture Class (USDA)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_CA.name",
+      "name": "Exchangeable Calcium (Ca²⁺)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_MG.name",
+      "name": "Exchangeable Magnesium (Mg²⁺)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_K.name",
+      "name": "Exchangeable Potassium (K⁺)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_NA.name",
+      "name": "Exchangeable Sodium (Na⁺)"
+    },
+    {
+      "key": "dynamic.analysis.PH_H2O.name",
+      "name": "Soil pH (1:2.5 Water)"
+    },
+    {
+      "key": "dynamic.analysis.PH_CACL2.name",
+      "name": "Soil pH (0.01M CaCl₂)"
+    },
+    {
+      "key": "dynamic.analysis.PH_KCL.name",
+      "name": "Soil pH (1M KCl Reserve Acidity)"
+    },
+    {
+      "key": "dynamic.analysis.EC.name",
+      "name": "Electrical Conductivity (1:5)"
+    },
+    {
+      "key": "dynamic.analysis.SOC.name",
+      "name": "Soil Organic Carbon (SOC)"
+    },
+    {
+      "key": "dynamic.analysis.SOM.name",
+      "name": "Soil Organic Matter (SOM)"
+    },
+    {
+      "key": "dynamic.analysis.CACO3.name",
+      "name": "Total Carbonate Equivalent (CaCO₃)"
+    },
+    {
+      "key": "dynamic.analysis.TN.name",
+      "name": "Total Nitrogen (TN)"
+    },
+    {
+      "key": "dynamic.analysis.P_OLSEN.name",
+      "name": "Available Phosphorus (Olsen P)"
+    },
+    {
+      "key": "dynamic.analysis.P_BRAY1.name",
+      "name": "Available Phosphorus (Bray-1 P)"
+    },
+    {
+      "key": "dynamic.analysis.P_MEHLICH3.name",
+      "name": "Available Phosphorus (Mehlich-3 P)"
+    },
+    {
+      "key": "dynamic.analysis.CEC.name",
+      "name": "Cation Exchange Capacity (CEC)"
+    },
+    {
+      "key": "dynamic.analysis.ECEC.name",
+      "name": "Effective CEC (ECEC)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_ACID.name",
+      "name": "Exchangeable Acidity (Al³⁺ + H⁺)"
+    },
+    {
+      "key": "dynamic.analysis.BD_FINE.name",
+      "name": "Bulk Density (Fine Earth)"
+    },
+    {
+      "key": "dynamic.analysis.BD_WHOLE.name",
+      "name": "Bulk Density (Whole Soil)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_ZN.name",
+      "name": "Extractable Zinc (Zn, DTPA)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_FE.name",
+      "name": "Extractable Iron (Fe, DTPA)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_CU.name",
+      "name": "Extractable Copper (Cu, DTPA)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_MN.name",
+      "name": "Extractable Manganese (Mn, DTPA)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_B.name",
+      "name": "Extractable Boron (Hot Water B)"
+    },
+    {
+      "key": "dynamic.analysis.GYPSUM.name",
+      "name": "Gypsum Content (CaSO₄·2H₂O)"
+    },
+    {
+      "key": "dynamic.analysis.COARSE_FRAG.name",
+      "name": "Coarse Fragments (> 2 mm)"
+    },
+    {
+      "key": "dynamic.analysis.PARTICLE_DENSITY.name",
+      "name": "Soil Particle Density (ρs)"
+    },
+    {
+      "key": "dynamic.analysis.POROSITY.name",
+      "name": "Total Soil Porosity (Φ)"
+    },
+    {
+      "key": "dynamic.analysis.SOIL_MOISTURE.name",
+      "name": "Gravimetric Moisture Content (θm)"
+    },
+    {
+      "key": "dynamic.analysis.VOL_MOISTURE.name",
+      "name": "Volumetric Water Content (θv)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_RET_FC.name",
+      "name": "Water Retention at Field Capacity (pF 2.5)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_RET_PWP.name",
+      "name": "Water Retention at Wilting Point (pF 4.2)"
+    },
+    {
+      "key": "dynamic.analysis.AWC.name",
+      "name": "Available Water Capacity (AWC)"
+    },
+    {
+      "key": "dynamic.analysis.K_SAT.name",
+      "name": "Saturated Hydraulic Conductivity (Ksat)"
+    },
+    {
+      "key": "dynamic.analysis.AGG_STABILITY.name",
+      "name": "Aggregate Stability (Mean Weight Diameter)"
+    },
+    {
+      "key": "dynamic.analysis.MUNSELL_COLOR.name",
+      "name": "Soil Munsell Color (Dry & Moist)"
+    },
+    {
+      "key": "dynamic.analysis.LIQUID_LIMIT.name",
+      "name": "Atterberg Liquid Limit (LL)"
+    },
+    {
+      "key": "dynamic.analysis.PLASTIC_LIMIT.name",
+      "name": "Atterberg Plastic Limit (PL)"
+    },
+    {
+      "key": "dynamic.analysis.POXC.name",
+      "name": "Permanganate-Oxidizable Carbon (Active Carbon)"
+    },
+    {
+      "key": "dynamic.analysis.EXCH_AL.name",
+      "name": "Exchangeable Aluminum (Al³⁺)"
+    },
+    {
+      "key": "dynamic.analysis.LIME_REQ.name",
+      "name": "Lime Requirement (Buffer Method)"
+    },
+    {
+      "key": "dynamic.analysis.N_NO3.name",
+      "name": "Nitrate Nitrogen (NO₃⁻-N)"
+    },
+    {
+      "key": "dynamic.analysis.N_NH4.name",
+      "name": "Ammonium Nitrogen (NH₄⁺-N)"
+    },
+    {
+      "key": "dynamic.analysis.N_MIN.name",
+      "name": "Total Mineral Available Nitrogen (N-min)"
+    },
+    {
+      "key": "dynamic.analysis.P_BRAY2.name",
+      "name": "Available Phosphorus (Bray-2 P)"
+    },
+    {
+      "key": "dynamic.analysis.P_MEHLICH1.name",
+      "name": "Available Phosphorus (Mehlich-1 Double Acid P)"
+    },
+    {
+      "key": "dynamic.analysis.P_RESIN.name",
+      "name": "Resin-Extractable Phosphorus"
+    },
+    {
+      "key": "dynamic.analysis.P_TOTAL.name",
+      "name": "Total Soil Phosphorus"
+    },
+    {
+      "key": "dynamic.analysis.P_RETENTION.name",
+      "name": "Phosphorus Retention / P-Sorption Capacity"
+    },
+    {
+      "key": "dynamic.analysis.EXT_S.name",
+      "name": "Available Sulfate Sulfur (SO₄²⁻-S)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_MO.name",
+      "name": "Extractable Molybdenum (Mo)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_CO.name",
+      "name": "Extractable Cobalt (Co)"
+    },
+    {
+      "key": "dynamic.analysis.EXT_SI.name",
+      "name": "Available Silicon (Si)"
+    },
+    {
+      "key": "dynamic.analysis.EC_E.name",
+      "name": "EC of Saturated Paste Extract (ECe)"
+    },
+    {
+      "key": "dynamic.analysis.SAR.name",
+      "name": "Sodium Adsorption Ratio (SAR)"
+    },
+    {
+      "key": "dynamic.analysis.ESP.name",
+      "name": "Exchangeable Sodium Percentage (ESP)"
+    },
+    {
+      "key": "dynamic.analysis.ACTIVE_CACO3.name",
+      "name": "Active Carbonate (Drouineau Method)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_SOLUBLE_CL.name",
+      "name": "Water-Soluble Chloride (Cl⁻)"
+    },
+    {
+      "key": "dynamic.analysis.HM_CD.name",
+      "name": "Total Cadmium (Cd, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_PB.name",
+      "name": "Total Lead (Pb, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_AS.name",
+      "name": "Total Arsenic (As, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_CR.name",
+      "name": "Total Chromium (Cr, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_NI.name",
+      "name": "Total Nickel (Ni, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_HG.name",
+      "name": "Total Mercury (Hg, Cold Vapor)"
+    },
+    {
+      "key": "dynamic.analysis.HM_CU.name",
+      "name": "Total Copper (Cu, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_ZN.name",
+      "name": "Total Zinc (Zn, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_CO.name",
+      "name": "Total Cobalt (Co, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_SE.name",
+      "name": "Total Selenium (Se, Hydride)"
+    },
+    {
+      "key": "dynamic.analysis.HM_BA.name",
+      "name": "Total Barium (Ba, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_V.name",
+      "name": "Total Vanadium (V, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.SOIL_RESPIRATION.name",
+      "name": "Soil Basal Respiration (CO₂-C)"
+    },
+    {
+      "key": "dynamic.analysis.MBC.name",
+      "name": "Microbial Biomass Carbon (MBC)"
+    },
+    {
+      "key": "dynamic.analysis.MBN.name",
+      "name": "Microbial Biomass Nitrogen (MBN)"
+    },
+    {
+      "key": "dynamic.analysis.Q_CO2.name",
+      "name": "Metabolic Quotient (qCO₂)"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_BGLU.name",
+      "name": "β-Glucosidase Enzyme Activity"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_ACID_PHOS.name",
+      "name": "Acid Phosphatase Enzyme Activity"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_ALK_PHOS.name",
+      "name": "Alkaline Phosphatase Enzyme Activity"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_UREASE.name",
+      "name": "Urease Enzyme Activity"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_DHA.name",
+      "name": "Dehydrogenase Enzyme Activity (DHA)"
+    },
+    {
+      "key": "dynamic.analysis.ENZ_FDA.name",
+      "name": "Fluorescein Diacetate Hydrolysis (FDA)"
+    },
+    {
+      "key": "dynamic.analysis.GLOMALIN.name",
+      "name": "Glomalin-Related Soil Protein (GRSP)"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_MIR.name",
+      "name": "Mid-Infrared Spectroscopy (MIR DRIFTS)"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_VIS_NIR.name",
+      "name": "Visible & Near-Infrared Spectroscopy (Vis-NIR)"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_GRS.name",
+      "name": "Gamma-Ray Spectrometry Scan (GRS)"
+    },
+    {
+      "key": "dynamic.analysis.GRS_K40.name",
+      "name": "Radiometric Potassium-40 (⁴⁰K)"
+    },
+    {
+      "key": "dynamic.analysis.GRS_U238.name",
+      "name": "Uranium-238 Equivalent (eU)"
+    },
+    {
+      "key": "dynamic.analysis.GRS_TH232.name",
+      "name": "Thorium-232 Equivalent (eTh)"
+    },
+    {
+      "key": "dynamic.analysis.GRS_TC.name",
+      "name": "Gamma Total Count / Dose Rate"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_XRF.name",
+      "name": "X-Ray Fluorescence Spectrometry (pXRF)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_N_TOT.name",
+      "name": "Total Nitrogen in Fertilizer"
+    },
+    {
+      "key": "dynamic.analysis.FERT_N_NH4.name",
+      "name": "Ammoniacal Nitrogen in Fertilizer (NH₄-N)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_N_NO3.name",
+      "name": "Nitrate Nitrogen in Fertilizer (NO₃-N)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_N_UREA.name",
+      "name": "Urea Nitrogen in Fertilizer (Ureic N)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_P_TOT.name",
+      "name": "Total Phosphorus in Fertilizer (P₂O₅)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_P_WATER.name",
+      "name": "Water-Soluble Phosphorus in Fertilizer (P₂O₅)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_P_CITRATE.name",
+      "name": "Citrate-Soluble Phosphorus in Fertilizer (P₂O₅)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_K_WATER.name",
+      "name": "Water-Soluble Potassium in Fertilizer (K₂O)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_S.name",
+      "name": "Total Sulfur in Fertilizer (S)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_CA.name",
+      "name": "Calcium Content in Fertilizer (CaO)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_MG.name",
+      "name": "Magnesium Content in Fertilizer (MgO)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_MOIST.name",
+      "name": "Free Moisture in Fertilizer"
+    },
+    {
+      "key": "dynamic.analysis.FERT_GRAN.name",
+      "name": "Fertilizer Granulometry / Particle Size"
+    },
+    {
+      "key": "dynamic.analysis.FERT_CD.name",
+      "name": "Cadmium in Fertilizer (Contaminant)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_PB.name",
+      "name": "Lead in Fertilizer (Contaminant)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_AS.name",
+      "name": "Arsenic in Fertilizer (Contaminant)"
+    },
+    {
+      "key": "dynamic.analysis.FERT_HG.name",
+      "name": "Mercury in Fertilizer (Contaminant)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_N.name",
+      "name": "Total Nitrogen in Foliar Tissue (N)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_P.name",
+      "name": "Total Phosphorus in Foliar Tissue (P)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_K.name",
+      "name": "Total Potassium in Foliar Tissue (K)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_CA.name",
+      "name": "Total Calcium in Foliar Tissue (Ca)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_MG.name",
+      "name": "Total Magnesium in Foliar Tissue (Mg)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_S.name",
+      "name": "Total Sulfur in Foliar Tissue (S)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_FE.name",
+      "name": "Iron in Foliar Tissue (Fe)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_ZN.name",
+      "name": "Zinc in Foliar Tissue (Zn)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_MN.name",
+      "name": "Manganese in Foliar Tissue (Mn)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_CU.name",
+      "name": "Copper in Foliar Tissue (Cu)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_B.name",
+      "name": "Boron in Foliar Tissue (B)"
+    },
+    {
+      "key": "dynamic.analysis.PLANT_MO.name",
+      "name": "Molybdenum in Foliar Tissue (Mo)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_PH.name",
+      "name": "Irrigation Water pH"
+    },
+    {
+      "key": "dynamic.analysis.WATER_EC.name",
+      "name": "Irrigation Water EC (ECw)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_TDS.name",
+      "name": "Total Dissolved Solids in Water (TDS)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_SAR.name",
+      "name": "Water Sodium Adsorption Ratio (SAR)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_HARDNESS.name",
+      "name": "Total Water Hardness (CaCO₃ eq)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_CA.name",
+      "name": "Dissolved Calcium in Water (Ca²⁺)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_MG.name",
+      "name": "Dissolved Magnesium in Water (Mg²⁺)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_NA.name",
+      "name": "Dissolved Sodium in Water (Na⁺)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_K.name",
+      "name": "Dissolved Potassium in Water (K⁺)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_HCO3.name",
+      "name": "Bicarbonate in Water (HCO₃⁻)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_CO3.name",
+      "name": "Carbonate in Water (CO₃²⁻)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_CL.name",
+      "name": "Chloride in Water (Cl⁻)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_SO4.name",
+      "name": "Sulfate in Water (SO₄²⁻)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_NO3_N.name",
+      "name": "Nitrate-Nitrogen in Water (NO₃⁻-N)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_B.name",
+      "name": "Boron in Irrigation Water (B)"
+    },
+    {
+      "key": "dynamic.analysis.WATER_RSC.name",
+      "name": "Residual Sodium Carbonate in Water (RSC)"
+    },
+    {
+      "key": "dynamic.analysis.HM_MO.name",
+      "name": "Total Molybdenum (Mo, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_TL.name",
+      "name": "Total Thallium (Tl, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_SB.name",
+      "name": "Total Antimony (Sb, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_BE.name",
+      "name": "Total Beryllium (Be, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_SN.name",
+      "name": "Total Tin (Sn, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_AG.name",
+      "name": "Total Silver (Ag, Aqua Regia)"
+    },
+    {
+      "key": "dynamic.analysis.HM_U.name",
+      "name": "Total Uranium (U, ICP-MS)"
+    },
+    {
+      "key": "dynamic.analysis.HM_TH.name",
+      "name": "Total Thorium (Th, ICP-MS)"
+    },
+    {
+      "key": "dynamic.analysis.LIME_CCE.name",
+      "name": "Calcium Carbonate Equivalent (CCE)"
+    },
+    {
+      "key": "dynamic.analysis.LIME_ENV.name",
+      "name": "Effective Neutralizing Value (ENV)"
+    },
+    {
+      "key": "dynamic.analysis.LIME_MG.name",
+      "name": "Magnesium Carbonate in Lime (MgCO₃)"
+    },
+    {
+      "key": "dynamic.analysis.LIME_FINENESS.name",
+      "name": "Liming Material Fineness (< 250 µm)"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_1.name",
+      "name": "Specialized Agronomic Parameter 1"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_2.name",
+      "name": "Specialized Agronomic Parameter 2"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_3.name",
+      "name": "Specialized Agronomic Parameter 3"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_4.name",
+      "name": "Specialized Agronomic Parameter 4"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_5.name",
+      "name": "Specialized Agronomic Parameter 5"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_6.name",
+      "name": "Specialized Agronomic Parameter 6"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_7.name",
+      "name": "Specialized Agronomic Parameter 7"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_8.name",
+      "name": "Specialized Agronomic Parameter 8"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_9.name",
+      "name": "Specialized Agronomic Parameter 9"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_10.name",
+      "name": "Specialized Agronomic Parameter 10"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_11.name",
+      "name": "Specialized Agronomic Parameter 11"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_12.name",
+      "name": "Specialized Agronomic Parameter 12"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_13.name",
+      "name": "Specialized Agronomic Parameter 13"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_14.name",
+      "name": "Specialized Agronomic Parameter 14"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_15.name",
+      "name": "Specialized Agronomic Parameter 15"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_16.name",
+      "name": "Specialized Agronomic Parameter 16"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_17.name",
+      "name": "Specialized Agronomic Parameter 17"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_18.name",
+      "name": "Specialized Agronomic Parameter 18"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_19.name",
+      "name": "Specialized Agronomic Parameter 19"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_20.name",
+      "name": "Specialized Agronomic Parameter 20"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_21.name",
+      "name": "Specialized Agronomic Parameter 21"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_22.name",
+      "name": "Specialized Agronomic Parameter 22"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_23.name",
+      "name": "Specialized Agronomic Parameter 23"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_24.name",
+      "name": "Specialized Agronomic Parameter 24"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_25.name",
+      "name": "Specialized Agronomic Parameter 25"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_26.name",
+      "name": "Specialized Agronomic Parameter 26"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_27.name",
+      "name": "Specialized Agronomic Parameter 27"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_28.name",
+      "name": "Specialized Agronomic Parameter 28"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_29.name",
+      "name": "Specialized Agronomic Parameter 29"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_30.name",
+      "name": "Specialized Agronomic Parameter 30"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_31.name",
+      "name": "Specialized Agronomic Parameter 31"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_32.name",
+      "name": "Specialized Agronomic Parameter 32"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_33.name",
+      "name": "Specialized Agronomic Parameter 33"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_34.name",
+      "name": "Specialized Agronomic Parameter 34"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_35.name",
+      "name": "Specialized Agronomic Parameter 35"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_36.name",
+      "name": "Specialized Agronomic Parameter 36"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_37.name",
+      "name": "Specialized Agronomic Parameter 37"
+    },
+    {
+      "key": "dynamic.analysis.SPEC_PARAM_38.name",
+      "name": "Specialized Agronomic Parameter 38"
+    }
+  ]
+}

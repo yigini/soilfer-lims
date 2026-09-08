@@ -1,0 +1,111 @@
+{
+  "note": "Identity with English is a review flag, not proof of error; acronyms and invariant text may correctly match. Coverage against the incomplete English pack cannot establish sitewide coverage.",
+  "stats": [
+    {
+      "locale": "en",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": [],
+      "empty": [],
+      "sameAsEnglish": [],
+      "extra": [],
+      "placeholderMismatch": []
+    },
+    {
+      "locale": "es",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": [],
+      "empty": [],
+      "sameAsEnglish": [
+        "common.error",
+        "common.ok",
+        "common.total",
+        "reception.pass",
+        "reception.na",
+        "terminology.completedBadge"
+      ],
+      "extra": [],
+      "placeholderMismatch": []
+    },
+    {
+      "locale": "es-419",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": [],
+      "empty": [],
+      "sameAsEnglish": [
+        "common.error",
+        "common.total",
+        "reception.pass",
+        "reception.na",
+        "terminology.completedBadge"
+      ],
+      "extra": [],
+      "placeholderMismatch": []
+    },
+    {
+      "locale": "fr",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": [],
+      "empty": [],
+      "sameAsEnglish": [
+        "common.ok",
+        "common.actions",
+        "common.total",
+        "header.notifications",
+        "ui.notifications",
+        "ui.message",
+        "reception.documentation",
+        "reception.sessionActive",
+        "reception.pass",
+        "reception.na",
+        "workflow.filters.spectral",
+        "sampleDetail.analyses",
+        "sampleDetail.actions",
+        "queue.urgent",
+        "projects.code",
+        "projects.actions",
+        "users.actions",
+        "equipment.actions",
+        "inventory.actions",
+        "labs.actions",
+        "terminology.completedBadge",
+        "terminology.moduleFilter",
+        "catalogue.texture.loam.name"
+      ],
+      "extra": [],
+      "placeholderMismatch": []
+    },
+    {
+      "locale": "pt",
+      "keys": 687,
+      "referenceKeys": 687,
+      "missing": [],
+      "empty": [],
+      "sameAsEnglish": [
+        "common.ok",
+        "common.total",
+        "ui.online",
+        "ui.offline",
+        "samples.status",
+        "reception.pass",
+        "reception.na",
+        "sampleDetail.status",
+        "terminology.completedBadge"
+      ],
+      "extra": [],
+      "placeholderMismatch": []
+    }
+  ],
+  "duplicateProperties": [],
+  "referencedKeysAbsentFromEnglish": [],
+  "referencedKeysAbsentByLocale": {
+    "en": [],
+    "es": [],
+    "es-419": [],
+    "fr": [],
+    "pt": []
+  }
+}

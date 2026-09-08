@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-09-08T10:39:48.437Z",
+  "note": "Integrity manifest of this planning package, excluding this manifest itself. Re-run validate-package.cjs after editing package files. No application implementation or deployment is implied.",
+  "baselineRevision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "files": [
+    {
+      "file": "ANTIGRAVITY_PROMPT.md",
+      "bytes": 5220,
+      "sha256": "7243b6d0fc18d43420712a90ba6d64151780ec62ac467db59b4b3e37adc637e9"
+    },
+    {
+      "file": "API_CONTRACTS.md",
+      "bytes": 6744,
+      "sha256": "c5299bbd33d90efc8b9d72bf2f48570ec14b0cdb7ff032126a3a22a3dd206d4a"
+    },
+    {
+      "file": "AUDIT_FINDINGS.md",
+      "bytes": 11019,
+      "sha256": "f3356410a86291b73370eeda2d685ec04395b20a62c623df0bd18224c698aaf8"
+    },
+    {
+      "file": "COVERAGE_AND_ACCEPTANCE.md",
+      "bytes": 14969,
+      "sha256": "d2106edc8eaf7149448f7a7b00f827693734134be20f17c46adf3252ca0f8ee3"
+    },
+    {
+      "file": "IMPLEMENTATION_PLAN.md",
+      "bytes": 32580,
+      "sha256": "23a157232137c9dc61c8779c1b74a94b5baba41b4d4aa6cdbdba5df0d082401d"
+    },
+    {
+      "file": "IMPLEMENT_NOW.md",
+      "bytes": 9608,
+      "sha256": "d12aac9a87c082f7021b2a22965d18b63a7621962d604477df254ae3f42e3d17"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3642,
+      "sha256": "45919364ad342bbc484ff57550de6e4074da9a4259f574bb8aa6ae4a2447a756"
+    },
+    {
+      "file": "ROUTE_COVERAGE_REGISTER.md",
+      "bytes": 2929,
+      "sha256": "d4bbd568afa3e850036529d511f5408989547ff157c65db1d8170410c9b8e0ab"
+    },
+    {
+      "file": "SCIENTIFIC_TERMINOLOGY.md",
+      "bytes": 17381,
+      "sha256": "7408774d8a5b143fd12c2097774144209ca317334827a95b40c91b0790490844"
+    },
+    {
+      "file": "audit-localization.cjs",
+      "bytes": 9706,
+      "sha256": "9175cfddebd8ee5d8dbf2e4b718573b879e440b07849ba13cebf1ce3a6a7229d"
+    },
+    {
+      "file": "audit-summary.json",
+      "bytes": 12423,
+      "sha256": "bd955864c937e54fd54d7a640b0a4fe0e1a13f843af4c42297edf9aaf59e5bd2"
+    },
+    {
+      "file": "build-review-assets.cjs",
+      "bytes": 2631,
+      "sha256": "85893a49062715a1c21f4b41c0be4fe26c262f57e541f0e4d92236929af5a45e"
+    },
+    {
+      "file": "catalogue-translation-review-matrix.json",
+      "bytes": 854760,
+      "sha256": "26a876b3574e78781e220efa7307d5149671ee7ece861da09c1449b2e630c978"
+    },
+    {
+      "file": "live-bootstrap-audit.json",
+      "bytes": 7003,
+      "sha256": "eb102e1d806fd77a8e5d1eadd6152ba07e3e752e26318291dbbd01c31bc7e725"
+    },
+    {
+      "file": "live-database-language-backup.json",
+      "bytes": 48172,
+      "sha256": "6e56ec441ecc6669b92363a68d4b60031966b7b498098c63831f8cc769089629"
+    },
+    {
+      "file": "live-public-analysis-names.json",
+      "bytes": 23843,
+      "sha256": "97e9e7e3fd30f98c4bcd66a71c7c0283600bf5ec1e716dc339da1448e9af222d"
+    },
+    {
+      "file": "live-ui-spot-check.json",
+      "bytes": 1293,
+      "sha256": "ac9c14a0f5937a60bf1f6d5d129d644e47aba94393ac097c948f1133c30fe195"
+    },
+    {
+      "file": "locale-pack-audit.json",
+      "bytes": 2633,
+      "sha256": "2c092615273a4f395a6c1f7256ad0fc2b47bbfd65d74faccfa7928168920a131"
+    },
+    {
+      "file": "package-validation.json",
+      "bytes": 2232,
+      "sha256": "3633632d8e06c2a1f99baea7fb8292b313482d4a85781bb1fa83886a4c18b61c"
+    },
+    {
+      "file": "scientific-glossary-draft.json",
+      "bytes": 24328,
+      "sha256": "7b108239fe0c3214aa55bc2cbe427b4a114f27d82ae240ea57c318e8b66abd11"
+    },
+    {
+      "file": "source-text-inventory.json",
+      "bytes": 846160,
+      "sha256": "1259247e716086e93a1c6ba37ecb82cd23d836c5bd4df057ebc1832619af25e2"
+    },
+    {
+      "file": "validate-package.cjs",
+      "bytes": 5389,
+      "sha256": "812003c67c2daa7dd7270c938b4877e7c96379a0079ceac3cb5affd8ca9466c6"
+    }
+  ]
+}
