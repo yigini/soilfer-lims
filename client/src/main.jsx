@@ -42,15 +42,195 @@ axios.interceptors.response.use(
     }
 );
 
+// Automatically recover from stale chunks after a deployment or intermittent network drops
+window.addEventListener('vite:preloadError', (event) => {
+    const reloadKey = 'sf_chunk_reload_ts';
+    const lastReload = sessionStorage.getItem(reloadKey);
+    const now = Date.now();
+    // Guard against reload loops: allow reload once per 15 seconds
+    if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+        sessionStorage.setItem(reloadKey, now.toString());
+        window.location.reload();
+    }
+});
+
+const isChunkLoadError = (error) => {
+    if (!error) return false;
+    const msg = (error.message || error.toString()).toLowerCase();
+    return (
+        msg.includes('failed to fetch dynamically imported module') ||
+        msg.includes('importing a module script failed') ||
+        msg.includes('error loading dynamically imported module') ||
+        msg.includes('loading chunk') ||
+        msg.includes('dynamically imported module')
+    );
+};
+
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { hasError: false, error: null };
+        this.state = { hasError: false, error: null, isChunkError: false };
     }
-    static getDerivedStateFromError(error) { return { hasError: true, error }; }
-    componentDidCatch(error, errorInfo) { console.error("Uncaught error:", error, errorInfo); }
+    static getDerivedStateFromError(error) {
+        return {
+            hasError: true,
+            error,
+            isChunkError: isChunkLoadError(error)
+        };
+    }
+    componentDidCatch(error, errorInfo) {
+        console.error("Uncaught application error:", error, errorInfo);
+        if (isChunkLoadError(error)) {
+            const reloadKey = 'sf_chunk_reload_ts';
+            const lastReload = sessionStorage.getItem(reloadKey);
+            const now = Date.now();
+            if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+                sessionStorage.setItem(reloadKey, now.toString());
+                window.location.reload();
+            }
+        }
+    }
     render() {
-        if (this.state.hasError) return <div style={{ padding: 20, color: 'red' }}><h1>Something went wrong.</h1><pre>{this.state.error?.toString()}</pre></div>;
+        if (this.state.hasError) {
+            if (this.state.isChunkError) {
+                return (
+                    <div style={{
+                        minHeight: '100vh',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#F5F3ED',
+                        padding: 24,
+                        fontFamily: 'Inter, system-ui, sans-serif'
+                    }}>
+                        <div style={{
+                            maxWidth: 440,
+                            width: '100%',
+                            backgroundColor: '#FFFFFF',
+                            borderRadius: 12,
+                            padding: '32px 24px',
+                            boxShadow: '0 4px 20px rgba(23,63,50,0.08)',
+                            textAlign: 'center',
+                            border: '1px solid #E5E7EB'
+                        }}>
+                            <div style={{
+                                width: 52,
+                                height: 52,
+                                margin: '0 auto 16px',
+                                borderRadius: '50%',
+                                backgroundColor: '#E4F1F3',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#173F32',
+                                fontSize: 24
+                            }}>
+                                ⟳
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#173F32', marginBottom: 8 }}>
+                                System Update Ready
+                            </h2>
+                            <p style={{ fontSize: '0.875rem', color: '#4B5563', lineHeight: 1.5, marginBottom: 24 }}>
+                                A new version of SoilFER LIMS was deployed. Please refresh to load the latest modules.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                <button
+                                    onClick={() => {
+                                        sessionStorage.setItem('sf_chunk_reload_ts', Date.now().toString());
+                                        window.location.reload();
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        backgroundColor: '#173F32',
+                                        color: '#FFFFFF',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        fontWeight: 600,
+                                        fontSize: '0.925rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Refresh Application
+                                </button>
+                                <button
+                                    onClick={() => { window.location.href = '/'; }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 16px',
+                                        backgroundColor: 'transparent',
+                                        color: '#4B5563',
+                                        border: '1px solid #D1D5DB',
+                                        borderRadius: 8,
+                                        fontWeight: 500,
+                                        fontSize: '0.875rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Return to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div style={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#F5F3ED',
+                    padding: 24,
+                    fontFamily: 'Inter, system-ui, sans-serif'
+                }}>
+                    <div style={{
+                        maxWidth: 520,
+                        width: '100%',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: 12,
+                        padding: '32px 24px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                        border: '1px solid #E5E7EB'
+                    }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#945539', marginBottom: 8 }}>
+                            Application Error
+                        </h2>
+                        <p style={{ fontSize: '0.875rem', color: '#4B5563', lineHeight: 1.5, marginBottom: 20 }}>
+                            An unexpected issue occurred while rendering this view.
+                        </p>
+                        <pre style={{
+                            fontSize: '0.75rem',
+                            backgroundColor: '#F9FAFB',
+                            padding: 12,
+                            borderRadius: 6,
+                            overflowX: 'auto',
+                            color: '#DC2626',
+                            border: '1px solid #F3F4F6',
+                            marginBottom: 20
+                        }}>
+                            {this.state.error?.toString()}
+                        </pre>
+                        <button
+                            onClick={() => window.location.reload()}
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                backgroundColor: '#173F32',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: 8,
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Reload Application
+                        </button>
+                    </div>
+                </div>
+            );
+        }
         return this.props.children;
     }
 }
