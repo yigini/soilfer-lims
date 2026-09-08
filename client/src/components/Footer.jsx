@@ -8,13 +8,13 @@ const Footer = () => {
     const { t } = useLanguage();
 
     return (
-        <footer className="mt-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 backdrop-blur-sm">
+        <footer className="mt-auto border-t border-sf-divider bg-sf-surface/80 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto px-4 py-4">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                     {/* Left: branding */}
-                    <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">LIMS</span>
-                        <span className="text-gray-300 dark:text-gray-600">•</span>
+                    <div className="flex items-center gap-2 text-xs text-sf-muted">
+                        <span className="font-semibold text-sf-text">LIMS</span>
+                        <span className="text-sf-divider">•</span>
                         <span>{t('footer.systemName', 'Laboratory Information Management System')}</span>
                     </div>
 
@@ -22,15 +22,15 @@ const Footer = () => {
                     <div className="flex items-center gap-4 text-xs">
                         <Link
                             to="/about"
-                            className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
+                            className="flex items-center gap-1.5 text-sf-muted hover:text-sf-primary transition-colors font-medium"
                         >
                             <Shield size={12} />
                             {t('footer.about', 'About SoilFER')}
                         </Link>
-                        <span className="text-gray-300 dark:text-gray-600">•</span>
+                        <span className="text-sf-divider">•</span>
                         <Link
                             to="/techstack"
-                            className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
+                            className="flex items-center gap-1.5 text-sf-muted hover:text-sf-primary transition-colors font-medium"
                         >
                             <Award size={12} />
                             {t('footer.techstack', 'Tech Stack & Releases')}
@@ -38,9 +38,9 @@ const Footer = () => {
                     </div>
 
                     {/* Right: copyright */}
-                    <div className="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-500">
+                    <div className="flex items-center gap-1.5 text-[11px] text-sf-muted">
                         <span>© {currentYear}</span>
-                        <span className="text-gray-300 dark:text-gray-600">•</span>
+                        <span className="text-sf-divider">•</span>
                         <span className="flex items-center gap-1">
                             {t('footer.builtWith', 'Built with')} <Heart size={10} className="text-red-400" fill="currentColor" /> {t('footer.care', 'care')}
                         </span>

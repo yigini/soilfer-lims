@@ -82,11 +82,11 @@ const NotificationDrawer = () => {
 
     const getTypeStyles = (type) => {
         switch (type) {
-            case 'SUCCESS': return { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' };
-            case 'WARNING': return { icon: AlertTriangle, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' };
-            case 'ERROR': return { icon: AlertOctagon, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' };
-            case 'MESSAGE': return { icon: Bell, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' };
-            default: return { icon: Info, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' };
+            case 'SUCCESS': return { icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-500/10' };
+            case 'WARNING': return { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-500/10' };
+            case 'ERROR': return { icon: AlertOctagon, color: 'text-rose-500', bg: 'bg-rose-500/10' };
+            case 'MESSAGE': return { icon: Bell, color: 'text-purple-500', bg: 'bg-purple-500/10' };
+            default: return { icon: Info, color: 'text-sf-primary', bg: 'bg-sf-primary/10' };
         }
     };
 
@@ -180,27 +180,27 @@ const NotificationDrawer = () => {
 
     // ── Tab Header ─────────────────────────────────────────────────
     const renderTabHeader = () => (
-        <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+        <div className="flex border-b border-sf-divider bg-sf-surface">
             {view === 'THREAD' ? (
                 <div className="flex items-center w-full px-4 py-3 gap-3">
                     <button
                         onClick={() => { setView('CHATS'); setActiveThreadPartner(null); }}
-                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                        className="p-1 hover:bg-sf-hover text-sf-muted hover:text-sf-text rounded-full transition-colors"
                     >
-                        <ArrowLeft size={20} className="text-gray-600 dark:text-gray-300" />
+                        <ArrowLeft size={20} />
                     </button>
                     <div className="flex items-center gap-3 flex-1">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
                             {getPartnerName().charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <p className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">{getPartnerName()}</p>
+                            <p className="font-semibold text-sm text-sf-text leading-tight">{getPartnerName()}</p>
                             {isOnline(activeThreadPartner) ? (
-                                <p className="text-xs text-green-500 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> {t('ui.online', 'online')}
+                                <p className="text-xs text-emerald-500 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> {t('ui.online', 'online')}
                                 </p>
                             ) : (
-                                <p className="text-xs text-gray-400">{t('ui.offline', 'offline')}</p>
+                                <p className="text-xs text-sf-muted">{t('ui.offline', 'offline')}</p>
                             )}
                         </div>
                     </div>
@@ -212,14 +212,14 @@ const NotificationDrawer = () => {
                         className={clsx(
                             "flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-all border-b-2",
                             view === 'NOTIFICATIONS'
-                                ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-                                : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
+                                ? "text-sf-primary border-sf-primary"
+                                : "text-sf-muted border-transparent hover:text-sf-text"
                         )}
                     >
                         <Bell size={16} />
                         <span>{t('ui.notifications', 'Notifications')}</span>
                         {unreadNotificationCount > 0 && (
-                            <span className="px-1.5 py-0.5 text-[11px] font-extrabold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full">
+                            <span className="px-1.5 py-0.5 text-[11px] font-extrabold bg-sf-primary/15 text-sf-primary rounded-full">
                                 {unreadNotificationCount}
                             </span>
                         )}
@@ -229,8 +229,8 @@ const NotificationDrawer = () => {
                         className={clsx(
                             "flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-all border-b-2",
                             view === 'CHATS' || view === 'COMPOSE'
-                                ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-                                : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200"
+                                ? "text-sf-primary border-sf-primary"
+                                : "text-sf-muted border-transparent hover:text-sf-text"
                         )}
                     >
                         <MessageCircle size={16} />
@@ -248,19 +248,19 @@ const NotificationDrawer = () => {
 
     // ── Notification List ──────────────────────────────────────────
     const renderNotificationList = () => (
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-sf-canvas">
             {/* Actions */}
             {notifications.length > 0 && (
-                <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex gap-2">
-                    <button onClick={markAllRead} className="text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors">{t('ui.markAllRead', 'Mark all read')}</button>
-                    <button onClick={clearAllNotifications} className="text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors">{t('ui.clearAll', 'Clear All')}</button>
+                <div className="px-4 py-2 border-b border-sf-divider bg-sf-surface flex gap-2">
+                    <button onClick={markAllRead} className="text-xs font-semibold text-sf-primary hover:bg-sf-primary/10 px-2 py-1 rounded-md transition-colors">{t('ui.markAllRead', 'Mark all read')}</button>
+                    <button onClick={clearAllNotifications} className="text-xs font-semibold text-rose-500 hover:bg-rose-500/10 px-2 py-1 rounded-md transition-colors">{t('ui.clearAll', 'Clear All')}</button>
                 </div>
             )}
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {notifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-8">
+                    <div className="flex flex-col items-center justify-center h-full text-center text-sf-muted p-8">
                         <Bell size={48} className="mb-4 opacity-20" />
-                        <p>{t('ui.noNotifications', 'No notifications yet')}</p>
+                        <p className="text-sm">{t('ui.noNotifications', 'No notifications yet')}</p>
                     </div>
                 ) : (
                     notifications.map(notif => {
@@ -276,8 +276,8 @@ const NotificationDrawer = () => {
                                 className={clsx(
                                     "relative group flex gap-3 p-3 rounded-xl transition-all cursor-pointer border",
                                     (notif.read || notif.isRead)
-                                        ? "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-70 hover:opacity-100"
-                                        : "bg-blue-50/30 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800/30 shadow-sm"
+                                        ? "bg-sf-surface border-sf-divider opacity-75 hover:opacity-100 hover:bg-sf-hover/40"
+                                        : "bg-sf-surface border-sf-primary/30 shadow-sm hover:border-sf-primary/60"
                                 )}
                             >
                                 <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${style.bg} ${style.color}`}>
@@ -285,13 +285,13 @@ const NotificationDrawer = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start mb-0.5">
-                                        <h4 className={clsx("text-sm font-medium truncate pr-2", (notif.read || notif.isRead) ? "text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-gray-100 font-semibold")}>{title}</h4>
-                                        {!(notif.read || notif.isRead) && <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />}
+                                        <h4 className={clsx("text-sm truncate pr-2", (notif.read || notif.isRead) ? "text-sf-text font-medium" : "text-sf-text font-bold")}>{title}</h4>
+                                        {!(notif.read || notif.isRead) && <span className="w-2 h-2 rounded-full bg-sf-primary shrink-0 mt-1.5" />}
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-1">{message}</p>
-                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <p className="text-xs text-sf-muted line-clamp-2 mb-1">{message}</p>
+                                    <div className="flex items-center justify-between text-xs text-sf-muted">
                                         <span>{formatTime(notif.createdAt)}</span>
-                                        {notif.link && <span className="flex items-center gap-1 text-blue-500 font-medium group-hover:underline">{t('ui.view', 'View')} <ExternalLink size={10} /></span>}
+                                        {notif.link && <span className="flex items-center gap-1 text-sf-primary font-medium group-hover:underline">{t('ui.view', 'View')} <ExternalLink size={10} /></span>}
                                     </div>
                                 </div>
                             </div>
@@ -304,19 +304,19 @@ const NotificationDrawer = () => {
 
     // ── Conversation List (WhatsApp-style) ──────────────────────────
     const renderConversationList = () => (
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-sf-canvas">
             {/* New Chat Button */}
-            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+            <div className="px-3 py-2 border-b border-sf-divider bg-sf-surface">
                 <button
                     onClick={() => setView('COMPOSE')}
-                    className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm flex items-center justify-center gap-2"
+                    className="w-full py-2.5 bg-sf-primary text-sf-on-primary rounded-xl text-sm font-semibold hover:bg-sf-primary-hover transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                     <MessageCircle size={16} /> {t('ui.newChat', 'New Chat')}
                 </button>
             </div>
 
             {sendSuccess && (
-                <div className="mx-3 mt-2 p-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-2 animate-in slide-in-from-top duration-300">
+                <div className="mx-3 mt-2 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-2 animate-in slide-in-from-top duration-300">
                     <CheckCircle size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">{t('ui.messageSent', 'Message sent!')}</p>
                 </div>
@@ -324,17 +324,17 @@ const NotificationDrawer = () => {
 
             <div className="flex-1 overflow-y-auto">
                 {conversations.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-8">
+                    <div className="flex flex-col items-center justify-center h-full text-center text-sf-muted p-8">
                         <MessageCircle size={48} className="mb-4 opacity-20" />
                         <p className="text-sm">{t('ui.noConversations', 'No conversations yet')}</p>
-                        <p className="text-xs mt-1">{t('ui.startNewChat', 'Start a new chat above')}</p>
+                        <p className="text-xs mt-1 text-sf-muted">{t('ui.startNewChat', 'Start a new chat above')}</p>
                     </div>
                 ) : (
                     conversations.map(conv => (
                         <div
                             key={conv.partnerId}
                             onClick={() => openConversation(conv.partnerId)}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-800"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-sf-hover cursor-pointer transition-colors border-b border-sf-divider bg-sf-surface"
                         >
                             {/* Avatar */}
                             <div className="relative shrink-0">
@@ -342,10 +342,10 @@ const NotificationDrawer = () => {
                                     {conv.partnerName.charAt(0).toUpperCase()}
                                 </div>
                                 {isOnline(conv.partnerId) && (
-                                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full shadow-sm" />
+                                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-sf-surface rounded-full shadow-sm" />
                                 )}
                                 {conv.unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
                                         {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                                     </span>
                                 )}
@@ -353,18 +353,18 @@ const NotificationDrawer = () => {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-baseline mb-0.5">
-                                    <h4 className={clsx("text-sm truncate", conv.unreadCount > 0 ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-800 dark:text-gray-200")}>
+                                    <h4 className={clsx("text-sm truncate", conv.unreadCount > 0 ? "font-bold text-sf-text" : "font-medium text-sf-text")}>
                                         {conv.partnerName}
                                     </h4>
-                                    <span className={clsx("text-[11px] ml-2 shrink-0", conv.unreadCount > 0 ? "text-green-500 font-semibold" : "text-gray-400")}>
+                                    <span className={clsx("text-[11px] ml-2 shrink-0", conv.unreadCount > 0 ? "text-emerald-500 font-semibold" : "text-sf-muted")}>
                                         {formatTime(conv.lastMessageAt)}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     {conv.lastMessageIsMe && (
-                                        <CheckCheck size={14} className="text-blue-400 shrink-0" />
+                                        <CheckCheck size={14} className="text-sf-primary shrink-0" />
                                     )}
-                                    <p className={clsx("text-xs truncate", conv.unreadCount > 0 ? "text-gray-800 dark:text-gray-200 font-medium" : "text-gray-500 dark:text-gray-400")}>
+                                    <p className={clsx("text-xs truncate", conv.unreadCount > 0 ? "text-sf-text font-medium" : "text-sf-muted")}>
                                         {conv.lastMessage}
                                     </p>
                                 </div>
@@ -378,18 +378,18 @@ const NotificationDrawer = () => {
 
     // ── Compose View ───────────────────────────────────────────────
     const renderCompose = () => (
-        <div className="flex-1 flex flex-col p-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col p-4 overflow-y-auto bg-sf-surface">
             <div className="flex items-center gap-2 mb-4">
-                <button onClick={() => setView('CHATS')} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-                    <ArrowLeft size={20} className="text-gray-600 dark:text-gray-300" />
+                <button onClick={() => setView('CHATS')} className="p-1 hover:bg-sf-hover text-sf-muted hover:text-sf-text rounded-full transition-colors">
+                    <ArrowLeft size={20} />
                 </button>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{t('ui.newMessage', 'New Message')}</h3>
+                <h3 className="font-semibold text-sf-text">{t('ui.newMessage', 'New Message')}</h3>
             </div>
             <form onSubmit={handleQuickCompose} className="space-y-4 flex-1 flex flex-col">
                 <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('ui.to', 'To')}</label>
+                    <label className="block text-xs font-medium text-sf-muted mb-1 uppercase tracking-wide">{t('ui.to', 'To')}</label>
                     <select
-                        className="w-full rounded-xl border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-2.5 px-3 focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-xl border border-sf-divider bg-sf-canvas text-sf-text text-sm py-2.5 px-3 focus:ring-2 focus:ring-sf-primary focus:border-sf-primary"
                         value={composeData.toUserId}
                         onChange={e => setComposeData({ ...composeData, toUserId: e.target.value })}
                         required
@@ -403,9 +403,9 @@ const NotificationDrawer = () => {
                     </select>
                 </div>
                 <div className="flex-1 flex flex-col">
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">{t('ui.message', 'Message')}</label>
+                    <label className="block text-xs font-medium text-sf-muted mb-1 uppercase tracking-wide">{t('ui.message', 'Message')}</label>
                     <textarea
-                        className="flex-1 w-full rounded-xl border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm p-3 resize-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
+                        className="flex-1 w-full rounded-xl border border-sf-divider bg-sf-canvas text-sf-text placeholder:text-sf-muted text-sm p-3 resize-none focus:ring-2 focus:ring-sf-primary min-h-[120px]"
                         value={composeData.message}
                         onChange={e => setComposeData({ ...composeData, message: e.target.value })}
                         required
@@ -413,8 +413,8 @@ const NotificationDrawer = () => {
                     />
                 </div>
                 <div className="flex gap-2">
-                    <button type="button" onClick={() => setView('CHATS')} className="flex-1 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">{t('ui.cancel', 'Cancel')}</button>
-                    <button type="submit" disabled={sending} className="flex-1 px-4 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 font-medium shadow-sm flex items-center justify-center gap-2 transition-all">
+                    <button type="button" onClick={() => setView('CHATS')} className="flex-1 px-4 py-2.5 text-sm text-sf-muted hover:text-sf-text hover:bg-sf-hover rounded-xl transition-colors">{t('ui.cancel', 'Cancel')}</button>
+                    <button type="submit" disabled={sending} className="flex-1 px-4 py-2.5 text-sm bg-sf-primary text-sf-on-primary rounded-xl hover:bg-sf-primary-hover font-semibold shadow-sm flex items-center justify-center gap-2 transition-all">
                         {sending ? t('ui.sending', 'Sending...') : <><Send size={14} /> {t('ui.send', 'Send')}</>}
                     </button>
                 </div>
@@ -430,24 +430,24 @@ const NotificationDrawer = () => {
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Chat Messages */}
                 <div
-                    className="flex-1 overflow-y-auto px-3 py-4 bg-gray-50 dark:bg-gray-900/40"
+                    className="flex-1 overflow-y-auto px-3 py-4 bg-sf-canvas"
                     style={{
                         backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.04\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
                     }}
                 >
 
                     {activeThread.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center text-gray-400">
+                        <div className="flex flex-col items-center justify-center h-full text-center text-sf-muted">
                             <MessageCircle size={40} className="mb-3 opacity-30" />
                             <p className="text-sm">{t('ui.noMessages', 'No messages yet')}</p>
-                            <p className="text-xs mt-1">{t('ui.sayHello', 'Say hello! 👋')}</p>
+                            <p className="text-xs mt-1 text-sf-muted">{t('ui.sayHello', 'Say hello! 👋')}</p>
                         </div>
                     ) : (
                         grouped.map((item, idx) => {
                             if (item.type === 'date') {
                                 return (
                                     <div key={`date-${idx}`} className="flex items-center justify-center my-4">
-                                        <span className="px-3 py-1 bg-white/80 dark:bg-gray-700/80 text-[11px] text-gray-500 dark:text-gray-400 rounded-lg shadow-sm font-medium backdrop-blur-sm">
+                                        <span className="px-3 py-1 bg-sf-surface border border-sf-divider text-[11px] text-sf-muted rounded-lg shadow-sm font-medium backdrop-blur-sm">
                                             {item.label}
                                         </span>
                                     </div>
@@ -462,20 +462,20 @@ const NotificationDrawer = () => {
                                     <div className={clsx(
                                         "relative max-w-[80%] px-3 py-2 rounded-2xl shadow-sm",
                                         isMe
-                                            ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-md"
-                                            : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-md border border-gray-100 dark:border-gray-600"
+                                            ? "bg-sf-primary text-sf-on-primary rounded-br-md"
+                                            : "bg-sf-surface text-sf-text rounded-bl-md border border-sf-divider"
                                     )}>
                                         {/* Bubble tail */}
                                         <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.body}</p>
-                                        <div className={clsx("flex items-center justify-end gap-1 mt-1", isMe ? "text-blue-100" : "text-gray-400 dark:text-gray-500")}>
+                                        <div className={clsx("flex items-center justify-end gap-1 mt-1", isMe ? "text-emerald-100" : "text-sf-muted")}>
                                             <span className="text-[10px]">{formatChatTime(msg.createdAt)}</span>
                                             {isMe && (
                                                 msg.isRead ? (
-                                                    <CheckCheck size={12} className="text-cyan-300" />
+                                                    <CheckCheck size={12} className="text-emerald-200" />
                                                 ) : msg.isDelivered ? (
-                                                    <CheckCheck size={12} className="text-blue-200" />
+                                                    <CheckCheck size={12} className="text-emerald-300/80" />
                                                 ) : (
-                                                    <Check size={12} className="text-blue-200/60" />
+                                                    <Check size={12} className="text-emerald-300/60" />
                                                 )
                                             )}
                                         </div>
@@ -488,11 +488,11 @@ const NotificationDrawer = () => {
                 </div>
 
                 {/* Input Bar */}
-                <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 relative">
+                <div className="border-t border-sf-divider bg-sf-surface px-3 py-2.5 relative">
                     {showEmojiPicker && (
                         <div
                             ref={emojiPickerRef}
-                            className="absolute bottom-full left-3 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 z-50 grid grid-cols-6 gap-1 animate-in zoom-in-95"
+                            className="absolute bottom-full left-3 mb-2 bg-sf-surface border border-sf-divider rounded-2xl shadow-xl p-2 z-50 grid grid-cols-6 gap-1 animate-in zoom-in-95"
                         >
                             {['😊', '😂', '👍', '🙏', '🔥', '❤️', '✅', '🚀', '🤔', '👀', '✨', '👋', '🎉', '🤝', '🙌', '💯', '📍', '🧪'].map(emoji => (
                                 <button
@@ -500,9 +500,8 @@ const NotificationDrawer = () => {
                                     type="button"
                                     onClick={() => {
                                         setChatInput(prev => prev + emoji);
-                                        // Keeping it open for multiple selection
                                     }}
-                                    className="w-10 h-10 flex items-center justify-center text-xl hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="w-10 h-10 flex items-center justify-center text-xl hover:bg-sf-hover rounded-lg transition-colors"
                                 >
                                     {emoji}
                                 </button>
@@ -515,14 +514,14 @@ const NotificationDrawer = () => {
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                             className={clsx(
                                 "shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                                showEmojiPicker ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                showEmojiPicker ? "bg-sf-primary/15 text-sf-primary" : "text-sf-muted hover:bg-sf-hover hover:text-sf-text"
                             )}
                         >
                             <Smile size={20} />
                         </button>
                         <div className="flex-1 relative">
                             <textarea
-                                className="w-full rounded-2xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm px-4 py-2.5 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent max-h-24 transition-all"
+                                className="w-full rounded-2xl border border-sf-divider bg-sf-canvas text-sf-text placeholder:text-sf-muted text-sm px-4 py-2.5 resize-none focus:ring-2 focus:ring-sf-primary focus:border-transparent max-h-24 transition-all"
                                 value={chatInput}
                                 onChange={e => setChatInput(e.target.value)}
                                 onKeyDown={e => {
@@ -542,8 +541,8 @@ const NotificationDrawer = () => {
                             className={clsx(
                                 "shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm",
                                 chatInput.trim()
-                                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 scale-100"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-400 scale-95"
+                                    ? "bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover scale-100"
+                                    : "bg-sf-raised text-sf-muted scale-95"
                             )}
                         >
                             <Send size={18} className={chatInput.trim() ? '' : 'opacity-50'} />
@@ -560,25 +559,26 @@ const NotificationDrawer = () => {
             {/* Backdrop */}
             {isDrawerOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
                     onClick={closeDrawer}
                 />
             )}
 
             {/* Drawer */}
-            <div className={`fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out z-[70] flex flex-col border-l dark:border-gray-700
+            <div className={`fixed inset-y-0 right-0 w-full md:w-[420px] bg-sf-surface shadow-2xl transform transition-transform duration-300 ease-in-out z-[70] flex flex-col border-l border-sf-divider
                 ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
                 {/* Header */}
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800">
+                <div className="px-4 py-3.5 border-b border-sf-divider flex items-center justify-between bg-sf-raised">
                     <div className="flex items-center gap-2">
-                        <h2 className="font-bold text-lg text-white">
+                        <h2 className="font-bold text-base text-sf-text">
                             {view === 'THREAD' ? t('ui.chat', 'Chat') : t('ui.messagesAndAlerts', 'Messages & Alerts')}
                         </h2>
                     </div>
                     <button
                         onClick={closeDrawer}
-                        className="p-1.5 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                        className="p-1.5 text-sf-muted hover:text-sf-text rounded-full hover:bg-sf-hover transition-colors"
+                        aria-label="Close drawer"
                     >
                         <X size={20} />
                     </button>
@@ -595,13 +595,13 @@ const NotificationDrawer = () => {
 
                 {/* Footer — only show on main views */}
                 {(view === 'NOTIFICATIONS' || view === 'CHATS') && (
-                    <div className="p-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+                    <div className="p-3 border-t border-sf-divider bg-sf-surface">
                         <button
                             onClick={() => {
                                 closeDrawer();
                                 navigate('/profile');
                             }}
-                            className="w-full py-2 flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
+                            className="w-full py-2 flex items-center justify-center gap-2 text-sf-primary hover:underline font-semibold transition-colors text-sm"
                         >
                             <Mail size={14} /> {t('ui.openMessagingCenter', 'Open Full Messaging Center')}
                         </button>

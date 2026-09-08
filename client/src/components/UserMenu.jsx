@@ -14,22 +14,22 @@ export const UserMenu = () => {
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sf-hover text-sf-text transition-colors"
                 title="User Menu"
             >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow-sm">
                     {user?.name?.charAt(0) || 'U'}
                 </div>
                 <div className="hidden md:block text-left">
-                    <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <div className="text-sm font-semibold text-sf-text">
                         {user?.name || 'User'}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-sf-muted">
                         {user?.role?.replace(/_/g, ' ')}
                     </div>
                 </div>
                 <svg
-                    className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-sf-muted transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -47,21 +47,21 @@ export const UserMenu = () => {
                     />
 
                     {/* Dropdown */}
-                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-50 border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-64 bg-sf-surface rounded-xl shadow-xl z-50 border border-sf-divider overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                         {/* User Info */}
-                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                        <div className="p-4 border-b border-sf-divider bg-sf-raised/40">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-md">
                                     {user?.name?.charAt(0) || 'U'}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-gray-900 dark:text-white truncate">
+                                    <div className="font-semibold text-sf-text truncate">
                                         {user?.name || 'User'}
                                     </div>
-                                    <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                    <div className="text-xs text-sf-muted truncate">
                                         {user?.email || user?.username}
                                     </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                    <div className="text-xs text-sf-muted mt-1">
                                         {user?.role?.replace(/_/g, ' ')}
                                     </div>
                                 </div>
@@ -69,13 +69,13 @@ export const UserMenu = () => {
                         </div>
 
                         {/* Timezone Info */}
-                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-                            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                                <Clock size={14} />
+                        <div className="px-4 py-3 border-b border-sf-divider bg-sf-raised/20">
+                            <div className="flex items-center gap-2 text-xs text-sf-text">
+                                <Clock size={14} className="text-sf-muted" />
                                 <span className="font-medium">{tzInfo.abbreviation}</span>
-                                <span className="text-gray-400 dark:text-gray-500">{tzInfo.offset}</span>
+                                <span className="text-sf-muted">{tzInfo.offset}</span>
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            <div className="text-xs text-sf-muted mt-1">
                                 {tzInfo.timezone}
                             </div>
                         </div>
@@ -88,9 +88,9 @@ export const UserMenu = () => {
                                     setIsOpen(false);
                                     navigate('/profile');
                                 }}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-sf-text hover:bg-sf-hover transition-colors"
                             >
-                                <User size={16} />
+                                <User size={16} className="text-sf-muted" />
                                 <span>Profile Settings</span>
                             </button>
 
@@ -100,7 +100,7 @@ export const UserMenu = () => {
                                     setIsOpen(false);
                                     logout();
                                 }}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
                             >
                                 <LogOut size={16} />
                                 <span className="font-medium">Sign Out</span>

@@ -58,9 +58,9 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
-        <div className="flex flex-col items-center gap-3 text-emerald-600 dark:text-emerald-400">
+        <div className="flex flex-col items-center gap-3 text-sf-primary">
             <Loader2 className="w-8 h-8 animate-spin" />
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading View...</span>
+            <span className="text-xs font-bold text-sf-muted uppercase tracking-widest">Loading View...</span>
         </div>
     </div>
 );
@@ -165,21 +165,21 @@ const Layout = ({ children }) => {
     const marginClass = sidebarCollapsed ? 'md:ml-16' : 'md:ml-64';
 
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden text-gray-900 dark:text-gray-100 font-sans">
+        <div className="flex h-screen bg-sf-canvas overflow-hidden text-sf-text font-sans">
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                ${sidebarWidth} bg-white dark:bg-gray-800 flex flex-col fixed h-full z-50 transition-all duration-300 border-r border-gray-200 dark:border-gray-700 shadow-lg font-sans
+                ${sidebarWidth} bg-sf-surface flex flex-col fixed h-full z-50 transition-all duration-300 border-r border-sf-divider shadow-sm font-sans
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
-                <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="h-16 flex items-center justify-between px-4 border-b border-sf-divider">
                     {sidebarCollapsed ? (
                         <img 
                             src="/assets/img/soilfer-logo.png" 
@@ -194,11 +194,11 @@ const Layout = ({ children }) => {
                             onError={(e) => { e.target.onerror = null; e.target.src = defaultSiteLogo; }} 
                         />
                     )}
-                    <button className="md:hidden p-2 text-gray-500" onClick={() => setIsSidebarOpen(false)}>
+                    <button className="md:hidden p-2 text-sf-muted hover:text-sf-text" onClick={() => setIsSidebarOpen(false)}>
                         <X size={20} />
                     </button>
                 </div>
-                <nav className={`flex-1 ${sidebarCollapsed ? 'p-2' : 'p-4'} space-y-1 overflow-y-auto sidebar-scroll`}>
+                <nav className={`flex-1 ${sidebarCollapsed ? 'p-2' : 'p-3'} space-y-1 overflow-y-auto sidebar-scroll`}>
                     {navItems.map((item) => {
                         const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path);
                         return (
@@ -206,23 +206,27 @@ const Layout = ({ children }) => {
                                 key={item.path}
                                 to={item.path}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-all ${isActive ? 'bg-emerald-700 dark:bg-emerald-800 text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                                className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5'} py-2.5 rounded-lg text-sm transition-all ${
+                                    isActive
+                                        ? 'bg-sf-primary text-sf-on-primary font-semibold shadow-sm'
+                                        : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
+                                }`}
                                 title={sidebarCollapsed ? item.label : undefined}
                             >
-                                <item.icon size={20} />
-                                {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
+                                <item.icon size={19} />
+                                {!sidebarCollapsed && <span className="font-medium truncate">{item.label}</span>}
                             </Link>
                         );
                     })}
                 </nav>
                 {/* Collapse toggle (desktop only) */}
-                <div className="hidden md:block border-t border-gray-200 dark:border-gray-700 p-2">
+                <div className="hidden md:block border-t border-sf-divider p-2">
                     <button
                         onClick={toggleCollapse}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-sm"
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-all text-xs font-semibold"
                         title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                     >
-                        {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <><PanelLeftClose size={18} /><span className="font-medium">Collapse</span></>}
+                        {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <><PanelLeftClose size={18} /><span>Collapse</span></>}
                     </button>
                 </div>
             </aside>
@@ -230,7 +234,7 @@ const Layout = ({ children }) => {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
-                <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 md:ml-0 pt-16 mt-0">
+                <main className="flex-1 overflow-auto bg-sf-canvas md:ml-0 pt-16 mt-0">
                     <div className={`p-4 md:p-8 ${marginClass} transition-all duration-300 min-h-[calc(100vh-8rem)]`}>
                         {children}
                     </div>

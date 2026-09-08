@@ -46,13 +46,13 @@ export const Header = ({ onMenuClick }) => {
             : t('header.notifications', 'Notifications');
 
     return (
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 right-0 left-0 z-30 transition-colors duration-300">
+        <header className="h-16 bg-sf-surface border-b border-sf-divider fixed top-0 right-0 left-0 z-30 transition-colors duration-200">
             <div className="h-full px-4 md:px-6 flex items-center justify-between">
                 {/* Left: Mobile Toggle & Logo */}
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onMenuClick}
-                        className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        className="md:hidden p-2 text-sf-muted hover:text-sf-text hover:bg-sf-hover rounded-lg transition-colors"
                         aria-label="Toggle navigation menu"
                     >
                         <Menu size={20} />
@@ -73,12 +73,12 @@ export const Header = ({ onMenuClick }) => {
                     <button
                         onClick={handleBellClick}
                         className={clsx(
-                            "relative p-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800",
+                            "relative p-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-sf-surface",
                             hasUnreadMessages
-                                ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:ring-amber-500 shadow-sm shadow-amber-200/50 dark:shadow-amber-900/30"
+                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/50 hover:bg-amber-500/20 focus:ring-amber-500 shadow-sm"
                                 : effectiveUnread > 0
-                                    ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 ring-2 ring-blue-400/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 focus:ring-blue-500"
-                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-gray-400"
+                                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-2 ring-blue-400/40 hover:bg-blue-500/20 focus:ring-blue-500"
+                                    : "text-sf-muted hover:text-sf-text hover:bg-sf-hover focus:ring-sf-divider"
                         )}
                         title={bellTitle}
                         aria-label={bellTitle}
@@ -92,7 +92,7 @@ export const Header = ({ onMenuClick }) => {
                                     ? "text-amber-600 dark:text-amber-400"
                                     : effectiveUnread > 0
                                         ? "text-blue-600 dark:text-blue-400"
-                                        : "text-gray-500 dark:text-gray-400"
+                                        : "text-sf-muted"
                             )} 
                         />
                         {effectiveUnread > 0 && (
@@ -107,7 +107,7 @@ export const Header = ({ onMenuClick }) => {
                                 {/* High-contrast badge pill with count */}
                                 <span 
                                     className={clsx(
-                                        "relative inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-black text-white shadow-md ring-2 ring-white dark:ring-gray-800",
+                                        "relative inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-black text-white shadow-md ring-2 ring-sf-surface",
                                         hasUnreadMessages
                                             ? "bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 animate-badge-pulse"
                                             : "bg-gradient-to-r from-blue-600 to-indigo-600"
@@ -118,7 +118,7 @@ export const Header = ({ onMenuClick }) => {
                             </span>
                         )}
                     </button>
-                    <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                    <div className="h-6 w-px bg-sf-divider mx-1"></div>
                     <LanguageSwitcher />
                     <ThemeToggle />
                     <UserMenu />

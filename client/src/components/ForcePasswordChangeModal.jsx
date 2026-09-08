@@ -57,8 +57,8 @@ const ForcePasswordChangeModal = () => {
     };
 
     return (
-        <div className="fixed inset-0 bg-stone-900/95 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300 border border-emerald-100 dark:border-emerald-900/30">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
+            <div className="bg-sf-surface rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300 border border-sf-divider">
 
                 {/* Header */}
                 <div className="bg-gradient-to-br from-emerald-800 to-green-950 p-8 text-center relative overflow-hidden">
@@ -74,44 +74,44 @@ const ForcePasswordChangeModal = () => {
 
                 <div className="p-8">
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-xl flex items-start gap-3 shadow-sm">
-                            <AlertCircle className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" size={18} />
-                            <p className="text-sm text-red-700 dark:text-red-300 font-bold">{error}</p>
+                        <div className="mb-6 p-4 bg-rose-500/10 border-l-4 border-rose-500 rounded-r-xl flex items-start gap-3 shadow-sm">
+                            <AlertCircle className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" size={18} />
+                            <p className="text-sm text-rose-700 dark:text-rose-300 font-bold">{error}</p>
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">Current Temporary Password</label>
+                            <label className="text-xs font-black uppercase tracking-wider text-sf-muted ml-1">Current Temporary Password</label>
                             <input
                                 type="password"
                                 value={currentPassword}
                                 onChange={e => setCurrentPassword(e.target.value)}
-                                className="w-full p-4 bg-stone-50 dark:bg-gray-900 border-2 border-transparent focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl outline-none transition-all font-semibold"
+                                className="w-full p-4 bg-sf-canvas border-2 border-sf-divider focus:border-sf-primary focus:ring-4 focus:ring-sf-primary/10 rounded-2xl outline-none transition-all font-semibold text-sf-text placeholder:text-sf-muted"
                                 placeholder="Enter temp password"
                                 required
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">New Private Password</label>
+                            <label className="text-xs font-black uppercase tracking-wider text-sf-muted ml-1">New Private Password</label>
                             <input
                                 type="password"
                                 value={newPassword}
                                 onChange={e => setNewPassword(e.target.value)}
-                                className="w-full p-4 bg-stone-50 dark:bg-gray-900 border-2 border-transparent focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl outline-none transition-all font-semibold"
+                                className="w-full p-4 bg-sf-canvas border-2 border-sf-divider focus:border-sf-primary focus:ring-4 focus:ring-sf-primary/10 rounded-2xl outline-none transition-all font-semibold text-sf-text placeholder:text-sf-muted"
                                 placeholder="Min. 8 characters"
                                 required
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">Confirm New Password</label>
+                            <label className="text-xs font-black uppercase tracking-wider text-sf-muted ml-1">Confirm New Password</label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={e => setConfirmPassword(e.target.value)}
-                                className="w-full p-4 bg-stone-50 dark:bg-gray-900 border-2 border-transparent focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl outline-none transition-all font-semibold"
+                                className="w-full p-4 bg-sf-canvas border-2 border-sf-divider focus:border-sf-primary focus:ring-4 focus:ring-sf-primary/10 rounded-2xl outline-none transition-all font-semibold text-sf-text placeholder:text-sf-muted"
                                 placeholder="Repeat new password"
                                 required
                             />
@@ -120,7 +120,7 @@ const ForcePasswordChangeModal = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-4 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-700/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0
+                            className={`w-full py-4 px-4 bg-sf-primary hover:bg-sf-primary-hover text-sf-on-primary rounded-2xl font-black text-lg shadow-xl shadow-sf-primary/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0
                                 ${loading ? 'opacity-75 cursor-not-allowed' : ''}
                             `}
                         >
@@ -130,7 +130,7 @@ const ForcePasswordChangeModal = () => {
 
                     <button
                         onClick={logout}
-                        className="w-full mt-6 py-2 text-sm font-bold text-gray-400 hover:text-emerald-600 transition-colors"
+                        className="w-full mt-6 py-2 text-sm font-bold text-sf-muted hover:text-sf-text transition-colors"
                     >
                         Cancel & Sign Out
                     </button>
