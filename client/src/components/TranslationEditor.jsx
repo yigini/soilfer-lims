@@ -590,7 +590,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                             </div>
 
                             {/* Terms Table */}
-                            {renderTermsTable(paginatedItems, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t)}
+                            {renderTermsTable(paginatedItems, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t, 'all', null, null)}
 
                             {/* Pagination */}
                             {renderPagination(currentPage, totalPages, filteredItems.length, setCurrentPage, t)}
@@ -624,7 +624,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                                 setCurrentPage(1);
                                                 setSelectedModule('ALL');
                                                 setGroupSearch('');
-                                                setStatusFilter('needs_attention');
+                                                setStatusFilter(st.needsAttention > 0 ? 'needs_attention' : 'all');
                                             }}
                                             className="group relative bg-sf-surface border border-sf-divider rounded-2xl p-5 hover:border-sf-primary hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
                                         >
@@ -682,8 +682,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                             </div>
                         </div>
 
-                    ) : (
-
+                    ) : (() => {
+                        const activeGroupStats = groupStats[activeGroupId] || { total: 0, missing: 0, needsReview: 0, sourceChanged: 0, published: 0, needsAttention: 0, pct: 0 };
+                        return (
                         /* VIEW 3: SINGLE GROUP EDIT VIEW */
                         <div className="space-y-4 max-w-7xl mx-auto">
                             {/* Group Header & Breadcrumb */}
@@ -704,7 +705,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                         <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
                                             <span>{activeGroupDef?.name}</span>
                                             <span className="text-xs font-normal text-sf-muted">
-                                                ({filteredItems.length} {t('terminology.matchingTerms', 'matching')})
+                                                ({filteredItems.length} of {activeGroupStats.total} {t('terminology.termsLabel', 'terms')})
                                             </span>
                                         </h3>
                                         <p className="text-xs text-sf-muted mt-0.5">
@@ -759,11 +760,11 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                 {/* Status Filter Tabs */}
                                 <div className="flex items-center gap-1.5">
                                     {[
-                                        { id: 'needs_attention', label: t('terminology.filterNeedsAttention', 'Needs Attention') },
-                                        { id: 'missing', label: t('terminology.filterMissing', 'Missing Only') },
-                                        { id: 'needs_review', label: t('terminology.filterInReview', 'In Review') },
-                                        { id: 'published', label: t('terminology.filterPublished', 'Published') },
-                                        { id: 'all', label: t('terminology.filterAll', 'All Items') }
+                                        { id: 'needs_attention', label: t('terminology.filterNeedsAttention', 'Needs Attention'), count: activeGroupStats.needsAttention },
+                                        { id: 'missing', label: t('terminology.filterMissing', 'Missing Only'), count: activeGroupStats.missing },
+                                        { id: 'needs_review', label: t('terminology.filterInReview', 'In Review'), count: activeGroupStats.needsReview },
+                                        { id: 'published', label: t('terminology.filterPublished', 'Published'), count: activeGroupStats.published },
+                                        { id: 'all', label: t('terminology.filterAll', 'All Items'), count: activeGroupStats.total }
                                     ].map(tab => (
                                         <button
                                             key={tab.id}
@@ -771,13 +772,18 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                                 setStatusFilter(tab.id);
                                                 setCurrentPage(1);
                                             }}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                                                 statusFilter === tab.id
                                                     ? 'bg-sf-primary text-white shadow-xs'
                                                     : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
                                             }`}
                                         >
-                                            {tab.label}
+                                            <span>{tab.label}</span>
+                                            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                                                statusFilter === tab.id ? 'bg-white/20 text-white' : 'bg-sf-raised text-sf-muted'
+                                            }`}>
+                                                {tab.count !== undefined ? tab.count : 0}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
@@ -827,12 +833,13 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                             </div>
 
                             {/* Terms Table */}
-                            {renderTermsTable(paginatedItems, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t)}
+                            {renderTermsTable(paginatedItems, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t, statusFilter, setStatusFilter, activeGroupStats)}
 
                             {/* Pagination */}
                             {renderPagination(currentPage, totalPages, filteredItems.length, setCurrentPage, t)}
                         </div>
-                    )}
+                        );
+                    })()}
                 </div>
 
                 {/* Import Preview Modal */}
@@ -901,17 +908,33 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
 };
 
 // Helper: Render Terms Table
-function renderTermsTable(items, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t) {
+function renderTermsTable(items, edits, reviewStatuses, handleChange, toggleReviewStatus, selectedLanguage, t, statusFilter, setStatusFilter, activeGroupStats) {
     if (items.length === 0) {
+        const isAllPublished = activeGroupStats && activeGroupStats.needsAttention === 0 && activeGroupStats.total > 0;
         return (
             <div className="bg-sf-surface border border-sf-divider rounded-2xl p-12 text-center space-y-3">
                 <Search size={36} className="mx-auto text-sf-muted opacity-40" />
                 <h4 className="text-sm font-bold text-sf-text">
-                    {t('terminology.noMatchingTerms', 'No matching terms found')}
+                    {isAllPublished && statusFilter === 'needs_attention'
+                        ? t('terminology.allPublishedHeading', 'All {count} terms in this group are translated and published!', { count: activeGroupStats.total })
+                        : statusFilter === 'missing'
+                            ? t('terminology.noMissing', 'No missing translations in this group.')
+                            : t('terminology.noMatchingTerms', 'No matching terms found')}
                 </h4>
                 <p className="text-xs text-sf-muted max-w-sm mx-auto">
-                    {t('terminology.noMatchingTermsDesc', 'Try switching your filter tabs or adjusting your search keywords.')}
+                    {isAllPublished && statusFilter === 'needs_attention'
+                        ? t('terminology.allPublishedDesc', 'There are no items currently requiring attention. Switch to "All Items" or "Published" to view or update translations.')
+                        : t('terminology.noMatchingTermsDesc', 'Try switching your filter tabs or adjusting your search keywords.')}
                 </p>
+                {setStatusFilter && (statusFilter === 'needs_attention' || statusFilter === 'missing') && (
+                    <button
+                        type="button"
+                        onClick={() => setStatusFilter('all')}
+                        className="btn-secondary text-xs px-4 py-2 mt-3 inline-flex items-center gap-2 font-semibold"
+                    >
+                        <span>{t('terminology.showAllItems', 'View All {count} Items', { count: activeGroupStats?.total || '' })}</span>
+                    </button>
+                )}
             </div>
         );
     }

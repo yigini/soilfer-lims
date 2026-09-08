@@ -776,7 +776,11 @@
     "noMatchingTermsDesc": "Essayez de changer les onglets de filtre ou d'ajuster vos mots-clés de recherche.",
     "englishReference": "Référence en anglais",
     "showingRange": "Affichage de {start} à {end} sur {total} éléments",
-    "adminOnly": "Super Admin uniquement"
+    "adminOnly": "Super Admin uniquement",
+    "allPublishedHeading": "Tous les {count} termes de ce groupe sont traduits et publiés !",
+    "allPublishedDesc": "Aucun élément ne nécessite d'attention pour le moment. Passez à « Tous les éléments » ou « Publiés » pour consulter ou modifier les traductions.",
+    "noMissing": "Aucune traduction manquante dans ce groupe.",
+    "showAllItems": "Voir tous les {count} éléments"
   },
   "catalogue": {
     "texture": {

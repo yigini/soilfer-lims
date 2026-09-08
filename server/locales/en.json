@@ -776,7 +776,11 @@
     "noMatchingTermsDesc": "Try switching your filter tabs or adjusting your search keywords.",
     "englishReference": "English Reference",
     "showingRange": "Showing {start} to {end} of {total} items",
-    "adminOnly": "Super Admin Only"
+    "adminOnly": "Super Admin Only",
+    "allPublishedHeading": "All {count} terms in this group are translated and published!",
+    "allPublishedDesc": "There are no items currently requiring attention. Switch to \"All Items\" or \"Published\" to view or update translations.",
+    "noMissing": "No missing translations in this group.",
+    "showAllItems": "View All {count} Items"
   },
   "catalogue": {
     "texture": {
