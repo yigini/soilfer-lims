@@ -55,8 +55,8 @@ exports.getAnalyticalResults = async (req, res) => {
             where.receptionDate = { lte: new Date(endDate) };
         }
 
-        // Status Filter - Exclude Expected, Received (unprocessed), and Drafts
-        where.status = { notIn: ['EXPECTED', 'RECEIVED', 'DRAFT'] };
+        // Status Filter - Exclude Expected, Received (unprocessed), Drafts, and Rejected samples
+        where.status = { notIn: ['EXPECTED', 'RECEIVED', 'DRAFT', 'RECEIVED_REJECTED'] };
 
         // Fetch Samples + Relations
         const samples = await prisma.sample.findMany({
@@ -95,7 +95,7 @@ exports.getAnalyticalResults = async (req, res) => {
         const flattenedData = samples.map(s => {
             const resultObj = {
                 id: s.id,
-                labId: s.labId || 'Pending...',
+                labId: s.labId || s.originalId || 'N/A',
                 originalId: s.originalId,
                 project: s.projectCode,
                 country: s.countryName,

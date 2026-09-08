@@ -104,9 +104,9 @@ const DataResults = () => {
     // Column Visibility
     const [visibleColumns, setVisibleColumns] = useState({
         labId: true,
-        originalId: false,
-        project: false,
-        status: false
+        originalId: true,
+        project: true,
+        status: true
         // Dynamic results default to true (handled in render)
     });
     const [showColumnMenu, setShowColumnMenu] = useState(false);
@@ -384,21 +384,31 @@ const DataResults = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
-                                {paginatedData.map((row) => (
-                                    <tr key={row.id} className="hover:bg-sf-raised/50 transition-colors">
-                                        {columns.filter(c => !['country', 'collectionDate', 'receptionDate'].includes(c.key)).filter(c => isColVisible(c.key, c.isResult)).map((col) => (
-                                            <td key={`${row.id}-${col.key}`} className={`px-4 py-2 text-sf-muted whitespace-nowrap ${col.frozen ? 'sticky left-0 z-10 bg-sf-surface font-medium border-r border-sf-divider' : ''} ${col.isResult ? 'text-right' : ''}`} style={col.frozen ? { left: 0 } : {}}>
-                                                {col.isResult ? renderCellContent(row[col.key], col, row) : (
-                                                    (col.key === 'labId' || col.key === 'originalId') ? (
-                                                        <Link to={`/samples/${row.id}`} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline font-medium">
-                                                            {row[col.key]}
-                                                        </Link>
-                                                    ) : (row[col.key] || '-')
-                                                )}
-                                            </td>
-                                        ))}
+                                {paginatedData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={columns.filter(c => !['country', 'collectionDate', 'receptionDate'].includes(c.key)).filter(c => isColVisible(c.key, c.isResult)).length || 4} className="text-center py-16 text-sf-muted">
+                                            <FlaskConical size={36} className="mx-auto mb-2 opacity-40 text-emerald-600" />
+                                            <p className="font-semibold text-sf-text text-sm">No Analytical Results Found</p>
+                                            <p className="text-xs text-sf-muted mt-1">Samples will appear here once intake is completed and testing work items begin.</p>
+                                        </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    paginatedData.map((row) => (
+                                        <tr key={row.id} className="hover:bg-sf-raised/50 transition-colors">
+                                            {columns.filter(c => !['country', 'collectionDate', 'receptionDate'].includes(c.key)).filter(c => isColVisible(c.key, c.isResult)).map((col) => (
+                                                <td key={`${row.id}-${col.key}`} className={`px-4 py-2 text-sf-muted whitespace-nowrap ${col.frozen ? 'sticky left-0 z-10 bg-sf-surface font-medium border-r border-sf-divider' : ''} ${col.isResult ? 'text-right' : ''}`} style={col.frozen ? { left: 0 } : {}}>
+                                                    {col.isResult ? renderCellContent(row[col.key], col, row) : (
+                                                        (col.key === 'labId' || col.key === 'originalId') ? (
+                                                            <Link to={`/samples/${row.id}`} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline font-medium">
+                                                                {row[col.key]}
+                                                            </Link>
+                                                        ) : (row[col.key] || '-')
+                                                    )}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     )}
