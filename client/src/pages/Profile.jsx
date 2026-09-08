@@ -1,19 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
-import { User, Lock, Bell, Mail, Shield, MapPin, Building2, Calendar } from 'lucide-react';
+import { User, Lock, Bell, Mail, Shield, MapPin, Building2, Calendar, Sun } from 'lucide-react';
 import axios from 'axios';
 import MessagingCenter from '../components/messaging/MessagingCenter';
 
 const Profile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUserPreferences } = useAuth();
+    const { savedAppearance, setSavedAppearance } = useTheme();
+    const { t } = useLanguage();
     const { showDialog } = useDialog();
     const [searchParams] = useSearchParams();
 
     // Initialize tab from URL or default to 'overview'
     const initialTab = searchParams.get('tab') || 'overview';
     const [activeTab, setActiveTab] = useState(initialTab);
+
+    // Appearance State
+    const [selectedPref, setSelectedPref] = useState(user?.themePreference || savedAppearance || 'light');
+    const [savingPref, setSavingPref] = useState(false);
+    const [appearanceStatus, setAppearanceStatus] = useState({ type: null, text: '' });
+
+    useEffect(() => {
+        if (user?.themePreference) {
+            setSelectedPref(user.themePreference);
+        } else if (savedAppearance) {
+            setSelectedPref(savedAppearance);
+        }
+    }, [user?.themePreference, savedAppearance]);
+
+    const handleSaveAppearance = async () => {
+        setSavingPref(true);
+        setAppearanceStatus({ type: null, text: '' });
+        try {
+            const res = await axios.patch('/api/auth/preferences', {
+                themePreference: selectedPref
+            });
+            const newPref = res.data?.data?.themePreference || selectedPref;
+            if (updateUserPreferences) {
+                updateUserPreferences(newPref);
+            }
+            setSavedAppearance(newPref);
+            setAppearanceStatus({
+                type: 'success',
+                text: t('appearance.savedSuccess', 'Appearance saved to your profile.')
+            });
+        } catch (err) {
+            console.error('Failed to save appearance preference:', err);
+            setAppearanceStatus({
+                type: 'error',
+                text: t('appearance.savedError', 'Could not save. Your saved appearance is unchanged.')
+            });
+        } finally {
+            setSavingPref(false);
+        }
+    };
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -111,11 +155,20 @@ const Profile = () => {
                 <button
                     onClick={() => setActiveTab('messaging')}
                     className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors ${activeTab === 'messaging'
-                        ? 'border-blue-600 text-blue-600 font-medium'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                        ? 'border-sf-primary text-sf-primary font-medium'
+                        : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                 >
                     <Mail size={18} /> Messaging Center
+                </button>
+                <button
+                    onClick={() => setActiveTab('appearance')}
+                    className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors ${activeTab === 'appearance'
+                        ? 'border-sf-primary text-sf-primary font-medium'
+                        : 'border-transparent text-sf-muted hover:text-sf-text'
+                        }`}
+                >
+                    <Sun size={18} /> {t('appearance.title', 'Appearance')}
                 </button>
             </div>
 
@@ -233,6 +286,153 @@ const Profile = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    )}
+
+                    {/* APPEARANCE TAB */}
+                    {activeTab === 'appearance' && (
+                        <div className="space-y-6 max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div>
+                                <h3 className="text-lg font-bold text-sf-text mb-1">
+                                    {t('appearance.profileHeading', 'Account appearance preference')}
+                                </h3>
+                                <p className="text-sm text-sf-muted">
+                                    {t('appearance.profileDescription', 'Use this appearance whenever you sign in, on any device. You can still switch for one session from the header.')}
+                                </p>
+                            </div>
+
+                            {appearanceStatus.text && (
+                                <div
+                                    role="status"
+                                    className={`p-3.5 rounded-xl text-sm font-medium border ${
+                                        appearanceStatus.type === 'success'
+                                            ? 'bg-sf-success-bg text-sf-success border-sf-success/30'
+                                            : 'bg-sf-danger-bg text-sf-danger border-sf-danger/30'
+                                    }`}
+                                >
+                                    {appearanceStatus.text}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Light Option Card */}
+                                <label
+                                    className={`relative flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                                        selectedPref === 'light'
+                                            ? 'border-sf-primary bg-sf-selected/40 shadow-sm'
+                                            : 'border-sf-divider bg-sf-surface hover:border-sf-control'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="appearance-preference"
+                                                value="light"
+                                                checked={selectedPref === 'light'}
+                                                onChange={() => {
+                                                    setSelectedPref('light');
+                                                    setAppearanceStatus({ type: null, text: '' });
+                                                }}
+                                                className="accent-sf-primary w-4 h-4"
+                                            />
+                                            <span className="font-semibold text-sf-text text-sm">
+                                                {t('appearance.light', 'Light')}
+                                            </span>
+                                        </div>
+                                        {savedAppearance === 'light' && (
+                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sf-hover text-sf-muted">
+                                                {t('appearance.defaultLabel', 'Default')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Miniature Preview Light */}
+                                    <div className="h-28 rounded-lg border border-[#D6DFDA] overflow-hidden grid grid-cols-4 bg-[#F4F6F5] select-none pointer-events-none">
+                                        <div className="bg-[#FFFFFF] border-r border-[#D6DFDA] p-2 space-y-1.5">
+                                            <div className="h-2 w-full bg-[#D6DFDA] rounded-sm" />
+                                            <div className="h-2 w-3/4 bg-[#EAF0EC] rounded-sm" />
+                                            <div className="h-2 w-2/3 bg-[#EAF0EC] rounded-sm" />
+                                        </div>
+                                        <div className="col-span-3 p-2.5 space-y-2">
+                                            <div className="h-2.5 w-1/2 bg-[#276B51] rounded-sm" />
+                                            <div className="h-12 bg-[#FFFFFF] border border-[#D6DFDA] rounded p-1.5 space-y-1">
+                                                <div className="h-1.5 w-full bg-[#EAF0EC] rounded-sm" />
+                                                <div className="h-1.5 w-4/5 bg-[#EAF0EC] rounded-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {/* Dark Option Card */}
+                                <label
+                                    className={`relative flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                                        selectedPref === 'dark'
+                                            ? 'border-sf-primary bg-sf-selected/40 shadow-sm'
+                                            : 'border-sf-divider bg-sf-surface hover:border-sf-control'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="appearance-preference"
+                                                value="dark"
+                                                checked={selectedPref === 'dark'}
+                                                onChange={() => {
+                                                    setSelectedPref('dark');
+                                                    setAppearanceStatus({ type: null, text: '' });
+                                                }}
+                                                className="accent-sf-primary w-4 h-4"
+                                            />
+                                            <span className="font-semibold text-sf-text text-sm">
+                                                {t('appearance.dark', 'Dark · Graphite')}
+                                            </span>
+                                        </div>
+                                        {savedAppearance === 'dark' && (
+                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sf-hover text-sf-muted">
+                                                {t('appearance.defaultLabel', 'Default')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Miniature Preview Dark */}
+                                    <div className="h-28 rounded-lg border border-[#515B61] overflow-hidden grid grid-cols-4 bg-[#25282B] select-none pointer-events-none">
+                                        <div className="bg-[#2E3236] border-r border-[#515B61] p-2 space-y-1.5">
+                                            <div className="h-2 w-full bg-[#515B61] rounded-sm" />
+                                            <div className="h-2 w-3/4 bg-[#3C4247] rounded-sm" />
+                                            <div className="h-2 w-2/3 bg-[#3C4247] rounded-sm" />
+                                        </div>
+                                        <div className="col-span-3 p-2.5 space-y-2">
+                                            <div className="h-2.5 w-1/2 bg-[#8ED3B8] rounded-sm" />
+                                            <div className="h-12 bg-[#393E43] border border-[#515B61] rounded p-1.5 space-y-1">
+                                                <div className="h-1.5 w-full bg-[#515B61] rounded-sm" />
+                                                <div className="h-1.5 w-4/5 bg-[#515B61] rounded-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="pt-2 flex items-center gap-4">
+                                <button
+                                    type="button"
+                                    onClick={handleSaveAppearance}
+                                    disabled={savingPref}
+                                    className="btn-primary flex items-center gap-2"
+                                >
+                                    {savingPref ? (
+                                        t('appearance.saving', 'Saving appearance...')
+                                    ) : (
+                                        t('appearance.saveButton', 'Save appearance')
+                                    )}
+                                </button>
+                                {selectedPref !== savedAppearance && (
+                                    <span className="text-xs text-sf-muted">
+                                        Unsaved selection: {selectedPref === 'dark' ? 'Dark' : 'Light'}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

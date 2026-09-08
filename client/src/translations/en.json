@@ -599,5 +599,22 @@
         "pillar3Desc": "Digital decision support tools enabling agricultural extension agents and smallholders to optimize nutrient use efficiency.",
         "pillar4Title": "Policy, Governance & Soil Health",
         "pillar4Desc": "National soil health policy formulation and integration into climate change commitments."
+    },
+    "appearance": {
+        "title": "Appearance",
+        "light": "Light",
+        "dark": "Dark · Graphite",
+        "defaultLabel": "Default",
+        "sessionNotice": "Changes apply to this session.",
+        "useSavedDefault": "Use my saved default",
+        "saveDefaultInProfile": "Save a default in Profile →",
+        "signInToSave": "Sign in to save a default.",
+        "profileHeading": "Account appearance preference",
+        "profileDescription": "Use this appearance whenever you sign in, on any device. You can still switch for one session from the header.",
+        "saveButton": "Save appearance",
+        "saving": "Saving appearance...",
+        "savedSuccess": "Appearance saved to your profile.",
+        "savedError": "Could not save. Your saved appearance is unchanged.",
+        "activeSessionNotice": "Session override active for this tab"
     }
 }

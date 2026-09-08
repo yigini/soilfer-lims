@@ -599,5 +599,22 @@
         "pillar3Desc": "Ferramentas digitais de apoio à decisão capacitando técnicos de extensão e pequenos agricultores a otimizar a eficiência no uso de nutrientes.",
         "pillar4Title": "Políticas, Governação e Saúde do Solo",
         "pillar4Desc": "Formulação de políticas nacionais sobre a saúde do solo e integração nos compromissos climáticos."
+    },
+    "appearance": {
+        "title": "Aparência",
+        "light": "Claro",
+        "dark": "Escuro · Grafite",
+        "defaultLabel": "Padrão",
+        "sessionNotice": "As alterações aplicam-se a esta sessão.",
+        "useSavedDefault": "Usar meu padrão salvo",
+        "saveDefaultInProfile": "Salvar um padrão no Perfil →",
+        "signInToSave": "Inicie sessão para salvar um padrão.",
+        "profileHeading": "Preferência de aparência da conta",
+        "profileDescription": "Use esta aparência sempre que iniciar sessão, em qualquer dispositivo. Você ainda pode alternar para uma sessão no cabeçalho.",
+        "saveButton": "Salvar aparência",
+        "saving": "Salvando aparência...",
+        "savedSuccess": "Aparência salva no seu perfil.",
+        "savedError": "Não foi possível salvar. Sua aparência salva permanece inalterada.",
+        "activeSessionNotice": "Substituição de sessão ativa para este separador"
     }
 }

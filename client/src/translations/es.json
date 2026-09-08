@@ -599,5 +599,22 @@
         "pillar3Desc": "Herramientas digitales de apoyo a la toma de decisiones para agentes de extensión y pequeños agricultores con el fin de optimizar la eficiencia en el uso de nutrientes.",
         "pillar4Title": "Políticas, Gobernanza y Salud del Suelo",
         "pillar4Desc": "Formulación de políticas nacionales sobre la salud del suelo e integración en los compromisos sobre el cambio climático."
+    },
+    "appearance": {
+        "title": "Apariencia",
+        "light": "Claro",
+        "dark": "Oscuro · Grafito",
+        "defaultLabel": "Predeterminado",
+        "sessionNotice": "Los cambios se aplican a esta sesión.",
+        "useSavedDefault": "Usar mi valor guardado",
+        "saveDefaultInProfile": "Guardar predeterminado en Perfil →",
+        "signInToSave": "Inicie sesión para guardar un valor predeterminado.",
+        "profileHeading": "Preferencia de apariencia de la cuenta",
+        "profileDescription": "Utilice esta apariencia cada vez que inicie sesión, en cualquier dispositivo. Aún puede cambiar para una sesión desde el encabezado.",
+        "saveButton": "Guardar apariencia",
+        "saving": "Guardando apariencia...",
+        "savedSuccess": "Apariencia guardada en su perfil.",
+        "savedError": "No se pudo guardar. Su apariencia guardada no ha cambiado.",
+        "activeSessionNotice": "Anulación de sesión activa para esta pestaña"
     }
 }

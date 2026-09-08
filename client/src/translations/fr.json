@@ -599,5 +599,22 @@
         "pillar3Desc": "Outils numériques d'aide à la décision permettant aux agents de vulgarisation et aux petits exploitants d'optimiser l'efficacité de l'utilisation des nutriments.",
         "pillar4Title": "Politiques, Gouvernance et Santé des Sols",
         "pillar4Desc": "Formulation de politiques nationales sur la santé des sols et intégration dans les engagements climatiques."
+    },
+    "appearance": {
+        "title": "Apparence",
+        "light": "Clair",
+        "dark": "Sombre · Graphite",
+        "defaultLabel": "Par défaut",
+        "sessionNotice": "Les modifications s'appliquent à cette session.",
+        "useSavedDefault": "Utiliser mon choix enregistré",
+        "saveDefaultInProfile": "Enregistrer un défaut dans Profil →",
+        "signInToSave": "Connectez-vous pour enregistrer un choix par défaut.",
+        "profileHeading": "Préférence d'apparence du compte",
+        "profileDescription": "Utilisez cette apparence à chaque connexion, sur n'importe quel appareil. Vous pouvez toujours changer pour une session depuis l'en-tête.",
+        "saveButton": "Enregistrer l'apparence",
+        "saving": "Enregistrement de l'apparence...",
+        "savedSuccess": "Apparence enregistrée dans votre profil.",
+        "savedError": "Impossible d'enregistrer. Votre apparence enregistrée reste inchangée.",
+        "activeSessionNotice": "Remplacement de session actif pour cet onglet"
     }
 }
