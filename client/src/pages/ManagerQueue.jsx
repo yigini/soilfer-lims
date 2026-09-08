@@ -29,7 +29,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
             {isStale ? t('queue.stale', 'Stale') : t('queue.live', 'Live')}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated)}</span>
         )}
     </div>
 );
@@ -252,16 +252,16 @@ const ManagerQueue = () => {
             <button
                 onClick={() => handleTabChange(id)}
                 className={`flex items-center gap-2 px-6 py-4 border-b-2 font-medium transition-colors relative ${activeTab === id
-                    ? 'border-indigo-600 text-indigo-700 bg-indigo-50/50 dark:border-indigo-400 dark:text-indigo-300 dark:bg-indigo-900/20'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                    ? 'border-sf-emerald text-sf-emerald bg-emerald-50/50 dark:bg-emerald-950/20 font-bold'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-sf-raised/30'
                     }`}
             >
                 <Icon size={18} />
                 {label}
                 {count > 0 && (
                     <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeTab === id
-                        ? 'bg-indigo-600 text-white dark:bg-indigo-500'
-                        : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-sf-emerald text-white'
+                        : 'bg-sf-raised text-sf-muted'
                         }`}>
                         {count}
                     </span>
@@ -274,20 +274,20 @@ const ManagerQueue = () => {
         <div className="p-8 max-w-7xl mx-auto space-y-8">
             <header className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('queue.title', 'Manager Queue')}</h1>
+                    <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Queue')}</h1>
                     <p className="text-gray-500">{t('queue.subtitle', 'Operational Dashboard')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
-                    <button onClick={() => { refreshLive(); fetchQueueData(meta.page); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Refresh now" aria-label="Refresh queue">
+                    <button onClick={() => { refreshLive(); fetchQueueData(meta.page); }} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title="Refresh now" aria-label="Refresh queue">
                         <RefreshCw size={16} className="text-gray-400" />
                     </button>
                 </div>
             </header>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px] flex flex-col">
+            <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden min-h-[600px] flex flex-col">
                 {/* TABS */}
-                <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <div className="flex border-b border-sf-divider overflow-x-auto">
                     <TabButton id={QUEUE_Tabs.INTAKE} icon={AlertOctagon} label={t('queue.tabIntake', 'New (Intake)')} />
                     <TabButton id={QUEUE_Tabs.ASSIGN} icon={UserPlus} label={t('queue.tabAssign', 'Assign Work')} />
                     <TabButton id={QUEUE_Tabs.REVIEW} icon={FileText} label={t('queue.tabReview', 'Review Submissions')} />
@@ -295,9 +295,9 @@ const ManagerQueue = () => {
                 </div>
 
                 {/* CONTENT */}
-                <div className="flex-1 p-6 relative bg-gray-50/50 dark:bg-gray-900/30">
+                <div className="flex-1 p-6 relative bg-sf-canvas">
                     {loading && (
-                        <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 flex items-center justify-center z-10 backdrop-blur-sm">
+                        <div className="absolute inset-0 bg-sf-surface/50 flex items-center justify-center z-10 backdrop-blur-sm">
                             <Loader className="animate-spin text-indigo-600" size={32} />
                         </div>
                     )}
@@ -309,8 +309,8 @@ const ManagerQueue = () => {
                     )}
 
                     {!loading && data.length === 0 && (
-                        <div className="h-64 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 italic">
-                            <CheckCircle size={48} className="mb-4 text-gray-200 dark:text-gray-600" />
+                        <div className="h-64 flex flex-col items-center justify-center text-sf-muted italic">
+                            <CheckCircle size={48} className="mb-4 text-sf-muted/40" />
                             <p>{t('queue.empty', 'Queue is empty. Good job!')}</p>
                         </div>
                     )}
@@ -324,7 +324,7 @@ const ManagerQueue = () => {
 
                 {/* PAGINATION */}
                 {meta && meta.totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between">
+                    <div className="px-6 py-4 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
                         <span className="text-sm text-gray-500">
                             Page {meta.page} of {meta.totalPages} ({meta.total} items)
                         </span>
@@ -332,14 +332,14 @@ const ManagerQueue = () => {
                             <button
                                 disabled={meta.page === 1}
                                 onClick={() => handlePageChange(meta.page - 1)}
-                                className="p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                                className="p-2 border rounded hover:bg-sf-raised disabled:opacity-50"
                             >
                                 <ArrowLeft size={16} />
                             </button>
                             <button
                                 disabled={meta.page === meta.totalPages}
                                 onClick={() => handlePageChange(meta.page + 1)}
-                                className="p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                                className="p-2 border rounded hover:bg-sf-raised disabled:opacity-50"
                             >
                                 <ArrowRight size={16} />
                             </button>
@@ -400,7 +400,7 @@ const QueueCard = ({ item, type, navigate, t }) => {
     return (
         <button
             onClick={() => navigate(`/samples/${item.sampleId || item.id}`)}
-            className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="group bg-sf-surface rounded-xl border border-sf-divider shadow-sm hover:shadow-md hover:border-sf-emerald transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-sf-emerald"
             aria-label={`${config.label}: ${title}`}
         >
             {isUrgent && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl-lg z-10">{t('queue.urgent', 'Urgent')}</div>}
@@ -411,24 +411,24 @@ const QueueCard = ({ item, type, navigate, t }) => {
                         <Icon size={20} />
                     </div>
                     <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-full">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-sf-muted bg-sf-canvas px-2 py-1 rounded-full">
                             {config.label}
                         </span>
                     </div>
                 </div>
 
                 <div className="mb-4">
-                    <h3 className="font-bold text-gray-800 dark:text-gray-200 text-lg truncate leading-tight" title={title}>{title}</h3>
+                    <h3 className="font-bold text-sf-text text-lg truncate leading-tight" title={title}>{title}</h3>
                     {item.labId && item.originalId && (
-                        <div className="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5 uppercase tracking-tighter">
+                        <div className="text-[10px] text-sf-muted font-mono mt-0.5 uppercase tracking-tighter">
                             ID: {item.originalId}
                         </div>
                     )}
-                    <div className="text-[11px] text-gray-600 dark:text-gray-400 font-bold mt-2 min-h-[1.5rem] line-clamp-2">
+                    <div className="text-[11px] text-sf-muted font-bold mt-2 min-h-[1.5rem] line-clamp-2">
                         {subtitle}
                     </div>
                     {item.isAggregated && (
-                        <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-1 font-bold">
+                        <div className="text-[10px] text-sf-muted uppercase tracking-wider mt-1 font-bold">
                             {(item.itemIds?.length || item.taskCount || 0)} {t('queue.tasksPending', 'Tasks Pending')}
                         </div>
                     )}
@@ -450,12 +450,12 @@ const QueueCard = ({ item, type, navigate, t }) => {
                 )}
             </div>
 
-            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20 flex justify-between items-center group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-900/10 transition-colors">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 font-medium">
+            <div className="px-5 py-3 border-t border-sf-divider bg-sf-canvas flex justify-between items-center group-hover:bg-sf-raised transition-colors">
+                <div className="flex items-center gap-1.5 text-xs text-sf-muted font-medium">
                     <Calendar size={12} />
                     {date}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                <div className="flex items-center gap-1 text-xs font-bold text-sf-emerald opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
                     {config.action} <ArrowRight size={12} />
                 </div>
             </div>

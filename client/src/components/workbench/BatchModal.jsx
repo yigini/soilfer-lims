@@ -182,25 +182,25 @@ export default function BatchModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl border border-sf-divider w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-sf-divider bg-sf-canvas/50">
                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                             <Layers size={20} />
                         </div>
                         <div>
-                            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                            <h2 className="text-base font-bold text-sf-text">
                                 Batch Run & QC Management
                             </h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Method: <span className="font-semibold text-slate-700 dark:text-slate-300">{getAnalysisDisplayName(analysisCode)}</span> · Physical Rack Allocation & QC Controls
+                            <p className="text-xs text-sf-muted">
+                                Method: <span className="font-semibold text-sf-text">{getAnalysisDisplayName(analysisCode)}</span> · Physical Rack Allocation & QC Controls
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-lg text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-colors"
                         title="Close modal"
                     >
                         <X size={18} />
@@ -208,7 +208,7 @@ export default function BatchModal({
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/30 dark:bg-slate-800/10">
+                <div className="flex border-b border-sf-divider px-6 bg-sf-canvas/30">
                     {[
                         { id: 'create', label: 'Create Run / Batch' },
                         { id: 'allocate', label: `Allocate Samples (${selectedWorkItemIds.length} selected)` },
@@ -220,7 +220,7 @@ export default function BatchModal({
                             className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors flex items-center gap-1.5 ${
                                 activeTab === tab.id
                                     ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400'
-                                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                                    : 'border-transparent text-sf-muted hover:text-sf-text'
                             }`}
                         >
                             {tab.label}
@@ -230,13 +230,13 @@ export default function BatchModal({
 
                 {/* Notifications */}
                 {error && (
-                    <div className="mx-6 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-200">
+                    <div className="mx-6 mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
                         <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-600" />
                         <span className="font-medium">{error}</span>
                     </div>
                 )}
                 {successMsg && (
-                    <div className="mx-6 mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-start gap-2.5 text-xs text-emerald-800 dark:text-emerald-200">
+                    <div className="mx-6 mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-2.5 text-xs text-emerald-800 dark:text-emerald-300">
                         <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-600" />
                         <span className="font-medium">{successMsg}</span>
                     </div>
@@ -249,25 +249,25 @@ export default function BatchModal({
                         <form onSubmit={handleCreateBatch} className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                    <label className="block text-xs font-bold text-sf-text mb-1">
                                         Run Profile Architecture *
                                     </label>
                                     <select
                                         value={createForm.profile}
                                         onChange={(e) => setCreateForm({ ...createForm, profile: e.target.value })}
-                                        className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500"
+                                        className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text focus:ring-1 focus:ring-emerald-500"
                                     >
                                         <option value="RACK_40">RACK_40 (40 Places: 36 Samples max, 4 QC slots)</option>
                                         <option value="MICROPLATE_96">MICROPLATE_96 (96 Wells: 92 Samples max, 4 QC slots)</option>
                                         <option value="CENTRIFUGE_24">CENTRIFUGE_24 (24 Tubes: 21 Samples max, 3 QC slots)</option>
                                     </select>
-                                    <p className="text-[11px] text-slate-400 mt-1">
+                                    <p className="text-[11px] text-sf-muted mt-1">
                                         Strict capacity enforcement: QC slots 1, 2, 20, 40 reserved.
                                     </p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                    <label className="block text-xs font-bold text-sf-text mb-1">
                                         Instrument Asset
                                     </label>
                                     <input
@@ -275,13 +275,13 @@ export default function BatchModal({
                                         value={createForm.instrument}
                                         onChange={(e) => setCreateForm({ ...createForm, instrument: e.target.value })}
                                         placeholder="e.g. Metrohm 914 pH/Conductometer"
-                                        className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                        className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text focus:ring-1 focus:ring-emerald-500"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-xs font-bold text-sf-text mb-1">
                                     Custom Batch ID (Optional)
                                 </label>
                                 <input
@@ -290,12 +290,12 @@ export default function BatchModal({
                                     value={createForm.id}
                                     onChange={(e) => setCreateForm({ ...createForm, id: e.target.value })}
                                     placeholder="Leave blank for auto-generated BATCH-TIMESTAMP"
-                                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono"
+                                    className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-xs font-bold text-sf-text mb-1">
                                     Run Notes
                                 </label>
                                 <textarea
@@ -303,7 +303,7 @@ export default function BatchModal({
                                     onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
                                     placeholder="Operational notes or calibration reference..."
                                     rows={2}
-                                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-none"
+                                    className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text resize-none focus:ring-1 focus:ring-emerald-500"
                                 />
                             </div>
 
@@ -325,11 +325,11 @@ export default function BatchModal({
                     {activeTab === 'allocate' && (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-xs font-bold text-sf-text mb-1">
                                     Target Batch Run
                                 </label>
                                 {batches.length === 0 ? (
-                                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 text-center text-xs text-slate-500">
+                                    <div className="p-4 rounded-xl bg-sf-canvas/50 text-center text-xs text-sf-muted">
                                         No active batches found for {analysisCode}. Switch to "Create Run" tab first.
                                     </div>
                                 ) : (
@@ -337,7 +337,7 @@ export default function BatchModal({
                                         data-testid="allocate-batch-select"
                                         value={selectedBatchId}
                                         onChange={(e) => setSelectedBatchId(e.target.value)}
-                                        className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono"
+                                        className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                     >
                                         {batches.map(b => (
                                             <option key={b.id} value={b.id}>
@@ -349,38 +349,38 @@ export default function BatchModal({
                             </div>
 
                             {currentBatch && (
-                                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+                                <div className="p-4 rounded-xl border border-sf-divider bg-sf-canvas/50 space-y-3">
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-slate-500">Profile Architecture:</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{currentBatch.profile || 'RACK_40'} (Max {currentBatch.maxCapacity || 40})</span>
+                                        <span className="text-sf-muted">Profile Architecture:</span>
+                                        <span className="font-bold text-sf-text">{currentBatch.profile || 'RACK_40'} (Max {currentBatch.maxCapacity || 40})</span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-slate-500">Allocated Samples:</span>
+                                        <span className="text-sf-muted">Allocated Samples:</span>
                                         <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400">
                                             {currentBatch.workItems?.length || 0} sample(s)
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-slate-500">Physical Reserved QC Positions:</span>
-                                        <span className="font-semibold text-slate-600 dark:text-slate-400 text-[11px]">
+                                        <span className="text-sf-muted">Physical Reserved QC Positions:</span>
+                                        <span className="font-semibold text-sf-muted text-[11px]">
                                             #1 (BLANK), #2 (CONTROL), #20 (DUPLICATE), #40 (DUPLICATE)
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-slate-500">Maximum Sample Capacity:</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                                        <span className="text-sf-muted">Maximum Sample Capacity:</span>
+                                        <span className="font-bold text-sf-text">
                                             {(currentBatch.maxCapacity || 40) - 4} samples
                                         </span>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div>
                                     <div className="text-xs font-bold text-indigo-950 dark:text-indigo-200">
                                         {selectedWorkItemIds.length} sample(s) selected in worksheet
                                     </div>
-                                    <div className="text-[11px] text-slate-500 mt-0.5">
+                                    <div className="text-[11px] text-sf-muted mt-0.5">
                                         Rack slots will be assigned sequentially respecting reserved QC positions.
                                     </div>
                                 </div>
@@ -403,14 +403,14 @@ export default function BatchModal({
                     {activeTab === 'qc' && (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-xs font-bold text-sf-text mb-1">
                                     Target Batch
                                 </label>
                                 <select
                                     data-testid="qc-batch-select"
                                     value={selectedBatchId}
                                     onChange={(e) => setSelectedBatchId(e.target.value)}
-                                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono"
+                                    className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                 >
                                     {batches.map(b => (
                                         <option key={b.id} value={b.id}>
@@ -421,13 +421,13 @@ export default function BatchModal({
                             </div>
 
                             {currentBatch && (
-                                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                                    <span className="text-xs text-slate-500">Current QC Status:</span>
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-sf-canvas/50 border border-sf-divider">
+                                    <span className="text-xs text-sf-muted">Current QC Status:</span>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                        currentBatch.status === 'QC_PASS' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' :
-                                        currentBatch.status === 'QC_FAIL' ? 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300' :
-                                        currentBatch.status === 'CLOSED' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' :
-                                        'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                        currentBatch.status === 'QC_PASS' ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300' :
+                                        currentBatch.status === 'QC_FAIL' ? 'bg-red-500/15 text-red-800 dark:text-red-300' :
+                                        currentBatch.status === 'CLOSED' ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' :
+                                        'bg-sf-surface text-sf-muted'
                                     }`} data-testid="batch-qc-status-badge">
                                         {currentBatch.status}
                                     </span>
@@ -435,13 +435,13 @@ export default function BatchModal({
                             )}
 
                             <div className="space-y-3 pt-2">
-                                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                                <h3 className="text-xs font-bold text-sf-text uppercase tracking-wider">
                                     Required QC Slot Determinations
                                 </h3>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40">
-                                        <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                    <div className="p-3 rounded-xl border border-sf-divider bg-sf-surface">
+                                        <label className="block text-[11px] font-bold text-sf-muted mb-1">
                                             Reagent Blank (Slot #1)
                                         </label>
                                         <input
@@ -449,13 +449,13 @@ export default function BatchModal({
                                             value={qcForm.blankVal}
                                             onChange={(e) => setQcForm({ ...qcForm, blankVal: e.target.value })}
                                             placeholder="0.00"
-                                            className="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 font-mono"
+                                            className="w-full text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                             data-testid="qc-blank-input"
                                         />
                                     </div>
 
-                                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40">
-                                        <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                    <div className="p-3 rounded-xl border border-sf-divider bg-sf-surface">
+                                        <label className="block text-[11px] font-bold text-sf-muted mb-1">
                                             CRM Control (Slot #2)
                                         </label>
                                         <div className="flex gap-1.5">
@@ -465,7 +465,7 @@ export default function BatchModal({
                                                 onChange={(e) => setQcForm({ ...qcForm, ctrlExpected: e.target.value })}
                                                 placeholder="Exp"
                                                 title="Expected"
-                                                className="w-1/2 text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 font-mono"
+                                                className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-ctrl-exp-input"
                                             />
                                             <input
@@ -474,14 +474,14 @@ export default function BatchModal({
                                                 onChange={(e) => setQcForm({ ...qcForm, ctrlMeasured: e.target.value })}
                                                 placeholder="Meas"
                                                 title="Measured"
-                                                className="w-1/2 text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 font-mono"
+                                                className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-ctrl-meas-input"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40">
-                                        <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                    <div className="p-3 rounded-xl border border-sf-divider bg-sf-surface">
+                                        <label className="block text-[11px] font-bold text-sf-muted mb-1">
                                             Duplicate Pair (Slot #20)
                                         </label>
                                         <div className="flex gap-1.5">
@@ -490,7 +490,7 @@ export default function BatchModal({
                                                 value={qcForm.dupVal1}
                                                 onChange={(e) => setQcForm({ ...qcForm, dupVal1: e.target.value })}
                                                 placeholder="Val 1"
-                                                className="w-1/2 text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 font-mono"
+                                                className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup1-input"
                                             />
                                             <input
@@ -498,7 +498,7 @@ export default function BatchModal({
                                                 value={qcForm.dupVal2}
                                                 onChange={(e) => setQcForm({ ...qcForm, dupVal2: e.target.value })}
                                                 placeholder="Val 2"
-                                                className="w-1/2 text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 font-mono"
+                                                className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup2-input"
                                             />
                                         </div>
@@ -506,13 +506,13 @@ export default function BatchModal({
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-sf-divider">
                                 <button
                                     type="button"
                                     onClick={handleCloseBatch}
                                     disabled={loading}
                                     data-testid="close-batch-btn"
-                                    className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    className="px-4 py-2 rounded-xl text-xs font-bold border border-sf-divider text-sf-text hover:bg-sf-hover transition-colors"
                                 >
                                     Close Batch
                                 </button>

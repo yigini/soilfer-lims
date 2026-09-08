@@ -285,12 +285,12 @@ const Samples = () => {
             {/* Floating Bulk Actions Bar */}
             {selected.length > 0 && user?.role === 'SUPER_ADMIN' && (
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-8 duration-300 w-[calc(100%-2rem)] max-w-lg md:w-auto md:max-w-none">
-                    <div className="bg-gray-900 border border-white/10 shadow-2xl rounded-2xl px-4 md:px-6 py-3 md:py-4 flex items-center gap-4 md:gap-8 backdrop-blur-xl bg-opacity-95">
-                        <div className="flex items-center gap-3 border-r border-white/10 pr-8">
+                    <div className="bg-sf-raised border border-sf-divider shadow-2xl rounded-2xl px-4 md:px-6 py-3 md:py-4 flex items-center gap-4 md:gap-8 backdrop-blur-xl text-sf-text">
+                        <div className="flex items-center gap-3 border-r border-sf-divider pr-8">
                             <div className="bg-emerald-500 text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full shadow-lg shadow-emerald-500/20">
                                 {selected.length}
                             </div>
-                            <span className="text-white font-medium text-sm">{t('samples.samplesSelected', 'Samples Selected')}</span>
+                            <span className="text-sf-text font-medium text-sm">{t('samples.samplesSelected', 'Samples Selected')}</span>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -305,7 +305,7 @@ const Samples = () => {
 
                             <button
                                 onClick={() => setSelected([])}
-                                className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2"
+                                className="text-sf-muted hover:text-sf-text transition-colors text-sm font-medium px-2"
                             >
                                 {t('common.cancel', 'Cancel')}
                             </button>
@@ -358,8 +358,8 @@ const Samples = () => {
             />
 
             {/* Pagination ... */}
-            <div className="flex justify-between items-center mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex justify-between items-center mt-4 border-t border-sf-divider pt-4">
+                <span className="text-sm text-sf-muted">
                     {meta.total > 0
                         ? `Showing ${(meta.page - 1) * meta.limit + 1} to ${Math.min(meta.page * meta.limit, meta.total)} of ${meta.total} entries`
                         : 'No entries found'}
@@ -368,14 +368,14 @@ const Samples = () => {
                     <button
                         onClick={() => handlePageChange(meta.page - 1)}
                         disabled={meta.page === 1}
-                        className="p-2 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="p-2 rounded border border-sf-divider disabled:opacity-50 hover:bg-sf-canvas text-sf-text transition"
                     >
                         <ChevronLeft size={16} />
                     </button>
                     <button
                         onClick={() => handlePageChange(meta.page + 1)}
                         disabled={meta.page === meta.pages}
-                        className="p-2 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="p-2 rounded border border-sf-divider disabled:opacity-50 hover:bg-sf-canvas text-sf-text transition"
                     >
                         <ChevronRight size={16} />
                     </button>
@@ -394,18 +394,18 @@ const Samples = () => {
             {/* Confirmation Modal */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+                    <div className="bg-sf-surface rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-sf-divider">
                         <div className="flex items-center gap-3 text-red-600 mb-4">
                             <AlertTriangle size={24} />
-                            <h3 className="text-lg font-bold">{t('samples.deleteSample', 'Delete Sample?')}</h3>
+                            <h3 className="text-lg font-bold text-sf-text">{t('samples.deleteSample', 'Delete Sample?')}</h3>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        <p className="text-sf-muted mb-6">
                             {t('samples.deleteConfirm', 'Are you sure you want to delete this sample? This action will permanently remove all associated work items and audit logs.')}
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setDeleteTarget(null)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded transition"
+                                className="px-4 py-2 text-sf-text hover:bg-sf-canvas border border-sf-divider rounded transition"
                             >
                                 {t('common.cancel', 'Cancel')}
                             </button>
@@ -424,7 +424,7 @@ const Samples = () => {
             {deletingIds.length > 0 && (
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50">
                     {deletingIds.map(id => (
-                        <div key={id} className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-4 animate-in slide-in-from-bottom duration-300">
+                        <div key={id} className="bg-sf-raised text-sf-text border border-sf-divider px-4 py-3 rounded-lg shadow-lg flex items-center gap-4 animate-in slide-in-from-bottom duration-300">
                             <span>{t('samples.sampleDeleted', 'Sample deleted.')}</span>
                             <button
                                 onClick={() => undoDelete(id)}

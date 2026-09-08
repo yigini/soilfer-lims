@@ -218,23 +218,23 @@ const BatchIntake = ({
         const csg = submissionResult.consignment;
         return (
             <div className="max-w-3xl mx-auto p-6 animate-in zoom-in-95 duration-300">
-                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden text-center p-8">
+                <div className="bg-sf-surface rounded-3xl shadow-2xl border border-sf-divider overflow-hidden text-center p-8">
                     <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Check size={36} />
                     </div>
                     
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    <h2 className="text-2xl font-bold text-sf-text mb-1">
                         Consignment Received Successfully
                     </h2>
-                    <p className="text-gray-500 text-sm mb-6">
+                    <p className="text-sf-muted text-sm mb-6">
                         All samples have been processed and registered into the laboratory database.
                     </p>
 
                     {/* Receipt Badge */}
-                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 inline-block mb-6 text-left">
-                        <div className="text-xs text-gray-400 font-bold uppercase tracking-wider">Consignment Identifier</div>
+                    <div className="bg-sf-canvas p-4 rounded-2xl border border-sf-divider inline-block mb-6 text-left">
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Consignment Identifier</div>
                         <div className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">{csg.code}</div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-sf-muted mt-1">
                             Waybill: {csg.deliveryNoteRef || 'N/A'} • Courier: {csg.deliveredBy || 'N/A'}
                         </div>
                     </div>
@@ -260,7 +260,7 @@ const BatchIntake = ({
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                            className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-text hover:bg-sf-canvas flex items-center gap-2"
                         >
                             <Printer size={16} /> Print Consignment Voucher
                         </button>
@@ -294,13 +294,13 @@ const BatchIntake = ({
     return (
         <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
             {/* Top Navigation Bar */}
-            <div className="flex justify-between items-center bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
+            <div className="flex justify-between items-center bg-sf-raised border border-sf-divider text-sf-text p-4 rounded-2xl shadow-md">
                 <div className="flex items-center gap-3">
-                    <button onClick={onBack} className="bg-slate-800 hover:bg-slate-700 p-2 rounded-xl transition-colors">
+                    <button onClick={onBack} className="bg-sf-surface hover:bg-sf-canvas border border-sf-divider p-2 rounded-xl transition-colors">
                         <ArrowLeft size={18} />
                     </button>
                     <div>
-                        <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Archetype B / C Intake</div>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Archetype B / C Intake</div>
                         <h2 className="text-lg font-bold">Consignment & High-Throughput Batch Reception</h2>
                     </div>
                 </div>
@@ -317,15 +317,15 @@ const BatchIntake = ({
             </div>
 
             {/* Consignment Delivery & Submitter Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-700 pb-2">
+            <div className="bg-sf-surface rounded-2xl p-5 shadow-sm border border-sf-divider space-y-4">
+                <div className="flex items-center gap-2 text-sm font-bold text-sf-text border-b border-sf-divider pb-2">
                     <Truck size={18} className="text-blue-600" />
                     Delivery & Consignment Information
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Delivery Note / Waybill Ref
                         </label>
                         <input
@@ -333,12 +333,12 @@ const BatchIntake = ({
                             placeholder="e.g. WAYBILL-9921"
                             value={consignment.deliveryNoteRef}
                             onChange={(e) => setConsignment(prev => ({ ...prev, deliveryNoteRef: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Delivered By (Courier / Driver)
                         </label>
                         <input
@@ -346,12 +346,12 @@ const BatchIntake = ({
                             placeholder="e.g. DHL / Carlos Mendizabal"
                             value={consignment.deliveredBy}
                             onChange={(e) => setConsignment(prev => ({ ...prev, deliveredBy: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Expected Bag Count (on Manifest)
                         </label>
                         <input
@@ -359,18 +359,18 @@ const BatchIntake = ({
                             placeholder="e.g. 40"
                             value={consignment.expectedCount}
                             onChange={(e) => setConsignment(prev => ({ ...prev, expectedCount: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Project Affiliation
                         </label>
                         <select
                             value={consignment.projectCode}
                             onChange={(e) => setConsignment(prev => ({ ...prev, projectCode: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         >
                             <option value="">-- Generic / Walk-In Consignment --</option>
                             {availableProjects.map(p => (
@@ -380,7 +380,7 @@ const BatchIntake = ({
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Submitter Contact Name
                         </label>
                         <input
@@ -388,12 +388,12 @@ const BatchIntake = ({
                             placeholder="e.g. Dr. Roberto Arbenz"
                             value={consignment.submitterName}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterName: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Submitter Organization
                         </label>
                         <input
@@ -401,12 +401,12 @@ const BatchIntake = ({
                             placeholder="e.g. ICTA / University"
                             value={consignment.submitterOrg}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterOrg: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Submitter Phone
                         </label>
                         <input
@@ -414,12 +414,12 @@ const BatchIntake = ({
                             placeholder="+502 ..."
                             value={consignment.submitterPhone}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterPhone: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
 
                     <div>
-                        <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block font-bold text-sf-muted mb-1">
                             Submitter Email
                         </label>
                         <input
@@ -427,26 +427,26 @@ const BatchIntake = ({
                             placeholder="email@domain.com"
                             value={consignment.submitterEmail}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterEmail: e.target.value }))}
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Batch Defaults Strip */}
-            <div className="bg-slate-50 dark:bg-gray-850 p-4 rounded-2xl border border-slate-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4 text-xs">
-                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-bold">
+            <div className="bg-sf-canvas p-4 rounded-2xl border border-sf-divider flex flex-wrap items-center justify-between gap-4 text-xs">
+                <div className="flex items-center gap-2 text-sf-text font-bold">
                     <Layers size={16} className="text-blue-600" />
                     <span>Batch Defaults:</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-1.5">
-                        <span className="text-gray-500">Bundle:</span>
+                        <span className="text-sf-muted">Bundle:</span>
                         <select
                             value={defaults.analysisBundle}
                             onChange={(e) => handleBundleChange(e.target.value)}
-                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-bold"
+                            className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-bold"
                         >
                             {analysisGroups.map(g => (
                                 <option key={g.id} value={g.id}>{g.name}</option>
@@ -455,21 +455,21 @@ const BatchIntake = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        <span className="text-gray-500">Std Mass (g):</span>
+                        <span className="text-sf-muted">Std Mass (g):</span>
                         <input
                             type="number"
                             value={defaults.receivedMass}
                             onChange={(e) => setDefaults(prev => ({ ...prev, receivedMass: e.target.value }))}
-                            className="w-20 p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs text-center font-bold"
+                            className="w-20 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center font-bold"
                         />
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        <span className="text-gray-500">Moisture:</span>
+                        <span className="text-sf-muted">Moisture:</span>
                         <select
                             value={defaults.moistureOnArrival}
                             onChange={(e) => setDefaults(prev => ({ ...prev, moistureOnArrival: e.target.value }))}
-                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs"
+                            className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs"
                         >
                             <option value="DRY">Dry</option>
                             <option value="MOIST">Moist</option>
@@ -479,19 +479,19 @@ const BatchIntake = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        <span className="text-gray-500">Depths:</span>
+                        <span className="text-sf-muted">Depths:</span>
                         <input
                             type="number"
                             value={defaults.depthTopCm}
                             onChange={(e) => setDefaults(prev => ({ ...prev, depthTopCm: e.target.value }))}
-                            className="w-14 p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs text-center"
+                            className="w-14 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center"
                         />
                         <span>-</span>
                         <input
                             type="number"
                             value={defaults.depthBottomCm}
                             onChange={(e) => setDefaults(prev => ({ ...prev, depthBottomCm: e.target.value }))}
-                            className="w-14 p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs text-center"
+                            className="w-14 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center"
                         />
                         <span>cm</span>
                     </div>
@@ -501,7 +501,7 @@ const BatchIntake = ({
             {/* Fast Rapid-Scan Intake Bar & Running Counter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Rapid Scan Input */}
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-3">
+                <div className="md:col-span-2 bg-sf-surface p-4 rounded-2xl shadow-sm border border-sf-divider flex items-center gap-3">
                     <input
                         ref={scanInputRef}
                         type="text"
@@ -514,7 +514,7 @@ const BatchIntake = ({
                                 handleAddSample();
                             }
                         }}
-                        className="flex-1 p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 font-mono text-sm font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                        className="flex-1 p-3 rounded-xl border border-sf-divider bg-sf-canvas font-mono text-sm font-bold text-sf-text focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     />
                     <button
                         type="button"
@@ -528,11 +528,11 @@ const BatchIntake = ({
                 </div>
 
                 {/* Running Count Badge (RC-13) */}
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="bg-sf-surface p-4 rounded-2xl shadow-sm border border-sf-divider flex items-center justify-between">
                     <div>
-                        <div className="text-xs text-gray-400 font-bold uppercase tracking-wider">Consignment Progress</div>
-                        <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">
-                            {samples.length} <span className="text-sm font-normal text-gray-400">/ {expectedNum > 0 ? expectedNum : '—'} expected</span>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Consignment Progress</div>
+                        <div className="text-xl font-bold text-sf-text mt-0.5">
+                            {samples.length} <span className="text-sm font-normal text-sf-muted">/ {expectedNum > 0 ? expectedNum : '—'} expected</span>
                         </div>
                         <div className="flex gap-2 text-[11px] mt-1 font-medium">
                             <span className="text-emerald-600 dark:text-emerald-400">{acceptedCount} Accepted</span>
@@ -557,9 +557,9 @@ const BatchIntake = ({
             </div>
 
             {/* High-Throughput Scanned Samples Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/70 dark:bg-gray-800">
-                    <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
+                <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-raised">
+                    <h3 className="font-bold text-sm text-sf-text flex items-center gap-2">
                         <PackageCheck size={16} className="text-blue-600" />
                         Scanned Samples ({samples.length})
                     </h3>
@@ -581,14 +581,14 @@ const BatchIntake = ({
 
                 <div className="max-h-[450px] overflow-y-auto">
                     {samples.length === 0 ? (
-                        <div className="text-center py-16 text-gray-400">
+                        <div className="text-center py-16 text-sf-muted">
                             <PackageCheck size={40} className="mx-auto mb-2 opacity-30" />
                             <p className="font-medium text-sm">No samples added yet.</p>
-                            <p className="text-xs text-gray-400 mt-1">Scan barcodes above or click "Import Client Manifest".</p>
+                            <p className="text-xs text-sf-muted mt-1">Scan barcodes above or click "Import Client Manifest".</p>
                         </div>
                     ) : (
                         <table className="w-full text-left text-xs">
-                            <thead className="bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 sticky top-0 font-bold">
+                            <thead className="bg-sf-canvas text-sf-muted sticky top-0 font-bold">
                                 <tr>
                                     <th className="p-3 w-12">#</th>
                                     <th className="p-3">Sample ID</th>
@@ -600,11 +600,11 @@ const BatchIntake = ({
                                     <th className="p-3 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody className="divide-y divide-sf-divider">
                                 {samples.map((s, idx) => (
-                                    <tr key={idx} className={`hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors ${s.status === 'REJECTED' ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}>
-                                        <td className="p-3 text-gray-400 font-mono">{idx + 1}</td>
-                                        <td className="p-3 font-mono font-bold text-gray-900 dark:text-gray-100">{s.originalId}</td>
+                                    <tr key={idx} className={`hover:bg-sf-canvas transition-colors ${s.status === 'REJECTED' ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}>
+                                        <td className="p-3 text-sf-muted font-mono">{idx + 1}</td>
+                                        <td className="p-3 font-mono font-bold text-sf-text">{s.originalId}</td>
                                         <td className="p-3">
                                             {s.status === 'REJECTED' ? (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 flex items-center gap-1 w-max">
@@ -616,15 +616,15 @@ const BatchIntake = ({
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-3 font-mono">{s.receivedMass ? `${s.receivedMass}g` : '—'}</td>
-                                        <td className="p-3 capitalize text-gray-600 dark:text-gray-400">{s.moistureOnArrival?.toLowerCase() || 'moist'}</td>
-                                        <td className="p-3 text-gray-600 dark:text-gray-400">
+                                        <td className="p-3 font-mono text-sf-text">{s.receivedMass ? `${s.receivedMass}g` : '—'}</td>
+                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival?.toLowerCase() || 'moist'}</td>
+                                        <td className="p-3 text-sf-muted">
                                             {s.latitude && s.longitude ? (
                                                 <span className="font-mono">{s.latitude.toFixed(4)}, {s.longitude.toFixed(4)}</span>
                                             ) : s.siteName ? (
                                                 <span>{s.siteName}</span>
                                             ) : (
-                                                <span className="text-gray-400 italic">None</span>
+                                                <span className="text-sf-muted italic">None</span>
                                             )}
                                         </td>
                                         <td className="p-3">
@@ -633,7 +633,7 @@ const BatchIntake = ({
                                                     {s.rejectionReason || 'Non-conformance'}
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-400">—</span>
+                                                <span className="text-sf-muted">—</span>
                                             )}
                                         </td>
                                         <td className="p-3 text-right">
@@ -641,7 +641,7 @@ const BatchIntake = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => setEditingSampleIdx(idx)}
-                                                    className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-sf-canvas text-sf-muted hover:text-sf-text transition-colors"
                                                     title="Edit / Record Exception"
                                                 >
                                                     <Edit3 size={14} />
@@ -665,9 +665,9 @@ const BatchIntake = ({
 
                 {/* Submit Bar */}
                 {samples.length > 0 && (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <div className="text-xs text-gray-500">
-                            Ready to batch receive <strong className="text-gray-900 dark:text-gray-100">{samples.length} samples</strong> into Consignment.
+                    <div className="p-4 bg-sf-canvas border-t border-sf-divider flex justify-between items-center">
+                        <div className="text-xs text-sf-muted">
+                            Ready to batch receive <strong className="text-sf-text">{samples.length} samples</strong> into Consignment.
                         </div>
 
                         <button

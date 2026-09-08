@@ -191,6 +191,16 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
 
     React.useEffect(() => { setLoaded(false); setHistory([]); }, [sampleId]);
 
+    // Close on Escape key
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     // Group same-action events within 2 seconds (matches CollapsibleDrawer logic)
     const processedHistory = React.useMemo(() => {
         if (!history || history.length === 0) return [];
@@ -227,54 +237,54 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800 flex flex-col animate-in slide-in-from-right duration-300" onClick={e => e.stopPropagation()}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="relative w-full max-w-md bg-sf-surface shadow-2xl border-l border-sf-divider flex flex-col animate-in slide-in-from-right duration-300" onClick={e => e.stopPropagation()}>
                 {/* Header - matches CollapsibleDrawer */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-sf-divider">
                     <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                         <Clock size={18} className="text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                        <h2 className="font-bold text-gray-900 dark:text-gray-100 uppercase tracking-widest text-xs">Audit Timeline</h2>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">History of all activities</p>
+                        <h2 className="font-bold text-sf-text uppercase tracking-widest text-xs">Audit Timeline</h2>
+                        <p className="text-[10px] text-sf-muted font-medium">History of all activities</p>
                     </div>
-                    <span className="ml-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700">{processedHistory.length}</span>
-                    <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><X size={18} className="text-gray-500" /></button>
+                    <span className="ml-auto bg-sf-canvas text-sf-muted text-[10px] font-bold px-2.5 py-1 rounded-full border border-sf-divider">{processedHistory.length}</span>
+                    <button onClick={onClose} className="p-1.5 hover:bg-sf-raised rounded-lg transition-colors"><X size={18} className="text-sf-muted hover:text-sf-text" /></button>
                 </div>
                 {/* Timeline */}
                 <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
                     {loading && <div className="flex items-center justify-center py-12"><Loader2 size={24} className="animate-spin text-indigo-500" /></div>}
                     {!loading && processedHistory.length === 0 && (
                         <div className="text-center py-12">
-                            <Activity size={32} className="mx-auto text-gray-200 mb-2" />
-                            <div className="text-gray-400 italic text-sm">No history recorded yet</div>
+                            <Activity size={32} className="mx-auto text-sf-muted mb-2" />
+                            <div className="text-sf-muted italic text-sm">No history recorded yet</div>
                         </div>
                     )}
                     {!loading && processedHistory.length > 0 && (
-                        <div className="relative border-l-2 border-indigo-50 dark:border-gray-800 ml-4 space-y-9 pb-10">
+                        <div className="relative border-l-2 border-sf-divider ml-4 space-y-9 pb-10">
                             {processedHistory.map((event, idx) => {
                                 if (event.isGroup) {
                                     const exp = expandedGroups[idx];
                                     return (
                                         <div key={idx} className="relative pl-8">
-                                            <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-white dark:bg-gray-900 border-[3px] border-indigo-500 z-10 shadow-sm" />
-                                            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-indigo-50/30 dark:bg-indigo-900/10 border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-all">
+                                            <div className="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full bg-sf-surface border-[3px] border-indigo-500 z-10 shadow-sm" />
+                                            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-indigo-50/30 dark:bg-indigo-900/10 border border-sf-divider hover:border-indigo-200 dark:hover:border-indigo-800 transition-all">
                                                 <span className="text-[10px] font-mono font-bold text-indigo-400/80">{formatTime(event.timestamp)}</span>
-                                                <div className="font-bold text-gray-800 dark:text-gray-100 text-[13px] cursor-pointer hover:text-indigo-600 flex items-center justify-between" onClick={() => toggleGroup(idx)}>
+                                                <div className="font-bold text-sf-text text-[13px] cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-between" onClick={() => toggleGroup(idx)}>
                                                     <span>{event.label}</span>
-                                                    <div className="p-0.5 rounded bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                                                    <div className="p-0.5 rounded bg-sf-surface border border-sf-divider text-sf-text">
                                                         {exp ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                                                     </div>
                                                 </div>
-                                                <div className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5">
-                                                    <div className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-[8px]">{(event.performedByName || event.performedBy || 'S').charAt(0).toUpperCase()}</div>
+                                                <div className="text-[11px] text-sf-muted font-semibold flex items-center gap-1.5">
+                                                    <div className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-[8px] text-indigo-700 dark:text-indigo-300">{(event.performedByName || event.performedBy || 'S').charAt(0).toUpperCase()}</div>
                                                     {event.performedByName || event.performedBy || 'System'}
                                                 </div>
                                                 {exp && (
                                                     <div className="mt-3 pl-3 border-l-2 border-indigo-100 dark:border-indigo-900/50 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                                                         {event.members.map((m, mi) => (
                                                             <div key={mi} className="flex flex-col gap-1">
-                                                                <div className="text-[11px] text-gray-700 dark:text-gray-300 font-bold flex items-center gap-2">
+                                                                <div className="text-[11px] text-sf-text font-bold flex items-center gap-2">
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                                                                     {m.analysisName || m.analysisCode || humanizeAudit(m)}
                                                                 </div>
@@ -289,12 +299,12 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
                                 }
                                 return (
                                     <div key={event.id || idx} className="relative pl-8 group">
-                                        <div className="absolute -left-3 top-0 p-1.5 bg-white dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 rounded-xl z-10 shadow-sm transition-all group-hover:border-indigo-400 group-hover:scale-110 group-hover:shadow-md">
+                                        <div className="absolute -left-3 top-0 p-1.5 bg-sf-surface border-2 border-sf-divider rounded-xl z-10 shadow-sm transition-all group-hover:border-indigo-400 group-hover:scale-110 group-hover:shadow-md">
                                             {getAuditIcon(event.action)}
                                         </div>
-                                        <div className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
-                                            <span className="text-[10px] font-mono font-bold text-gray-400 group-hover:text-indigo-400 transition-colors">{formatTime(event.timestamp)}</span>
-                                            <div className="font-bold text-gray-800 dark:text-gray-100 text-[13px] leading-snug">{humanizeAudit(event)}</div>
+                                        <div className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-sf-canvas transition-all border border-transparent hover:border-sf-divider">
+                                            <span className="text-[10px] font-mono font-bold text-sf-muted group-hover:text-indigo-400 transition-colors">{formatTime(event.timestamp)}</span>
+                                            <div className="font-bold text-sf-text text-[13px] leading-snug">{humanizeAudit(event)}</div>
                                             <div className="flex items-center gap-2 text-[11px] text-indigo-600 dark:text-indigo-400 font-bold">
                                                 <div className="w-4 h-4 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-[8px] border border-indigo-100 dark:border-indigo-800">
                                                     {(event.performedByName || event.performedBy || 'S').charAt(0).toUpperCase()}
@@ -302,9 +312,9 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
                                                 {event.performedByName || event.performedBy || 'System'}
                                             </div>
                                             {(event.reason || (event.details && !humanizeAudit(event).includes(event.details))) && (
-                                                <div className="mt-2 text-[11px] text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                                                <div className="mt-2 text-[11px] text-sf-muted bg-sf-canvas p-2.5 rounded-lg border border-sf-divider shadow-sm">
                                                     {event.reason && <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-black mb-1 text-[10px] uppercase tracking-wider"><span className="w-1 h-1 rounded-full bg-orange-600 animate-pulse" />Reason: {event.reason}</div>}
-                                                    {event.details && event.details !== humanizeAudit(event) && <div className="font-medium whitespace-pre-wrap leading-relaxed">{event.details}</div>}
+                                                    {event.details && event.details !== humanizeAudit(event) && <div className="font-medium whitespace-pre-wrap leading-relaxed text-sf-text">{event.details}</div>}
                                                 </div>
                                             )}
                                         </div>
@@ -333,11 +343,11 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
 
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div className="bg-sf-surface rounded-lg shadow border border-sf-divider overflow-x-auto">
                 <table className="w-full text-sm text-left min-w-[700px]">
-                    <thead className="text-[10px] font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-gray-200 dark:border-gray-700">
+                    <thead className="text-[10px] font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-b border-sf-divider">
                         <tr>
-                            <th className="p-4 w-4"><input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} checked={data.length > 0 && selected.length === data.length} /></th>
+                            <th className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} checked={data.length > 0 && selected.length === data.length} /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('labId')}>ID <SortIcon field="labId" /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('projectCode')}>Project <SortIcon field="projectCode" /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('status')}>State <SortIcon field="status" /></th>
@@ -350,15 +360,15 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                     <tbody>
                         {loading && data.length === 0 && (
                             Array.from({ length: 6 }).map((_, i) => (
-                                <tr key={`skel-${i}`} className="border-b border-gray-100 dark:border-gray-700 animate-pulse">
-                                    <td className="p-4 w-4"><div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded" /></td>
-                                    <td className="px-4 py-4"><div className="flex items-center gap-2.5"><div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg" /><div className="flex flex-col gap-1.5"><div className={`h-3.5 bg-gray-200 dark:bg-gray-700 rounded`} style={{ width: `${80 + i * 15}px` }} /><div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-16" /></div></div></td>
-                                    <td className="px-4 py-4"><div className="flex flex-col gap-1.5"><div className={`h-3 bg-gray-200 dark:bg-gray-700 rounded`} style={{ width: `${70 + i * 10}px` }} /><div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-12" /></div></td>
-                                    <td className="px-4 py-4"><div className="w-9 h-9 bg-gray-200 dark:bg-gray-700 rounded-xl mx-auto" /></td>
-                                    <td className="px-4 py-4"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-lg" /></td>
-                                    <td className="px-4 py-4"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full" /><div className="w-8 h-3 bg-gray-200 dark:bg-gray-700 rounded" /></div></td>
-                                    <td className="px-4 py-4"><div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-14" /></td>
-                                    <td className="px-4 py-4"><div className="flex justify-end gap-1"><div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded" /><div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded" /></div></td>
+                                <tr key={`skel-${i}`} className="border-b border-sf-divider animate-pulse">
+                                    <td className="p-4 w-4"><div className="w-4 h-4 bg-sf-canvas rounded" /></td>
+                                    <td className="px-4 py-4"><div className="flex items-center gap-2.5"><div className="w-8 h-8 bg-sf-canvas rounded-lg" /><div className="flex flex-col gap-1.5"><div className={`h-3.5 bg-sf-canvas rounded`} style={{ width: `${80 + i * 15}px` }} /><div className="h-2.5 bg-sf-canvas rounded w-16" /></div></div></td>
+                                    <td className="px-4 py-4"><div className="flex flex-col gap-1.5"><div className={`h-3 bg-sf-canvas rounded`} style={{ width: `${70 + i * 10}px` }} /><div className="h-2.5 bg-sf-canvas rounded w-12" /></div></td>
+                                    <td className="px-4 py-4"><div className="w-9 h-9 bg-sf-canvas rounded-xl mx-auto" /></td>
+                                    <td className="px-4 py-4"><div className="w-6 h-6 bg-sf-canvas rounded-lg" /></td>
+                                    <td className="px-4 py-4"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-sf-canvas rounded-full" /><div className="w-8 h-3 bg-sf-canvas rounded" /></div></td>
+                                    <td className="px-4 py-4"><div className="h-3 bg-sf-canvas rounded w-14" /></td>
+                                    <td className="px-4 py-4"><div className="flex justify-end gap-1"><div className="w-6 h-6 bg-sf-canvas rounded" /><div className="w-6 h-6 bg-sf-canvas rounded" /></div></td>
                                 </tr>
                             ))
                         )}
@@ -371,13 +381,13 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
 
                             return (
                                 <tr key={sample.id} onClick={(e) => handleRowClick(e, sample.id)} onKeyDown={(e) => handleRowKeyDown(e, sample.id)} tabIndex={0} role="link" aria-label={`Sample ${sample.labId || sample.originalId || sample.id}`}
-                                    className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${selected.includes(sample.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/10 scale-95' : ''}`}>
+                                    className={`border-b border-sf-divider hover:bg-sf-canvas cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${selected.includes(sample.id) ? 'bg-emerald-50/30 dark:bg-emerald-950/20' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/10 scale-95' : ''}`}>
 
                                     {/* Checkbox */}
-                                    <td className="p-4 w-4"><input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500" checked={selected.includes(sample.id)} onChange={(e) => onSelect(sample.id, e.target.checked)} disabled={isDeleting} /></td>
+                                    <td className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" checked={selected.includes(sample.id)} onChange={(e) => onSelect(sample.id, e.target.checked)} disabled={isDeleting} /></td>
 
                                     {/* ID */}
-                                    <td className="px-4 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                    <td className="px-4 py-4 font-medium text-sf-text whitespace-nowrap">
                                         <div className="flex items-center gap-2.5">
                                             <div className={`p-1.5 rounded-lg shrink-0 ${isWalkIn ? 'bg-orange-50 text-orange-500 dark:bg-orange-900/20' : 'bg-blue-50 text-blue-500 dark:bg-blue-900/20'}`}>
                                                 {isWalkIn ? <User size={14} /> : <FileText size={14} />}
@@ -388,12 +398,12 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                         ? (sample.originalId || 'PENDING')
                                                         : (sample.labId || sample.siteId || sample.originalId || 'PENDING')}
                                                 </span>
-                                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                <span className="text-xs text-sf-muted flex items-center gap-1">
                                                     {sample.status === 'EXPECTED'
                                                         ? <span className="text-amber-500 font-medium">Lab ID: Pending</span>
                                                         : sample.labId
                                                             ? sample.originalId
-                                                            : sample.siteId ? <><MapPin size={10} className="text-gray-400" />{sample.originalId}</> : ''}
+                                                            : sample.siteId ? <><MapPin size={10} className="text-sf-muted" />{sample.originalId}</> : ''}
                                                 </span>
                                             </div>
                                         </div>
@@ -405,12 +415,12 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                             <span className="text-sm font-medium text-orange-600 dark:text-orange-400">Walk-in</span>
                                         ) : (
                                             <div className="flex flex-col">
-                                                <div className="flex items-center gap-1.5 font-bold text-gray-700 dark:text-gray-200 text-sm">
-                                                    <Folder size={13} className="text-gray-400 shrink-0" />
+                                                <div className="flex items-center gap-1.5 font-bold text-sf-text text-sm">
+                                                    <Folder size={13} className="text-sf-muted shrink-0" />
                                                     <span className="truncate max-w-[120px]">{sample.projectCode}</span>
                                                 </div>
                                                 {(sample.countryName || sample.country) && (
-                                                    <div className="flex items-center gap-1 text-xs text-gray-500 pl-5"><MapPin size={9} />{sample.countryName || sample.country}</div>
+                                                    <div className="flex items-center gap-1 text-xs text-sf-muted pl-5"><MapPin size={9} />{sample.countryName || sample.country}</div>
                                                 )}
                                             </div>
                                         )}
@@ -428,7 +438,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                     <td className="px-4 py-4">
                                         <div className="flex gap-1.5">
                                             {attention === null ? (
-                                                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
+                                                <span className="text-xs text-sf-muted">—</span>
                                             ) : attention.length === 0 ? (
                                                 <span className="text-xs text-emerald-500 flex items-center gap-1"><CheckCircle2 size={13} /><span className="font-medium">OK</span></span>
                                             ) : (
@@ -439,9 +449,9 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                             <div className={`p-1.5 rounded-lg border-2 border-transparent transition-all duration-300 group-hover/flag:border-current group-hover/flag:bg-current/10 ${flag.color}`}>
                                                                 <FlagIcon size={16} className="transition-transform duration-300 group-hover/flag:scale-110" />
                                                             </div>
-                                                            <div className={`absolute left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover/flag:opacity-100 whitespace-nowrap pointer-events-none z-50 transition-all duration-300 shadow-xl ${rowIdx < 2 && data.length > 3 ? 'top-full mt-2' : 'bottom-full mb-2'}`}>
+                                                            <div className={`absolute left-1/2 -translate-x-1/2 px-3 py-1.5 bg-sf-raised text-sf-text text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover/flag:opacity-100 whitespace-nowrap pointer-events-none z-50 transition-all duration-300 shadow-xl border border-sf-divider ${rowIdx < 2 && data.length > 3 ? 'top-full mt-2' : 'bottom-full mb-2'}`}>
                                                                 {flag.label}
-                                                                <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${rowIdx < 2 && data.length > 3 ? 'bottom-full -mb-1 border-b-gray-900' : 'top-full -mt-1 border-t-gray-900'}`}></div>
+                                                                <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${rowIdx < 2 && data.length > 3 ? 'bottom-full -mb-1 border-b-sf-raised' : 'top-full -mt-1 border-t-sf-raised'}`}></div>
                                                             </div>
                                                         </div>
                                                     );
@@ -462,7 +472,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                             });
                                             return (
                                                 <div className="group/prog relative flex items-center gap-2.5 min-w-[110px]">
-                                                    <div className="flex-1 flex rounded-full h-2 overflow-hidden shadow-inner bg-gray-200 dark:bg-gray-700 gap-px">
+                                                    <div className="flex-1 flex rounded-full h-2 overflow-hidden shadow-inner bg-sf-canvas gap-px">
                                                         {segments.map(s => (
                                                             <div key={s.cat} className="relative h-full overflow-hidden" style={{ width: `${s.w}%` }}>
                                                                 <div className={`h-full ${s.cc.bar} transition-all duration-1000 ease-out`} style={{ width: `${s.fill}%` }} />
@@ -472,38 +482,38 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                     <div className="shrink-0">
                                                         {done
                                                             ? <div className="flex items-center gap-1 text-emerald-500"><CheckCircle2 size={14} /><span className="text-[10px] font-black">DONE</span></div>
-                                                            : <span className="text-[10px] text-gray-500 font-bold tabular-nums">{progress.completed}/{progress.total}</span>
+                                                            : <span className="text-[10px] text-sf-muted font-bold tabular-nums">{progress.completed}/{progress.total}</span>
                                                         }
                                                     </div>
                                                     {/* Tooltip: grouped by category */}
-                                                    <div className={`absolute left-1/2 -translate-x-1/2 px-3 py-2.5 bg-gray-900 dark:bg-black text-white text-[10px] rounded-lg opacity-0 group-hover/prog:opacity-100 pointer-events-none z-50 transition-all duration-300 shadow-xl whitespace-nowrap border border-white/10 min-w-[180px] ${rowIdx < 2 && data.length > 3 ? 'top-full mt-2 translate-y-2 group-hover/prog:translate-y-0' : 'bottom-full mb-2 translate-y-2 group-hover/prog:translate-y-0'}`}>
+                                                    <div className={`absolute left-1/2 -translate-x-1/2 px-3 py-2.5 bg-sf-raised text-sf-text text-[10px] rounded-lg opacity-0 group-hover/prog:opacity-100 pointer-events-none z-50 transition-all duration-300 shadow-xl whitespace-nowrap border border-sf-divider min-w-[180px] ${rowIdx < 2 && data.length > 3 ? 'top-full mt-2 translate-y-2 group-hover/prog:translate-y-0' : 'bottom-full mb-2 translate-y-2 group-hover/prog:translate-y-0'}`}>
                                                         <div className="flex flex-col gap-2">
                                                             {segments.map(s => (
                                                                 <div key={s.cat}>
                                                                     <div className="flex items-center gap-2 mb-1">
                                                                         <div className={`w-2 h-2 rounded-full ${s.cc.bar}`} />
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{s.cc.label}</span>
-                                                                        <span className={`ml-auto text-[9px] font-bold ${s.comp === s.items.length ? 'text-emerald-400' : 'text-gray-500'}`}>{s.comp}/{s.items.length}</span>
+                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-sf-muted">{s.cc.label}</span>
+                                                                        <span className={`ml-auto text-[9px] font-bold ${s.comp === s.items.length ? 'text-emerald-400' : 'text-sf-muted'}`}>{s.comp}/{s.items.length}</span>
                                                                     </div>
                                                                     {s.items.map((item, idx) => (
                                                                         <div key={idx} className="flex items-center gap-2 py-0.5 pl-4">
-                                                                            <span className={WI_STATUS_COLOR[item.status] || 'text-gray-500'}>{WI_STATUS_ICON[item.status] || '○'}</span>
+                                                                            <span className={WI_STATUS_COLOR[item.status] || 'text-sf-muted'}>{WI_STATUS_ICON[item.status] || '○'}</span>
                                                                             <span className="font-bold">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                        <div className="mt-1.5 pt-1.5 border-t border-white/10 text-gray-400 font-black">{pct}% — {progress.completed} of {progress.total} steps</div>
-                                                        <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${rowIdx < 2 && data.length > 3 ? 'bottom-full -mb-1 border-b-gray-900 dark:border-b-black' : 'top-full -mt-1 border-t-gray-900 dark:border-t-black'}`}></div>
+                                                        <div className="mt-1.5 pt-1.5 border-t border-sf-divider text-sf-muted font-black">{pct}% — {progress.completed} of {progress.total} steps</div>
+                                                        <div className={`absolute left-1/2 -translate-x-1/2 border-4 border-transparent ${rowIdx < 2 && data.length > 3 ? 'bottom-full -mb-1 border-b-sf-raised' : 'top-full -mt-1 border-t-sf-raised'}`}></div>
                                                     </div>
                                                 </div>
                                             );
-                                        })() : <span className="text-xs text-gray-400 italic">—</span>}
+                                        })() : <span className="text-xs text-sf-muted italic">—</span>}
                                     </td>
 
                                     {/* Updated */}
-                                    <td className="px-4 py-4 text-xs text-gray-500 whitespace-nowrap">
+                                    <td className="px-4 py-4 text-xs text-sf-muted whitespace-nowrap">
                                         {sample.updatedAt ? new Date(sample.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '—'}
                                     </td>
 
@@ -511,20 +521,20 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                     <td className="px-4 py-4 text-right">
                                         <div className="flex items-center justify-end gap-1">
                                             {user.role === 'SUPER_ADMIN' && !isProtected && !isDeleting && (
-                                                <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-gray-400 hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete" aria-label="Delete sample"><Trash2 size={15} /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-sf-muted hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete" aria-label="Delete sample"><Trash2 size={15} /></button>
                                             )}
-                                            <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-gray-400 hover:text-indigo-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Print Label" aria-label="Print label"><Printer size={15} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-sf-muted hover:text-indigo-600 p-1.5 hover:bg-sf-canvas rounded transition-colors" title="Print Label" aria-label="Print label"><Printer size={15} /></button>
                                             {!['EXPECTED', 'RECEIVED', 'COLLECTED', 'DRAFT'].includes(sample.status) && (
-                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/samples/${sample.id}/map`); }} className="text-gray-400 hover:text-purple-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Workflow Map" aria-label="Workflow map"><GitBranch size={15} /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/samples/${sample.id}/map`); }} className="text-sf-muted hover:text-purple-600 p-1.5 hover:bg-sf-canvas rounded transition-colors" title="Workflow Map" aria-label="Workflow map"><GitBranch size={15} /></button>
                                             )}
-                                            <button onClick={(e) => { e.stopPropagation(); setAuditSampleId(sample.id); }} className="text-gray-400 hover:text-emerald-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors" title="Audit Log" aria-label="Audit log"><ExternalLink size={15} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); setAuditSampleId(sample.id); }} className="text-sf-muted hover:text-emerald-600 p-1.5 hover:bg-sf-canvas rounded transition-colors" title="Audit Log" aria-label="Audit log"><ExternalLink size={15} /></button>
                                         </div>
                                     </td>
                                 </tr>
                             );
                         })}
                         {!loading && data.length === 0 && (
-                            <tr><td colSpan="8" className="p-8 text-center text-gray-500 dark:text-gray-400 italic">No samples found matching your filters.</td></tr>
+                            <tr><td colSpan="8" className="p-8 text-center text-sf-muted italic">No samples found matching your filters.</td></tr>
                         )}
                     </tbody>
                 </table>

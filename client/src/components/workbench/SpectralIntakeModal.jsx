@@ -388,39 +388,39 @@ export default function SpectralIntakeModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-4xl bg-sf-surface rounded-2xl shadow-2xl border border-sf-divider flex flex-col max-h-[92vh] overflow-hidden">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-sf-divider flex items-center justify-between">
                     <div>
-                        <span className="text-[11px] text-emerald-600 font-semibold uppercase tracking-wider">
+                        <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider">
                             Spectroscopy Intake & QC Engine
                         </span>
-                        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <h2 className="text-base font-bold text-sf-text flex items-center gap-2">
                             {effectiveTargetModality === 'MIR' ? 'Mid-Infrared (MIR DRIFTS) Intake' : 'Visible & Near-Infrared (Vis-NIR) Intake'}
                             {selectedItem && (
-                                <span className="text-xs px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-normal">
+                                <span className="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 font-normal">
                                     Target: {selectedItem.sampleDisplayId || selectedItem.labId || selectedItem.sampleId}
                                 </span>
                             )}
                         </h2>
                     </div>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+                    <button onClick={onClose} className="text-sf-muted hover:text-sf-text transition-colors">
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Steps indicator */}
-                <div className="px-6 py-3 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center gap-6 text-xs font-medium">
+                <div className="px-6 py-3 bg-sf-canvas/50 border-b border-sf-divider flex items-center gap-6 text-xs font-medium">
                     {[
                         { num: 1, label: 'Identify & Upload' },
                         { num: 2, label: 'Match & Inspect' },
                         { num: 3, label: 'Confirm Import' },
                         { num: 4, label: 'Receipt' }
                     ].map(st => (
-                        <div key={st.num} className={`flex items-center gap-2 ${step === st.num ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'}`}>
+                        <div key={st.num} className={`flex items-center gap-2 ${step === st.num ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-sf-muted'}`}>
                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] border
-                                ${step === st.num ? 'border-emerald-600 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700' : 'border-slate-300 dark:border-slate-700 text-slate-400'}
+                                ${step === st.num ? 'border-emerald-600 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold' : 'border-sf-divider text-sf-muted'}
                             `}>
                                 {st.num}
                             </span>
@@ -432,7 +432,7 @@ export default function SpectralIntakeModal({
                 {/* Body Content */}
                 <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
                     {error && (
-                        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 flex items-center gap-2">
+                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-800 dark:text-red-300 flex items-center gap-2">
                             <AlertOctagon size={16} className="shrink-0 text-red-600" />
                             <span>{error}</span>
                         </div>
@@ -441,15 +441,15 @@ export default function SpectralIntakeModal({
                     {/* Step 1: Identify Run & Upload */}
                     {step === 1 && (
                         <div className="flex flex-col gap-5">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-sf-divider bg-sf-canvas/50">
                                 <div>
-                                    <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
+                                    <label className="text-[11px] font-bold text-sf-muted uppercase block mb-1">
                                         Operating Spectrometer (Required)
                                     </label>
                                     <select
                                         value={selectedInstrument}
                                         onChange={(e) => setSelectedInstrument(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium"
+                                        className="w-full px-3 py-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text font-medium focus:ring-1 focus:ring-emerald-500"
                                     >
                                         <option value="">-- Select Verified Spectrometer --</option>
                                         {instruments.map(eq => (
@@ -458,14 +458,14 @@ export default function SpectralIntakeModal({
                                             </option>
                                         ))}
                                     </select>
-                                    <span className="text-[10px] text-slate-400 mt-1 block">
+                                    <span className="text-[10px] text-sf-muted mt-1 block">
                                         {selectedInstrument ? '✓ Verified instrument selected' : 'Spectrometer must be active and qualified in the equipment register.'}
                                     </span>
                                 </div>
 
                                 <div>
                                     <div className="flex items-center justify-between mb-1">
-                                        <label className="text-[11px] font-bold text-slate-500 uppercase">
+                                        <label className="text-[11px] font-bold text-sf-muted uppercase">
                                             Modality & Acquisition Method
                                         </label>
                                         {overrideModality && (
@@ -484,15 +484,15 @@ export default function SpectralIntakeModal({
                                             onClick={() => setOverrideModality('MIR')}
                                             className={`py-2 px-2.5 rounded-lg border text-left text-xs transition-all flex flex-col ${
                                                 effectiveTargetModality === 'MIR'
-                                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500'
-                                                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                                    ? 'border-emerald-500 bg-emerald-500/15 text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500'
+                                                    : 'border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-hover hover:text-sf-text'
                                             }`}
                                         >
                                             <span className="font-bold flex items-center justify-between">
                                                 <span>MIR DRIFTS</span>
-                                                {effectiveTargetModality === 'MIR' && <span className="text-[10px] font-bold text-emerald-600">Active</span>}
+                                                {effectiveTargetModality === 'MIR' && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Active</span>}
                                             </span>
-                                            <span className="text-[10px] text-slate-400">4000 - 400 cm⁻¹</span>
+                                            <span className="text-[10px] text-sf-muted">4000 - 400 cm⁻¹</span>
                                         </button>
 
                                         <button
@@ -500,25 +500,25 @@ export default function SpectralIntakeModal({
                                             onClick={() => setOverrideModality('NIR')}
                                             className={`py-2 px-2.5 rounded-lg border text-left text-xs transition-all flex flex-col ${
                                                 effectiveTargetModality === 'NIR'
-                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500'
-                                                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                                    ? 'border-blue-500 bg-blue-500/15 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500'
+                                                    : 'border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-hover hover:text-sf-text'
                                             }`}
                                         >
                                             <span className="font-bold flex items-center justify-between">
                                                 <span>Vis-NIR</span>
-                                                {effectiveTargetModality === 'NIR' && <span className="text-[10px] font-bold text-blue-600">Active</span>}
+                                                {effectiveTargetModality === 'NIR' && <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Active</span>}
                                             </span>
-                                            <span className="text-[10px] text-slate-400">350 - 2500 nm</span>
+                                            <span className="text-[10px] text-sf-muted">350 - 2500 nm</span>
                                         </button>
                                     </div>
-                                    <span className="text-[10px] text-slate-400 mt-1 block">
+                                    <span className="text-[10px] text-sf-muted mt-1 block">
                                         Task default: {defaultTargetModality === 'MIR' ? 'Mid-Infrared (SPEC_MIR)' : 'Near-Infrared (SPEC_NIR)'}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Dropzone */}
-                            <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-2.5 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors relative cursor-pointer">
+                            <div className="border-2 border-dashed border-sf-divider rounded-xl p-6 flex flex-col items-center justify-center text-center gap-2.5 bg-sf-canvas/30 hover:bg-sf-hover/30 transition-colors relative cursor-pointer">
                                 <input
                                     type="file"
                                     multiple
@@ -528,15 +528,15 @@ export default function SpectralIntakeModal({
                                 />
                                 <Upload size={32} className="text-blue-500" />
                                 <div>
-                                    <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+                                    <h4 className="font-semibold text-sm text-sf-text">
                                         {files.length > 0 ? `${files.length} file(s) selected` : 'Select or Drop Spectral Files'}
                                     </h4>
-                                    <p className="text-xs text-slate-500 mt-0.5 max-w-md">
+                                    <p className="text-xs text-sf-muted mt-0.5 max-w-md">
                                         Supports Bruker OPUS (.opus), JCAMP-DX (.dx), Galactic SPC (.spc), ASD (.asd), and calibrated CSV exports.
                                     </p>
                                 </div>
                                 {files.length > 0 && (
-                                    <div className="text-xs font-mono px-3 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-full">
+                                    <div className="text-xs font-mono px-3 py-1 bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-full">
                                         {files.map(f => f.name).join(', ')}
                                     </div>
                                 )}
@@ -603,14 +603,14 @@ export default function SpectralIntakeModal({
                     {step === 2 && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                             {/* Scans list */}
-                            <div className="lg:col-span-2 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col">
-                                <div className="p-3 bg-slate-100 dark:bg-slate-850 font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+                            <div className="lg:col-span-2 border border-sf-divider rounded-lg overflow-hidden flex flex-col bg-sf-surface">
+                                <div className="p-3 bg-sf-canvas/80 font-semibold text-sf-text flex items-center justify-between border-b border-sf-divider">
                                     <span>Staged Scans ({stagedItems.length})</span>
-                                    <span className="text-[11px] text-emerald-600 font-bold">
+                                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
                                         {eligibleItems.length} Eligible to Commit
                                     </span>
                                 </div>
-                                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-80 overflow-y-auto">
+                                <div className="divide-y divide-sf-divider max-h-80 overflow-y-auto bg-sf-surface">
                                     {stagedItems.map((item, idx) => {
                                         const st = getItemStatus(item);
                                         const isSelected = selectedScanIdx === idx;
@@ -621,11 +621,11 @@ export default function SpectralIntakeModal({
                                                 key={item.id}
                                                 onClick={() => setSelectedScanIdx(idx)}
                                                 className={`p-3 flex flex-col gap-2 cursor-pointer transition-colors ${
-                                                    isSelected ? 'bg-blue-50/70 dark:bg-blue-950/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                                                    isSelected ? 'bg-emerald-500/10 dark:bg-emerald-950/20' : 'hover:bg-sf-hover/60'
                                                 }`}
                                             >
                                                 <div className="flex items-center justify-between">
-                                                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
+                                                    <span className="font-mono font-bold text-sf-text truncate max-w-[200px]">
                                                         {item.filename}
                                                     </span>
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${st.tone}`}>
@@ -633,9 +633,9 @@ export default function SpectralIntakeModal({
                                                     </span>
                                                 </div>
 
-                                                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                                                <div className="flex items-center justify-between text-[11px] text-sf-muted">
                                                     <span>
-                                                        Sample: <strong className="text-slate-700 dark:text-slate-300">
+                                                        Sample: <strong className="text-sf-text">
                                                             {item.matchedSample?.sampleDisplayId || item.matchedSample?.labId || 'Unmatched'}
                                                         </strong>
                                                     </span>
@@ -644,8 +644,8 @@ export default function SpectralIntakeModal({
 
                                                 {/* Duplicate Replicate Resolution */}
                                                 {item.duplicate && (
-                                                    <div className="mt-1 pt-1.5 border-t border-dashed border-slate-200 dark:border-slate-800 flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                                        <span className="text-[10px] text-amber-600 font-bold">Decision:</span>
+                                                    <div className="mt-1 pt-1.5 border-t border-dashed border-sf-divider flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">Decision:</span>
                                                         <select
                                                             value={dec.decision}
                                                             onChange={(e) => {
@@ -653,7 +653,7 @@ export default function SpectralIntakeModal({
                                                                 next[item.id] = { ...dec, decision: e.target.value };
                                                                 setDecisions(next);
                                                             }}
-                                                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px]"
+                                                            className="px-2 py-1 rounded border border-sf-divider bg-sf-canvas text-sf-text text-[11px] focus:ring-1 focus:ring-emerald-500"
                                                         >
                                                             <option value="REPLACE">Replace Prior Scan (Supersede)</option>
                                                             <option value="ADD_REPLICATE">Add as Replicate 2 (Preserve R1)</option>
@@ -668,22 +668,22 @@ export default function SpectralIntakeModal({
                             </div>
 
                             {/* Curve Inspector */}
-                            <div className="p-3 border border-slate-200 dark:border-slate-800 rounded-lg flex flex-col gap-2.5 bg-slate-50 dark:bg-slate-950">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Interactive Signal Curve</span>
+                            <div className="p-3 border border-sf-divider rounded-lg flex flex-col gap-2.5 bg-sf-surface">
+                                <span className="text-[10px] font-bold text-sf-muted uppercase">Interactive Signal Curve</span>
                                 {renderSignalCurve(stagedItems[selectedScanIdx])}
                                 <div className="mt-1 text-xs space-y-1">
                                     <div className="flex justify-between text-[11px]">
-                                        <span className="text-slate-400">Data Points:</span>
-                                        <span className="font-mono">{stagedItems[selectedScanIdx]?.wavelengths?.length || 0} pts</span>
+                                        <span className="text-sf-muted">Data Points:</span>
+                                        <span className="font-mono text-sf-text">{stagedItems[selectedScanIdx]?.wavelengths?.length || 0} pts</span>
                                     </div>
                                     <div className="flex justify-between text-[11px]">
-                                        <span className="text-slate-400">QC Status:</span>
+                                        <span className="text-sf-muted">QC Status:</span>
                                         <span className={`font-bold ${stagedItems[selectedScanIdx]?.qcStatus === 'FAIL' ? 'text-red-600' : (stagedItems[selectedScanIdx]?.qcStatus === 'WARN' ? 'text-amber-600' : 'text-emerald-600')}`}>
                                             {stagedItems[selectedScanIdx]?.qcStatus}
                                         </span>
                                     </div>
                                     {stagedItems[selectedScanIdx]?.qcFlags?.length > 0 && (
-                                        <div className="p-2 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 text-[10px]">
+                                        <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px]">
                                             Flags: {stagedItems[selectedScanIdx].qcFlags.join(', ')}
                                         </div>
                                     )}
@@ -695,23 +695,23 @@ export default function SpectralIntakeModal({
                     {/* Step 3: Confirm Import */}
                     {step === 3 && (
                         <div className="flex flex-col gap-4">
-                            <div className="p-3.5 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-200 text-xs leading-relaxed">
+                            <div className="p-3.5 rounded-lg border border-blue-500/20 bg-blue-500/10 text-blue-800 dark:text-blue-200 text-xs leading-relaxed">
                                 You are about to commit <strong>{eligibleItems.length} eligible spectral scan(s)</strong> into the library.
                                 Atomic database records will be created, files permanently persisted, and corresponding queue tasks marked as acquired.
                             </div>
 
-                            <div className="border border-slate-200 dark:border-slate-800 rounded-lg divide-y divide-slate-100 dark:divide-slate-800 max-h-60 overflow-y-auto">
+                            <div className="border border-sf-divider rounded-lg divide-y divide-sf-divider max-h-60 overflow-y-auto bg-sf-surface">
                                 {stagedItems.map((item, idx) => {
                                     const st = getItemStatus(item);
                                     const dec = decisions[item.id] || { decision: item.suggestedAction || 'PROCEED' };
                                     return (
                                         <div key={idx} className="p-2.5 flex items-center justify-between text-xs">
                                             <div className="flex items-center gap-2">
-                                                <FileText size={14} className="text-slate-400" />
-                                                <span className="font-mono">{item.filename}</span>
-                                                <span className="text-slate-400">→</span>
-                                                <span className="font-bold">{item.matchedSample?.sampleDisplayId || item.matchedSample?.labId || 'Unmatched'}</span>
-                                                <span className="text-[11px] text-slate-500">
+                                                <FileText size={14} className="text-sf-muted" />
+                                                <span className="font-mono text-sf-text">{item.filename}</span>
+                                                <span className="text-sf-muted">→</span>
+                                                <span className="font-bold text-sf-text">{item.matchedSample?.sampleDisplayId || item.matchedSample?.labId || 'Unmatched'}</span>
+                                                <span className="text-[11px] text-sf-muted">
                                                     ({dec.decision === 'REPLACE' ? 'Replace R1' : (dec.decision === 'ADD_REPLICATE' ? 'Replicate 2' : 'Replicate 1')})
                                                 </span>
                                             </div>
@@ -724,12 +724,12 @@ export default function SpectralIntakeModal({
                             </div>
 
                             <div className="flex flex-col gap-2 pt-2">
-                                <label className="flex items-center gap-2 text-xs cursor-pointer text-slate-800 dark:text-slate-200">
+                                <label className="flex items-center gap-2 text-xs cursor-pointer text-sf-text">
                                     <input
                                         type="checkbox"
                                         checked={confirmed}
                                         onChange={(e) => setConfirmed(e.target.checked)}
-                                        className="w-4 h-4 rounded text-emerald-600"
+                                        className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                                     />
                                     <span>I verified the sample IDs, replicate numbers, and spectra match the physical soil cups.</span>
                                 </label>
@@ -740,7 +740,7 @@ export default function SpectralIntakeModal({
                                             type="checkbox"
                                             checked={warningAck}
                                             onChange={(e) => setWarningAck(e.target.checked)}
-                                            className="w-4 h-4 rounded text-amber-600"
+                                            className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500"
                                         />
                                         <span>I acknowledged the signal QC warnings. Warnings will be recorded for technical review.</span>
                                     </label>
@@ -751,15 +751,15 @@ export default function SpectralIntakeModal({
 
                     {/* Step 4: Durable Receipt */}
                     {step === 4 && commitReceipt && (
-                        <div className="p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 text-center flex flex-col items-center gap-3">
+                        <div className="p-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-center flex flex-col items-center gap-3">
                             <CheckCircle2 size={36} className="text-emerald-600 dark:text-emerald-400" />
-                            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                            <h3 className="text-base font-bold text-sf-text">
                                 Spectral Intake Committed Successfully
                             </h3>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md">
+                            <p className="text-xs text-sf-muted max-w-md">
                                 Recorded {commitReceipt.success || eligibleItems.length} scan(s) into the permanent library with cryptographic SHA-256 integrity and task linkage.
                             </p>
-                            <div className="font-mono text-xs p-2.5 rounded bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700/60 mt-2">
+                            <div className="font-mono text-xs p-2.5 rounded bg-sf-surface border border-emerald-500/30 mt-2 text-sf-text">
                                 Manifest ID: {commitReceipt.manifestId || manifestId}
                             </div>
                         </div>
@@ -767,12 +767,12 @@ export default function SpectralIntakeModal({
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
+                <div className="px-6 py-3 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
                     {step > 1 && step < 4 ? (
                         <button
                             type="button"
                             onClick={() => setStep(step - 1)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider text-sf-text hover:bg-sf-hover transition-colors flex items-center gap-1"
                         >
                             <ArrowLeft size={13} /> Back
                         </button>
@@ -818,7 +818,7 @@ export default function SpectralIntakeModal({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-700 transition-colors"
+                                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-sf-raised text-sf-text border border-sf-divider hover:bg-sf-hover transition-colors"
                             >
                                 Close & Return to Workbench
                             </button>

@@ -12,6 +12,15 @@ const PRESET_REASONS = [
 ];
 
 const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen || !sample) return null;
 
     const [status, setStatus] = useState(sample.status || 'ACCEPTED');
@@ -73,20 +82,20 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl border border-sf-divider w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+                <div className="p-4 bg-sf-raised border-b border-sf-divider text-sf-text flex justify-between items-center">
                     <div>
-                        <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Sample Exception Override (Item #{index + 1})</div>
-                        <h3 className="text-lg font-bold font-mono text-white">{sample.originalId}</h3>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Sample Exception Override (Item #{index + 1})</div>
+                        <h3 className="text-lg font-bold font-mono text-sf-text">{sample.originalId}</h3>
                     </div>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors">
+                    <button onClick={onClose} className="text-sf-muted hover:text-sf-text p-1 rounded-lg transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-gray-700 dark:text-gray-200">
+                <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-sf-text">
                     {/* Status Toggle */}
                     <div>
                         <label className="block font-bold mb-2">Sample Reception Decision</label>
@@ -95,8 +104,8 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 type="button"
                                 onClick={() => setStatus('ACCEPTED')}
                                 className={`p-3 rounded-xl border flex items-center justify-center gap-2 font-bold transition-all ${status === 'ACCEPTED'
-                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
-                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                                    ? 'bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
+                                    : 'border-sf-divider hover:bg-sf-hover text-sf-muted'
                                 }`}
                             >
                                 <CheckCircle size={18} />
@@ -107,8 +116,8 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 type="button"
                                 onClick={() => setStatus('REJECTED')}
                                 className={`p-3 rounded-xl border flex items-center justify-center gap-2 font-bold transition-all ${status === 'REJECTED'
-                                    ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-700 dark:text-red-300 ring-2 ring-red-500/20'
-                                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                                    ? 'bg-red-500/10 border-red-500 text-red-700 dark:text-red-300 ring-2 ring-red-500/20'
+                                    : 'border-sf-divider hover:bg-sf-hover text-sf-muted'
                                 }`}
                             >
                                 <AlertTriangle size={18} />
@@ -119,7 +128,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
                     {/* Rejection Details */}
                     {status === 'REJECTED' && (
-                        <div className="p-4 bg-red-50/50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl space-y-3">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-3">
                             <label className="block font-bold text-red-900 dark:text-red-300">
                                 Rejection Reason <span className="text-red-500">*</span>
                             </label>
@@ -133,7 +142,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                         onClick={() => setRejectionReason(reason)}
                                         className={`text-xs px-2.5 py-1 rounded-full border transition-all ${rejectionReason === reason
                                             ? 'bg-red-600 text-white border-red-600 font-bold'
-                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-red-300'
+                                            : 'bg-sf-surface border-sf-divider text-sf-text hover:border-red-300'
                                         }`}
                                     >
                                         {reason}
@@ -145,7 +154,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
                                 placeholder="Explain why this bag cannot be accepted for analytical processing..."
-                                className="w-full p-2.5 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-hidden focus:ring-2 focus:ring-red-500 text-xs"
+                                className="w-full p-2.5 rounded-lg border border-red-500/30 bg-sf-canvas text-sf-text focus:outline-hidden focus:ring-2 focus:ring-red-500 text-xs"
                                 rows={2}
                             />
                         </div>
@@ -154,7 +163,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                     {/* Physical Overrides */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">
+                            <label className="block text-xs font-bold text-sf-muted mb-1">
                                 Received Mass (g)
                             </label>
                             <input
@@ -163,18 +172,18 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 value={receivedMass}
                                 onChange={(e) => setReceivedMass(e.target.value)}
                                 placeholder="e.g. 520"
-                                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs"
+                                className="w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text text-xs focus:ring-1 focus:ring-emerald-500"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">
+                            <label className="block text-xs font-bold text-sf-muted mb-1">
                                 Moisture State
                             </label>
                             <select
                                 value={moistureOnArrival}
                                 onChange={(e) => setMoistureOnArrival(e.target.value)}
-                                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs"
+                                className="w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text text-xs focus:ring-1 focus:ring-emerald-500"
                             >
                                 <option value="DRY">Dry (&lt;10%)</option>
                                 <option value="MOIST">Moist (10-25%)</option>
@@ -186,12 +195,12 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
                     {/* Non-conformance Photo Upload */}
                     <div>
-                        <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-1.5">
+                        <label className="block text-xs font-bold text-sf-muted mb-2 flex items-center gap-1.5">
                             <Camera size={14} /> Photographic Evidence of Condition
                         </label>
                         <div className="flex flex-wrap gap-2 items-center">
                             {photos.map((p, idx) => (
-                                <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 group">
+                                <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-sf-divider group">
                                     <img src={p} alt="evidence" className="w-full h-full object-cover" />
                                     <button
                                         type="button"
@@ -203,7 +212,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 </div>
                             ))}
 
-                            <label className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:text-blue-500 transition-colors">
+                            <label className="w-16 h-16 rounded-lg border-2 border-dashed border-sf-divider hover:border-emerald-500 flex flex-col items-center justify-center cursor-pointer text-sf-muted hover:text-emerald-500 transition-colors">
                                 <Upload size={18} />
                                 <span className="text-[9px] font-bold mt-1">Upload</span>
                                 <input
@@ -221,7 +230,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
                     {/* Specific Notes */}
                     <div>
-                        <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">
+                        <label className="block text-xs font-bold text-sf-muted mb-1">
                             Sample-Specific Intake Notes
                         </label>
                         <input
@@ -229,17 +238,17 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="e.g. Sample bag label smudged with water, verified via field sheet"
-                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs"
+                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text text-xs focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                <div className="p-4 bg-sf-canvas/40 border-t border-sf-divider flex justify-end gap-2">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:bg-sf-hover hover:text-sf-text transition-colors"
                     >
                         Cancel
                     </button>

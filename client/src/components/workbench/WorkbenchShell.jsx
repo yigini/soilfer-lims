@@ -460,7 +460,7 @@ export default function WorkbenchShell({
     return (
         <div className="flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans">
             {/* Top Ribbon */}
-            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <div className="flex items-center justify-between text-[11px] text-sf-muted border-b border-sf-divider pb-2">
                 <span>SoilFER LIMS / Technician Workspace</span>
                 <span>Role: {user?.role} · Lab: {user?.labId || 'Default'}</span>
             </div>
@@ -468,10 +468,10 @@ export default function WorkbenchShell({
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+                    <h1 className="text-2xl font-bold text-sf-text tracking-tight">
                         Technician Workbench
                     </h1>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-sf-muted mt-0.5">
                         Unified determination queue, method-aware worksheets, and two-step reviewer handoff
                     </p>
                 </div>
@@ -479,19 +479,19 @@ export default function WorkbenchShell({
                 {/* Save / Sync Status Pill */}
                 <div className="flex items-center gap-2">
                     {syncStatus === 'saving' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300">
                             <RefreshCw size={12} className="animate-spin" /> Saving drafts...
                         </span>
                     ) : syncStatus === 'conflict' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300">
                             <AlertTriangle size={12} /> {conflictCount} Conflict{conflictCount === 1 ? '' : 's'} to compare
                         </span>
                     ) : syncStatus === 'offline' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-700 dark:text-red-300">
                             Offline · Local edits preserved
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             <CheckCircle2 size={12} /> ✓ Drafts saved
                         </span>
                     )}
@@ -500,7 +500,7 @@ export default function WorkbenchShell({
                         type="button"
                         onClick={fetchQueue}
                         disabled={isLoading}
-                        className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                        className="p-1.5 rounded-lg border border-sf-divider hover:bg-sf-hover transition-colors text-sf-muted hover:text-sf-text"
                         title="Refresh queue"
                     >
                         <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
@@ -509,7 +509,7 @@ export default function WorkbenchShell({
             </div>
 
             {/* Navigation Tabs */}
-            <nav className="flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold" aria-label="Workbench navigation">
+            <nav className="flex items-center gap-1.5 border-b border-sf-divider text-xs font-semibold" aria-label="Workbench navigation">
                 {[
                     { id: 'queue', label: `My Work (${stats.myWorkCount ?? stats.totalItems ?? 0})` },
                     { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
@@ -535,7 +535,7 @@ export default function WorkbenchShell({
                         className={`px-4 py-2.5 border-b-2 transition-colors ${
                             activeTab === tab.id
                                 ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 font-bold'
-                                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         {tab.label}
@@ -627,9 +627,9 @@ export default function WorkbenchShell({
             {/* Toast Notification */}
             {toast && (
                 <div className={`fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-lg shadow-lg text-xs font-medium border flex items-center gap-2 ${
-                    toast.type === 'error' ? 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300' :
-                    toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300' :
-                    'bg-slate-800 text-white border-slate-700'
+                    toast.type === 'error' ? 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/80 dark:text-red-300 dark:border-red-900' :
+                    toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-900' :
+                    'bg-sf-raised text-sf-text border-sf-divider'
                 }`}>
                     <span>{toast.message}</span>
                 </div>

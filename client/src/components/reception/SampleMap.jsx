@@ -44,14 +44,14 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
 
     if (!hasCoords) {
         return (
-            <div className="h-64 bg-amber-50/50 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-amber-300 dark:border-amber-800/60 p-6 text-center">
+            <div className="h-64 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-amber-300 dark:border-amber-800/60 p-6 text-center">
                 <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full mb-2">
                     <MapPinOff size={24} />
                 </div>
-                <h4 className="font-bold text-gray-800 dark:text-gray-200 text-sm">
+                <h4 className="font-bold text-sf-text text-sm">
                     No coordinates recorded in the field
                 </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1">
+                <p className="text-xs text-sf-muted max-w-xs mt-1">
                     This sample was logged without GPS coordinates. Contact the field survey team or check the delivery manifest.
                 </p>
             </div>
@@ -64,7 +64,7 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
     const uncertainty = uncertaintyM || coordinates.positionalUncertaintyM || coordinates.accuracy;
 
     return (
-        <div className="relative isolate min-h-[256px] h-64 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700 z-0">
+        <div className="relative isolate min-h-[256px] h-64 rounded-xl overflow-hidden shadow-inner border border-sf-divider bg-sf-surface z-0">
             <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
                 <TileLayer

@@ -46,6 +46,14 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         }
     }, []);
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
     const handleFileUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -176,49 +184,49 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl border border-sf-divider w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+                <div className="p-4 bg-sf-raised border-b border-sf-divider text-sf-text flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-emerald-600/30 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30">
                             <FileSpreadsheet size={20} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white text-base">Client Manifest Spreadsheet Import</h3>
-                            <div className="text-xs text-slate-400">Institutional Delivery Manifests (CSV / XLSX)</div>
+                            <h3 className="font-bold text-sf-text text-base">Client Manifest Spreadsheet Import</h3>
+                            <div className="text-xs text-sf-muted">Institutional Delivery Manifests (CSV / XLSX)</div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors">
+                    <button onClick={onClose} className="text-sf-muted hover:text-sf-text p-1 rounded-lg transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Stepper Bar */}
-                <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs">
-                    <div className={`flex items-center gap-2 font-bold ${step === 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>1</span>
+                <div className="bg-sf-canvas px-6 py-3 border-b border-sf-divider flex items-center justify-between text-xs">
+                    <div className={`flex items-center gap-2 font-bold ${step === 1 ? 'text-blue-600 dark:text-blue-400' : 'text-sf-muted'}`}>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-sf-surface border border-sf-divider text-sf-muted'}`}>1</span>
                         Upload File
                     </div>
-                    <ArrowRight size={14} className="text-gray-300 dark:text-gray-600" />
-                    <div className={`flex items-center gap-2 font-bold ${step === 2 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>2</span>
+                    <ArrowRight size={14} className="text-sf-muted opacity-40" />
+                    <div className={`flex items-center gap-2 font-bold ${step === 2 ? 'text-blue-600 dark:text-blue-400' : 'text-sf-muted'}`}>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-sf-surface border border-sf-divider text-sf-muted'}`}>2</span>
                         Map Columns
                     </div>
-                    <ArrowRight size={14} className="text-gray-300 dark:text-gray-600" />
-                    <div className={`flex items-center gap-2 font-bold ${step === 3 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>3</span>
+                    <ArrowRight size={14} className="text-sf-muted opacity-40" />
+                    <div className={`flex items-center gap-2 font-bold ${step === 3 ? 'text-blue-600 dark:text-blue-400' : 'text-sf-muted'}`}>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 3 ? 'bg-blue-600 text-white' : 'bg-sf-surface border border-sf-divider text-sf-muted'}`}>3</span>
                         Review & Batch Receive
                     </div>
                 </div>
 
                 {/* Content Area */}
-                <div className="p-6 overflow-y-auto flex-1">
+                <div className="p-6 overflow-y-auto flex-1 bg-sf-surface">
                     {/* STEP 1: UPLOAD */}
                     {step === 1 && (
-                        <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-900/40 text-center">
+                        <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-sf-divider rounded-2xl bg-sf-canvas text-center">
                             <FileSpreadsheet size={48} className="text-emerald-500 mb-4 animate-bounce" />
-                            <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Select or drop client spreadsheet</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">Supports Microsoft Excel (.xlsx, .xls) and Comma-Separated Values (.csv)</p>
+                            <h4 className="text-lg font-bold text-sf-text mb-1">Select or drop client spreadsheet</h4>
+                            <p className="text-xs text-sf-muted mb-6">Supports Microsoft Excel (.xlsx, .xls) and Comma-Separated Values (.csv)</p>
                             
                             <label className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer shadow-md transition-all flex items-center gap-2">
                                 <Upload size={16} /> Choose File
@@ -239,11 +247,11 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                             <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-2">
                                     <FolderOpen size={16} className="text-blue-600 dark:text-blue-400" />
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">Saved Client Mapping Template:</span>
+                                    <span className="font-bold text-sf-text">Saved Client Mapping Template:</span>
                                     <select
                                         value={selectedProfile}
                                         onChange={(e) => handleLoadProfile(e.target.value)}
-                                        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-xs"
+                                        className="bg-sf-surface border border-sf-divider text-sf-text rounded-md px-2 py-1 text-xs"
                                     >
                                         <option value="">-- Select Template --</option>
                                         {Object.keys(profiles).map(name => (
@@ -258,7 +266,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                         placeholder="Profile name (e.g. FAO-KE)"
                                         value={newProfileName}
                                         onChange={(e) => setNewProfileName(e.target.value)}
-                                        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-xs w-36"
+                                        className="bg-sf-surface border border-sf-divider text-sf-text rounded-md px-2 py-1 text-xs w-36"
                                     />
                                     <button
                                         type="button"
@@ -273,9 +281,9 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                             {/* Mapping Grid */}
                             <div className="grid md:grid-cols-2 gap-4">
                                 {LIMS_FIELDS.map(field => (
-                                    <div key={field.key} className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl flex flex-col justify-between">
+                                    <div key={field.key} className="p-3 bg-sf-surface border border-sf-divider rounded-xl flex flex-col justify-between">
                                         <div className="flex justify-between items-center mb-1.5">
-                                            <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                            <label className="text-xs font-bold text-sf-text">
                                                 {field.label} {field.required && <span className="text-red-500">*</span>}
                                             </label>
                                             {mapping[field.key] && (
@@ -288,10 +296,10 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                         <select
                                             value={mapping[field.key] || ''}
                                             onChange={(e) => setMapping(prev => ({ ...prev, [field.key]: e.target.value }))}
-                                            className={`w-full p-2 text-xs rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                                            className={`w-full p-2 text-xs rounded-lg border bg-sf-surface text-sf-text ${
                                                 mapping[field.key]
                                                     ? 'border-emerald-400 dark:border-emerald-600 font-medium'
-                                                    : field.required ? 'border-red-300 dark:border-red-800' : 'border-gray-300 dark:border-gray-600'
+                                                    : field.required ? 'border-red-300 dark:border-red-850' : 'border-sf-divider'
                                             }`}
                                         >
                                             <option value="">-- Do Not Import --</option>
@@ -312,12 +320,12 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                 <div className="text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
                                     <Check size={16} /> Successfully parsed {parsedSamples.length} samples from manifest.
                                 </div>
-                                <div className="text-[11px] text-gray-500">Coordinates parsed automatically (DD/DMS/UTM)</div>
+                                <div className="text-[11px] text-sf-muted">Coordinates parsed automatically (DD/DMS/UTM)</div>
                             </div>
 
-                            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden max-h-[350px] overflow-y-auto">
+                            <div className="border border-sf-divider rounded-xl overflow-hidden max-h-[350px] overflow-y-auto">
                                 <table className="w-full text-left text-xs">
-                                    <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 sticky top-0 font-bold">
+                                    <thead className="bg-sf-canvas text-sf-muted sticky top-0 font-bold">
                                         <tr>
                                             <th className="p-2.5">#</th>
                                             <th className="p-2.5">Sample ID</th>
@@ -327,45 +335,45 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                             <th className="p-2.5">Site / Village</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700 font-mono">
+                                    <tbody className="divide-y divide-sf-divider font-mono">
                                         {parsedSamples.slice(0, 50).map((s, idx) => (
-                                            <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-750">
-                                                <td className="p-2 text-gray-400">{idx + 1}</td>
-                                                <td className="p-2 font-bold text-gray-900 dark:text-gray-100">{s.originalId}</td>
+                                            <tr key={idx} className="hover:bg-sf-canvas">
+                                                <td className="p-2 text-sf-muted">{idx + 1}</td>
+                                                <td className="p-2 font-bold text-sf-text">{s.originalId}</td>
                                                 <td className="p-2">
                                                     {s.latitude && s.longitude
                                                         ? `${s.latitude.toFixed(4)}, ${s.longitude.toFixed(4)}`
                                                         : <span className="text-amber-500 font-sans text-[10px]">No GPS</span>
                                                     }
                                                 </td>
-                                                <td className="p-2">
+                                                <td className="p-2 text-sf-text">
                                                     {s.depthTopCm !== null && s.depthBottomCm !== null
                                                         ? `${s.depthTopCm} - ${s.depthBottomCm}`
                                                         : '-'
                                                     }
                                                 </td>
-                                                <td className="p-2">{s.receivedMass || '-'}</td>
-                                                <td className="p-2 font-sans text-gray-600 dark:text-gray-400">{s.siteName || s.village || '-'}</td>
+                                                <td className="p-2 text-sf-text">{s.receivedMass || '-'}</td>
+                                                <td className="p-2 font-sans text-sf-muted">{s.siteName || s.village || '-'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
                             {parsedSamples.length > 50 && (
-                                <div className="text-center text-[11px] text-gray-400">Showing first 50 of {parsedSamples.length} rows...</div>
+                                <div className="text-center text-[11px] text-sf-muted">Showing first 50 of {parsedSamples.length} rows...</div>
                             )}
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                <div className="p-4 bg-sf-canvas border-t border-sf-divider flex justify-between">
                     <div>
                         {step > 1 && (
                             <button
                                 type="button"
                                 onClick={() => setStep(step - 1)}
-                                className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                                className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:bg-sf-raised hover:text-sf-text transition-colors"
                             >
                                 Back
                             </button>
@@ -376,7 +384,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:bg-sf-raised hover:text-sf-text transition-colors"
                         >
                             Cancel
                         </button>

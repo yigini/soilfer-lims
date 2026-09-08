@@ -128,12 +128,12 @@ export default function WorksheetArea({
             {/* Toolbar */}
             <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
                 <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-sf-text">
                         <span>Work type:</span>
                         <select
                             value={activeGroup?.analysis || ''}
                             onChange={(e) => onSelectGroup(e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            className="px-3 py-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-medium focus:outline-none focus:ring-1 focus:ring-sf-primary"
                         >
                             {allGroups.map(g => (
                                 <option key={g.analysis} value={g.analysis}>
@@ -148,7 +148,7 @@ export default function WorksheetArea({
                             <button
                                 type="button"
                                 onClick={() => setIsPasteModalOpen(true)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                             >
                                 <Clipboard size={13} />
                                 <span>Paste Values</span>
@@ -158,7 +158,7 @@ export default function WorksheetArea({
                                 type="button"
                                 onClick={() => setIsBatchModalOpen(true)}
                                 data-testid="open-batch-modal-btn"
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-700 dark:text-slate-300"
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                             >
                                 <Layers size={13} />
                                 <span>Batch & QC Runs</span>
@@ -168,35 +168,35 @@ export default function WorksheetArea({
                 </div>
 
                 <div className="relative">
-                    <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+                    <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Find sample ID..."
-                        className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-56"
+                        className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-56"
                     />
                 </div>
             </div>
 
             {/* Method Banner */}
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div className="p-3.5 rounded-xl border border-sf-divider bg-sf-surface flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <h3 className="font-bold text-sm text-sf-text flex items-center gap-2">
                         <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
                     </h3>
-                    <p className="text-slate-500 text-[11px] mt-0.5">
+                    <p className="text-sf-muted text-[11px] mt-0.5">
                         {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {activeGroup?.unit && (
-                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-sf-raised text-sf-muted border border-sf-divider">
                             Unit: {activeGroup.unit}
                         </span>
                     )}
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                         {filteredItems.length} assigned sample{filteredItems.length === 1 ? '' : 's'}
                     </span>
                 </div>
@@ -205,18 +205,18 @@ export default function WorksheetArea({
             {/* Main Work Area: Table + Docked 240px Inspector */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
                 {/* Worksheet Table (3 cols) */}
-                <div className="lg:col-span-3 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 flex flex-col">
+                <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-xs">
                             <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                                <tr className="bg-sf-raised text-sf-muted border-b border-sf-divider">
                                     <th className="py-2.5 px-3 w-8">
                                         <input
                                             type="checkbox"
                                             checked={allSelected}
                                             onChange={toggleSelectAll}
                                             aria-label="Select all rows"
-                                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
+                                            className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                         />
                                     </th>
                                     <th className="py-2.5 px-3 font-semibold min-w-[130px]">Sample</th>
@@ -230,7 +230,7 @@ export default function WorksheetArea({
                                     <th className="py-2.5 px-3 font-semibold text-right w-20">Details</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody className="divide-y divide-sf-divider">
                                 {filteredItems.map((item, idx) => {
                                     const isSelected = item.workItemId === inspectedItem?.workItemId;
                                     const isChecked = selectedRows.has(item.workItemId);
@@ -259,8 +259,8 @@ export default function WorksheetArea({
                                             onClick={() => setSelectedItemId(item.workItemId)}
                                             className={`cursor-pointer transition-colors ${
                                                 isSelected
-                                                    ? 'bg-blue-50/50 dark:bg-blue-950/20'
-                                                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                                                    ? 'bg-sf-primary/10'
+                                                    : 'hover:bg-sf-hover'
                                             }`}
                                         >
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
@@ -269,7 +269,7 @@ export default function WorksheetArea({
                                                     checked={isChecked}
                                                     onChange={() => toggleRowSelect(item.workItemId)}
                                                     aria-label={`Select ${item.sampleDisplayId || item.sampleId}`}
-                                                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
+                                                    className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                                 />
                                             </td>
 
@@ -278,23 +278,23 @@ export default function WorksheetArea({
                                                     {item.rackPosition != null && (
                                                         <span
                                                             data-testid={`rack-pos-${item.workItemId}`}
-                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0"
+                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shrink-0"
                                                             title={`Rack Position ${item.rackPosition}${item.batchId ? ` (Batch: ${item.batchId})` : ''}`}
                                                         >
                                                             #{item.rackPosition}
                                                         </span>
                                                     )}
-                                                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                                                    <span className="font-mono font-bold text-sf-text">
                                                         {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
                                                     </span>
                                                 </div>
                                                 {item.originalId && (
-                                                    <div className="text-[11px] text-slate-400 font-mono">
+                                                    <div className="text-[11px] text-sf-muted font-mono">
                                                         Field: {item.originalId}
                                                     </div>
                                                 )}
                                                 {item.projectCode && (
-                                                    <span className="text-[10px] text-slate-400">
+                                                    <span className="text-[10px] text-sf-muted">
                                                         {item.projectCode}
                                                     </span>
                                                 )}
@@ -326,35 +326,35 @@ export default function WorksheetArea({
                                                         {item.latestSpectralScan || item.hasSpectrum || isRecorded ? (
                                                             <div className="flex items-center gap-2">
                                                                 <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                                                                    item.latestSpectralScan?.qcStatus === 'PASS' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
-                                                                    item.latestSpectralScan?.qcStatus === 'WARN' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
-                                                                    'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
+                                                                    item.latestSpectralScan?.qcStatus === 'PASS' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
+                                                                    item.latestSpectralScan?.qcStatus === 'WARN' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' :
+                                                                    'bg-sf-primary/15 text-sf-primary'
                                                                 }`}>
                                                                     ✓ {item.latestSpectralScan?.qcStatus ? `QC: ${item.latestSpectralScan.qcStatus}` : 'Scan Recorded'}
                                                                 </span>
                                                                 {item.latestSpectralScan?.id && (
-                                                                    <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                                                                    <span className="text-[10px] font-mono text-sf-muted hidden sm:inline">
                                                                         {item.latestSpectralScan.id}
                                                                     </span>
                                                                 )}
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
-                                                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-medium transition-colors"
+                                                                    className="px-2 py-1 bg-sf-raised hover:bg-sf-hover text-sf-text rounded text-xs font-medium transition-colors border border-sf-divider"
                                                                 >
                                                                     Inspect / Rescan
                                                                 </button>
                                                             </div>
                                                         ) : (
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded font-medium border border-amber-200 dark:border-amber-800">
+                                                                <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded font-medium border border-amber-500/20">
                                                                     Spectrum required
                                                                 </span>
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
                                                                     disabled={!item.readiness?.isReady || isRecorded}
-                                                                    className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
+                                                                    className="px-2.5 py-1 bg-sf-primary hover:bg-sf-primary-hover text-sf-on-primary rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
                                                                 >
                                                                     Upload spectra →
                                                                 </button>
@@ -378,36 +378,36 @@ export default function WorksheetArea({
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-1.5 flex-wrap">
                                                         {item.readiness?.isReady ? (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                                                                 <CheckCircle2 size={10} /> Ready
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
                                                                 <AlertTriangle size={10} /> Blocked
                                                             </span>
                                                         )}
 
                                                         {hasConflict ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">
                                                                 Conflict
                                                             </span>
                                                         ) : isRecorded ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700">
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                                                                 Recorded
                                                             </span>
                                                         ) : draft ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-sf-primary/15 text-sf-primary">
                                                                 Draft saved
                                                             </span>
                                                         ) : (
-                                                            <span className="text-[10px] text-slate-400">
+                                                            <span className="text-[10px] text-sf-muted">
                                                                 Pending
                                                             </span>
                                                         )}
                                                     </div>
 
                                                     {item.readiness && !item.readiness.isReady && (
-                                                        <span className="text-[10px] text-slate-400 max-w-xs truncate">
+                                                        <span className="text-[10px] text-sf-muted max-w-xs truncate">
                                                             {item.readiness.reasons?.[0]}
                                                         </span>
                                                     )}
@@ -418,7 +418,7 @@ export default function WorksheetArea({
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedItemId(item.workItemId)}
-                                                    className="px-2 py-1 rounded text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 font-medium transition-colors"
+                                                    className="px-2 py-1 rounded text-xs text-sf-primary hover:underline font-medium transition-colors"
                                                 >
                                                     Inspect →
                                                 </button>
@@ -429,7 +429,7 @@ export default function WorksheetArea({
 
                                 {filteredItems.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="py-8 text-center text-slate-400">
+                                        <td colSpan={5} className="py-8 text-center text-sf-muted">
                                             No samples found matching your filter.
                                         </td>
                                     </tr>
@@ -439,9 +439,9 @@ export default function WorksheetArea({
                     </div>
 
                     {/* Footer */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2 text-xs">
-                        <span className="text-slate-500">
-                            <strong>{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">Enter</kbd> to advance to next row
+                    <div className="p-3 bg-sf-raised border-t border-sf-divider flex items-center justify-between flex-wrap gap-2 text-xs">
+                        <span className="text-sf-muted">
+                            <strong className="text-sf-text">{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">Enter</kbd> to advance to next row
                         </span>
 
                         {isOperationalGate ? (
@@ -457,7 +457,7 @@ export default function WorksheetArea({
                                     });
                                 }}
                                 disabled={selectedRows.size === 0}
-                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
                                 <CheckCircle2 size={13} />
                                 <span>Confirm {activeGroup?.analysisName || 'Preparation'} Complete ({selectedRows.size})</span>
@@ -467,7 +467,7 @@ export default function WorksheetArea({
                                 type="button"
                                 onClick={() => onReviewRecord(Array.from(selectedRows))}
                                 disabled={selectedRows.size === 0}
-                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
                                 <span>Review Completion ({selectedRows.size})</span>
                                 <ArrowRight size={13} />

@@ -26,7 +26,7 @@ const WorkflowProgressBar = ({ workflowSummary }) => {
     const Icon = config.icon;
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-4">
+        <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider p-4 mb-4">
             {/* Phase Header */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -35,13 +35,13 @@ const WorkflowProgressBar = ({ workflowSummary }) => {
                         {phase}
                     </span>
                 </div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <span className="text-sm font-medium text-sf-muted">
                     {progress}% Complete
                 </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-3">
+            <div className="w-full h-2 bg-sf-raised rounded-full overflow-hidden mb-3">
                 <div
                     className={`h-full ${config.color} rounded-full transition-all duration-500 ease-out`}
                     style={{ width: `${progress}%` }}
@@ -51,11 +51,11 @@ const WorkflowProgressBar = ({ workflowSummary }) => {
             {/* Next Actions */}
             {nextActions && nextActions.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Next:</span>
+                    <span className="text-xs text-sf-muted font-medium">Next:</span>
                     {nextActions.map((action, idx) => (
                         <span
                             key={idx}
-                            className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md"
+                            className="text-xs bg-sf-canvas text-sf-muted px-2 py-1 rounded-md"
                         >
                             {action}
                         </span>
@@ -65,7 +65,7 @@ const WorkflowProgressBar = ({ workflowSummary }) => {
 
             {/* Eligibility Badges */}
             {eligibility && (
-                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-sf-divider">
                     {eligibility.gatesComplete && (
                         <span className="text-xs bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded-md flex items-center gap-1">
                             <CheckCircle className="w-3 h-3" /> Gates Done

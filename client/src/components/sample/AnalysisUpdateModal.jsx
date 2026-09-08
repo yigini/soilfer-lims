@@ -6,6 +6,15 @@ import { useAuth } from '../../context/AuthContext';
 import InfoTooltip from '../common/InfoTooltip';
 
 const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        if (isOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isOpen, onClose]);
     const getAnalysisDisplayName = useAnalysisNames();
     const { token } = useAuth();
     const [loading, setLoading] = useState(false);
@@ -126,23 +135,23 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-sf-divider overflow-hidden">
 
                 {/* Header */}
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="p-6 border-b border-sf-divider flex items-center justify-between bg-sf-canvas">
                     <div className="flex items-center gap-3">
                         <div className="bg-blue-100 dark:bg-blue-900/30 p-2.5 rounded-xl text-blue-600 dark:text-blue-400">
                             <Droplet size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-sf-text flex items-center gap-2">
                                 Adjust Analysis Selection
                                 <InfoTooltip text="Add or remove technical tests for this sample. New tests will generate new work items for technicians." />
                             </h2>
                             <p className="text-sm text-gray-500 font-mono">{sample.labId || sample.originalId}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-full transition-colors">
                         <X size={20} className="text-gray-400" />
                     </button>
                 </div>
@@ -158,7 +167,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
 
                     {/* Bundle Selection */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                        <label className="block text-sm font-bold text-sf-muted mb-2 flex items-center gap-1">
                             Analysis Bundle
                             <InfoTooltip text="Select a predefined group of tests to merge or replace." />
                         </label>
@@ -227,7 +236,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
 
                     {/* Individual Search */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                        <label className="block text-sm font-bold text-sf-muted mb-2 flex items-center gap-1">
                             Add Individual Tests
                             <InfoTooltip text="Search by test name or chemical code (e.g., pH, P, SOC)." />
                         </label>
@@ -240,11 +249,11 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 placeholder="Search by name or code..."
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-sf-canvas border border-sf-divider rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                             />
 
                             {searchQuery && (
-                                <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-60 overflow-y-auto animate-in slide-in-from-top-2">
+                                <div className="absolute z-10 w-full mt-2 bg-sf-surface border border-sf-divider rounded-xl shadow-xl max-h-60 overflow-y-auto animate-in slide-in-from-top-2">
                                     {allAnalyses
                                         .filter(a => a.orderable && !currentAnalyses.includes(a.code) && (
                                             a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -257,10 +266,10 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                                     handleToggleAnalysis(a.code);
                                                     setSearchQuery('');
                                                 }}
-                                                className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 last:border-0"
+                                                className="w-full text-left px-4 py-3 hover:bg-sf-raised flex items-center justify-between border-b border-sf-divider last:border-0"
                                             >
                                                 <div>
-                                                    <div className="font-bold text-sm text-gray-900 dark:text-white uppercase">{getAnalysisDisplayName(a.code, a.name)}</div>
+                                                    <div className="font-bold text-sm text-sf-text uppercase">{getAnalysisDisplayName(a.code, a.name)}</div>
                                                 </div>
                                                 <Plus size={16} className="text-blue-500" />
                                             </button>
@@ -279,18 +288,18 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
 
                     {/* Current Selection */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-1">
+                        <label className="block text-sm font-bold text-sf-muted mb-3 flex items-center gap-1">
                             Current Selections ({currentAnalyses.length})
                             <InfoTooltip text="These tests are currently required for this sample. Items with existing results cannot be easily removed." />
                         </label>
-                        <div className="flex flex-wrap gap-2 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-700 inner-shadow">
+                        <div className="flex flex-wrap gap-2 p-4 bg-sf-canvas rounded-2xl border border-sf-divider inner-shadow">
                             {currentAnalyses.length === 0 && (
                                 <div className="text-gray-400 text-sm italic w-full text-center py-4">No analyses selected</div>
                             )}
                             {currentAnalyses.map(code => {
                                 const ana = allAnalyses.find(a => a.code === code);
                                 return (
-                                    <div key={code} className="group flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm hover:border-red-300 dark:hover:border-red-900/50 transition-all">
+                                    <div key={code} className="group flex items-center gap-2 px-3 py-1.5 bg-sf-surface border border-sf-divider rounded-xl shadow-sm hover:border-red-300 dark:hover:border-red-900/50 transition-all">
                                         <div>
                                             <span className="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase leading-none">{getAnalysisDisplayName(code, ana?.name)}</span>
                                         </div>
@@ -318,7 +327,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                                 value={reason}
                                 onChange={e => setReason(e.target.value)}
                                 placeholder="Specify reason for dropping or waiving analysis..."
-                                className="w-full p-2.5 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-700 rounded-lg text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
+                                className="w-full p-2.5 bg-sf-surface border border-amber-300 dark:border-amber-700 rounded-lg text-sm text-sf-text outline-none focus:ring-2 focus:ring-amber-500"
                             />
                         </div>
                     )}
@@ -335,11 +344,11 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-3 bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="p-6 border-t border-sf-divider flex items-center justify-end gap-3 bg-sf-canvas">
                     <button
                         onClick={onClose}
                         disabled={loading}
-                        className="px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="px-5 py-2.5 rounded-xl text-sf-muted font-bold hover:bg-sf-raised transition-colors"
                     >
                         Discard
                     </button>

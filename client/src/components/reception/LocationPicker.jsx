@@ -407,10 +407,10 @@ const LocationPicker = ({
     const showMap = captureMethod !== 'TEXT_ONLY';
 
     return (
-        <div className="space-y-4 text-gray-800 dark:text-gray-200">
+        <div className="space-y-4 text-sf-text">
             {/* 6 CAPTURE METHOD CHIPS (RC-05) */}
             <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                <label className="block text-xs font-bold text-sf-muted uppercase tracking-wide mb-2">
                     How was this location captured? (RC-05)
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -437,7 +437,7 @@ const LocationPicker = ({
                                 }}
                                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${isActive
                                     ? `${method.color} ring-2 ring-offset-1 shadow-md scale-[1.02]`
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm'
+                                    : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-sf-divider hover:bg-sf-canvas hover:text-sf-text hover:shadow-sm'
                                     }`}
                             >
                                 <Icon size={15} />
@@ -460,7 +460,7 @@ const LocationPicker = ({
                         <span className="text-[10px] text-indigo-600 dark:text-indigo-400">Accepts DD, DMS, or UTM Zone</span>
                     </div>
                     <input
-                        className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-sm font-mono dark:border-gray-700"
+                        className="w-full p-2 border rounded-lg bg-sf-surface text-sm font-mono border-sf-divider text-sf-text"
                         placeholder="e.g. 15N 752300 1625400  OR  14°48'12&quot;N, 90°13'48&quot;W  OR  -1.2921, 36.8219"
                         value={pasteText}
                         onChange={(e) => handlePasteChange(e.target.value)}
@@ -523,9 +523,9 @@ const LocationPicker = ({
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                            <label className="block text-[11px] font-semibold text-gray-500 mb-1">Department / Province</label>
+                            <label className="block text-[11px] font-semibold text-sf-muted mb-1">Department / Province</label>
                             <select
-                                className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 text-xs"
+                                className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-xs"
                                 value={selectedDept}
                                 onChange={(e) => handleDepartmentSelect(e.target.value)}
                             >
@@ -536,9 +536,9 @@ const LocationPicker = ({
                             </select>
                         </div>
                         <div>
-                            <label className="block text-[11px] font-semibold text-gray-500 mb-1">Municipality / District</label>
+                            <label className="block text-[11px] font-semibold text-sf-muted mb-1">Municipality / District</label>
                             <select
-                                className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 text-xs disabled:opacity-50"
+                                className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-xs disabled:opacity-50"
                                 value={selectedMun}
                                 disabled={!selectedDept}
                                 onChange={(e) => handleMunicipalitySelect(e.target.value)}
@@ -556,36 +556,36 @@ const LocationPicker = ({
             {/* STRUCTURED TEXT FIELDS */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Site / Farm Name</label>
+                    <label className="block text-xs font-semibold text-sf-muted mb-1">Site / Farm Name</label>
                     <input
-                        className={`w-full p-2 border rounded-lg text-sm bg-white dark:bg-gray-800 dark:border-gray-700 ${errBorder('siteName')}`}
+                        className={`w-full p-2 border rounded-lg text-sm bg-sf-surface border-sf-divider text-sf-text ${errBorder('siteName')}`}
                         placeholder="e.g. Mutara Farm"
                         value={siteName || ''}
                         onChange={(e) => onSiteNameChange?.(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Area / Village *</label>
+                    <label className="block text-xs font-semibold text-sf-muted mb-1">Area / Village *</label>
                     <input
-                        className={`w-full p-2 border rounded-lg text-sm bg-white dark:bg-gray-800 dark:border-gray-700 ${errBorder('areaVillage')}`}
+                        className={`w-full p-2 border rounded-lg text-sm bg-sf-surface border-sf-divider text-sf-text ${errBorder('areaVillage')}`}
                         placeholder="e.g. Nyagatare"
                         value={areaVillage || ''}
                         onChange={(e) => onAreaVillageChange?.(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">District / County</label>
+                    <label className="block text-xs font-semibold text-sf-muted mb-1">District / County</label>
                     <input
-                        className={`w-full p-2 border rounded-lg text-sm bg-white dark:bg-gray-800 dark:border-gray-700`}
+                        className={`w-full p-2 border rounded-lg text-sm bg-sf-surface border-sf-divider text-sf-text`}
                         placeholder="e.g. Eastern Province"
                         value={district || ''}
                         onChange={(e) => onDistrictChange?.(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Nearest Landmark *</label>
+                    <label className="block text-xs font-semibold text-sf-muted mb-1">Nearest Landmark *</label>
                     <input
-                        className={`w-full p-2 border rounded-lg text-sm bg-white dark:bg-gray-800 dark:border-gray-700 ${errBorder('landmark')}`}
+                        className={`w-full p-2 border rounded-lg text-sm bg-sf-surface border-sf-divider text-sf-text ${errBorder('landmark')}`}
                         placeholder="e.g. 500m south of church"
                         value={landmark || ''}
                         onChange={(e) => onLandmarkChange?.(e.target.value)}
@@ -597,7 +597,7 @@ const LocationPicker = ({
             {showMap && (
                 <>
                     <div className="flex justify-between items-end flex-wrap gap-2 pt-1">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                        <label className="block text-sm font-semibold text-sf-text flex items-center gap-2">
                             <MapPin size={16} /> Map Coordinates &amp; Uncertainty (RC-06)
                         </label>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -613,7 +613,7 @@ const LocationPicker = ({
                                         onChange({ ...value, lat, lng: position[1] });
                                     }
                                 }}
-                                className="text-xs p-1.5 border rounded w-28 bg-white dark:bg-gray-800 dark:border-gray-700 font-mono"
+                                className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
                             />
                             <input
                                 type="number"
@@ -627,7 +627,7 @@ const LocationPicker = ({
                                         onChange({ ...value, lat: position[0], lng });
                                     }
                                 }}
-                                className="text-xs p-1.5 border rounded w-28 bg-white dark:bg-gray-800 dark:border-gray-700 font-mono"
+                                className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
                             />
                             {/* RC-06: Positional Uncertainty in Metres */}
                             <div className="relative">
@@ -645,9 +645,9 @@ const LocationPicker = ({
                                             onConfidenceChange?.(deriveLocationConfidence(locationSource, valUncert));
                                         }
                                     }}
-                                    className="text-xs p-1.5 pr-7 border rounded w-28 bg-white dark:bg-gray-800 dark:border-gray-700 font-mono"
+                                    className="text-xs p-1.5 pr-7 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
                                 />
-                                <span className="absolute right-2 top-1.5 text-[10px] text-gray-400 font-bold">&plusmn;m</span>
+                                <span className="absolute right-2 top-1.5 text-[10px] text-sf-muted font-bold">&plusmn;m</span>
                             </div>
 
                             <div className="relative">
@@ -660,15 +660,15 @@ const LocationPicker = ({
                                         const el = parseFloat(e.target.value);
                                         onChange({ ...value, elevation: isNaN(el) ? null : el });
                                     }}
-                                    className="text-xs p-1.5 pr-6 border rounded w-20 bg-white dark:bg-gray-800 dark:border-gray-700"
+                                    className="text-xs p-1.5 pr-6 border rounded-lg w-20 bg-sf-surface border-sf-divider text-sf-text"
                                 />
-                                <span className="absolute right-2 top-1.5 text-[10px] text-gray-400">m</span>
+                                <span className="absolute right-2 top-1.5 text-[10px] text-sf-muted">m</span>
                             </div>
                         </div>
                     </div>
 
                     {/* STATIC MAP CONTAINER - PREVENTS PAGE SHIFT */}
-                    <div className="h-64 w-full rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 relative z-0 shadow-inner">
+                    <div className="h-64 w-full rounded-xl overflow-hidden border border-sf-divider relative z-0 shadow-inner bg-sf-surface">
                         <MapContainer center={position || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                             <TileLayer
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -684,7 +684,7 @@ const LocationPicker = ({
             {/* CONFIDENCE CHIPS & OVERRIDE BADGE (RC-07) */}
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <label className="block text-xs font-bold text-sf-muted uppercase tracking-wide">
                         Location Confidence (Derived from Evidence)
                     </label>
                     {isConfidenceOverridden && (
@@ -707,7 +707,7 @@ const LocationPicker = ({
                                 }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border cursor-pointer ${isActive
                                     ? `${level.color} ring-2 ring-offset-1 shadow-md scale-[1.02]`
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-sf-divider hover:bg-sf-canvas hover:text-sf-text'
                                     }`}
                             >
                                 <Icon size={14} />
@@ -727,7 +727,7 @@ const LocationPicker = ({
                         <label className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase">Why is confidence low?</label>
                     </div>
                     <textarea
-                        className="w-full p-2 border border-amber-200 dark:border-amber-700/50 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                        className="w-full p-2 border border-amber-200 dark:border-amber-700/50 rounded-lg text-sm bg-sf-surface text-sf-text"
                         placeholder="e.g. Customer could not remember exact coordinates, mapped by general municipality description..."
                         rows={2}
                         value={uncertaintyReason || ''}

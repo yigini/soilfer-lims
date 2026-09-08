@@ -31,19 +31,19 @@ export default function ReviewCompletionView({
     return (
         <div className="flex flex-col gap-5 max-w-4xl mx-auto py-2">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-sf-divider">
                 <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-lg font-bold text-sf-text">
                         Review Determinations Before Recording
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-sf-muted mt-0.5">
                         Verify determinations and metadata. Recording writes defensible results and marks tasks completed, but does not submit for reviewer acceptance.
                     </p>
                 </div>
                 <button
                     type="button"
                     onClick={onBack}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                 >
                     <ArrowLeft size={13} /> Back to Worksheet
                 </button>
@@ -51,7 +51,7 @@ export default function ReviewCompletionView({
 
             {/* Counts Ribbon */}
             <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 flex items-center justify-between">
                     <div>
                         <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">
                             Eligible to Record
@@ -63,12 +63,12 @@ export default function ReviewCompletionView({
                     <CheckCircle2 size={24} className="text-emerald-600 dark:text-emerald-400" />
                 </div>
 
-                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl border border-sf-divider bg-sf-surface flex items-center justify-between">
                     <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-500">
+                        <span className="text-[10px] uppercase font-bold text-sf-muted">
                             Excluded / Incomplete
                         </span>
-                        <div className="text-xl font-bold text-slate-700 dark:text-slate-300 mt-0.5">
+                        <div className="text-xl font-bold text-sf-text mt-0.5">
                             {excluded.length} Item{excluded.length === 1 ? '' : 's'}
                         </div>
                     </div>
@@ -77,23 +77,23 @@ export default function ReviewCompletionView({
             </div>
 
             {/* Included Items List */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-200 text-xs flex items-center justify-between">
+            <div className="rounded-xl border border-sf-divider overflow-hidden bg-sf-surface">
+                <div className="px-4 py-2.5 bg-sf-canvas/80 font-semibold text-sf-text text-xs flex items-center justify-between border-b border-sf-divider">
                     <span>Included Determinations ({included.length})</span>
-                    <span className="text-[11px] text-emerald-600 font-bold">Ready to Record</span>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Ready to Record</span>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto bg-white dark:bg-slate-900">
+                <div className="divide-y divide-sf-divider max-h-64 overflow-y-auto bg-sf-surface">
                     {included.map((item, idx) => (
                         <div key={idx} className="p-3 flex items-center justify-between text-xs">
                             <div>
-                                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                                <span className="font-bold text-sf-text font-mono">
                                     {item.sampleId}
                                 </span>
-                                <span className="text-slate-400 mx-2">·</span>
-                                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                                <span className="text-sf-muted mx-2">·</span>
+                                <span className="text-sf-text font-medium">
                                     {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                 </span>
-                                <span className="text-slate-400 text-[11px] ml-2">
+                                <span className="text-sf-muted text-[11px] ml-2">
                                     (Basis: {item.basis || 'Air-dry'}, Rep: {item.replicateNo || 1})
                                 </span>
                             </div>
@@ -101,14 +101,14 @@ export default function ReviewCompletionView({
                                 <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">
                                     {item.value ?? (item.values ? item.values.join('/') : '3/3 checks')}
                                 </span>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
                                     ✓ Included
                                 </span>
                             </div>
                         </div>
                     ))}
                     {included.length === 0 && (
-                        <div className="p-4 text-center text-xs text-slate-400">
+                        <div className="p-4 text-center text-xs text-sf-muted">
                             No items meet the completion readiness requirements.
                         </div>
                     )}
@@ -117,25 +117,25 @@ export default function ReviewCompletionView({
 
             {/* Excluded Items (if any) */}
             {excluded.length > 0 && (
-                <div className="rounded-xl border border-amber-200 dark:border-amber-900/60 overflow-hidden">
-                    <div className="px-4 py-2.5 bg-amber-50 dark:bg-amber-950/30 font-semibold text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between">
+                <div className="rounded-xl border border-amber-500/30 overflow-hidden bg-sf-surface">
+                    <div className="px-4 py-2.5 bg-amber-500/10 font-semibold text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between border-b border-amber-500/20">
                         <span>Excluded Items ({excluded.length})</span>
-                        <span className="text-[11px] text-amber-600 font-bold">Remains Draft</span>
+                        <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold">Remains Draft</span>
                     </div>
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-48 overflow-y-auto bg-white dark:bg-slate-900">
+                    <div className="divide-y divide-sf-divider max-h-48 overflow-y-auto bg-sf-surface">
                         {excluded.map((item, idx) => (
                             <div key={idx} className="p-3 flex items-center justify-between text-xs">
                                 <div>
-                                    <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">
+                                    <span className="font-bold text-sf-text font-mono">
                                         {item.sampleId}
                                     </span>
-                                    <span className="text-slate-400 mx-2">·</span>
-                                    <span className="text-slate-500">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
+                                    <span className="text-sf-muted mx-2">·</span>
+                                    <span className="text-sf-muted">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5">
                                         • {item.reasons?.[0] || 'Prerequisites or validation incomplete'}
                                     </div>
                                 </div>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300">
                                     Excluded
                                 </span>
                             </div>
@@ -145,8 +145,8 @@ export default function ReviewCompletionView({
             )}
 
             {/* Checkbox and Action */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex flex-col gap-3">
-                <label className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200 cursor-pointer">
+            <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-3">
+                <label className="flex items-center gap-2 text-xs text-sf-text cursor-pointer">
                     <input
                         type="checkbox"
                         checked={confirmed}
@@ -158,8 +158,8 @@ export default function ReviewCompletionView({
                     </span>
                 </label>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <span className="text-xs text-slate-500">
+                <div className="flex items-center justify-between pt-2 border-t border-sf-divider">
+                    <span className="text-xs text-sf-muted">
                         {included.length} item{included.length === 1 ? '' : 's'} will be recorded.
                     </span>
                     <button

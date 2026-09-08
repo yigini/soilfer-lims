@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Keyboard, Zap, Printer, CheckCircle, ArrowRight, CornerDownLeft } from 'lucide-react';
 
 const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const shortcuts = [
@@ -34,25 +43,25 @@ const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-sf-divider">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-750">
+                <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-canvas/50">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                             <Keyboard size={18} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">
+                            <h3 className="font-bold text-sf-text text-sm">
                                 Reception Desk Keyboard Shortcuts
                             </h3>
-                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                            <p className="text-[11px] text-sf-muted">
                                 High-throughput ergonomic key combinations
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                        className="p-1.5 hover:bg-sf-hover rounded-full transition-colors text-sf-muted hover:text-sf-text"
                     >
                         <X size={18} />
                     </button>
@@ -62,26 +71,26 @@ const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
                 <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                     {shortcuts.map((section, sIdx) => (
                         <div key={sIdx} className="space-y-2.5">
-                            <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            <h4 className="text-[11px] font-bold text-sf-muted uppercase tracking-wider">
                                 {section.category}
                             </h4>
                             <div className="space-y-1.5">
                                 {section.items.map((item, iIdx) => (
                                     <div
                                         key={iIdx}
-                                        className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-xs"
+                                        className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-sf-hover/60 text-xs"
                                     >
-                                        <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                        <span className="text-sf-text font-medium">
                                             {item.label}
                                         </span>
                                         <div className="flex items-center gap-1 shrink-0">
                                             {item.keys.map((k, kIdx) => (
                                                 <React.Fragment key={kIdx}>
-                                                    <kbd className="px-2 py-0.5 font-mono text-[11px] font-bold bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded shadow-sm">
+                                                    <kbd className="px-2 py-0.5 font-mono text-[11px] font-bold bg-sf-canvas border border-sf-divider text-sf-text rounded shadow-sm">
                                                         {k}
                                                     </kbd>
                                                     {kIdx < item.keys.length - 1 && (
-                                                        <span className="text-gray-400 text-[10px]">+</span>
+                                                        <span className="text-sf-muted text-[10px]">+</span>
                                                     )}
                                                 </React.Fragment>
                                             ))}
@@ -94,10 +103,10 @@ const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 flex justify-end">
+                <div className="p-3 border-t border-sf-divider bg-sf-canvas/30 flex justify-end">
                     <button
                         onClick={onClose}
-                        className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all"
+                        className="px-4 py-1.5 bg-sf-raised hover:bg-sf-hover text-sf-text border border-sf-divider rounded-lg text-xs font-bold transition-all"
                     >
                         Got it
                     </button>

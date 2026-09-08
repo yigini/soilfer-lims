@@ -1293,12 +1293,12 @@ const Reception = () => {
                 />
 
                 <div className="text-center mb-6 md:mb-10">
-                    <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Reception Console</h1>
-                    <p className="text-gray-500">Select intake mode or resume a draft</p>
+                    <h1 className="text-2xl md:text-4xl font-bold text-sf-text mb-2">Reception Console</h1>
+                    <p className="text-sf-muted">Select intake mode or resume a draft</p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-                    <button onClick={() => setMode('PROJECT')} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                    <button onClick={() => setMode('PROJECT')} className="p-6 md:p-8 bg-sf-surface rounded-2xl shadow-md border border-sf-divider hover:border-blue-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <Layers size={100} />
                         </div>
@@ -1306,8 +1306,8 @@ const Reception = () => {
                             <div className="bg-blue-100 dark:bg-blue-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                 <Layers size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Project Sample</h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Scheduled samples (SoilFER campaigns)</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">Project Sample</h2>
+                            <p className="text-xs text-sf-muted">Scheduled samples (SoilFER campaigns)</p>
                         </div>
                     </button>
 
@@ -1317,7 +1317,7 @@ const Reception = () => {
                         const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                         setScanCode(`EXT-${randomId}`);
                         setSampleData({ originalId: `EXT-${randomId}`, isNew: true });
-                    }} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                    }} className="p-6 md:p-8 bg-sf-surface rounded-2xl shadow-md border border-sf-divider hover:border-purple-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <User size={100} />
                         </div>
@@ -1325,12 +1325,12 @@ const Reception = () => {
                             <div className="bg-purple-100 dark:bg-purple-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                                 <User size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Walk-in Sample</h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Farmers & Individual walk-in clients</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">Walk-in Sample</h2>
+                            <p className="text-xs text-sf-muted">Farmers & Individual walk-in clients</p>
                         </div>
                     </button>
 
-                    <button onClick={() => setMode('CONSIGNMENT')} className="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-transparent hover:border-emerald-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
+                    <button onClick={() => setMode('CONSIGNMENT')} className="p-6 md:p-8 bg-sf-surface rounded-2xl shadow-md border border-sf-divider hover:border-emerald-500 hover:shadow-xl group transition-all text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <PackageCheck size={100} />
                         </div>
@@ -1338,23 +1338,23 @@ const Reception = () => {
                             <div className="bg-emerald-100 dark:bg-emerald-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
                                 <PackageCheck size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Consignment Batch</h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Couriers, manifests & bulk field campaigns</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">Consignment Batch</h2>
+                            <p className="text-xs text-sf-muted">Couriers, manifests & bulk field campaigns</p>
                         </div>
                     </button>
                 </div>
 
                 {/* DRAFTS LIST */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex-1 max-h-[400px] flex flex-col">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center sticky top-0">
-                        <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden flex-1 max-h-[400px] flex flex-col">
+                    <div className="p-4 border-b border-sf-divider bg-sf-canvas flex justify-between items-center sticky top-0">
+                        <h3 className="font-bold text-sf-text flex items-center gap-2">
                             <FileText size={18} /> Incomplete Intakes (Drafts)
                         </h3>
-                        <span className="text-xs font-bold bg-gray-200 dark:bg-gray-600 dark:text-gray-200 px-2 py-1 rounded-full">{drafts.length}</span>
+                        <span className="text-xs font-bold bg-sf-raised text-sf-muted px-2 py-1 rounded-full border border-sf-divider">{drafts.length}</span>
                     </div>
                     <div className="overflow-y-auto flex-1 p-2 space-y-2">
                         {drafts.length === 0 ? (
-                            <div className="text-center py-10 text-gray-400 dark:text-gray-500">No drafts found.</div>
+                            <div className="text-center py-10 text-sf-muted">No drafts found.</div>
                         ) : (
                             drafts.map(d => (
                                 <div key={d.id} className="flex items-center justify-between p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl border border-transparent hover:border-blue-100 dark:hover:border-blue-800 transition-colors group cursor-pointer"
@@ -1368,13 +1368,13 @@ const Reception = () => {
                                             DFT
                                         </div>
                                         <div>
-                                            <div className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                            <div className="font-bold text-sf-text flex items-center gap-2">
                                                 {d.originalId}
-                                                <span className="text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded capitalize">
+                                                <span className="text-xs font-normal text-sf-muted bg-sf-canvas px-1.5 py-0.5 rounded capitalize border border-sf-divider">
                                                     {(d.receptionData?.isWalkIn || (!d.projectId && !d.projectCode)) ? 'Walk-in' : 'Project'}
                                                 </span>
                                             </div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            <div className="text-xs text-sf-muted">
                                                 {new Date(d.updatedAt || d.createdAt).toLocaleString()} • {d.receptionData?.submitterDetails?.name || 'Unknown Submitter'}
                                             </div>
                                         </div>
@@ -1385,11 +1385,11 @@ const Reception = () => {
                                                 e.stopPropagation();
                                                 handleDiscard(d.id);
                                             }}
-                                            className="text-gray-400 hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-700 px-3 py-1.5 rounded border border-gray-200 dark:border-gray-600 hover:border-red-200 dark:hover:border-red-700 shadow-sm"
+                                            className="text-sf-muted hover:text-red-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-sf-divider hover:border-red-200 dark:hover:border-red-700 shadow-sm"
                                         >
                                             Discard
                                         </button>
-                                        <button className="text-blue-600 dark:text-blue-400 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-700 px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm">
+                                        <button className="text-blue-600 dark:text-blue-400 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm">
                                             Resume
                                         </button>
                                     </div>
@@ -1431,19 +1431,19 @@ const Reception = () => {
     if (mode === 'PROJECT' && !sessionProject) {
         return (
             <div className="p-4 md:p-10 max-w-2xl mx-auto animate-in slide-in-from-right">
-                <button onClick={() => setMode(null)} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-6 font-medium"><ArrowLeft size={20} /> Back</button>
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Select Project Session</h2>
+                <button onClick={() => setMode(null)} className="flex items-center gap-2 text-sf-muted hover:text-sf-text mb-6 font-medium"><ArrowLeft size={20} /> Back</button>
+                <div className="bg-sf-surface p-8 rounded-xl shadow-xl border border-sf-divider">
+                    <h2 className="text-2xl font-bold text-sf-text mb-6">Select Project Session</h2>
                     <div className="space-y-3">
                         {availableProjects.filter(p => p.status === 'ACTIVE').map(p => (
-                            <button key={p.id} onClick={() => handleSelectProject(p)} className="w-full text-left p-4 border dark:border-gray-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col group">
+                            <button key={p.id} onClick={() => handleSelectProject(p)} className="w-full text-left p-4 border border-sf-divider bg-sf-surface rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col group">
                                 <div className="flex justify-between items-start">
-                                    <span className="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400">{p.name || p.id}</span>
+                                    <span className="font-bold text-lg text-sf-text group-hover:text-blue-700 dark:group-hover:text-blue-400">{p.name || p.id}</span>
                                     <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
                                 </div>
                                 <div className="flex gap-3 mt-1">
-                                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{p.code}</div>
-                                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? 'Template' : p.projectType === 'KOBO_LINKED' ? 'Kobo Linked' : 'Open Intake'}</div>
+                                    <div className="text-[10px] text-sf-muted font-bold uppercase tracking-widest">{p.code}</div>
+                                    <div className="text-[10px] text-sf-muted font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? 'Template' : p.projectType === 'KOBO_LINKED' ? 'Kobo Linked' : 'Open Intake'}</div>
                                     {p.defaultAnalysisBundle && (
                                         <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">• Auto-Bundle: {p.defaultAnalysisBundle}</div>
                                     )}
@@ -1452,8 +1452,8 @@ const Reception = () => {
                         ))}
                         {availableProjects.filter(p => p.status === 'ACTIVE').length === 0 && (
                             <div className="text-center py-10">
-                                <p className="text-gray-500 font-medium">No active project sessions found.</p>
-                                <p className="text-xs text-gray-400 mt-1">Projects must be ACTIVE to accept samples.</p>
+                                <p className="text-sf-muted font-medium">No active project sessions found.</p>
+                                <p className="text-xs text-sf-muted mt-1">Projects must be ACTIVE to accept samples.</p>
                             </div>
                         )}
                     </div>
@@ -1478,7 +1478,7 @@ const Reception = () => {
             />
 
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-6 bg-slate-900 text-white p-4 rounded-xl shadow-lg">
+            <div className="flex justify-between items-center mb-6 bg-sf-raised border border-sf-divider text-sf-text p-4 rounded-xl shadow-md">
                 <div className="flex items-center gap-4">
                     <button onClick={() => {
                         showDialog({
@@ -1492,24 +1492,24 @@ const Reception = () => {
                                 resetForm();
                             }
                         });
-                    }} className="bg-slate-700 hover:bg-slate-600 p-2 rounded transition-colors">
+                    }} className="bg-sf-surface hover:bg-sf-canvas border border-sf-divider p-2 rounded-lg transition-colors text-sf-text">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">{t('reception.sessionActive', 'Session Active')}</div>
+                        <div className="text-xs text-sf-muted uppercase font-bold tracking-wider">{t('reception.sessionActive', 'Session Active')}</div>
                         <div className="text-lg font-bold flex items-center gap-2">
                             {mode === 'PROJECT' || sessionProject ? <><Layers size={18} /> {t('common.project', 'Project')}: {sessionProject}</> : <><User size={18} /> {t('reception.walkInReception', 'Walk-in Reception')}</>}
                         </div>
                     </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-xs text-slate-400">{t('reception.operator', 'Operator')} ({user.labId || 'Global'})</div>
+                    <div className="text-xs text-sf-muted">{t('reception.operator', 'Operator')} ({user.labId || 'Global'})</div>
                     <div className="font-medium">{user.name || user.username}</div>
                 </div>
             </div>
 
             {/* LOOKUP with Autocomplete */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 relative">
+            <div className="bg-sf-surface p-6 rounded-xl shadow-sm border border-sf-divider mb-6 relative">
                 <div className="flex gap-4">
                     <div className="flex-1 relative">
                         <input
@@ -1523,8 +1523,8 @@ const Reception = () => {
                                 : t('reception.enterSampleId', 'Enter Sample ID')}
                             className={`w-full p-3 border rounded-lg focus:ring-2 font-mono text-lg transition-all ${
                                 isWedgeMode 
-                                    ? 'border-amber-400 focus:ring-amber-500 bg-amber-50/20 dark:bg-amber-950/10' 
-                                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                                    ? 'border-amber-400 focus:ring-amber-500 bg-amber-50/20 dark:bg-amber-950/10 text-sf-text' 
+                                    : 'border-sf-divider bg-sf-surface text-sf-text focus:ring-blue-500'
                             }`}
                             onKeyDown={e => {
                                 const isEnterMatch = (wedgeSuffix === 'ENTER' || wedgeSuffix === 'BOTH') && e.key === 'Enter';
@@ -1550,24 +1550,24 @@ const Reception = () => {
 
                         {/* Autocomplete Dropdown */}
                         {showAutocomplete && mode === 'PROJECT' && (
-                            <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto mt-1">
+                            <div className="absolute top-full left-0 right-0 bg-sf-surface border border-sf-divider rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto mt-1">
                                 {isSearching ? (
-                                    <div className="p-4 text-center text-gray-500">{t('common.searching', 'Searching...')}</div>
+                                    <div className="p-4 text-center text-sf-muted">{t('common.searching', 'Searching...')}</div>
                                 ) : (
                                     null
                                 )}
                                 {!isSearching && autocompleteResults.length === 0 ? (
-                                    <div className="p-4 text-center text-gray-400">{t('reception.noExpectedSamples', 'No EXPECTED samples found')}</div>
+                                    <div className="p-4 text-center text-sf-muted">{t('reception.noExpectedSamples', 'No EXPECTED samples found')}</div>
                                 ) : (
                                     autocompleteResults.map(sample => (
                                         <div
                                             key={sample.id}
                                             onClick={() => handleSelectAutocomplete(sample)}
-                                            className="p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b last:border-0 dark:border-gray-700 flex items-center justify-between group"
+                                            className="p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b last:border-0 border-sf-divider flex items-center justify-between group"
                                         >
                                             <div>
-                                                <div className="font-mono font-bold text-gray-900 dark:text-gray-100">{sample.originalId}</div>
-                                                <div className="text-xs text-gray-500">
+                                                <div className="font-mono font-bold text-sf-text">{sample.originalId}</div>
+                                                <div className="text-xs text-sf-muted">
                                                     {sample.projectCode} • {sample.location || sample.country || 'Unknown Location'}
                                                 </div>
                                             </div>
@@ -1587,7 +1587,7 @@ const Reception = () => {
                     </div>
                     <button
                         onClick={() => setShowScanner(true)}
-                        className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600 flex items-center gap-2"
+                        className="bg-sf-surface text-sf-muted hover:text-sf-text p-3 rounded-lg hover:bg-sf-canvas transition-colors border border-sf-divider flex items-center gap-2"
                         title={t('reception.scan', 'Scan')}
                     >
                         <Camera size={20} />
@@ -1604,7 +1604,7 @@ const Reception = () => {
 
                 {mode === 'PROJECT' && (
                     <div className="mt-3 flex items-center justify-between">
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-sf-muted">
                             {availableProjects.find(p => p.id === sessionProject)?.projectType === 'TEMPLATE_PREDEFINED_IDS'
                                 ? "💡 Scheduled project: Verification against manifest required."
                                 : "💡 Open intake: Register samples manually as they arrive."}
@@ -1671,7 +1671,7 @@ const Reception = () => {
                                             setDuplicateWarning(null);
                                             resetForm();
                                         }}
-                                        className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-medium hover:bg-gray-50"
+                                        className="px-3 py-1.5 bg-sf-surface border border-sf-divider text-sf-text rounded-lg text-xs font-medium hover:bg-sf-canvas transition-colors"
                                     >
                                         Cancel / Clear ID
                                     </button>
@@ -1697,13 +1697,13 @@ const Reception = () => {
                     <div className="space-y-6">
                         {/* Map View - Persistent for Project mode (RC-09) */}
                         {mode !== 'WALK_IN' && !sampleData?.isNew && (
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm animate-in fade-in slide-in-from-top-2">
+                            <div className="bg-sf-surface p-4 rounded-xl border border-sf-divider shadow-sm animate-in fade-in slide-in-from-top-2">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2 text-sm">
+                                    <h3 className="font-bold text-sf-text flex items-center gap-2 text-sm">
                                         <MapPin size={16} /> Location Preview
                                     </h3>
                                     {resolvedCoordinates && (
-                                        <span className="text-[11px] font-mono text-gray-500">
+                                        <span className="text-[11px] font-mono text-sf-muted">
                                             {parseFloat(resolvedCoordinates.lat).toFixed(4)}&deg;, {parseFloat(resolvedCoordinates.lng).toFixed(4)}&deg;
                                         </span>
                                     )}
@@ -1746,39 +1746,39 @@ const Reception = () => {
                         {/* ANALYSIS SELECTION */}
                         <div
                             ref={analysisSectionRef}
-                            className={`bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm transition-all duration-500 ${analysisHighlight
+                            className={`bg-sf-surface p-6 rounded-xl border shadow-sm transition-all duration-500 ${analysisHighlight
                                 ? 'border-blue-400 ring-2 ring-blue-200 shadow-blue-100 shadow-lg'
                                 : validationErrors.some(e => e.key === 'analyses')
                                     ? 'border-red-400 ring-1 ring-red-200'
-                                    : 'border-gray-200 dark:border-gray-700'
+                                    : 'border-sf-divider'
                                 }`}
                         >
-                            <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
+                            <h3 className="font-bold text-sf-text mb-4 flex items-center gap-2">
                                 <Droplet size={20} /> Requested Analysis
                                 <InfoTooltip text="Choose a predefined package of tests (Bundle) or add individual tests as required by the client." />
                             </h3>
 
-                            <label className="block text-sm font-semibold mb-2">
+                            <label className="block text-sm font-semibold text-sf-text mb-2">
                                 Select Bundle
                                 <InfoTooltip text="Bundles are optimized groups of analyses defined for specific project needs." />
                             </label>
                             <select
                                 value={selectedGroup}
                                 onChange={e => { setSelectedGroup(e.target.value); setRemovals([]); setAdditions([]); }}
-                                className="w-full p-3 border rounded bg-blue-50 dark:bg-blue-900/30 font-bold text-blue-800 dark:text-blue-300 mb-4"
+                                className="w-full p-3 border rounded bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 font-bold text-blue-800 dark:text-blue-300 mb-4"
                             >
                                 <option value="">-- No Bundle --</option>
                                 {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                             </select>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-semibold mb-1">Add Individual Test</label>
+                                <label className="block text-sm font-semibold text-sf-text mb-1">Add Individual Test</label>
                                 <div className="flex gap-2 relative">
-                                    <input value={searchAnalysis} onChange={e => setSearchAnalysis(e.target.value)} placeholder="Search analysis code..." className="flex-1 p-2 border rounded" />
+                                    <input value={searchAnalysis} onChange={e => setSearchAnalysis(e.target.value)} placeholder="Search analysis code..." className="flex-1 p-2 border border-sf-divider rounded bg-sf-surface text-sf-text" />
                                     {searchAnalysis && (
-                                        <div className="absolute top-full left-0 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded z-10 max-h-40 overflow-y-auto">
+                                        <div className="absolute top-full left-0 w-full bg-sf-surface border border-sf-divider shadow-lg rounded z-10 max-h-40 overflow-y-auto">
                                             {analyses.filter(a => a.orderable && !effectiveList.includes(a.code) && a.name.toLowerCase().includes(searchAnalysis.toLowerCase())).map(a => (
-                                                <div key={a.code} onClick={() => { toggleAnalysis(a.code); setSearchAnalysis(''); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">
+                                                <div key={a.code} onClick={() => { toggleAnalysis(a.code); setSearchAnalysis(''); }} className="p-2 hover:bg-sf-raised cursor-pointer text-sm text-sf-text">
                                                     {getAnalysisDisplayName(a.code, a.name)}
                                                 </div>
                                             ))}
@@ -1787,22 +1787,22 @@ const Reception = () => {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 min-h-[40px] bg-gray-50 dark:bg-gray-700/50 p-3 rounded border dark:border-gray-600 inner-shadow">
-                                {effectiveList.length === 0 && <span className="text-gray-400 text-sm italic">No analyses selected</span>}
+                            <div className="flex flex-wrap gap-2 min-h-[40px] bg-sf-canvas p-3 rounded border border-sf-divider inner-shadow">
+                                {effectiveList.length === 0 && <span className="text-sf-muted text-sm italic">No analyses selected</span>}
                                 {effectiveList.map(code => {
                                     const group = groups.find(g => g.id === selectedGroup);
                                     const isGroup = group?.analyses.includes(code);
                                     return (
-                                        <div key={code} className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${isGroup ? 'bg-white dark:bg-gray-700 border dark:border-gray-600 shadow-sm' : 'bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'}`}>
+                                        <div key={code} className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${isGroup ? 'bg-sf-surface border border-sf-divider shadow-sm text-sf-text' : 'bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'}`}>
                                             <span className="font-bold">{code}</span>
-                                            <button onClick={() => toggleAnalysis(code)} className="text-gray-400 hover:text-red-500 ml-1"><XCircle size={14} /></button>
+                                            <button onClick={() => toggleAnalysis(code)} className="text-sf-muted hover:text-red-500 ml-1"><XCircle size={14} /></button>
                                         </div>
                                     )
                                 })}
                                 {removals.map(code => (
-                                    <div key={code} className="flex items-center gap-1 px-2 py-1 rounded border border-red-200 bg-red-50 text-red-400 text-xs line-through">
+                                    <div key={code} className="flex items-center gap-1 px-2 py-1 rounded border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-500 text-xs line-through">
                                         <span>{code}</span>
-                                        <button onClick={() => toggleAnalysis(code)} className="text-gray-400"><Plus size={12} /></button>
+                                        <button onClick={() => toggleAnalysis(code)} className="text-sf-muted"><Plus size={12} /></button>
                                     </div>
                                 ))}
                             </div>
@@ -1812,7 +1812,7 @@ const Reception = () => {
                                     value={justification}
                                     onChange={e => setJustification(e.target.value)}
                                     placeholder="Required: Reason for removing tests..."
-                                    className="w-full mt-3 p-2 border border-red-300 bg-red-50 rounded text-sm"
+                                    className="w-full mt-3 p-2 border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 rounded text-sm text-sf-text"
                                 />
                             )}
                         </div>
@@ -1822,9 +1822,9 @@ const Reception = () => {
                     <div className="space-y-6">
 
                         {/* PHYSICAL ARRIVAL STATE & DESK FACTS (RC-01, RC-02, RC-03) */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-5">
-                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
-                                <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm space-y-5">
+                            <div className="flex items-center justify-between border-b border-sf-divider pb-3">
+                                <h3 className="font-bold text-sf-text flex items-center gap-2">
                                     <Scale size={20} className="text-indigo-600 dark:text-indigo-400" />
                                     <span>Physical Arrival State & Desk Facts</span>
                                     <InfoTooltip text="Desk-level observations recorded as the physical sample bag arrives at reception, prior to drying or grinding." />
@@ -1839,11 +1839,11 @@ const Reception = () => {
                             {/* RC-01: Received Sample Mass & Live Sufficiency Meter */}
                             <div>
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1.5">
+                                    <label className="text-sm font-semibold text-sf-text flex items-center gap-1.5">
                                         Received Sample Mass (g) *
                                         <InfoTooltip text="Weigh physical bag on desk scale. System verifies sufficient material for ordered tests + 100g standard archive retention." />
                                     </label>
-                                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                                    <span className="text-xs font-mono text-sf-muted">
                                         Req: {totalRequiredMass}g ({totalAnalyticalMass}g tests + {retentionBuffer}g archive)
                                     </span>
                                 </div>
@@ -1861,21 +1861,21 @@ const Reception = () => {
                                         placeholder="e.g. 500.0"
                                         className={`w-full p-2.5 pl-3 pr-10 border rounded-lg font-mono text-base outline-none transition-all ${
                                             validationErrors.some(e => e.key === 'receivedMass')
-                                                ? 'border-red-400 ring-2 ring-red-200 bg-red-50/50 dark:bg-red-900/20'
+                                                ? 'border-red-400 ring-2 ring-red-200 bg-red-50/50 dark:bg-red-900/20 text-sf-text'
                                                 : isMassDeficient
-                                                    ? 'border-amber-400 ring-1 ring-amber-200 bg-amber-50/30 dark:bg-amber-900/20'
+                                                    ? 'border-amber-400 ring-1 ring-amber-200 bg-amber-50/30 dark:bg-amber-900/20 text-sf-text'
                                                     : parsedReceivedMass >= totalRequiredMass && totalRequiredMass > 0
-                                                        ? 'border-emerald-400 ring-1 ring-emerald-200 bg-emerald-50/30 dark:bg-emerald-900/20'
-                                                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                                                        ? 'border-emerald-400 ring-1 ring-emerald-200 bg-emerald-50/30 dark:bg-emerald-900/20 text-sf-text'
+                                                        : 'border-sf-divider bg-sf-surface text-sf-text'
                                         }`}
                                     />
-                                    <span className="absolute right-3 top-2.5 font-bold text-gray-400 text-sm">g</span>
+                                    <span className="absolute right-3 top-2.5 font-bold text-sf-muted text-sm">g</span>
                                 </div>
 
                                 {/* Live Sufficiency Meter */}
                                 {parsedReceivedMass > 0 && totalRequiredMass > 0 && (
                                     <div className="space-y-2 mt-2">
-                                        <div className="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
+                                        <div className="h-2 w-full bg-sf-canvas rounded-full overflow-hidden flex">
                                             <div
                                                 className={`h-full transition-all duration-300 ${
                                                     isMassDeficient ? 'bg-amber-500' : 'bg-emerald-500'
@@ -1890,16 +1890,16 @@ const Reception = () => {
                                                     <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
                                                     <div>
                                                         <span className="font-bold">Mass Deficit: {massDeficit}g deficit.</span>
-                                                        <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                                                        <p className="text-sf-muted mt-0.5">
                                                             Required: {totalRequiredMass}g ({totalAnalyticalMass}g for {effectiveList.length} test{effectiveList.length === 1 ? '' : 's'} + {retentionBuffer}g retention buffer). Received: {parsedReceivedMass}g.
                                                         </p>
                                                     </div>
                                                 </div>
 
-                                                <div className="text-[11px] text-gray-600 dark:text-gray-400 border-t border-amber-200 dark:border-amber-800/50 pt-1.5 flex flex-wrap gap-1.5 items-center">
+                                                <div className="text-[11px] text-sf-muted border-t border-amber-200 dark:border-amber-800/50 pt-1.5 flex flex-wrap gap-1.5 items-center">
                                                     <span className="font-semibold">Tests at risk:</span>
                                                     {massRequirementBreakdown.map(b => (
-                                                        <span key={b.code} className="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 font-mono text-[10px]">
+                                                        <span key={b.code} className="bg-sf-surface px-1.5 py-0.5 rounded border border-sf-divider font-mono text-[10px] text-sf-text">
                                                             {getAnalysisDisplayName(b.code)}: {b.massRequired}g
                                                         </span>
                                                     ))}
@@ -1929,7 +1929,7 @@ const Reception = () => {
 
                             {/* RC-02: Moisture State on Arrival */}
                             <div>
-                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5 flex items-center gap-1.5">
+                                <label className="text-sm font-semibold text-sf-text mb-1.5 flex items-center gap-1.5">
                                     <Droplets size={16} className="text-blue-500" /> Moisture on Arrival
                                     <InfoTooltip text="Desk assessment of raw sample moisture prior to lab drying protocol." />
                                 </label>
@@ -1949,11 +1949,11 @@ const Reception = () => {
                                                 className={`p-2 rounded-lg border text-center transition-all ${
                                                     isSelected
                                                         ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-400'
+                                                        : 'bg-sf-surface border-sf-divider text-sf-text hover:border-blue-400'
                                                 }`}
                                             >
                                                 <div className="text-xs font-semibold">{m.label}</div>
-                                                <div className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>{m.hint}</div>
+                                                <div className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-sf-muted'}`}>{m.hint}</div>
                                             </button>
                                         );
                                     })}
@@ -1962,7 +1962,7 @@ const Reception = () => {
 
                             {/* RC-02: Foreign Material Inclusions */}
                             <div>
-                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5 flex items-center gap-1.5">
+                                <label className="text-sm font-semibold text-sf-text mb-1.5 flex items-center gap-1.5">
                                     <Layers size={16} className="text-amber-500" /> Foreign Material Inclusions
                                     <InfoTooltip text="Check any non-soil inclusions visible in the sample bag upon receipt." />
                                 </label>
@@ -1988,8 +1988,8 @@ const Reception = () => {
                                                 }}
                                                 className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 ${
                                                     isChecked
-                                                        ? 'bg-slate-900 text-white border-slate-900 dark:bg-blue-600 dark:border-blue-600 shadow-sm'
-                                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-400'
+                                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                                        : 'bg-sf-surface border-sf-divider text-sf-text hover:border-sf-muted'
                                                 }`}
                                             >
                                                 <span>{isChecked ? '✓' : '+'}</span>
@@ -2003,7 +2003,7 @@ const Reception = () => {
                             {/* RC-03: Intake Photographs */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1.5">
+                                    <label className="text-sm font-semibold text-sf-text flex items-center gap-1.5">
                                         <Camera size={16} className="text-purple-500" /> Intake Photographs ({intakePhotos.length})
                                         <InfoTooltip text="Upload photos of bag condition, legible field labels, physical defects, or bag tags." />
                                     </label>
@@ -2024,7 +2024,7 @@ const Reception = () => {
                                 {intakePhotos.length > 0 ? (
                                     <div className="grid grid-cols-4 gap-2 pt-1">
                                         {intakePhotos.map((url, idx) => (
-                                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 aspect-video bg-gray-100 dark:bg-gray-800 shadow-sm">
+                                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-sf-divider aspect-video bg-sf-canvas shadow-sm">
                                                 <img src={url} alt={`Intake ${idx + 1}`} className="w-full h-full object-cover" />
                                                 <button
                                                     type="button"
@@ -2038,12 +2038,12 @@ const Reception = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-xs text-gray-400 italic">No intake photos attached yet.</p>
+                                    <p className="text-xs text-sf-muted italic">No intake photos attached yet.</p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
@@ -2057,9 +2057,9 @@ const Reception = () => {
                         </div>
 
                         {/* STAGE E: CHAIN OF CUSTODY & VERIFICATION (RC-19) */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
-                                <h3 className="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm space-y-4">
+                            <div className="flex items-center justify-between border-b border-sf-divider pb-3">
+                                <h3 className="font-bold text-sf-text flex items-center gap-2">
                                     <ShieldCheck size={20} className="text-indigo-600 dark:text-indigo-400" />
                                     <span>Chain of Custody & Physical Handover</span>
                                 </h3>
@@ -2070,22 +2070,22 @@ const Reception = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1 flex items-center gap-1">
-                                        <Clock size={13} className="text-gray-400" />
+                                    <label className="block text-xs font-bold text-sf-text mb-1 flex items-center gap-1">
+                                        <Clock size={13} className="text-sf-muted" />
                                         <span>Handover Timestamp</span>
                                     </label>
                                     <input
                                         type="datetime-local"
                                         value={custodyHandoverAt}
                                         onChange={e => setCustodyHandoverAt(e.target.value)}
-                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                         title="Physical date and time the sample was physically handed over at desk"
                                     />
-                                    <span className="text-[10px] text-gray-400 block mt-0.5">Physical custody handover (distinct from entry time)</span>
+                                    <span className="text-[10px] text-sf-muted block mt-0.5">Physical custody handover (distinct from entry time)</span>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                    <label className="block text-xs font-bold text-sf-text mb-1">
                                         Carrier / Delivered By
                                     </label>
                                     <input
@@ -2093,12 +2093,12 @@ const Reception = () => {
                                         value={custodyCarrierName}
                                         onChange={e => setCustodyCarrierName(e.target.value)}
                                         placeholder="Courier, driver, extension agent, or client"
-                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                    <label className="block text-xs font-bold text-sf-text mb-1">
                                         Waybill / Tracking / Delivery Note #
                                     </label>
                                     <input
@@ -2106,12 +2106,12 @@ const Reception = () => {
                                         value={custodyTrackingNumber}
                                         onChange={e => setCustodyTrackingNumber(e.target.value)}
                                         placeholder="e.g. WB-992834, DN-2026-04"
-                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                    <label className="block text-xs font-bold text-sf-text mb-1">
                                         Deliverer / Submitter Signature Confirmation
                                     </label>
                                     <input
@@ -2119,44 +2119,44 @@ const Reception = () => {
                                         value={custodySenderSignature}
                                         onChange={e => setCustodySenderSignature(e.target.value)}
                                         placeholder="Printed name or delivery signature token"
-                                        className="w-full p-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
                             </div>
 
                             {/* Receiving Officer Counter-Signature */}
-                            <div className="bg-slate-50 dark:bg-gray-750 p-3 rounded-lg border border-slate-200 dark:border-gray-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div className="bg-sf-canvas p-3 rounded-lg border border-sf-divider flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
                                         {user?.username ? user.username.slice(0, 2).toUpperCase() : 'RO'}
                                     </div>
                                     <div>
-                                        <div className="text-xs font-bold text-gray-800 dark:text-gray-100">
+                                        <div className="text-xs font-bold text-sf-text">
                                             Receiving Officer: <span className="text-indigo-600 dark:text-indigo-400">{user?.name || user?.username}</span> ({user?.labId || 'Desk'})
                                         </div>
-                                        <div className="text-[11px] text-gray-500 dark:text-gray-400">Authenticated custody receiver counter-signature</div>
+                                        <div className="text-[11px] text-sf-muted">Authenticated custody receiver counter-signature</div>
                                     </div>
                                 </div>
-                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-sf-text">
                                     <input
                                         type="checkbox"
                                         checked={custodyCounterSigned}
                                         onChange={e => setCustodyCounterSigned(e.target.checked)}
-                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                                        className="rounded border-sf-divider text-indigo-600 focus:ring-indigo-500 h-4 w-4"
                                     />
                                     <span>Officer Sign-Off Confirmed</span>
                                 </label>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">
+                                <label className="block text-xs font-bold text-sf-text mb-1">
                                     General Reception & Sample Notes
                                 </label>
                                 <textarea
                                     value={intakeNotes}
                                     onChange={e => setIntakeNotes(e.target.value)}
                                     placeholder="Enter physical observations, special handling notes, or delivery observations..."
-                                    className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 h-20 resize-none text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    className="w-full p-2.5 border border-sf-divider rounded-lg bg-sf-canvas text-sf-text h-20 resize-none text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                 />
                             </div>
                         </div>
@@ -2170,7 +2170,7 @@ const Reception = () => {
                                 </p>
                             </div>
                         )}
-                        <div className="sticky bottom-4 z-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-gray-200 dark:border-gray-700">
+                        <div className="sticky bottom-4 z-10 bg-sf-surface/95 backdrop-blur-md p-3 rounded-2xl shadow-lg shadow-black/10 border border-sf-divider">
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => handleDiscard()}
@@ -2183,7 +2183,7 @@ const Reception = () => {
                                 <button
                                     onClick={() => handleSubmit('ACCEPTED', true)}
                                     disabled={loading}
-                                    className="py-3 px-5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    className="py-3 px-5 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
                                     <FileText size={18} /> {t('reception.saveDraft', 'Save Draft')}
                                 </button>
@@ -2221,7 +2221,7 @@ const Reception = () => {
             {/* RESULT MODAL */}
             {result && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300 no-print">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+                    <div className="bg-sf-surface p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-sf-divider">
                         {result.success && (result.rejected || result.status === 'RECEIVED_REJECTED') ? (
                             <>
                                 <div className="mx-auto w-24 h-24 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
@@ -2229,38 +2229,38 @@ const Reception = () => {
                                         <AlertTriangle size={32} className="text-white" />
                                     </div>
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-900 dark:text-gray-100 mb-1 tracking-tight uppercase">Non-Conformance Recorded</h2>
+                                <h2 className="text-2xl font-black text-sf-text mb-1 tracking-tight uppercase">Non-Conformance Recorded</h2>
                                 <p className="text-rose-600 dark:text-rose-400 mb-6 font-semibold text-xs">
                                     Sample rejected at reception desk and recorded as <span className="font-mono px-1.5 py-0.5 bg-rose-100 dark:bg-rose-900/50 rounded font-bold">RECEIVED_REJECTED</span>
                                 </p>
 
-                                <div className="space-y-3 bg-slate-50 dark:bg-gray-750 rounded-2xl p-4 border border-slate-200 dark:border-gray-600 mb-6 text-left text-xs shadow-inner">
-                                    <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
-                                        <span className="text-gray-500 font-medium">Sample Identifier:</span>
-                                        <span className="font-mono font-bold text-gray-900 dark:text-white">{result.originalId}</span>
+                                <div className="space-y-3 bg-sf-canvas rounded-2xl p-4 border border-sf-divider mb-6 text-left text-xs shadow-inner">
+                                    <div className="flex justify-between items-center pb-2 border-b border-sf-divider">
+                                        <span className="text-sf-muted font-medium">Sample Identifier:</span>
+                                        <span className="font-mono font-bold text-sf-text">{result.originalId}</span>
                                     </div>
-                                    <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
-                                        <span className="text-gray-500 font-medium block mb-1">Rejection Reason:</span>
+                                    <div className="pb-2 border-b border-sf-divider">
+                                        <span className="text-sf-muted font-medium block mb-1">Rejection Reason:</span>
                                         <div className="p-2 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 rounded border border-rose-200 dark:border-rose-900 font-semibold text-xs">
                                             {result.rejectionReason || 'Sample non-conformance recorded during physical intake.'}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-[11px]">
                                         <div>
-                                            <span className="text-gray-400 block">Carrier / Courier:</span>
-                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.custodyCarrierName || 'Direct Delivery'}</span>
+                                            <span className="text-sf-muted block">Carrier / Courier:</span>
+                                            <span className="font-semibold text-sf-text">{result.custodyCarrierName || 'Direct Delivery'}</span>
                                         </div>
                                         <div>
-                                            <span className="text-gray-400 block">Waybill / Tracking:</span>
-                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.custodyTrackingNumber || 'None'}</span>
+                                            <span className="text-sf-muted block">Waybill / Tracking:</span>
+                                            <span className="font-semibold text-sf-text">{result.custodyTrackingNumber || 'None'}</span>
                                         </div>
                                         <div>
-                                            <span className="text-gray-400 block">Receiving Officer:</span>
-                                            <span className="font-semibold text-gray-700 dark:text-gray-200">{result.receivingOfficerName || user.username}</span>
+                                            <span className="text-sf-muted block">Receiving Officer:</span>
+                                            <span className="font-semibold text-sf-text">{result.receivingOfficerName || user.username}</span>
                                         </div>
                                         <div>
-                                            <span className="text-gray-400 block">Handover Time:</span>
-                                            <span className="font-semibold text-gray-700 dark:text-gray-200">
+                                            <span className="text-sf-muted block">Handover Time:</span>
+                                            <span className="font-semibold text-sf-text">
                                                 {result.custodyHandoverAt ? new Date(result.custodyHandoverAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recorded'}
                                             </span>
                                         </div>
@@ -2271,14 +2271,14 @@ const Reception = () => {
                                     <button
                                         type="button"
                                         onClick={() => window.print()}
-                                        className="py-3 px-4 bg-white dark:bg-gray-700 text-rose-700 dark:text-rose-300 font-bold rounded-xl border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-gray-600 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                        className="py-3 px-4 bg-sf-surface text-rose-600 dark:text-rose-400 font-bold rounded-xl border border-rose-300 dark:border-rose-800 hover:bg-sf-canvas transition-all flex items-center justify-center gap-2 active:scale-95"
                                     >
                                         <Printer size={16} /> Print Slip
                                     </button>
                                     <button
                                         type="button"
                                         onClick={resetForm}
-                                        className="py-3 px-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all flex items-center justify-center gap-2 active:scale-95 shadow-lg"
+                                        className="py-3 px-4 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-all flex items-center justify-center gap-2 active:scale-95 shadow-sm"
                                     >
                                         <Plus size={16} /> Next Sample
                                     </button>
@@ -2291,13 +2291,13 @@ const Reception = () => {
                                         <CheckCircle size={32} className="text-white" />
                                     </div>
                                 </div>
-                                <h2 className="text-3xl font-black text-slate-900 dark:text-gray-100 mb-2 tracking-tight uppercase">{t('reception.intakeConfirmed', 'Intake Confirmed!')}</h2>
-                                <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">{t('reception.intakeConfirmedSubtitle', 'Sample identity established and records synchronized.')}</p>
+                                <h2 className="text-3xl font-black text-sf-text mb-2 tracking-tight uppercase">{t('reception.intakeConfirmed', 'Intake Confirmed!')}</h2>
+                                <p className="text-sf-muted mb-8 font-medium">{t('reception.intakeConfirmedSubtitle', 'Sample identity established and records synchronized.')}</p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-gray-700/50 rounded-3xl p-6 border border-slate-200 dark:border-gray-600 mb-8 text-left shadow-inner">
-                                    {/* Left: QR Code */}
-                                    <div className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-200 dark:border-gray-600 shadow-sm">
-                                        <div className="w-32 h-32 border border-slate-100 p-1 rounded-xl">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-sf-canvas rounded-3xl p-6 border border-sf-divider mb-8 text-left shadow-inner">
+                                    {/* Left: QR Code - Keep white background for camera scanability */}
+                                    <div className="flex flex-col items-center justify-center gap-3 bg-sf-surface p-4 rounded-2xl border border-sf-divider shadow-sm">
+                                        <div className="w-32 h-32 border border-sf-divider bg-white p-1 rounded-xl">
                                             {resultQrUrl ? (
                                                 <img
                                                     src={resultQrUrl}
@@ -2305,23 +2305,23 @@ const Reception = () => {
                                                     className="w-full h-full object-contain"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 font-mono">
+                                                <div className="w-full h-full flex items-center justify-center text-xs text-slate-700 font-mono">
                                                     {result.labId}
                                                 </div>
                                             )}
                                         </div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Encoded: {result.labId}</span>
+                                        <span className="text-[10px] font-black text-sf-muted uppercase tracking-widest whitespace-nowrap">Encoded: {result.labId}</span>
                                     </div>
 
                                     {/* Right: ID Data */}
                                     <div className="flex flex-col justify-center space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('reception.permanentLabId', 'Permanent Lab ID')}</span>
-                                            <div className="font-mono font-black text-3xl text-indigo-600 leading-none">{result.labId}</div>
+                                            <span className="text-[9px] font-black text-sf-muted uppercase tracking-widest">{t('reception.permanentLabId', 'Permanent Lab ID')}</span>
+                                            <div className="font-mono font-black text-3xl text-indigo-600 dark:text-indigo-400 leading-none">{result.labId}</div>
                                         </div>
-                                        <div className="space-y-1 pt-3 border-t border-slate-200">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('reception.originalSampleId', 'Scanning Code (Original)')}</span>
-                                            <div className="font-mono font-bold text-slate-500 text-sm truncate" title={result.originalId}>{result.originalId}</div>
+                                        <div className="space-y-1 pt-3 border-t border-sf-divider">
+                                            <span className="text-[9px] font-black text-sf-muted uppercase tracking-widest">{t('reception.originalSampleId', 'Scanning Code (Original)')}</span>
+                                            <div className="font-mono font-bold text-sf-muted text-sm truncate" title={result.originalId}>{result.originalId}</div>
                                         </div>
                                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase w-fit">
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -2334,9 +2334,9 @@ const Reception = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsLabelPrintOpen(true)}
-                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl border-2 border-indigo-100 dark:border-indigo-800 hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-gray-600 transition-all active:scale-95 shadow-sm group"
+                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-sf-surface text-indigo-600 dark:text-indigo-400 font-bold rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 hover:bg-sf-raised transition-all active:scale-95 shadow-sm group"
                                     >
-                                        <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/40 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60 transition-colors">
                                             <Printer size={24} />
                                         </div>
                                         <span className="text-sm">{t('reception.printTag', 'Print Label')}</span>
@@ -2344,9 +2344,9 @@ const Reception = () => {
                                     <button
                                         type="button"
                                         onClick={resetForm}
-                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-900/20 group"
+                                        className="flex flex-col items-center justify-center gap-2 py-5 bg-sf-raised text-sf-text font-bold rounded-2xl border border-sf-divider hover:bg-sf-canvas transition-all active:scale-95 shadow-md group"
                                     >
-                                        <div className="p-2 bg-slate-800 rounded-lg group-hover:bg-slate-700 transition-colors">
+                                        <div className="p-2 bg-sf-canvas rounded-lg group-hover:bg-sf-surface transition-colors">
                                             <Plus size={24} />
                                         </div>
                                         <span className="text-sm">{t('reception.nextSample', 'Next Sample')}</span>
@@ -2360,8 +2360,8 @@ const Reception = () => {
                                     <XCircle size={40} className="text-red-600" />
                                 </div>
                                 <h2 className="text-2xl font-bold text-red-600 mb-2">{t('reception.intakeFailed', 'Intake Failed')}</h2>
-                                <p className="text-gray-600 mb-6">{result.message}</p>
-                                <button onClick={() => setResult(null)} className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors">
+                                <p className="text-sf-muted mb-6">{result.message}</p>
+                                <button onClick={() => setResult(null)} className="w-full py-4 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-colors">
                                     {t('reception.tryAgain', 'Try Again')}
                                 </button>
                             </>

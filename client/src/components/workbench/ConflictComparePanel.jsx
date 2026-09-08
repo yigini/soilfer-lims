@@ -26,25 +26,25 @@ export default function ConflictComparePanel({
     };
 
     return (
-        <div className="p-3.5 rounded-lg border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/30 text-slate-800 dark:text-slate-200">
-            <div className="flex items-center gap-2 mb-2 text-amber-800 dark:text-amber-300">
+        <div className="p-3.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-sf-text">
+            <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
                 <AlertCircle size={16} />
                 <span className="font-semibold text-xs uppercase tracking-wider">Concurrency Conflict Detected</span>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+            <p className="text-xs text-sf-muted mb-3 leading-relaxed">
                 This item was updated on the server while you were editing. Both values are preserved below for review:
             </p>
 
-            <div className="grid grid-cols-2 gap-2 p-2.5 rounded bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/40 mb-3 text-xs">
+            <div className="grid grid-cols-2 gap-2 p-2.5 rounded bg-sf-surface border border-sf-divider mb-3 text-xs">
                 <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400">Your Local Draft</span>
-                    <span className="text-sm font-mono font-semibold text-blue-600 dark:text-blue-400">
+                    <span className="block text-[10px] uppercase font-bold text-sf-muted">Your Local Draft</span>
+                    <span className="text-sm font-mono font-semibold text-sf-primary">
                         {localValue || '<empty>'}
                     </span>
                 </div>
                 <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400">Server Value</span>
+                    <span className="block text-[10px] uppercase font-bold text-sf-muted">Server Value</span>
                     <span className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                         {serverValue || '<empty>'}
                     </span>
@@ -55,14 +55,14 @@ export default function ConflictComparePanel({
                 <button
                     type="button"
                     onClick={onUseServer}
-                    className="w-full py-1.5 px-3 rounded text-xs font-medium bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 transition-colors"
+                    className="w-full py-1.5 px-3 rounded text-xs font-medium bg-sf-surface border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center justify-center gap-1.5 transition-colors"
                 >
                     <Check size={14} className="text-emerald-500" />
                     <span>Adopt Server Value ({serverValue})</span>
                 </button>
 
-                <div className="border-t border-amber-200 dark:border-amber-800/50 pt-2 mt-1">
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                <div className="border-t border-amber-500/20 pt-2 mt-1">
+                    <label className="block text-[11px] font-medium text-sf-muted mb-1">
                         Reason for retaining local draft (required):
                     </label>
                     <textarea
@@ -73,10 +73,10 @@ export default function ConflictComparePanel({
                             if (error) setError('');
                         }}
                         placeholder="e.g. Verified against physical laboratory bench notebook..."
-                        className="w-full p-2 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        className="w-full p-2 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-amber-500"
                     />
                     {error && (
-                        <span className="text-[11px] text-red-600 dark:text-red-400 font-medium block mt-1">
+                        <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium block mt-1">
                             {error}
                         </span>
                     )}

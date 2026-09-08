@@ -43,16 +43,16 @@ export default function NumericEditor({
                 aria-label={ariaLabel}
                 aria-invalid={isInvalid}
                 className={`w-28 px-2.5 py-1.5 text-sm font-mono rounded-md border transition-colors
-                    bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
+                    bg-sf-surface text-sf-text placeholder:text-sf-muted
                     ${isInvalid
-                        ? 'border-red-500 focus:ring-red-400 focus:border-red-500'
-                        : 'border-slate-300 dark:border-slate-700 focus:ring-emerald-500 focus:border-emerald-500'
+                        ? 'border-rose-500 focus:ring-rose-400 focus:border-rose-500'
+                        : 'border-sf-divider focus:ring-sf-primary focus:border-sf-primary'
                     }
-                    ${disabled ? 'opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : ''}
+                    ${disabled ? 'opacity-60 bg-sf-raised cursor-not-allowed' : ''}
                     focus:outline-none focus:ring-1`}
             />
             {unit && (
-                <span className="text-xs text-slate-500 dark:text-slate-400 select-none whitespace-nowrap">
+                <span className="text-xs text-sf-muted select-none whitespace-nowrap">
                     {unit}
                 </span>
             )}

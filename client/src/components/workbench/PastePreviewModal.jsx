@@ -94,19 +94,19 @@ export default function PastePreviewModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-2xl bg-sf-surface rounded-2xl shadow-2xl border border-sf-divider flex flex-col max-h-[90vh] overflow-hidden">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-sf-divider flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Clipboard className="text-emerald-600 dark:text-emerald-400" size={18} />
-                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                        <h3 className="text-base font-bold text-sf-text">
                             Batch Paste Preview — {getAnalysisDisplayName(analysisCode)}
                         </h3>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                        className="text-sf-muted hover:text-sf-text transition-colors"
                     >
                         <X size={18} />
                     </button>
@@ -115,7 +115,7 @@ export default function PastePreviewModal({
                 {/* Content */}
                 <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
                     <div>
-                        <p className="text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                        <p className="text-sf-muted mb-2 leading-relaxed">
                             Paste rows directly from your spreadsheet (Excel, CSV, or Google Sheets).
                             Format must be two columns separated by a tab: <strong>Sample ID</strong> and <strong>Result Value</strong>.
                         </p>
@@ -124,7 +124,7 @@ export default function PastePreviewModal({
                             value={pasteText}
                             onChange={(e) => setPasteText(e.target.value)}
                             placeholder="SMP-001	6.45&#10;SMP-002	7.12&#10;SMP-003	<0.50"
-                            className="w-full p-3 font-mono text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            className="w-full p-3 font-mono text-xs rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
 
@@ -133,7 +133,7 @@ export default function PastePreviewModal({
                             type="button"
                             onClick={handlePreview}
                             disabled={!pasteText.trim()}
-                            className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-700 transition-colors disabled:opacity-50"
+                            className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-raised text-sf-text border border-sf-divider hover:bg-sf-hover transition-colors disabled:opacity-50"
                         >
                             Preview Matches & Exclusions
                         </button>
@@ -141,37 +141,37 @@ export default function PastePreviewModal({
 
                     {/* Preview Table */}
                     {previewRows && (
-                        <div className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col mt-2">
-                            <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800/80 font-semibold text-slate-600 dark:text-slate-300 flex items-center justify-between text-[11px]">
+                        <div className="border border-sf-divider rounded-lg overflow-hidden flex flex-col mt-2">
+                            <div className="px-3 py-2 bg-sf-canvas/80 font-semibold text-sf-muted flex items-center justify-between text-[11px] border-b border-sf-divider">
                                 <span>Preview Results ({previewRows.length} rows parsed)</span>
                                 <div className="flex gap-2">
-                                    <span className="text-emerald-600 font-bold">
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                                         {validRows.length} Matched
                                     </span>
-                                    <span className="text-amber-600 font-bold">
+                                    <span className="text-amber-600 dark:text-amber-400 font-bold">
                                         {previewRows.length - validRows.length} Excluded
                                     </span>
                                 </div>
                             </div>
-                            <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                            <div className="max-h-56 overflow-y-auto divide-y divide-sf-divider">
                                 {previewRows.map((r, i) => (
                                     <div key={i} className="px-3 py-2 flex items-center justify-between gap-3 text-xs">
                                         <div className="flex items-center gap-2 min-w-0">
-                                            <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
+                                            <span className="font-mono font-medium text-sf-text">
                                                 {r.id}
                                             </span>
-                                            <span className="text-slate-400">→</span>
+                                            <span className="text-sf-muted">→</span>
                                             <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
                                                 {r.value}
                                             </span>
                                         </div>
                                         <div>
                                             {r.error ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-red-500/15 text-red-700 dark:text-red-300">
                                                     <AlertCircle size={10} /> {r.error}
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                                                     <Check size={10} /> Matched
                                                 </span>
                                             )}
@@ -184,15 +184,15 @@ export default function PastePreviewModal({
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">
+                <div className="px-6 py-3 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
+                    <span className="text-xs text-sf-muted">
                         Pasting updates local drafts only. Nothing is recorded or submitted.
                     </span>
                     <div className="flex gap-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider text-sf-text hover:bg-sf-hover transition-colors"
                         >
                             Cancel
                         </button>

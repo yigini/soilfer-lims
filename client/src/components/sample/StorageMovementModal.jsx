@@ -4,6 +4,15 @@ import { Package, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSuccess }) => {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        if (isOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isOpen, onClose]);
     const { t } = useLanguage();
     const [location, setLocation] = useState('');
     const [reason, setReason] = useState('');
@@ -43,19 +52,19 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Package size={20} className="text-indigo-600 dark:text-indigo-400" />
+                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2">
+                        <Package size={20} className="text-sf-emerald" />
                         {t('custody.recordMovement', 'Record Storage Movement')}
                     </h3>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500">
+                    <button onClick={onClose} className="p-1 hover:bg-sf-raised rounded-lg text-gray-500">
                         <X size={18} />
                     </button>
                 </div>
 
-                <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                    <div>{t('custody.currentLocation', 'Current location')}: <strong className="text-gray-700 dark:text-gray-200">{currentLocation || 'Not recorded'}</strong></div>
+                <div className="mb-4 text-xs text-sf-muted">
+                    <div>{t('custody.currentLocation', 'Current location')}: <strong className="text-sf-text">{currentLocation || 'Not recorded'}</strong></div>
                 </div>
 
                 {error && (
@@ -66,7 +75,7 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
 
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-bold text-sf-muted mb-1">
                             {t('custody.newLocation', 'New Storage Location')} <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -74,13 +83,13 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                             placeholder="e.g. Cabinet A / Shelf 2 / Box 04"
-                            className="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full text-sm p-2.5 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:ring-2 focus:ring-indigo-500 outline-none"
                             autoFocus
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-bold text-sf-muted mb-1">
                             {t('custody.reason', 'Reason for Movement')} <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -88,7 +97,7 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g. Aliquot transfer, archive relocation, cold room storage..."
                             rows={3}
-                            className="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                            className="w-full text-xs p-2.5 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
                         />
                     </div>
 
@@ -96,7 +105,7 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg transition-colors"
                         >
                             {t('common.cancel', 'Cancel')}
                         </button>

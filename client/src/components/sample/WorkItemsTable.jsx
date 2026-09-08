@@ -236,12 +236,12 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 relative flex flex-col h-full">
+        <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider relative flex flex-col h-full">
 
             {/* Toolbar / Filters */}
-            <div className="p-3 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="p-3 bg-sf-canvas border-b border-sf-divider flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <h3 className="font-bold text-gray-700 dark:text-gray-300 uppercase text-xs tracking-wider">
+                    <h3 className="font-bold text-sf-muted uppercase text-xs tracking-wider">
                         Analytical Results ({filteredWorkItems.length})
                     </h3>
 
@@ -251,7 +251,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                             onClick={() => setShowMyAssignedOnly(!showMyAssignedOnly)}
                             className={`text-xs font-bold px-3 py-1 rounded-full border transition-colors ${showMyAssignedOnly
                                 ? 'bg-indigo-100 text-indigo-700 border-indigo-200 shadow-sm'
-                                : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                : 'bg-sf-surface text-gray-500 dark:text-gray-400 border-sf-divider hover:bg-sf-raised'
                                 }`}
                         >
                             {showMyAssignedOnly ? 'Showing: My Assignments' : 'Showing: All'}
@@ -271,7 +271,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                         <select
                             value={selectedTech}
                             onChange={e => setSelectedTech(e.target.value)}
-                            className="text-xs p-1.5 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-800 shadow-sm"
+                            className="text-xs p-1.5 rounded border border-sf-divider dark:bg-gray-800 shadow-sm"
                         >
                             <option value="">Assign to...</option>
                             {technicians.map(t => <option key={t.id} value={t.username}>{t.name}</option>)}
@@ -341,10 +341,10 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
 
             <div className="overflow-auto max-h-[70vh]"> {/* Scrollable Container */}
                 <table className="w-full text-left border-collapse relative min-w-[800px]">
-                    <thead className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm">
+                    <thead className="bg-sf-canvas text-gray-500 dark:text-gray-400 font-semibold text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                         <tr>
                             {isManager && (
-                                <th className="px-4 py-3 w-8 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                                <th className="px-4 py-3 w-8 border-b border-sf-divider bg-sf-canvas">
                                     <input
                                         type="checkbox"
                                         onChange={toggleSelectAll}
@@ -353,54 +353,54 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                     />
                                 </th>
                             )}
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-1/4">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas w-1/4">
                                 <div className="flex items-center gap-1">
                                     Analysis
                                     <InfoTooltip text="Technical test or operational task required for this sample." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-24">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas w-24">
                                 <div className="flex items-center gap-1">
                                     Method
                                     <InfoTooltip text="Standard Operating Procedure (SOP) or analytical method used." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-32">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas w-32">
                                 <div className="flex items-center gap-1">
                                     Assigned To
                                     <InfoTooltip text="The laboratory technician responsible for performing this test." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-24">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas w-24">
                                 <div className="flex items-center gap-1">
                                     Status
                                     <InfoTooltip text="Current progress of the task. Managers must approve 'Submitted' results." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-40">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas w-40">
                                 <div className="flex items-center gap-1">
                                     Result
                                     <InfoTooltip text="Quantitative or qualitative output of the analysis." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hidden md:table-cell w-32">
+                            <th className="px-4 py-3 border-b border-sf-divider bg-sf-canvas hidden md:table-cell w-32">
                                 <div className="flex items-center gap-1">
                                     Updated
                                     <InfoTooltip text="Timestamp of the most recent change to this task." position="bottom" />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-right border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 w-24">Actions</th>
+                            <th className="px-4 py-3 text-right border-b border-sf-divider bg-sf-canvas w-24">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody className="divide-y divide-sf-divider">
                         {orderedCategories.map(category => (
                             <React.Fragment key={category}>
                                 {/* Category Header (Collapsible) */}
                                 <tr
-                                    className="bg-gray-100 dark:bg-gray-800 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                                    className="bg-sf-raised cursor-pointer hover:bg-sf-raised transition"
                                     onClick={() => toggleCategory(category)}
                                 >
-                                    <td colSpan={isManager ? 8 : 7} className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                                    <td colSpan={isManager ? 8 : 7} className="px-4 py-2 text-xs font-bold text-sf-muted uppercase tracking-wider flex items-center gap-2">
                                         <div className="transform transition-transform duration-200">
                                             {collapsedCategories[category] ? '▶' : '▼'}
                                         </div>
@@ -445,9 +445,9 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                     const effectiveBlocked = isBlockedByWorkflow && !isSealed && !isCompleted && !item.result;
 
                                     return (
-                                        <tr key={item.id} className="hover:bg-blue-50/30 dark:hover:bg-gray-800/50 transition-colors group">
+                                        <tr key={item.id} className="hover:bg-sf-raised/50 transition-colors group">
                                             {isManager && (
-                                                <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                                                <td className="px-4 py-3 border-b border-sf-divider">
                                                     <input
                                                         type="checkbox"
                                                         checked={selection.includes(item.id)}
@@ -456,8 +456,8 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     />
                                                 </td>
                                             )}
-                                            <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
-                                                <div className="font-bold text-xs text-gray-900 dark:text-gray-100">
+                                            <td className="px-4 py-3 border-b border-sf-divider">
+                                                <div className="font-bold text-xs text-sf-text">
                                                     {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                                 </div>
                                                 <div className="text-[10px] text-gray-400 font-mono flex items-center gap-1.5 mt-0.5">
@@ -482,15 +482,15 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-500 font-mono text-xs border-b border-gray-50 dark:border-gray-800">
+                                            <td className="px-4 py-3 text-gray-500 font-mono text-xs border-b border-sf-divider">
                                                 {item.method || 'STD'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm border-b border-gray-50 dark:border-gray-800">
+                                            <td className="px-4 py-3 text-sm border-b border-sf-divider">
                                                 {isManager ? (
                                                     <div className="relative flex items-center gap-2">
                                                         <select
                                                             title={isPostAnalytical && !allAnalysesApproved ? lockReason : "Assign Technician"}
-                                                            className={`bg-transparent border-none text-xs text-gray-700 dark:text-gray-300 focus:ring-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 -ml-1 w-full ${assigning === item.id ? 'opacity-30' : ''}`}
+                                                            className={`bg-transparent border-none text-xs text-sf-muted focus:ring-0 cursor-pointer hover:bg-sf-raised rounded px-1 -ml-1 w-full ${assigning === item.id ? 'opacity-30' : ''}`}
                                                             value={item.assignedTo || ''}
                                                             onChange={(e) => handleAssign(item.id, e.target.value)}
                                                             disabled={['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) || assigning === item.id || (
@@ -517,7 +517,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                                            <td className="px-4 py-3 border-b border-sf-divider">
                                                 <span
                                                     id={`wi-row-${item.analysis}`}
                                                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border shadow-sm ${item.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' :
@@ -532,7 +532,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     {item.status.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                                            <td className="px-4 py-3 border-b border-sf-divider">
                                                 {isOpsGate ? (
                                                     (() => {
                                                         if (['COMPLETED', 'ACCEPTED'].includes(item.status)) {
@@ -581,7 +581,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleViewSpectra(item)}
-                                                                    className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                                                                    className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border border-sf-divider hover:bg-sf-raised text-sf-muted transition-colors"
                                                                 >
                                                                     <FileText size={11} /> View
                                                                 </button>
@@ -595,7 +595,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 ) : (
                                                     <div className="flex flex-col">
                                                         {item.result ? (
-                                                            <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                                                            <span className="font-mono text-xs font-bold text-sf-text">
                                                                 {workItemEvidenceText(item)}
                                                                 {item.unit && <span className="text-[10px] text-gray-400 font-normal ml-1">{item.unit}</span>}
                                                             </span>
@@ -607,7 +607,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 border-b border-gray-50 dark:border-gray-800 hidden md:table-cell">
+                                            <td className="px-4 py-3 border-b border-sf-divider hidden md:table-cell">
                                                 {Array.isArray(item.history) && item.history.length > 0 ? (
                                                     <div className="flex flex-col">
                                                         <span className="text-[10px] text-gray-500">
@@ -620,12 +620,12 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                     </div>
                                                 ) : <span className="text-[10px] text-gray-300">-</span>}
                                             </td>
-                                            <td className="px-4 py-3 text-right border-b border-gray-50 dark:border-gray-800">
+                                            <td className="px-4 py-3 text-right border-b border-sf-divider">
                                                 <div className="flex items-center gap-2 justify-end">
                                                     <button
                                                         type="button"
                                                         onClick={() => navigate(`/workbench?workItemId=${item.id}&sampleId=${item.sampleId}`)}
-                                                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline"
+                                                        className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover hover:underline"
                                                         title="Open task in Technician Workbench"
                                                     >
                                                         <span>Open in Workbench →</span>
@@ -633,7 +633,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
 
                                                     {/* MANAGER APPROVAL ACTIONS (Strictly SUBMITTED scientific determinations or AWAITING_VERIFICATION gates) */}
                                                     {isManager && (
-                                                        <div className="flex items-center gap-1 ml-1 border-l border-gray-200 dark:border-gray-700 pl-2">
+                                                        <div className="flex items-center gap-1 ml-1 border-l border-sf-divider pl-2">
                                                             {(() => {
                                                                 const isGate = item.category === 'Operational Gates';
                                                                 const isReadyForReview = item.status === 'SUBMITTED' || (isGate && item.status === 'AWAITING_VERIFICATION');
@@ -687,8 +687,8 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             {
                 selectedScan && (
                     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col">
-                            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 rounded-t-xl">
+                        <div className="bg-sf-surface rounded-xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col">
+                            <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-canvas/50 rounded-t-xl">
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-800">
                                         {selectedScan.labId} <span className="text-gray-400 dark:text-gray-500">|</span> {selectedScan.modality}
@@ -696,10 +696,10 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                     <p className="text-xs text-gray-500">{selectedScan.id}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={handleDownload} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-blue-600 dark:text-blue-400" title="Download CSV">
+                                    <button onClick={handleDownload} className="p-2 hover:bg-sf-raised rounded-full text-blue-600 dark:text-blue-400" title="Download CSV">
                                         <Download size={20} />
                                     </button>
-                                    <button onClick={() => setSelectedScan(null)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full">
+                                    <button onClick={() => setSelectedScan(null)} className="p-2 hover:bg-sf-raised rounded-full">
                                         <XCircle size={24} className="text-gray-500" />
                                     </button>
                                 </div>
@@ -712,7 +712,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                 </div>
 
                                 {/* Sidebar Info */}
-                                <div className="w-80 border-l dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-6 overflow-y-auto">
+                                <div className="w-80 border-l border-sf-divider bg-sf-canvas/50 p-6 overflow-y-auto">
                                     <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
                                         <FileText size={16} /> Metadata
                                     </h3>
@@ -734,7 +734,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                             <div className="break-all text-xs text-gray-600">{selectedScan.metadata?.filename || selectedScan.filename || 'N/A'}</div>
                                         </div>
 
-                                        <hr className="border-gray-200 dark:border-gray-600" />
+                                        <hr className="border-sf-divider" />
 
                                         <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
                                             <CheckCircle size={16} /> QC Report
@@ -759,8 +759,8 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
             {/* Spectra Batch Upload Modal (Reused for Single Item Upload) */}
             {showUploadModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
-                        <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-700/50">
+                    <div className="bg-sf-surface rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
+                        <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-canvas/50">
                             <h3 className="font-bold text-lg">Upload Spectrum for {uploadItem?.labId}</h3>
                             <button onClick={() => setShowUploadModal(false)} className="text-gray-400 hover:text-gray-600">
                                 <XCircle size={24} />

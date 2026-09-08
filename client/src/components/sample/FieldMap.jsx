@@ -455,12 +455,12 @@ const FieldMap = ({ sample }) => {
 
     if (!lat || !lng) {
         return (
-            <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl h-[300px] flex items-center justify-center">
+            <div className="bg-gray-50 dark:bg-gray-800/50 border border-sf-divider rounded-xl h-[300px] flex items-center justify-center">
                 <div className="text-center p-6">
                     <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                         <MapPin size={24} className="text-gray-400" />
                     </div>
-                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-1">No Coordinates Available</p>
+                    <p className="text-sm font-bold text-sf-muted mb-1">No Coordinates Available</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">This sample doesn't have GPS data</p>
                 </div>
             </div>
@@ -533,7 +533,7 @@ const FieldMap = ({ sample }) => {
     return (
         <>
             {/* Inline map */}
-            <div className={`relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-500 ${expanded ? 'h-[600px]' : 'h-[350px]'}`}>
+            <div className={`relative rounded-xl overflow-hidden border border-sf-divider shadow-sm transition-all duration-500 ${expanded ? 'h-[600px]' : 'h-[350px]'}`}>
                 <MapContent />
                 <Controls isFullscreen={false} />
                 <InfoBar isFullscreen={false} />

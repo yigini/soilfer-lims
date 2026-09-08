@@ -25,7 +25,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
 
             {/* SUBMITTER */}
-            <div className="bg-purple-50 dark:bg-purple-900/10 p-6 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
+            <div className="bg-purple-50/50 dark:bg-purple-950/20 p-6 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
                 <h3 className="font-bold text-purple-900 dark:text-purple-300 mb-4 flex items-center gap-2">
                     <User size={20} /> {t('reception.submitterDetails', '1. Submitter Details')}
                     <InfoTooltip text={t('reception.submitterTooltip', 'Information about the laboratory customer or farmer submitting the samples.')} />
@@ -34,13 +34,13 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     <input
                         data-field-key="submitter.name"
                         placeholder={t('reception.firstName', 'First Name *')}
-                        className={`p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.name')}`}
+                        className={`p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text ${errBorder('submitter.name')}`}
                         value={submitter.name}
                         onChange={e => handleChange('submitter', 'name', e.target.value)}
                     />
                     <input
                         placeholder={t('reception.lastName', 'Last Name *')}
-                        className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                        className="p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text"
                         value={submitter.surname}
                         onChange={e => handleChange('submitter', 'surname', e.target.value)}
                     />
@@ -48,7 +48,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                         <input
                             data-field-key="submitter.phone"
                             placeholder={t('reception.phoneReq', 'Phone (Required) *')}
-                            className={`w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 ${errBorder('submitter.phone')}`}
+                            className={`w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text ${errBorder('submitter.phone')}`}
                             value={submitter.phone}
                             onChange={e => handleChange('submitter', 'phone', e.target.value)}
                         />
@@ -56,24 +56,24 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     </div>
                     <input
                         placeholder={t('reception.email', 'Email')}
-                        className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                        className="p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text"
                         value={submitter.email}
                         onChange={e => handleChange('submitter', 'email', e.target.value)}
                     />
                     <input
                         placeholder={t('reception.organization', 'Organization / Farm Name')}
-                        className="p-2 border rounded lg:col-span-2 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                        className="p-2 border rounded-lg lg:col-span-2 bg-sf-surface border-sf-divider text-sf-text"
                         value={submitter.organization}
                         onChange={e => handleChange('submitter', 'organization', e.target.value)}
                     />
                     <div className="lg:col-span-2">
-                        <label className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
+                        <label className="text-xs font-semibold text-sf-muted uppercase flex items-center gap-1">
                             {t('reception.contactPreference', 'Contact Preference')}
                             <InfoTooltip text={t('reception.contactPrefTooltip', 'How the client prefers to receive their final analysis report.')} />
                         </label>
                         <div className="flex flex-wrap gap-4 mt-1">
                             {['Phone', 'Email', 'WhatsApp', 'In-Person'].map(m => (
-                                <label key={m} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
+                                <label key={m} className="flex items-center gap-2 cursor-pointer text-sf-text">
                                     <input
                                         type="radio"
                                         name="contactMethod"
@@ -91,8 +91,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             </div>
 
             {/* SAMPLING CONTEXT */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
+            <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
+                <h3 className="font-bold text-sf-text mb-4 flex items-center gap-2">
                     <Sprout size={20} /> {t('reception.sampleContext', '2. Sample Context')}
                     <InfoTooltip text={t('reception.sampleContextTooltip', 'Agronomic and environmental data helps experts interpret soil results more accurately.')} />
                 </h3>
@@ -100,31 +100,31 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                 {/* Row 1: Crops, Land Use, Date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                        <label className="block text-xs font-semibold text-sf-muted mb-1 flex items-center gap-1">
                             {t('reception.crops', 'Crops')}
                             <InfoTooltip text={t('reception.cropsTooltip', 'Providing crop history allows for tailored fertilizer recommendations.')} />
                         </label>
                         <input
                             placeholder={t('reception.currentCrop', 'Current Crop')}
-                            className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-2 border rounded-lg mb-2 bg-sf-surface border-sf-divider text-sf-text"
                             value={sampling.crop}
                             onChange={e => handleChange('sampling', 'crop', e.target.value)}
                         />
                         <input
                             placeholder={t('reception.previousCrop', 'Previous Crop (Rotation)')}
-                            className="w-full p-2 border rounded text-sm bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-2 border rounded-lg text-sm bg-sf-canvas border-sf-divider text-sf-text"
                             value={sampling.previousCrop || ''}
                             onChange={e => handleChange('sampling', 'previousCrop', e.target.value)}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                        <label className="block text-xs font-semibold text-sf-muted mb-1 flex items-center gap-1">
                             {t('reception.landUse', 'Land Use & Management')} 
                             <InfoTooltip text={t('reception.landUseTooltip', 'Current land use affects nutrient availability and fertilizer recommendations.')} />
                         </label>
                         <select
-                            className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-2 border rounded-lg mb-2 bg-sf-surface border-sf-divider text-sf-text"
                             value={sampling.landUse}
                             onChange={e => handleChange('sampling', 'landUse', e.target.value)}
                         >
@@ -137,20 +137,20 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                         </select>
                         <input
                             placeholder={t('reception.fertilizerUsed', 'Fertilizer / Manure Used?')}
-                            className="w-full p-2 border rounded text-sm bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-2 border rounded-lg text-sm bg-sf-canvas border-sf-divider text-sf-text"
                             value={sampling.management || ''}
                             onChange={e => handleChange('sampling', 'management', e.target.value)}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1">
+                        <label className="block text-xs font-semibold text-sf-muted mb-1">
                             {t('reception.collectionDate', 'Collection Date')}
                             <InfoTooltip text={t('reception.collectionDateTooltip', 'Date of physical collection in the field.')} />
                         </label>
                         <input
                             type="date"
-                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text"
                             value={sampling.date}
                             onChange={e => handleChange('sampling', 'date', e.target.value)}
                         />
@@ -158,8 +158,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                 </div>
 
                 {/* Row 2: Sampling Depth — full width */}
-                <div data-field-key="depth" className={`p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border ${hasErr('depth') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-100 dark:border-gray-700'}`}>
-                    <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
+                <div data-field-key="depth" className={`p-4 bg-sf-canvas rounded-xl border ${hasErr('depth') ? 'border-red-400 ring-1 ring-red-200' : 'border-sf-divider'}`}>
+                    <label className="block text-xs font-semibold text-sf-muted mb-2 flex items-center gap-1">
                         Sampling Depth
                         <InfoTooltip text="Select the standard soil horizon or enter a custom depth range." />
                     </label>
@@ -176,7 +176,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                 onClick={() => setSampling(prev => ({ ...prev, depthType: opt.val, depth: opt.label }))}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border cursor-pointer ${sampling.depthType === opt.val
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                                    : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-sf-raised hover:text-sf-text'
                                     }`}
                             >
                                 {opt.label}
@@ -187,39 +187,39 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                             onClick={() => setSampling(prev => ({ ...prev, depthType: 'Custom', depth: '' }))}
                             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border cursor-pointer ${sampling.depthType === 'Custom'
                                 ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
-                                }`}
+                                : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-sf-raised hover:text-sf-text'
+                                    }`}
                         >
                             Custom…
                         </button>
                     </div>
                     {sampling.depthType === 'Custom' && (
-                        <div className="flex gap-2 items-center mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-100 dark:border-gray-700">
+                        <div className="flex gap-2 items-center mt-3 p-3 bg-sf-surface rounded-lg border border-sf-divider">
                             <input
                                 type="number"
                                 placeholder="From"
                                 min="0"
-                                className="w-24 p-2 border rounded text-sm text-center dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                                className="w-24 p-2 border rounded-lg text-sm text-center bg-sf-surface border-sf-divider text-sf-text"
                                 value={sampling.depthMin || ''}
                                 onChange={e => handleChange('sampling', 'depthMin', e.target.value)}
                             />
-                            <span className="text-gray-400 font-bold">–</span>
+                            <span className="text-sf-muted font-bold">–</span>
                             <input
                                 type="number"
                                 placeholder="To"
                                 min="0"
-                                className="w-24 p-2 border rounded text-sm text-center dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                                className="w-24 p-2 border rounded-lg text-sm text-center bg-sf-surface border-sf-divider text-sf-text"
                                 value={sampling.depthMax || ''}
                                 onChange={e => handleChange('sampling', 'depthMax', e.target.value)}
                             />
-                            <span className="text-sm text-gray-500 font-semibold">cm</span>
+                            <span className="text-sm text-sf-muted font-semibold">cm</span>
                         </div>
                     )}
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid md:grid-cols-2 gap-6">
+                <div className="mt-4 pt-4 border-t border-sf-divider grid md:grid-cols-2 gap-6">
                     <div>
-                        <label className="flex items-center gap-2 mb-2 text-gray-700 dark:text-gray-300">
+                        <label className="flex items-center gap-2 mb-2 text-sf-text">
                             <input
                                 type="checkbox"
                                 checked={sampling.isComposite || false}
@@ -237,7 +237,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                     type="number"
                                     min="1"
                                     placeholder="Sub-samples count"
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-sm"
+                                    className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-sm"
                                     value={sampling.subsamples || ''}
                                     onChange={e => handleChange('sampling', 'subsamples', e.target.value)}
                                 />
@@ -247,7 +247,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                         min="1"
                                         step="1"
                                         placeholder="Composite Radius"
-                                        className="w-full p-2 pr-8 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-sm"
+                                        className="w-full p-2 pr-8 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-sm"
                                         value={sampling.compositeRadiusM || ''}
                                         onChange={e => {
                                             const r = parseFloat(e.target.value);
@@ -264,7 +264,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                         )}
                     </div>
                     <div className="md:col-span-2">
-                        <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
+                        <label className="block text-xs font-semibold text-sf-muted mb-2 flex items-center gap-1">
                             Purpose of Testing
                             <InfoTooltip text="Select the testing purpose. Group-based options will auto-suggest the matching analysis bundle." />
                         </label>
@@ -280,12 +280,12 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                     }}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border cursor-pointer ${sampling.purpose === g.id
                                         ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-sm'
+                                        : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-sf-raised hover:text-sf-text hover:shadow-sm'
                                         }`}
                                 >
                                     <FlaskConical size={16} />
                                     {g.name}
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${sampling.purpose === g.id ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${sampling.purpose === g.id ? 'bg-white/20' : 'bg-sf-canvas border border-sf-divider text-sf-muted'
                                         }`}>
                                         {g.analyses?.length || 0}
                                     </span>
@@ -293,7 +293,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                             ))}
 
                             {/* Separator */}
-                            {groups.length > 0 && <div className="w-px bg-gray-200 dark:bg-gray-600 mx-1 self-stretch" />}
+                            {groups.length > 0 && <div className="w-px bg-sf-divider mx-1 self-stretch" />}
 
                             {/* Static expert options */}
                             {STATIC_PURPOSES.map(sp => (
@@ -306,7 +306,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                     }}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border cursor-pointer ${sampling.purpose === sp.val
                                         ? `${sp.color} ring-2 ring-offset-1 shadow-md scale-[1.02] dark:bg-opacity-20`
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm'
+                                        : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-sf-divider hover:bg-sf-canvas hover:text-sf-text hover:shadow-sm'
                                         }`}
                                 >
                                     <sp.icon size={16} />
@@ -317,7 +317,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     </div>
                     {/* Urgency Selector */}
                     <div className="md:col-span-2">
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                        <label className="block text-xs font-semibold text-sf-muted mb-1 flex items-center gap-1">
                             Processing Urgency
                             <InfoTooltip text="Priority level for lab processing. Urgent samples are prioritized in the queue." />
                         </label>
@@ -327,7 +327,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                 { val: 'Medium', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' },
                                 { val: 'Urgent', color: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' }
                             ].map(opt => (
-                                <label key={opt.val} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${sampling.urgency === opt.val ? `ring-2 ring-offset-1 ${opt.color}` : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>
+                                <label key={opt.val} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${sampling.urgency === opt.val ? `ring-2 ring-offset-1 ${opt.color}` : 'border-sf-divider hover:bg-sf-canvas text-sf-text'}`}>
                                     <input
                                         type="radio"
                                         name="urgency"
@@ -345,8 +345,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             </div>
 
             {/* LOCATION PICKER */}
-            <div data-field-key="location" className={`bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm relative z-0 ${hasErr('location') ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-200 dark:border-gray-700'}`}>
-                <h3 className="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
+            <div data-field-key="location" className={`bg-sf-surface p-6 rounded-xl border shadow-sm relative z-0 ${hasErr('location') ? 'border-red-400 ring-1 ring-red-200' : 'border-sf-divider'}`}>
+                <h3 className="font-bold text-sf-text mb-4 flex items-center gap-2">
                     <MapPin size={20} /> 3. Sampling Location
                 </h3>
                 <LocationPicker

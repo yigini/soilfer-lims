@@ -125,6 +125,24 @@ const SampleDetail = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Dismiss active modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (infoModal?.isOpen) setInfoModal(prev => ({ ...prev, isOpen: false }));
+                else if (confirmModal?.isOpen) setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                else if (amendmentModal?.isOpen) setAmendmentModal(prev => ({ ...prev, isOpen: false }));
+                else if (undoApprovalModal?.isOpen) setUndoApprovalModal(prev => ({ ...prev, isOpen: false }));
+                else if (returningSubmissionId) { setReturningSubmissionId(null); setReturnReason(''); }
+                else if (reportModal) setReportModal(null);
+                else if (selectedSpectraScan) setSelectedSpectraScan(null);
+                else if (moreActionsOpen) setMoreActionsOpen(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [infoModal, confirmModal, amendmentModal, undoApprovalModal, returningSubmissionId, reportModal, selectedSpectraScan, moreActionsOpen]);
+
     // Generic Action Wrapper
     const requestConfirmation = (title, message, action) => {
         setConfirmModal({
@@ -373,7 +391,7 @@ const SampleDetail = () => {
     };
 
     if (loading && !workspace && !sample) {
-        return <div className="p-12 text-center text-gray-500">{t('sampleDetail.loading', 'Loading sample workspace...')}</div>;
+        return <div className="p-12 text-center text-sf-muted bg-sf-canvas min-h-screen">{t('sampleDetail.loading', 'Loading sample workspace...')}</div>;
     }
 
     // Normalized Identity
@@ -431,15 +449,15 @@ const SampleDetail = () => {
     const currentReleasedReport = workspace?.currentReleasedReport || existingReport;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-6 text-left transition-colors duration-200">
+        <div className="min-h-screen bg-sf-canvas p-3 sm:p-6 text-left transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
 
                 {/* ─── 1. BREADCRUMB & CONTEXT ─── */}
-                <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-sf-muted">
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => navigate('/samples')}
-                            className="inline-flex items-center gap-1 font-bold text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            className="inline-flex items-center gap-1 font-bold text-sf-muted hover:text-sf-emerald transition-colors"
                         >
                             <ArrowLeft size={14} /> Back to samples
                         </button>
@@ -448,19 +466,19 @@ const SampleDetail = () => {
                     </div>
                     <div className="flex items-center gap-3">
                         {refreshing && <RefreshCw size={13} className="animate-spin text-indigo-500" />}
-                        <span className="font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700">
+                        <span className="font-semibold text-sf-muted bg-sf-raised px-2.5 py-1 rounded-full border border-sf-divider">
                             {roleBadgeText}
                         </span>
                     </div>
                 </div>
 
                 {/* ─── 2. ALWAYS-VISIBLE HEADER ─── */}
-                <header className="bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <header className="bg-sf-surface rounded-2xl p-5 sm:p-6 shadow-sm border border-sf-divider">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         {/* Identity Details */}
                         <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                                <h1 className="text-2xl sm:text-3xl font-black text-sf-text tracking-tight">
                                     {identity.labSampleCode !== 'Not assigned' ? identity.labSampleCode : identity.fieldId}
                                 </h1>
                                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
@@ -468,7 +486,7 @@ const SampleDetail = () => {
                                 </span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                     identity.status === 'APPROVED' || identity.status === 'ARCHIVED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300' :
-                                    identity.status === 'DISPOSED' ? 'bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-700 dark:text-gray-300' :
+                                    identity.status === 'DISPOSED' ? 'bg-sf-raised text-sf-muted border border-sf-divider' :
                                     'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300'
                                 }`}>
                                     {getStatusLabel(identity.status, t)}
@@ -479,8 +497,8 @@ const SampleDetail = () => {
                                     </span>
                                 )}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-2 pt-0.5">
-                                <span>Field ID: <strong className="text-gray-700 dark:text-gray-300 font-mono">{identity.fieldId}</strong></span>
+                            <div className="text-xs text-sf-muted flex flex-wrap items-center gap-2 pt-0.5">
+                                <span>Field ID: <strong className="text-sf-text font-mono">{identity.fieldId}</strong></span>
                                 <span>•</span>
                                 <span>Matrix: <strong>{identity.matrix}</strong></span>
                                 <span>•</span>
@@ -494,9 +512,9 @@ const SampleDetail = () => {
                             {capabilities.canManageAnalyses?.allowed && (
                                 <button
                                     onClick={() => setIsAnalysisModalOpen(true)}
-                                    className="px-3 py-2 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
+                                    className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
                                 >
-                                    <Sliders size={14} className="text-indigo-600 dark:text-indigo-400" />
+                                    <Sliders size={14} className="text-sf-emerald" />
                                     Manage analyses
                                 </button>
                             )}
@@ -504,7 +522,7 @@ const SampleDetail = () => {
                             {/* Print Label */}
                             <button
                                 onClick={() => setPrintTarget(sample || { id, labId: identity.labSampleCode, originalId: identity.fieldId })}
-                                className="px-3 py-2 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
+                                className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
                             >
                                 <Printer size={14} className="text-emerald-600 dark:text-emerald-400" />
                                 Print label
@@ -513,7 +531,7 @@ const SampleDetail = () => {
                             {/* Workflow Map */}
                             <button
                                 onClick={() => navigate(`/workflow-map?sampleId=${id}`)}
-                                className="px-3 py-2 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
+                                className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
                             >
                                 <Map size={14} className="text-amber-600 dark:text-amber-400" />
                                 Workflow map
@@ -523,7 +541,7 @@ const SampleDetail = () => {
                             {currentReleasedReport && (
                                 <button
                                     onClick={() => handleViewReport(currentReleasedReport.id)}
-                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center gap-1.5 transition-colors"
+                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors"
                                 >
                                     <FileText size={14} />
                                     View report v{currentReleasedReport.version || 1}
@@ -555,18 +573,18 @@ const SampleDetail = () => {
                             <div className="relative" ref={moreActionsRef}>
                                 <button
                                     onClick={() => setMoreActionsOpen(!moreActionsOpen)}
-                                    className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                                    className="p-2 rounded-xl border border-sf-divider hover:bg-sf-raised text-sf-muted transition-colors"
                                     title="More actions"
                                 >
                                     <MoreHorizontal size={16} />
                                 </button>
 
                                 {moreActionsOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
+                                    <div className="absolute right-0 mt-2 w-56 bg-sf-surface rounded-xl shadow-xl border border-sf-divider py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
                                         {capabilities.canArchive?.allowed && (
                                             <button
                                                 onClick={() => { setMoreActionsOpen(false); handleArchive(); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-text hover:bg-sf-raised flex items-center gap-2"
                                             >
                                                 <Package size={14} /> Archive sample
                                             </button>
@@ -605,7 +623,7 @@ const SampleDetail = () => {
                                         )}
                                         <button
                                             onClick={() => { setMoreActionsOpen(false); fetchWorkspaceData(); }}
-                                            className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                            className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-muted hover:bg-sf-raised flex items-center gap-2"
                                         >
                                             <RefreshCw size={14} /> Refresh projection
                                         </button>
@@ -616,8 +634,8 @@ const SampleDetail = () => {
                     </div>
 
                     {/* Operational Summary Sub-row */}
-                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-                        <div className="flex flex-wrap items-center gap-2 font-medium text-gray-600 dark:text-gray-300">
+                    <div className="mt-4 pt-4 border-t border-sf-divider flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div className="flex flex-wrap items-center gap-2 font-medium text-sf-muted">
                             <span>{getStatusLabel(identity.status, t)}</span>
                             <span>·</span>
                             <span><strong>{counters.ordered}</strong> ordered analyses</span>
@@ -636,7 +654,7 @@ const SampleDetail = () => {
                                 </>
                             )}
                         </div>
-                        <div className="text-gray-500 dark:text-gray-400">
+                        <div className="text-sf-muted">
                             {materialCustody.isDisposed ? (
                                 <span className="text-red-600 font-semibold">Material: disposed · no retained aliquot</span>
                             ) : (
@@ -648,7 +666,7 @@ const SampleDetail = () => {
 
                 {/* ─── 3. ORDER INTEGRITY WARNING (W001: Order Revision vs Tasks Mismatch) ─── */}
                 {(workspace?.orderIntegrityWarning || workspace?.order?.warning) && (
-                    <div className="p-4 sm:p-5 bg-rose-50 dark:bg-rose-950/40 border-l-4 border-rose-500 rounded-xl shadow-sm text-left">
+                    <div className="p-4 sm:p-5 bg-rose-50 dark:bg-rose-950/30 border-l-4 border-rose-500 rounded-xl shadow-sm text-left">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 font-bold text-rose-900 dark:text-rose-200">
@@ -673,7 +691,7 @@ const SampleDetail = () => {
 
                 {/* ─── 3B. HISTORICAL EVIDENCE GAP ALERT (Finding S003) ─── */}
                 {integrity.hasHistoricalGap && (
-                    <div className="p-4 sm:p-5 bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 rounded-xl shadow-sm text-left">
+                    <div className="p-4 sm:p-5 bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 rounded-xl shadow-sm text-left">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-200">
@@ -695,13 +713,13 @@ const SampleDetail = () => {
                 )}
 
                 {/* ─── 4. OPERATIONAL NEXT ACTION BANNER ─── */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 border-l-4 border-l-indigo-600 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div className="bg-sf-surface rounded-xl p-4 sm:p-5 border border-sf-divider border-l-4 border-l-sf-emerald flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                     <div className="space-y-0.5">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Recommended Next Action</span>
-                        <h3 className="font-bold text-gray-900 dark:text-white text-base">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-sf-emerald">Recommended Next Action</span>
+                        <h3 className="font-bold text-sf-text text-base">
                             {integrity.hasHistoricalGap ? 'Resolve the historical evidence gap' : nextAction.label}
                         </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-sf-muted">
                             {integrity.hasHistoricalGap ? 'Manager · Inspect recorded acceptance decisions and verify original physical records.' :
                              counters.submitted > 0 ? 'Manager · Inspect submitted evidence and QC before accepting.' :
                              identity.status === 'EXPECTED' ? 'Reception · Confirm physical specimen condition, label, and requested methods.' :
@@ -718,7 +736,7 @@ const SampleDetail = () => {
                             else if (counters.accepted >= counters.ordered && counters.ordered > 0) setActiveTab('reports');
                             else setActiveTab('work');
                         }}
-                        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all transform hover:scale-[1.02] flex-shrink-0"
+                        className="px-5 py-2.5 bg-sf-emerald hover:bg-sf-emerald-hover text-white rounded-xl text-xs font-bold shadow-md transition-all transform hover:scale-[1.02] flex-shrink-0"
                     >
                         {integrity.hasHistoricalGap ? 'Inspect evidence' :
                          counters.submitted > 0 ? 'Review submission' :
@@ -730,18 +748,16 @@ const SampleDetail = () => {
                 </div>
 
                 {/* ─── 5. FIVE TABS NAVIGATION ─── */}
-                <nav className="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto" aria-label="Sample sections">
+                <nav className="flex items-center gap-1 border-b border-sf-divider overflow-x-auto" aria-label="Sample sections">
                     <button
                         onClick={() => setActiveTab('work')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'work'
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                            activeTab === 'work' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <Layers size={15} />
                         Work & results
-                        <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-sf-raised text-sf-muted">
                             {counters.ordered}
                         </span>
                     </button>
@@ -749,9 +765,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('review')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'review'
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                            activeTab === 'review' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <ShieldCheck size={15} />
@@ -766,9 +780,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('request')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'request'
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                            activeTab === 'request' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <Package size={15} />
@@ -778,9 +790,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('reports')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'reports'
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                            activeTab === 'reports' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <FileText size={15} />
@@ -795,9 +805,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('history')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'history'
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                            activeTab === 'history' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <HistoryIcon size={15} />
@@ -811,21 +819,21 @@ const SampleDetail = () => {
                 {activeTab === 'work' && (
                     <div className="space-y-6">
                         {/* Preparation Gates Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <div className="bg-sf-surface rounded-2xl p-5 border border-sf-divider shadow-sm">
                             <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Preparation Prerequisites</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted">Preparation Prerequisites</h3>
                                 <button
                                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
-                                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                                    className="text-xs font-semibold text-sf-emerald hover:underline flex items-center gap-1"
                                 >
                                     <span>Execute in Workbench →</span>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                                <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Air Drying</div>
-                                        <div className="text-xs text-gray-500 mt-0.5">
+                                        <div className="font-bold text-sf-text text-sm">Air Drying</div>
+                                        <div className="text-xs text-sf-muted mt-0.5">
                                             {workspace?.operationalGates?.drying?.receipt?.schemaVersion || 'operational-checklist-v1'} · Constant weight
                                         </div>
                                     </div>
@@ -838,10 +846,10 @@ const SampleDetail = () => {
                                     </span>
                                 </div>
 
-                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                                <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Sample Preparation</div>
-                                        <div className="text-xs text-gray-500 mt-0.5">
+                                        <div className="font-bold text-sf-text text-sm">Sample Preparation</div>
+                                        <div className="text-xs text-sf-muted mt-0.5">
                                             {workspace?.operationalGates?.preparation?.receipt?.schemaVersion || 'operational-checklist-v1'} · Homogenized fraction
                                         </div>
                                     </div>
@@ -874,12 +882,12 @@ const SampleDetail = () => {
                         </div>
 
                         {/* Ordered Analyses Table */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
-                                <h3 className="font-bold text-gray-900 dark:text-white text-sm">
+                        <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
+                            <div className="p-4 border-b border-sf-divider flex flex-wrap items-center justify-between gap-3">
+                                <h3 className="font-bold text-sf-text text-sm">
                                     Ordered Analyses ({workItems.filter(w => !w.isGate && w.category !== 'Operational Gates').length})
                                 </h3>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-sf-muted">
                                     {isTech ? 'Showing all analyses (assigned highlighted)' : 'All analytical tasks visible'}
                                 </div>
                             </div>
@@ -895,35 +903,35 @@ const SampleDetail = () => {
                         </div>
 
                         {/* Review Coverage & Counters Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Scientific Review Coverage</h3>
+                        <div className="bg-sf-surface rounded-2xl p-5 border border-sf-divider shadow-sm">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted mb-3">Scientific Review Coverage</h3>
                             <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-center">
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                                    <div className="text-xl font-bold text-gray-900 dark:text-white">{counters.ordered}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Ordered</div>
+                                <div className="p-3 bg-sf-canvas rounded-xl">
+                                    <div className="text-xl font-bold text-sf-text">{counters.ordered}</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Ordered</div>
                                 </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <div className="p-3 bg-sf-canvas rounded-xl">
                                     <div className="text-xl font-bold text-blue-600">{counters.recorded}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Recorded</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Recorded</div>
                                 </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <div className="p-3 bg-sf-canvas rounded-xl">
                                     <div className="text-xl font-bold text-purple-600">{counters.submitted}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Submitted</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Submitted</div>
                                 </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <div className="p-3 bg-sf-canvas rounded-xl">
                                     <div className="text-xl font-bold text-emerald-600">{counters.accepted}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Accepted</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Accepted</div>
                                 </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <div className="p-3 bg-sf-canvas rounded-xl">
                                     <div className="text-xl font-bold text-gray-500">{counters.omitted}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Omitted</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Omitted</div>
                                 </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <div className="p-3 bg-sf-canvas rounded-xl">
                                     <div className="text-xl font-bold text-amber-600">{counters.blocked}</div>
-                                    <div className="text-[11px] text-gray-500 uppercase font-semibold">Blocked</div>
+                                    <div className="text-[11px] text-sf-muted uppercase font-semibold">Blocked</div>
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 mt-3 text-center">
+                            <p className="text-xs text-sf-muted mt-3 text-center">
                                 Only submitted evidence can be reviewed and accepted. Blanket approval without submitted evidence is prohibited.
                             </p>
                         </div>
@@ -934,13 +942,13 @@ const SampleDetail = () => {
                 {activeTab === 'review' && (
                     <div className="space-y-6">
                         {counters.submitted === 0 ? (
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 text-center space-y-4 shadow-sm">
-                                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto text-gray-400">
+                            <div className="bg-sf-surface rounded-2xl p-8 border border-sf-divider text-center space-y-4 shadow-sm">
+                                <div className="w-12 h-12 rounded-full bg-sf-raised flex items-center justify-center mx-auto text-sf-muted">
                                     <ShieldCheck size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-base">No reviewable submission pending</h3>
-                                    <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+                                    <h3 className="font-bold text-sf-text text-base">No reviewable submission pending</h3>
+                                    <p className="text-xs text-sf-muted max-w-md mx-auto mt-1">
                                         {integrity.hasHistoricalGap
                                             ? 'Accepted labels do not establish that testing or submission occurred. Investigate the original records.'
                                             : 'Recorded laboratory work must be frozen and submitted by an analyst before managerial review can proceed.'}
@@ -948,16 +956,16 @@ const SampleDetail = () => {
                                 </div>
                                 <button
                                     onClick={() => setActiveTab('work')}
-                                    className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors"
+                                    className="px-4 py-2 bg-sf-canvas text-sf-emerald border border-sf-divider rounded-xl text-xs font-bold hover:bg-sf-raised transition-colors"
                                 >
                                     View work & evidence
                                 </button>
                             </div>
                         ) : (
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-purple-200 dark:border-purple-800 shadow-sm space-y-6">
-                                <div className="flex flex-wrap justify-between items-center gap-3 border-b border-gray-100 dark:border-gray-700 pb-4">
+                            <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-6">
+                                <div className="flex flex-wrap justify-between items-center gap-3 border-b border-sf-divider pb-4">
                                     <div>
-                                        <h3 className="text-base font-bold text-purple-950 dark:text-purple-200 flex items-center gap-2">
+                                        <h3 className="text-base font-bold text-sf-text flex items-center gap-2">
                                             <ShieldCheck size={20} className="text-purple-600" />
                                             Review Submitted Package ({counters.submitted} item(s))
                                         </h3>
@@ -973,10 +981,10 @@ const SampleDetail = () => {
                                 {/* Items awaiting review */}
                                 <div className="space-y-3">
                                     {workItems.filter(w => w.status === 'SUBMITTED').map(item => (
-                                        <div key={item.id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div key={item.id} className="p-4 rounded-xl border border-sf-divider bg-sf-canvas flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-gray-900 dark:text-white text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
+                                                    <span className="font-bold text-sf-text text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
                                                     <span className="text-xs text-gray-400">({item.category || 'Analytical'})</span>
                                                 </div>
                                                 <div className="text-xs text-gray-500 flex flex-wrap gap-3">
@@ -987,12 +995,12 @@ const SampleDetail = () => {
                                             </div>
 
                                             <div className="flex items-center gap-3">
-                                                <div className="font-mono font-bold text-base text-gray-900 dark:text-white">
+                                                <div className="font-mono font-bold text-base text-sf-text">
                                                     {workItemEvidenceText(item)}
                                                 </div>
                                                 <button
                                                     onClick={() => setInspectedItem(item)}
-                                                    className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 text-gray-700 dark:text-gray-200 transition-colors"
+                                                    className="px-3 py-1.5 bg-sf-surface border border-sf-divider rounded-lg text-xs font-bold hover:bg-sf-raised text-sf-text transition-colors"
                                                 >
                                                     Inspect
                                                 </button>
@@ -1024,8 +1032,8 @@ const SampleDetail = () => {
 
                                 {/* Confirmation & Bulk Accept */}
                                 {isManager && (
-                                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
-                                        <label className="flex items-start gap-3 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+                                    <div className="pt-4 border-t border-sf-divider space-y-4">
+                                        <label className="flex items-start gap-3 cursor-pointer text-xs text-sf-muted">
                                             <input
                                                 type="checkbox"
                                                 checked={reviewChecked}
@@ -1059,27 +1067,27 @@ const SampleDetail = () => {
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Request & Identity Card */}
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
-                                <h3 className="font-bold text-gray-900 dark:text-white text-base">Request & Laboratory Accession</h3>
+                            <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-4">
+                                <h3 className="font-bold text-sf-text text-base">Request & Laboratory Accession</h3>
                                 <div className="space-y-3 text-xs">
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Accession Code</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Accession Code</span>
                                         <span className="font-bold font-mono">{identity.labSampleCode}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Field Sample ID</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Field Sample ID</span>
                                         <span className="font-bold font-mono">{identity.fieldId}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Date Received</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Date Received</span>
                                         <span className="font-semibold">{identity.dates?.receivedDateDisplay || 'Not yet received'}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Owning Laboratory</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Owning Laboratory</span>
                                         <span className="font-semibold">{identity.assignedLab}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Client / Submitter</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Client / Submitter</span>
                                         <span className="font-semibold">{workspace?.identity?.clientName || 'Not recorded'}</span>
                                     </div>
                                 </div>
@@ -1087,7 +1095,7 @@ const SampleDetail = () => {
                                 {capabilities.canManageAnalyses?.allowed && (
                                     <button
                                         onClick={() => setIsAnalysisModalOpen(true)}
-                                        className="w-full py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-800 dark:text-gray-200 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-600 transition-colors"
+                                        className="w-full py-2 bg-sf-canvas hover:bg-sf-raised text-sf-text rounded-xl text-xs font-bold border border-sf-divider transition-colors"
                                     >
                                         Change requested analyses (Revision {workspace?.order?.revisionNumber || 1})
                                     </button>
@@ -1095,9 +1103,9 @@ const SampleDetail = () => {
                             </div>
 
                             {/* Physical Material & Custody */}
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                            <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Physical Material & Custody</h3>
+                                    <h3 className="font-bold text-sf-text text-base">Physical Material & Custody</h3>
                                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                         materialCustody.isDisposed ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
                                     }`}>
@@ -1106,20 +1114,20 @@ const SampleDetail = () => {
                                 </div>
 
                                 <div className="space-y-3 text-xs">
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Available Mass</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Available Mass</span>
                                         <span className="font-semibold">{materialCustody.receivedMass ? `${materialCustody.receivedMass} g` : 'Not recorded'}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Storage Location</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Storage Location</span>
                                         <span className="font-bold font-mono">{materialCustody.storageLocation || 'Not recorded'}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Custody Carrier</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Custody Carrier</span>
                                         <span className="font-semibold">{materialCustody.carrierName || 'Not recorded'}</span>
                                     </div>
-                                    <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-                                        <span className="text-gray-500">Receiving Officer</span>
+                                    <div className="flex justify-between py-1.5 border-b border-sf-divider">
+                                        <span className="text-sf-muted">Receiving Officer</span>
                                         <span className="font-semibold">{materialCustody.receivingOfficerName || 'Not recorded'}</span>
                                     </div>
                                 </div>
@@ -1127,7 +1135,7 @@ const SampleDetail = () => {
                                 {!materialCustody.isDisposed && (
                                     <button
                                         onClick={() => setStorageModalOpen(true)}
-                                        className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-colors"
+                                        className="w-full py-2 bg-sf-canvas text-sf-emerald border border-sf-divider hover:bg-sf-raised rounded-xl text-xs font-bold transition-colors"
                                     >
                                         Record storage movement
                                     </button>
@@ -1139,28 +1147,28 @@ const SampleDetail = () => {
                         <IntakeRequestCard sample={sample || identity} />
 
                         {/* Expandable Field Metadata & Map */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                        <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-4">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-sm">Field Collection Metadata & Coordinates</h3>
-                                    <p className="text-xs text-gray-500">Source provenance and GPS location map</p>
+                                    <h3 className="font-bold text-sf-text text-sm">Field Collection Metadata & Coordinates</h3>
+                                    <p className="text-xs text-sf-muted">Source provenance and GPS location map</p>
                                 </div>
                                 <button
                                     onClick={() => setShowFieldMetadata(!showFieldMetadata)}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    className="px-3 py-1.5 rounded-lg text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text transition-colors"
                                 >
                                     {showFieldMetadata ? 'Hide details' : 'View full field data'}
                                 </button>
                             </div>
 
                             {showFieldMetadata && (
-                                <div className="space-y-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <div className="space-y-4 pt-3 border-t border-sf-divider">
                                     <FieldMetadataCard
                                         sample={sample || identity}
                                         canEdit={['INTAKE_OFFICER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(userRole)}
                                         onUpdateMetadata={handleUpdateMetadata}
                                     />
-                                    <div className="h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                    <div className="h-[250px] rounded-xl overflow-hidden border border-sf-divider">
                                         <FieldMap sample={sample || identity} />
                                     </div>
                                 </div>
@@ -1172,10 +1180,10 @@ const SampleDetail = () => {
                 {/* TAB 4: REPORTS */}
                 {activeTab === 'reports' && (
                     <div className="space-y-6">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
-                            <div className="flex flex-wrap justify-between items-center gap-3 border-b border-gray-100 dark:border-gray-700 pb-4">
+                        <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-6">
+                            <div className="flex flex-wrap justify-between items-center gap-3 border-b border-sf-divider pb-4">
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Analytical Report Releases</h3>
+                                    <h3 className="font-bold text-sf-text text-base">Analytical Report Releases</h3>
                                     <p className="text-xs text-gray-500 mt-0.5">Immutable certificate snapshots authorized by laboratory sign-off</p>
                                 </div>
                                 {currentReleasedReport ? (
@@ -1183,7 +1191,7 @@ const SampleDetail = () => {
                                         Report v{currentReleasedReport.version || 1} Released
                                     </span>
                                 ) : (
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-sf-raised text-sf-muted border border-sf-divider">
                                         DRAFT • Not Released
                                     </span>
                                 )}
@@ -1191,13 +1199,13 @@ const SampleDetail = () => {
 
                             {/* Release Eligibility Check */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-700/60">
+                                <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider">
                                     <span className="block text-[11px] uppercase font-bold text-gray-400 mb-1">Coverage Status</span>
-                                    <div className="font-bold text-gray-800 dark:text-gray-200 text-sm">
+                                    <div className="font-bold text-sf-text text-sm">
                                         {counters.accepted} of {counters.ordered} required results reviewed & accepted
                                     </div>
                                 </div>
-                                <div className="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-700/60">
+                                <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider">
                                     <span className="block text-[11px] uppercase font-bold text-gray-400 mb-1">Release Integrity Check</span>
                                     <div className="font-bold text-sm">
                                         {integrity.hasHistoricalGap ? (
@@ -1213,14 +1221,14 @@ const SampleDetail = () => {
                                                 <CheckCircle size={15} /> Ready for official release
                                             </span>
                                         ) : (
-                                            <span className="text-gray-500">Incomplete laboratory analysis</span>
+                                            <span className="text-sf-muted">Incomplete laboratory analysis</span>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Release / View Actions */}
-                            <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-sf-divider">
                                 {currentReleasedReport ? (
                                     <>
                                         <button
@@ -1232,7 +1240,7 @@ const SampleDetail = () => {
                                         {isManager && (
                                             <button
                                                 onClick={() => setAmendmentModal({ isOpen: true, type: 'CLERICAL', reason: '', impact: '' })}
-                                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-colors"
+                                                className="px-4 py-2 border border-sf-divider hover:bg-sf-raised text-sf-text rounded-xl text-xs font-bold transition-colors"
                                             >
                                                 Start amendment
                                             </button>
@@ -1254,14 +1262,14 @@ const SampleDetail = () => {
 
                 {/* TAB 5: HISTORY */}
                 {activeTab === 'history' && (
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
-                        <h3 className="font-bold text-gray-900 dark:text-white text-base">Traceable Event Audit Trail</h3>
-                        <div className="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
+                    <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-4">
+                        <h3 className="font-bold text-sf-text text-base">Traceable Event Audit Trail</h3>
+                        <div className="divide-y divide-sf-divider text-xs">
                             {history && history.length > 0 ? (
                                 history.map((event, idx) => (
                                     <div key={event.id || idx} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                         <div className="space-y-0.5">
-                                            <div className="font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <div className="font-bold text-sf-text flex items-center gap-2">
                                                 <span>{event.action || event.entity}</span>
                                                 {event.action?.includes('BULK') && (
                                                     <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.2 rounded font-mono">
@@ -1329,10 +1337,10 @@ const SampleDetail = () => {
             {/* Spectra Viewer Modal */}
             {selectedSpectraScan && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Linked Spectral Scan — {selectedSpectraScan.sampleId}</h3>
-                            <button onClick={() => setSelectedSpectraScan(null)} className="p-1 hover:bg-gray-100 rounded text-gray-400"><X size={20} /></button>
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
+                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center">
+                            <h3 className="font-bold text-sf-text">Linked Spectral Scan — {selectedSpectraScan.sampleId}</h3>
+                            <button onClick={() => setSelectedSpectraScan(null)} className="p-1 hover:bg-sf-raised rounded text-sf-muted"><X size={20} /></button>
                         </div>
                         <div className="p-6 overflow-y-auto">
                             <SpectraViewer scan={selectedSpectraScan} />
@@ -1344,25 +1352,25 @@ const SampleDetail = () => {
             {/* Report Viewer Modal */}
             {reportModal && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800 no-print">
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
+                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface no-print">
                             <div>
-                                <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                                <h2 className="text-xl font-black text-sf-text flex items-center gap-2">
                                     <FileText size={20} className="text-indigo-600" />
                                     Report — {reportModal.sampleLabId || reportModal.sampleId?.slice(0, 8)}
                                 </h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Version {reportModal.version} • Generated {reportModal.generatedAt ? new Date(reportModal.generatedAt).toLocaleDateString('en-GB') : '—'}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 transition-colors" title="Print">
+                                <button onClick={() => window.print()} className="p-2.5 hover:bg-sf-raised rounded-xl text-sf-emerald transition-colors" title="Print">
                                     <Printer size={20} />
                                 </button>
-                                <button onClick={() => setReportModal(null)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 transition-colors">
+                                <button onClick={() => setReportModal(null)} className="p-2.5 hover:bg-sf-raised rounded-xl text-sf-muted transition-colors">
                                     <XCircle size={24} />
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-gray-900">
+                        <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
                             <ReportContent data={reportModal.content ? (typeof reportModal.content === 'string' ? JSON.parse(reportModal.content) : reportModal.content) : reportModal} showActions />
                         </div>
                     </div>
@@ -1372,20 +1380,20 @@ const SampleDetail = () => {
             {/* Return for Correction Modal */}
             {returningSubmissionId && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Return Item for Correction</h3>
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
+                        <h3 className="text-lg font-bold text-sf-text mb-2">Return Item for Correction</h3>
                         <p className="text-xs text-gray-500 mb-4">Under laboratory review policy, a mandatory reason is required to return a submitted result.</p>
                         <textarea
                             value={returnReason}
                             onChange={(e) => setReturnReason(e.target.value)}
                             placeholder="Enter specific correction requirements (e.g., Re-check dilution factor, baseline drift on scan)..."
-                            className="w-full text-xs p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none resize-none h-24 mb-4"
+                            className="w-full text-xs p-3 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text outline-none resize-none h-24 mb-4 focus:border-sf-emerald"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setReturningSubmissionId(null)}
-                                className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 rounded-lg"
+                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
                             >
                                 Cancel
                             </button>
@@ -1408,20 +1416,20 @@ const SampleDetail = () => {
             {/* Reopening / Undo Approval Modal */}
             {undoApprovalModal.isOpen && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Undo Final Approval</h3>
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
+                        <h3 className="text-lg font-bold text-sf-text mb-2">Undo Final Approval</h3>
                         <p className="text-xs text-gray-500 mb-4">Reverting approval will return the sample to PROCESSING. To maintain defensible audit traceability, a mandatory reason is required.</p>
                         <textarea
                             value={undoApprovalModal.reason}
                             onChange={(e) => setUndoApprovalModal(prev => ({ ...prev, reason: e.target.value }))}
                             placeholder="Enter mandatory reason (e.g., Client requested re-analysis, QC verification issue)..."
-                            className="w-full text-xs p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none resize-none h-24 mb-4"
+                            className="w-full text-xs p-3 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text outline-none resize-none h-24 mb-4 focus:border-sf-emerald"
                             autoFocus
                         />
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setUndoApprovalModal({ isOpen: false, reason: '' })}
-                                className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 rounded-lg"
+                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
                             >
                                 Cancel
                             </button>
@@ -1451,16 +1459,16 @@ const SampleDetail = () => {
             {/* Amendment Modal */}
             {amendmentModal.isOpen && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Open Report Amendment</h3>
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
+                        <h3 className="text-lg font-bold text-sf-text mb-2">Open Report Amendment</h3>
                         <p className="text-xs text-gray-500 mb-4">Original released reports remain preserved as immutable snapshots. Amendments create traceable superseding records.</p>
                         <div className="space-y-3 mb-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Amendment Type</label>
+                                <label className="block text-xs font-bold text-sf-muted mb-1">Amendment Type</label>
                                 <select
                                     value={amendmentModal.type}
                                     onChange={(e) => setAmendmentModal(prev => ({ ...prev, type: e.target.value }))}
-                                    className="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:border-sf-emerald"
                                 >
                                     <option value="CLERICAL">Clerical / Typo correction</option>
                                     <option value="SCIENTIFIC">Scientific / Result recalculation</option>
@@ -1468,19 +1476,19 @@ const SampleDetail = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Reason for Amendment *</label>
+                                <label className="block text-xs font-bold text-sf-muted mb-1">Reason for Amendment *</label>
                                 <textarea
                                     value={amendmentModal.reason}
                                     onChange={(e) => setAmendmentModal(prev => ({ ...prev, reason: e.target.value }))}
                                     placeholder="Describe specific reasons and affected parameters..."
-                                    className="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white resize-none h-20"
+                                    className="w-full text-xs p-2.5 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:border-sf-emerald resize-none h-20"
                                 />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setAmendmentModal({ isOpen: false, type: 'CLERICAL', reason: '', impact: '' })}
-                                className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 rounded-lg"
+                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
                             >
                                 Cancel
                             </button>
@@ -1513,13 +1521,13 @@ const SampleDetail = () => {
             {/* General Confirm Modal */}
             {confirmModal.isOpen && (
                 <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{confirmModal.title}</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-wrap">{confirmModal.message}</p>
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
+                        <h3 className="text-lg font-bold text-sf-text mb-2">{confirmModal.title}</h3>
+                        <p className="text-xs text-sf-muted mb-6 whitespace-pre-wrap">{confirmModal.message}</p>
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-                                className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 rounded-lg"
+                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
                             >
                                 Cancel
                             </button>
@@ -1537,16 +1545,16 @@ const SampleDetail = () => {
             {/* Info / Alert Modal */}
             {infoModal.isOpen && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
+                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
                         <div className="flex items-center gap-2 mb-2">
                             {infoModal.type === 'error' ? (
                                 <AlertCircle size={20} className="text-red-500" />
                             ) : (
                                 <CheckCircle size={20} className="text-emerald-500" />
                             )}
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{infoModal.title}</h3>
+                            <h3 className="text-lg font-bold text-sf-text">{infoModal.title}</h3>
                         </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-wrap">{infoModal.message}</p>
+                        <p className="text-xs text-sf-muted mb-6 whitespace-pre-wrap">{infoModal.message}</p>
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setInfoModal({ ...infoModal, isOpen: false })}

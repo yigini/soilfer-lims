@@ -90,7 +90,7 @@ const ComplianceChecklist = ({
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                <h3 className="font-bold text-sf-text flex items-center gap-2">
                     <ShieldCheck size={20} className="text-blue-600" /> {t('reception.receptionCompliance', 'Reception Compliance')}
                     <InfoTooltip text={t('reception.complianceTooltip', 'Verify each item by clicking ✓ Pass or ✗ Fail. All items must be checked before completing the intake.')} />
                 </h3>
@@ -112,7 +112,7 @@ const ComplianceChecklist = ({
             </div>
 
             {/* Progress bar */}
-            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
+            <div className="h-1.5 bg-sf-canvas rounded-full overflow-hidden flex">
                 {passCount > 0 && (
                     <div
                         className="h-full bg-emerald-400 transition-all duration-500"
@@ -143,7 +143,7 @@ const ComplianceChecklist = ({
                                 ? (showIncomplete ? 'border-red-400 ring-1 ring-red-200 bg-red-50/50 dark:bg-red-900/20' : 'border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/20') :
                                 isPass ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/20' :
                                     isFail ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20' :
-                                        'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
+                                        'border-sf-divider bg-sf-surface'
                                 }`}
                         >
                             <div className="flex items-center gap-3 p-3">
@@ -167,7 +167,7 @@ const ComplianceChecklist = ({
                                             <Minus size={12} className="text-white" strokeWidth={3} />
                                         </div>
                                     )}
-                                    <span className={`font-medium text-sm truncate ${isFail ? 'text-red-800 dark:text-red-400' : isNA ? 'text-gray-500 dark:text-gray-400' : isPending ? 'text-amber-900 dark:text-amber-400' : 'text-gray-800 dark:text-gray-200'
+                                    <span className={`font-medium text-sm truncate ${isFail ? 'text-red-800 dark:text-red-400' : isNA ? 'text-sf-muted' : isPending ? 'text-amber-900 dark:text-amber-400' : 'text-sf-text'
                                         }`}>
                                         {item.label}
                                     </span>
@@ -180,7 +180,7 @@ const ComplianceChecklist = ({
                                         onClick={() => setStatus(item.key, 'PASS')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isPass
                                             ? 'bg-emerald-600 text-white shadow-sm'
-                                            : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                                            : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
                                             }`}
                                         title="Mark as Pass"
                                     >
@@ -190,7 +190,7 @@ const ComplianceChecklist = ({
                                         onClick={() => setStatus(item.key, 'FAIL')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isFail
                                             ? 'bg-red-600 text-white shadow-sm'
-                                            : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30'
+                                            : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30'
                                             }`}
                                         title="Mark as Fail"
                                     >
@@ -200,7 +200,7 @@ const ComplianceChecklist = ({
                                         onClick={() => setStatus(item.key, 'NA')}
                                         className={`px-1.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isNA
                                             ? 'bg-gray-500 text-white shadow-sm'
-                                            : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                                            : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-sf-divider hover:text-sf-text'
                                             }`}
                                         title="Not Applicable"
                                     >
@@ -214,7 +214,7 @@ const ComplianceChecklist = ({
                                 <div className="px-3 pb-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                     <input
                                         placeholder={item.failHint}
-                                        className="w-full text-sm p-2 border border-red-200 dark:border-red-800 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 dark:text-gray-100"
+                                        className="w-full text-sm p-2 border border-red-200 dark:border-red-800 bg-sf-surface text-sf-text rounded-lg focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700"
                                         value={value?.items?.[item.key]?.note || ''}
                                         onChange={(e) => updateNote(item.key, e.target.value)}
                                     />
@@ -247,17 +247,17 @@ const ComplianceChecklist = ({
                         });
                         onChange({ ...value, items: newItems });
                     }}
-                    className="text-xs text-gray-400 hover:text-gray-600 font-bold px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+                    className="text-xs text-sf-muted hover:text-sf-text font-bold px-2 py-1 rounded hover:bg-sf-canvas transition-colors"
                 >
                     Reset all
                 </button>
             </div>
 
             {/* Non-Conformance flag */}
-            <div className={`pt-4 border-t transition-colors ${value?.nonConformance ? 'border-red-200 dark:border-red-800' : 'border-gray-200 dark:border-gray-700'}`}>
+            <div className={`pt-4 border-t transition-colors ${value?.nonConformance ? 'border-red-200 dark:border-red-800' : 'border-sf-divider'}`}>
                 <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${value?.nonConformance
                     ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-red-200 hover:bg-red-50/30 dark:hover:bg-red-900/10'
+                    : 'border-sf-divider hover:border-red-200 hover:bg-red-50/30 dark:hover:bg-red-900/10'
                     }`}>
                     <input
                         type="checkbox"
@@ -266,14 +266,14 @@ const ComplianceChecklist = ({
                         className="w-5 h-5 accent-red-600 rounded"
                     />
                     <div className="flex-1">
-                        <span className={`font-bold text-sm ${value?.nonConformance ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                        <span className={`font-bold text-sm ${value?.nonConformance ? 'text-red-700 dark:text-red-400' : 'text-sf-muted'}`}>
                             Flag as Non-Conformance
                         </span>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-sf-muted mt-0.5">
                             Flags this sample for manager review before processing can begin
                         </p>
                     </div>
-                    <AlertCircle size={18} className={value?.nonConformance ? 'text-red-500' : 'text-gray-300'} />
+                    <AlertCircle size={18} className={value?.nonConformance ? 'text-red-500' : 'text-sf-muted'} />
                 </label>
                 {value?.nonConformance && (
                     <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -281,7 +281,7 @@ const ComplianceChecklist = ({
                             Non-Conformance Description *
                         </label>
                         <textarea
-                            className="w-full p-3 border border-red-300 dark:border-red-800 bg-white dark:bg-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 resize-none dark:text-gray-100"
+                            className="w-full p-3 border border-red-300 dark:border-red-800 bg-sf-surface text-sf-text rounded-xl text-sm focus:ring-2 focus:ring-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 resize-none"
                             placeholder="Describe the issue requiring attention..."
                             value={value?.reason || ''}
                             onChange={(e) => onChange({ ...value, reason: e.target.value })}
@@ -313,7 +313,7 @@ const ComplianceChecklist = ({
                             {photos.length > 0 ? (
                                 <div className="grid grid-cols-4 gap-2 pt-1">
                                     {photos.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-gray-100 dark:bg-gray-800 shadow-sm">
+                                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-sf-canvas shadow-sm">
                                             <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
                                             {onRemovePhoto && (
                                                 <button
@@ -329,7 +329,7 @@ const ComplianceChecklist = ({
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-[11px] text-gray-400 italic">No non-conformance photos attached yet.</p>
+                                <p className="text-[11px] text-sf-muted italic">No non-conformance photos attached yet.</p>
                             )}
                         </div>
                     </div>

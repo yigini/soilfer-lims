@@ -45,7 +45,7 @@ const IntakeRequestCard = ({ sample }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 animate-in fade-in slide-in-from-top-4">
 
             {/* LEFT: Analysis Request */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-100 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-xl shadow-sm border border-blue-100 dark:border-gray-700 overflow-hidden">
                 <div className="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center justify-between">
                     <h3 className="font-bold text-blue-900 flex items-center gap-2 text-sm">
                         <FlaskConical size={16} className="text-blue-500" />
@@ -81,7 +81,7 @@ const IntakeRequestCard = ({ sample }) => {
             </div>
 
             {/* RIGHT: Compliance & Conditions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
                 <div className="bg-gray-50/50 p-3 border-b border-gray-100 flex items-center justify-between">
                     <h3 className="font-bold text-gray-900 flex items-center gap-2 text-sm">
                         <ClipboardList size={16} className="text-gray-500" />

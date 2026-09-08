@@ -41,12 +41,12 @@ export default function ReviewSubmissionView({
     return (
         <div className="flex flex-col gap-5 max-w-4xl mx-auto py-2">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-sf-divider">
                 <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-lg font-bold text-sf-text">
                         Review & Submit Samples for Review
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-sf-muted mt-0.5">
                         Submission bundles completed determinations by sample and places them into the QA / Reviewer queue.
                     </p>
                 </div>
@@ -54,7 +54,7 @@ export default function ReviewSubmissionView({
                     <button
                         type="button"
                         onClick={onBack}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                     >
                         <ArrowLeft size={13} /> Back
                     </button>
@@ -62,17 +62,17 @@ export default function ReviewSubmissionView({
             </div>
 
             {/* Explanation Notice */}
-            <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-200 text-xs leading-relaxed">
+            <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-800 dark:text-blue-300 text-xs leading-relaxed">
                 Samples submitted for review become read-only for technicians. The laboratory manager or assigned reviewer will inspect your determinations and make an accept or reanalysis decision.
             </div>
 
             {/* Samples List */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-200 text-xs flex items-center justify-between">
+            <div className="rounded-xl border border-sf-divider overflow-hidden bg-sf-surface">
+                <div className="px-4 py-2.5 bg-sf-canvas/80 font-semibold text-sf-text text-xs flex items-center justify-between border-b border-sf-divider">
                     <span>Recorded Samples ({eligibleSamples.length})</span>
-                    <span className="text-[11px] text-slate-500">Select samples to submit</span>
+                    <span className="text-[11px] text-sf-muted">Select samples to submit</span>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto bg-white dark:bg-slate-900">
+                <div className="divide-y divide-sf-divider max-h-72 overflow-y-auto bg-sf-surface">
                     {eligibleSamples.map((group) => {
                         const isChecked = selectedSamples.includes(group.sampleId);
                         return (
@@ -80,7 +80,7 @@ export default function ReviewSubmissionView({
                                 key={group.sampleId}
                                 onClick={() => toggleSample(group.sampleId)}
                                 className={`p-3.5 flex items-center justify-between cursor-pointer transition-colors text-xs ${
-                                    isChecked ? 'bg-emerald-50/40 dark:bg-emerald-950/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                    isChecked ? 'bg-emerald-500/10' : 'hover:bg-sf-hover/60'
                                 }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -91,26 +91,26 @@ export default function ReviewSubmissionView({
                                         className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                                     />
                                     <div>
-                                        <span className="font-bold text-slate-900 dark:text-slate-100 font-mono text-sm">
+                                        <span className="font-bold text-sf-text font-mono text-sm">
                                             {group.sampleId}
                                         </span>
                                         {group.originalId && (
-                                            <span className="text-slate-400 ml-2">({group.originalId})</span>
+                                            <span className="text-sf-muted ml-2">({group.originalId})</span>
                                         )}
-                                        <div className="text-[11px] text-slate-500 mt-0.5">
+                                        <div className="text-[11px] text-sf-muted mt-0.5">
                                             {group.items?.map(i => i.analysis).join(', ') || 'Determinations'}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[11px] text-slate-500">
+                                    <span className="text-[11px] text-sf-muted">
                                         {group.completedCount} / {group.totalCount} tests complete
                                     </span>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                         group.submissionType === 'FULL'
-                                            ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300'
-                                            : 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300'
+                                            ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
+                                            : 'bg-blue-500/15 text-blue-800 dark:text-blue-300'
                                     }`}>
                                         {group.submissionType}
                                     </span>
@@ -119,7 +119,7 @@ export default function ReviewSubmissionView({
                         );
                     })}
                     {eligibleSamples.length === 0 && (
-                        <div className="p-6 text-center text-xs text-slate-400">
+                        <div className="p-6 text-center text-xs text-sf-muted">
                             No recorded samples are currently awaiting review submission. Record eligible worksheet items first.
                         </div>
                     )}
@@ -128,9 +128,9 @@ export default function ReviewSubmissionView({
 
             {/* Submission Form & Notes */}
             {eligibleSamples.length > 0 && (
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex flex-col gap-3">
+                <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-3">
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        <label className="block text-xs font-semibold text-sf-text mb-1">
                             Submission Notes for Reviewer (optional):
                         </label>
                         <input
@@ -138,11 +138,11 @@ export default function ReviewSubmissionView({
                             value={submissionNote}
                             onChange={(e) => setSubmissionNote(e.target.value)}
                             placeholder="e.g. Batch run 4 complete; QC duplicate verified on SMP-102"
-                            className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            className="w-full px-3 py-1.5 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
 
-                    <label className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200 cursor-pointer pt-1">
+                    <label className="flex items-center gap-2 text-xs text-sf-text cursor-pointer pt-1">
                         <input
                             type="checkbox"
                             checked={confirmed}
@@ -154,8 +154,8 @@ export default function ReviewSubmissionView({
                         </span>
                     </label>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
-                        <span className="text-xs text-slate-500">
+                    <div className="flex items-center justify-between pt-2 border-t border-sf-divider">
+                        <span className="text-xs text-sf-muted">
                             {selectedSamples.length} sample{selectedSamples.length === 1 ? '' : 's'} selected for handoff.
                         </span>
                         <button

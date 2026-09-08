@@ -22,31 +22,31 @@ export default function ActivityReceiptsView({
             case 'WORKBENCH_COMPLETE':
                 return {
                     label: 'Determinations Recorded',
-                    color: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300',
+                    color: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
                     icon: CheckCircle
                 };
             case 'WORKBENCH_SUBMIT':
                 return {
                     label: 'Submitted for Review',
-                    color: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300',
+                    color: 'bg-blue-500/15 text-blue-800 dark:text-blue-300',
                     icon: Send
                 };
             case 'DRAFT_DISCARDED':
                 return {
                     label: 'Draft Discarded',
-                    color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
+                    color: 'bg-sf-hover text-sf-muted',
                     icon: Trash2
                 };
             case 'DRAFT_CONFLICT_RESOLVED':
                 return {
                     label: 'Conflict Resolved',
-                    color: 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300',
+                    color: 'bg-amber-500/15 text-amber-800 dark:text-amber-300',
                     icon: AlertCircle
                 };
             default:
                 return {
                     label: action,
-                    color: 'bg-slate-100 text-slate-700',
+                    color: 'bg-sf-hover text-sf-muted',
                     icon: FileText
                 };
         }
@@ -66,25 +66,25 @@ export default function ActivityReceiptsView({
     return (
         <div className="flex flex-col gap-4 max-w-4xl mx-auto py-2">
             {/* Header & Controls */}
-            <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-sf-divider">
                 <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-lg font-bold text-sf-text">
                         Workbench Activity & Receipts
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-sf-muted mt-0.5">
                         Durable audit trail of determinations, submissions, and draft operations.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <div className="relative">
-                        <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+                        <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search sample or receipt..."
-                            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
                     {onRefresh && (
@@ -92,7 +92,7 @@ export default function ActivityReceiptsView({
                             type="button"
                             onClick={onRefresh}
                             disabled={isLoading}
-                            className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                            className="p-1.5 rounded-lg border border-sf-divider hover:bg-sf-hover transition-colors text-sf-muted hover:text-sf-text"
                         >
                             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
                         </button>
@@ -116,7 +116,7 @@ export default function ActivityReceiptsView({
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                             filter === p.id
                                 ? 'bg-emerald-600 text-white font-semibold'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                                : 'bg-sf-surface text-sf-muted hover:bg-sf-hover hover:text-sf-text border border-sf-divider'
                         }`}
                     >
                         {p.label}
@@ -125,7 +125,7 @@ export default function ActivityReceiptsView({
             </div>
 
             {/* Feed List */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
+            <div className="rounded-xl border border-sf-divider bg-sf-surface divide-y divide-sf-divider overflow-hidden">
                 {filtered.map((r) => {
                     const badge = getActionBadge(r.action);
                     const Icon = badge.icon;
@@ -143,21 +143,21 @@ export default function ActivityReceiptsView({
                                             {badge.label}
                                         </span>
                                         {r.sampleId && (
-                                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                                            <span className="font-mono font-bold text-sf-text">
                                                 {r.sampleId}
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-slate-700 dark:text-slate-300 mt-1 leading-snug">
+                                    <p className="text-sf-text mt-1 leading-snug">
                                         {r.details}
                                     </p>
-                                    <div className="font-mono text-[10px] text-slate-400 mt-1">
+                                    <div className="font-mono text-[10px] text-sf-muted mt-1">
                                         ID: {r.id}
                                     </div>
                                 </div>
                             </div>
 
-                            <span className="text-[11px] text-slate-400 whitespace-nowrap">
+                            <span className="text-[11px] text-sf-muted whitespace-nowrap">
                                 {dateStr}
                             </span>
                         </div>
@@ -165,7 +165,7 @@ export default function ActivityReceiptsView({
                 })}
 
                 {filtered.length === 0 && (
-                    <div className="p-8 text-center text-xs text-slate-400">
+                    <div className="p-8 text-center text-xs text-sf-muted">
                         No activity receipts matching the current criteria.
                     </div>
                 )}

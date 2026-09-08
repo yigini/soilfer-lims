@@ -27,6 +27,16 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
         if (isOpen) setLocalFilters(filters);
     }, [isOpen, filters]);
 
+    // Close on Escape key
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     const handleChange = (sectionId, value, checked) => {
         const currentCSV = localFilters[sectionId] || '';
         const currentList = currentCSV ? currentCSV.split(',') : [];
@@ -50,15 +60,15 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose}></div>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
 
             {/* Drawer */}
-            <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col h-full transform transition-transform duration-300">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                    <h2 className="font-bold flex items-center gap-2">
+            <div className="relative w-full max-w-sm bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col h-full transform transition-transform duration-300">
+                <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-canvas">
+                    <h2 className="font-bold flex items-center gap-2 text-sf-text">
                         <Filter size={18} /> Advanced Filters
                     </h2>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded full transition-colors">
+                    <button onClick={onClose} className="p-1 text-sf-muted hover:text-sf-text hover:bg-sf-raised rounded-full transition-colors">
                         <X size={20} />
                     </button>
                 </div>
@@ -67,7 +77,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     {/* Dynamic Status/Blocker Sections */}
                     {SECTIONS.map(section => (
                         <div key={section.id}>
-                            <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-3">{section.label}</h3>
+                            <h3 className="font-bold text-sm text-sf-text mb-3">{section.label}</h3>
                             <div className="space-y-2 pl-1">
                                 {section.options.map(opt => {
                                     const isChecked = (localFilters[section.id] || '').split(',').includes(opt.value);
@@ -77,9 +87,9 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                                                 type="checkbox"
                                                 checked={isChecked}
                                                 onChange={(e) => handleChange(section.id, opt.value, e.target.checked)}
-                                                className="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800"
+                                                className="rounded text-indigo-600 focus:ring-indigo-500 border-sf-divider bg-sf-canvas"
                                             />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                            <span className="text-sm text-sf-muted group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                                 {opt.label}
                                             </span>
                                         </label>
@@ -93,7 +103,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     {/* Projects */}
                     {options.projects && options.projects.length > 0 && (
                         <div>
-                            <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-3">Project</h3>
+                            <h3 className="font-bold text-sm text-sf-text mb-3">Project</h3>
                             <div className="space-y-2 pl-1 max-h-40 overflow-y-auto scrollbar-thin">
                                 {options.projects.map(p => {
                                     const isChecked = (localFilters.projects || '').split(',').includes(p.code);
@@ -103,9 +113,9 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                                                 type="checkbox"
                                                 checked={isChecked}
                                                 onChange={(e) => handleChange('projects', p.code, e.target.checked)}
-                                                className="rounded text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-800"
+                                                className="rounded text-indigo-600 border-sf-divider bg-sf-canvas"
                                             />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">{p.name}</span>
+                                            <span className="text-sm text-sf-muted">{p.name}</span>
                                         </label>
                                     );
                                 })}
@@ -116,7 +126,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     {/* Countries */}
                     {options.countries && options.countries.length > 0 && (
                         <div>
-                            <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-3">Country</h3>
+                            <h3 className="font-bold text-sm text-sf-text mb-3">Country</h3>
                             <div className="space-y-2 pl-1 max-h-40 overflow-y-auto scrollbar-thin">
                                 {options.countries.map(c => {
                                     const isChecked = (localFilters.countries || '').split(',').includes(c.code);
@@ -126,9 +136,9 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                                                 type="checkbox"
                                                 checked={isChecked}
                                                 onChange={(e) => handleChange('countries', c.code, e.target.checked)}
-                                                className="rounded text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-800"
+                                                className="rounded text-indigo-600 border-sf-divider bg-sf-canvas"
                                             />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">{c.name}</span>
+                                            <span className="text-sm text-sf-muted">{c.name}</span>
                                         </label>
                                     );
                                 })}
@@ -139,7 +149,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     {/* Labs */}
                     {options.labs && options.labs.length > 0 && (
                         <div>
-                            <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-3">Lab</h3>
+                            <h3 className="font-bold text-sm text-sf-text mb-3">Lab</h3>
                             <div className="space-y-2 pl-1 max-h-40 overflow-y-auto scrollbar-thin">
                                 {options.labs.map(l => {
                                     const isChecked = (localFilters.labs || '').split(',').includes(l.id);
@@ -149,9 +159,9 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                                                 type="checkbox"
                                                 checked={isChecked}
                                                 onChange={(e) => handleChange('labs', l.id, e.target.checked)}
-                                                className="rounded text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-800"
+                                                className="rounded text-indigo-600 border-sf-divider bg-sf-canvas"
                                             />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">{l.name}</span>
+                                            <span className="text-sm text-sf-muted">{l.name}</span>
                                         </label>
                                     );
                                 })}
@@ -160,7 +170,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     )}
                 </div>
 
-                <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+                <div className="p-4 border-t border-sf-divider bg-sf-canvas flex gap-4">
                     <button
                         onClick={() => { setLocalFilters({}); onReset(); }}
                         className="btn-secondary flex-1 py-2 text-sm flex items-center justify-center gap-2"
