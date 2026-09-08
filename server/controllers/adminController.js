@@ -97,13 +97,7 @@ exports.updateBranding = async (req, res) => {
                 }
             });
 
-            // If default language is set, propagate to all users in the lab
-            if (defaultLanguage) {
-                await prisma.user.updateMany({
-                    where: { labId: req.user.labId },
-                    data: { language: defaultLanguage }
-                });
-            }
+            // Note: Staff personal preferences are preserved; default applies only when user preference is not set.
 
             res.success('BRANDING_UPDATED', 'Lab branding and default language updated');
 
@@ -248,7 +242,9 @@ exports.setDefaultLanguage = async (req, res) => {
 
         // Lab Manager Context: Update Lab Branding
         if (user && user.labId) {
-            const lab = await prisma.lab.findUnique({ where: { id: user.labId } });
+            const lab = await prisma.lab.findFirst({
+                where: { OR: [{ id: user.labId }, { code: user.labId }] }
+            });
             if (!lab) return res.error(404, 'LAB_NOT_FOUND', 'Lab not found');
 
             let branding = {};
@@ -262,17 +258,13 @@ exports.setDefaultLanguage = async (req, res) => {
             branding.defaultLanguage = code;
 
             await prisma.lab.update({
-                where: { id: user.labId },
+                where: { id: lab.id },
                 data: { branding: JSON.stringify(branding) }
             });
 
-            // Bulk update all users in this lab to enforce the new default language preference
-            await prisma.user.updateMany({
-                where: { labId: user.labId },
-                data: { language: code }
-            });
+            // Note: Staff personal preferences are preserved; default applies only when user preference is not set.
 
-            return res.success('LAB_DEFAULT_UPDATED', 'Lab default language updated', { scope: 'LAB' });
+            return res.success('LAB_DEFAULT_UPDATED', 'Lab default language updated', null, 200, { scope: 'LAB' });
         }
 
         // Global Context: Super Admin only
@@ -296,7 +288,7 @@ exports.setDefaultLanguage = async (req, res) => {
                 console.warn('[setDefaultLanguage] branding sync failed', e.message);
             }
 
-            return res.success('GLOBAL_DEFAULT_UPDATED', 'Global default language updated', { scope: 'GLOBAL' });
+            return res.success('GLOBAL_DEFAULT_UPDATED', 'Global default language updated', null, 200, { scope: 'GLOBAL' });
         }
 
         return res.error(403, 'AUTH_FORBIDDEN', 'Not authorized to change default language');
@@ -309,30 +301,82 @@ exports.setDefaultLanguage = async (req, res) => {
 
 exports.updateLanguage = async (req, res) => {
     const { code } = req.params;
-    const { translations } = req.body;
+    const { translations, scope } = req.body;
+    const user = req.user;
 
     try {
+        const requestedScope = (scope || (user.role === 'SUPER_ADMIN' ? 'global' : 'lab')).toLowerCase();
+
+        // Enforce global versus own-lab rights on the server
+        if (requestedScope === 'global' && user.role !== 'SUPER_ADMIN') {
+            return res.error(403, 'AUTH_FORBIDDEN', 'Only Super Administrators can publish global translations');
+        }
+
+        const isLabScope = requestedScope === 'lab';
+
+        if (isLabScope) {
+            if (!user.labId) {
+                return res.error(400, 'VALIDATION_ERROR', 'User has no associated laboratory for lab-scoped translations');
+            }
+            const lab = await prisma.lab.findFirst({
+                where: { OR: [{ id: user.labId }, { code: user.labId }] }
+            });
+            if (!lab) return res.error(404, 'LAB_NOT_FOUND', 'Laboratory not found');
+
+            let branding = {};
+            try {
+                branding = lab.branding ? JSON.parse(lab.branding) : {};
+            } catch (e) {
+                branding = {};
+            }
+            if (!branding.translations) branding.translations = {};
+            branding.translations[code] = {
+                ...(branding.translations[code] || {}),
+                ...(translations || {})
+            };
+
+            await prisma.lab.update({
+                where: { id: lab.id },
+                data: { branding: JSON.stringify(branding) }
+            });
+
+            translationService.invalidateCache();
+            return res.success('TRANSLATIONS_UPDATED', 'Lab translations updated', null, 200, { scope: 'LAB' });
+        }
+
+        // Global scope (Super Admin)
         const lang = await prisma.language.findUnique({ where: { code } });
         if (!lang) return res.error(404, 'NOT_FOUND', 'Language not found');
 
+        let existing = {};
+        try {
+            existing = lang.translations ? JSON.parse(lang.translations) : {};
+        } catch (e) {
+            existing = {};
+        }
+
+        const merged = { ...existing, ...(translations || {}) };
+
         await prisma.language.update({
             where: { code },
-            data: { translations: JSON.stringify(translations) }
+            data: { translations: JSON.stringify(merged) }
         });
 
         // Invalidate cache if needed
         translationService.invalidateCache();
 
-        res.success('TRANSLATIONS_UPDATED', 'Translations updated');
+        res.success('TRANSLATIONS_UPDATED', 'Global translations updated', null, 200, { scope: 'GLOBAL' });
     } catch (error) {
+        console.error("Update Language Error:", error);
         res.error(500, 'TRANSLATION_UPDATE_FAILED', 'Failed to update translations');
     }
 };
 
 exports.getLanguageCatalog = async (req, res) => {
     const { code } = req.params;
+    const labId = req.query.labId || req.user?.labId;
     try {
-        const catalog = await translationService.getCatalog(code);
+        const catalog = await translationService.getCatalog(code, labId);
         res.success('CATALOG_FETCHED', 'Catalog fetched', null, 200, catalog);
     } catch (error) {
         console.error('Get Catalog Error:', error);

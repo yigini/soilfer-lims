@@ -173,7 +173,27 @@
     "batchDelete": "Suppression par lot",
     "deleteSample": "Supprimer l'échantillon ?",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet échantillon ? Cette action supprimera définitivement tous les éléments de travail et journaux d'audit associés.",
-    "sampleDeleted": "Échantillon supprimé."
+    "sampleDeleted": "Échantillon supprimé.",
+    "attention": {
+      "draftIntake": "Information seulement – Pas encore accepté",
+      "needsAcceptance": "Nécessite une acceptation",
+      "needsProcessing": "En attente de traitement",
+      "dryingPending": "Séchage en attente",
+      "prepPending": "Préparation en attente",
+      "inProgress": "Analyse en cours",
+      "assigned": "Travail assigné",
+      "reanalysis": "Nouvelle analyse requise",
+      "review": "Examen en attente",
+      "hold": "En attente"
+    },
+    "table": {
+      "id": "ID",
+      "project": "Projet",
+      "state": "État",
+      "attention": "Attention",
+      "progress": "Progression",
+      "updated": "Mis à jour"
+    }
   },
   "reception": {
     "title": "Réception des Échantillons",
@@ -321,7 +341,15 @@
     "BLOCKED": "Bloqué",
     "ASSIGNED": "Assigné",
     "PENDING": "En attente",
-    "SUBMITTED": "Soumis"
+    "SUBMITTED": "Soumis",
+    "SUBMITTED_FULL": "Soumis",
+    "SUBMITTED_PARTIAL": "Partiel",
+    "ARCHIVING_PENDING": "Archivage",
+    "DISPOSAL_PENDING": "Élimination",
+    "ON_HOLD": "En attente",
+    "RECEIVED_REJECTED": "Rejeté (Non-conformité)",
+    "REANALYSIS_REQUIRED": "À refaire",
+    "WAIVED": "Dispensé"
   },
   "roles": {
     "SUPER_ADMIN": "Super administrateur",
@@ -396,7 +424,9 @@
     "timeline": {
       "jumpToLatest": "Aller au dernier"
     },
-    "errorLoading": "Erreur lors du chargement du flux de travail"
+    "errorLoading": "Erreur lors du chargement du flux de travail",
+    "airDrying": "Séchage à l’air libre",
+    "samplePreparation": "Préparation des échantillons"
   },
   "sampleDetail": {
     "title": "Détail de l'échantillon",
@@ -432,7 +462,12 @@
     "printLabel": "Imprimer l'étiquette",
     "viewWorkflow": "Voir le flux de travail",
     "noSampleFound": "Échantillon introuvable",
-    "loading": "Chargement des détails de l'échantillon..."
+    "loading": "Chargement des détails de l'échantillon...",
+    "prepPrerequisites": "Conditions préalables à la préparation",
+    "executeInWorkbench": "Exécuter sur le banc de travail →",
+    "constantWeight": "Poids constant",
+    "homogenizedFraction": "Fraction homogénéisée",
+    "evidenceNeedsVerification": "La preuve nécessite une vérification"
   },
   "queue": {
     "title": "File d'attente du responsable",
@@ -740,7 +775,8 @@
     "noMatchingTerms": "Aucun terme correspondant trouvé",
     "noMatchingTermsDesc": "Essayez de changer les onglets de filtre ou d'ajuster vos mots-clés de recherche.",
     "englishReference": "Référence en anglais",
-    "showingRange": "Affichage de {start} à {end} sur {total} éléments"
+    "showingRange": "Affichage de {start} à {end} sur {total} éléments",
+    "adminOnly": "Super Admin uniquement"
   },
   "catalogue": {
     "texture": {
@@ -779,6 +815,16 @@
       },
       "loam": {
         "name": "Loam"
+      }
+    }
+  },
+  "dynamic": {
+    "gate": {
+      "DRYING": {
+        "name": "Séchage à l’air libre"
+      },
+      "PREPARATION": {
+        "name": "Préparation des échantillons"
       }
     }
   }

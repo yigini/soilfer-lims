@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './LanguageContext';
 import { getAnalysisDisplayName } from '../utils/analysisNames';
 
 const CatalogueContext = createContext({ analyses: [], getName: getAnalysisDisplayName });
@@ -9,6 +10,7 @@ export const notifyCatalogueChanged = () => window.dispatchEvent(new Event('anal
 // Names belong to the current session scope; never persist a previous lab's catalogue.
 export function AnalysisCatalogueProvider({ children }) {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const scope = user ? `${user.username}:${user.role}:${user.labId || ''}` : '';
     const [loaded, setLoaded] = useState({ scope: '', analyses: [] });
     useEffect(() => {
@@ -29,7 +31,12 @@ export function AnalysisCatalogueProvider({ children }) {
     }, [scope]);
     const analyses = useMemo(() => loaded.scope === scope ? loaded.analyses : [], [loaded, scope]);
     const names = useMemo(() => new Map(analyses.map(a => [a.code, a.name])), [analyses]);
-    const getName = useCallback((code, fallback) => getAnalysisDisplayName(code, names.get(code) || fallback), [names]);
+    const getName = useCallback((code, fallback) => {
+        if (!code) return fallback || '—';
+        const rawDefault = names.get(code) || fallback;
+        const base = getAnalysisDisplayName(code, rawDefault);
+        return t(`dynamic.analysis.${code}.name`, base);
+    }, [names, t]);
     const value = useMemo(() => ({ analyses, getName }), [analyses, getName]);
     return <CatalogueContext.Provider value={value}>{children}</CatalogueContext.Provider>;
 }

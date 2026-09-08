@@ -173,7 +173,27 @@
     "batchDelete": "Batch Delete",
     "deleteSample": "Delete Sample?",
     "deleteConfirm": "Are you sure you want to delete this sample? This action will permanently remove all associated work items and audit logs.",
-    "sampleDeleted": "Sample deleted."
+    "sampleDeleted": "Sample deleted.",
+    "attention": {
+      "draftIntake": "Info Only – Not yet accepted",
+      "needsAcceptance": "Needs Acceptance",
+      "needsProcessing": "Awaiting Processing",
+      "dryingPending": "Drying Pending",
+      "prepPending": "Preparation Pending",
+      "inProgress": "Analysis In Progress",
+      "assigned": "Work Assigned",
+      "reanalysis": "Reanalysis Required",
+      "review": "Pending Review",
+      "hold": "On Hold"
+    },
+    "table": {
+      "id": "ID",
+      "project": "Project",
+      "state": "State",
+      "attention": "Attention",
+      "progress": "Progress",
+      "updated": "Updated"
+    }
   },
   "reception": {
     "title": "Sample Reception & Intake",
@@ -321,7 +341,15 @@
     "BLOCKED": "Blocked",
     "ASSIGNED": "Assigned",
     "PENDING": "Pending",
-    "SUBMITTED": "Submitted"
+    "SUBMITTED": "Submitted",
+    "SUBMITTED_FULL": "Submitted",
+    "SUBMITTED_PARTIAL": "Partial",
+    "ARCHIVING_PENDING": "Archiving",
+    "DISPOSAL_PENDING": "Disposal",
+    "ON_HOLD": "On Hold",
+    "RECEIVED_REJECTED": "Rejected (Non-Conformance)",
+    "REANALYSIS_REQUIRED": "Redo",
+    "WAIVED": "Waived"
   },
   "roles": {
     "SUPER_ADMIN": "Super Admin",
@@ -396,7 +424,9 @@
     "timeline": {
       "jumpToLatest": "Jump to Latest"
     },
-    "errorLoading": "Error loading workflow"
+    "errorLoading": "Error loading workflow",
+    "airDrying": "Air Drying",
+    "samplePreparation": "Sample Preparation"
   },
   "sampleDetail": {
     "title": "Sample Detail",
@@ -432,7 +462,12 @@
     "printLabel": "Print Label",
     "viewWorkflow": "View Workflow",
     "noSampleFound": "Sample not found",
-    "loading": "Loading sample details..."
+    "loading": "Loading sample details...",
+    "prepPrerequisites": "Preparation Prerequisites",
+    "executeInWorkbench": "Execute in Workbench →",
+    "constantWeight": "Constant weight",
+    "homogenizedFraction": "Homogenized fraction",
+    "evidenceNeedsVerification": "Evidence needs verification"
   },
   "queue": {
     "title": "Manager Queue",
@@ -740,7 +775,8 @@
     "noMatchingTerms": "No matching terms found",
     "noMatchingTermsDesc": "Try switching your filter tabs or adjusting your search keywords.",
     "englishReference": "English Reference",
-    "showingRange": "Showing {start} to {end} of {total} items"
+    "showingRange": "Showing {start} to {end} of {total} items",
+    "adminOnly": "Super Admin Only"
   },
   "catalogue": {
     "texture": {
@@ -779,6 +815,16 @@
       },
       "loam": {
         "name": "Loam"
+      }
+    }
+  },
+  "dynamic": {
+    "gate": {
+      "DRYING": {
+        "name": "Air Drying"
+      },
+      "PREPARATION": {
+        "name": "Sample Preparation"
       }
     }
   }

@@ -1,7 +1,7 @@
 {
-  "verifiedAt": "2026-09-08T10:39:48.435Z",
+  "verifiedAt": "2026-09-08T10:50:57.423Z",
   "scope": "Package structure, evidence consistency and explicit draft status only. This does not certify translations or execute application workflow, RBAC, report, or deployment tests.",
-  "baselineRevision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "baselineRevision": "854e88282e395e5735148ed764f992143013e406",
   "passed": true,
   "checks": [
     {

@@ -123,7 +123,7 @@ class TranslationService {
     /**
      * Returns full merged translation dictionary for runtime locale usage.
      */
-    async getMergedTranslations(code) {
+    async getMergedTranslations(code, labId = null) {
         const dynamicDefaults = await this.getDynamicKeys();
 
         const staticFilePath = path.join(CLIENT_TRANSLATIONS_DIR, `${code}.json`);
@@ -140,6 +140,22 @@ class TranslationService {
             }
         }
 
+        if (labId) {
+            try {
+                const lab = await prisma.lab.findFirst({
+                    where: { OR: [{ id: labId }, { code: labId }] }
+                });
+                if (lab?.branding) {
+                    const branding = typeof lab.branding === 'string' ? JSON.parse(lab.branding) : lab.branding;
+                    if (branding.translations && branding.translations[code]) {
+                        dbOverrides = { ...dbOverrides, ...branding.translations[code] };
+                    }
+                }
+            } catch (e) {
+                console.error(`[TranslationService] Failed to load lab overrides for ${labId}`, e);
+            }
+        }
+
         return {
             ...dynamicDefaults,
             ...staticFlat,
@@ -150,7 +166,7 @@ class TranslationService {
     /**
      * Returns the structured "Catalog" with primaryGroup, tags, reviewStatus for Admin/Manager UI.
      */
-    async getCatalog(targetCode) {
+    async getCatalog(targetCode, labId = null) {
         const dynamicKeys = await this.getDynamicKeys();
 
         // English baseline (reference)
@@ -168,6 +184,22 @@ class TranslationService {
                 dbOverrides = JSON.parse(langRecord.translations);
             } catch (e) {
                 console.error(`[TranslationService] Bad overrides JSON for ${targetCode}`, e);
+            }
+        }
+
+        if (labId) {
+            try {
+                const lab = await prisma.lab.findFirst({
+                    where: { OR: [{ id: labId }, { code: labId }] }
+                });
+                if (lab?.branding) {
+                    const branding = typeof lab.branding === 'string' ? JSON.parse(lab.branding) : lab.branding;
+                    if (branding.translations && branding.translations[targetCode]) {
+                        dbOverrides = { ...dbOverrides, ...branding.translations[targetCode] };
+                    }
+                }
+            } catch (e) {
+                console.error(`[TranslationService] Bad lab overrides for ${labId}`, e);
             }
         }
 

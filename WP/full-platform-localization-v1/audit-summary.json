@@ -1,12 +1,12 @@
 {
-  "date": "2026-09-08T10:38:55.906Z",
-  "revision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "date": "2026-09-08T10:47:15.814Z",
+  "revision": "854e88282e395e5735148ed764f992143013e406",
   "scope": "Read-only local source + unauthenticated production translation bootstrap. No authenticated production actions, DB edits, or implementation changes.",
   "locales": [
     {
       "locale": "en",
-      "keys": 687,
-      "referenceKeys": 687,
+      "keys": 721,
+      "referenceKeys": 721,
       "missing": 0,
       "empty": 0,
       "sameAsEnglish": 0,
@@ -15,8 +15,18 @@
     },
     {
       "locale": "es",
-      "keys": 687,
-      "referenceKeys": 687,
+      "keys": 721,
+      "referenceKeys": 721,
+      "missing": 0,
+      "empty": 0,
+      "sameAsEnglish": 7,
+      "extra": 0,
+      "placeholderMismatch": 0
+    },
+    {
+      "locale": "es-419",
+      "keys": 721,
+      "referenceKeys": 721,
       "missing": 0,
       "empty": 0,
       "sameAsEnglish": 6,
@@ -24,32 +34,22 @@
       "placeholderMismatch": 0
     },
     {
-      "locale": "es-419",
-      "keys": 687,
-      "referenceKeys": 687,
-      "missing": 0,
-      "empty": 0,
-      "sameAsEnglish": 5,
-      "extra": 0,
-      "placeholderMismatch": 0
-    },
-    {
       "locale": "fr",
-      "keys": 687,
-      "referenceKeys": 687,
+      "keys": 721,
+      "referenceKeys": 721,
       "missing": 0,
       "empty": 0,
-      "sameAsEnglish": 23,
+      "sameAsEnglish": 25,
       "extra": 0,
       "placeholderMismatch": 0
     },
     {
       "locale": "pt",
-      "keys": 687,
-      "referenceKeys": 687,
+      "keys": 721,
+      "referenceKeys": 721,
       "missing": 0,
       "empty": 0,
-      "sameAsEnglish": 9,
+      "sameAsEnglish": 10,
       "extra": 0,
       "placeholderMismatch": 0
     }
@@ -57,12 +57,12 @@
   "duplicateProperties": 0,
   "sourceFiles": 225,
   "parseErrors": 0,
-  "candidates": 4171,
-  "jsxCandidates": 2509,
+  "candidates": 4149,
+  "jsxCandidates": 2497,
   "candidateFiles": 182,
-  "staticTranslationKeysUsed": 377,
+  "staticTranslationKeysUsed": 405,
   "usedKeysMissingEnglish": 0,
-  "dynamicTranslationCalls": 14,
+  "dynamicTranslationCalls": 16,
   "routes": 35,
   "catalogue": {
     "analyses": 176,
@@ -120,30 +120,6 @@
       ]
     },
     {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "jsx": 130,
-      "displayProperties": 4,
-      "total": 134,
-      "examples": [
-        {
-          "line": 198,
-          "text": "Sample is outside your authorized laboratory scope."
-        },
-        {
-          "line": 280,
-          "text": "Bulk Review"
-        },
-        {
-          "line": 445,
-          "text": "View sample workspace"
-        },
-        {
-          "line": 446,
-          "text": "VIEW"
-        }
-      ]
-    },
-    {
       "file": "server/controllers/sampleController.js",
       "jsx": 0,
       "displayProperties": 130,
@@ -188,6 +164,30 @@
         {
           "line": 51,
           "text": "Kenya (KEN)"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "jsx": 123,
+      "displayProperties": 4,
+      "total": 127,
+      "examples": [
+        {
+          "line": 198,
+          "text": "Sample is outside your authorized laboratory scope."
+        },
+        {
+          "line": 280,
+          "text": "Bulk Review"
+        },
+        {
+          "line": 445,
+          "text": "View sample workspace"
+        },
+        {
+          "line": 446,
+          "text": "VIEW"
         }
       ]
     },
@@ -480,26 +480,26 @@
       ]
     },
     {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "jsx": 22,
-      "displayProperties": 36,
-      "total": 58,
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "jsx": 50,
+      "displayProperties": 7,
+      "total": 57,
       "examples": [
         {
-          "line": 16,
-          "text": "Expected"
+          "line": 281,
+          "text": "Excluded by operator"
         },
         {
-          "line": 17,
-          "text": "Received"
+          "line": 287,
+          "text": "No matching sample found"
         },
         {
-          "line": 18,
-          "text": "Collected"
+          "line": 295,
+          "text": "QC passed"
         },
         {
-          "line": 19,
-          "text": "Accepted"
+          "line": 333,
+          "text": "No spectral curve data available"
         }
       ]
     }

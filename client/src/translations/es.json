@@ -173,7 +173,27 @@
     "batchDelete": "Eliminación por lote",
     "deleteSample": "¿Eliminar muestra?",
     "deleteConfirm": "¿Está seguro de que desea eliminar esta muestra? Esta acción eliminará permanentemente todas las tareas y registros de auditoría asociados.",
-    "sampleDeleted": "Muestra eliminada."
+    "sampleDeleted": "Muestra eliminada.",
+    "attention": {
+      "draftIntake": "Informativo – Aún no aceptado",
+      "needsAcceptance": "Requiere aceptación",
+      "needsProcessing": "En espera de procesamiento",
+      "dryingPending": "Secado pendiente",
+      "prepPending": "Preparación pendiente",
+      "inProgress": "Análisis en progreso",
+      "assigned": "Trabajo asignado",
+      "reanalysis": "Reanálisis requerido",
+      "review": "Revisión pendiente",
+      "hold": "En espera"
+    },
+    "table": {
+      "id": "ID",
+      "project": "Proyecto",
+      "state": "Estado",
+      "attention": "Atención",
+      "progress": "Progreso",
+      "updated": "Actualizado"
+    }
   },
   "reception": {
     "title": "Recepción de Muestras",
@@ -321,7 +341,15 @@
     "BLOCKED": "Bloqueado",
     "ASSIGNED": "Asignado",
     "PENDING": "Pendiente",
-    "SUBMITTED": "Enviado"
+    "SUBMITTED": "Enviado",
+    "SUBMITTED_FULL": "Enviado",
+    "SUBMITTED_PARTIAL": "Parcial",
+    "ARCHIVING_PENDING": "En archivo",
+    "DISPOSAL_PENDING": "Disposición",
+    "ON_HOLD": "En espera",
+    "RECEIVED_REJECTED": "Rechazado (No conformidad)",
+    "REANALYSIS_REQUIRED": "Repetir",
+    "WAIVED": "Eximido"
   },
   "roles": {
     "SUPER_ADMIN": "Super administrador",
@@ -396,7 +424,9 @@
     "timeline": {
       "jumpToLatest": "Ir al último"
     },
-    "errorLoading": "Error al cargar el flujo de trabajo"
+    "errorLoading": "Error al cargar el flujo de trabajo",
+    "airDrying": "Secado al aire",
+    "samplePreparation": "Preparación de muestras"
   },
   "sampleDetail": {
     "title": "Detalle de muestra",
@@ -432,7 +462,12 @@
     "printLabel": "Imprimir etiqueta",
     "viewWorkflow": "Ver flujo de trabajo",
     "noSampleFound": "Muestra no encontrada",
-    "loading": "Cargando detalles de la muestra..."
+    "loading": "Cargando detalles de la muestra...",
+    "prepPrerequisites": "Prerrequisitos de preparación",
+    "executeInWorkbench": "Ejecutar en Banco de trabajo →",
+    "constantWeight": "Peso constante",
+    "homogenizedFraction": "Fracción homogeneizada",
+    "evidenceNeedsVerification": "La evidencia requiere verificación"
   },
   "queue": {
     "title": "Cola del responsable",
@@ -740,7 +775,8 @@
     "noMatchingTerms": "No se encontraron términos coincidentes",
     "noMatchingTermsDesc": "Intente cambiar las pestañas de filtro o ajustar sus palabras clave de búsqueda.",
     "englishReference": "Referencia en inglés",
-    "showingRange": "Mostrando {start} a {end} de {total} elementos"
+    "showingRange": "Mostrando {start} a {end} de {total} elementos",
+    "adminOnly": "Solo Super Admin"
   },
   "catalogue": {
     "texture": {
@@ -779,6 +815,16 @@
       },
       "loam": {
         "name": "Franco"
+      }
+    }
+  },
+  "dynamic": {
+    "gate": {
+      "DRYING": {
+        "name": "Secado al aire"
+      },
+      "PREPARATION": {
+        "name": "Preparación de muestras"
       }
     }
   }

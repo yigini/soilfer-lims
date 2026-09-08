@@ -1,5 +1,6 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import axios from 'axios';
 import {
     ArrowUp, ArrowDown, Folder, MapPin, FileText, User, Trash2,
@@ -48,9 +49,10 @@ const CATEGORY_COLORS = {
 };
 
 const StatusIcon = ({ status, overrideText }) => {
+    const { t } = useLanguage();
     const config = STATE_CONFIG[status] || { icon: AlertCircle, color: 'text-gray-400', bg: 'bg-gray-50', label: status };
     const Icon = config.icon;
-    const label = overrideText || config.label;
+    const label = overrideText || t(`status.${status}`, config.label);
     return (
         <div className="flex items-center justify-center">
             <div className={`flex items-center justify-center p-2 rounded-xl transition-all duration-300 ease-out border-2 border-transparent group-hover:border-current group-hover:bg-current/10 ${config.bg} ${config.color}`}>
@@ -62,26 +64,26 @@ const StatusIcon = ({ status, overrideText }) => {
 };
 
 // Attention: returns null (N/A), [] (OK), or array of flags
-const computeAttention = (sample) => {
+const computeAttention = (sample, t = (k, d) => d) => {
     const st = sample.status;
     if (['EXPECTED', 'ARCHIVED', 'DISPOSED', 'APPROVED', 'SUBMITTED_FULL', 'RECEIVED_REJECTED', 'REJECTED'].includes(st)) return null;
     const flags = [];
     if (st === 'Draft Intake' || st === 'DRAFT')
-        flags.push({ key: 'draft_intake', icon: AlertTriangle, color: 'text-orange-500', label: 'Info Only – Not yet accepted' });
+        flags.push({ key: 'draft_intake', icon: AlertTriangle, color: 'text-orange-500', label: t('samples.attention.draftIntake', 'Info Only – Not yet accepted') });
     if (['RECEIVED', 'COLLECTED'].includes(st))
-        flags.push({ key: 'needs_acceptance', icon: AlertTriangle, color: 'text-indigo-500', label: 'Needs Acceptance' });
+        flags.push({ key: 'needs_acceptance', icon: AlertTriangle, color: 'text-indigo-500', label: t('samples.attention.needsAcceptance', 'Needs Acceptance') });
     if (st === 'ACCEPTED' && sample.dryingStatus === 'PENDING' && sample.preparationStatus === 'PENDING')
-        flags.push({ key: 'needs_processing', icon: Clock, color: 'text-amber-500', label: 'Awaiting Processing' });
+        flags.push({ key: 'needs_processing', icon: Clock, color: 'text-amber-500', label: t('samples.attention.needsProcessing', 'Awaiting Processing') });
     if (['PROCESSING', 'LAB_ID_ASSIGNED'].includes(st)) {
-        if (sample.dryingStatus === 'PENDING') flags.push({ key: 'drying', icon: Droplets, color: 'text-blue-500', label: 'Drying Pending' });
-        if (sample.preparationStatus === 'PENDING') flags.push({ key: 'prep', icon: FlaskConical, color: 'text-purple-500', label: 'Preparation Pending' });
+        if (sample.dryingStatus === 'PENDING') flags.push({ key: 'drying', icon: Droplets, color: 'text-blue-500', label: t('samples.attention.dryingPending', 'Drying Pending') });
+        if (sample.preparationStatus === 'PENDING') flags.push({ key: 'prep', icon: FlaskConical, color: 'text-purple-500', label: t('samples.attention.prepPending', 'Preparation Pending') });
     }
     // Work-item-level attention signals (from server activity flags)
-    if (sample.hasInProgressWork) flags.push({ key: 'in_progress', icon: Clock, color: 'text-emerald-500', label: 'Analysis In Progress' });
-    if (sample.hasAssignedWork) flags.push({ key: 'assigned', icon: AlertTriangle, color: 'text-blue-500', label: 'Work Assigned' });
-    if (sample.hasReanalysisWork) flags.push({ key: 'reanalysis', icon: AlertTriangle, color: 'text-red-500', label: 'Reanalysis Required' });
-    if (sample.pendingReview) flags.push({ key: 'review', icon: AlertTriangle, color: 'text-purple-500', label: 'Pending Review' });
-    if (st === 'ON_HOLD') flags.push({ key: 'hold', icon: History, color: 'text-red-500', label: 'On Hold' });
+    if (sample.hasInProgressWork) flags.push({ key: 'in_progress', icon: Clock, color: 'text-emerald-500', label: t('samples.attention.inProgress', 'Analysis In Progress') });
+    if (sample.hasAssignedWork) flags.push({ key: 'assigned', icon: AlertTriangle, color: 'text-blue-500', label: t('samples.attention.assigned', 'Work Assigned') });
+    if (sample.hasReanalysisWork) flags.push({ key: 'reanalysis', icon: AlertTriangle, color: 'text-red-500', label: t('samples.attention.reanalysis', 'Reanalysis Required') });
+    if (sample.pendingReview) flags.push({ key: 'review', icon: AlertTriangle, color: 'text-purple-500', label: t('samples.attention.review', 'Pending Review') });
+    if (st === 'ON_HOLD') flags.push({ key: 'hold', icon: History, color: 'text-red-500', label: t('samples.attention.hold', 'On Hold') });
     return flags;
 };
 
@@ -332,6 +334,7 @@ const AuditDrawer = ({ isOpen, onClose, sampleId, token }) => {
 
 const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSelectAll, canDelete, onDelete, deletingIds = [], onPrintLabel, loading = false }) => {
     const getAnalysisDisplayName = useAnalysisNames();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const { user, token } = useAuth();
     const [auditSampleId, setAuditSampleId] = useState(null);
@@ -348,12 +351,12 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                     <thead className="text-[10px] font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-b border-sf-divider">
                         <tr>
                             <th className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} checked={data.length > 0 && selected.length === data.length} /></th>
-                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('labId')}>ID <SortIcon field="labId" /></th>
-                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('projectCode')}>Project <SortIcon field="projectCode" /></th>
-                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('status')}>State <SortIcon field="status" /></th>
-                            <th className="px-4 py-4">Attention</th>
-                            <th className="px-4 py-4">Progress</th>
-                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('updatedAt')}>Updated <SortIcon field="updatedAt" /></th>
+                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('labId')}>{t('samples.table.id', 'ID')} <SortIcon field="labId" /></th>
+                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('projectCode')}>{t('samples.table.project', 'Project')} <SortIcon field="projectCode" /></th>
+                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('status')}>{t('samples.table.state', 'State')} <SortIcon field="status" /></th>
+                            <th className="px-4 py-4">{t('samples.table.attention', 'Attention')}</th>
+                            <th className="px-4 py-4">{t('samples.table.progress', 'Progress')}</th>
+                            <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('updatedAt')}>{t('samples.table.updated', 'Updated')} <SortIcon field="updatedAt" /></th>
                             <th className="px-4 py-4 text-right w-20"></th>
                         </tr>
                     </thead>
@@ -376,7 +379,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                             const isWalkIn = !sample.projectCode || String(sample.originalId).startsWith('EXT-') || String(sample.originalId).startsWith('W');
                             const isProtected = sample.metadata && (sample.metadata._uuid || sample.metadata['Country']);
                             const isDeleting = deletingIds.includes(sample.id);
-                            const attention = computeAttention(sample);
+                            const attention = computeAttention(sample, t);
                             const progress = computeProgress(sample);
 
                             return (

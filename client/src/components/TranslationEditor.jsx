@@ -298,9 +298,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
             });
 
             if (onSave) {
-                await onSave(payload);
+                await onSave(payload, selectedScope);
             } else {
-                await axios.put(`/api/admin/languages/${selectedLanguage.code}`, { translations: payload });
+                await axios.put(`/api/admin/languages/${selectedLanguage.code}`, { translations: payload, scope: selectedScope });
             }
 
             setHasChanges(false);
@@ -483,7 +483,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                 onChange={(e) => setSelectedScope(e.target.value)}
                                 className="bg-transparent text-sf-text font-semibold pr-3 py-1 outline-none cursor-pointer"
                             >
-                                <option value="global" className="bg-sf-surface text-sf-text">Global System</option>
+                                <option value="global" disabled={user?.role !== 'SUPER_ADMIN'} className="bg-sf-surface text-sf-text">
+                                    Global System {user?.role !== 'SUPER_ADMIN' ? `(${t('terminology.adminOnly', 'Super Admin Only')})` : ''}
+                                </option>
                                 {user?.labId && (
                                     <option value="lab" className="bg-sf-surface text-sf-text">Own Lab ({user.labId})</option>
                                 )}

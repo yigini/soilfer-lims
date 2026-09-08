@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-08T10:39:48.437Z",
+  "generatedAt": "2026-09-08T10:50:57.425Z",
   "note": "Integrity manifest of this planning package, excluding this manifest itself. Re-run validate-package.cjs after editing package files. No application implementation or deployment is implied.",
-  "baselineRevision": "e06808ca34a2e3a21411e742b33fdc0b6533c8c0",
+  "baselineRevision": "854e88282e395e5735148ed764f992143013e406",
   "files": [
     {
       "file": "ANTIGRAVITY_PROMPT.md",
@@ -55,8 +55,8 @@
     },
     {
       "file": "audit-summary.json",
-      "bytes": 12423,
-      "sha256": "bd955864c937e54fd54d7a640b0a4fe0e1a13f843af4c42297edf9aaf59e5bd2"
+      "bytes": 12488,
+      "sha256": "0e64bd437739cf85e1da59bab9dfa38bbb44b7fbb34d7c6a084cb26fcdcc44a6"
     },
     {
       "file": "build-review-assets.cjs",
@@ -71,7 +71,7 @@
     {
       "file": "live-bootstrap-audit.json",
       "bytes": 7003,
-      "sha256": "eb102e1d806fd77a8e5d1eadd6152ba07e3e752e26318291dbbd01c31bc7e725"
+      "sha256": "f8626d46414037eff7729b6ec1754cfdd143739aa420f75873ca052d29e58f24"
     },
     {
       "file": "live-database-language-backup.json",
@@ -81,7 +81,7 @@
     {
       "file": "live-public-analysis-names.json",
       "bytes": 23843,
-      "sha256": "97e9e7e3fd30f98c4bcd66a71c7c0283600bf5ec1e716dc339da1448e9af222d"
+      "sha256": "0497c2ff095ac327b63ae59825ee4726c5268fdf30a8291977a27a10a6ee0a20"
     },
     {
       "file": "live-ui-spot-check.json",
@@ -90,13 +90,13 @@
     },
     {
       "file": "locale-pack-audit.json",
-      "bytes": 2633,
-      "sha256": "2c092615273a4f395a6c1f7256ad0fc2b47bbfd65d74faccfa7928168920a131"
+      "bytes": 2780,
+      "sha256": "aec8a0a5b8da9244d7287c17f5bd4589069b903c01f2c6bc69ecfd6dc2dc6d9d"
     },
     {
       "file": "package-validation.json",
       "bytes": 2232,
-      "sha256": "3633632d8e06c2a1f99baea7fb8292b313482d4a85781bb1fa83886a4c18b61c"
+      "sha256": "ddbe986e3a2234670a661d1b6cbac7f6e5a133c6e7edc3dbf47d84760eca1c9e"
     },
     {
       "file": "scientific-glossary-draft.json",
@@ -105,8 +105,8 @@
     },
     {
       "file": "source-text-inventory.json",
-      "bytes": 846160,
-      "sha256": "1259247e716086e93a1c6ba37ecb82cd23d836c5bd4df057ebc1832619af25e2"
+      "bytes": 846902,
+      "sha256": "876553e9cec672bc8ba11286b5cc236251258d96e426149048ed9a74bd8deb0a"
     },
     {
       "file": "validate-package.cjs",

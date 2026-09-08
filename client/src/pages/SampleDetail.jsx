@@ -821,20 +821,20 @@ const SampleDetail = () => {
                         {/* Preparation Gates Card */}
                         <div className="bg-sf-surface rounded-2xl p-5 border border-sf-divider shadow-sm">
                             <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted">Preparation Prerequisites</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted">{t('sampleDetail.prepPrerequisites', 'Preparation Prerequisites')}</h3>
                                 <button
                                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
                                     className="text-xs font-semibold text-sf-emerald hover:underline flex items-center gap-1"
                                 >
-                                    <span>Execute in Workbench →</span>
+                                    <span>{t('sampleDetail.executeInWorkbench', 'Execute in Workbench →')}</span>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-sf-text text-sm">Air Drying</div>
+                                        <div className="font-bold text-sf-text text-sm">{t('dynamic.gate.DRYING.name', t('workflow.airDrying', 'Air Drying'))}</div>
                                         <div className="text-xs text-sf-muted mt-0.5">
-                                            {workspace?.operationalGates?.drying?.receipt?.schemaVersion || 'operational-checklist-v1'} · Constant weight
+                                            {workspace?.operationalGates?.drying?.receipt?.schemaVersion || 'operational-checklist-v1'} · {t('sampleDetail.constantWeight', 'Constant weight')}
                                         </div>
                                     </div>
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -842,15 +842,15 @@ const SampleDetail = () => {
                                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                                             : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                                     }`}>
-                                        {workspace?.operationalGates?.drying?.isDone || sample?.dryingStatus === 'DONE' ? 'Completed' : 'Pending'}
+                                        {workspace?.operationalGates?.drying?.isDone || sample?.dryingStatus === 'DONE' ? t('status.COMPLETED', 'Completed') : t('status.PENDING', 'Pending')}
                                     </span>
                                 </div>
 
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-sf-text text-sm">Sample Preparation</div>
+                                        <div className="font-bold text-sf-text text-sm">{t('dynamic.gate.PREPARATION.name', t('workflow.samplePreparation', 'Sample Preparation'))}</div>
                                         <div className="text-xs text-sf-muted mt-0.5">
-                                            {workspace?.operationalGates?.preparation?.receipt?.schemaVersion || 'operational-checklist-v1'} · Homogenized fraction
+                                            {workspace?.operationalGates?.preparation?.receipt?.schemaVersion || 'operational-checklist-v1'} · {t('sampleDetail.homogenizedFraction', 'Homogenized fraction')}
                                         </div>
                                     </div>
                                     {(() => {
@@ -862,7 +862,7 @@ const SampleDetail = () => {
                                             return (
                                                 <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-1">
                                                     <AlertTriangle size={12} />
-                                                    Evidence needs verification
+                                                    {t('sampleDetail.evidenceNeedsVerification', 'Evidence needs verification')}
                                                 </span>
                                             );
                                         }
@@ -873,7 +873,7 @@ const SampleDetail = () => {
                                                     ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                                                     : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                                             }`}>
-                                                {isPrepDone ? 'Completed' : 'Pending'}
+                                                {isPrepDone ? t('status.COMPLETED', 'Completed') : t('status.PENDING', 'Pending')}
                                             </span>
                                         );
                                     })()}

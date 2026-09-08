@@ -240,11 +240,15 @@ async function assembleReport(sampleId, user) {
     }
 
     // 15. Assemble the final structured report payload
+    const reportLocale = (user && user.language) ? user.language : 'en';
     const reportContent = {
         meta: {
             reportId: null, // assigned when saved
             formatVersion: '2.0',
-            template: 'STANDARD_AGRONOMIC'
+            template: 'STANDARD_AGRONOMIC',
+            locale: reportLocale,
+            terminologyVersion: '1.0',
+            frozenAt: new Date().toISOString()
         },
         // Sample Details
         sample: {

@@ -7131,93 +7131,87 @@
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 16,
+      "line": 17,
       "kind": "display-property-candidate",
       "text": "Expected"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 17,
+      "line": 18,
       "kind": "display-property-candidate",
       "text": "Received"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 18,
+      "line": 19,
       "kind": "display-property-candidate",
       "text": "Collected"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 19,
+      "line": 20,
       "kind": "display-property-candidate",
       "text": "Accepted"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 20,
+      "line": 21,
       "kind": "display-property-candidate",
       "text": "Processing"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 21,
+      "line": 22,
       "kind": "display-property-candidate",
       "text": "Submitted"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 22,
+      "line": 23,
       "kind": "display-property-candidate",
       "text": "Partial"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 23,
+      "line": 24,
       "kind": "display-property-candidate",
       "text": "Approved"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 24,
+      "line": 25,
       "kind": "display-property-candidate",
       "text": "Archiving"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 25,
+      "line": 26,
       "kind": "display-property-candidate",
       "text": "Disposal"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 26,
+      "line": 27,
       "kind": "display-property-candidate",
       "text": "Archived"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 27,
+      "line": 28,
       "kind": "display-property-candidate",
       "text": "Disposed"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 28,
+      "line": 29,
       "kind": "display-property-candidate",
       "text": "On Hold"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 29,
-      "kind": "display-property-candidate",
-      "text": "ID Assigned"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 30,
       "kind": "display-property-candidate",
-      "text": "Draft Intake"
+      "text": "ID Assigned"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
@@ -7229,251 +7223,167 @@
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 32,
       "kind": "display-property-candidate",
-      "text": "Rejected (Non-Conformance)"
+      "text": "Draft Intake"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 33,
       "kind": "display-property-candidate",
-      "text": "Rejected"
+      "text": "Rejected (Non-Conformance)"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 40,
+      "line": 34,
       "kind": "display-property-candidate",
-      "text": "Gates"
+      "text": "Rejected"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 41,
       "kind": "display-property-candidate",
-      "text": "Wet Chem"
+      "text": "Gates"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 42,
       "kind": "display-property-candidate",
-      "text": "Texture"
+      "text": "Wet Chem"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 43,
       "kind": "display-property-candidate",
-      "text": "Spectral"
+      "text": "Texture"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 44,
       "kind": "display-property-candidate",
-      "text": "QA/QC"
+      "text": "Spectral"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 45,
       "kind": "display-property-candidate",
-      "text": "Review"
+      "text": "QA/QC"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 46,
       "kind": "display-property-candidate",
-      "text": "Done"
+      "text": "Review"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
       "line": 47,
       "kind": "display-property-candidate",
+      "text": "Done"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 48,
+      "kind": "display-property-candidate",
       "text": "Other"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 70,
-      "kind": "display-property-candidate",
-      "text": "Info Only – Not yet accepted"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 72,
-      "kind": "display-property-candidate",
-      "text": "Needs Acceptance"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 74,
-      "kind": "display-property-candidate",
-      "text": "Awaiting Processing"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 76,
-      "kind": "display-property-candidate",
-      "text": "Drying Pending"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 77,
-      "kind": "display-property-candidate",
-      "text": "Preparation Pending"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 80,
-      "kind": "display-property-candidate",
-      "text": "Analysis In Progress"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 81,
-      "kind": "display-property-candidate",
-      "text": "Work Assigned"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 82,
-      "kind": "display-property-candidate",
-      "text": "Reanalysis Required"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 83,
-      "kind": "display-property-candidate",
-      "text": "Pending Review"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 84,
-      "kind": "display-property-candidate",
-      "text": "On Hold"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 248,
+      "line": 250,
       "kind": "jsx-text",
       "text": "Audit Timeline"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 249,
+      "line": 251,
       "kind": "jsx-text",
       "text": "History of all activities"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 260,
+      "line": 262,
       "kind": "jsx-text",
       "text": "No history recorded yet"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 316,
+      "line": 318,
       "kind": "jsx-text",
       "text": "Reason:"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 352,
-      "kind": "jsx-text",
-      "text": "Project"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 353,
-      "kind": "jsx-text",
-      "text": "State"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 354,
-      "kind": "jsx-text",
-      "text": "Attention"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 355,
-      "kind": "jsx-text",
-      "text": "Progress"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 356,
-      "kind": "jsx-text",
-      "text": "Updated"
-    },
-    {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 403,
+      "line": 406,
       "kind": "jsx-text",
       "text": "Lab ID: Pending"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 415,
+      "line": 418,
       "kind": "jsx-text",
       "text": "Walk-in"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 484,
+      "line": 487,
       "kind": "jsx-text",
       "text": "DONE"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 507,
+      "line": 510,
       "kind": "jsx-text",
       "text": "steps"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 524,
+      "line": 527,
       "kind": "jsx-attribute",
       "text": "Hard Delete"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 524,
+      "line": 527,
       "kind": "jsx-attribute",
       "text": "Delete sample"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 526,
+      "line": 529,
       "kind": "jsx-attribute",
       "text": "Print Label"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 526,
+      "line": 529,
       "kind": "jsx-attribute",
       "text": "Print label"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 528,
+      "line": 531,
       "kind": "jsx-attribute",
       "text": "Workflow Map"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 528,
+      "line": 531,
       "kind": "jsx-attribute",
       "text": "Workflow map"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 530,
+      "line": 533,
       "kind": "jsx-attribute",
       "text": "Audit Log"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 530,
+      "line": 533,
       "kind": "jsx-attribute",
       "text": "Audit log"
     },
     {
       "file": "client/src/components/samples/SamplesTable.jsx",
-      "line": 537,
+      "line": 540,
       "kind": "jsx-text",
       "text": "No samples found matching your filters."
     },
@@ -8187,49 +8097,49 @@
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 488,
+      "line": 490,
       "kind": "jsx-text",
       "text": "Own Lab ("
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 567,
+      "line": 569,
       "kind": "jsx-text",
       "text": "Dismiss"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 729,
+      "line": 731,
       "kind": "jsx-attribute",
       "text": "Export Group to JSON"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 737,
+      "line": 739,
       "kind": "jsx-attribute",
       "text": "Export Group to CSV"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 746,
+      "line": 748,
       "kind": "jsx-attribute",
       "text": "Mark all filled items on this page as reviewed"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 859,
+      "line": 861,
       "kind": "jsx-text",
       "text": "Key"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 860,
+      "line": 862,
       "kind": "jsx-text",
       "text": "Current Value"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 861,
+      "line": 863,
       "kind": "jsx-text",
       "text": "New Imported Value"
     },
@@ -17475,48 +17385,6 @@
     },
     {
       "file": "client/src/pages/SampleDetail.jsx",
-      "line": 824,
-      "kind": "jsx-text",
-      "text": "Preparation Prerequisites"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 829,
-      "kind": "jsx-text",
-      "text": "Execute in Workbench →"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 835,
-      "kind": "jsx-text",
-      "text": "Air Drying"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 837,
-      "kind": "jsx-text",
-      "text": "· Constant weight"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 851,
-      "kind": "jsx-text",
-      "text": "Sample Preparation"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 853,
-      "kind": "jsx-text",
-      "text": "· Homogenized fraction"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "line": 864,
-      "kind": "jsx-text",
-      "text": "Evidence needs verification"
-    },
-    {
-      "file": "client/src/pages/SampleDetail.jsx",
       "line": 887,
       "kind": "jsx-text",
       "text": "Ordered Analyses ("
@@ -19125,7 +18993,7 @@
     },
     {
       "file": "server/controllers/adminController.js",
-      "line": 247,
+      "line": 241,
       "kind": "display-property-candidate",
       "text": "Language not found"
     },
@@ -25306,30 +25174,6 @@
       ]
     },
     {
-      "file": "client/src/pages/SampleDetail.jsx",
-      "jsx": 130,
-      "displayProperties": 4,
-      "total": 134,
-      "examples": [
-        {
-          "line": 198,
-          "text": "Sample is outside your authorized laboratory scope."
-        },
-        {
-          "line": 280,
-          "text": "Bulk Review"
-        },
-        {
-          "line": 445,
-          "text": "View sample workspace"
-        },
-        {
-          "line": 446,
-          "text": "VIEW"
-        }
-      ]
-    },
-    {
       "file": "server/controllers/sampleController.js",
       "jsx": 0,
       "displayProperties": 130,
@@ -25374,6 +25218,30 @@
         {
           "line": 51,
           "text": "Kenya (KEN)"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "jsx": 123,
+      "displayProperties": 4,
+      "total": 127,
+      "examples": [
+        {
+          "line": 198,
+          "text": "Sample is outside your authorized laboratory scope."
+        },
+        {
+          "line": 280,
+          "text": "Bulk Review"
+        },
+        {
+          "line": 445,
+          "text": "View sample workspace"
+        },
+        {
+          "line": 446,
+          "text": "VIEW"
         }
       ]
     },
@@ -25666,30 +25534,6 @@
       ]
     },
     {
-      "file": "client/src/components/samples/SamplesTable.jsx",
-      "jsx": 22,
-      "displayProperties": 36,
-      "total": 58,
-      "examples": [
-        {
-          "line": 16,
-          "text": "Expected"
-        },
-        {
-          "line": 17,
-          "text": "Received"
-        },
-        {
-          "line": 18,
-          "text": "Collected"
-        },
-        {
-          "line": 19,
-          "text": "Accepted"
-        }
-      ]
-    },
-    {
       "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
       "jsx": 50,
       "displayProperties": 7,
@@ -25926,6 +25770,30 @@
         {
           "line": 129,
           "text": "Share link has been revoked"
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "jsx": 17,
+      "displayProperties": 26,
+      "total": 43,
+      "examples": [
+        {
+          "line": 17,
+          "text": "Expected"
+        },
+        {
+          "line": 18,
+          "text": "Received"
+        },
+        {
+          "line": 19,
+          "text": "Collected"
+        },
+        {
+          "line": 20,
+          "text": "Accepted"
         }
       ]
     },
@@ -29196,7 +29064,7 @@
           "text": "SoilFER LIMS"
         },
         {
-          "line": 247,
+          "line": 241,
           "text": "Language not found"
         }
       ]
@@ -30114,6 +29982,86 @@
       "key": "custody.saveMovement"
     },
     {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 72,
+      "key": "samples.attention.draftIntake"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 74,
+      "key": "samples.attention.needsAcceptance"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 76,
+      "key": "samples.attention.needsProcessing"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 78,
+      "key": "samples.attention.dryingPending"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 79,
+      "key": "samples.attention.prepPending"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 82,
+      "key": "samples.attention.inProgress"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 83,
+      "key": "samples.attention.assigned"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 84,
+      "key": "samples.attention.reanalysis"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 85,
+      "key": "samples.attention.review"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 86,
+      "key": "samples.attention.hold"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 354,
+      "key": "samples.table.id"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 355,
+      "key": "samples.table.project"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 356,
+      "key": "samples.table.state"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 357,
+      "key": "samples.table.attention"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 358,
+      "key": "samples.table.progress"
+    },
+    {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 359,
+      "key": "samples.table.updated"
+    },
+    {
       "file": "client/src/components/ThemeToggle.jsx",
       "line": 86,
       "key": "appearance.title"
@@ -30215,222 +30163,227 @@
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 500,
+      "line": 487,
+      "key": "terminology.adminOnly"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "line": 502,
       "key": "common.saving"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 500,
+      "line": 502,
       "key": "common.save"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 507,
+      "line": 509,
       "key": "terminology.unsavedWarning"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 512,
+      "line": 514,
       "key": "common.close"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 525,
+      "line": 527,
       "key": "terminology.searchAllPlaceholder"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 546,
+      "line": 548,
       "key": "terminology.unsavedChanges"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 555,
+      "line": 557,
       "key": "terminology.publishedCount"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 580,
+      "line": 582,
       "key": "terminology.globalSearchResults"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 586,
+      "line": 588,
       "key": "terminology.backToOverview"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 602,
+      "line": 604,
       "key": "terminology.groupsHeading"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 605,
+      "line": 607,
       "key": "terminology.groupsSubheading"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 636,
+      "line": 638,
       "key": "terminology.missingBadge"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 640,
+      "line": 642,
       "key": "terminology.reviewBadge"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 644,
+      "line": 646,
       "key": "terminology.completedBadge"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 662,
+      "line": 664,
       "key": "terminology.termsLabel"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 698,
+      "line": 700,
       "key": "terminology.allGroups"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 705,
+      "line": 707,
       "key": "terminology.matchingTerms"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 718,
+      "line": 720,
       "key": "terminology.importBtn"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 732,
+      "line": 734,
       "key": "terminology.exportJson"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 740,
+      "line": 742,
       "key": "terminology.exportCsv"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 749,
+      "line": 751,
       "key": "terminology.markReviewed"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 760,
+      "line": 762,
       "key": "terminology.filterNeedsAttention"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 761,
+      "line": 763,
       "key": "terminology.filterMissing"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 762,
+      "line": 764,
       "key": "terminology.filterInReview"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 763,
+      "line": 765,
       "key": "terminology.filterPublished"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 764,
+      "line": 766,
       "key": "terminology.filterAll"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 786,
+      "line": 788,
       "key": "terminology.moduleFilter"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 795,
+      "line": 797,
       "key": "common.all"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 808,
+      "line": 810,
       "key": "terminology.searchInGroup"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 843,
+      "line": 845,
       "key": "terminology.importPreviewTitle"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 852,
+      "line": 854,
       "key": "terminology.importPreviewDesc"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 882,
+      "line": 884,
       "key": "common.cancel"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 889,
+      "line": 891,
       "key": "terminology.applyImport"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 908,
+      "line": 910,
       "key": "terminology.noMatchingTerms"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 911,
+      "line": 913,
       "key": "terminology.noMatchingTermsDesc"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 959,
+      "line": 961,
       "key": "terminology.englishReference"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 975,
+      "line": 977,
       "key": "terminology.statusMissing"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 979,
+      "line": 981,
       "key": "terminology.statusInReview"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 983,
+      "line": 985,
       "key": "terminology.statusPublished"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 992,
+      "line": 994,
       "key": "terminology.markReviewAction"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 992,
+      "line": 994,
       "key": "terminology.approveAction"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 1023,
+      "line": 1025,
       "key": "terminology.showingRange"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 1036,
+      "line": 1038,
       "key": "common.previous"
     },
     {
       "file": "client/src/components/TranslationEditor.jsx",
-      "line": 1046,
+      "line": 1048,
       "key": "common.next"
     },
     {
@@ -31420,6 +31373,71 @@
     },
     {
       "file": "client/src/pages/SampleDetail.jsx",
+      "line": 824,
+      "key": "sampleDetail.prepPrerequisites"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 829,
+      "key": "sampleDetail.executeInWorkbench"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 835,
+      "key": "dynamic.gate.DRYING.name"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 835,
+      "key": "workflow.airDrying"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 837,
+      "key": "sampleDetail.constantWeight"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 845,
+      "key": "status.COMPLETED"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 845,
+      "key": "status.PENDING"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 851,
+      "key": "dynamic.gate.PREPARATION.name"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 851,
+      "key": "workflow.samplePreparation"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 853,
+      "key": "sampleDetail.homogenizedFraction"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 865,
+      "key": "sampleDetail.evidenceNeedsVerification"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 876,
+      "key": "status.COMPLETED"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "line": 876,
+      "key": "status.PENDING"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
       "line": 1312,
       "key": "common.success"
     },
@@ -31706,6 +31724,11 @@
       "expression": "t(`reception.pref${m.replace(/[^a-zA-Z]/g, '')}`, m)"
     },
     {
+      "file": "client/src/components/samples/SamplesTable.jsx",
+      "line": 55,
+      "expression": "t(`status.${status}`, config.label)"
+    },
+    {
       "file": "client/src/components/UserDialog.jsx",
       "line": 137,
       "expression": "t(`roles.${r}`, r.replace('_', ' '))"
@@ -31724,6 +31747,11 @@
       "file": "client/src/components/workflow/WorkflowKPICards.jsx",
       "line": 34,
       "expression": "t(card.label)"
+    },
+    {
+      "file": "client/src/context/AnalysisCatalogueContext.jsx",
+      "line": 38,
+      "expression": "t(`dynamic.analysis.${code}.name`, base)"
     },
     {
       "file": "client/src/pages/Equipment.jsx",
