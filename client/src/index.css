@@ -99,6 +99,62 @@
     .border-soft {
         border-color: var(--sf-divider);
     }
+
+    /* SoilFER Signature brand & laboratory components */
+    .sf-kicker {
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--sf-earth);
+    }
+
+    .sf-sample-id {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--sf-divider);
+        border-left: 3px solid var(--sf-earth);
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        background-color: var(--sf-surface);
+        padding: 0.1875rem 0.5rem;
+        color: var(--sf-text);
+        letter-spacing: 0.025em;
+    }
+
+    .sf-brand-rule {
+        height: 5px;
+        background: var(--sf-brand-rule);
+    }
+
+    .sf-soil-bands {
+        height: 38px;
+        background: var(--sf-soil-bands);
+        opacity: 0.85;
+    }
+
+    .sf-method-banner {
+        background-color: var(--sf-earth-bg);
+        border: 1px solid var(--sf-divider);
+        border-left: 4px solid var(--sf-earth);
+        border-radius: 0.75rem;
+    }
+
+    .sf-instructions-box {
+        background-color: var(--sf-ochre-bg);
+        border: 1px solid var(--sf-divider);
+        border-top: 3px solid var(--sf-ochre);
+        border-radius: 0.75rem;
+    }
+
+    .sf-nav-active {
+        background-color: var(--sf-side-active);
+        color: var(--sf-side-text);
+        font-weight: 600;
+        box-shadow: inset 3px 0 0 var(--sf-primary);
+    }
 }
 
 @layer utilities {

@@ -457,7 +457,7 @@ const SampleDetail = () => {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => navigate('/samples')}
-                            className="inline-flex items-center gap-1 font-bold text-sf-muted hover:text-sf-emerald transition-colors"
+                            className="inline-flex items-center gap-1 font-bold text-sf-muted hover:text-sf-primary transition-colors"
                         >
                             <ArrowLeft size={14} /> Back to samples
                         </button>
@@ -465,7 +465,7 @@ const SampleDetail = () => {
                         <span>Sample workspace</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        {refreshing && <RefreshCw size={13} className="animate-spin text-indigo-500" />}
+                        {refreshing && <RefreshCw size={13} className="animate-spin text-sf-primary" />}
                         <span className="font-semibold text-sf-muted bg-sf-raised px-2.5 py-1 rounded-full border border-sf-divider">
                             {roleBadgeText}
                         </span>
@@ -473,170 +473,192 @@ const SampleDetail = () => {
                 </div>
 
                 {/* ─── 2. ALWAYS-VISIBLE HEADER ─── */}
-                <header className="bg-sf-surface rounded-2xl p-5 sm:p-6 shadow-sm border border-sf-divider">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        {/* Identity Details */}
-                        <div className="space-y-1">
-                            <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-2xl sm:text-3xl font-black text-sf-text tracking-tight">
-                                    {identity.labSampleCode !== 'Not assigned' ? identity.labSampleCode : identity.fieldId}
-                                </h1>
-                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
-                                    {identity.assignedLab}
-                                </span>
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                    identity.status === 'APPROVED' || identity.status === 'ARCHIVED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300' :
-                                    identity.status === 'DISPOSED' ? 'bg-sf-raised text-sf-muted border border-sf-divider' :
-                                    'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300'
-                                }`}>
-                                    {getStatusLabel(identity.status, t)}
-                                </span>
-                                {identity.priority && identity.priority !== 'NORMAL' && (
-                                    <span className="px-2 py-0.5 rounded text-[11px] font-black uppercase bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                                        {identity.priority}
+                <header className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
+                    {/* Decorative Soil-Band Brand Rule (Signature Identity) */}
+                    <div className="sf-brand-rule w-full" aria-hidden="true" />
+
+                    <div className="p-5 sm:p-6">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            {/* Identity Details (Laboratory Record Label) */}
+                            <div className="border-l-4 border-l-[var(--sf-earth)] pl-4 space-y-1">
+                                <div className="sf-kicker">Laboratory sample</div>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <h1 className="text-2xl sm:text-3xl font-mono font-bold text-sf-text tracking-tight">
+                                        {identity.labSampleCode !== 'Not assigned' ? identity.labSampleCode : identity.fieldId}
+                                    </h1>
+                                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">
+                                        {identity.assignedLab}
                                     </span>
-                                )}
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                                        identity.status === 'APPROVED' || identity.status === 'ARCHIVED' ? 'bg-[var(--sf-success-bg)] text-[var(--sf-success)] border-[var(--sf-success)]/30' :
+                                        identity.status === 'DISPOSED' ? 'bg-sf-inset text-sf-muted border-sf-divider' :
+                                        'bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border-[var(--sf-blue)]/30'
+                                    }`}>
+                                        {getStatusLabel(identity.status, t)}
+                                    </span>
+                                    {identity.priority && identity.priority !== 'NORMAL' && (
+                                        <span className="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border border-[var(--sf-danger)]/30">
+                                            {identity.priority}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="text-xs text-sf-muted pt-0.5">
+                                    Field ID: <strong className="text-sf-text font-mono">{identity.fieldId}</strong>
+                                </div>
                             </div>
-                            <div className="text-xs text-sf-muted flex flex-wrap items-center gap-2 pt-0.5">
-                                <span>Field ID: <strong className="text-sf-text font-mono">{identity.fieldId}</strong></span>
-                                <span>•</span>
-                                <span>Matrix: <strong>{identity.matrix}</strong></span>
-                                <span>•</span>
-                                <span>Project: <strong>{identity.project?.name || identity.projectCode || 'None'}</strong></span>
+
+                            {/* Retained Header Actions (Section 15) */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {/* Manage Analyses */}
+                                {capabilities.canManageAnalyses?.allowed && (
+                                    <button
+                                        onClick={() => setIsAnalysisModalOpen(true)}
+                                        className="px-3 py-2 rounded-xl text-xs font-semibold border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center gap-1.5 transition-colors"
+                                    >
+                                        <Sliders size={14} className="text-sf-primary" />
+                                        Manage analyses
+                                    </button>
+                                )}
+
+                                {/* Print Label */}
+                                <button
+                                    onClick={() => setPrintTarget(sample || { id, labId: identity.labSampleCode, originalId: identity.fieldId })}
+                                    className="px-3 py-2 rounded-xl text-xs font-semibold border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center gap-1.5 transition-colors"
+                                >
+                                    <Printer size={14} className="text-sf-primary" />
+                                    Print label
+                                </button>
+
+                                {/* Workflow Map */}
+                                <button
+                                    onClick={() => navigate(`/workflow-map?sampleId=${id}`)}
+                                    className="px-3 py-2 rounded-xl text-xs font-semibold border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center gap-1.5 transition-colors"
+                                >
+                                    <Map size={14} className="text-[var(--sf-earth)]" />
+                                    Workflow map
+                                </button>
+
+                                {/* View Report vN shortcut */}
+                                {currentReleasedReport && (
+                                    <button
+                                        onClick={() => handleViewReport(currentReleasedReport.id)}
+                                        className="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--sf-success-bg)] text-[var(--sf-success)] border border-[var(--sf-success)]/30 hover:brightness-95 flex items-center gap-1.5 transition-colors"
+                                    >
+                                        <FileText size={14} />
+                                        View report v{currentReleasedReport.version || 1}
+                                    </button>
+                                )}
+
+                                {/* Open in Workbench Shortcut */}
+                                <button
+                                    onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
+                                    className="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--sf-selected)] text-sf-primary border border-sf-divider hover:bg-sf-hover flex items-center gap-1.5 transition-colors"
+                                    title="Open sample tasks in Technician Workbench"
+                                >
+                                    <span>Open in Workbench →</span>
+                                </button>
+
+                                {/* Final Approve Sample Button */}
+                                {isManager && identity.status !== 'APPROVED' && (
+                                    <button
+                                        onClick={handleApproveSample}
+                                        data-testid="final-approve-sample-btn"
+                                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sf-primary hover:brightness-95 text-sf-on-primary flex items-center gap-1.5 transition-colors shadow-sm"
+                                    >
+                                        <ShieldCheck size={14} />
+                                        Final approve sample
+                                    </button>
+                                )}
+
+                                {/* More Actions Dropdown */}
+                                <div className="relative" ref={moreActionsRef}>
+                                    <button
+                                        onClick={() => setMoreActionsOpen(!moreActionsOpen)}
+                                        className="p-2 rounded-xl border border-sf-divider hover:bg-sf-hover text-sf-muted transition-colors"
+                                        title="More actions"
+                                    >
+                                        <MoreHorizontal size={16} />
+                                    </button>
+
+                                    {moreActionsOpen && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-sf-surface rounded-xl shadow-xl border border-sf-divider py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
+                                            {capabilities.canArchive?.allowed && (
+                                                <button
+                                                    onClick={() => { setMoreActionsOpen(false); handleArchive(); }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-text hover:bg-sf-hover flex items-center gap-2"
+                                                >
+                                                    <Package size={14} /> Archive sample
+                                                </button>
+                                            )}
+                                            {capabilities.canDispose?.allowed && (
+                                                <button
+                                                    onClick={() => { setMoreActionsOpen(false); handleDispose(); }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--sf-danger)] hover:bg-[var(--sf-danger-bg)] flex items-center gap-2"
+                                                >
+                                                    <XCircle size={14} /> Dispose material
+                                                </button>
+                                            )}
+                                            {identity.status === 'RECEIVED' && isReception && (
+                                                <button
+                                                    onClick={() => { setMoreActionsOpen(false); handleUndoIntake(); }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--sf-warning)] hover:bg-[var(--sf-warning-bg)] flex items-center gap-2"
+                                                >
+                                                    <RotateCcw size={14} /> Undo intake
+                                                </button>
+                                            )}
+                                            {['APPROVED', 'ARCHIVED'].includes(identity.status) && isManager && (
+                                                <button
+                                                    onClick={() => { setMoreActionsOpen(false); setUndoApprovalModal({ isOpen: true, reason: '' }); }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--sf-earth)] hover:bg-[var(--sf-earth-bg)] flex items-center gap-2"
+                                                >
+                                                    <RotateCcw size={14} /> Undo final approval
+                                                </button>
+                                            )}
+                                            {capabilities.canAmend?.allowed && (
+                                                <button
+                                                    onClick={() => { setMoreActionsOpen(false); setAmendmentModal({ isOpen: true, type: 'CLERICAL', reason: '', impact: '' }); }}
+                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--sf-blue)] hover:bg-[var(--sf-blue-bg)] flex items-center gap-2"
+                                                >
+                                                    <FileText size={14} /> Start report amendment
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => { setMoreActionsOpen(false); fetchWorkspaceData(); }}
+                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-muted hover:bg-sf-hover flex items-center gap-2"
+                                            >
+                                                <RefreshCw size={14} /> Refresh projection
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Retained Header Actions (Section 15) */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* Manage Analyses */}
-                            {capabilities.canManageAnalyses?.allowed && (
-                                <button
-                                    onClick={() => setIsAnalysisModalOpen(true)}
-                                    className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
-                                >
-                                    <Sliders size={14} className="text-sf-emerald" />
-                                    Manage analyses
-                                </button>
-                            )}
-
-                            {/* Print Label */}
-                            <button
-                                onClick={() => setPrintTarget(sample || { id, labId: identity.labSampleCode, originalId: identity.fieldId })}
-                                className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
-                            >
-                                <Printer size={14} className="text-emerald-600 dark:text-emerald-400" />
-                                Print label
-                            </button>
-
-                            {/* Workflow Map */}
-                            <button
-                                onClick={() => navigate(`/workflow-map?sampleId=${id}`)}
-                                className="px-3 py-2 rounded-xl text-xs font-bold border border-sf-divider hover:bg-sf-raised text-sf-text flex items-center gap-1.5 transition-colors"
-                            >
-                                <Map size={14} className="text-amber-600 dark:text-amber-400" />
-                                Workflow map
-                            </button>
-
-                            {/* View Report vN shortcut */}
-                            {currentReleasedReport && (
-                                <button
-                                    onClick={() => handleViewReport(currentReleasedReport.id)}
-                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors"
-                                >
-                                    <FileText size={14} />
-                                    View report v{currentReleasedReport.version || 1}
-                                </button>
-                            )}
-
-                            {/* Open in Workbench Shortcut */}
-                            <button
-                                onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
-                                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors"
-                                title="Open sample tasks in Technician Workbench"
-                            >
-                                <span>Open in Workbench →</span>
-                            </button>
-
-                            {/* Final Approve Sample Button */}
-                            {isManager && identity.status !== 'APPROVED' && (
-                                <button
-                                    onClick={handleApproveSample}
-                                    data-testid="final-approve-sample-btn"
-                                    className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
-                                >
-                                    <ShieldCheck size={14} />
-                                    Final approve sample
-                                </button>
-                            )}
-
-                            {/* More Actions Dropdown */}
-                            <div className="relative" ref={moreActionsRef}>
-                                <button
-                                    onClick={() => setMoreActionsOpen(!moreActionsOpen)}
-                                    className="p-2 rounded-xl border border-sf-divider hover:bg-sf-raised text-sf-muted transition-colors"
-                                    title="More actions"
-                                >
-                                    <MoreHorizontal size={16} />
-                                </button>
-
-                                {moreActionsOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-sf-surface rounded-xl shadow-xl border border-sf-divider py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
-                                        {capabilities.canArchive?.allowed && (
-                                            <button
-                                                onClick={() => { setMoreActionsOpen(false); handleArchive(); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-text hover:bg-sf-raised flex items-center gap-2"
-                                            >
-                                                <Package size={14} /> Archive sample
-                                            </button>
-                                        )}
-                                        {capabilities.canDispose?.allowed && (
-                                            <button
-                                                onClick={() => { setMoreActionsOpen(false); handleDispose(); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                                            >
-                                                <XCircle size={14} /> Dispose material
-                                            </button>
-                                        )}
-                                        {identity.status === 'RECEIVED' && isReception && (
-                                            <button
-                                                onClick={() => { setMoreActionsOpen(false); handleUndoIntake(); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2"
-                                            >
-                                                <RotateCcw size={14} /> Undo intake
-                                            </button>
-                                        )}
-                                        {['APPROVED', 'ARCHIVED'].includes(identity.status) && isManager && (
-                                            <button
-                                                onClick={() => { setMoreActionsOpen(false); setUndoApprovalModal({ isOpen: true, reason: '' }); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
-                                            >
-                                                <RotateCcw size={14} /> Undo final approval
-                                            </button>
-                                        )}
-                                        {capabilities.canAmend?.allowed && (
-                                            <button
-                                                onClick={() => { setMoreActionsOpen(false); setAmendmentModal({ isOpen: true, type: 'CLERICAL', reason: '', impact: '' }); }}
-                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2"
-                                            >
-                                                <FileText size={14} /> Start report amendment
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => { setMoreActionsOpen(false); fetchWorkspaceData(); }}
-                                            className="w-full text-left px-4 py-2 text-xs font-semibold text-sf-muted hover:bg-sf-raised flex items-center gap-2"
-                                        >
-                                            <RefreshCw size={14} /> Refresh projection
-                                        </button>
-                                    </div>
-                                )}
+                        {/* Four Column Laboratory Record Metadata Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 mt-4 border-t border-sf-divider">
+                            <div>
+                                <span className="text-[10px] uppercase font-bold text-sf-muted tracking-wider block mb-0.5">Project</span>
+                                <strong className="text-xs text-sf-text font-semibold">{identity.project?.name || identity.projectCode || 'None'}</strong>
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase font-bold text-sf-muted tracking-wider block mb-0.5">Matrix</span>
+                                <strong className="text-xs text-sf-text font-semibold">{identity.matrix}</strong>
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase font-bold text-sf-muted tracking-wider block mb-0.5">Received mass</span>
+                                <strong className="text-xs text-sf-text font-semibold">{materialCustody.receivedMass ? `${materialCustody.receivedMass} g` : 'Not recorded'}</strong>
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase font-bold text-sf-muted tracking-wider block mb-0.5">Storage location</span>
+                                <strong className="text-xs text-sf-text font-semibold">{materialCustody.storageLocation || 'Not recorded'}</strong>
                             </div>
                         </div>
                     </div>
 
                     {/* Operational Summary Sub-row */}
-                    <div className="mt-4 pt-4 border-t border-sf-divider flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div className="px-5 sm:px-6 py-3 bg-sf-inset border-t border-sf-divider flex flex-wrap items-center justify-between gap-3 text-xs">
                         <div className="flex flex-wrap items-center gap-2 font-medium text-sf-muted">
-                            <span>{getStatusLabel(identity.status, t)}</span>
+                            <span className="font-semibold text-sf-text">{getStatusLabel(identity.status, t)}</span>
                             <span>·</span>
                             <span><strong>{counters.ordered}</strong> ordered analyses</span>
                             <span>·</span>
@@ -644,19 +666,19 @@ const SampleDetail = () => {
                             {counters.submitted > 0 && (
                                 <>
                                     <span>·</span>
-                                    <span className="text-purple-600 dark:text-purple-400 font-bold"><strong>{counters.submitted}</strong> submitted for review</span>
+                                    <span className="text-[var(--sf-primary)] font-bold"><strong>{counters.submitted}</strong> submitted for review</span>
                                 </>
                             )}
                             {counters.blocked > 0 && (
                                 <>
                                     <span>·</span>
-                                    <span className="text-amber-600 font-bold">review blocked</span>
+                                    <span className="text-[var(--sf-warning)] font-bold">review blocked</span>
                                 </>
                             )}
                         </div>
                         <div className="text-sf-muted">
                             {materialCustody.isDisposed ? (
-                                <span className="text-red-600 font-semibold">Material: disposed · no retained aliquot</span>
+                                <span className="text-[var(--sf-danger)] font-semibold">Material: disposed · no retained aliquot</span>
                             ) : (
                                 <span>Material: {materialCustody.receivedMass ? `${materialCustody.receivedMass} g` : 'Not recorded'} · Location: <strong>{materialCustody.storageLocation || 'Not recorded'}</strong></span>
                             )}
@@ -666,21 +688,21 @@ const SampleDetail = () => {
 
                 {/* ─── 3. ORDER INTEGRITY WARNING (W001: Order Revision vs Tasks Mismatch) ─── */}
                 {(workspace?.orderIntegrityWarning || workspace?.order?.warning) && (
-                    <div className="p-4 sm:p-5 bg-rose-50 dark:bg-rose-950/30 border-l-4 border-rose-500 rounded-xl shadow-sm text-left">
+                    <div className="p-4 sm:p-5 bg-[var(--sf-danger-bg)] border-l-4 border-l-[var(--sf-danger)] rounded-xl shadow-sm text-left">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
-                                <div className="flex items-center gap-2 font-bold text-rose-900 dark:text-rose-200">
-                                    <AlertTriangle size={18} className="text-rose-600 flex-shrink-0" />
+                                <div className="flex items-center gap-2 font-bold text-[var(--sf-danger)]">
+                                    <AlertTriangle size={18} className="text-[var(--sf-danger)] flex-shrink-0" />
                                     <span>Order & Analysis Discrepancy Detected</span>
                                 </div>
-                                <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
+                                <p className="text-xs text-sf-text leading-relaxed">
                                     {(workspace?.orderIntegrityWarning || workspace?.order?.warning)?.message}
                                 </p>
                             </div>
                             {isManager && (
                                 <button
                                     onClick={() => setIsAnalysisModalOpen(true)}
-                                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow transition-colors flex-shrink-0"
+                                    className="px-3.5 py-1.5 bg-[var(--sf-danger)] hover:brightness-95 text-white rounded-lg text-xs font-bold shadow transition-colors flex-shrink-0"
                                 >
                                     Reconcile analyses
                                 </button>
@@ -691,20 +713,20 @@ const SampleDetail = () => {
 
                 {/* ─── 3B. HISTORICAL EVIDENCE GAP ALERT (Finding S003) ─── */}
                 {integrity.hasHistoricalGap && (
-                    <div className="p-4 sm:p-5 bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 rounded-xl shadow-sm text-left">
+                    <div className="p-4 sm:p-5 bg-[var(--sf-warning-bg)] border-l-4 border-l-[var(--sf-warning)] rounded-xl shadow-sm text-left">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
-                                <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-200">
-                                    <AlertTriangle size={18} className="text-amber-600 flex-shrink-0" />
+                                <div className="flex items-center gap-2 font-bold text-[var(--sf-warning)]">
+                                    <AlertTriangle size={18} className="text-[var(--sf-warning)] flex-shrink-0" />
                                     Historical approval — evidence needs verification
                                 </div>
-                                <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                                <p className="text-xs text-sf-text leading-relaxed">
                                     {integrity.historicalGapCount} analysis record(s) are marked ACCEPTED without linked raw results, valid spectral scans, or an authorized waiver. Report release is blocked until records are verified.
                                 </p>
                             </div>
                             <button
                                 onClick={() => setActiveTab('work')}
-                                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow transition-colors flex-shrink-0"
+                                className="px-3.5 py-1.5 bg-[var(--sf-warning)] hover:brightness-95 text-white rounded-lg text-xs font-bold shadow transition-colors flex-shrink-0"
                             >
                                 Inspect work & evidence
                             </button>
@@ -713,9 +735,9 @@ const SampleDetail = () => {
                 )}
 
                 {/* ─── 4. OPERATIONAL NEXT ACTION BANNER ─── */}
-                <div className="bg-sf-surface rounded-xl p-4 sm:p-5 border border-sf-divider border-l-4 border-l-sf-emerald flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div className="bg-[var(--sf-selected)] rounded-xl p-4 sm:p-5 border border-sf-divider border-l-4 border-l-sf-primary flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                     <div className="space-y-0.5">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-sf-emerald">Recommended Next Action</span>
+                        <span className="sf-kicker">Recommended Next Action</span>
                         <h3 className="font-bold text-sf-text text-base">
                             {integrity.hasHistoricalGap ? 'Resolve the historical evidence gap' : nextAction.label}
                         </h3>
@@ -736,7 +758,7 @@ const SampleDetail = () => {
                             else if (counters.accepted >= counters.ordered && counters.ordered > 0) setActiveTab('reports');
                             else setActiveTab('work');
                         }}
-                        className="px-5 py-2.5 bg-sf-emerald hover:bg-sf-emerald-hover text-white rounded-xl text-xs font-bold shadow-md transition-all transform hover:scale-[1.02] flex-shrink-0"
+                        className="px-5 py-2.5 bg-sf-primary text-sf-on-primary hover:brightness-95 rounded-xl text-xs font-bold shadow-sm transition-all flex-shrink-0"
                     >
                         {integrity.hasHistoricalGap ? 'Inspect evidence' :
                          counters.submitted > 0 ? 'Review submission' :
@@ -752,12 +774,12 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('work')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'work' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
+                            activeTab === 'work' ? 'border-sf-primary text-sf-primary font-bold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <Layers size={15} />
                         Work & results
-                        <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-sf-raised text-sf-muted">
+                        <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-sf-inset text-sf-muted border border-sf-divider">
                             {counters.ordered}
                         </span>
                     </button>
@@ -765,13 +787,13 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('review')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'review' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
+                            activeTab === 'review' ? 'border-sf-primary text-sf-primary font-bold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <ShieldCheck size={15} />
                         Review
                         {counters.submitted > 0 && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-black">
+                            <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] font-bold border border-[var(--sf-blue)]/20">
                                 {counters.submitted}
                             </span>
                         )}
@@ -780,7 +802,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('request')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'request' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
+                            activeTab === 'request' ? 'border-sf-primary text-sf-primary font-bold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <Package size={15} />
@@ -790,13 +812,13 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('reports')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'reports' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
+                            activeTab === 'reports' ? 'border-sf-primary text-sf-primary font-bold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <FileText size={15} />
                         Reports
                         {workspace?.reports?.length > 0 && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300">
+                            <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-[var(--sf-success-bg)] text-[var(--sf-success)] font-bold border border-[var(--sf-success)]/20">
                                 {workspace.reports.length}
                             </span>
                         )}
@@ -805,7 +827,7 @@ const SampleDetail = () => {
                     <button
                         onClick={() => setActiveTab('history')}
                         className={`px-4 py-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-                            activeTab === 'history' ? 'border-sf-emerald text-sf-emerald font-extrabold' : 'border-transparent text-sf-muted hover:text-sf-text'
+                            activeTab === 'history' ? 'border-sf-primary text-sf-primary font-bold' : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                     >
                         <HistoryIcon size={15} />
@@ -815,7 +837,6 @@ const SampleDetail = () => {
 
                 {/* ─── 6. TAB CONTENT PANELS ─── */}
 
-                {/* TAB 1: WORK & RESULTS */}
                 {activeTab === 'work' && (
                     <div className="space-y-6">
                         {/* Preparation Gates Card */}

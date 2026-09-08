@@ -7,43 +7,59 @@
 
 :root,
 [data-appearance="light"] {
-    --sf-canvas: #F4F6F5;
+    --sf-canvas: #F5F3ED;
     --sf-surface: #FFFFFF;
     --sf-raised: #FFFFFF;
-    --sf-inset: #FAFBFA;
-    --sf-hover: #EAF0EC;
-    --sf-text: #20302B;
-    --sf-muted: #53635C;
-    --sf-divider: #D6DFDA;
-    --sf-control: #7A8A82;
+    --sf-inset: #F8F7F2;
+    --sf-hover: #EDF4EF;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #D9DFD7;
+    --sf-border: #D9DFD7;
+    --sf-control: #829087;
 
-    --sf-primary: #276B51;
+    --sf-primary: #256348;
     --sf-on-primary: #FFFFFF;
-    --sf-primary-hover: #20583F;
+    --sf-primary-hover: #1E523B;
 
-    --sf-link: #135E9E;
-    --sf-focus: #135E9E;
+    --sf-sidebar: #173F32;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #C4D3CA;
+    --sf-side-active: #305C49;
 
-    --sf-success-bg: #E4F3EB;
-    --sf-success: #24613F;
+    --sf-earth: #945539;
+    --sf-earth-bg: #F4E8DD;
+    --sf-ochre: #85601B;
+    --sf-ochre-bg: #F8F0D8;
+    --sf-blue: #206477;
+    --sf-blue-bg: #E4F1F3;
 
-    --sf-warning-bg: #FFF1D5;
-    --sf-warning: #7B4C03;
+    --sf-link: #206477;
+    --sf-focus: #256348;
 
-    --sf-danger-bg: #FBEAEA;
-    --sf-danger: #9B2D30;
+    --sf-success-bg: #EAF4ED;
+    --sf-success: #246044;
 
-    --sf-info-bg: #E7F0FB;
-    --sf-info: #235D92;
+    --sf-warning-bg: #FCF2DA;
+    --sf-warning: #7F5710;
 
-    --sf-selected: #E4F3EB;
+    --sf-danger-bg: #FAEDEF;
+    --sf-danger: #9B3842;
+
+    --sf-info-bg: #E4F1F3;
+    --sf-info: #206477;
+
+    --sf-selected: #EDF4EF;
 
     --sf-disabled-bg: #EBEFEC;
     --sf-disabled-text: #617067;
 
-    --sf-chart-1: #276B51;
-    --sf-chart-2: #135E9E;
-    --sf-chart-3: #8755A2;
+    --sf-chart-1: #256348;
+    --sf-chart-2: #206477;
+    --sf-chart-3: #945539;
+
+    --sf-brand-rule: linear-gradient(90deg, #436B45 0% 36%, #AA6844 36% 64%, #C79D49 64% 83%, #4D91A0 83%);
+    --sf-soil-bands: linear-gradient(180deg, #638052 0% 20%, #7F6849 20% 45%, #AC7954 45% 73%, #C7AE7D 73%);
 
     --sf-radius-sm: 6px;
     --sf-radius-md: 8px;
@@ -56,41 +72,57 @@
 .dark {
     --sf-canvas: #25282B;
     --sf-surface: #2E3236;
-    --sf-raised: #393E43;
-    --sf-inset: #222629;
+    --sf-raised: #34393C;
+    --sf-inset: #34393C;
     --sf-hover: #3C4247;
     --sf-text: #F1F4F3;
-    --sf-muted: #BAC5C8;
-    --sf-divider: #515B61;
-    --sf-control: #899599;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #505C58;
+    --sf-border: #505C58;
+    --sf-control: #8C9B95;
 
-    --sf-primary: #8ED3B8;
-    --sf-on-primary: #182B23;
-    --sf-primary-hover: #ADE3CD;
+    --sf-primary: #91D2AF;
+    --sf-on-primary: #173127;
+    --sf-primary-hover: #A5E0C0;
 
-    --sf-link: #9ACCF2;
-    --sf-focus: #9ACCF2;
+    --sf-sidebar: #243932;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #C4D3CA;
+    --sf-side-active: #3A5749;
 
-    --sf-success-bg: #254438;
-    --sf-success: #A3DFC0;
+    --sf-earth: #E6B298;
+    --sf-earth-bg: #453A33;
+    --sf-ochre: #E8C879;
+    --sf-ochre-bg: #44402F;
+    --sf-blue: #9CD4E1;
+    --sf-blue-bg: #2E4149;
 
-    --sf-warning-bg: #51422B;
-    --sf-warning: #F3CF8A;
+    --sf-link: #9CD4E1;
+    --sf-focus: #91D2AF;
 
-    --sf-danger-bg: #503439;
-    --sf-danger: #FFB5B7;
+    --sf-success-bg: #31493B;
+    --sf-success: #A5DABA;
 
-    --sf-info-bg: #2E4357;
-    --sf-info: #B5D8FA;
+    --sf-warning-bg: #494030;
+    --sf-warning: #F0D083;
 
-    --sf-selected: #254438;
+    --sf-danger-bg: #4A343B;
+    --sf-danger: #F3AFB5;
+
+    --sf-info-bg: #2E4149;
+    --sf-info: #9CD4E1;
+
+    --sf-selected: #344B41;
 
     --sf-disabled-bg: #3B4145;
     --sf-disabled-text: #C0C8CB;
 
-    --sf-chart-1: #8ED3B8;
-    --sf-chart-2: #9ACCF2;
-    --sf-chart-3: #DAB1F0;
+    --sf-chart-1: #91D2AF;
+    --sf-chart-2: #9CD4E1;
+    --sf-chart-3: #E6B298;
+
+    --sf-brand-rule: linear-gradient(90deg, #436B45 0% 36%, #AA6844 36% 64%, #C79D49 64% 83%, #4D91A0 83%);
+    --sf-soil-bands: linear-gradient(180deg, #638052 0% 20%, #7F6849 20% 45%, #AC7954 45% 73%, #C7AE7D 73%);
 
     color-scheme: dark;
 }

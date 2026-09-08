@@ -59,23 +59,25 @@ export default function WorkbenchInspector({
     const selectedAsset = eligibleEquipment.find(e => e.id === selectedEquipId);
 
     return (
-        <aside className="w-full lg:w-64 p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-4 text-xs">
+        <aside className="w-full lg:w-64 p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-4 text-xs shadow-sm">
             {/* Header / Identity */}
             <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-sf-muted">
+                <span className="sf-kicker block mb-1">
                     Selected Sample
                 </span>
-                <h3 className="text-base font-bold text-sf-text truncate">
-                    {sampleDisplayId || labId || originalId || 'Sample'}
-                </h3>
+                <div className="my-1.5">
+                    <span className="sf-sample-id text-base px-2.5 py-1">
+                        {sampleDisplayId || labId || originalId || 'Sample'}
+                    </span>
+                </div>
                 {originalId && (
-                    <p className="text-[11px] text-sf-muted truncate">Field ID: {originalId}</p>
+                    <p className="text-[11px] text-sf-muted font-mono truncate">Field ID: {originalId}</p>
                 )}
-                <p className="text-[11px] text-sf-muted mt-0.5">
+                <p className="text-[11px] text-sf-muted mt-1 font-medium">
                     {getAnalysisDisplayName(analysis, methodDefinition?.name)}
                 </p>
                 {projectCode && (
-                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sf-raised text-sf-muted border border-sf-divider">
+                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sf-inset text-sf-muted border border-sf-divider">
                         {projectCode}
                     </span>
                 )}
@@ -92,17 +94,17 @@ export default function WorkbenchInspector({
             )}
 
             {/* Readiness Summary */}
-            <div className="p-2.5 rounded-lg border border-sf-divider bg-sf-raised/50">
-                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-1.5">
+            <div className="p-3 rounded-lg border border-sf-divider bg-sf-inset">
+                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-1.5 tracking-wider">
                     Execution Readiness
                 </span>
                 <div className="flex items-center gap-1.5 mb-1">
                     {readiness?.isReady ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--sf-success-bg)] text-[var(--sf-success)] border border-[var(--sf-success)]/20">
                             <CheckCircle2 size={11} /> Ready to Record
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border border-[var(--sf-warning)]/20">
                             <AlertTriangle size={11} /> Blocked
                         </span>
                     )}

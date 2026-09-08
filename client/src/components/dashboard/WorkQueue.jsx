@@ -45,13 +45,13 @@ export default function WorkQueue({
         if (!status) return null;
         const s = status.toLowerCase();
 
-        let badgeClass = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-sf-divider';
+        let badgeClass = 'bg-sf-inset text-sf-muted border-sf-divider';
         if (s.includes('ready') || s.includes('accepted') || s.includes('passed') || s.includes('done') || s.includes('published') || s.includes('operational')) {
-            badgeClass = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+            badgeClass = 'bg-[var(--sf-success-bg)] text-[var(--sf-success)] border-[var(--sf-success)]/20';
         } else if (s.includes('fail') || s.includes('problem') || s.includes('rejected') || s.includes('conflict') || s.includes('missing') || s.includes('unconfigured')) {
-            badgeClass = 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-800';
+            badgeClass = 'bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border-[var(--sf-danger)]/20';
         } else if (s.includes('wait') || s.includes('pending') || s.includes('review') || s.includes('hold') || s.includes('progress') || s.includes('unassigned') || s.includes('required')) {
-            badgeClass = 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+            badgeClass = 'bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border-[var(--sf-warning)]/20';
         }
 
         return (
@@ -62,9 +62,9 @@ export default function WorkQueue({
     };
 
     return (
-        <section aria-label="Work queue panel" className="bg-sf-surface/80 rounded-xl border border-sf-divider/80 shadow-sm overflow-hidden flex flex-col">
+        <section aria-label="Work queue panel" className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm overflow-hidden flex flex-col">
             {/* Queue Header & Search */}
-            <div className="p-4 sm:p-5 border-b border-sf-divider/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 border-b border-sf-divider flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-lg font-bold text-sf-text">
                         {title || 'Current Work Queue'}
@@ -81,21 +81,21 @@ export default function WorkQueue({
                         <button
                             type="button"
                             onClick={onToggleSideRail}
-                            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-sf-divider bg-sf-canvas/60 text-sf-muted hover:bg-sf-raised transition-colors whitespace-nowrap shadow-sm"
+                            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-sf-divider bg-sf-inset text-sf-muted hover:bg-sf-hover transition-colors whitespace-nowrap shadow-sm"
                             title={sideRailCollapsed ? "Show side notes panel" : "Expand table to full width"}
                         >
-                            <PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-emerald-600' : 'text-gray-400'}`} />
+                            <PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-sf-primary' : 'text-sf-muted'}`} />
                             <span>{sideRailCollapsed ? "Show Notes" : "Full Width"}</span>
                         </button>
                     )}
                     <div className="relative w-full sm:w-64">
-                        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <Search className="w-4 h-4 text-sf-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                             type="search"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Filter this queue…"
-                            className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-canvas/60 border border-sf-divider rounded-lg text-sf-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-surface border border-sf-control rounded-lg text-sf-text placeholder:text-sf-muted focus:outline-none focus:border-sf-primary focus:ring-1 focus:ring-sf-primary"
                         />
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default function WorkQueue({
 
             {/* Queue Selector Lanes / Tabs */}
             {availableQueues && availableQueues.length > 1 && (
-                <div className="px-4 sm:px-5 py-2.5 bg-gray-50/70 dark:bg-gray-900/40 border-b border-sf-divider/60 flex flex-wrap items-center gap-2">
+                <div className="px-4 sm:px-5 py-2.5 bg-sf-inset border-b border-sf-divider flex flex-wrap items-center gap-2">
                     {availableQueues.map((q) => {
                         const isSelected = q.key === queueKey;
                         return (
@@ -113,14 +113,14 @@ export default function WorkQueue({
                                 onClick={() => onSelectQueue && onSelectQueue(q.key)}
                                 className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
                                     isSelected
-                                        ? 'bg-emerald-700 text-white shadow-sm'
-                                        : 'text-sf-muted hover:bg-gray-200/60 dark:hover:bg-gray-700/60'
+                                        ? 'bg-sf-primary text-sf-on-primary font-semibold shadow-sm'
+                                        : 'text-sf-muted hover:bg-sf-hover'
                                 }`}
                             >
                                 <span>{q.label}</span>
                                 {q.count !== undefined && (
                                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                                        isSelected ? 'bg-emerald-800 text-emerald-100' : 'bg-gray-200 dark:bg-gray-700 text-sf-muted'
+                                        isSelected ? 'bg-black/20 text-white' : 'bg-sf-surface border border-sf-divider text-sf-muted'
                                     }`}>
                                         {q.count}
                                     </span>
@@ -134,8 +134,8 @@ export default function WorkQueue({
             {/* Main Content Area */}
             <div className="flex-1 p-4 sm:p-5 min-h-[300px] flex flex-col justify-between">
                 {isLoading ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-gray-400">
-                        <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-2" />
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-sf-muted">
+                        <Loader2 className="w-8 h-8 animate-spin text-sf-primary mb-2" />
                         <span className="text-xs font-medium">Loading queue items…</span>
                     </div>
                 ) : error ? (
@@ -174,7 +174,7 @@ export default function WorkQueue({
                                 {filteredRows.map((row) => (
                                     <tr
                                         key={row.key || row.id}
-                                        className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group"
+                                        className="hover:bg-sf-hover transition-colors group"
                                     >
                                         <td className="py-3 pr-4">
                                             <div className="font-semibold text-sf-text text-sm">
@@ -215,13 +215,13 @@ export default function WorkQueue({
                                             {row.route ? (
                                                 <Link
                                                     to={row.route}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/80 transition-colors shadow-sm"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sf-primary bg-[var(--sf-selected)] hover:bg-sf-hover border border-sf-divider transition-colors shadow-sm"
                                                 >
                                                     <span>{row.action || 'Open'}</span>
                                                     <ArrowUpRight className="w-3.5 h-3.5" />
                                                 </Link>
                                             ) : (
-                                                <span className="text-gray-400 text-xs italic">
+                                                <span className="text-sf-muted text-xs italic">
                                                     View only
                                                 </span>
                                             )}
@@ -234,7 +234,7 @@ export default function WorkQueue({
                 )}
 
                 {/* Pagination Controls */}
-                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-sf-muted mt-4">
+                <div className="pt-4 border-t border-sf-divider flex items-center justify-between text-xs text-sf-muted mt-4">
                     <div>
                         Showing <span className="font-semibold text-sf-muted">{filteredRows.length}</span> of{' '}
                         <span className="font-semibold text-sf-muted">{total || filteredRows.length}</span> items

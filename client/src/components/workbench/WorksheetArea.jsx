@@ -179,24 +179,24 @@ export default function WorksheetArea({
                 </div>
             </div>
 
-            {/* Method Banner */}
-            <div className="p-3.5 rounded-xl border border-sf-divider bg-sf-surface flex items-center justify-between flex-wrap gap-2 text-xs">
+            {/* Method Banner (SoilFER Signature Earth Accent) */}
+            <div className="sf-method-banner p-4 flex items-center justify-between flex-wrap gap-3 text-xs mb-4">
                 <div>
-                    <h3 className="font-bold text-sm text-sf-text flex items-center gap-2">
+                    <h3 className="font-bold text-base text-[var(--sf-earth)] flex items-center gap-2">
                         <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
                     </h3>
-                    <p className="text-sf-muted text-[11px] mt-0.5">
+                    <p className="text-sf-muted text-xs mt-0.5">
                         {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {activeGroup?.unit && (
-                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-sf-raised text-sf-muted border border-sf-divider">
+                        <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
                             Unit: {activeGroup.unit}
                         </span>
                     )}
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                    <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
                         {filteredItems.length} assigned sample{filteredItems.length === 1 ? '' : 's'}
                     </span>
                 </div>
@@ -205,11 +205,11 @@ export default function WorksheetArea({
             {/* Main Work Area: Table + Docked 240px Inspector */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
                 {/* Worksheet Table (3 cols) */}
-                <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col">
+                <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-xs">
                             <thead>
-                                <tr className="bg-sf-raised text-sf-muted border-b border-sf-divider">
+                                <tr className="bg-sf-inset text-sf-muted border-b border-sf-divider">
                                     <th className="py-2.5 px-3 w-8">
                                         <input
                                             type="checkbox"
@@ -259,8 +259,8 @@ export default function WorksheetArea({
                                             onClick={() => setSelectedItemId(item.workItemId)}
                                             className={`cursor-pointer transition-colors ${
                                                 isSelected
-                                                    ? 'bg-sf-primary/10'
-                                                    : 'hover:bg-sf-hover'
+                                                    ? 'bg-[var(--sf-selected)] shadow-[inset_3px_0_0_var(--sf-primary)]'
+                                                    : 'hover:bg-sf-hover/60'
                                             }`}
                                         >
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
@@ -278,18 +278,18 @@ export default function WorksheetArea({
                                                     {item.rackPosition != null && (
                                                         <span
                                                             data-testid={`rack-pos-${item.workItemId}`}
-                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shrink-0"
+                                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20 shrink-0"
                                                             title={`Rack Position ${item.rackPosition}${item.batchId ? ` (Batch: ${item.batchId})` : ''}`}
                                                         >
                                                             #{item.rackPosition}
                                                         </span>
                                                     )}
-                                                    <span className="font-mono font-bold text-sf-text">
+                                                    <span className="sf-sample-id">
                                                         {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
                                                     </span>
                                                 </div>
                                                 {item.originalId && (
-                                                    <div className="text-[11px] text-sf-muted font-mono">
+                                                    <div className="text-[11px] text-sf-muted font-mono mt-0.5">
                                                         Field: {item.originalId}
                                                     </div>
                                                 )}
