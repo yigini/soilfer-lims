@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Package, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';

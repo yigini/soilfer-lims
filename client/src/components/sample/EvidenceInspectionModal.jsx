@@ -1,6 +1,6 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import { operationalEvidence, workItemEvidenceText } from '../../utils/workItemEvidence';
-﻿import React from 'react';
+import React, { useEffect } from 'react';
 import { FileText, AlertTriangle, ShieldCheck, CheckCircle, X, ExternalLink, Activity } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 

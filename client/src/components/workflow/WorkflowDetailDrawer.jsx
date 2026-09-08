@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     X, Clock, User, FileText, AlertTriangle, FlaskConical,
     CheckCircle2, Loader2, ArrowRight, ShieldCheck, ChevronRight
@@ -11,16 +11,7 @@ import { getStatusColor, getDisplayName, getRoom, ROOM_CONFIG } from '../../util
  * Full Dark Mode support, comprehensive parameter breakdown, and direct technician action triggers.
  */
 export default function WorkflowDetailDrawer({
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && onClose) onClose();
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
-
     isOpen,
-    onClose,
     selectedRoom,
     stageSummary,
     blockerGraph = [],
@@ -30,6 +21,15 @@ export default function WorkflowDetailDrawer({
     onClose,
 }) {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
     if (!selectedRoom) return null;
 
     const config = ROOM_CONFIG[selectedRoom] || {};
