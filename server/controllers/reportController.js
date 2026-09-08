@@ -188,7 +188,7 @@ async function getReportBySample(req, res) {
         }
 
         if (!report) {
-            return res.status(404).json({ error: 'No report found for this sample' });
+            return res.json(null);
         }
 
         res.json({
