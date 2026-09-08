@@ -2,8 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../prisma');
 const { classifyTerminologyKey } = require('../utils/terminologyRegistry');
+function getTranslationsDir() {
+    const candidatePaths = [
+        path.resolve(__dirname, '../../client/src/translations'),
+        path.resolve(__dirname, '../locales'),
+        path.resolve(__dirname, '../../locales')
+    ];
+    for (const p of candidatePaths) {
+        if (fs.existsSync(p) && fs.existsSync(path.join(p, 'en.json'))) {
+            return p;
+        }
+    }
+    return candidatePaths[0];
+}
 
-const CLIENT_TRANSLATIONS_DIR = path.resolve(__dirname, '../../client/src/translations');
+const CLIENT_TRANSLATIONS_DIR = getTranslationsDir();
 
 // In-memory cache for dynamic keys
 let dynamicKeyCache = null;
