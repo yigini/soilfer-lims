@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from './LanguageContext';
+import { clearStoredSessionOverride } from '../lib/appearance';
 
 const AuthContext = createContext();
 
@@ -104,11 +105,25 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        clearStoredSessionOverride();
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setToken(null);
         setUser(null);
+    };
+
+    const updateUserPreferences = (themePreference) => {
+        setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, themePreference };
+            try {
+                localStorage.setItem('user', JSON.stringify(updated));
+            } catch {
+                // Ignore storage error
+            }
+            return updated;
+        });
     };
 
     const hasAccess = (scopeType, scopeValue) => {
@@ -144,7 +159,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, hasAccess, hasPermission }}>
+        <AuthContext.Provider value={{ user, token, login, logout, hasAccess, hasPermission, updateUserPreferences }}>
             {children}
         </AuthContext.Provider>
     );

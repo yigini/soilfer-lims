@@ -1,13 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
+import {
+    resolveAppearance,
+    getStoredSessionOverride,
+    setStoredSessionOverride,
+    clearStoredSessionOverride,
+    clearLegacyThemeStorage,
+    applyRootAppearance,
+    isValidAppearance
+} from '../lib/appearance';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    // Branding theme (colors, title, etc.)
+    // Branding theme (colors, title, logoUrl) - preserved for laboratory branding customization
     const [theme, setTheme] = useState({
         colors: {
-            primary: '#047857',
+            primary: '#276B51',
             secondary: '#111827',
             accent: '#D97706'
         },
@@ -15,20 +24,73 @@ export const ThemeProvider = ({ children }) => {
         logoUrl: '/assets/img/logo-light.png'
     });
 
-    // Dark mode state
-    const [darkMode, setDarkMode] = useState(() => {
-        // Check localStorage first
-        const saved = localStorage.getItem('darkMode');
-        if (saved !== null) {
-            return saved === 'true';
-        }
-        // Fall back to OS preference
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    });
-
     const [loading, setLoading] = useState(true);
 
-    // Load branding settings from backend
+    // Current authenticated identity context
+    const [authSubject, setAuthSubject] = useState({
+        authenticated: false,
+        userId: 'anonymous',
+        savedPreference: 'light'
+    });
+
+    // Session override state for current tab (null = no override, 'light', or 'dark')
+    const [sessionOverride, setSessionOverrideState] = useState(() => {
+        // Clear legacy unapproved localStorage key
+        clearLegacyThemeStorage();
+        // Check sessionStorage for anonymous or pre-existing session override
+        return getStoredSessionOverride('anonymous');
+    });
+
+    // Saved account preference state
+    const [savedAppearance, setSavedAppearanceState] = useState('light');
+
+    // Synchronize authenticated user identity & preference from AuthProvider
+    const syncAuthUser = useCallback((user) => {
+        if (user && user.id) {
+            const subjectId = String(user.id);
+            const userPref = isValidAppearance(user.themePreference) ? user.themePreference : 'light';
+            const existingOverride = getStoredSessionOverride(subjectId);
+
+            setAuthSubject({
+                authenticated: true,
+                userId: subjectId,
+                savedPreference: userPref
+            });
+            setSavedAppearanceState(userPref);
+            setSessionOverrideState(existingOverride);
+        } else {
+            // Anonymous / logged out
+            const anonOverride = getStoredSessionOverride('anonymous');
+            setAuthSubject({
+                authenticated: false,
+                userId: 'anonymous',
+                savedPreference: 'light'
+            });
+            setSavedAppearanceState('light');
+            setSessionOverrideState(anonOverride);
+        }
+    }, []);
+
+    // Resolve effective appearance based on strict precedence:
+    // sessionOverride ?? savedPreference ?? 'light'
+    const resolved = useMemo(() => {
+        return resolveAppearance({
+            authenticated: authSubject.authenticated,
+            savedPreference: authSubject.savedPreference,
+            sessionOverride
+        });
+    }, [authSubject.authenticated, authSubject.savedPreference, sessionOverride]);
+
+    const appearance = resolved.appearance;
+    const appearanceSource = resolved.source;
+    const darkMode = appearance === 'dark';
+
+    // Apply document root classes and meta tags whenever effective appearance changes
+    useEffect(() => {
+        applyRootAppearance(appearance);
+    }, [appearance]);
+
+    // Load laboratory branding settings
     useEffect(() => {
         const loadSettings = async () => {
             const token = localStorage.getItem('token');
@@ -41,7 +103,7 @@ export const ThemeProvider = ({ children }) => {
                 const res = await axios.get('/api/admin/settings');
                 const settings = res.data?.data || res.data;
                 if (settings.branding) {
-                    setTheme({ ...theme, ...settings.branding });
+                    setTheme(prev => ({ ...prev, ...settings.branding }));
                     if (settings.branding.colors) {
                         updateCssVars(settings.branding.colors);
                     }
@@ -57,43 +119,72 @@ export const ThemeProvider = ({ children }) => {
         loadSettings();
     }, []);
 
-    // Apply dark mode class to document root
-    useEffect(() => {
-        const root = window.document.documentElement;
-        if (darkMode) {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('darkMode', darkMode);
-    }, [darkMode]);
-
-    // Listen for OS preference changes
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (e) => {
-            // Only auto-switch if user hasn't manually set preference
-            if (localStorage.getItem('darkMode') === null) {
-                setDarkMode(e.matches);
-            }
-        };
-
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
-
     const updateCssVars = (colors) => {
         const root = document.documentElement;
-        root.style.setProperty('--color-primary', colors.primary);
-        root.style.setProperty('--color-secondary', colors.secondary);
+        if (colors.primary) root.style.setProperty('--color-primary', colors.primary);
+        if (colors.secondary) root.style.setProperty('--color-secondary', colors.secondary);
     };
 
-    const toggleDarkMode = () => {
-        setDarkMode(prev => !prev);
-    };
+    // Header session appearance switch (does NOT persist to server profile)
+    const setSessionAppearance = useCallback((mode) => {
+        if (!isValidAppearance(mode)) return;
+        setStoredSessionOverride(authSubject.userId, mode);
+        setSessionOverrideState(mode);
+    }, [authSubject.userId]);
+
+    // Revert to saved profile default by clearing session override
+    const clearSessionAppearance = useCallback(() => {
+        clearStoredSessionOverride();
+        setSessionOverrideState(null);
+    }, []);
+
+    // Toggle session appearance between light and dark
+    const toggleDarkMode = useCallback(() => {
+        const nextMode = appearance === 'dark' ? 'light' : 'dark';
+        setSessionAppearance(nextMode);
+    }, [appearance, setSessionAppearance]);
+
+    // Set saved preference in memory (called after successful Profile API save)
+    const setSavedAppearance = useCallback((mode) => {
+        if (!isValidAppearance(mode)) return;
+        // Clearing session override ensures saved preference immediately applies
+        clearStoredSessionOverride();
+        setSessionOverrideState(null);
+        setSavedAppearanceState(mode);
+        setAuthSubject(prev => ({
+            ...prev,
+            savedPreference: mode
+        }));
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        theme,
+        loading,
+        darkMode,
+        appearance,
+        savedAppearance,
+        appearanceSource,
+        setSessionAppearance,
+        clearSessionAppearance,
+        toggleDarkMode,
+        setSavedAppearance,
+        syncAuthUser
+    }), [
+        theme,
+        loading,
+        darkMode,
+        appearance,
+        savedAppearance,
+        appearanceSource,
+        setSessionAppearance,
+        clearSessionAppearance,
+        toggleDarkMode,
+        setSavedAppearance,
+        syncAuthUser
+    ]);
 
     return (
-        <ThemeContext.Provider value={{ theme, loading, darkMode, toggleDarkMode }}>
+        <ThemeContext.Provider value={contextValue}>
             {children}
         </ThemeContext.Provider>
     );

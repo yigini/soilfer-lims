@@ -9,6 +9,9 @@ import { AuthProvider } from './context/AuthContext'
 import { DialogProvider } from './context/DialogContext'
 import { AnalysisCatalogueProvider } from './context/AnalysisCatalogueContext'
 
+import { clearStoredSessionOverride } from './lib/appearance';
+import { AuthenticatedAppearanceBridge } from './components/AuthenticatedAppearanceBridge';
+
 import axios from 'axios';
 axios.defaults.baseURL = import.meta.env.DEV ? 'http://localhost:3000' : ''; // Use relative URLs in production
 axios.interceptors.request.use(config => {
@@ -28,6 +31,7 @@ axios.interceptors.response.use(
             if (!isAuthEndpoint && localStorage.getItem('token')) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
+                clearStoredSessionOverride();
                 delete axios.defaults.headers.common['Authorization'];
                 if (window.location.pathname !== '/login') {
                     window.location.href = '/login?expired=true';
@@ -58,6 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <ThemeProvider>
                     <LanguageProvider>
                         <AuthProvider>
+                            <AuthenticatedAppearanceBridge />
                             <AnalysisCatalogueProvider>
                             <DialogProvider>
                                 <App />

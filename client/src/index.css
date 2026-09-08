@@ -1,10 +1,13 @@
+@import './styles/appearance-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
     body {
-        @apply bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+        background-color: var(--sf-canvas);
+        color: var(--sf-text);
         font-family: 'Inter', sans-serif;
     }
 }
@@ -13,139 +16,173 @@
 
     /* Card styles */
     .card-base {
-        @apply bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700;
+        background-color: var(--sf-surface);
+        border: 1px solid var(--sf-divider);
     }
 
     /* Input styles */
     .input-base {
-        @apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500;
+        background-color: var(--sf-inset);
+        border: 1px solid var(--sf-control);
+        color: var(--sf-text);
+    }
+    .input-base::placeholder {
+        color: var(--sf-muted);
     }
 
     /* Button styles */
     .btn-primary {
-        @apply bg-blue-600 dark:bg-slate-700 text-white font-bold rounded-xl px-6 py-2.5 hover:bg-blue-700 dark:hover:bg-slate-800 transition-all shadow-lg shadow-blue-500/20 dark:shadow-slate-900/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+        background-color: var(--sf-primary);
+        color: var(--sf-on-primary);
+        font-weight: 700;
+        border-radius: 0.75rem;
+        padding: 0.625rem 1.5rem;
+        transition: all 0.15s ease-in-out;
+        border: 1px solid var(--sf-primary);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .btn-primary:hover:not(:disabled) {
+        background-color: var(--sf-primary-hover);
+        border-color: var(--sf-primary-hover);
+    }
+    .btn-primary:disabled {
+        background-color: var(--sf-disabled-bg);
+        color: var(--sf-disabled-text);
+        border-color: var(--sf-divider);
+        cursor: not-allowed;
     }
 
     .btn-secondary {
-        @apply bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100;
+        background-color: var(--sf-hover);
+        color: var(--sf-text);
+        border: 1px solid var(--sf-divider);
+    }
+    .btn-secondary:hover:not(:disabled) {
+        background-color: var(--sf-inset);
     }
 
     /* Semantic surface tokens */
     .surface {
-        @apply bg-white dark:bg-gray-800;
+        background-color: var(--sf-surface);
+        color: var(--sf-text);
     }
 
     .surface-muted {
-        @apply bg-gray-50 dark:bg-gray-800/50;
+        background-color: var(--sf-hover);
     }
 
     .panel {
-        @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+        background-color: var(--sf-surface);
+        border: 1px solid var(--sf-divider);
+        color: var(--sf-text);
     }
 
     .modal-surface {
-        @apply bg-white dark:bg-gray-800;
+        background-color: var(--sf-raised);
+        color: var(--sf-text);
+        border: 1px solid var(--sf-divider);
     }
 
     .modal-sidebar {
-        @apply bg-gray-50 dark:bg-gray-700;
+        background-color: var(--sf-inset);
+        color: var(--sf-text);
     }
 
     .text-muted {
-        @apply text-gray-500 dark:text-gray-400;
+        color: var(--sf-muted);
     }
 
     .text-heading {
-        @apply text-gray-900 dark:text-gray-100;
+        color: var(--sf-text);
     }
 
     .border-soft {
-        @apply border-gray-200 dark:border-gray-700;
+        border-color: var(--sf-divider);
     }
 }
 
 @layer utilities {
 
-    /* Link Colors - Soft slate with subtle warmth */
+    /* Link Colors */
     a {
-        @apply text-blue-600 dark:text-slate-300;
+        color: var(--sf-link);
     }
 
     a:hover {
-        @apply text-blue-800 dark:text-slate-200;
+        color: var(--sf-focus);
     }
 
-    /* Button and interactive element colors - softer slate tones */
+    /* Button and interactive element colors in graphite dark */
     .text-blue-600 {
-        @apply dark:text-slate-300;
+        @apply dark:text-sf-link;
     }
 
     .text-blue-600:hover {
-        @apply dark:text-slate-200;
+        @apply dark:hover:text-sf-focus;
     }
 
     .text-blue-700 {
-        @apply dark:text-slate-300;
+        @apply dark:text-sf-link;
     }
 
     .text-blue-800 {
-        @apply dark:text-slate-200;
+        @apply dark:text-sf-focus;
     }
 
     .hover\:text-blue-800:hover {
-        @apply dark:hover:text-slate-200;
+        @apply dark:hover:text-sf-focus;
     }
 
     /* Background colors for interactive elements */
     .bg-blue-50 {
-        @apply dark:bg-gray-800;
+        @apply dark:bg-sf-surface;
     }
 
     .bg-blue-100 {
-        @apply dark:bg-gray-700;
+        @apply dark:bg-sf-hover;
     }
 
     .hover\:bg-blue-50:hover {
-        @apply dark:hover:bg-gray-700;
+        @apply dark:hover:bg-sf-hover;
     }
 
     .hover\:bg-blue-50\/30:hover {
-        @apply dark:hover:bg-gray-700/30;
+        @apply dark:hover:bg-sf-hover;
     }
 
-    /* Primary action buttons - subtle warm tone */
+    /* Primary action buttons in graphite dark */
     .bg-blue-600 {
-        @apply dark:bg-slate-700;
+        @apply dark:bg-sf-primary dark:text-sf-on-primary;
     }
 
     .bg-blue-700 {
-        @apply dark:bg-slate-800;
+        @apply dark:bg-sf-primary-hover dark:text-sf-on-primary;
     }
 
     .hover\:bg-blue-700:hover {
-        @apply dark:hover:bg-slate-800;
+        @apply dark:hover:bg-sf-primary-hover;
     }
 
     /* Border colors */
     .border-blue-200 {
-        @apply dark:border-gray-600;
+        @apply dark:border-sf-divider;
     }
 
     .border-blue-500 {
-        @apply dark:border-slate-600;
+        @apply dark:border-sf-control;
     }
 
-    /* Focus ring colors - very subtle */
+    /* Focus ring colors */
     .focus\:ring-blue-500:focus {
-        @apply dark:focus:ring-slate-600;
+        @apply dark:focus:ring-sf-focus;
     }
 
     .focus\:ring-blue-200:focus {
-        @apply dark:focus:ring-slate-800/50;
+        @apply dark:focus:ring-sf-focus;
     }
 
     .focus\:border-blue-400:focus {
-        @apply dark:focus:border-slate-600;
+        @apply dark:focus:border-sf-focus;
     }
 
     /* Custom Scrollbar for Sidebar */
@@ -158,13 +195,12 @@
     }
 
     .sidebar-scroll::-webkit-scrollbar-thumb {
-        background-color: #374151;
+        background-color: var(--sf-control);
         border-radius: 20px;
     }
 
-    /* Dark mode scrollbar */
     .dark .sidebar-scroll::-webkit-scrollbar-thumb {
-        background-color: #4B5563;
+        background-color: var(--sf-divider);
     }
 
     /* Hide scrollbar for Chrome, Safari and Opera */
@@ -175,38 +211,10 @@
     /* Hide scrollbar for IE, Edge and Firefox */
     .no-scrollbar {
         -ms-overflow-style: none;
-        /* IE and Edge */
         scrollbar-width: none;
-        /* Firefox */
     }
 
     @media print {
-
-        /* Hide everything by default */
-        body * {
-            visibility: hidden !important;
-        }
-
-        /* Show the print-only label and its contents */
-        .print-only,
-        .print-only * {
-            visibility: visible !important;
-        }
-
-        .print-only {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 101mm;
-            height: 54mm;
-            background: white;
-            z-index: 9999;
-            margin: 0;
-            padding: 0;
-            display: block !important;
-        }
-
-        /* Hide the dialog overlay entirely */
         .no-print {
             display: none !important;
         }
@@ -214,13 +222,7 @@
         body,
         html {
             background: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-        @page {
-            size: 101mm 54mm;
-            margin: 0;
+            color: #1A1A1A !important;
         }
     }
 

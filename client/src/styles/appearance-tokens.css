@@ -1,0 +1,120 @@
+/**
+ * SoilFER LIMS - Authoritative Semantic Appearance Tokens
+ *
+ * Source: WP/sitewide-appearance-v1/tokens.json
+ * Light default + Graphite Dark paired system.
+ */
+
+:root,
+[data-appearance="light"] {
+    --sf-canvas: #F4F6F5;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #FAFBFA;
+    --sf-hover: #EAF0EC;
+    --sf-text: #20302B;
+    --sf-muted: #53635C;
+    --sf-divider: #D6DFDA;
+    --sf-control: #7A8A82;
+
+    --sf-primary: #276B51;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #20583F;
+
+    --sf-link: #135E9E;
+    --sf-focus: #135E9E;
+
+    --sf-success-bg: #E4F3EB;
+    --sf-success: #24613F;
+
+    --sf-warning-bg: #FFF1D5;
+    --sf-warning: #7B4C03;
+
+    --sf-danger-bg: #FBEAEA;
+    --sf-danger: #9B2D30;
+
+    --sf-info-bg: #E7F0FB;
+    --sf-info: #235D92;
+
+    --sf-selected: #E4F3EB;
+
+    --sf-disabled-bg: #EBEFEC;
+    --sf-disabled-text: #617067;
+
+    --sf-chart-1: #276B51;
+    --sf-chart-2: #135E9E;
+    --sf-chart-3: #8755A2;
+
+    --sf-radius-sm: 6px;
+    --sf-radius-md: 8px;
+    --sf-radius-lg: 12px;
+
+    color-scheme: light;
+}
+
+[data-appearance="dark"],
+.dark {
+    --sf-canvas: #25282B;
+    --sf-surface: #2E3236;
+    --sf-raised: #393E43;
+    --sf-inset: #222629;
+    --sf-hover: #3C4247;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BAC5C8;
+    --sf-divider: #515B61;
+    --sf-control: #899599;
+
+    --sf-primary: #8ED3B8;
+    --sf-on-primary: #182B23;
+    --sf-primary-hover: #ADE3CD;
+
+    --sf-link: #9ACCF2;
+    --sf-focus: #9ACCF2;
+
+    --sf-success-bg: #254438;
+    --sf-success: #A3DFC0;
+
+    --sf-warning-bg: #51422B;
+    --sf-warning: #F3CF8A;
+
+    --sf-danger-bg: #503439;
+    --sf-danger: #FFB5B7;
+
+    --sf-info-bg: #2E4357;
+    --sf-info: #B5D8FA;
+
+    --sf-selected: #254438;
+
+    --sf-disabled-bg: #3B4145;
+    --sf-disabled-text: #C0C8CB;
+
+    --sf-chart-1: #8ED3B8;
+    --sf-chart-2: #9ACCF2;
+    --sf-chart-3: #DAB1F0;
+
+    color-scheme: dark;
+}
+
+/* Scoped White Paper Exception (for reports, certificate viewports, barcode labels) */
+[data-surface="paper"],
+.sf-paper {
+    background-color: #FFFFFF !important;
+    color: #1A1A1A !important;
+    color-scheme: light !important;
+}
+
+[data-surface="paper"] p,
+[data-surface="paper"] td,
+[data-surface="paper"] th,
+[data-surface="paper"] span,
+.sf-paper p,
+.sf-paper td,
+.sf-paper th,
+.sf-paper span {
+    color: #1A1A1A;
+}
+
+[data-surface="paper"] .text-muted,
+.sf-paper .text-muted {
+    color: #555555 !important;
+}
