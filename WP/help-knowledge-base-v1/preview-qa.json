@@ -1,0 +1,266 @@
+{
+  "checkedAt": "2026-09-10T09:25:44.681Z",
+  "scope": "Isolated prototype only; not live LIMS, content approval, offline engine or production RBAC validation",
+  "checks": [
+    "Useful initial Help Centre and embedded logo",
+    "Technician does not see content editor",
+    "Search finds the spectra guide by MIR synonym",
+    "Search with HTML is treated as text and has empty-state guidance",
+    "Native FAQ disclosure and full guide share one answer",
+    "Article feedback never claims it was sent",
+    "Stable article link shown without sample ID/token",
+    "Help open, article drill-down, related article, back and close preserve typed result",
+    "Direct editor scene has a permission explanation for technician",
+    "Manager has only laboratory-local scope",
+    "Administrator can save a draft and request review; publication stays unavailable",
+    "Editing reviewed draft permits a new review request",
+    "Unreviewed translated article has an explicit English fallback notice",
+    "Support requires a description and never sends automatically",
+    "All five language controls render translated main headings"
+  ],
+  "layouts": [
+    {
+      "width": 320,
+      "theme": "light",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "graphite",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "graphite",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "light",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "light",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "light",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "light",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "light",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "graphite",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "graphite",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "graphite",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "graphite",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 736,
+      "theme": "graphite",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "scene": "editor",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "graphite",
+      "scene": "home",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "graphite",
+      "scene": "faq",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "graphite",
+      "scene": "article",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "graphite",
+      "scene": "context",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "theme": "graphite",
+      "scene": "editor",
+      "overflow": false
+    }
+  ],
+  "browserErrors": [],
+  "networkRequests": [],
+  "screenshots": 7
+}

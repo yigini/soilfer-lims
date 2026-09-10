@@ -831,5 +831,51 @@
         "name": "Preparação de amostras"
       }
     }
+  },
+  "help": {
+    "help": "Ajuda",
+    "centre": "Centro de ajuda",
+    "faq": "Perguntas frequentes",
+    "guides": "Guias de tarefas",
+    "search": "Pesquisar na ajuda",
+    "placeholder": "Experimente preparação, resultado bloqueado ou ficheiro de espectro…",
+    "hero": "Como podemos ajudar no laboratório?",
+    "intro": "Orientações claras para a tarefa em curso.",
+    "all": "Todos os temas",
+    "read": "Ler o guia",
+    "back": "Voltar",
+    "close": "Fechar ajuda",
+    "useful": "Esta página foi útil?",
+    "yes": "Sim",
+    "no": "Ainda não",
+    "support": "Contactar o laboratório",
+    "context": "Ajuda sobre esta página",
+    "searchAll": "Pesquisar em toda a ajuda",
+    "sourceFallback": "Este artigo está disponível em inglês. Ainda não existe uma tradução revista.",
+    "draft": "Rascunho",
+    "review": "Em revisão",
+    "published": "Publicado",
+    "needsReview": "Requer revisão",
+    "saveDraft": "Guardar rascunho",
+    "requestReview": "Pedir revisão",
+    "publish": "Publicar a versão aprovada",
+    "localNote": "Orientações do seu laboratório",
+    "lastReviewed": "Última revisão",
+    "offline": "Ajuda transferida",
+    "offlineDate": "Última sincronização",
+    "zero": "Não foram encontradas orientações correspondentes",
+    "zeroHint": "Experimente o nome do método ou uma expressão mais curta, ou contacte o laboratório.",
+    "permission": "Estas orientações não estão disponíveis com as suas permissões atuais.",
+    "unavailable": "Esta funcionalidade não está ativada na sua versão atual.",
+    "categories": {
+      "start": "Primeiros passos",
+      "intake": "Receção de amostras",
+      "bench": "Trabalho analítico",
+      "review": "Revisão e relatórios",
+      "assets": "Equipamentos e inventário",
+      "offline": "Dispositivos móveis e sem ligação",
+      "connect": "Projetos e ligações",
+      "manage": "Gestão do laboratório"
+    }
   }
 }

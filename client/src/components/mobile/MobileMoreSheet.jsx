@@ -16,6 +16,7 @@ import {
     ShieldAlert,
     Table,
     Info,
+    HelpCircle,
     ChevronRight,
     Sparkles,
     CheckCircle2
@@ -274,14 +275,38 @@ export const MobileMoreSheet = ({ isOpen, onClose }) => {
                                 <Settings size={18} className="text-sf-muted" />
                                 <span>{t('nav.admin', 'Admin Panel')}</span>
                             </Link>
+                            <Link
+                                to="/admin/help"
+                                onClick={onClose}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sf-text hover:bg-sf-hover font-medium"
+                            >
+                                <HelpCircle size={18} className="text-sf-primary" />
+                                <span>{t('help.guides', 'Knowledge Base Editor')}</span>
+                            </Link>
                         </div>
                     )}
 
                     {/* Section: Info & Tech Stack */}
                     <div className="space-y-1">
                         <div className="px-2 text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                            Information
+                            {t('help.help', 'Help & Guidance')}
                         </div>
+                        <Link
+                            to="/help"
+                            onClick={onClose}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sf-text hover:bg-sf-hover font-medium"
+                        >
+                            <HelpCircle size={18} className="text-sf-primary" />
+                            <span>{t('help.centre', 'Help Centre')}</span>
+                        </Link>
+                        <Link
+                            to="/help/faq"
+                            onClick={onClose}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sf-text hover:bg-sf-hover font-medium"
+                        >
+                            <HelpCircle size={18} className="text-sf-muted" />
+                            <span>{t('help.faq', 'Common Questions (FAQs)')}</span>
+                        </Link>
                         <Link
                             to="/about"
                             onClick={onClose}

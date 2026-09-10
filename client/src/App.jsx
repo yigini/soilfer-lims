@@ -56,6 +56,11 @@ const LabMethods = React.lazy(() => import('./pages/admin/LabMethods'));
 const LegacyImport = React.lazy(() => import('./pages/admin/LegacyImport'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 const ScanPage = React.lazy(() => import('./pages/ScanPage'));
+const HelpCentre = React.lazy(() => import('./pages/help/HelpCentre'));
+const FAQPage = React.lazy(() => import('./pages/help/FAQPage'));
+const ArticleReader = React.lazy(() => import('./pages/help/ArticleReader'));
+const TopicExplorer = React.lazy(() => import('./pages/help/TopicExplorer'));
+const AdminHelpEditor = React.lazy(() => import('./pages/help/AdminHelpEditor'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -70,12 +75,14 @@ import { useTheme } from './context/ThemeContext';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { SyncProvider } from './context/SyncContext';
+import { HelpProvider } from './context/HelpContext';
 import { Header } from './components/Header';
 import Footer from './components/Footer';
 import { MobileHeader } from './components/mobile/MobileHeader';
 import { MobileNavBar } from './components/mobile/MobileNavBar';
 import { MobileMoreSheet } from './components/mobile/MobileMoreSheet';
 import { SyncCentreModal } from './components/mobile/SyncCentreModal';
+import { ContextHelpDrawer } from './components/help/ContextHelpDrawer';
 
 // --- Layout Component ---
 const Layout = ({ children }) => {
@@ -309,12 +316,15 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
     return (
         <NotificationProvider>
             <SyncProvider>
-                <Layout>
-                    <React.Suspense fallback={<LazyFallback />}>
-                        {children}
-                    </React.Suspense>
-                    <NotificationDrawer />
-                </Layout>
+                <HelpProvider>
+                    <Layout>
+                        <React.Suspense fallback={<LazyFallback />}>
+                            {children}
+                        </React.Suspense>
+                        <NotificationDrawer />
+                        <ContextHelpDrawer />
+                    </Layout>
+                </HelpProvider>
             </SyncProvider>
         </NotificationProvider>
     );
@@ -367,6 +377,14 @@ function App() {
             <Route path="/techstack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
             <Route path="/tech-stack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
             <Route path="/credits" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+
+            {/* Help Centre & Knowledge Base Routes */}
+            <Route path="/help" element={<RequireAuth><HelpCentre /></RequireAuth>} />
+            <Route path="/help/faq" element={<RequireAuth><FAQPage /></RequireAuth>} />
+            <Route path="/faq" element={<Navigate to="/help/faq" replace />} />
+            <Route path="/help/articles/:articleId" element={<RequireAuth><ArticleReader /></RequireAuth>} />
+            <Route path="/help/topics/:topicId" element={<RequireAuth><TopicExplorer /></RequireAuth>} />
+            <Route path="/admin/help" element={<RequireAuth permission="HELP_EDIT_LAB"><AdminHelpEditor /></RequireAuth>} />
 
             {/* Catch-All 404 Route */}
             <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />

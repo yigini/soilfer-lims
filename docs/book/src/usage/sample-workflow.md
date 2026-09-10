@@ -54,14 +54,15 @@ The **Lab Manager** assigns samples to **Lab Technicians** for analysis. Each sa
 
 The technician:
 
-1. Goes to **My Work** to see their assigned samples
-2. Performs the physical analysis in the lab
-3. Opens the sample in LIMS and enters the result for each test
-4. Clicks **Submit for Review**
+1. Goes to **My Work** or **Tech Workbench** to view their assigned analytical queue
+2. Selects the method worksheet (e.g. pH, texture panel, or spectra intake)
+3. Confirms prerequisites (sample drying, physical preparation, instrument eligibility)
+4. Enters observations or uploads original spectral exports with QC validation
+5. Saves local drafts and clicks **Submit for Review**
 
-The results are now pending approval.
+The results are now pending approval in the Manager Review Queue.
 
-> 💡 Technicians can only **enter** and **submit** results — they cannot approve them. This separation of duties is important for quality control.
+> 💡 Technicians can only **save** and **submit** analytical results — they cannot approve them. This separation of duties is strictly enforced by the system for laboratory quality control and ISO/GLOSOLAN compliance. Guidance is available at every step via the **Help Centre** and page contextual drawer.
 
 ---
 

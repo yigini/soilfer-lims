@@ -9,7 +9,7 @@
  */
 
 const DB_NAME = 'soilfer_lims_offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise = null;
 
@@ -73,6 +73,17 @@ export function getOfflineDb() {
             // 7. Device enrollment identity
             if (!db.objectStoreNames.contains('device')) {
                 db.createObjectStore('device', { keyPath: 'key' });
+            }
+
+            // 8. Offline Help Knowledge Base store: keyed by article id
+            if (!db.objectStoreNames.contains('helpArticles')) {
+                const helpStore = db.createObjectStore('helpArticles', { keyPath: 'id' });
+                helpStore.createIndex('category', 'category', { unique: false });
+            }
+
+            // 9. Offline Help metadata (lastSync, blockers, categories)
+            if (!db.objectStoreNames.contains('helpMeta')) {
+                db.createObjectStore('helpMeta', { keyPath: 'key' });
             }
         };
 
@@ -306,5 +317,65 @@ export async function getEnrolledDevice() {
 export async function setEnrolledDevice(deviceData) {
     return withStore('device', 'readwrite', (store) => {
         store.put({ key: 'current', ...deviceData, updatedAt: new Date().toISOString() });
+    });
+}
+
+// ─── OFFLINE HELP PACK OPERATIONS ───
+
+export async function saveOfflineHelpPack(pack) {
+    if (!pack || !Array.isArray(pack.articles)) return;
+
+    await withStore('helpArticles', 'readwrite', (store) => {
+        pack.articles.forEach(article => store.put(article));
+    });
+
+    await withStore('helpMeta', 'readwrite', (store) => {
+        store.put({ key: 'lastSync', value: new Date().toISOString() });
+        store.put({ key: 'locale', value: pack.locale || 'en' });
+        store.put({ key: 'categories', value: pack.categories || [] });
+        store.put({ key: 'routeMap', value: pack.routeMap || {} });
+    });
+}
+
+export async function getOfflineHelpArticles(category = null) {
+    return withStore('helpArticles', 'readonly', (store) => {
+        return new Promise((resolve, reject) => {
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const list = req.result || [];
+                if (category) {
+                    resolve(list.filter(a => a.category === category));
+                } else {
+                    resolve(list);
+                }
+            };
+            req.onerror = () => reject(req.error);
+        });
+    });
+}
+
+export async function getOfflineHelpArticle(id) {
+    return withStore('helpArticles', 'readonly', (store) => {
+        return new Promise((resolve, reject) => {
+            const req = store.get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+        });
+    });
+}
+
+export async function getOfflineHelpMeta() {
+    return withStore('helpMeta', 'readonly', (store) => {
+        return new Promise((resolve, reject) => {
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const map = {};
+                (req.result || []).forEach(item => {
+                    map[item.key] = item.value;
+                });
+                resolve(map);
+            };
+            req.onerror = () => reject(req.error);
+        });
     });
 }

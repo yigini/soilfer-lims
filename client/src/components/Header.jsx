@@ -5,6 +5,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useLanguage } from '../context/LanguageContext';
 import { UserMenu } from './UserMenu';
+import { HelpButton } from './help/HelpButton';
 
 import { Bell, Menu } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
@@ -118,6 +119,7 @@ export const Header = ({ onMenuClick }) => {
                             </span>
                         )}
                     </button>
+                    <HelpButton className="hidden sm:inline-flex" />
                     <div className="h-6 w-px bg-sf-divider mx-1"></div>
                     <LanguageSwitcher />
                     <ThemeToggle />

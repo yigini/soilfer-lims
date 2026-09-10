@@ -166,6 +166,24 @@ const PERMISSIONS = {
     ],
     'VIEW_AUDIT': [
         'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'AUDIT_USER'
+    ],
+
+    // Help & Knowledge Base
+    'HELP_READ': [
+        'SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER',
+        'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'SURVEYOR', 'AUDIT_USER', 'EXTERNAL_VIEWER', 'VIEWER'
+    ],
+    'HELP_EDIT_GLOBAL': [
+        'SUPER_ADMIN'
+    ],
+    'HELP_EDIT_LAB': [
+        'SUPER_ADMIN', 'LAB_MANAGER'
+    ],
+    'HELP_PUBLISH_GLOBAL': [
+        'SUPER_ADMIN'
+    ],
+    'HELP_PUBLISH_LAB': [
+        'SUPER_ADMIN', 'LAB_MANAGER'
     ]
 };
 

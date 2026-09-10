@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-09-10T09:25:38.840Z",
+  "head": "55117f23c387add2cb3a032ea8a66da3ab77a572",
+  "routeCount": 42,
+  "readinessCodeCount": 15,
+  "sources": [
+    {
+      "path": "client/src/App.jsx",
+      "sha256": "4a762b92c31423e336e20cad4d61904e5ed80bec745edae34205f0a9b6972b58"
+    },
+    {
+      "path": "client/src/components/Header.jsx",
+      "sha256": "abb4ee96519167ec69d82ef18d738fb49478e31ed9997811469700909b29dc9f"
+    },
+    {
+      "path": "client/src/components/mobile/MobileHeader.jsx",
+      "sha256": "b7bdfe2815ed2f6b3e5ede77d606e6279a5684ae556af52beee9bd59fb52e71d"
+    },
+    {
+      "path": "client/src/components/common/InfoTooltip.jsx",
+      "sha256": "26ab18bbbcc62062bb47fa8e0171879f3b95aabfe32c291c1f14b6ead8665681"
+    },
+    {
+      "path": "server/services/workbenchReadinessService.js",
+      "sha256": "4bad6fb434a1db5d1be66774bfbad28b3e138b15fc2eb40968cc0f6775ee25e8"
+    },
+    {
+      "path": "server/services/sampleWorkspaceService.js",
+      "sha256": "bce5ed3a4ebcc9c1e66ccbdc0b831e9b2a53d77c1d2fd449d83399e561cdfa94"
+    },
+    {
+      "path": "docs/book/src/usage/sample-workflow.md",
+      "sha256": "676c0b07415de06ef702a884c11cb05c3ecb761bebc118de37a551b220160447"
+    },
+    {
+      "path": "docs/book/src/usage/spectral.md",
+      "sha256": "da440bbfbc025395644642ae1436be2e9211c9e56106a65d93233df162702966"
+    }
+  ],
+  "scope": "Read-only local source audit; no authenticated live verification in this package"
+}

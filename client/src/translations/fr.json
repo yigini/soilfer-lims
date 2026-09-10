@@ -831,5 +831,51 @@
         "name": "Préparation des échantillons"
       }
     }
+  },
+  "help": {
+    "help": "Aide",
+    "centre": "Centre d’aide",
+    "faq": "Questions fréquentes",
+    "guides": "Guides pratiques",
+    "search": "Rechercher dans l’aide",
+    "placeholder": "Essayez préparation, résultat bloqué ou fichier de spectre…",
+    "hero": "Comment vous aider au laboratoire ?",
+    "intro": "Des indications claires pour votre tâche en cours.",
+    "all": "Tous les sujets",
+    "read": "Lire le guide",
+    "back": "Retour",
+    "close": "Fermer l’aide",
+    "useful": "Cette page vous a-t-elle été utile ?",
+    "yes": "Oui",
+    "no": "Pas encore",
+    "support": "Contacter votre laboratoire",
+    "context": "Aide sur cette page",
+    "searchAll": "Rechercher dans toute l’aide",
+    "sourceFallback": "Cet article est disponible en anglais. Aucune traduction révisée n’est encore disponible.",
+    "draft": "Brouillon",
+    "review": "En cours de révision",
+    "published": "Publié",
+    "needsReview": "À réviser",
+    "saveDraft": "Enregistrer le brouillon",
+    "requestReview": "Demander une révision",
+    "publish": "Publier la version approuvée",
+    "localNote": "Consignes de votre laboratoire",
+    "lastReviewed": "Dernière révision",
+    "offline": "Aide téléchargée",
+    "offlineDate": "Dernière synchronisation",
+    "zero": "Aucune indication correspondante trouvée",
+    "zeroHint": "Essayez le nom d’une méthode ou une expression plus courte, ou contactez votre laboratoire.",
+    "permission": "Ces indications ne sont pas disponibles avec vos droits d’accès actuels.",
+    "unavailable": "Cette fonctionnalité n’est pas activée dans votre version actuelle.",
+    "categories": {
+      "start": "Premiers pas",
+      "intake": "Réception des échantillons",
+      "bench": "Travail à la paillasse",
+      "review": "Révision et rapports",
+      "assets": "Équipements et stocks",
+      "offline": "Mobile et hors connexion",
+      "connect": "Projets et connexions",
+      "manage": "Gestion du laboratoire"
+    }
   }
 }

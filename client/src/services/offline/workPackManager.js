@@ -12,7 +12,8 @@ import {
     getOfflineSample,
     getOfflineWorkItemsForSample,
     getEnrolledDevice,
-    setEnrolledDevice
+    setEnrolledDevice,
+    saveOfflineHelpPack
 } from './offlineDb';
 
 /**
@@ -97,6 +98,19 @@ export async function downloadAndActivateWorkPack({ labId, methodCodes, sampleId
     }
     if (bundle.workItems && bundle.workItems.length) {
         await cacheWorkItems(bundle.workItems);
+    }
+
+    // 5. Download and cache scoped offline help pack
+    try {
+        const helpRes = await fetch('/api/help/pack', { method: 'GET', headers });
+        if (helpRes.ok) {
+            const helpData = await helpRes.json();
+            if (helpData?.pack) {
+                await saveOfflineHelpPack(helpData.pack);
+            }
+        }
+    } catch (e) {
+        console.warn('[WORK_PACK] Notice caching offline help pack:', e.message);
     }
 
     return bundle;

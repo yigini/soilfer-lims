@@ -831,5 +831,51 @@
         "name": "Sample Preparation"
       }
     }
+  },
+  "help": {
+    "help": "Help",
+    "centre": "Help Centre",
+    "faq": "Common questions",
+    "guides": "Task guides",
+    "search": "Search help",
+    "placeholder": "Try preparation, a blocked result or a spectrum file…",
+    "hero": "How can we help at the lab?",
+    "intro": "Clear guidance for the work in front of you.",
+    "all": "All topics",
+    "read": "Read the guide",
+    "back": "Back",
+    "close": "Close help",
+    "useful": "Was this useful?",
+    "yes": "Yes",
+    "no": "Not yet",
+    "support": "Ask your lab",
+    "context": "Help with this page",
+    "searchAll": "Search all help",
+    "sourceFallback": "This article is available in English. A reviewed translation is not yet available.",
+    "draft": "Draft",
+    "review": "In review",
+    "published": "Published",
+    "needsReview": "Needs review",
+    "saveDraft": "Save draft",
+    "requestReview": "Request review",
+    "publish": "Publish approved revision",
+    "localNote": "Your laboratory's guidance",
+    "lastReviewed": "Last reviewed",
+    "offline": "Downloaded help",
+    "offlineDate": "Last synchronized",
+    "zero": "No matching guidance found",
+    "zeroHint": "Try a method name or a shorter phrase, or ask your lab.",
+    "permission": "This guidance is not available in your current access scope.",
+    "unavailable": "This feature is not enabled in your current version.",
+    "categories": {
+      "start": "Getting started",
+      "intake": "Receiving samples",
+      "bench": "Working at the bench",
+      "review": "Review & reports",
+      "assets": "Equipment & stock",
+      "offline": "Mobile & offline",
+      "connect": "Projects & connections",
+      "manage": "Managing the laboratory"
+    }
   }
 }

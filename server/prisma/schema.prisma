@@ -1184,5 +1184,129 @@ model CommandReceipt {
   @@index([actor])
 }
 
+// ─── HELP CENTRE & KNOWLEDGE BASE MODELS ───
 
+model HelpArticle {
+  id          String    @id
+  category    String
+  kind        String
+  feature     String    @default("core")
+  roles       String
+  keywords    String
+  minutes     Int       @default(2)
+  reviewOwner String    @default("Lab operations lead")
+  visibility  String    @default("AUTHENTICATED")
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  revisions    HelpRevision[]
+  publications HelpPublication[]
+  labNotes     HelpLabNote[]
+  feedback     HelpFeedback[]
+
+  @@index([category])
+  @@index([visibility])
+}
+
+model HelpRevision {
+  id             String       @id @default(uuid())
+  articleId      String
+  article        HelpArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionNumber Int
+  title          String
+  summary        String
+  steps          String
+  success        String
+  caution        String
+  related        String
+  sourceLocale   String       @default("en")
+  sourceHash     String
+  changeReason   String?
+  authorId       String?
+  createdAt      DateTime     @default(now())
+
+  locales      HelpLocaleRevision[]
+  publications HelpPublication[]
+
+  @@unique([articleId, revisionNumber])
+  @@index([articleId])
+}
+
+model HelpLocaleRevision {
+  id           String       @id @default(uuid())
+  revisionId   String
+  revision     HelpRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  locale       String
+  title        String
+  summary      String
+  steps        String
+  success      String
+  caution      String
+  reviewStatus String       @default("TRANSLATION_REQUIRED")
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([revisionId, locale])
+  @@index([locale])
+}
+
+model HelpPublication {
+  id              String       @id @default(uuid())
+  articleId       String
+  article         HelpArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionId      String
+  revision        HelpRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  approvedLocales String
+  publishedBy     String
+  publishedAt     DateTime     @default(now())
+  reviewDue       DateTime?
+  isCurrent       Boolean      @default(true)
+
+  @@index([articleId, isCurrent])
+}
+
+model HelpLabNote {
+  id        String      @id @default(uuid())
+  articleId String
+  article   HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  labId     String
+  noteText  String
+  authorId  String
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([articleId, labId])
+  @@index([labId])
+}
+
+model HelpFeedback {
+  id         String      @id @default(uuid())
+  articleId  String
+  article    HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionId String?
+  locale     String      @default("en")
+  useful     Boolean
+  comment    String?
+  category   String?
+  userId     String?
+  createdAt  DateTime    @default(now())
+
+  @@index([articleId])
+}
+
+model HelpSupportConfig {
+  id            String   @id @default(uuid())
+  labId         String   @unique
+  supportName   String?
+  contactMethod String?
+  contactValue  String?
+  instructions  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([labId])
+}

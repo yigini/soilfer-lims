@@ -1,0 +1,957 @@
+{
+  "status": "ALL_CONTENT_UNAPPROVED",
+  "locales": [
+    "en",
+    "es",
+    "es-419",
+    "fr",
+    "pt"
+  ],
+  "articles": [
+    {
+      "id": "start-shift",
+      "title": "Start your shift with the right work",
+      "sourceHash": "be1788076afe0b149f3aada67077db74b8dd1a82c72b4053cd1ce11b05e5b707",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "intake-project",
+      "title": "Receive a project sample",
+      "sourceHash": "93d804c8e9fb0bf6c2db7f3c554920cc812339bab9ae5908a11b4ca307e52c3f",
+      "proposedReviewOwner": "Reception lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "intake-location",
+      "title": "Why is the location missing from an intake draft?",
+      "sourceHash": "fee73b9b2f9af250d369d4b297b972b646671641c0ef30267d1f777b5aaae120",
+      "proposedReviewOwner": "Reception lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "intake-identity",
+      "title": "Which sample identifier should I use?",
+      "sourceHash": "181de11b37ca7d6658a4f66e2dd276e3e80fc9d386ff13a099b666cb7383df78",
+      "proposedReviewOwner": "Reception lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-blocked",
+      "title": "Why can't I start this analysis?",
+      "sourceHash": "b480b1ba1b7848506ac4896594b2cfd733cc467a27333e211f58a7e6ba484467",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-drying",
+      "title": "Record sample drying",
+      "sourceHash": "bd3d101c7b0a6d4b07c9aa95e8b425aebb36ac5be3ecab6f793c0fad631507e2",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-preparation",
+      "title": "Why does preparation still need attention after I confirm it?",
+      "sourceHash": "712d473dccbfbb8803e548d87294c0a023e2ab95bf37675fada0242092699f16",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-run",
+      "title": "Record a run of samples for one method",
+      "sourceHash": "af7e58d97646ccd81c6a0e7dfc35e80e37a4cfa909f5ab077ace8014310cd8d3",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-save-submit",
+      "title": "Was my result saved or submitted?",
+      "sourceHash": "cdaaf4dfbc588908a649cbffe8db0581cb58d2ed25b2277abe2a47c2299cbff6",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-texture",
+      "title": "Why are sand, silt and clay entered together?",
+      "sourceHash": "354d0de4770ae564a0b9fe0aa04b70c0b44e8c4287cd5fc9ea2385df20f5ea4a",
+      "proposedReviewOwner": "Particle-size method specialist",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "bench-spectra",
+      "title": "What should I upload for MIR or NIR analysis?",
+      "sourceHash": "8c12bbb2b0afe694b25f23e789e432b2a506379e1e3d26ccb4a37e1c4be1f469",
+      "proposedReviewOwner": "Spectroscopy method specialist",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "review-results",
+      "title": "Review submitted work before approval",
+      "sourceHash": "08e6fae81b02095792914954126914e9ffcb3cefdd841cf92f161f008233c11b",
+      "proposedReviewOwner": "Quality lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "review-returned",
+      "title": "What should I do when work is returned?",
+      "sourceHash": "dd052ec94e94300958ea26ff106c97a423cc21e23950bfeabcede2bf5aad2cfc",
+      "proposedReviewOwner": "Quality lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "review-amend",
+      "title": "Can I change an approved result?",
+      "sourceHash": "fd5056a9e0d2539c87a296edcf5770ce26719922699e1a93a95603689e7a15f6",
+      "proposedReviewOwner": "Quality lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "review-report",
+      "title": "Find and share the correct report",
+      "sourceHash": "98e5cccb7b068118d679b5f813c95f2d495f43b02d5d17efdbca8a5e9fc0397f",
+      "proposedReviewOwner": "Quality lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "assets-instrument",
+      "title": "Why can't I select this instrument?",
+      "sourceHash": "0831aad5a3ef86aa79ede62499aab03e945ace0cef4158dc7ea3755b4b271298",
+      "proposedReviewOwner": "Equipment lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "assets-stock",
+      "title": "Record materials used at the bench",
+      "sourceHash": "5e9cefe7f1f10076fef746ba9ef93af0a756611b339d2637a263f9712373d580",
+      "proposedReviewOwner": "Inventory lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "offline-prepare",
+      "title": "Prepare for a supported offline shift",
+      "sourceHash": "fb8caff0b12deb2a4448075e3713b85a8c489c60d27de66437d624a0e5d9a7b0",
+      "proposedReviewOwner": "Mobile/offline product owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "offline-sync",
+      "title": "What does saved on this device mean?",
+      "sourceHash": "37e63c21141040dbf1c678b2c444be2aff8f622e34f2cec67c1f9873cb26d232",
+      "proposedReviewOwner": "Mobile/offline product owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "offline-files",
+      "title": "Has my photo or spectrum really been saved?",
+      "sourceHash": "9924300023fa6d77739470e86fb39b51cd16c654cc7e3f1d4717e7a489e49b32",
+      "proposedReviewOwner": "Lab operations lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "connect-kobo",
+      "title": "Does a KoBo submission mean the sample was received?",
+      "sourceHash": "9d2ca4310cdb8adb1adb732b6a30e602032120978f0779dbbcc83b1d5662e22b",
+      "proposedReviewOwner": "Project/integration lead",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "connect-library",
+      "title": "How is the spectral library related to sample results?",
+      "sourceHash": "3f4f9bfc3b5ecf2bef36887043dbb4163dc2707345f97c2fa9089fd53d7624c4",
+      "proposedReviewOwner": "Spectroscopy method specialist",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "connect-sis",
+      "title": "Has the result reached the Soil Information System?",
+      "sourceHash": "af9f4d8b183325b0f101d2afb8f5ead1164d4e132ea4cb157878a22d7197aba2",
+      "proposedReviewOwner": "Integration owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "manage-catalogue",
+      "title": "Change an analysis definition responsibly",
+      "sourceHash": "ad9523fe626a35b61632292752a81dd7dbe963f785452a819906dec3afce7771",
+      "proposedReviewOwner": "Scientific catalogue owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "manage-language",
+      "title": "How do I change the language or report a translation?",
+      "sourceHash": "79156c1f074c9d96b6ec8b9fb9d51ed89c5e9daaab26462955c883b70a9c9c68",
+      "proposedReviewOwner": "Localization owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "manage-load-error",
+      "title": "What should I do if a page fails to load?",
+      "sourceHash": "3da74be5438b6cb17d455dceef2acfd4c06c31213d70b0b4e27d004b9328060b",
+      "proposedReviewOwner": "Application support owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    },
+    {
+      "id": "manage-support",
+      "title": "Ask for help with the right information",
+      "sourceHash": "e6794f6a37dd5e7f9f50f1aa48adda564d61923998b64650f1393a98b85dce53",
+      "proposedReviewOwner": "Application support owner",
+      "behaviorVerified": false,
+      "scientificReviewApproved": false,
+      "locales": {
+        "en": {
+          "status": "EDITORIAL_DRAFT",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "es-419": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "fr": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        },
+        "pt": {
+          "status": "TRANSLATION_REQUIRED",
+          "approvedRevision": null,
+          "reviewedBy": null
+        }
+      }
+    }
+  ]
+}
