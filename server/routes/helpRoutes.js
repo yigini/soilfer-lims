@@ -57,8 +57,11 @@ router.post('/feedback', optionalAuth, helpController.recordFeedback);
 
 // ─── Administration & Content Governance Endpoints ───
 router.get('/admin/articles', verifyToken, checkPermission('HELP_EDIT_LAB'), adminHelpController.listAdminArticles);
+router.get('/admin/articles/:articleId/revisions/:revisionNumber', verifyToken, checkPermission('HELP_EDIT_LAB'), adminHelpController.getRevisionDetails);
 router.post('/admin/articles/:articleId/revisions', verifyToken, checkPermission('HELP_EDIT_GLOBAL'), adminHelpController.createDraftRevision);
 router.put('/admin/articles/:articleId/revisions/:revisionNumber/locales/:locale', verifyToken, checkPermission('HELP_EDIT_GLOBAL'), adminHelpController.updateLocaleDraft);
+router.post('/admin/articles/:articleId/request-review', verifyToken, checkPermission('HELP_EDIT_GLOBAL'), adminHelpController.requestReview);
+router.post('/admin/articles/:articleId/approve', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.approveLocale);
 router.post('/admin/articles/:articleId/publish', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.publishArticleRevision);
 router.put('/admin/articles/:articleId/lab-note', verifyToken, checkPermission('HELP_EDIT_LAB'), adminHelpController.saveLabNote);
 

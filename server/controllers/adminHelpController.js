@@ -19,6 +19,12 @@ async function listAdminArticles(req, res) {
     try {
         const user = req.user;
         const isSuperAdmin = user.role === 'SUPER_ADMIN';
+        const userPermissions = user.permissions || [];
+
+        const canEditGlobal = isSuperAdmin || userPermissions.includes('HELP_EDIT_GLOBAL');
+        const canPublishGlobal = isSuperAdmin || userPermissions.includes('HELP_PUBLISH_GLOBAL');
+        const canEditLab = isSuperAdmin || userPermissions.includes('HELP_EDIT_LAB') || !!user.labId;
+        const canPublishLab = isSuperAdmin || userPermissions.includes('HELP_PUBLISH_LAB') || !!user.labId;
 
         const articles = await prisma.helpArticle.findMany({
             where: { archivedAt: null },
@@ -33,7 +39,7 @@ async function listAdminArticles(req, res) {
                 },
                 revisions: {
                     orderBy: { revisionNumber: 'desc' },
-                    take: 3,
+                    take: 5,
                     include: { locales: true }
                 },
                 labNotes: user.labId ? {
@@ -48,12 +54,18 @@ async function listAdminArticles(req, res) {
             const currentRev = currentPub?.revision;
             const latestRev = a.revisions[0];
 
-            // Locale review matrix
+            // Locale review matrix for latest revision
             const localeStatus = {};
             ['en', 'es', 'es-419', 'fr', 'pt'].forEach(loc => {
                 const locRev = latestRev?.locales?.find(l => l.locale === loc);
                 localeStatus[loc] = locRev ? locRev.reviewStatus : 'TRANSLATION_REQUIRED';
             });
+
+            // Parse steps, success, caution
+            let steps = [];
+            try { steps = JSON.parse(latestRev?.steps || '[]'); } catch (e) { steps = []; }
+            let related = [];
+            try { related = JSON.parse(latestRev?.related || '[]'); } catch (e) { related = []; }
 
             return {
                 id: a.id,
@@ -64,8 +76,14 @@ async function listAdminArticles(req, res) {
                 visibility: a.visibility,
                 currentRevisionNumber: currentRev?.revisionNumber || null,
                 latestRevisionNumber: latestRev?.revisionNumber || null,
+                isPublished: !!currentPub,
+                publishedLocales: currentPub?.approvedLocales ? JSON.parse(currentPub.approvedLocales) : [],
                 title: latestRev?.title || a.id,
                 summary: latestRev?.summary || '',
+                steps,
+                success: latestRev?.success || '',
+                caution: latestRev?.caution || '',
+                related,
                 locales: localeStatus,
                 labNote: a.labNotes?.[0] ? {
                     id: a.labNotes[0].id,
@@ -80,10 +98,13 @@ async function listAdminArticles(req, res) {
             success: true,
             articles: items,
             userScope: {
+                username: user.username,
                 role: user.role,
                 labId: user.labId || null,
-                canEditGlobal: isSuperAdmin,
-                canEditLab: !!user.labId || isSuperAdmin
+                canEditGlobal,
+                canPublishGlobal,
+                canEditLab,
+                canPublishLab
             }
         });
     } catch (err) {
@@ -93,8 +114,75 @@ async function listAdminArticles(req, res) {
 }
 
 /**
+ * GET /api/help/admin/articles/:articleId/revisions/:revisionNumber
+ * Get full structured details of a specific revision and its locale variants
+ */
+async function getRevisionDetails(req, res) {
+    try {
+        const { articleId, revisionNumber } = req.params;
+        const rev = await prisma.helpRevision.findFirst({
+            where: {
+                articleId,
+                revisionNumber: parseInt(revisionNumber)
+            },
+            include: {
+                locales: true,
+                publications: true
+            }
+        });
+
+        if (!rev) {
+            return res.status(404).json({ error: 'Revision not found' });
+        }
+
+        let steps = [];
+        try { steps = JSON.parse(rev.steps || '[]'); } catch (e) { steps = []; }
+        let related = [];
+        try { related = JSON.parse(rev.related || '[]'); } catch (e) { related = []; }
+
+        const isPublished = rev.publications && rev.publications.length > 0;
+
+        res.json({
+            success: true,
+            revision: {
+                id: rev.id,
+                articleId: rev.articleId,
+                revisionNumber: rev.revisionNumber,
+                title: rev.title,
+                summary: rev.summary,
+                steps,
+                success: rev.success,
+                caution: rev.caution,
+                related,
+                sourceLocale: rev.sourceLocale,
+                sourceHash: rev.sourceHash,
+                changeReason: rev.changeReason,
+                authorId: rev.authorId,
+                createdAt: rev.createdAt,
+                isPublished,
+                locales: rev.locales.map(l => ({
+                    id: l.id,
+                    locale: l.locale,
+                    title: l.title,
+                    summary: l.summary,
+                    steps: JSON.parse(l.steps || '[]'),
+                    success: l.success,
+                    caution: l.caution,
+                    reviewStatus: l.reviewStatus,
+                    reviewedBy: l.reviewedBy,
+                    reviewedAt: l.reviewedAt
+                }))
+            }
+        });
+    } catch (err) {
+        console.error('[ADMIN_HELP_CONTROLLER] getRevisionDetails error:', err);
+        res.status(500).json({ error: 'Failed to fetch revision details' });
+    }
+}
+
+/**
  * POST /api/help/admin/articles/:articleId/revisions
- * Create a new draft revision (Super Admin only for global guidance)
+ * Create a new draft revision preserving all fields (Super Admin / HELP_EDIT_GLOBAL)
  */
 async function createDraftRevision(req, res) {
     try {
@@ -115,7 +203,8 @@ async function createDraftRevision(req, res) {
             include: {
                 revisions: {
                     orderBy: { revisionNumber: 'desc' },
-                    take: 1
+                    take: 1,
+                    include: { locales: true }
                 }
             }
         });
@@ -137,12 +226,24 @@ async function createDraftRevision(req, res) {
         }
 
         const newRevisionNumber = currentRevNum + 1;
-        const sanitizedTitle = sanitizeHtml(title);
-        const sanitizedSummary = sanitizeHtml(summary);
-        const sanitizedSuccess = sanitizeHtml(success);
-        const sanitizedCaution = sanitizeHtml(caution);
-        const stepsArray = Array.isArray(steps) ? steps.map(sanitizeHtml) : [];
-        const relatedArray = Array.isArray(related) ? related : [];
+        const sanitizedTitle = sanitizeHtml(title || latestRev?.title || articleId);
+        const sanitizedSummary = sanitizeHtml(summary || latestRev?.summary || '');
+        const sanitizedSuccess = sanitizeHtml(success !== undefined ? success : (latestRev?.success || ''));
+        const sanitizedCaution = sanitizeHtml(caution !== undefined ? caution : (latestRev?.caution || ''));
+
+        let stepsArray = [];
+        if (Array.isArray(steps)) {
+            stepsArray = steps.map(sanitizeHtml);
+        } else if (latestRev?.steps) {
+            try { stepsArray = JSON.parse(latestRev.steps); } catch (e) { stepsArray = []; }
+        }
+
+        let relatedArray = [];
+        if (Array.isArray(related)) {
+            relatedArray = related;
+        } else if (latestRev?.related) {
+            try { relatedArray = JSON.parse(latestRev.related); } catch (e) { relatedArray = []; }
+        }
 
         const sourceHash = sha256({
             id: articleId,
@@ -167,19 +268,22 @@ async function createDraftRevision(req, res) {
                 related: JSON.stringify(relatedArray),
                 sourceLocale: 'en',
                 sourceHash,
-                changeReason: changeReason ? sanitizeHtml(changeReason) : 'Updated draft',
-                authorId: req.user.id || req.user.username,
+                changeReason: changeReason ? sanitizeHtml(changeReason) : 'Updated draft revision',
+                authorId: req.user.username || req.user.id,
                 locales: {
-                    create: locales.map(loc => ({
-                        locale: loc,
-                        title: sanitizedTitle,
-                        summary: sanitizedSummary,
-                        steps: JSON.stringify(stepsArray),
-                        success: sanitizedSuccess,
-                        caution: sanitizedCaution,
-                        // Any source edit requires downstream translations to be re-reviewed
-                        reviewStatus: loc === 'en' ? 'IN_REVIEW' : 'TRANSLATION_REQUIRED'
-                    }))
+                    create: locales.map(loc => {
+                        const prevLocaleRev = latestRev?.locales?.find(l => l.locale === loc);
+                        return {
+                            locale: loc,
+                            title: loc === 'en' ? sanitizedTitle : (prevLocaleRev?.title || sanitizedTitle),
+                            summary: loc === 'en' ? sanitizedSummary : (prevLocaleRev?.summary || sanitizedSummary),
+                            steps: loc === 'en' ? JSON.stringify(stepsArray) : (prevLocaleRev?.steps || JSON.stringify(stepsArray)),
+                            success: loc === 'en' ? sanitizedSuccess : (prevLocaleRev?.success || sanitizedSuccess),
+                            caution: loc === 'en' ? sanitizedCaution : (prevLocaleRev?.caution || sanitizedCaution),
+                            // Source edit invalidates dependent translations
+                            reviewStatus: loc === 'en' ? 'EDITORIAL_DRAFT' : 'TRANSLATION_REQUIRED'
+                        };
+                    })
                 }
             }
         });
@@ -188,7 +292,7 @@ async function createDraftRevision(req, res) {
             success: true,
             revisionNumber: newRev.revisionNumber,
             revisionId: newRev.id,
-            message: `Draft revision ${newRev.revisionNumber} created. Awaiting review.`
+            message: `Draft revision ${newRev.revisionNumber} created. All locales require review before publication.`
         });
     } catch (err) {
         console.error('[ADMIN_HELP_CONTROLLER] createDraftRevision error:', err);
@@ -198,7 +302,8 @@ async function createDraftRevision(req, res) {
 
 /**
  * PUT /api/help/admin/articles/:articleId/revisions/:revisionNumber/locales/:locale
- * Update a translation draft for a specific locale
+ * Update a translation draft for a specific locale.
+ * Rejects edits if revision is already published (Finding 1: Immutability of published guidance).
  */
 async function updateLocaleDraft(req, res) {
     try {
@@ -209,6 +314,9 @@ async function updateLocaleDraft(req, res) {
             where: {
                 articleId,
                 revisionNumber: parseInt(revisionNumber)
+            },
+            include: {
+                publications: true
             }
         });
 
@@ -216,8 +324,18 @@ async function updateLocaleDraft(req, res) {
             return res.status(404).json({ error: 'Revision not found' });
         }
 
-        const validStatuses = ['EDITORIAL_DRAFT', 'TRANSLATION_REQUIRED', 'IN_REVIEW', 'APPROVED'];
-        const targetStatus = validStatuses.includes(reviewStatus) ? reviewStatus : 'IN_REVIEW';
+        // IMMUTABILITY CHECK (Finding 1): Published revisions are immutable!
+        const isPublished = rev.publications && rev.publications.length > 0;
+        if (isPublished) {
+            return res.status(409).json({
+                error: 'IMMUTABLE_PUBLISHED_REVISION',
+                message: `Revision ${revisionNumber} has been published and is immutable. Create a new draft revision to propose changes.`
+            });
+        }
+
+        // Draft editing endpoint does NOT accept APPROVED directly without dedicated review action (Finding 1)
+        const allowedStatuses = ['EDITORIAL_DRAFT', 'TRANSLATION_REQUIRED', 'IN_REVIEW'];
+        const targetStatus = allowedStatuses.includes(reviewStatus) ? reviewStatus : 'EDITORIAL_DRAFT';
 
         const updated = await prisma.helpLocaleRevision.upsert({
             where: {
@@ -232,9 +350,7 @@ async function updateLocaleDraft(req, res) {
                 steps: JSON.stringify(Array.isArray(steps) ? steps.map(sanitizeHtml) : []),
                 success: sanitizeHtml(success),
                 caution: sanitizeHtml(caution),
-                reviewStatus: targetStatus,
-                reviewedBy: targetStatus === 'APPROVED' ? req.user.username : null,
-                reviewedAt: targetStatus === 'APPROVED' ? new Date() : null
+                reviewStatus: targetStatus
             },
             create: {
                 revisionId: rev.id,
@@ -244,13 +360,15 @@ async function updateLocaleDraft(req, res) {
                 steps: JSON.stringify(Array.isArray(steps) ? steps.map(sanitizeHtml) : []),
                 success: sanitizeHtml(success),
                 caution: sanitizeHtml(caution),
-                reviewStatus: targetStatus,
-                reviewedBy: targetStatus === 'APPROVED' ? req.user.username : null,
-                reviewedAt: targetStatus === 'APPROVED' ? new Date() : null
+                reviewStatus: targetStatus
             }
         });
 
-        res.json({ success: true, localeRevision: updated });
+        res.json({
+            success: true,
+            localeRevision: updated,
+            message: `Locale ${locale} updated for revision ${revisionNumber}.`
+        });
     } catch (err) {
         console.error('[ADMIN_HELP_CONTROLLER] updateLocaleDraft error:', err);
         res.status(500).json({ error: 'Failed to update locale translation draft' });
@@ -258,13 +376,116 @@ async function updateLocaleDraft(req, res) {
 }
 
 /**
+ * POST /api/help/admin/articles/:articleId/request-review
+ * Submit draft for review (transitions status to IN_REVIEW)
+ */
+async function requestReview(req, res) {
+    try {
+        const { articleId } = req.params;
+        const { revisionNumber, locales = ['en'] } = req.body;
+
+        const rev = await prisma.helpRevision.findFirst({
+            where: {
+                articleId,
+                revisionNumber: revisionNumber ? parseInt(revisionNumber) : undefined
+            },
+            orderBy: { revisionNumber: 'desc' },
+            include: { locales: true }
+        });
+
+        if (!rev) {
+            return res.status(404).json({ error: 'Revision not found' });
+        }
+
+        const targetLocales = Array.isArray(locales) ? locales : [locales];
+
+        await prisma.helpLocaleRevision.updateMany({
+            where: {
+                revisionId: rev.id,
+                locale: { in: targetLocales }
+            },
+            data: {
+                reviewStatus: 'IN_REVIEW'
+            }
+        });
+
+        res.json({
+            success: true,
+            message: `Revision ${rev.revisionNumber} submitted for review for locales: ${targetLocales.join(', ')}.`
+        });
+    } catch (err) {
+        console.error('[ADMIN_HELP_CONTROLLER] requestReview error:', err);
+        res.status(500).json({ error: 'Failed to submit review request' });
+    }
+}
+
+/**
+ * POST /api/help/admin/articles/:articleId/approve
+ * Approve locale revision (requires HELP_PUBLISH_GLOBAL or SUPER_ADMIN)
+ */
+async function approveLocale(req, res) {
+    try {
+        const { articleId } = req.params;
+        const { revisionNumber, locale = 'en' } = req.body;
+
+        const user = req.user;
+        const canApprove = user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_PUBLISH_GLOBAL');
+        if (!canApprove) {
+            return res.status(403).json({ error: 'UNAUTHORIZED', message: 'You do not have permission to approve article translations.' });
+        }
+
+        const rev = await prisma.helpRevision.findFirst({
+            where: {
+                articleId,
+                revisionNumber: revisionNumber ? parseInt(revisionNumber) : undefined
+            },
+            orderBy: { revisionNumber: 'desc' },
+            include: { locales: true }
+        });
+
+        if (!rev) {
+            return res.status(404).json({ error: 'Revision not found' });
+        }
+
+        const updated = await prisma.helpLocaleRevision.update({
+            where: {
+                revisionId_locale: {
+                    revisionId: rev.id,
+                    locale
+                }
+            },
+            data: {
+                reviewStatus: 'APPROVED',
+                reviewedBy: user.username || user.id,
+                reviewedAt: new Date()
+            }
+        });
+
+        res.json({
+            success: true,
+            localeRevision: updated,
+            message: `Locale ${locale} approved by ${user.username} for revision ${rev.revisionNumber}.`
+        });
+    } catch (err) {
+        console.error('[ADMIN_HELP_CONTROLLER] approveLocale error:', err);
+        res.status(500).json({ error: 'Failed to approve locale revision' });
+    }
+}
+
+/**
  * POST /api/help/admin/articles/:articleId/publish
- * Publish a revision atomically (Super Admin only)
+ * Publish a revision atomically with strict approval gate (Finding 1 & 2)
  */
 async function publishArticleRevision(req, res) {
     try {
         const { articleId } = req.params;
-        const { revisionNumber, approvedLocales } = req.body;
+        const { revisionNumber, approvedLocales, expectedRevisionNumber } = req.body;
+
+        const user = req.user;
+        const canPublish = user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_PUBLISH_GLOBAL');
+        if (!canPublish) {
+            return res.status(403).json({ error: 'UNAUTHORIZED', message: 'You do not have permission to publish articles.' });
+        }
 
         const rev = await prisma.helpRevision.findFirst({
             where: {
@@ -278,10 +499,38 @@ async function publishArticleRevision(req, res) {
             return res.status(404).json({ error: 'Revision not found' });
         }
 
-        // Validate approved locales list
+        // Optimistic concurrency check
+        if (expectedRevisionNumber !== undefined && expectedRevisionNumber !== rev.revisionNumber) {
+            return res.status(409).json({
+                error: 'CONCURRENCY_CONFLICT',
+                message: `Publication conflict: expected revision ${expectedRevisionNumber} but target is ${rev.revisionNumber}.`
+            });
+        }
+
+        // Validate approvedLocales list
         const localesList = Array.isArray(approvedLocales) && approvedLocales.length > 0
             ? approvedLocales
             : ['en'];
+
+        // STRICT PUBLICATION GATE (Finding 1):
+        // Every single locale in approvedLocales MUST have reviewStatus === 'APPROVED'
+        for (const loc of localesList) {
+            const locRev = rev.locales.find(l => l.locale === loc);
+            if (!locRev) {
+                return res.status(422).json({
+                    error: 'MISSING_LOCALE_REVISION',
+                    message: `Cannot publish: locale '${loc}' does not exist in revision ${revisionNumber}.`
+                });
+            }
+            if (locRev.reviewStatus !== 'APPROVED') {
+                return res.status(422).json({
+                    error: 'UNREVIEWED_DRAFT_PUBLICATION_REJECTED',
+                    message: `Cannot publish: locale '${loc}' has review status '${locRev.reviewStatus}'. All published locales must be APPROVED before release.`,
+                    locale: loc,
+                    status: locRev.reviewStatus
+                });
+            }
+        }
 
         // Transactionally supersede older publications and set new current publication
         await prisma.$transaction([
@@ -302,7 +551,7 @@ async function publishArticleRevision(req, res) {
 
         res.json({
             success: true,
-            message: `Article ${articleId} revision ${revisionNumber} published successfully.`
+            message: `Article ${articleId} revision ${revisionNumber} published atomically for locales: ${localesList.join(', ')}.`
         });
     } catch (err) {
         console.error('[ADMIN_HELP_CONTROLLER] publishArticleRevision error:', err);
@@ -363,8 +612,11 @@ async function saveLabNote(req, res) {
 
 module.exports = {
     listAdminArticles,
+    getRevisionDetails,
     createDraftRevision,
     updateLocaleDraft,
+    requestReview,
+    approveLocale,
     publishArticleRevision,
     saveLabNote
 };

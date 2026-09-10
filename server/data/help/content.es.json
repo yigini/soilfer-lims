@@ -1,0 +1,921 @@
+{
+  "schemaVersion": 1,
+  "locale": "es",
+  "status": "EDITORIAL_DRAFT",
+  "publicationNote": "Starter wording for implementation and lab review in es. Verified scientific terminology. No article is published without authorized editorial approval.",
+  "articles": [
+    {
+      "id": "start-shift",
+      "category": "start",
+      "kind": "guide",
+      "title": "Comienza tu turno con el trabajo adecuado",
+      "summary": "Comprueba tu cuenta, laboratorio y asignaciones antes de registrar nada.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "login",
+        "dashboard",
+        "role",
+        "start",
+        "queue"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Confirma la cuenta y el laboratorio mostrados. Usa tu propia cuenta para que el registro identifique a la persona que realizó el trabajo.",
+        "Abre el área de tareas disponible para tu rol. Lee la prioridad y los mensajes de trabajo bloqueado antes de elegir una muestra.",
+        "Confirma la etiqueta de la muestra, el método solicitado y el contexto del instrumento. Los identificadores similares no deben tratarse como intercambiables.",
+        "Si utilizas el trabajo sin conexión compatible, comprueba el paquete de trabajo descargado y la autorización antes de perder la conexión."
+      ],
+      "success": "La muestra y el método correctos están abiertos en tu cuenta, con cualquier bloqueo claramente identificado.",
+      "caution": "Si una asignación o laboratorio parecen incorrectos, detente y pide al responsable de laboratorio que lo revise.",
+      "related": [
+        "bench-blocked",
+        "offline-prepare"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "intake-project",
+      "category": "intake",
+      "kind": "guide",
+      "title": "Recibir una muestra de proyecto",
+      "summary": "Empareja el material físico con el registro de proyecto existente antes de aceptarlo.",
+      "roles": [
+        "reception",
+        "manager"
+      ],
+      "keywords": [
+        "receive",
+        "kobo",
+        "gtm",
+        "intake",
+        "consignment"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Abre Recepción y selecciona el proyecto o remesa correspondiente. Busca o escanea el identificador de campo de la muestra.",
+        "Compara el proyecto, identificador y contexto de campo mostrados con la etiqueta física. No crees otro registro solo porque el esperado sea difícil de encontrar.",
+        "Registra el estado real de llegada, la información de cantidad requerida y las observaciones según el procedimiento de recepción de tu laboratorio.",
+        "Revisa los análisis solicitados y los detalles obligatorios. Completa la acción de recepción mostrada en el formulario y comprueba la confirmación."
+      ],
+      "success": "Se visualiza una recepción aceptada o se conserva un recibo provisional del dispositivo al usar recepción sin conexión compatible.",
+      "caution": "Un envío de campo o un registro de muestra previsto no demuestra que el material haya llegado físicamente.",
+      "related": [
+        "intake-location",
+        "intake-identity"
+      ],
+      "feature": "reception",
+      "reviewOwner": "Reception lead"
+    },
+    {
+      "id": "intake-location",
+      "category": "intake",
+      "kind": "faq",
+      "title": "¿Por qué falta la ubicación en un borrador de recepción?",
+      "summary": "Comprueba el registro de origen del proyecto y conserva sus datos de campo. No adivines una ubicación.",
+      "roles": [
+        "reception",
+        "manager"
+      ],
+      "keywords": [
+        "location",
+        "draft",
+        "gps",
+        "coordinates",
+        "no location",
+        "reopen"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Confirma que el borrador esté vinculado a la muestra de proyecto prevista, y no a una recepción independiente nueva.",
+        "Abre los datos de campo disponibles y comprueba si existen coordenadas o ubicación en el registro de origen.",
+        "Si el origen contiene la información pero el borrador reabierto no, conserva el borrador y notifica la discrepancia con el identificador de muestra por el canal de soporte autorizado.",
+        "Espera a la conciliación en lugar de sobrescribir las coordenadas con una ubicación inventada o crear una recepción duplicada."
+      ],
+      "success": "El contexto de campo de origen queda correctamente vinculado o la discrepancia se registra para corrección sin inventar datos.",
+      "caution": "La falta de un valor en pantalla y la falta de datos de origen son problemas distintos.",
+      "related": [
+        "intake-project",
+        "connect-kobo"
+      ],
+      "feature": "reception",
+      "reviewOwner": "Reception lead"
+    },
+    {
+      "id": "intake-identity",
+      "category": "intake",
+      "kind": "faq",
+      "title": "¿Qué identificador de muestra debo utilizar?",
+      "summary": "Usa el identificador de laboratorio para el trabajo analítico y conserva el identificador de campo para la trazabilidad.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "id",
+        "uuid",
+        "barcode",
+        "label",
+        "field id",
+        "sample number"
+      ],
+      "minutes": 1,
+      "steps": [
+        "Lee el identificador de muestra de laboratorio mostrado en la aplicación y compáralo con la etiqueta del recipiente.",
+        "Usa el identificador de campo asociado para confirmar el registro de recolección y el proyecto. Un UUID es una referencia interna, no un sustituto de una etiqueta dudosa.",
+        "Si usas una recepción provisional sin conexión, sigue la política de etiquetado temporal mostrada hasta que el servidor asigne o confirme el identificador oficial."
+      ],
+      "success": "El recipiente, la tarea y el registro de la muestra hacen referencia al mismo espécimen.",
+      "caution": "No reetiquetes una muestra ni fusiones registros sin el procedimiento autorizado de corrección de identidad.",
+      "related": [
+        "intake-project",
+        "offline-sync"
+      ],
+      "feature": "core",
+      "reviewOwner": "Reception lead"
+    },
+    {
+      "id": "bench-blocked",
+      "category": "bench",
+      "kind": "faq",
+      "title": "¿Por qué no puedo iniciar este análisis?",
+      "summary": "Lee el bloqueo actual. La recepción, preparación, asignación o los equipos pueden requerir atención.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "blocked",
+        "start",
+        "ready",
+        "prerequisite",
+        "pending",
+        "cannot"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre los detalles de disponibilidad del elemento de trabajo y lee el motivo mostrado para esta muestra y método.",
+        "Comprueba si la recepción física está aceptada, los pasos operativos requeridos están completos y el trabajo está asignado a ti.",
+        "Si se requiere un equipo, confirma que haya seleccionado un equipo apto y que su estado esté al día.",
+        "Completa solo las acciones autorizadas para ti. Pide al responsable o al equipo de recepción que resuelvan los requisitos de su competencia."
+      ],
+      "success": "El elemento de trabajo pasa a estar listo según las reglas de flujo actuales, o el responsable dispone del bloqueo exacto para resolverlo.",
+      "caution": "No introduzcas un valor sustitutivo, no alteres un estado no relacionado ni reenvíes repetidamente para eludir un bloqueo.",
+      "related": [
+        "bench-preparation",
+        "assets-instrument",
+        "review-returned"
+      ],
+      "feature": "workbench",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "bench-drying",
+      "category": "bench",
+      "kind": "guide",
+      "title": "Registrar el secado de la muestra",
+      "summary": "Registra el paso físico utilizando la lista de verificación operativa asignada y las evidencias requeridas.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "drying",
+        "dry",
+        "temperature",
+        "checklist",
+        "numerical"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre la tarea de secado para la muestra correcta o lote permitido en el banco de trabajo.",
+        "Lee el procedimiento de secado asignado. Registra las condiciones, tiempos y evidencias requeridos por dicho procedimiento.",
+        "Confirma cada elemento de la lista solo después de realizar y comprobar el trabajo físico.",
+        "Utiliza la acción de confirmación disponible e inspecciona el recibo resultante o el estado de sincronización pendiente."
+      ],
+      "success": "La confirmación de secado y su evidencia quedan visibles con el estado local o del servidor correcto.",
+      "caution": "Un valor numérico genérico no representa la finalización de una lista de verificación de secado. Usa el PNT aprobado para temperaturas y puntos finales.",
+      "related": [
+        "bench-preparation",
+        "bench-save-submit"
+      ],
+      "feature": "workbench",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "bench-preparation",
+      "category": "bench",
+      "kind": "faq",
+      "title": "¿Por qué la preparación sigue pendiente tras confirmarla?",
+      "summary": "Un guardado local, una confirmación operativa y una verificación obligatoria son eventos independientes.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "prep",
+        "preparation",
+        "submit",
+        "incomplete",
+        "drying",
+        "verification"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Lee el último recibo de confirmación o sincronización. Comprueba si el trabajo está guardado en el dispositivo o aceptado por el servidor.",
+        "Comprueba en el procedimiento de preparación asignado si se requiere evidencia o verificación independiente.",
+        "Si el trabajo está esperando la verificación de otra persona autorizada, solicita a esa persona que revise el registro existente.",
+        "Si las páginas discrepan tras un recibo confirmado del servidor, notifica la contradicción. No repitas el trabajo físico ni crees otra confirmación para cambiar una insignia."
+      ],
+      "success": "Sabes con certeza si se requiere sincronización, verificación o una corrección del software.",
+      "caution": "No des por sentado que la confirmación por sí sola cumple las condiciones de liberación de todos los métodos.",
+      "related": [
+        "bench-drying",
+        "bench-save-submit",
+        "offline-sync"
+      ],
+      "feature": "workbench",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "bench-run",
+      "category": "bench",
+      "kind": "guide",
+      "title": "Registrar una serie de muestras para un método",
+      "summary": "Mantén unidos el orden de las muestras, el contexto del método y los controles de calidad al procesar un lote.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "40",
+        "batch",
+        "ph",
+        "worksheet",
+        "run",
+        "paste",
+        "results"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Elige el método previsto y las muestras asignadas aptas. Comprueba el orden de la serie, las unidades, la revisión del método y el equipo.",
+        "Mantén los controles de calidad y réplicas diferenciables de las muestras rutinarias de acuerdo con el método aprobado.",
+        "Para cada muestra, confirma la identidad, introduce la observación en el campo correspondiente y verifica el estado de guardado antes de continuar.",
+        "Revisa las entradas completadas, los mensajes de validación pendientes y la evidencia de CC. Envía solo los registros listos utilizando la revisión de envío."
+      ],
+      "success": "Cada observación permanece vinculada a su muestra y método, con un resultado de envío claro para cada elemento incluido.",
+      "caution": "Al pegar en bloque, revisa el emparejamiento de muestras y el mapeo de columnas/unidades antes de aceptar la vista previa. Nunca confíes solo en la posición de fila.",
+      "related": [
+        "bench-save-submit",
+        "bench-texture",
+        "bench-blocked"
+      ],
+      "feature": "workbench",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "bench-save-submit",
+      "category": "bench",
+      "kind": "faq",
+      "title": "¿Se guardó o se envió mi resultado?",
+      "summary": "Guardar conserva una entrada. Enviar remite el trabajo listo para revisión. La verificación y la emisión son decisiones posteriores.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "draft",
+        "saved",
+        "submitted",
+        "accepted",
+        "verified",
+        "released",
+        "complete"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Lee el estado situado junto al elemento de trabajo exacto, no solo una notificación general de la página.",
+        "Si indica guardado en este dispositivo, es posible que el servidor aún no tenga la entrada. Comprueba la sincronización antes de que otro compañero espere verla.",
+        "Si es un borrador, revisa los valores y evidencias requeridos y utiliza la acción de envío autorizada cuando esté listo.",
+        "Comprueba el recibo de envío. El trabajo enviado aún puede requerir verificación e inclusión en un informe emitido autorizado."
+      ],
+      "success": "Puedes distinguir entre datos capturados, trabajo enviado y un resultado emitido.",
+      "caution": "Un indicador de guardado verde no es prueba de aprobación de supervisión ni de emisión de informe.",
+      "related": [
+        "offline-sync",
+        "review-results",
+        "review-report"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "bench-texture",
+      "category": "bench",
+      "kind": "faq",
+      "title": "¿Por qué se introducen juntos arena, limo y arcilla?",
+      "summary": "Forman un panel único de resultados granulométricos y deben verificarse conjuntamente antes del envío.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "texture",
+        "sand",
+        "silt",
+        "clay",
+        "100",
+        "particle size",
+        "class"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Selecciona el método de textura asignado e introduce cada fracción en su campo etiquetado dentro del mismo panel.",
+        "Comprueba la base, las unidades y la suma total frente a la tolerancia configurada del método. Investiga cualquier discrepancia en lugar de forzar el total alterando una fracción.",
+        "Revisa la clase calculada por las reglas de clasificación configuradas cuando dicha función esté habilitada.",
+        "Envía el panel con sus evidencias obligatorias. Los informes deben conservar los mismos valores validados y la misma clasificación."
+      ],
+      "success": "Todas las fracciones pertenecen a un único resultado verificado, con una clasificación trazable cuando corresponda.",
+      "caution": "No normalices fracciones de forma silenciosa ni selecciones otro sistema de clasificación textural para forzar una clase deseada.",
+      "related": [
+        "bench-run",
+        "review-report"
+      ],
+      "feature": "texture_panel",
+      "reviewOwner": "Particle-size method specialist"
+    },
+    {
+      "id": "bench-spectra",
+      "category": "bench",
+      "kind": "faq",
+      "title": "¿Qué debo cargar para el análisis MIR o NIR?",
+      "summary": "Utiliza la exportación del espectro original y el perfil de importación compatible con tu equipo y método.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "mir",
+        "nir",
+        "reflectance",
+        "spectrum",
+        "spectra",
+        "opus",
+        "csv",
+        "upload"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Exporta el espectro mediante el procedimiento aprobado de equipo/software del laboratorio y conserva el archivo original.",
+        "Elige un perfil de importación compatible mostrado por la aplicación. Respeta los ejes, unidades y metadatos requeridos; una extensión de archivo no garantiza compatibilidad.",
+        "Empareja el espectro con la muestra, adquisición y réplica correctas; a continuación inspecciona los mensajes del analizador y de control de calidad.",
+        "Verifica el estado de carga y procesamiento de la evidencia antes de enviar el trabajo analítico."
+      ],
+      "success": "El espectro original, los metadatos y el vínculo con la muestra se conservan con un resultado de CC y procesamiento explícito.",
+      "caution": "No sustituyas un espectro por un único número de reflectancia. Una predicción espectral no es automáticamente una medición de laboratorio de referencia.",
+      "related": [
+        "connect-library",
+        "assets-instrument",
+        "offline-files"
+      ],
+      "feature": "spectral_intake",
+      "reviewOwner": "Spectroscopy method specialist"
+    },
+    {
+      "id": "review-results",
+      "category": "review",
+      "kind": "guide",
+      "title": "Revisar el trabajo enviado antes de la aprobación",
+      "summary": "Comprueba la versión enviada, los requisitos previos, el CC y las evidencias antes de tomar una decisión autorizada.",
+      "roles": [
+        "manager",
+        "quality"
+      ],
+      "keywords": [
+        "approval",
+        "manager",
+        "verify",
+        "qc",
+        "submitted",
+        "review"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Abre la cola de revisión y confirma que el trabajo haya sido enviado efectivamente y esté dentro de tu ámbito de revisión.",
+        "Inspecciona el método, los valores, las unidades, los requisitos previos, los equipos requeridos y las evidencias de control de calidad.",
+        "Devuelve el elemento con un motivo explícito cuando se requiera corrección. Usa la vía de enmienda aprobada para registros ya emitidos.",
+        "Antes de aprobar, confirma la versión vigente y los requisitos. Comprueba el recibo de decisión y el estado resultante."
+      ],
+      "success": "La decisión queda vinculada a la versión revisada y es visible para la siguiente persona responsable.",
+      "caution": "Una muestra esperada o recién recibida no está lista para aprobación científica solo porque aparezca un botón.",
+      "related": [
+        "review-returned",
+        "review-amend",
+        "review-report"
+      ],
+      "feature": "review",
+      "reviewOwner": "Quality lead"
+    },
+    {
+      "id": "review-returned",
+      "category": "review",
+      "kind": "faq",
+      "title": "¿Qué debo hacer cuando se devuelve un trabajo?",
+      "summary": "Lee el motivo del revisor y corrige la incidencia identificada en el elemento de trabajo autorizado.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "returned",
+        "rejected",
+        "correction",
+        "resubmit",
+        "review"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre el elemento devuelto y lee las observaciones de revisión y el historial de versiones.",
+        "Confirma que la tarea haya sido reabierta o reasignada adecuadamente antes de editarla.",
+        "Corrige el dato o la evidencia requerida, conservando la observación original y cualquier aclaración exigida.",
+        "Revisa y reenvía a través del banco de trabajo, y comprueba el nuevo recibo generado."
+      ],
+      "success": "La corrección es trazable y el revisor recibe el trabajo modificado previsto.",
+      "caution": "No repitas una medición física únicamente porque el estado del software resulte confuso; sigue el método y la decisión de revisión.",
+      "related": [
+        "bench-save-submit",
+        "review-amend"
+      ],
+      "feature": "review",
+      "reviewOwner": "Quality lead"
+    },
+    {
+      "id": "review-amend",
+      "category": "review",
+      "kind": "faq",
+      "title": "¿Puedo modificar un resultado aprobado?",
+      "summary": "Utiliza el proceso de corrección o enmienda autorizado para que el resultado original y la decisión sigan siendo trazables.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "edit",
+        "approved",
+        "amend",
+        "correction",
+        "locked",
+        "released"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Identifica el resultado exacto y la versión de informe que necesita corrección y registra el motivo.",
+        "Solicita al revisor o responsable autorizado que inicie la vía de corrección permitida si no puedes hacerlo tú mismo.",
+        "Realiza cambios únicamente en la revisión autorizada resultante y conserva las evidencias de respaldo.",
+        "Completa la revisión requerida y, cuando sea necesario, emite una nueva versión del informe bajo el procedimiento del laboratorio."
+      ],
+      "success": "La corrección se vincula a la versión anterior con una justificación y la revisión correspondiente.",
+      "caution": "No sobrescribas ni borres el registro aprobado para ocultar un error.",
+      "related": [
+        "review-results",
+        "review-report"
+      ],
+      "feature": "review",
+      "reviewOwner": "Quality lead"
+    },
+    {
+      "id": "review-report",
+      "category": "review",
+      "kind": "guide",
+      "title": "Buscar y compartir el informe correcto",
+      "summary": "Comprueba el estado de emisión del informe, su versión y el destinatario previsto antes de compartirlo.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "report",
+        "pdf",
+        "certificate",
+        "download",
+        "print",
+        "release"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre el área de informes disponible para tu rol y localiza la muestra o proyecto correctos.",
+        "Comprueba si el documento es un borrador, un informe emitido o una versión superada.",
+        "Inspecciona identificadores, métodos, unidades, calificadores y paneles de resultados antes de descargar o imprimir.",
+        "Comparte a través del procedimiento autorizado del laboratorio. Usa un informe sustitutivo cuando una enmienda haya superado una emisión previa."
+      ],
+      "success": "El destinatario previsto recibe la versión autorizada correcta.",
+      "caution": "Un PDF descargado puede permanecer en un dispositivo tras la emisión de una versión más reciente. Comprueba la versión antes de reutilizarlo.",
+      "related": [
+        "review-amend",
+        "connect-sis"
+      ],
+      "feature": "reports",
+      "reviewOwner": "Quality lead"
+    },
+    {
+      "id": "assets-instrument",
+      "category": "assets",
+      "kind": "faq",
+      "title": "¿Por qué no puedo seleccionar este equipo?",
+      "summary": "El equipo debe ser apto para el método y cumplir las condiciones requeridas de mantenimiento y calibración.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "equipment",
+        "instrument",
+        "calibration",
+        "overdue",
+        "unavailable"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Comprueba los requisitos de instrumental del método y la ficha del equipo.",
+        "Lee el mensaje específico de idoneidad, mantenimiento o calibración. Confirma que el registro esté al día si trabajas con datos descargados.",
+        "Elige otro equipo apto si el procedimiento lo permite, o solicita al responsable correspondiente que resuelva la incidencia del equipo."
+      ],
+      "success": "El equipo seleccionado es apto, o la tarea permanece visiblemente bloqueada mientras se resuelve la incidencia.",
+      "caution": "No modifiques fechas de calibración ni estados de mantenimiento simplemente para desbloquear una tarea.",
+      "related": [
+        "bench-blocked",
+        "assets-stock"
+      ],
+      "feature": "equipment",
+      "reviewOwner": "Equipment lead"
+    },
+    {
+      "id": "assets-stock",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Registrar materiales utilizados en la analítica",
+      "summary": "Mantén el lote del reactivo o consumible vinculado al trabajo cuando lo exija el método.",
+      "roles": [
+        "technician",
+        "manager"
+      ],
+      "keywords": [
+        "inventory",
+        "stock",
+        "lot",
+        "reagent",
+        "consumption",
+        "expiry"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Confirma el material y lote requeridos para el método, incluida la caducidad y cualquier retención.",
+        "Registra la cantidad y unidad utilizando el control de transacción de stock o el registro de trabajo autorizado.",
+        "Comprueba la transacción de stock resultante o el recibo sin conexión pendiente. Notifica discrepancias de saldo en lugar de alterar registros no relacionados."
+      ],
+      "success": "El consumo queda trazado al material y lote correctos.",
+      "caution": "Un saldo en caché puede ser anterior a la transacción efectuada por otro analista.",
+      "related": [
+        "assets-instrument",
+        "offline-sync"
+      ],
+      "feature": "inventory",
+      "reviewOwner": "Inventory lead"
+    },
+    {
+      "id": "offline-prepare",
+      "category": "offline",
+      "kind": "guide",
+      "title": "Preparar un turno de trabajo sin conexión asistido",
+      "summary": "Descarga el trabajo y las instrucciones que necesitará tu dispositivo autorizado antes de perder la conexión.",
+      "roles": [
+        "technician",
+        "reception",
+        "manager"
+      ],
+      "keywords": [
+        "offline",
+        "download",
+        "pack",
+        "mobile",
+        "phone",
+        "shift"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Confirma que la captura sin conexión esté habilitada y admitida para este dispositivo y tarea en tu versión instalada.",
+        "Estando conectado, descarga el paquete de trabajo acotado y comprueba su integridad, vigencia, almacenamiento y autorización sin conexión.",
+        "Abre los métodos y la ayuda requeridos mientras preparas el paquete. Verifica que las evidencias e instrucciones clave estén realmente disponibles sin conexión.",
+        "Al finalizar el turno, reconéctate e inspecciona los elementos aceptados, pendientes y en conflicto antes de entregar el trabajo."
+      ],
+      "success": "La tarea admitida y sus instrucciones necesarias están disponibles para el usuario autorizado en el dispositivo.",
+      "caution": "Un icono instalado o una página en caché no bastan por sí solos para garantizar una captura de resultados fiable sin conexión.",
+      "related": [
+        "offline-sync",
+        "offline-files"
+      ],
+      "feature": "offline_capture_verified",
+      "reviewOwner": "Mobile/offline product owner"
+    },
+    {
+      "id": "offline-sync",
+      "category": "offline",
+      "kind": "faq",
+      "title": "¿Qué significa guardado en este dispositivo?",
+      "summary": "El dispositivo retiene la entrada, pero es posible que el servidor aún no la haya aceptado.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "offline",
+        "sync",
+        "saved",
+        "device",
+        "waiting",
+        "upload",
+        "conflict"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre el Centro de Sincronización y comprueba el elemento exacto: en espera, enviando, aceptado o requiere atención.",
+        "Vuelve a conectarte e inicia sesión según se requiera; a continuación permite la sincronización o usa la acción de reintento disponible.",
+        "Si se produce un conflicto, compara la propuesta local con el registro del servidor y sigue la vía de resolución autorizada.",
+        "Antes de borrar el almacenamiento del navegador, reinstalar o retirar el dispositivo, resuelve el trabajo pendiente según el procedimiento de recuperación del laboratorio."
+      ],
+      "success": "Cada entrada cuenta con un resultado confirmado del servidor o una acción visible y recuperable.",
+      "caution": "No borres el almacenamiento del navegador para solucionar un problema de sincronización pendiente.",
+      "related": [
+        "bench-save-submit",
+        "offline-prepare",
+        "offline-files"
+      ],
+      "feature": "offline_capture_verified",
+      "reviewOwner": "Mobile/offline product owner"
+    },
+    {
+      "id": "offline-files",
+      "category": "offline",
+      "kind": "faq",
+      "title": "¿Se ha guardado realmente mi fotografía o espectro?",
+      "summary": "Comprueba que el archivo original fue capturado y que la carga o procesamiento requeridos han finalizado.",
+      "roles": [
+        "technician",
+        "reception",
+        "manager"
+      ],
+      "keywords": [
+        "file",
+        "attachment",
+        "photo",
+        "spectra",
+        "upload",
+        "interrupted"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Comprueba el estado del adjunto para la muestra y el elemento de trabajo exactos. Un nombre de archivo o miniatura no demuestra que los bytes originales se hayan guardado.",
+        "En capturas sin conexión compatibles, confirma el recibo de guardado en dispositivo antes de retirar el acceso al archivo de origen.",
+        "Tras reconectarte, inspecciona los resultados de carga y procesamiento. Conserva la exportación original y usa los controles de reintento si una transferencia falla."
+      ],
+      "success": "La evidencia requerida está vinculada y su estado de almacenamiento o procesamiento es explícito.",
+      "caution": "No vuelvas a enviar un archivo modificado bajo la identidad de un original anterior.",
+      "related": [
+        "bench-spectra",
+        "offline-sync"
+      ],
+      "feature": "attachments",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "connect-kobo",
+      "category": "connect",
+      "kind": "faq",
+      "title": "¿Un envío de KoBo significa que la muestra ha sido recibida?",
+      "summary": "No. La información de campo y la recepción física en el laboratorio describen acontecimientos distintos.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "kobo",
+        "field",
+        "received",
+        "expected",
+        "project",
+        "sync"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Comprueba el registro de campo del proyecto y el estado de la integración para conocer qué datos han llegado.",
+        "Empareja el espécimen físico en Recepción cuando llegue físicamente al laboratorio.",
+        "Si faltan registros previstos o aparecen duplicados, solicita al responsable de la integración que inspeccione la conexión antes de volver a crearlos."
+      ],
+      "success": "La trazabilidad de campo se mantiene y la recepción física se registra por separado.",
+      "caution": "No asumas un intervalo fijo de sincronización automática a menos que la configuración de tu despliegue lo confirme.",
+      "related": [
+        "intake-project",
+        "intake-location"
+      ],
+      "feature": "kobo",
+      "reviewOwner": "Project/integration lead"
+    },
+    {
+      "id": "connect-library",
+      "category": "connect",
+      "kind": "faq",
+      "title": "¿Cómo se relaciona la biblioteca espectral con los resultados?",
+      "summary": "La biblioteca almacena espectros vinculados y su contexto; un archivo, una predicción y un informe aprobado son registros distintos.",
+      "roles": [
+        "technician",
+        "manager",
+        "project"
+      ],
+      "keywords": [
+        "spectral library",
+        "model",
+        "prediction",
+        "reference",
+        "mir",
+        "nir"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Abre el vínculo de la muestra del espectro y los metadatos de adquisición para determinar su procedencia.",
+        "Comprueba el estado de procesamiento/CC y cualquier versión de modelo asociada a una predicción.",
+        "Utiliza las vistas de resultados de muestra e informes para determinar qué resultados revisados fueron efectivamente emitidos."
+      ],
+      "success": "Puedes rastrear espectro → procesamiento/modelo → resultado revisado sin tratarlos como el mismo estado.",
+      "caution": "La inclusión en la biblioteca no certifica por sí sola la predicción de un modelo ni autoriza la emisión de un informe.",
+      "related": [
+        "bench-spectra",
+        "review-report"
+      ],
+      "feature": "spectral_intake",
+      "reviewOwner": "Spectroscopy method specialist"
+    },
+    {
+      "id": "connect-sis",
+      "category": "connect",
+      "kind": "faq",
+      "title": "¿Ha llegado el resultado al Sistema de Información de Suelos (SIS)?",
+      "summary": "Comprueba el registro de entrega autorizado. Un informe emitido y una transferencia externa correcta son resultados independientes.",
+      "roles": [
+        "manager",
+        "project",
+        "admin"
+      ],
+      "keywords": [
+        "sis",
+        "glosis",
+        "export",
+        "connection",
+        "delivery",
+        "integration"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Identifica la versión de resultado/informe emitida destinada al sistema receptor.",
+        "Inspecciona el registro de integración o exportación disponible para comprobar el estado de entrega y posibles fallos de validación.",
+        "Solicita al responsable de integración configurado que resuelva las entregas rechazadas o dudosas. Conserva la identidad de entrega original al reintentar."
+      ],
+      "success": "Existe un resultado de entrega confirmado para la versión correcta o una acción de recuperación asignada.",
+      "caution": "No expongas credenciales de API en solicitudes de ayuda ni asumas que abrir una pantalla de exportación transmitió datos.",
+      "related": [
+        "review-report",
+        "manage-support"
+      ],
+      "feature": "sis",
+      "reviewOwner": "Integration owner"
+    },
+    {
+      "id": "manage-catalogue",
+      "category": "manage",
+      "kind": "guide",
+      "title": "Modificar la definición de un análisis de forma responsable",
+      "summary": "Una definición del catálogo está conectada a la selección, hojas de trabajo, validación e informes.",
+      "roles": [
+        "manager",
+        "admin"
+      ],
+      "keywords": [
+        "catalogue",
+        "analysis",
+        "method",
+        "parameter",
+        "configuration",
+        "unit"
+      ],
+      "minutes": 3,
+      "steps": [
+        "Determina si la solicitud modifica la redacción visible, la asignación de un método o una definición científica.",
+        "Inspecciona la selección afectada, el esquema de la tarea, los requisitos previos, las unidades, los paneles y los mapeos de informe antes de editar.",
+        "Utiliza el proceso de revisión/revisión autorizado y prueba el flujo de laboratorio afectado con registros representativos.",
+        "Preserva el significado histórico de los resultados y los informes emitidos al publicar una nueva definición."
+      ],
+      "success": "La definición prevista es coherente en selección, trabajo e informes sin reinterpretar resultados previos.",
+      "caution": "Cambiar una etiqueta traducida no debe alterar un código científico estable ni su cálculo.",
+      "related": [
+        "manage-language",
+        "bench-texture"
+      ],
+      "feature": "catalogue",
+      "reviewOwner": "Scientific catalogue owner"
+    },
+    {
+      "id": "manage-language",
+      "category": "manage",
+      "kind": "faq",
+      "title": "¿Cómo cambio el idioma o notifico un error de traducción?",
+      "summary": "Utiliza el control de idioma de la interfaz. Comunica la terminología científica en su contexto para revisarla con precisión.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "language",
+        "translation",
+        "english",
+        "spanish",
+        "french",
+        "portuguese",
+        "terminology"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Elige tu idioma mediante el control de idioma de la interfaz o la preferencia de tu perfil.",
+        "Para términos incorrectos, anota la página, el parámetro/método y la frase confusa, sin compartir datos innecesarios de muestras.",
+        "Solicita a un revisor de idioma autorizado o al responsable de laboratorio que revise el grupo terminológico correspondiente. Los términos científicos requieren revisión en el contexto de su método."
+      ],
+      "success": "Se aplica el idioma elegido o la corrección de redacción precisa llega al revisor correspondiente.",
+      "caution": "Una corrección de traducción no debe modificar valores almacenados, unidades ni identificadores científicos.",
+      "related": [
+        "manage-catalogue",
+        "manage-support"
+      ],
+      "feature": "core",
+      "reviewOwner": "Localization owner"
+    },
+    {
+      "id": "manage-load-error",
+      "category": "manage",
+      "kind": "faq",
+      "title": "¿Qué debo hacer si una página no carga?",
+      "summary": "Conserva primero el trabajo no guardado. Un módulo de página con error puede requerir un reintento seguro o una actualización.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "error",
+        "refresh",
+        "loading",
+        "module",
+        "blank",
+        "something went wrong"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Comprueba la conectividad y cualquier aviso de actualización de la aplicación. Anota la página y la hora aproximada del error.",
+        "Antes de actualizar o salir, comprueba si hay trabajo introducido no guardado o pendiente de sincronización.",
+        "Utiliza el control de reintento/actualización seguro de la aplicación cuando esté disponible. Si no hay riesgo de perder datos, una actualización normal puede cargar la versión actual.",
+        "Si la incidencia se repite, notifícala al contacto de soporte configurado con la referencia del error mostrado y la versión del sistema."
+      ],
+      "success": "La página carga sin perder trabajo o el equipo de soporte dispone de información no confidencial suficiente para investigar.",
+      "caution": "No borres el almacenamiento del navegador ni recargues repetidamente mientras haya trabajo analítico no sincronizado en riesgo.",
+      "related": [
+        "offline-sync",
+        "manage-support"
+      ],
+      "feature": "core",
+      "reviewOwner": "Application support owner"
+    },
+    {
+      "id": "manage-support",
+      "category": "manage",
+      "kind": "guide",
+      "title": "Solicitar ayuda con la información adecuada",
+      "summary": "Envía una descripción clara a través del canal de soporte configurado para tu laboratorio.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "support",
+        "help",
+        "contact",
+        "manager",
+        "issue",
+        "bug"
+      ],
+      "minutes": 2,
+      "steps": [
+        "Indica qué estabas intentando hacer, qué ocurrió y qué esperabas que sucediera.",
+        "Incluye la página, la hora aproximada y la versión de la aplicación o referencia de error correspondiente, si se muestra.",
+        "Utiliza identificadores de muestra o tarea solo cuando sea necesario y esté permitido. Revisa cualquier captura de pantalla para evitar datos personales o credenciales.",
+        "Elige al responsable de laboratorio, especialista de método o soporte de aplicación configurado para la incidencia. Envía solo tras revisar el mensaje y los archivos adjuntos."
+      ],
+      "success": "La persona adecuada recibe una solicitud de soporte clara y adecuadamente delimitada.",
+      "caution": "Nunca incluyas contraseñas, tokens de acceso ni exportaciones completas de bases de datos.",
+      "related": [
+        "manage-load-error",
+        "bench-blocked"
+      ],
+      "feature": "core",
+      "reviewOwner": "Application support owner"
+    }
+  ]
+}

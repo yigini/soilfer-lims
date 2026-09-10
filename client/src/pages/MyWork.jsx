@@ -1,6 +1,7 @@
 import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useHelp } from '../context/HelpContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -29,6 +30,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
 const MyWork = () => {
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
+    const { registerBlockers, clearBlockers } = useHelp();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('active');
     const [work, setWork] = useState([]);
@@ -39,6 +41,18 @@ const MyWork = () => {
     const [lastUpdated, setLastUpdated] = useState(null);
     const [isLive, setIsLive] = useState(false);
     const [isStale, setIsStale] = useState(false);
+
+    // Sync blockers when viewing Redo / Reanalysis tab
+    useEffect(() => {
+        if (activeTab === 'redo') {
+            registerBlockers(['SAMPLE_STATUS_INELIGIBLE']);
+        } else {
+            clearBlockers();
+        }
+        return () => {
+            clearBlockers();
+        };
+    }, [activeTab, registerBlockers, clearBlockers]);
 
     const fetchMyWork = useCallback(async () => {
         try {

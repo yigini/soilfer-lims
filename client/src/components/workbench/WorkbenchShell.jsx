@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useHelp } from '../../context/HelpContext';
 import {
     Activity, Save, CheckCircle2, AlertTriangle, Clock, Send,
     RefreshCw, Layers, ShieldCheck, Check
@@ -32,7 +33,15 @@ export default function WorkbenchShell({
 }) {
     const { user } = useAuth();
     const { t } = useLanguage();
+    const { clearBlockers } = useHelp();
     const [toast, setToast] = useState(null);
+
+    // Clean up blockers when navigating away from Workbench
+    useEffect(() => {
+        return () => {
+            clearBlockers();
+        };
+    }, [clearBlockers]);
     const addToast = useCallback((message, type = 'info') => {
         setToast({ message, type });
         setTimeout(() => setToast(null), 4000);

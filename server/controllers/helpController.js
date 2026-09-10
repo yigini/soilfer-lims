@@ -6,7 +6,9 @@ const prisma = require('../prisma');
  */
 async function getTopics(req, res) {
     try {
-        const topics = await helpContentService.getTopics(req.user);
+        const locale = req.query.locale || req.locale || 'en';
+        const preview = req.query.preview === 'true';
+        const topics = await helpContentService.getTopics(req.user, locale, preview);
         res.json({ success: true, topics });
     } catch (err) {
         console.error('[HELP_CONTROLLER] getTopics error:', err);
@@ -19,12 +21,13 @@ async function getTopics(req, res) {
  */
 async function getArticles(req, res) {
     try {
-        const { category, role, locale = req.locale || 'en' } = req.query;
+        const { category, role, locale = req.locale || 'en', preview } = req.query;
         const articles = await helpContentService.getArticles({
             category,
             role,
             user: req.user,
-            locale
+            locale,
+            preview: preview === 'true'
         });
         res.json({ success: true, articles });
     } catch (err) {
@@ -40,10 +43,11 @@ async function getArticleById(req, res) {
     try {
         const { articleId } = req.params;
         const locale = req.query.locale || req.locale || 'en';
-        const article = await helpContentService.getArticleById(articleId, req.user, locale);
+        const preview = req.query.preview === 'true';
+        const article = await helpContentService.getArticleById(articleId, req.user, locale, preview);
 
         if (!article) {
-            return res.status(404).json({ error: 'Help article not found or not accessible' });
+            return res.status(404).json({ error: 'Help article not found or not published' });
         }
 
         res.json({ success: true, article });
@@ -58,7 +62,7 @@ async function getArticleById(req, res) {
  */
 async function searchHelp(req, res) {
     try {
-        const { q, topic, role, limit, offset, locale = req.locale || 'en' } = req.query;
+        const { q, topic, role, limit, offset, locale = req.locale || 'en', preview } = req.query;
         const result = await helpContentService.searchHelp({
             query: q || '',
             topic: topic || null,
@@ -66,7 +70,8 @@ async function searchHelp(req, res) {
             user: req.user,
             locale,
             limit: Math.min(parseInt(limit) || 20, 50),
-            offset: Math.max(parseInt(offset) || 0, 0)
+            offset: Math.max(parseInt(offset) || 0, 0),
+            preview: preview === 'true'
         });
 
         res.json({ success: true, ...result });
@@ -81,7 +86,7 @@ async function searchHelp(req, res) {
  */
 async function getContextHelp(req, res) {
     try {
-        const { route, blockers, locale = req.locale || 'en' } = req.query;
+        const { route, blockers, locale = req.locale || 'en', preview } = req.query;
         let blockerCodes = [];
         if (blockers) {
             try {
@@ -95,7 +100,8 @@ async function getContextHelp(req, res) {
             route: route || '/',
             blockerCodes,
             user: req.user,
-            locale
+            locale,
+            preview: preview === 'true'
         });
 
         res.json({ success: true, ...context });
@@ -152,6 +158,8 @@ async function getOfflinePack(req, res) {
 
 /**
  * GET /api/help/support-config
+ * Honest support contact endpoint (Finding 8).
+ * If not configured for the lab, returns configured: false without inventing fake IN_APP destinations.
  */
 async function getSupportConfig(req, res) {
     try {
@@ -164,13 +172,24 @@ async function getSupportConfig(req, res) {
             });
         }
 
+        if (!config) {
+            return res.json({
+                success: true,
+                isConfigured: false,
+                support: null,
+                message: 'Support contact is not configured for this laboratory.'
+            });
+        }
+
         res.json({
             success: true,
-            support: config || {
-                labId: labId || null,
-                supportName: 'Laboratory Operations & System Support',
-                contactMethod: 'IN_APP',
-                instructions: 'Use the in-app support preview or contact your assigned laboratory manager.'
+            isConfigured: true,
+            support: {
+                labId: config.labId,
+                supportName: config.supportName,
+                contactMethod: config.contactMethod,
+                contactValue: config.contactValue,
+                instructions: config.instructions
             }
         });
     } catch (err) {

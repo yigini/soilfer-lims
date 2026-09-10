@@ -1,0 +1,12 @@
+{
+  "method": ["method", "methods", "metodo", "metodos", "methode", "methodes"],
+  "drying": ["dry", "secado", "sechage", "secagem", "estufa", "four", "temperatura", "temperature"],
+  "preparation": ["prep", "sieving", "tamizado", "tamisage", "peneiramento", "molienda", "broyage", "moagem"],
+  "texture": ["particle size", "sand", "silt", "clay", "arena", "limo", "arcilla", "sable", "limon", "argile", "areia", "silte", "argila", "usda"],
+  "spectra": ["mir", "nir", "spectrum", "espectro", "spectre", "reflectance", "reflectancia", "opus", "ftir"],
+  "kobo": ["field", "campo", "terrain", "survey", "gtm"],
+  "sis": ["glosis", "export", "exportacion", "transfert", "integracao", "integration"],
+  "blocked": ["bloqueado", "bloque", "prerequisite", "prerrequisito", "prerequis", "cannot", "ready"],
+  "returned": ["devuelto", "renvoye", "devolvido", "rejected", "correction", "amend", "amendment"],
+  "report": ["informe", "rapport", "relatorio", "certificate", "certificado", "pdf", "results"]
+}

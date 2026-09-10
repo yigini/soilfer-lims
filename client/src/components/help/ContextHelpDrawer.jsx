@@ -12,11 +12,12 @@ import {
     Loader2,
     Building2,
     CheckCircle2,
-    ShieldAlert
+    ShieldAlert,
+    WifiOff
 } from 'lucide-react';
-import axios from 'axios';
 import { useHelp } from '../../context/HelpContext';
 import { useLanguage } from '../../context/LanguageContext';
+import helpClientService from '../../services/helpClientService';
 import clsx from 'clsx';
 
 export const ContextHelpDrawer = () => {
@@ -36,7 +37,17 @@ export const ContextHelpDrawer = () => {
     const [articleData, setArticleData] = useState(null);
     const [loadingContext, setLoadingContext] = useState(false);
     const [loadingArticle, setLoadingArticle] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
     const drawerRef = useRef(null);
+
+    // Responsive screen width listener
+    useEffect(() => {
+        const handleResize = () => {
+            setIsDesktop(window.innerWidth >= 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Escape key listener to close drawer
     useEffect(() => {
@@ -51,23 +62,21 @@ export const ContextHelpDrawer = () => {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isDrawerOpen, closeDrawer]);
 
-    // Fetch page contextual help when opened or route/blockers change
+    // Fetch page contextual help when opened or route/blockers change (network-first with offline IndexedDB fallback)
     useEffect(() => {
         if (!isDrawerOpen) return;
 
         let isMounted = true;
         setLoadingContext(true);
 
-        axios.get('/api/help/context', {
-            params: {
-                route: location.pathname,
-                blockers: activeBlockers.length > 0 ? JSON.stringify(activeBlockers) : undefined,
-                locale
-            }
+        helpClientService.getContextHelp({
+            route: location.pathname,
+            blockers: activeBlockers,
+            locale
         })
-            .then(res => {
-                if (isMounted && res.data?.success) {
-                    setContextData(res.data);
+            .then(data => {
+                if (isMounted && data) {
+                    setContextData(data);
                 }
             })
             .catch(err => {
@@ -90,10 +99,10 @@ export const ContextHelpDrawer = () => {
         let isMounted = true;
         setLoadingArticle(true);
 
-        axios.get(`/api/help/articles/${drawerArticleId}`, { params: { locale } })
-            .then(res => {
-                if (isMounted && res.data?.success) {
-                    setArticleData(res.data.article);
+        helpClientService.getArticleById(drawerArticleId, locale)
+            .then(article => {
+                if (isMounted && article) {
+                    setArticleData(article);
                 }
             })
             .catch(err => {
@@ -109,23 +118,35 @@ export const ContextHelpDrawer = () => {
     if (!isDrawerOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 animate-fadeIn"
-                onClick={closeDrawer}
-                aria-hidden="true"
-            />
-
-            {/* Slide-out Panel */}
-            <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+        <div className={clsx(
+            "fixed inset-0 z-50 overflow-hidden",
+            isDesktop ? "pointer-events-none" : "pointer-events-auto"
+        )}>
+            {/* Backdrop: only visible on mobile (< md) to allow non-intrusive split-screen desktop bench entry */}
+            {!isDesktop && (
                 <div
+                    className="fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 animate-fadeIn pointer-events-auto"
+                    onClick={closeDrawer}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Slide-out Companion Panel */}
+            <div className="fixed inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
+                <aside
                     ref={drawerRef}
-                    role="dialog"
-                    aria-modal="true"
+                    role={isDesktop ? "region" : "dialog"}
+                    aria-modal={isDesktop ? "false" : "true"}
                     aria-labelledby="context-help-title"
-                    className="w-screen max-w-md bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col transition-transform duration-300 animate-slideLeft"
+                    className="w-screen max-w-md bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col transition-transform duration-300 animate-slideLeft pointer-events-auto"
                 >
+                    {/* Offline indicator if served from local cache */}
+                    {contextData?.isOffline && (
+                        <div className="px-3 py-1 bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] flex items-center gap-1.5 font-medium">
+                            <WifiOff size={12} />
+                            <span>Serving from offline cache</span>
+                        </div>
+                    )}
                     {/* Header */}
                     <div className="p-4 border-b border-sf-divider bg-sf-canvas flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -379,7 +400,7 @@ export const ContextHelpDrawer = () => {
                             {t('help.searchAll', 'Search all help')}
                         </Link>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     );

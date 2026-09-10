@@ -322,31 +322,109 @@ export async function setEnrolledDevice(deviceData) {
 
 // ─── OFFLINE HELP PACK OPERATIONS ───
 
-export async function saveOfflineHelpPack(pack) {
+export async function saveOfflineHelpPack(pack, { labId = null, locale = null } = {}) {
     if (!pack || !Array.isArray(pack.articles)) return;
 
+    const packLocale = locale || pack.locale || 'en';
+    const packLabId = labId || pack.labId || 'global';
+    const scopeKey = `${packLabId}::${packLocale}`;
+    const newArticleIds = new Set(pack.articles.map(a => a.id));
+
     await withStore('helpArticles', 'readwrite', (store) => {
-        pack.articles.forEach(article => store.put(article));
+        // 1. Fetch existing to reconcile withdrawals for this scope
+        const req = store.getAll();
+        req.onsuccess = () => {
+            const allItems = req.result || [];
+            allItems.forEach(item => {
+                if (item.scopeKey === scopeKey && !newArticleIds.has(item.articleId || item.id)) {
+                    // Reconcile withdrawal: delete removed/withdrawn article
+                    store.delete(item.id);
+                }
+            });
+
+            // 2. Put incoming articles with scoped identifiers
+            pack.articles.forEach(article => {
+                const scopedId = `${scopeKey}::${article.id}`;
+                const record = {
+                    ...article,
+                    id: scopedId,
+                    articleId: article.id,
+                    scopeKey,
+                    labId: packLabId,
+                    locale: packLocale,
+                    cachedAt: new Date().toISOString()
+                };
+                store.put(record);
+
+                // Also maintain legacy direct id lookup for active session
+                store.put({
+                    ...article,
+                    id: article.id,
+                    articleId: article.id,
+                    scopeKey,
+                    labId: packLabId,
+                    locale: packLocale,
+                    cachedAt: new Date().toISOString()
+                });
+            });
+        };
     });
 
     await withStore('helpMeta', 'readwrite', (store) => {
-        store.put({ key: 'lastSync', value: new Date().toISOString() });
-        store.put({ key: 'locale', value: pack.locale || 'en' });
+        const metaPayload = {
+            lastSync: new Date().toISOString(),
+            locale: packLocale,
+            labId: packLabId,
+            packVersion: pack.packVersion || 1,
+            categories: pack.categories || [],
+            routeMap: pack.routeMap || {}
+        };
+
+        store.put({ key: `meta::${scopeKey}`, value: metaPayload });
+        store.put({ key: 'current', value: metaPayload });
+        store.put({ key: 'lastSync', value: metaPayload.lastSync });
+        store.put({ key: 'locale', value: packLocale });
         store.put({ key: 'categories', value: pack.categories || [] });
         store.put({ key: 'routeMap', value: pack.routeMap || {} });
     });
 }
 
-export async function getOfflineHelpArticles(category = null) {
+export async function getOfflineHelpArticles({ category = null, labId = null, locale = 'en' } = {}) {
     return withStore('helpArticles', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const req = store.getAll();
             req.onsuccess = () => {
                 const list = req.result || [];
-                if (category) {
-                    resolve(list.filter(a => a.category === category));
+                const targetScope = `${labId || 'global'}::${locale}`;
+                const globalScope = `global::${locale}`;
+
+                // Filter by scope (specific lab/locale -> global/locale -> all unique by articleId)
+                let scoped = list.filter(a => a.scopeKey === targetScope);
+                if (scoped.length === 0) {
+                    scoped = list.filter(a => a.scopeKey === globalScope);
+                }
+                if (scoped.length === 0) {
+                    scoped = list.filter(a => !a.id.includes('::'));
+                }
+
+                // Deduplicate by articleId
+                const seen = new Set();
+                const deduped = [];
+                for (const art of scoped) {
+                    const artId = art.articleId || art.id;
+                    if (!seen.has(artId)) {
+                        seen.add(artId);
+                        deduped.push({
+                            ...art,
+                            id: artId
+                        });
+                    }
+                }
+
+                if (category && category !== 'all') {
+                    resolve(deduped.filter(a => a.category === category));
                 } else {
-                    resolve(list);
+                    resolve(deduped);
                 }
             };
             req.onerror = () => reject(req.error);
@@ -354,28 +432,66 @@ export async function getOfflineHelpArticles(category = null) {
     });
 }
 
-export async function getOfflineHelpArticle(id) {
+export async function getOfflineHelpArticle(id, { labId = null, locale = 'en' } = {}) {
     return withStore('helpArticles', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
-            const req = store.get(id);
-            req.onsuccess = () => resolve(req.result || null);
-            req.onerror = () => reject(req.error);
+            const scopedKey = `${labId || 'global'}::${locale}::${id}`;
+            const globalKey = `global::${locale}::${id}`;
+
+            const tryScoped = store.get(scopedKey);
+            tryScoped.onsuccess = () => {
+                if (tryScoped.result) {
+                    return resolve({ ...tryScoped.result, id });
+                }
+                // Try global key
+                const tryGlobal = store.get(globalKey);
+                tryGlobal.onsuccess = () => {
+                    if (tryGlobal.result) {
+                        return resolve({ ...tryGlobal.result, id });
+                    }
+                    // Fall back to direct ID lookup
+                    const tryDirect = store.get(id);
+                    tryDirect.onsuccess = () => {
+                        resolve(tryDirect.result ? { ...tryDirect.result, id } : null);
+                    };
+                    tryDirect.onerror = () => reject(tryDirect.error);
+                };
+                tryGlobal.onerror = () => reject(tryGlobal.error);
+            };
+            tryScoped.onerror = () => reject(tryScoped.error);
         });
     });
 }
 
-export async function getOfflineHelpMeta() {
+export async function getOfflineHelpMeta({ labId = null, locale = 'en' } = {}) {
     return withStore('helpMeta', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
-            const req = store.getAll();
-            req.onsuccess = () => {
-                const map = {};
-                (req.result || []).forEach(item => {
-                    map[item.key] = item.value;
-                });
-                resolve(map);
+            const scopedKey = `meta::${labId || 'global'}::${locale}`;
+            const reqScoped = store.get(scopedKey);
+            reqScoped.onsuccess = () => {
+                if (reqScoped.result && reqScoped.result.value) {
+                    return resolve(reqScoped.result.value);
+                }
+                // Try current
+                const reqCurrent = store.get('current');
+                reqCurrent.onsuccess = () => {
+                    if (reqCurrent.result && reqCurrent.result.value) {
+                        return resolve(reqCurrent.result.value);
+                    }
+                    // Fall back to legacy flat map
+                    const reqAll = store.getAll();
+                    reqAll.onsuccess = () => {
+                        const map = {};
+                        (reqAll.result || []).forEach(item => {
+                            map[item.key] = item.value;
+                        });
+                        resolve(map);
+                    };
+                    reqAll.onerror = () => reject(reqAll.error);
+                };
+                reqCurrent.onerror = () => reject(reqCurrent.error);
             };
-            req.onerror = () => reject(req.error);
+            reqScoped.onerror = () => reject(reqScoped.error);
         });
     });
 }

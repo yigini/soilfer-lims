@@ -13,9 +13,10 @@ import {
     AlertCircle,
     ChevronRight,
     Loader2,
-    Check
+    Check,
+    WifiOff
 } from 'lucide-react';
-import axios from 'axios';
+import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
 import clsx from 'clsx';
 
@@ -36,10 +37,10 @@ export const ArticleReader = () => {
         setFeedbackStatus(null);
         setCopied(false);
 
-        axios.get(`/api/help/articles/${articleId}`, { params: { locale } })
-            .then(res => {
-                if (isMounted && res.data?.success) {
-                    setArticle(res.data.article);
+        helpClientService.getArticleById(articleId, locale)
+            .then(art => {
+                if (isMounted && art) {
+                    setArticle(art);
                 }
             })
             .catch(err => {
@@ -53,11 +54,7 @@ export const ArticleReader = () => {
     }, [articleId, locale]);
 
     const handleFeedback = (useful) => {
-        axios.post('/api/help/feedback', {
-            articleId,
-            useful,
-            locale
-        })
+        helpClientService.recordFeedback(articleId, useful, '', locale)
             .then(() => {
                 setFeedbackStatus(
                     useful
@@ -152,6 +149,14 @@ export const ArticleReader = () => {
 
             {/* Article Content */}
             <main className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-8">
+                {/* Offline Cached Notice */}
+                {article.isOffline && (
+                    <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-800 dark:text-amber-200 text-xs flex items-center gap-2">
+                        <WifiOff size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                        <span>Offline mode: reading locally synchronized copy.</span>
+                    </div>
+                )}
+
                 {/* Fallback Notice for Unreviewed Translation */}
                 {article.isFallback && (
                     <div className="hc-notice p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-800 dark:text-amber-200 text-xs flex items-start gap-2.5">

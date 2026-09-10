@@ -2,17 +2,47 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../prisma');
 
-// Static categories metadata from content contract
-const CATEGORIES = [
-    { id: 'start', title: 'Getting started', description: 'Find your way and prepare for a shift.', icon: 'compass' },
-    { id: 'intake', title: 'Receiving samples', description: 'Identity, condition, field context and labels.', icon: 'package-check' },
-    { id: 'bench', title: 'Working at the bench', description: 'Preparation, method runs and result entry.', icon: 'flask-conical' },
-    { id: 'review', title: 'Review & reports', description: 'Check evidence, return work and release reports.', icon: 'clipboard-check' },
-    { id: 'assets', title: 'Equipment & stock', description: 'Use eligible instruments and traceable materials.', icon: 'microscope' },
-    { id: 'offline', title: 'Mobile & offline', description: 'Device saves, synchronization and recovery.', icon: 'cloud-download' },
-    { id: 'connect', title: 'Projects & connections', description: 'KoBo field records, projects and SIS exchange.', icon: 'network' },
-    { id: 'manage', title: 'Managing the laboratory', description: 'Assignments, configuration and language.', icon: 'settings-2' }
-];
+// Load runtime data from server/data/help/
+const HELP_DATA_DIR = path.resolve(__dirname, '../data/help');
+
+function loadJsonFile(fileName, fallback = null) {
+    const fullPath = path.join(HELP_DATA_DIR, fileName);
+    if (fs.existsSync(fullPath)) {
+        try {
+            return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+        } catch (e) {
+            console.error(`[HELP_SERVICE] Failed to read ${fileName}:`, e.message);
+        }
+    }
+    return fallback;
+}
+
+// Route and blocker map (cached)
+let cachedRouteMap = null;
+function getRouteMap() {
+    if (cachedRouteMap) return cachedRouteMap;
+    const map = loadJsonFile('route-help-map.json', { routes: [], blockers: {} });
+    cachedRouteMap = map;
+    return cachedRouteMap;
+}
+
+// Categories with multi-language metadata
+let cachedCategories = null;
+function getCategories() {
+    if (cachedCategories) return cachedCategories;
+    const cats = loadJsonFile('categories.json', []);
+    cachedCategories = cats;
+    return cachedCategories;
+}
+
+// Synonyms dictionary for multi-language search
+let cachedSynonyms = null;
+function getSynonyms() {
+    if (cachedSynonyms) return cachedSynonyms;
+    const syns = loadJsonFile('synonyms.json', {});
+    cachedSynonyms = syns;
+    return cachedSynonyms;
+}
 
 // Fallback notices for unreviewed locales
 const FALLBACK_NOTICES = {
@@ -23,24 +53,9 @@ const FALLBACK_NOTICES = {
     pt: 'Este artigo está disponível em inglês. Ainda não existe uma tradução revista.'
 };
 
-// Route and blocker map
-let cachedRouteMap = null;
-function getRouteMap() {
-    if (cachedRouteMap) return cachedRouteMap;
-    const mapPath = path.resolve(__dirname, '../../WP/help-knowledge-base-v1/route-help-map.json');
-    if (fs.existsSync(mapPath)) {
-        try {
-            cachedRouteMap = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
-        } catch (e) {
-            console.error('[HELP_SERVICE] Failed to read route-help-map.json:', e);
-        }
-    }
-    return cachedRouteMap || { routes: [], blockers: {} };
-}
-
-// Helpers
+// String normalization for accented & typo-tolerant search
 const normalizeString = (str = '') => {
-    return str
+    return String(str)
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -56,20 +71,25 @@ const sanitizeHtml = (str = '') => {
 };
 
 /**
- * Return categories with counts of approved articles available to the user
+ * Return categories with counts of approved articles available to the user.
+ * Returns localized titles and descriptions based on requested locale.
  */
-async function getTopics(user = null) {
+async function getTopics(user = null, locale = 'en', preview = false) {
     const isAuth = !!user;
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
+    const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
+
+    const where = {
+        archivedAt: null,
+        visibility: { in: allowedVisibilities }
+    };
+
+    if (!canPreview) {
+        where.publications = { some: { isCurrent: true } };
+    }
 
     const articles = await prisma.helpArticle.findMany({
-        where: {
-            archivedAt: null,
-            visibility: { in: allowedVisibilities },
-            publications: {
-                some: { isCurrent: true }
-            }
-        },
+        where,
         select: { id: true, category: true }
     });
 
@@ -78,26 +98,33 @@ async function getTopics(user = null) {
         countByCategory[a.category] = (countByCategory[a.category] || 0) + 1;
     });
 
-    return CATEGORIES.map(cat => ({
-        ...cat,
+    const rawCategories = getCategories();
+    return rawCategories.map(cat => ({
+        id: cat.id,
+        icon: cat.icon,
+        title: cat.titles?.[locale] || cat.titles?.en || cat.id,
+        description: cat.descriptions?.[locale] || cat.descriptions?.en || '',
         articleCount: countByCategory[cat.id] || 0
     }));
 }
 
 /**
- * Get articles by category or search filters
+ * Get articles by category or search filters.
+ * Returns published articles only, unless preview=true is requested by an authorized editor.
  */
-async function getArticles({ category = null, role = null, user = null, locale = 'en' }) {
+async function getArticles({ category = null, role = null, user = null, locale = 'en', preview = false }) {
     const isAuth = !!user;
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
+    const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     const where = {
         archivedAt: null,
-        visibility: { in: allowedVisibilities },
-        publications: {
-            some: { isCurrent: true }
-        }
+        visibility: { in: allowedVisibilities }
     };
+
+    if (!canPreview) {
+        where.publications = { some: { isCurrent: true } };
+    }
 
     if (category) {
         where.category = category;
@@ -110,12 +137,18 @@ async function getArticles({ category = null, role = null, user = null, locale =
                 where: { isCurrent: true },
                 include: {
                     revision: {
-                        include: {
-                            locales: true
-                        }
+                        include: { locales: true }
                     }
                 }
-            }
+            },
+            revisions: canPreview ? {
+                orderBy: { revisionNumber: 'desc' },
+                take: 1,
+                include: { locales: true }
+            } : false,
+            labNotes: user?.labId ? {
+                where: { labId: user.labId, isActive: true }
+            } : false
         },
         orderBy: { id: 'asc' }
     });
@@ -131,112 +164,104 @@ async function getArticles({ category = null, role = null, user = null, locale =
             }
         })
         .map(article => {
-            const pub = article.publications[0];
-            const rev = pub?.revision;
+            const pub = article.publications?.[0];
+            const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
+            if (!rev) return null;
+
             const targetLocaleRev = rev?.locales?.find(l => l.locale === locale);
             const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
             const isFallback = !isApproved && locale !== 'en';
+            const content = targetLocaleRev || rev;
 
             return {
                 id: article.id,
                 category: article.category,
                 kind: article.kind,
                 feature: article.feature,
-                title: (isApproved ? targetLocaleRev.title : rev?.title) || article.id,
-                summary: (isApproved ? targetLocaleRev.summary : rev?.summary) || '',
-                minutes: article.minutes,
                 roles: JSON.parse(article.roles || '["all"]'),
                 keywords: JSON.parse(article.keywords || '[]'),
+                minutes: article.minutes,
+                reviewOwner: article.reviewOwner,
+                visibility: article.visibility,
+                title: content.title || rev.title,
+                summary: content.summary || rev.summary,
                 isFallback,
-                localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
+                localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null,
+                isDraftPreview: !pub && canPreview,
+                labNote: article.labNotes?.[0] ? {
+                    id: article.labNotes[0].id,
+                    noteText: article.labNotes[0].noteText,
+                    isActive: article.labNotes[0].isActive
+                } : null
             };
-        });
+        })
+        .filter(Boolean);
 }
 
 /**
- * Get single full article by ID
+ * Get detailed article by ID
  */
-async function getArticleById(articleId, user = null, locale = 'en') {
+async function getArticleById(articleId, user = null, locale = 'en', preview = false) {
     const isAuth = !!user;
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
+    const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
+
+    const where = {
+        id: articleId,
+        archivedAt: null,
+        visibility: { in: allowedVisibilities }
+    };
+
+    if (!canPreview) {
+        where.publications = { some: { isCurrent: true } };
+    }
 
     const article = await prisma.helpArticle.findFirst({
-        where: {
-            id: articleId,
-            archivedAt: null,
-            visibility: { in: allowedVisibilities }
-        },
+        where,
         include: {
             publications: {
                 where: { isCurrent: true },
                 include: {
                     revision: {
-                        include: {
-                            locales: true
-                        }
+                        include: { locales: true }
                     }
                 }
             },
+            revisions: canPreview ? {
+                orderBy: { revisionNumber: 'desc' },
+                take: 1,
+                include: { locales: true }
+            } : false,
             labNotes: user?.labId ? {
-                where: {
-                    labId: user.labId,
-                    isActive: true
-                }
+                where: { labId: user.labId, isActive: true }
             } : false
         }
     });
 
     if (!article) return null;
 
-    const pub = article.publications[0];
-    const rev = pub?.revision;
+    const pub = article.publications?.[0];
+    const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
     if (!rev) return null;
 
-    const targetLocaleRev = rev.locales.find(l => l.locale === locale);
+    const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
     const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
     const isFallback = !isApproved && locale !== 'en';
+    const activeContent = targetLocaleRev || rev;
 
-    // Content payload: use approved locale or fall back to English source
-    const content = isApproved ? targetLocaleRev : rev;
-
-    // Fetch related articles summaries
-    let relatedArticles = [];
+    let steps = [];
     try {
-        const relatedIds = JSON.parse(rev.related || '[]');
-        if (relatedIds.length > 0) {
-            const relatedRecords = await prisma.helpArticle.findMany({
-                where: {
-                    id: { in: relatedIds },
-                    archivedAt: null,
-                    visibility: { in: allowedVisibilities },
-                    publications: { some: { isCurrent: true } }
-                },
-                include: {
-                    publications: {
-                        where: { isCurrent: true },
-                        include: { revision: true }
-                    }
-                }
-            });
-
-            relatedArticles = relatedRecords.map(r => ({
-                id: r.id,
-                category: r.category,
-                kind: r.kind,
-                title: r.publications[0]?.revision?.title || r.id,
-                summary: r.publications[0]?.revision?.summary || '',
-                minutes: r.minutes
-            }));
-        }
+        steps = JSON.parse(activeContent.steps || rev.steps || '[]');
     } catch (e) {
-        console.warn('[HELP_SERVICE] Failed parsing related articles:', e.message);
+        steps = [];
     }
 
-    // Lab note (strictly scoped to user's assigned lab)
-    const labNote = article.labNotes?.[0] ? {
-        noteText: article.labNotes[0].noteText,
-        updatedAt: article.labNotes[0].updatedAt
-    } : null;
+    let related = [];
+    try {
+        related = JSON.parse(rev.related || '[]');
+    } catch (e) {
+        related = [];
+    }
 
     return {
         id: article.id,
@@ -247,68 +272,61 @@ async function getArticleById(articleId, user = null, locale = 'en') {
         keywords: JSON.parse(article.keywords || '[]'),
         minutes: article.minutes,
         reviewOwner: article.reviewOwner,
+        visibility: article.visibility,
+        title: activeContent.title || rev.title,
+        summary: activeContent.summary || rev.summary,
+        steps,
+        success: activeContent.success || rev.success || '',
+        caution: activeContent.caution || rev.caution || '',
+        related,
+        sourceLocale: rev.sourceLocale,
         revisionNumber: rev.revisionNumber,
-        publishedAt: pub.publishedAt,
-        title: content.title,
-        summary: content.summary,
-        steps: JSON.parse(content.steps || '[]'),
-        success: content.success,
-        caution: content.caution,
-        relatedArticles,
-        labNote,
+        publishedAt: pub?.publishedAt || null,
         isFallback,
-        localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
+        localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null,
+        isDraftPreview: !pub && canPreview,
+        labNote: article.labNotes?.[0] ? {
+            id: article.labNotes[0].id,
+            noteText: article.labNotes[0].noteText,
+            isActive: article.labNotes[0].isActive
+        } : null
     };
 }
 
-const SYNONYMS = {
-    metodo: 'method',
-    metodos: 'methods',
-    preparacion: 'preparation',
-    preparacao: 'preparation',
-    sechage: 'drying',
-    secado: 'drying',
-    secagem: 'drying',
-    recepcion: 'reception',
-    recepcao: 'reception',
-    espectro: 'spectrum',
-    espectros: 'spectra',
-    spectre: 'spectrum',
-    spectres: 'spectra',
-    resultado: 'result',
-    resultados: 'results',
-    resultats: 'results',
-    aprobacion: 'approval',
-    aprovacao: 'approval',
-    muestra: 'sample',
-    muestras: 'samples',
-    amostra: 'sample',
-    echantillon: 'sample'
-};
-
 /**
- * Search articles across titles, summaries, steps, and keywords
+ * Search articles using multi-language token and synonym scoring
  */
-async function searchHelp({ query = '', topic = null, role = null, user = null, locale = 'en', limit = 20, offset = 0 }) {
-    const rawQuery = String(query).trim();
-    if (!rawQuery) {
+async function searchHelp({ query = '', topic = null, role = null, user = null, locale = 'en', limit = 20, offset = 0, preview = false }) {
+    const normQuery = normalizeString(query);
+    if (!normQuery) {
         return { total: 0, results: [] };
     }
 
-    const normQuery = normalizeString(rawQuery);
-    const queryTokens = normQuery.split(/\s+/).filter(t => t.length > 1);
-    const searchTokens = [...new Set([...queryTokens, ...queryTokens.map(t => SYNONYMS[t]).filter(Boolean)])];
+    const queryTokens = normQuery.split(/\s+/).filter(Boolean);
+    const synonymsDict = getSynonyms();
+
+    // Expand search tokens with synonyms across languages
+    const searchTokens = new Set(queryTokens);
+    for (const [canonicalKey, synonymList] of Object.entries(synonymsDict)) {
+        const canonicalNorm = normalizeString(canonicalKey);
+        const allSyns = [canonicalNorm, ...(synonymList || []).map(normalizeString)];
+        if (allSyns.some(s => queryTokens.includes(s) || normQuery.includes(s))) {
+            allSyns.forEach(s => searchTokens.add(s));
+        }
+    }
 
     const isAuth = !!user;
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
+    const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     const where = {
         archivedAt: null,
-        visibility: { in: allowedVisibilities },
-        publications: {
-            some: { isCurrent: true }
-        }
+        visibility: { in: allowedVisibilities }
     };
+
+    if (!canPreview) {
+        where.publications = { some: { isCurrent: true } };
+    }
 
     if (topic && topic !== 'all') {
         where.category = topic;
@@ -324,15 +342,20 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
                         include: { locales: true }
                     }
                 }
-            }
+            },
+            revisions: canPreview ? {
+                orderBy: { revisionNumber: 'desc' },
+                take: 1,
+                include: { locales: true }
+            } : false
         }
     });
 
     const scoredResults = [];
 
     for (const article of articles) {
-        const pub = article.publications[0];
-        const rev = pub?.revision;
+        const pub = article.publications?.[0];
+        const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
         if (!rev) continue;
 
         // Role filtering
@@ -348,7 +371,7 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
         const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
         const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
         const isFallback = !isApproved && locale !== 'en';
-        const activeContent = isApproved ? targetLocaleRev : rev;
+        const activeContent = targetLocaleRev || rev;
 
         const normTitle = normalizeString(activeContent.title || '');
         const normSummary = normalizeString(activeContent.summary || '');
@@ -386,8 +409,8 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
                     id: article.id,
                     category: article.category,
                     kind: article.kind,
-                    title: activeContent.title,
-                    summary: activeContent.summary,
+                    title: activeContent.title || rev.title,
+                    summary: activeContent.summary || rev.summary,
                     minutes: article.minutes,
                     isFallback,
                     localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
@@ -397,7 +420,6 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
     }
 
     scoredResults.sort((a, b) => b.score - a.score);
-
     const total = scoredResults.length;
     const paginated = scoredResults.slice(offset, offset + limit).map(r => r.article);
 
@@ -405,32 +427,33 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
 }
 
 /**
- * Contextual help resolver for routes and live readiness blocker codes
+ * Contextual help resolver for routes and live readiness blocker codes.
+ * Deep copies matched article arrays so blocker resolution NEVER contaminates cached route maps!
  */
-async function getContextHelp({ route = '/', blockerCodes = [], user = null, locale = 'en' }) {
+async function getContextHelp({ route = '/', blockerCodes = [], user = null, locale = 'en', preview = false }) {
     const routeMap = getRouteMap();
     const isAuth = !!user;
+    const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     // 1. Resolve route mapping
     let matchedArticleIds = [];
     const normalizedRoute = route.split('?')[0].replace(/\/$/, '') || '/';
 
-    // Route matching order: exact match -> parameterized pattern -> wildcard
-    const exactMatch = routeMap.routes.find(r => r.route === normalizedRoute);
+    const exactMatch = (routeMap.routes || []).find(r => r.route === normalizedRoute);
     if (exactMatch) {
-        matchedArticleIds = exactMatch.articleIds || [];
+        // Deep clone to prevent cached array mutation (Finding 4)
+        matchedArticleIds = [...(exactMatch.articleIds || [])];
     } else {
-        // Pattern match (e.g. /samples/:id)
-        const patternMatch = routeMap.routes.find(r => {
+        const patternMatch = (routeMap.routes || []).find(r => {
             if (!r.route.includes(':')) return false;
             const regex = new RegExp('^' + r.route.replace(/:[a-zA-Z0-9_-]+/g, '[^/]+') + '$');
             return regex.test(normalizedRoute);
         });
         if (patternMatch) {
-            matchedArticleIds = patternMatch.articleIds || [];
+            matchedArticleIds = [...(patternMatch.articleIds || [])];
         } else {
-            const wildcard = routeMap.routes.find(r => r.route === '*');
-            matchedArticleIds = wildcard ? wildcard.articleIds : ['manage-load-error', 'manage-support'];
+            const wildcard = (routeMap.routes || []).find(r => r.route === '*');
+            matchedArticleIds = [...(wildcard?.articleIds || ['manage-load-error', 'manage-support'])];
         }
     }
 
@@ -438,13 +461,13 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
     const resolvedBlockers = [];
     if (Array.isArray(blockerCodes) && blockerCodes.length > 0) {
         for (const code of blockerCodes) {
-            const mappedArticleId = routeMap.blockers[code] || routeMap.unknownCodeArticle || 'bench-blocked';
+            const mappedArticleId = routeMap.blockers?.[code] || routeMap.unknownCodeArticle || 'bench-blocked';
             resolvedBlockers.push({
                 code,
                 articleId: mappedArticleId
             });
             if (!matchedArticleIds.includes(mappedArticleId)) {
-                // Prepend blocker article to front of recommendations
+                // Prepend blocker article to front of recommendations without mutating source registry
                 matchedArticleIds.unshift(mappedArticleId);
             }
         }
@@ -452,13 +475,18 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
 
     // 3. Load recommended articles
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
+    const where = {
+        id: { in: matchedArticleIds },
+        archivedAt: null,
+        visibility: { in: allowedVisibilities }
+    };
+
+    if (!canPreview) {
+        where.publications = { some: { isCurrent: true } };
+    }
+
     const articles = await prisma.helpArticle.findMany({
-        where: {
-            id: { in: matchedArticleIds },
-            archivedAt: null,
-            visibility: { in: allowedVisibilities },
-            publications: { some: { isCurrent: true } }
-        },
+        where,
         include: {
             publications: {
                 where: { isCurrent: true },
@@ -468,6 +496,11 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
                     }
                 }
             },
+            revisions: canPreview ? {
+                orderBy: { revisionNumber: 'desc' },
+                take: 1,
+                include: { locales: true }
+            } : false,
             labNotes: user?.labId ? {
                 where: { labId: user.labId, isActive: true }
             } : false
@@ -476,21 +509,21 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
 
     const articleMap = new Map();
     for (const a of articles) {
-        const pub = a.publications[0];
-        const rev = pub?.revision;
+        const pub = a.publications?.[0];
+        const rev = canPreview ? (pub?.revision || a.revisions?.[0]) : pub?.revision;
         if (!rev) continue;
 
         const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
         const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
         const isFallback = !isApproved && locale !== 'en';
-        const activeContent = isApproved ? targetLocaleRev : rev;
+        const activeContent = targetLocaleRev || rev;
 
         articleMap.set(a.id, {
             id: a.id,
             category: a.category,
             kind: a.kind,
-            title: activeContent.title,
-            summary: activeContent.summary,
+            title: activeContent.title || rev.title,
+            summary: activeContent.summary || rev.summary,
             minutes: a.minutes,
             labNote: a.labNotes?.[0] ? a.labNotes[0].noteText : null,
             isFallback,
@@ -529,7 +562,8 @@ async function recordFeedback({ articleId, revisionId = null, locale = 'en', use
 }
 
 /**
- * Build offline pack bundle for synchronization
+ * Build offline pack bundle for synchronization.
+ * Partitioned by audience/lab/locale.
  */
 async function getOfflinePack({ user = null, locale = 'en' }) {
     const isAuth = !!user;
@@ -557,14 +591,27 @@ async function getOfflinePack({ user = null, locale = 'en' }) {
     });
 
     const routeMap = getRouteMap();
+    const categories = getCategories().map(cat => ({
+        id: cat.id,
+        icon: cat.icon,
+        title: cat.titles?.[locale] || cat.titles?.en || cat.id,
+        description: cat.descriptions?.[locale] || cat.descriptions?.en || ''
+    }));
 
     const items = articles.map(article => {
-        const pub = article.publications[0];
+        const pub = article.publications?.[0];
         const rev = pub?.revision;
-        const targetLocaleRev = rev?.locales?.find(l => l.locale === locale);
+        if (!rev) return null;
+
+        const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
         const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
         const isFallback = !isApproved && locale !== 'en';
-        const content = isApproved ? targetLocaleRev : rev;
+        const content = targetLocaleRev || rev;
+
+        let steps = [];
+        try { steps = JSON.parse(content.steps || rev.steps || '[]'); } catch (e) { steps = []; }
+        let related = [];
+        try { related = JSON.parse(rev.related || '[]'); } catch (e) { related = []; }
 
         return {
             id: article.id,
@@ -574,33 +621,35 @@ async function getOfflinePack({ user = null, locale = 'en' }) {
             roles: JSON.parse(article.roles || '["all"]'),
             keywords: JSON.parse(article.keywords || '[]'),
             minutes: article.minutes,
-            title: content.title,
-            summary: content.summary,
-            steps: JSON.parse(content.steps || '[]'),
-            success: content.success,
-            caution: content.caution,
-            related: JSON.parse(rev.related || '[]'),
+            title: content.title || rev.title,
+            summary: content.summary || rev.summary,
+            steps,
+            success: content.success || rev.success || '',
+            caution: content.caution || rev.caution || '',
+            related,
             labNote: article.labNotes?.[0]?.noteText || null,
+            revisionNumber: rev.revisionNumber,
             isFallback,
             localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
         };
-    });
+    }).filter(Boolean);
 
     return {
         packVersion: 1,
         locale,
+        labId: user?.labId || null,
         generatedAt: new Date().toISOString(),
-        categories: CATEGORIES,
+        categories,
         routeMap: {
-            blockers: routeMap.blockers,
-            unknownCodeArticle: routeMap.unknownCodeArticle
+            blockers: routeMap.blockers || {},
+            unknownCodeArticle: routeMap.unknownCodeArticle || 'bench-blocked'
         },
         articles: items
     };
 }
 
 module.exports = {
-    CATEGORIES,
+    getCategories,
     getTopics,
     getArticles,
     getArticleById,

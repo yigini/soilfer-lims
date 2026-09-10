@@ -13,9 +13,10 @@ import {
     DownloadCloud,
     Network,
     Settings2,
-    HelpCircle
+    HelpCircle,
+    WifiOff
 } from 'lucide-react';
-import axios from 'axios';
+import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
 
 const ICON_MAP = {
@@ -36,24 +37,22 @@ export const TopicExplorer = () => {
     const [articles, setArticles] = useState([]);
     const [topicMeta, setTopicMeta] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
         setLoading(true);
 
         Promise.all([
-            axios.get('/api/help/topics'),
-            axios.get('/api/help/articles', { params: { category: topicId, locale } })
+            helpClientService.getTopics(locale),
+            helpClientService.getArticles({ category: topicId, locale })
         ])
-            .then(([topicsRes, articlesRes]) => {
+            .then(([topics, arts]) => {
                 if (!isMounted) return;
-                if (topicsRes.data?.success) {
-                    const found = (topicsRes.data.topics || []).find(tp => tp.id === topicId);
-                    setTopicMeta(found || null);
-                }
-                if (articlesRes.data?.success) {
-                    setArticles(articlesRes.data.articles || []);
-                }
+                const found = (topics || []).find(tp => tp.id === topicId);
+                setTopicMeta(found || null);
+                setArticles(Array.isArray(arts) ? arts : []);
+                setIsOffline((Array.isArray(arts) && arts.length > 0 && arts[0].isOffline) || false);
             })
             .catch(err => {
                 console.warn('[TOPIC_EXPLORER] Failed to load topic:', err.message);
@@ -92,6 +91,12 @@ export const TopicExplorer = () => {
                             <p className="text-xs md:text-sm text-sf-muted mt-0.5">
                                 {topicMeta?.description || 'Task guides and standard operational procedures.'}
                             </p>
+                            {isOffline && (
+                                <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
+                                    <WifiOff size={14} />
+                                    <span>Offline mode: served from local workpack cache</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

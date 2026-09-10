@@ -1,0 +1,146 @@
+[
+  {
+    "id": "start",
+    "icon": "compass",
+    "titles": {
+      "en": "Getting started",
+      "es": "Primeros pasos",
+      "es-419": "Primeros pasos",
+      "fr": "Premiers pas",
+      "pt": "Primeiros passos"
+    },
+    "descriptions": {
+      "en": "Find your way and prepare for a shift.",
+      "es": "Oriéntate y prepárate para el turno.",
+      "es-419": "Oriéntese y prepárese para el turno.",
+      "fr": "Repérez-vous et préparez votre prise de poste.",
+      "pt": "Oriente-se e prepare-se para o turno de trabalho."
+    }
+  },
+  {
+    "id": "intake",
+    "icon": "package-check",
+    "titles": {
+      "en": "Receiving samples",
+      "es": "Recepción de muestras",
+      "es-419": "Recepción de muestras",
+      "fr": "Réception des échantillons",
+      "pt": "Receção de amostras"
+    },
+    "descriptions": {
+      "en": "Identity, condition, field context and labels.",
+      "es": "Identidad, estado, contexto de campo y etiquetas.",
+      "es-419": "Identidad, condición, contexto de campo y etiquetas.",
+      "fr": "Identité, état, contexte de terrain et étiquetage.",
+      "pt": "Identidade, estado, contexto de campo e etiquetas."
+    }
+  },
+  {
+    "id": "bench",
+    "icon": "flask-conical",
+    "titles": {
+      "en": "Working at the bench",
+      "es": "Trabajo analítico",
+      "es-419": "Trabajo analítico",
+      "fr": "Travail à la paillasse",
+      "pt": "Trabalho analítico"
+    },
+    "descriptions": {
+      "en": "Preparation, method runs and result entry.",
+      "es": "Preparación, series analíticas y registro de resultados.",
+      "es-419": "Preparación, corridas analíticas y captura de resultados.",
+      "fr": "Préparation, séries d'analyses et saisie des résultats.",
+      "pt": "Preparação, ensaios de métodos e registo de resultados."
+    }
+  },
+  {
+    "id": "review",
+    "icon": "clipboard-check",
+    "titles": {
+      "en": "Review & reports",
+      "es": "Revisión e informes",
+      "es-419": "Revisión e informes",
+      "fr": "Révision et rapports",
+      "pt": "Revisão e relatórios"
+    },
+    "descriptions": {
+      "en": "Check evidence, return work and release reports.",
+      "es": "Comprobar evidencias, devolver análisis y emitir informes.",
+      "es-419": "Verificar evidencias, devolver trabajo y emitir reportes.",
+      "fr": "Vérification des preuves, renvoi des analyses et diffusion des rapports.",
+      "pt": "Verificar evidências, devolver análises e emitir relatórios."
+    }
+  },
+  {
+    "id": "assets",
+    "icon": "microscope",
+    "titles": {
+      "en": "Equipment & stock",
+      "es": "Equipos e inventario",
+      "es-419": "Equipos e inventario",
+      "fr": "Équipements et stocks",
+      "pt": "Equipamentos e inventário"
+    },
+    "descriptions": {
+      "en": "Use eligible instruments and traceable materials.",
+      "es": "Utilizar equipos aptos y materiales trazables.",
+      "es-419": "Utilizar instrumentos aptos y materiales trazables.",
+      "fr": "Utiliser des instruments conformes et des consommables traçables.",
+      "pt": "Utilizar instrumentos elegíveis e reagentes rastreáveis."
+    }
+  },
+  {
+    "id": "offline",
+    "icon": "cloud-download",
+    "titles": {
+      "en": "Mobile & offline",
+      "es": "Móvil y sin conexión",
+      "es-419": "Móvil y sin conexión",
+      "fr": "Mobile et hors connexion",
+      "pt": "Dispositivos móveis e sem ligação"
+    },
+    "descriptions": {
+      "en": "Device saves, synchronization and recovery.",
+      "es": "Guardado local, sincronización y recuperación.",
+      "es-419": "Almacenamiento en dispositivo, sincronización y recuperación.",
+      "fr": "Sauvegarde sur l'appareil, synchronisation et récupération.",
+      "pt": "Gravação no dispositivo, sincronização e recuperação."
+    }
+  },
+  {
+    "id": "connect",
+    "icon": "network",
+    "titles": {
+      "en": "Projects & connections",
+      "es": "Proyectos y conexiones",
+      "es-419": "Proyectos y conexiones",
+      "fr": "Projets et connexions",
+      "pt": "Projetos e ligações"
+    },
+    "descriptions": {
+      "en": "KoBo field records, projects and SIS exchange.",
+      "es": "Registros de campo KoBo, proyectos e intercambio SIS.",
+      "es-419": "Registros de campo KoBo, proyectos e intercambio con SIS.",
+      "fr": "Données de terrain KoBo, projets et échanges avec le SIS.",
+      "pt": "Registos de campo KoBo, projetos e integração SIS."
+    }
+  },
+  {
+    "id": "manage",
+    "icon": "settings-2",
+    "titles": {
+      "en": "Managing the laboratory",
+      "es": "Gestión del laboratorio",
+      "es-419": "Gestión del laboratorio",
+      "fr": "Gestion du laboratoire",
+      "pt": "Gestão do laboratório"
+    },
+    "descriptions": {
+      "en": "Assignments, configuration and language.",
+      "es": "Asignaciones, configuración e idioma.",
+      "es-419": "Asignaciones, configuración e idioma.",
+      "fr": "Affectations, configuration et langue.",
+      "pt": "Atribuições, parametrização e idioma."
+    }
+  }
+]

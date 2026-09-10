@@ -7,6 +7,29 @@ describe('Help Lab Isolation & Security Enforcement Tests', () => {
     const labB = 'test-lab-beta';
 
     beforeAll(async () => {
+        // Ensure clean state and active publications for published-only reader tests
+        await prisma.helpPublication.deleteMany({
+            where: { articleId: { in: [testArticleId, 'bench-drying'] } }
+        });
+
+        for (const artId of [testArticleId, 'bench-drying']) {
+            const rev = await prisma.helpRevision.findFirst({
+                where: { articleId: artId },
+                orderBy: { revisionNumber: 'desc' }
+            });
+            if (rev) {
+                await prisma.helpPublication.create({
+                    data: {
+                        articleId: artId,
+                        revisionId: rev.id,
+                        publishedBy: 'system-test',
+                        approvedLocales: '["en"]',
+                        isCurrent: true
+                    }
+                });
+            }
+        }
+
         // Create a lab note for Lab A
         await prisma.helpLabNote.upsert({
             where: {
@@ -31,9 +54,12 @@ describe('Help Lab Isolation & Security Enforcement Tests', () => {
     });
 
     afterAll(async () => {
-        // Clean up test lab note
+        // Clean up test lab note and test publications
         await prisma.helpLabNote.deleteMany({
             where: { labId: labA }
+        });
+        await prisma.helpPublication.deleteMany({
+            where: { articleId: { in: [testArticleId, 'bench-drying'] } }
         });
     });
 

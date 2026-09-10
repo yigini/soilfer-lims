@@ -8,9 +8,10 @@ import {
     ArrowLeft,
     Clock,
     X,
-    Loader2
+    Loader2,
+    WifiOff
 } from 'lucide-react';
-import axios from 'axios';
+import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
 import clsx from 'clsx';
 
@@ -22,15 +23,17 @@ export const FAQPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
         setLoading(true);
 
-        axios.get('/api/help/articles', { params: { locale } })
-            .then(res => {
-                if (isMounted && res.data?.success) {
-                    setArticles(res.data.articles || []);
+        helpClientService.getArticles({ locale })
+            .then(data => {
+                if (isMounted) {
+                    setArticles(Array.isArray(data) ? data : []);
+                    setIsOffline(Array.isArray(data) && data.length > 0 && data[0].isOffline);
                 }
             })
             .catch(err => {
@@ -90,6 +93,12 @@ export const FAQPage = () => {
                             <p className="text-xs md:text-sm text-sf-muted mt-1">
                                 Concise answers and resolutions for daily laboratory work.
                             </p>
+                            {isOffline && (
+                                <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
+                                    <WifiOff size={14} />
+                                    <span>Offline mode: served from local workpack cache</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Search in FAQs */}

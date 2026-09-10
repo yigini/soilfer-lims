@@ -378,13 +378,13 @@ function App() {
             <Route path="/tech-stack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
             <Route path="/credits" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
 
-            {/* Help Centre & Knowledge Base Routes */}
-            <Route path="/help" element={<RequireAuth><HelpCentre /></RequireAuth>} />
-            <Route path="/help/faq" element={<RequireAuth><FAQPage /></RequireAuth>} />
+            {/* Help Centre & Knowledge Base Routes (Publicly accessible with server-side visibility filtering) */}
+            <Route path="/help" element={<React.Suspense fallback={<LazyFallback />}><HelpCentre /></React.Suspense>} />
+            <Route path="/help/faq" element={<React.Suspense fallback={<LazyFallback />}><FAQPage /></React.Suspense>} />
             <Route path="/faq" element={<Navigate to="/help/faq" replace />} />
-            <Route path="/help/articles/:articleId" element={<RequireAuth><ArticleReader /></RequireAuth>} />
-            <Route path="/help/topics/:topicId" element={<RequireAuth><TopicExplorer /></RequireAuth>} />
-            <Route path="/admin/help" element={<RequireAuth permission="HELP_EDIT_LAB"><AdminHelpEditor /></RequireAuth>} />
+            <Route path="/help/articles/:articleId" element={<React.Suspense fallback={<LazyFallback />}><ArticleReader /></React.Suspense>} />
+            <Route path="/help/topics/:topicId" element={<React.Suspense fallback={<LazyFallback />}><TopicExplorer /></React.Suspense>} />
+            <Route path="/admin/help" element={<RequireAuth permission="HELP_EDIT_LAB"><React.Suspense fallback={<LazyFallback />}><AdminHelpEditor /></React.Suspense></RequireAuth>} />
 
             {/* Catch-All 404 Route */}
             <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />

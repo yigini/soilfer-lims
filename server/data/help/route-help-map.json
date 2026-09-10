@@ -1,0 +1,495 @@
+{
+  "status": "PROPOSED_REGISTRY_NOT_RUNTIME_AUTHORITY",
+  "source": "client/src/App.jsx",
+  "routeCount": 42,
+  "routes": [
+    {
+      "route": "/login",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/",
+      "articleIds": [
+        "start-shift",
+        "bench-blocked",
+        "review-results"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/samples",
+      "articleIds": [
+        "intake-identity",
+        "start-shift"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/samples/:id",
+      "articleIds": [
+        "bench-save-submit",
+        "review-results",
+        "review-amend"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/scan",
+      "articleIds": [
+        "intake-identity",
+        "offline-prepare"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/samples/:id/map",
+      "articleIds": [
+        "bench-blocked",
+        "bench-drying",
+        "bench-preparation"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/workflow-map",
+      "articleIds": [
+        "bench-blocked",
+        "bench-drying",
+        "bench-preparation"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/my-work",
+      "articleIds": [
+        "bench-run",
+        "bench-save-submit"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "ENTER_RESULTS",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/workbench",
+      "articleIds": [
+        "bench-blocked",
+        "bench-run",
+        "bench-save-submit",
+        "bench-spectra"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "ENTER_RESULTS",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/manager-queue",
+      "articleIds": [
+        "review-results",
+        "review-returned",
+        "review-report"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "APPROVE_RESULTS",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/reception",
+      "articleIds": [
+        "intake-project",
+        "intake-location",
+        "intake-identity"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "RECEIVE_SAMPLE",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/inventory",
+      "articleIds": [
+        "assets-stock"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "VIEW_INVENTORY",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/equipment",
+      "articleIds": [
+        "assets-instrument"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "VIEW_EQUIPMENT",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/users",
+      "articleIds": [
+        "manage-support",
+        "start-shift"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "MANAGE_USERS",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/projects",
+      "articleIds": [
+        "connect-kobo",
+        "intake-project",
+        "connect-sis"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "MANAGE_PROJECTS",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin",
+      "articleIds": [
+        "manage-catalogue",
+        "manage-language"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "MANAGE_ANALYSES",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/methods",
+      "articleIds": [
+        "manage-catalogue"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "MANAGE_ANALYSES",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/lab-methods",
+      "articleIds": [
+        "manage-catalogue"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "MANAGE_ANALYSES",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/audit",
+      "articleIds": [
+        "review-amend",
+        "review-results"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "VIEW_AUDIT",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/labs",
+      "articleIds": [
+        "manage-support",
+        "manage-language"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": "SUPER_ADMIN",
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/legacy-import",
+      "articleIds": [
+        "intake-identity",
+        "manage-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "RECEIVE_SAMPLE",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/datasheet",
+      "articleIds": [
+        "review-results",
+        "review-report"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/maps",
+      "articleIds": [
+        "intake-location",
+        "connect-kobo"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/qa",
+      "articleIds": [
+        "review-results",
+        "assets-instrument"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "VIEW_AUDIT",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/spectral-library",
+      "articleIds": [
+        "connect-library",
+        "bench-spectra"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/spectral",
+      "articleIds": [
+        "connect-library",
+        "bench-spectra"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/data-results",
+      "articleIds": [
+        "review-results",
+        "review-report",
+        "bench-texture"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/result-reports",
+      "articleIds": [
+        "review-report",
+        "connect-sis"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/reports",
+      "articleIds": [
+        "review-report"
+      ],
+      "auth": "redirect-to-authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/report/:token",
+      "articleIds": [
+        "review-report",
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/profile",
+      "articleIds": [
+        "manage-language",
+        "offline-prepare"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/about",
+      "articleIds": [
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/techstack",
+      "articleIds": [
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/tech-stack",
+      "articleIds": [
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/credits",
+      "articleIds": [
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/help",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/help/faq",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/faq",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    },
+    {
+      "route": "/help/articles/:articleId",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/help/topics/:topicId",
+      "articleIds": [
+        "start-shift",
+        "manage-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/help",
+      "articleIds": [
+        "manage-catalogue",
+        "manage-language"
+      ],
+      "auth": "authenticated",
+      "currentPermission": "HELP_EDIT_LAB",
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "*",
+      "articleIds": [
+        "manage-load-error",
+        "manage-support"
+      ],
+      "auth": "public-or-error",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+    }
+  ],
+  "blockers": {
+    "UNASSIGNED_TO_USER": "bench-blocked",
+    "ITEM_SEALED": "review-amend",
+    "SAMPLE_NOT_FOUND": "intake-identity",
+    "SAMPLE_ON_HOLD": "bench-blocked",
+    "SAMPLE_REJECTED": "bench-blocked",
+    "SAMPLE_NOT_ACCEPTED": "intake-project",
+    "SAMPLE_STATUS_INELIGIBLE": "bench-blocked",
+    "DRYING_FAILED": "bench-drying",
+    "DRYING_PREREQUISITE_BLOCKED": "bench-drying",
+    "PREPARATION_PREREQUISITE_BLOCKED": "bench-preparation",
+    "INSTRUMENT_REQUIRED": "assets-instrument",
+    "INSTRUMENT_NOT_ELIGIBLE": "assets-instrument",
+    "INSTRUMENT_OUT_OF_SERVICE": "assets-instrument",
+    "INSTRUMENT_CALIBRATION_OVERDUE": "assets-instrument",
+    "INSTRUMENT_CALIBRATION_DUE_SOON": "assets-instrument"
+  },
+  "unknownCodeArticle": "bench-blocked",
+  "notes": [
+    "Never derive readiness or permissions from help metadata. Use server decisions.",
+    "Roles in content.en.json are editorial audiences, not authorization grants.",
+    "Match routes using the router, most specific first. Discard query tokens and sample identifiers from help analytics.",
+    "Inspect nested tabs, panels and controls in addition to these route declarations.",
+    "Some admin subjects use generic help for now; see launch backlog for task-specific pages."
+  ]
+}

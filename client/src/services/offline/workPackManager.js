@@ -100,13 +100,14 @@ export async function downloadAndActivateWorkPack({ labId, methodCodes, sampleId
         await cacheWorkItems(bundle.workItems);
     }
 
-    // 5. Download and cache scoped offline help pack
+    // 5. Download and cache scoped offline help pack (Finding 5)
     try {
-        const helpRes = await fetch('/api/help/pack', { method: 'GET', headers });
+        const locale = (user?.language || (typeof localStorage !== 'undefined' ? localStorage.getItem('soilfer_language') : null) || 'en');
+        const helpRes = await fetch(`/api/help/pack?locale=${encodeURIComponent(locale)}`, { method: 'GET', headers });
         if (helpRes.ok) {
             const helpData = await helpRes.json();
             if (helpData?.pack) {
-                await saveOfflineHelpPack(helpData.pack);
+                await saveOfflineHelpPack(helpData.pack, { labId: user?.labId, locale });
             }
         }
     } catch (e) {

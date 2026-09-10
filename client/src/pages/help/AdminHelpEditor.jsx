@@ -13,7 +13,9 @@ import {
     RefreshCw,
     X,
     Loader2,
-    Eye
+    Eye,
+    Trash2,
+    ShieldCheck
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -24,23 +26,28 @@ export const AdminHelpEditor = () => {
     const { user, hasPermission } = useAuth();
     const { t } = useLanguage();
 
-    const isAuthorized = ['SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'].includes(user?.role);
-    const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+    const canEditGlobal = user?.role === 'SUPER_ADMIN' || (hasPermission && hasPermission('HELP_EDIT_GLOBAL'));
+    const canPublishGlobal = user?.role === 'SUPER_ADMIN' || (hasPermission && hasPermission('HELP_PUBLISH_GLOBAL'));
+    const canEditLab = user?.role === 'SUPER_ADMIN' || user?.role === 'LAB_MANAGER' || (hasPermission && hasPermission('HELP_EDIT_LAB'));
+    const isAuthorized = canEditGlobal || canPublishGlobal || canEditLab;
 
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchFilter, setSearchFilter] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
 
-    // Editing Modal / Pane State
+    // Structured Editing State
     const [activeArticle, setActiveArticle] = useState(null);
-    const [editScope, setEditScope] = useState(isSuperAdmin ? 'global' : 'lab');
-    const [editBody, setEditBody] = useState('');
-    const [editCaution, setEditCaution] = useState('');
+    const [editScope, setEditScope] = useState(canEditGlobal ? 'global' : 'lab');
+    const [editTitle, setEditTitle] = useState('');
+    const [editSummary, setEditSummary] = useState('');
+    const [editSteps, setEditSteps] = useState([]);
     const [editSuccess, setEditSuccess] = useState('');
+    const [editCaution, setEditCaution] = useState('');
+    const [editChangeReason, setEditChangeReason] = useState('');
     const [labNoteText, setLabNoteText] = useState('');
+    const [currentReviewStatus, setCurrentReviewStatus] = useState('EDITORIAL_DRAFT');
     const [saveStatus, setSaveStatus] = useState(null);
-    const [inReview, setInReview] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const fetchArticles = () => {
@@ -79,11 +86,16 @@ export const AdminHelpEditor = () => {
 
     const openEditor = (article) => {
         setActiveArticle(article);
-        setEditScope(isSuperAdmin ? 'global' : 'lab');
-        setEditBody(article.summary || '');
+        setEditScope(canEditGlobal ? 'global' : 'lab');
+        setEditTitle(article.title || '');
+        setEditSummary(article.summary || '');
+        setEditSteps(Array.isArray(article.steps) ? [...article.steps] : []);
+        setEditSuccess(article.success || '');
+        setEditCaution(article.caution || '');
+        setEditChangeReason('');
         setLabNoteText(article.labNote?.noteText || '');
+        setCurrentReviewStatus(article.locales?.en || 'EDITORIAL_DRAFT');
         setSaveStatus(null);
-        setInReview(false);
     };
 
     const handleSaveDraft = async (e) => {
@@ -94,58 +106,110 @@ export const AdminHelpEditor = () => {
 
         try {
             if (editScope === 'lab') {
-                const res = await axios.put(`/api/help/admin/articles/${activeArticle.id}/lab-note`, {
+                await axios.put(`/api/help/admin/articles/${activeArticle.id}/lab-note`, {
                     noteText: labNoteText,
                     isActive: true
                 });
                 setSaveStatus({ error: false, message: 'Laboratory note saved successfully.' });
                 fetchArticles();
             } else {
-                const res = await axios.post(`/api/help/admin/articles/${activeArticle.id}/revisions`, {
+                const cleanedSteps = editSteps.filter(s => typeof s === 'string' && s.trim());
+                await axios.post(`/api/help/admin/articles/${activeArticle.id}/revisions`, {
                     expectedRevisionNumber: activeArticle.latestRevisionNumber,
-                    title: activeArticle.title,
-                    summary: editBody,
-                    steps: [],
+                    title: editTitle,
+                    summary: editSummary,
+                    steps: cleanedSteps,
                     success: editSuccess,
                     caution: editCaution,
-                    changeReason: 'Admin draft update'
+                    changeReason: editChangeReason || 'Updated draft revision'
                 });
+                setCurrentReviewStatus('EDITORIAL_DRAFT');
                 setSaveStatus({
                     error: false,
-                    message: 'Draft revision saved. No published article was changed until approved.'
+                    message: 'Draft revision created. Changes remain unpublished until approved.'
                 });
                 fetchArticles();
             }
         } catch (err) {
             setSaveStatus({
                 error: true,
-                message: err.response?.data?.message || 'Failed to save draft revision.'
+                message: err.response?.data?.message || err.response?.data?.error || 'Failed to save draft revision.'
             });
         } finally {
             setIsSaving(false);
         }
     };
 
-    const handleRequestReview = () => {
-        setInReview(true);
-        setSaveStatus({
-            error: false,
-            message: 'Revision submitted for scientific & language review. Publication stays unavailable until approved.'
-        });
+    const handleRequestReview = async () => {
+        if (!activeArticle) return;
+        setIsSaving(true);
+        setSaveStatus(null);
+        try {
+            await axios.post(`/api/help/admin/articles/${activeArticle.id}/request-review`, {
+                revisionNumber: activeArticle.latestRevisionNumber,
+                locales: ['en']
+            });
+            setCurrentReviewStatus('IN_REVIEW');
+            setSaveStatus({
+                error: false,
+                message: 'Revision submitted for scientific & language review (status: IN_REVIEW).'
+            });
+            fetchArticles();
+        } catch (err) {
+            setSaveStatus({
+                error: true,
+                message: err.response?.data?.message || err.response?.data?.error || 'Failed to submit review request.'
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleApprove = async () => {
+        if (!activeArticle) return;
+        setIsSaving(true);
+        setSaveStatus(null);
+        try {
+            await axios.post(`/api/help/admin/articles/${activeArticle.id}/approve`, {
+                revisionNumber: activeArticle.latestRevisionNumber,
+                locale: 'en'
+            });
+            setCurrentReviewStatus('APPROVED');
+            setSaveStatus({
+                error: false,
+                message: 'Revision approved for publication (status: APPROVED).'
+            });
+            fetchArticles();
+        } catch (err) {
+            setSaveStatus({
+                error: true,
+                message: err.response?.data?.message || err.response?.data?.error || 'Failed to approve revision.'
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handlePublish = async () => {
         if (!activeArticle) return;
         setIsSaving(true);
+        setSaveStatus(null);
         try {
             await axios.post(`/api/help/admin/articles/${activeArticle.id}/publish`, {
                 revisionNumber: activeArticle.latestRevisionNumber || 1,
                 approvedLocales: ['en']
             });
-            setSaveStatus({ error: false, message: 'Article revision published atomically.' });
+            setCurrentReviewStatus('PUBLISHED');
+            setSaveStatus({
+                error: false,
+                message: 'Article revision published atomically.'
+            });
             fetchArticles();
         } catch (err) {
-            setSaveStatus({ error: true, message: err.response?.data?.message || 'Publication failed.' });
+            setSaveStatus({
+                error: true,
+                message: err.response?.data?.message || err.response?.data?.error || 'Publication failed.'
+            });
         } finally {
             setIsSaving(false);
         }
@@ -310,10 +374,27 @@ export const AdminHelpEditor = () => {
             {/* Editing Slide-Over / Modal */}
             {activeArticle && (
                 <div id="hc-sideeditor" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
-                    <div className="w-full max-w-2xl bg-sf-surface border border-sf-divider rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between border-b border-sf-divider pb-3">
-                            <div>
-                                <span className="text-[10px] font-bold text-sf-primary uppercase font-mono">{activeArticle.id}</span>
+                    <div className="w-full max-w-3xl bg-sf-surface border border-sf-divider rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+                        {/* Header with real revision & review status */}
+                        <div className="flex items-start justify-between border-b border-sf-divider pb-3">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-sf-primary uppercase font-mono">{activeArticle.id}</span>
+                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sf-inset text-sf-muted">
+                                        Rev {activeArticle.latestRevisionNumber || 1}
+                                    </span>
+                                    <span className={clsx(
+                                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
+                                        currentReviewStatus === 'APPROVED' ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" :
+                                        currentReviewStatus === 'IN_REVIEW' ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
+                                        currentReviewStatus === 'PUBLISHED' ? "bg-blue-500/20 text-blue-700 dark:text-blue-300" :
+                                        "bg-sf-inset text-sf-muted"
+                                    )}>
+                                        {currentReviewStatus === 'APPROVED' ? 'Approved' :
+                                         currentReviewStatus === 'IN_REVIEW' ? 'In Review' :
+                                         currentReviewStatus === 'PUBLISHED' ? 'Published' : 'Editorial Draft'}
+                                    </span>
+                                </div>
                                 <h2 className="text-base font-black text-sf-text">{activeArticle.title}</h2>
                             </div>
                             <button
@@ -333,8 +414,8 @@ export const AdminHelpEditor = () => {
                                 onChange={(e) => setEditScope(e.target.value)}
                                 className="w-full p-2.5 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text"
                             >
-                                {isSuperAdmin && <option value="global">Global Article Guidance</option>}
-                                <option value="lab">Laboratory-Local SOP Note ({user?.labId || 'Default Lab'})</option>
+                                {canEditGlobal && <option value="global">Global Article Guidance (v{activeArticle.latestRevisionNumber || 1})</option>}
+                                {canEditLab && <option value="lab">Laboratory-Local SOP Note ({user?.labId || 'Default Lab'})</option>}
                             </select>
                         </div>
 
@@ -353,18 +434,108 @@ export const AdminHelpEditor = () => {
                                 />
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-sf-text">Article Title</label>
+                                    <input
+                                        type="text"
+                                        value={editTitle}
+                                        onChange={(e) => setEditTitle(e.target.value)}
+                                        placeholder="Article title..."
+                                        className="w-full p-2.5 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text font-semibold focus:ring-2 focus:ring-sf-primary"
+                                    />
+                                </div>
+
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-sf-text">Summary Guidance</label>
                                     <textarea
                                         id="hc-edit-body"
-                                        rows={4}
-                                        value={editBody}
-                                        onChange={(e) => {
-                                            setEditBody(e.target.value);
-                                            setInReview(false);
-                                        }}
+                                        rows={3}
+                                        value={editSummary}
+                                        onChange={(e) => setEditSummary(e.target.value)}
+                                        placeholder="Brief overview explaining what this task accomplishes..."
                                         className="w-full p-3 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:ring-2 focus:ring-sf-primary"
+                                    />
+                                </div>
+
+                                {/* Structured Procedure Steps */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-bold text-sf-text">
+                                            Procedure Steps ({editSteps.length})
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditSteps(prev => [...prev, ''])}
+                                            className="inline-flex items-center gap-1 text-[11px] font-bold text-sf-primary hover:underline"
+                                        >
+                                            <Plus size={13} />
+                                            <span>Add Step</span>
+                                        </button>
+                                    </div>
+                                    {editSteps.map((step, idx) => (
+                                        <div key={idx} className="flex items-start gap-2">
+                                            <span className="w-6 h-6 rounded-full bg-sf-inset border border-sf-divider text-[11px] font-bold flex items-center justify-center shrink-0 mt-1">
+                                                {idx + 1}
+                                            </span>
+                                            <textarea
+                                                rows={2}
+                                                value={step}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setEditSteps(prev => {
+                                                        const next = [...prev];
+                                                        next[idx] = val;
+                                                        return next;
+                                                    });
+                                                }}
+                                                placeholder={`Step ${idx + 1} instructions...`}
+                                                className="flex-1 p-2 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:ring-2 focus:ring-sf-primary"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditSteps(prev => prev.filter((_, i) => i !== idx))}
+                                                className="p-1.5 rounded-lg text-sf-muted hover:text-rose-500 hover:bg-rose-500/10 transition-colors mt-1"
+                                                title="Remove step"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-sf-text">Success Criteria</label>
+                                        <textarea
+                                            rows={2}
+                                            value={editSuccess}
+                                            onChange={(e) => setEditSuccess(e.target.value)}
+                                            placeholder="What does success look like..."
+                                            className="w-full p-2.5 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:ring-2 focus:ring-sf-primary"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-sf-text">Precaution / Caution</label>
+                                        <textarea
+                                            rows={2}
+                                            value={editCaution}
+                                            onChange={(e) => setEditCaution(e.target.value)}
+                                            placeholder="Critical warnings or tips to keep in mind..."
+                                            className="w-full p-2.5 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:ring-2 focus:ring-sf-primary"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-sf-text">Change Reason</label>
+                                    <input
+                                        type="text"
+                                        value={editChangeReason}
+                                        onChange={(e) => setEditChangeReason(e.target.value)}
+                                        placeholder="Why is this revision being updated (e.g., ISO method adjustment)..."
+                                        className="w-full p-2 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:ring-2 focus:ring-sf-primary"
                                     />
                                 </div>
                             </div>
@@ -385,8 +556,8 @@ export const AdminHelpEditor = () => {
                             </div>
                         )}
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center justify-between pt-3 border-t border-sf-divider">
+                        {/* Action Buttons with Real Governance Workflow */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-sf-divider">
                             <button
                                 type="button"
                                 onClick={() => setActiveArticle(null)}
@@ -395,7 +566,7 @@ export const AdminHelpEditor = () => {
                                 Close
                             </button>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <button
                                     type="button"
                                     data-act="editor-save"
@@ -407,25 +578,41 @@ export const AdminHelpEditor = () => {
                                     <span>{t('help.saveDraft', 'Save draft')}</span>
                                 </button>
 
-                                {editScope === 'global' && isSuperAdmin && (
+                                {editScope === 'global' && canEditGlobal && (
+                                    <button
+                                        type="button"
+                                        data-act="editor-review"
+                                        disabled={currentReviewStatus === 'IN_REVIEW' || currentReviewStatus === 'APPROVED' || isSaving}
+                                        onClick={handleRequestReview}
+                                        className="px-4 py-2 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                                        title={currentReviewStatus === 'IN_REVIEW' ? 'Already in review' : 'Submit for review'}
+                                    >
+                                        <Send size={14} />
+                                        <span>{t('help.requestReview', 'Request review')}</span>
+                                    </button>
+                                )}
+
+                                {editScope === 'global' && canPublishGlobal && (
                                     <>
                                         <button
                                             type="button"
-                                            data-act="editor-review"
-                                            disabled={inReview || isSaving}
-                                            onClick={handleRequestReview}
-                                            className="px-4 py-2 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                                            data-act="editor-approve"
+                                            disabled={currentReviewStatus !== 'IN_REVIEW' || isSaving}
+                                            onClick={handleApprove}
+                                            className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                                            title="Approve revision after scientific review"
                                         >
-                                            <Send size={14} />
-                                            <span>{t('help.requestReview', 'Request review')}</span>
+                                            <ShieldCheck size={14} />
+                                            <span>Approve Revision</span>
                                         </button>
 
                                         <button
                                             type="button"
                                             data-act="editor-publish"
-                                            disabled={!inReview || isSaving}
+                                            disabled={currentReviewStatus !== 'APPROVED' || isSaving}
                                             onClick={handlePublish}
                                             className="px-4 py-2 rounded-xl bg-sf-primary text-white text-xs font-bold hover:bg-sf-primary/90 disabled:opacity-40 flex items-center gap-1.5"
+                                            title={currentReviewStatus !== 'APPROVED' ? 'Requires approval before publication' : 'Publish atomically to production'}
                                         >
                                             <CheckCircle2 size={14} />
                                             <span>{t('help.publish', 'Publish revision')}</span>

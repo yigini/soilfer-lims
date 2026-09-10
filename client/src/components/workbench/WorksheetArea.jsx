@@ -11,6 +11,7 @@ import WorkbenchInspector from './WorkbenchInspector';
 import PastePreviewModal from './PastePreviewModal';
 import BatchModal from './BatchModal';
 import SingleSampleEditor from './SingleSampleEditor';
+import { useHelp } from '../../context/HelpContext';
 
 /**
  * WorksheetArea
@@ -33,6 +34,7 @@ export default function WorksheetArea({
     onBatchUpdated,
     isDiscarding = false
 }) {
+    const { registerBlockers, clearBlockers } = useHelp();
     const getAnalysisDisplayName = useAnalysisNames();
     const items = activeGroup?.items || [];
     const [selectedItemId, setSelectedItemId] = useState(() => {
@@ -88,6 +90,31 @@ export default function WorksheetArea({
         }
         return filteredItems.find(i => i.workItemId === selectedItemId) || filteredItems[0] || null;
     }, [filteredItems, selectedItemId]);
+
+    // Synchronize execution readiness blockers with contextual help
+    useEffect(() => {
+        if (inspectedItem?.readiness && !inspectedItem.readiness.isReady) {
+            const rawBlockers = inspectedItem.readiness.blockers || [];
+            let codes = [...rawBlockers];
+            if (codes.length === 0 && Array.isArray(inspectedItem.readiness.reasons)) {
+                codes = inspectedItem.readiness.reasons.map(r => {
+                    const low = r.toLowerCase();
+                    if (low.includes('drying')) return 'DRYING_PREREQUISITE_BLOCKED';
+                    if (low.includes('prep') || low.includes('siev')) return 'PREPARATION_PREREQUISITE_BLOCKED';
+                    if (low.includes('instrument') || low.includes('calibrat')) return 'INSTRUMENT_REQUIRED';
+                    if (low.includes('hold')) return 'SAMPLE_ON_HOLD';
+                    if (low.includes('reject')) return 'SAMPLE_REJECTED';
+                    return 'SAMPLE_STATUS_INELIGIBLE';
+                });
+            }
+            registerBlockers(codes);
+        } else {
+            clearBlockers();
+        }
+        return () => {
+            clearBlockers();
+        };
+    }, [inspectedItem, registerBlockers, clearBlockers]);
 
     // Select all handler
     const allSelected = filteredItems.length > 0 && filteredItems.every(i => selectedRows.has(i.workItemId));
