@@ -48,6 +48,9 @@ async function escalateUnassignedWork(now = new Date(), thresholds = DEFAULT_THR
     const escalations = [];
 
     for (const item of unassignedItems) {
+        // Skip orphaned work items without an active parent sample
+        if (!item.sample) continue;
+
         const sampleDisplay = item.sample?.labId && item.sample.labId !== item.sampleId
             ? `${item.sample.labId} (${item.sampleId})`
             : item.sampleId;
@@ -59,13 +62,17 @@ async function escalateUnassignedWork(now = new Date(), thresholds = DEFAULT_THR
         const durationStr = ageDays >= 1 ? `${ageDays} day${ageDays > 1 ? 's' : ''}` : `${ageHours} hours`;
 
         for (const mgr of managers) {
-            // Deduplicate: check if an unread notification for this unassigned work item already exists
+            // Deduplicate: check if an unread notification exists OR if one was created within 24h
+            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             const existing = await prisma.notification.findFirst({
                 where: {
                     userId: mgr.id,
                     link: `/samples/${item.sampleId}`,
                     title: { contains: 'Unassigned' },
-                    isRead: false
+                    OR: [
+                        { isRead: false },
+                        { createdAt: { gte: oneDayAgo } }
+                    ]
                 }
             });
 
@@ -113,6 +120,9 @@ async function escalateStalledWork(now = new Date(), thresholds = DEFAULT_THRESH
     const escalations = [];
 
     for (const item of inProgressItems) {
+        // Skip orphaned work items without an active parent sample
+        if (!item.sample) continue;
+
         const sampleDisplay = item.sample?.labId && item.sample.labId !== item.sampleId
             ? `${item.sample.labId} (${item.sampleId})`
             : item.sampleId;
@@ -124,12 +134,17 @@ async function escalateStalledWork(now = new Date(), thresholds = DEFAULT_THRESH
         const durationStr = ageDays >= 1 ? `${ageDays} day${ageDays > 1 ? 's' : ''}` : `${ageHours} hours`;
 
         for (const mgr of managers) {
+            // Deduplicate: check if an unread notification exists OR if one was created within 24h
+            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             const existing = await prisma.notification.findFirst({
                 where: {
                     userId: mgr.id,
                     link: `/samples/${item.sampleId}`,
                     title: { contains: 'Stalled' },
-                    isRead: false
+                    OR: [
+                        { isRead: false },
+                        { createdAt: { gte: oneDayAgo } }
+                    ]
                 }
             });
 
@@ -177,6 +192,9 @@ async function escalateOnHoldWork(now = new Date(), thresholds = DEFAULT_THRESHO
     const escalations = [];
 
     for (const item of onHoldItems) {
+        // Skip orphaned work items without an active parent sample
+        if (!item.sample) continue;
+
         const sampleDisplay = item.sample?.labId && item.sample.labId !== item.sampleId
             ? `${item.sample.labId} (${item.sampleId})`
             : item.sampleId;
@@ -186,12 +204,17 @@ async function escalateOnHoldWork(now = new Date(), thresholds = DEFAULT_THRESHO
         const ageHours = Math.round((now.getTime() - new Date(item.updatedAt).getTime()) / (1000 * 60 * 60));
 
         for (const mgr of managers) {
+            // Deduplicate: check if an unread notification exists OR if one was created within 24h
+            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             const existing = await prisma.notification.findFirst({
                 where: {
                     userId: mgr.id,
                     link: `/samples/${item.sampleId}`,
                     title: { contains: 'On Hold' },
-                    isRead: false
+                    OR: [
+                        { isRead: false },
+                        { createdAt: { gte: oneDayAgo } }
+                    ]
                 }
             });
 
