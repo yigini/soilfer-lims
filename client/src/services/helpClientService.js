@@ -448,10 +448,10 @@ export const helpClientService = {
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 return await axios.post('/api/help/feedback', {
-                    articleId,
-                    revisionId,
-                    locale,
-                    useful,
+                    articleId: String(articleId),
+                    revisionId: revisionId !== null && revisionId !== undefined ? String(revisionId) : null,
+                    locale: String(locale || 'en'),
+                    useful: !!useful,
                     comment,
                     category
                 });

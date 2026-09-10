@@ -86,7 +86,7 @@ export const ArticleReader = () => {
         if (!article) return;
         helpClientService.recordFeedback({
             articleId: article.id,
-            revisionId: article.revisionId || article.revisionNumber || null,
+            revisionId: article.revisionId ? String(article.revisionId) : (article.revisionNumber != null ? String(article.revisionNumber) : null),
             locale,
             useful,
             comment: '',

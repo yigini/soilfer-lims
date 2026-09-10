@@ -123,7 +123,7 @@ async function recordFeedback(req, res) {
 
         const feedback = await helpContentService.recordFeedback({
             articleId,
-            revisionId,
+            revisionId: revisionId !== null && revisionId !== undefined ? String(revisionId) : null,
             locale: locale || req.locale || 'en',
             useful,
             comment,

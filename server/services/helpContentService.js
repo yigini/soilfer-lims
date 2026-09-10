@@ -788,17 +788,17 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
  * Record feedback for an article
  */
 async function recordFeedback({ articleId, revisionId = null, locale = 'en', useful, comment = '', category = null, user = null }) {
-    const sanitizedComment = sanitizeHtml(comment.slice(0, 1000));
+    const sanitizedComment = comment ? sanitizeHtml(String(comment).slice(0, 1000)) : null;
 
     return await prisma.helpFeedback.create({
         data: {
-            articleId,
-            revisionId,
-            locale,
+            articleId: String(articleId),
+            revisionId: revisionId !== null && revisionId !== undefined ? String(revisionId) : null,
+            locale: String(locale || 'en'),
             useful: !!useful,
             comment: sanitizedComment || null,
             category: category ? String(category).slice(0, 50) : null,
-            userId: user?.id || null
+            userId: user?.id ? String(user.id) : null
         }
     });
 }

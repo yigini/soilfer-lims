@@ -106,6 +106,20 @@ describe('Help Content Service Contract Tests', () => {
 
         // Clean up feedback
         await prisma.helpFeedback.delete({ where: { id: feedback.id } });
+
+        // Numeric revisionId (e.g. revisionNumber: 1) should be coerced to string without error
+        const numericRevFeedback = await helpContentService.recordFeedback({
+            articleId: 'start-shift',
+            revisionId: 1, // numeric Int from article.revisionNumber
+            locale: 'en',
+            useful: false,
+            comment: 'Testing numeric revisionId coercion',
+            category: 'start',
+            user: { id: 'test-user-2' }
+        });
+        expect(numericRevFeedback).toBeDefined();
+        expect(numericRevFeedback.revisionId).toBe('1');
+        await prisma.helpFeedback.delete({ where: { id: numericRevFeedback.id } });
     });
 
     test('getArticleById returns rich v2 blocks for bench-batch and prep-drying', async () => {
