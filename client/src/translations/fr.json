@@ -898,7 +898,22 @@
       "openFullArticle": "Ouvrir la page complète de l'article",
       "steps": "Étapes requises",
       "success": "Critères de réussite",
-      "caution": "À garder à l'esprit"
+      "caution": "À garder à l'esprit",
+      "unPublishedTitle": "Guide en cours de révision",
+      "unPublishedEditorBody": "Cette page est associée à des guides de travail, mais ils n'ont pas encore été publiés.",
+      "openEditor": "Examiner les brouillons dans l'éditeur d'administration",
+      "inReviewTitle": "Guide bientôt disponible",
+      "inReviewBody": "Le guide pour cette page est en cours de révision éditoriale et n'a pas encore été publié.",
+      "browseGeneral": "Parcourir le Centre d'aide",
+      "authRequiredTitle": "Authentification requise",
+      "authRequiredBody": "Veuillez vous connecter pour accéder aux procédures de laboratoire et aux guides de paillasse.",
+      "missingPackTitle": "Pack hors ligne non téléchargé",
+      "missingPackBody": "Vous êtes hors ligne et aucun pack d'aide hors ligne n'a été téléchargé pour ce laboratoire.",
+      "requestFailureTitle": "Erreur de connexion",
+      "requestFailureBody": "Impossible de charger le guide en raison d'une erreur réseau.",
+      "noTranslationTitle": "Traduction non disponible",
+      "noTranslationBody": "Le guide pour cette page n'est pas encore disponible dans la langue sélectionnée.",
+      "zeroPageSub": "Recherchez dans la base de connaissances ou explorez les thèmes généraux dans le Centre d'aide."
     },
     "support": {
       "title": "Contacter le support",

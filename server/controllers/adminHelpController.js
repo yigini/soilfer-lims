@@ -655,6 +655,210 @@ async function saveLabNote(req, res) {
     }
 }
 
+/**
+ * GET /api/help/admin/release-preview
+ * Previews all articles and their locale review states for release management
+ */
+async function getReleasePreview(req, res) {
+    try {
+        const articles = await prisma.helpArticle.findMany({
+            where: { archivedAt: null },
+            include: {
+                publications: {
+                    where: { isCurrent: true },
+                    include: { revision: true }
+                },
+                revisions: {
+                    orderBy: { revisionNumber: 'desc' },
+                    take: 1,
+                    include: { locales: true }
+                }
+            },
+            orderBy: { id: 'asc' }
+        });
+
+        const locales = ['en', 'es', 'es-419', 'fr', 'pt'];
+        const approvedCounts = { en: 0, es: 0, 'es-419': 0, fr: 0, pt: 0 };
+
+        const items = articles.map(a => {
+            const currentPub = a.publications[0];
+            const latestRev = a.revisions[0];
+            const localeStatus = {};
+
+            locales.forEach(loc => {
+                const locRev = latestRev?.locales?.find(l => l.locale === loc);
+                const status = locRev ? locRev.reviewStatus : 'TRANSLATION_REQUIRED';
+                localeStatus[loc] = status;
+                if (status === 'APPROVED') {
+                    approvedCounts[loc] = (approvedCounts[loc] || 0) + 1;
+                }
+            });
+
+            const currentPublishedLocales = currentPub?.approvedLocales
+                ? (typeof currentPub.approvedLocales === 'string' ? JSON.parse(currentPub.approvedLocales) : currentPub.approvedLocales)
+                : [];
+
+            return {
+                id: a.id,
+                category: a.category,
+                title: latestRev?.title || a.id,
+                revisionNumber: latestRev?.revisionNumber || 1,
+                revisionId: latestRev?.id || null,
+                isPublished: !!currentPub,
+                currentlyPublishedLocales,
+                locales: localeStatus,
+                readyToPublishLocales: locales.filter(loc => localeStatus[loc] === 'APPROVED')
+            };
+        });
+
+        res.json({
+            success: true,
+            totalArticles: articles.length,
+            approvedCounts,
+            items
+        });
+    } catch (err) {
+        console.error('[ADMIN_HELP_CONTROLLER] getReleasePreview error:', err);
+        res.status(500).json({ error: 'Failed to generate release preview' });
+    }
+}
+
+/**
+ * POST /api/help/admin/batch-publish
+ * Batch publish reviewed articles with manifest validation and transactional execution
+ */
+async function batchPublish(req, res) {
+    try {
+        const user = req.user;
+        const canPublish = user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_PUBLISH_GLOBAL');
+        if (!canPublish) {
+            return res.status(403).json({ error: 'UNAUTHORIZED', message: 'You do not have permission to batch publish articles.' });
+        }
+
+        const { releases, dryRun = false } = req.body;
+        if (!Array.isArray(releases) || releases.length === 0) {
+            return res.status(400).json({ error: 'releases must be a non-empty array' });
+        }
+
+        const validationErrors = [];
+        const validatedReleases = [];
+
+        for (const item of releases) {
+            const { articleId, revisionNumber, approvedLocales } = item;
+            if (!articleId) {
+                validationErrors.push({ articleId: 'unknown', error: 'Missing articleId' });
+                continue;
+            }
+
+            const rev = await prisma.helpRevision.findFirst({
+                where: {
+                    articleId,
+                    revisionNumber: revisionNumber ? parseInt(revisionNumber) : undefined
+                },
+                orderBy: { revisionNumber: 'desc' },
+                include: { locales: true }
+            });
+
+            if (!rev) {
+                validationErrors.push({ articleId, error: `Revision ${revisionNumber || 'latest'} not found` });
+                continue;
+            }
+
+            const localesList = Array.isArray(approvedLocales) && approvedLocales.length > 0
+                ? approvedLocales
+                : ['en'];
+
+            // Validate that every requested locale is APPROVED
+            let allApproved = true;
+            for (const loc of localesList) {
+                const locRev = rev.locales.find(l => l.locale === loc);
+                if (!locRev) {
+                    validationErrors.push({ articleId, locale: loc, error: `Locale ${loc} does not exist on revision ${rev.revisionNumber}` });
+                    allApproved = false;
+                } else if (locRev.reviewStatus !== 'APPROVED') {
+                    validationErrors.push({ articleId, locale: loc, status: locRev.reviewStatus, error: `Locale ${loc} status is ${locRev.reviewStatus}, must be APPROVED` });
+                    allApproved = false;
+                }
+            }
+
+            if (allApproved) {
+                validatedReleases.push({
+                    articleId,
+                    revisionId: rev.id,
+                    revisionNumber: rev.revisionNumber,
+                    approvedLocales: localesList
+                });
+            }
+        }
+
+        if (dryRun) {
+            return res.json({
+                success: true,
+                dryRun: true,
+                valid: validationErrors.length === 0,
+                totalRequested: releases.length,
+                validCount: validatedReleases.length,
+                errorsCount: validationErrors.length,
+                errors: validationErrors,
+                manifest: validatedReleases
+            });
+        }
+
+        if (validationErrors.length > 0) {
+            return res.status(422).json({
+                error: 'BATCH_PUBLICATION_VALIDATION_FAILED',
+                message: `Cannot publish release: ${validationErrors.length} validation errors encountered.`,
+                errors: validationErrors
+            });
+        }
+
+        // Execute batch publication atomically in transaction
+        const publishedRecords = await prisma.$transaction(async (tx) => {
+            const results = [];
+            for (const item of validatedReleases) {
+                // Supersede existing current publications
+                await tx.helpPublication.updateMany({
+                    where: { articleId: item.articleId, isCurrent: true },
+                    data: { isCurrent: false }
+                });
+
+                // Create new publication
+                const pub = await tx.helpPublication.create({
+                    data: {
+                        articleId: item.articleId,
+                        revisionId: item.revisionId,
+                        publishedBy: user.username || user.id,
+                        publishedAt: new Date(),
+                        approvedLocales: JSON.stringify(item.approvedLocales),
+                        isCurrent: true
+                    }
+                });
+                results.push(pub);
+            }
+            return results;
+        });
+
+        const localeCounts = {};
+        validatedReleases.forEach(r => {
+            r.approvedLocales.forEach(loc => {
+                localeCounts[loc] = (localeCounts[loc] || 0) + 1;
+            });
+        });
+
+        res.json({
+            success: true,
+            publishedCount: publishedRecords.length,
+            publishedAt: new Date().toISOString(),
+            publishedBy: user.username || user.id,
+            localeCounts,
+            message: `Successfully published ${publishedRecords.length} articles across languages: ${Object.keys(localeCounts).join(', ')}.`
+        });
+    } catch (err) {
+        console.error('[ADMIN_HELP_CONTROLLER] batchPublish error:', err);
+        res.status(500).json({ error: 'Failed to execute batch publication' });
+    }
+}
+
 module.exports = {
     listAdminArticles,
     getRevisionDetails,
@@ -663,5 +867,7 @@ module.exports = {
     requestReview,
     approveLocale,
     publishArticleRevision,
-    saveLabNote
+    saveLabNote,
+    getReleasePreview,
+    batchPublish
 };

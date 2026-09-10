@@ -1,0 +1,748 @@
+{
+  "releaseVersion": "v1.0.0",
+  "publishedAt": "2026-09-10T13:26:03.582Z",
+  "provenance": "system-app-review",
+  "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
+  "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
+  "totalArticles": 27,
+  "locales": [
+    "en",
+    "es",
+    "es-419",
+    "fr",
+    "pt"
+  ],
+  "articles": [
+    {
+      "id": "start-shift",
+      "category": "start",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "92228b66-bd1f-42d4-ab39-89f728a90776",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "eafddfc930c0887dc8f9713b855a4edc8466dd84ee4b06cd94acac93522f767d",
+        "es": "c241e8f5f464753aba153f687e6ea1de85dcc388c6e8417434a339207c2b211e",
+        "es-419": "45e63ac49c851ebe0fac339501d5b9d839600c22aecc9de1782c42a2bf2d0ef1",
+        "fr": "0cdfbfa142b169d67105e877ae9eb68948c6d84a0621d482181d98ab86636c22",
+        "pt": "ca0dee7fd1824a10350ebad9400259f9e4a7b39a501190e794f29154b1125daa"
+      },
+      "mappedRoutes": [
+        "/login",
+        "/",
+        "/samples",
+        "/users",
+        "/help",
+        "/help/faq",
+        "/faq",
+        "/help/articles/:articleId",
+        "/help/topics/:topicId"
+      ]
+    },
+    {
+      "id": "intake-project",
+      "category": "intake",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "54bf102c-a985-435e-b05e-047b36ec3fbe",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "e59c7e7536e0acfd23c020a370989093169d0deedfa2db089756082e460f8268",
+        "es": "7ed7ee04473dab2598a199d2c24c2988a401d95ce044db14ce0e9e168d773595",
+        "es-419": "7ed7ee04473dab2598a199d2c24c2988a401d95ce044db14ce0e9e168d773595",
+        "fr": "f4b0d535bb9c670c1c3fbef61a18792e4e535b6f35e556efd055fb8b98d0af3a",
+        "pt": "e61bcab3da4c8a45861775785dd08fa6416db30dcfb8ed6255c1a69b9557c7f5"
+      },
+      "mappedRoutes": [
+        "/reception",
+        "/projects"
+      ]
+    },
+    {
+      "id": "intake-location",
+      "category": "intake",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "123dbc66-ae73-4cdf-a434-ffe29c8246a3",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "a9d59c255324cf749301a96c4bd16a710dcd286d9c4ad79375e9a2fc36fc2821",
+        "es": "4f83ffbe3f4c27b4e98ed32a3be2babb7b5c75c087cf08576920c494bfa59a3c",
+        "es-419": "4f83ffbe3f4c27b4e98ed32a3be2babb7b5c75c087cf08576920c494bfa59a3c",
+        "fr": "dfa7407d3cff5e4addca733751c6ed4531444e57339e24c487addfbf8a76bbc9",
+        "pt": "b01e6c301d6cb8433310b0ccc367cd814b3a0ed6bd569b23b2046df703f344db"
+      },
+      "mappedRoutes": [
+        "/reception",
+        "/maps"
+      ]
+    },
+    {
+      "id": "intake-identity",
+      "category": "intake",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "a9d314e5-d367-4fd5-bc61-b13ab8c99a40",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "0bd2fa2ded7181c05b831360a5ab2b7b8922157e19d7e26935358ee2a259d7ee",
+        "es": "7d0b73402ad1717cbd98b97d6beebdf75f91d8c828f45e869f138faf615202d4",
+        "es-419": "7d0b73402ad1717cbd98b97d6beebdf75f91d8c828f45e869f138faf615202d4",
+        "fr": "8920f63b2b097aa4787491a686ac299e249de7af1a318c7c59d66f164c5b4733",
+        "pt": "565c0d50028acebe6fdda1a5ce089b204cd9b0b55a8fdc4e82ba8c3fd27ae4ec"
+      },
+      "mappedRoutes": [
+        "/samples",
+        "/scan",
+        "/reception",
+        "/admin/legacy-import"
+      ]
+    },
+    {
+      "id": "bench-blocked",
+      "category": "bench",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "927b7d54-b390-4c79-9930-0e041c4c46d4",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "22339d97c36996e76b4fbbeb26cf0a98702879a9c345c5a7c92275822c72228e",
+        "es": "6de658d611dd27166fdb847a0acbdb21395fa00327b82675644a687164206d77",
+        "es-419": "6de658d611dd27166fdb847a0acbdb21395fa00327b82675644a687164206d77",
+        "fr": "6ba17e110b4a61f0d108b3a3c0e8fe52ff48bb3b451e10e4827368dccb48bd5a",
+        "pt": "9fec47f907f4510c30220111ada34b34cd7683723abb0d687b6cd3817c6dc159"
+      },
+      "mappedRoutes": [
+        "/",
+        "/samples/:id/map",
+        "/workflow-map",
+        "/workbench"
+      ]
+    },
+    {
+      "id": "bench-drying",
+      "category": "bench",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "f9e7e098-10e7-42ed-9654-693f209d4c61",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "6e01dd9f36743852bad9b6e03d625da616cb28da88ad706ac8dcb7b0faac1116",
+        "es": "095ce5a9081d62ad3cbdf559f50db9068bb6f9ba3fcca2ae5027e909140cf794",
+        "es-419": "095ce5a9081d62ad3cbdf559f50db9068bb6f9ba3fcca2ae5027e909140cf794",
+        "fr": "6d068aabb6fc6a8fda50bb072e3105b6477f7a0b7ab669a0a83f46b1e3a75f2c",
+        "pt": "2e8989acdceca63b00e86e953558ee88e01a526925ffcc4229666eefb27da011"
+      },
+      "mappedRoutes": [
+        "/samples/:id/map",
+        "/workflow-map"
+      ]
+    },
+    {
+      "id": "bench-preparation",
+      "category": "bench",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "bad787a6-d676-4ffc-8672-58750ef88f5a",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "e15d6f569f19f815612c73d61500a35254ac1276ed0e8e7e06e9a3733e95684a",
+        "es": "749c63be905c43747dc0f51155cbfa7a1ef8be7352479741b5b457c00ffeeb1b",
+        "es-419": "749c63be905c43747dc0f51155cbfa7a1ef8be7352479741b5b457c00ffeeb1b",
+        "fr": "df4b164e3821283bedac032cbdb233881b0b7ffc2461fbc3db598c7a344bb496",
+        "pt": "c425ee57cd8c7250771820637c806d572a88bca16ab5857014c5efa99cb85f40"
+      },
+      "mappedRoutes": [
+        "/samples/:id/map",
+        "/workflow-map"
+      ]
+    },
+    {
+      "id": "bench-run",
+      "category": "bench",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "edb560bf-c3b2-471b-957d-63be2f1e43bf",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "cc356189341c491c19825187d3efb1ede7a0787de00aa3d942f3599fe1256e6e",
+        "es": "dd6d939b1a749533cfc0f37a4f6403a2b57c0ddfa47c75377d5a0a77381220d4",
+        "es-419": "8b6c56b3534c2226cceaebe0276845e76ad8e5df4ee64d940d8ab418b3dd9524",
+        "fr": "e0e952f38938b75b9aa3a4fb0ad1bc2ad1f85990887cba677e683ccf43290f6f",
+        "pt": "cca16247e27c780ce333f3b15549009cc5a47614098c49ce49a6073827c5f121"
+      },
+      "mappedRoutes": [
+        "/my-work",
+        "/workbench"
+      ]
+    },
+    {
+      "id": "bench-save-submit",
+      "category": "bench",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "bba6250f-64ba-417a-9b5d-b951970e66b7",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "68c4ad346dda3ef0702e588aba28b73d2a61a0e2b47335dbf9d90d6f34b1114f",
+        "es": "be6725e2855db3096855df54152fc1f2b928bea7bbfbea8329e3d6df6bccf986",
+        "es-419": "be6725e2855db3096855df54152fc1f2b928bea7bbfbea8329e3d6df6bccf986",
+        "fr": "4d59ae99ba0e3601aa0d9d2a911b9e7704615d7bf9905fbdf785e024f02f4031",
+        "pt": "e20757645388dc8320abd4eb7815e2272b4d2950e5d6ffdc697439ce352bf98c"
+      },
+      "mappedRoutes": [
+        "/samples/:id",
+        "/my-work",
+        "/workbench"
+      ]
+    },
+    {
+      "id": "bench-texture",
+      "category": "bench",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "965bb874-a498-4c29-b6d9-b4a351eb94f1",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "d57f3076de0964bb84fc8e49122648b2ac0788afb7fabc8e84ff7ad65b20c349",
+        "es": "ac0aa64073f9a4d650b66b7b09635b3dcca0dd92d7c5770756dd498a79f46aec",
+        "es-419": "ac0aa64073f9a4d650b66b7b09635b3dcca0dd92d7c5770756dd498a79f46aec",
+        "fr": "0378a5628323ee5c472126433afd0748bd40ab840a98eb589e7699e0f7db3250",
+        "pt": "b015d9b95dd86030c76c97c5a108177d2f4f1690e05b47b899d381bb96b01211"
+      },
+      "mappedRoutes": [
+        "/data-results"
+      ]
+    },
+    {
+      "id": "bench-spectra",
+      "category": "bench",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "a6de2fe4-3c0f-4afd-82ad-0655ded52890",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "10676f015547eb860f07aa726f47b223e20f06c6473edf987fce321627f4ea03",
+        "es": "8be7b797cfa8aa744f8fc7cafc4af112f8f1331e430f04b5450b678dd99cff59",
+        "es-419": "8be7b797cfa8aa744f8fc7cafc4af112f8f1331e430f04b5450b678dd99cff59",
+        "fr": "81690d700941f711a493608ef02429c3ef2d213a2d2c08460ac36b0311a54fe2",
+        "pt": "9dde0fd903cc3020a49f560af1f91cf6c7a4e4f6263f568a6b296616c7ae213d"
+      },
+      "mappedRoutes": [
+        "/workbench",
+        "/spectral-library",
+        "/spectral"
+      ]
+    },
+    {
+      "id": "review-results",
+      "category": "review",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "3d085e41-b101-4665-a104-a7c0e413c594",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "bc147e6c9ac84feec3d8dfae2a0e31dfa638fa257bece599cddf82fb7aa3dfff",
+        "es": "8aefba641e787335a87ee3017e8690ac5d0f78c5d78eca1781987eedaf080fac",
+        "es-419": "8aefba641e787335a87ee3017e8690ac5d0f78c5d78eca1781987eedaf080fac",
+        "fr": "e6c4b6f963b68e8407b3940855539a05a715affb6116b2e30c3363fd82d6f488",
+        "pt": "7f7327bbaef2fde3265307e5c601d67885b097cd09003acf0786d0f7b1a91be5"
+      },
+      "mappedRoutes": [
+        "/",
+        "/samples/:id",
+        "/manager-queue",
+        "/admin/audit",
+        "/datasheet",
+        "/qa",
+        "/data-results"
+      ]
+    },
+    {
+      "id": "review-returned",
+      "category": "review",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "29f34b4a-e4c4-4c63-a78c-1042f7992c67",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "569efed08604e914c418d8acf7dada835fbcc42073cccc022997d92e35647c36",
+        "es": "260408497ff88b346c7850a254e6b932153ea1b4dcf073fa9e44f645984c42ff",
+        "es-419": "260408497ff88b346c7850a254e6b932153ea1b4dcf073fa9e44f645984c42ff",
+        "fr": "a0367462f0cbb1738362436e0e007b06fc7516622695c98206227a9fcd3d5737",
+        "pt": "291aeaa405e59bb1acd44138fa438eb1582ee467b80d475ea6d259b673540b12"
+      },
+      "mappedRoutes": [
+        "/manager-queue"
+      ]
+    },
+    {
+      "id": "review-amend",
+      "category": "review",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "5998a90c-c952-4842-8ce9-22d80400f814",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "319b03cf00c5c1f58b704b58f759bee0fdf29cb99b8735fd87ec5c8b9099d668",
+        "es": "5335ed7a6800479083695ea478dfb45f65610dcdafc270ceaa2bf82148c12d50",
+        "es-419": "5335ed7a6800479083695ea478dfb45f65610dcdafc270ceaa2bf82148c12d50",
+        "fr": "d86162c1903d61e627bd6cb2ea7e817dd54d60860abddb1e7a170ef35029004d",
+        "pt": "e1fd5db27732d085681b3f6fb77bd9b3bd3003d901e5995328b3b5c030cbb5df"
+      },
+      "mappedRoutes": [
+        "/samples/:id",
+        "/admin/audit"
+      ]
+    },
+    {
+      "id": "review-report",
+      "category": "review",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "7984cbf2-30ac-4707-acc8-c64ed5f244a8",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "f3f0bac913a3d68b6e3fb357b32efd843ada76ece386decea29415581a512984",
+        "es": "4a760bd27a71a2e660e9d982875c003666c5ab3d00f9dedb9ed7b6aa2d46fedd",
+        "es-419": "4a760bd27a71a2e660e9d982875c003666c5ab3d00f9dedb9ed7b6aa2d46fedd",
+        "fr": "52bfc01140cff19819de4ec5ffeb7f78556655af01eb94289ade91df4ac2567a",
+        "pt": "250c54b17a7a51916d860ec57c94068c62e661f829e224ed2fed48dec98ee1bf"
+      },
+      "mappedRoutes": [
+        "/manager-queue",
+        "/datasheet",
+        "/data-results",
+        "/result-reports",
+        "/reports",
+        "/report/:token"
+      ]
+    },
+    {
+      "id": "assets-instrument",
+      "category": "assets",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "e7f6da03-2205-4744-8f0b-e957c7f7220d",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "baa7995f6f3bb08ad59f7605483484213d7f412626612c5f863a434196a1c0b3",
+        "es": "8fce517b5c49075884948baa05b9dd3132810201db92e9ac7f5a7fcdedf74500",
+        "es-419": "8fce517b5c49075884948baa05b9dd3132810201db92e9ac7f5a7fcdedf74500",
+        "fr": "8a905bafe62963ae925b054c3d3e01139ccf3fb654741486cbe0b1899006f813",
+        "pt": "9f61855cc4e861d787d7020af852ede14f0d8360d7758d3c8459055aa1bab249"
+      },
+      "mappedRoutes": [
+        "/equipment",
+        "/qa"
+      ]
+    },
+    {
+      "id": "assets-stock",
+      "category": "assets",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "8a64f34c-314a-4c2b-8b00-f6147efc4bcc",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "9d3f80c0429b7ccaf4aa32d194b1887f99940829638b1c8a46d6babbd58eb2ea",
+        "es": "b75f1b23dc4ab56791a66dc39dd8672755d048b3d493bd88d7437a2484bbd25e",
+        "es-419": "b75f1b23dc4ab56791a66dc39dd8672755d048b3d493bd88d7437a2484bbd25e",
+        "fr": "f489a41ed2ce590b8da5ebd689f6126688587da406132ee2c3d6dafca2480ba3",
+        "pt": "23e8aa03de468f28a98363fc4bdcaa4274746937f2ad1171c7438ca59af48ded"
+      },
+      "mappedRoutes": [
+        "/inventory"
+      ]
+    },
+    {
+      "id": "offline-prepare",
+      "category": "offline",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "e2424a6b-befa-4075-81ad-37d7e0af5fe8",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "6faff4fe009083ea00472096ed3b43e14fc154c01c728d700c9dad13807dc39b",
+        "es": "2b8396d2c57b51f8b61af1de9839f807d83ce71fe85b243d388059afc5140113",
+        "es-419": "2b8396d2c57b51f8b61af1de9839f807d83ce71fe85b243d388059afc5140113",
+        "fr": "e5076f967259b5c181ecc0a9b7967b07c27fc913ded6b29f5fca0ec30dda2d5f",
+        "pt": "0e1ba8f9b5d638b748ae5460587eb75665a8d507eca423a55326aac5c3ad1498"
+      },
+      "mappedRoutes": [
+        "/scan",
+        "/profile"
+      ]
+    },
+    {
+      "id": "offline-sync",
+      "category": "offline",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "bbb582ed-b694-4120-9f81-3cfc8033e2e5",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "39a00bffd32fea0ddb7a97d72af0c830c1d271fd2a4c932a9dd403a2dd980979",
+        "es": "956a03d6b4bbe93975944216972e7b15e03f5e6cc59b8031137a3acb5bd90bb0",
+        "es-419": "956a03d6b4bbe93975944216972e7b15e03f5e6cc59b8031137a3acb5bd90bb0",
+        "fr": "2344b827e30c7651fa0aec1101d0785ab7b14482da4b0881339283e1b9d29b18",
+        "pt": "86243ea2b226fdca2425a0826d7b11c5bfea72fa16fe90c44a9f730acdf26c8c"
+      },
+      "mappedRoutes": []
+    },
+    {
+      "id": "offline-files",
+      "category": "offline",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "3c3dfc61-f4c6-46f2-be3c-fd820cacb122",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "dac09c0b3422f9d39d46552c5a44df8915370d4f47b5b3f5cd24cd73c5a89a6a",
+        "es": "08dd9b2c844316d544f20ffc174cd58e503d3902d4e4c5d88778c6e8aec1c902",
+        "es-419": "08dd9b2c844316d544f20ffc174cd58e503d3902d4e4c5d88778c6e8aec1c902",
+        "fr": "82c468a0bfce80779c8329c2b93668ca81f42e099cfff25bc98c9804fc86cfff",
+        "pt": "2e6043b53b65fb8895bb3c7d5839e17f33bf8f561e0c7b85053eacde3ee6610e"
+      },
+      "mappedRoutes": []
+    },
+    {
+      "id": "connect-kobo",
+      "category": "connect",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "9c509b45-e104-415c-943d-919e78f6563f",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "6088e5095563bc7fe94778b9032143067f76f36d8eb5ab8f163ba271ef6e2e11",
+        "es": "cd505aa960b376a17e2f00f6364c6cf91d4203e1b9d538fede1ed13dffbd6f66",
+        "es-419": "cd505aa960b376a17e2f00f6364c6cf91d4203e1b9d538fede1ed13dffbd6f66",
+        "fr": "31cdaee7563bf345a31c27377c261e8ccc54e018a1a5ab827957ccb67702b8d7",
+        "pt": "72ecee4dd3722d9be3ed31233112b25b5ed3603ed0a21ebff690a4c462beb9c7"
+      },
+      "mappedRoutes": [
+        "/projects",
+        "/maps"
+      ]
+    },
+    {
+      "id": "connect-library",
+      "category": "connect",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "b78ae9d1-2ced-4c0c-91d3-3732c1145165",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "2d78c56f0b28a3b5e254d6d8bcf69d830b2a4f4c6d6f9c16cfdaf91d4070b651",
+        "es": "21acb573c9a511a7b9b48ea419d53ee575c049d82051887b2c41605062d82e7a",
+        "es-419": "21acb573c9a511a7b9b48ea419d53ee575c049d82051887b2c41605062d82e7a",
+        "fr": "626e66e5f131450bd4c12ba7d9285cd9a12871f5c60c8b4a0428196bc0a4531f",
+        "pt": "b3c4236f409571c804ef17a6965cfff2b49ed7a782850f56901b6f4f0c9ff016"
+      },
+      "mappedRoutes": [
+        "/spectral-library",
+        "/spectral"
+      ]
+    },
+    {
+      "id": "connect-sis",
+      "category": "connect",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "1d67d311-31bc-4c67-9255-332808c7f56e",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "87688a55eb8be6dd9e4e7cb09ca3280bc7a6bc26c8ecdd697f783aa9a120a737",
+        "es": "8334fc32211b62c54dd03e209b7a6819fc08f45b5375ad215493c37454795c08",
+        "es-419": "8334fc32211b62c54dd03e209b7a6819fc08f45b5375ad215493c37454795c08",
+        "fr": "d0df1844de4fa81aef4cdb22a8acbf322f31c9b6a1acbee09ce3dda7262c9acc",
+        "pt": "54d215e0bbab03d5a0cce0e6cdebfe66fb21a1bacfd47cf6937f8356446ab13e"
+      },
+      "mappedRoutes": [
+        "/projects",
+        "/result-reports"
+      ]
+    },
+    {
+      "id": "manage-catalogue",
+      "category": "manage",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "eb552e31-bf96-4b74-9374-60cbc0d2e7d4",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "62982ca0a3f0b3adb88fd7c1796763ab53e209fe4f4d975e3fd7aa7da1ab72f9",
+        "es": "473ba83190bbdabf38605955ab7461108f32cf867a650fe5ca51d6c672d73153",
+        "es-419": "473ba83190bbdabf38605955ab7461108f32cf867a650fe5ca51d6c672d73153",
+        "fr": "26ddd44b4537f3751feff07b69fedf2cf416e122eccf9e98f71dcb1267b10bd7",
+        "pt": "81ed14e0c4d6d2def377efe86818b704938e77fb6e8073ff1d08cb3e54083e8c"
+      },
+      "mappedRoutes": [
+        "/admin",
+        "/admin/methods",
+        "/lab-methods",
+        "/admin/help"
+      ]
+    },
+    {
+      "id": "manage-language",
+      "category": "manage",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "2ab76c74-09b0-45ac-a0da-48f63403d826",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "9aca7b1f64b306545a91132fd6d2ef9d5c82f54e673224ce1d892b018b0808ab",
+        "es": "8969222c25b4b365be34c44b8da4cbed788df123a96a4f45e5596b70683fa0cd",
+        "es-419": "8969222c25b4b365be34c44b8da4cbed788df123a96a4f45e5596b70683fa0cd",
+        "fr": "e7e605ef60f24e91730b1bf3ac462fddce75c6822e75d4a656ced0122e68e17e",
+        "pt": "cf28fe4c20f1cbb743729b946d25e5d5e7825ec4f8cae27667ed454c3286ed76"
+      },
+      "mappedRoutes": [
+        "/admin",
+        "/admin/labs",
+        "/profile",
+        "/admin/help"
+      ]
+    },
+    {
+      "id": "manage-load-error",
+      "category": "manage",
+      "kind": "faq",
+      "revisionNumber": 1,
+      "revisionId": "427f6bf5-aef5-444b-a760-1e78c99bcab0",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "f5410115773d9d311484e3cd7cd2db595ab27a8e1099ea27f49b4b4074967919",
+        "es": "550df42cf297f6d710380b762bbcd563f9ec4418fca4ab10c50a598292e14240",
+        "es-419": "550df42cf297f6d710380b762bbcd563f9ec4418fca4ab10c50a598292e14240",
+        "fr": "4c76063b1f3dde6484b7366f7414de8fe5d1939a71dc0a0f42d19e6c54a3bb7e",
+        "pt": "bf32982cfcb67b5c8eeaf0dcccfef8a0fe8ea6f380e75971c4dd4789cd393472"
+      },
+      "mappedRoutes": [
+        "*"
+      ]
+    },
+    {
+      "id": "manage-support",
+      "category": "manage",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "6a67f925-6f9c-4209-b39a-199dce4959bf",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "f6028271a75b93e25850fa272616edb1dd7e5f138e79e2a826b6b67267bd1fdd",
+        "es": "251468b676e95a41e61d0c0e65e362dc210a95e977f8fab07b7f974ca8909442",
+        "es-419": "251468b676e95a41e61d0c0e65e362dc210a95e977f8fab07b7f974ca8909442",
+        "fr": "94196bbf3bf417cb8c2b2db672cdf28ec84be356d4e100cc44fd7489bdbd776a",
+        "pt": "1cc4bad5537052db76024bbf203f26c358ca3932eb90af9b12bd694cb4458b7c"
+      },
+      "mappedRoutes": [
+        "/login",
+        "/users",
+        "/admin/labs",
+        "/admin/legacy-import",
+        "/report/:token",
+        "/about",
+        "/techstack",
+        "/tech-stack",
+        "/credits",
+        "/help",
+        "/help/faq",
+        "/faq",
+        "/help/articles/:articleId",
+        "/help/topics/:topicId",
+        "*"
+      ]
+    }
+  ]
+}

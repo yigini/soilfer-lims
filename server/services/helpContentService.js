@@ -53,6 +53,107 @@ const FALLBACK_NOTICES = {
     pt: 'Este artigo está disponível em inglês. Ainda não existe uma tradução revista.'
 };
 
+function parseApprovedLocales(pub) {
+    if (!pub || !pub.approvedLocales) return ['en'];
+    try {
+        const parsed = typeof pub.approvedLocales === 'string'
+            ? JSON.parse(pub.approvedLocales)
+            : pub.approvedLocales;
+        return Array.isArray(parsed) ? parsed : ['en'];
+    } catch (e) {
+        return ['en'];
+    }
+}
+
+/**
+ * Common locale resolution policy across all help readers, context, search, and offline pack.
+ * Enforces:
+ * - Normal readers receive ONLY locales explicitly included in pub.approvedLocales AND reviewStatus === 'APPROVED'.
+ * - If target locale is not approved, falls back to approved source locale with a truthful fallback notice.
+ * - NEVER serves unapproved translated bytes to regular readers.
+ * - Preview remains an explicit authorized editor action.
+ */
+function resolveRevisionContent({ rev, pub, locale = 'en', canPreview = false }) {
+    if (!rev) return null;
+
+    const sourceLocale = rev.sourceLocale || 'en';
+
+    // 1. Editorial preview mode for authorized editors
+    if (canPreview) {
+        const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
+        if (locale === sourceLocale) {
+            return {
+                content: rev,
+                isFallback: false,
+                localeNotice: null,
+                isDraftPreview: !pub,
+                resolvedLocale: sourceLocale
+            };
+        }
+
+        if (targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED') {
+            return {
+                content: targetLocaleRev,
+                isFallback: false,
+                localeNotice: null,
+                isDraftPreview: !pub,
+                resolvedLocale: locale
+            };
+        }
+
+        // Unapproved translation or missing locale falls back to source locale content
+        return {
+            content: rev,
+            isFallback: true,
+            localeNotice: FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en,
+            isDraftPreview: !pub,
+            resolvedLocale: sourceLocale
+        };
+    }
+
+    // 2. Normal published reader mode: requires current publication
+    if (!pub) return null;
+
+    const approvedLocales = parseApprovedLocales(pub);
+    const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
+
+    // If requested locale is source locale (e.g. 'en')
+    if (locale === sourceLocale) {
+        if (!approvedLocales.includes(sourceLocale)) return null;
+        return {
+            content: rev,
+            isFallback: false,
+            localeNotice: null,
+            isDraftPreview: false,
+            resolvedLocale: sourceLocale
+        };
+    }
+
+    // If requested locale is approved and locale revision is APPROVED
+    if (approvedLocales.includes(locale) && targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED') {
+        return {
+            content: targetLocaleRev,
+            isFallback: false,
+            localeNotice: null,
+            isDraftPreview: false,
+            resolvedLocale: locale
+        };
+    }
+
+    // Fall back to approved source locale if available
+    if (approvedLocales.includes(sourceLocale)) {
+        return {
+            content: rev,
+            isFallback: true,
+            localeNotice: FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en,
+            isDraftPreview: false,
+            resolvedLocale: sourceLocale
+        };
+    }
+
+    return null;
+}
+
 // String normalization for accented & typo-tolerant search
 const normalizeString = (str = '') => {
     return String(str)
@@ -90,12 +191,31 @@ async function getTopics(user = null, locale = 'en', preview = false) {
 
     const articles = await prisma.helpArticle.findMany({
         where,
-        select: { id: true, category: true }
+        include: {
+            publications: {
+                where: { isCurrent: true },
+                include: {
+                    revision: {
+                        include: { locales: true }
+                    }
+                }
+            },
+            revisions: canPreview ? {
+                orderBy: { revisionNumber: 'desc' },
+                take: 1,
+                include: { locales: true }
+            } : false
+        }
     });
 
     const countByCategory = {};
     articles.forEach(a => {
-        countByCategory[a.category] = (countByCategory[a.category] || 0) + 1;
+        const pub = a.publications?.[0];
+        const rev = canPreview ? (pub?.revision || a.revisions?.[0]) : pub?.revision;
+        const resolved = resolveRevisionContent({ rev, pub, locale, canPreview });
+        if (resolved) {
+            countByCategory[a.category] = (countByCategory[a.category] || 0) + 1;
+        }
     });
 
     const rawCategories = getCategories();
@@ -168,10 +288,10 @@ async function getArticles({ category = null, role = null, user = null, locale =
             const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
             if (!rev) return null;
 
-            const targetLocaleRev = rev?.locales?.find(l => l.locale === locale);
-            const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
-            const isFallback = !isApproved && locale !== 'en';
-            const content = targetLocaleRev || rev;
+            const resolved = resolveRevisionContent({ rev, pub, locale, canPreview });
+            if (!resolved) return null;
+
+            const { content, isFallback, localeNotice, isDraftPreview } = resolved;
 
             return {
                 id: article.id,
@@ -186,8 +306,8 @@ async function getArticles({ category = null, role = null, user = null, locale =
                 title: content.title || rev.title,
                 summary: content.summary || rev.summary,
                 isFallback,
-                localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null,
-                isDraftPreview: !pub && canPreview,
+                localeNotice,
+                isDraftPreview,
                 labNote: article.labNotes?.[0] ? {
                     id: article.labNotes[0].id,
                     noteText: article.labNotes[0].noteText,
@@ -244,14 +364,14 @@ async function getArticleById(articleId, user = null, locale = 'en', preview = f
     const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
     if (!rev) return null;
 
-    const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
-    const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
-    const isFallback = !isApproved && locale !== 'en';
-    const activeContent = targetLocaleRev || rev;
+    const resolved = resolveRevisionContent({ rev, pub, locale, canPreview });
+    if (!resolved) return null;
+
+    const { content, isFallback, localeNotice, isDraftPreview } = resolved;
 
     let steps = [];
     try {
-        steps = JSON.parse(activeContent.steps || rev.steps || '[]');
+        steps = JSON.parse(content.steps || rev.steps || '[]');
     } catch (e) {
         steps = [];
     }
@@ -273,18 +393,18 @@ async function getArticleById(articleId, user = null, locale = 'en', preview = f
         minutes: article.minutes,
         reviewOwner: article.reviewOwner,
         visibility: article.visibility,
-        title: activeContent.title || rev.title,
-        summary: activeContent.summary || rev.summary,
+        title: content.title || rev.title,
+        summary: content.summary || rev.summary,
         steps,
-        success: activeContent.success || rev.success || '',
-        caution: activeContent.caution || rev.caution || '',
+        success: content.success || rev.success || '',
+        caution: content.caution || rev.caution || '',
         related,
         sourceLocale: rev.sourceLocale,
         revisionNumber: rev.revisionNumber,
         publishedAt: pub?.publishedAt || null,
         isFallback,
-        localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null,
-        isDraftPreview: !pub && canPreview,
+        localeNotice,
+        isDraftPreview,
         labNote: article.labNotes?.[0] ? {
             id: article.labNotes[0].id,
             noteText: article.labNotes[0].noteText,
@@ -368,15 +488,15 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
             } catch (e) { }
         }
 
-        const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
-        const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
-        const isFallback = !isApproved && locale !== 'en';
-        const activeContent = targetLocaleRev || rev;
+        const resolved = resolveRevisionContent({ rev, pub, locale, canPreview });
+        if (!resolved) continue;
 
-        const normTitle = normalizeString(activeContent.title || '');
-        const normSummary = normalizeString(activeContent.summary || '');
+        const { content, isFallback, localeNotice } = resolved;
+
+        const normTitle = normalizeString(content.title || rev.title || '');
+        const normSummary = normalizeString(content.summary || rev.summary || '');
         const normKeywords = normalizeString(article.keywords || '');
-        const normSteps = normalizeString(activeContent.steps || '');
+        const normSteps = normalizeString(content.steps || rev.steps || '');
         const normId = normalizeString(article.id);
 
         let score = 0;
@@ -409,11 +529,11 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
                     id: article.id,
                     category: article.category,
                     kind: article.kind,
-                    title: activeContent.title || rev.title,
-                    summary: activeContent.summary || rev.summary,
+                    title: content.title || rev.title,
+                    summary: content.summary || rev.summary,
                     minutes: article.minutes,
                     isFallback,
-                    localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
+                    localeNotice
                 }
             });
         }
@@ -429,6 +549,7 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
 /**
  * Contextual help resolver for routes and live readiness blocker codes.
  * Deep copies matched article arrays so blocker resolution NEVER contaminates cached route maps!
+ * Computes structured availability (AVAILABLE, MAPPED_UNPUBLISHED, MAPPED_UNPUBLISHED_EDITOR, AUTH_REQUIRED, NO_PAGE_GUIDE, UNAVAILABLE_TRANSLATION).
  */
 async function getContextHelp({ route = '/', blockerCodes = [], user = null, locale = 'en', preview = false }) {
     const routeMap = getRouteMap();
@@ -440,9 +561,12 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
     const normalizedRoute = route.split('?')[0].replace(/\/$/, '') || '/';
 
     const exactMatch = (routeMap.routes || []).find(r => r.route === normalizedRoute);
+    let isMappedRoute = false;
+
     if (exactMatch) {
         // Deep clone to prevent cached array mutation (Finding 4)
         matchedArticleIds = [...(exactMatch.articleIds || [])];
+        isMappedRoute = true;
     } else {
         const patternMatch = (routeMap.routes || []).find(r => {
             if (!r.route.includes(':')) return false;
@@ -451,9 +575,11 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
         });
         if (patternMatch) {
             matchedArticleIds = [...(patternMatch.articleIds || [])];
+            isMappedRoute = true;
         } else {
             const wildcard = (routeMap.routes || []).find(r => r.route === '*');
             matchedArticleIds = [...(wildcard?.articleIds || ['manage-load-error', 'manage-support'])];
+            isMappedRoute = false;
         }
     }
 
@@ -473,12 +599,11 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
         }
     }
 
-    // 3. Load recommended articles
+    // 3. Load candidate articles
     const allowedVisibilities = isAuth ? ['PUBLIC', 'AUTHENTICATED'] : ['PUBLIC'];
     const where = {
         id: { in: matchedArticleIds },
-        archivedAt: null,
-        visibility: { in: allowedVisibilities }
+        archivedAt: null
     };
 
     if (!canPreview) {
@@ -509,25 +634,28 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
 
     const articleMap = new Map();
     for (const a of articles) {
+        if (!allowedVisibilities.includes(a.visibility)) continue;
+
         const pub = a.publications?.[0];
         const rev = canPreview ? (pub?.revision || a.revisions?.[0]) : pub?.revision;
         if (!rev) continue;
 
-        const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
-        const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
-        const isFallback = !isApproved && locale !== 'en';
-        const activeContent = targetLocaleRev || rev;
+        const resolved = resolveRevisionContent({ rev, pub, locale, canPreview });
+        if (!resolved) continue;
+
+        const { content, isFallback, localeNotice, isDraftPreview } = resolved;
 
         articleMap.set(a.id, {
             id: a.id,
             category: a.category,
             kind: a.kind,
-            title: activeContent.title || rev.title,
-            summary: activeContent.summary || rev.summary,
+            title: content.title || rev.title,
+            summary: content.summary || rev.summary,
             minutes: a.minutes,
             labNote: a.labNotes?.[0] ? a.labNotes[0].noteText : null,
             isFallback,
-            localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
+            localeNotice,
+            isDraftPreview
         });
     }
 
@@ -535,11 +663,55 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
         .map(id => articleMap.get(id))
         .filter(Boolean);
 
-    return {
+    // 4. Compute structured availability
+    let availability = 'AVAILABLE';
+    let draftArticleIds = undefined;
+
+    if (orderedArticles.length > 0) {
+        availability = 'AVAILABLE';
+    } else if (!isMappedRoute) {
+        availability = 'NO_PAGE_GUIDE';
+    } else {
+        // Route is mapped, but orderedArticles is empty. Diagnose why:
+        const mappedArticlesInDb = articles.filter(a => matchedArticleIds.includes(a.id));
+        if (mappedArticlesInDb.length === 0) {
+            // Check if articles exist in DB regardless of publication filter
+            const dbCheck = await prisma.helpArticle.findMany({
+                where: { id: { in: matchedArticleIds }, archivedAt: null },
+                select: { id: true, visibility: true }
+            });
+            if (dbCheck.length === 0) {
+                availability = 'NO_PAGE_GUIDE';
+            } else if (!isAuth && dbCheck.every(a => a.visibility === 'AUTHENTICATED')) {
+                availability = 'AUTH_REQUIRED';
+            } else {
+                const canEditHelp = isAuth && (user?.role === 'SUPER_ADMIN' || user?.permissions?.includes('HELP_EDIT_GLOBAL'));
+                if (canEditHelp) {
+                    availability = 'MAPPED_UNPUBLISHED_EDITOR';
+                    draftArticleIds = dbCheck.map(a => a.id);
+                } else {
+                    availability = 'MAPPED_UNPUBLISHED';
+                }
+            }
+        } else if (!isAuth && mappedArticlesInDb.every(a => a.visibility === 'AUTHENTICATED')) {
+            availability = 'AUTH_REQUIRED';
+        } else {
+            availability = 'UNAVAILABLE_TRANSLATION';
+        }
+    }
+
+    const response = {
         route: normalizedRoute,
+        availability,
         blockers: resolvedBlockers,
         articles: orderedArticles
     };
+
+    if (draftArticleIds) {
+        response.draftArticleIds = draftArticleIds;
+    }
+
+    return response;
 }
 
 /**
@@ -603,10 +775,10 @@ async function getOfflinePack({ user = null, locale = 'en' }) {
         const rev = pub?.revision;
         if (!rev) return null;
 
-        const targetLocaleRev = rev.locales?.find(l => l.locale === locale);
-        const isApproved = targetLocaleRev && targetLocaleRev.reviewStatus === 'APPROVED';
-        const isFallback = !isApproved && locale !== 'en';
-        const content = targetLocaleRev || rev;
+        const resolved = resolveRevisionContent({ rev, pub, locale, canPreview: false });
+        if (!resolved) return null;
+
+        const { content, isFallback, localeNotice } = resolved;
 
         let steps = [];
         try { steps = JSON.parse(content.steps || rev.steps || '[]'); } catch (e) { steps = []; }
@@ -630,7 +802,7 @@ async function getOfflinePack({ user = null, locale = 'en' }) {
             labNote: article.labNotes?.[0]?.noteText || null,
             revisionNumber: rev.revisionNumber,
             isFallback,
-            localeNotice: isFallback ? (FALLBACK_NOTICES[locale] || FALLBACK_NOTICES.en) : null
+            localeNotice
         };
     }).filter(Boolean);
 

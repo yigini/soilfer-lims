@@ -898,7 +898,22 @@
       "openFullArticle": "Abrir página completa do artigo",
       "steps": "Etapas necessárias",
       "success": "Como é o sucesso",
-      "caution": "Lembre-se"
+      "caution": "Lembre-se",
+      "unPublishedTitle": "Guia em revisão",
+      "unPublishedEditorBody": "Esta página está associada a guias de fluxo de trabalho, mas ainda não foram publicados.",
+      "openEditor": "Rever rascunhos no editor de administração",
+      "inReviewTitle": "Guia brevemente disponível",
+      "inReviewBody": "O guia para esta página está em revisão editorial e ainda não foi publicado.",
+      "browseGeneral": "Navegar no Centro de Ajuda",
+      "authRequiredTitle": "Autenticação necessária",
+      "authRequiredBody": "Inicie sessão para aceder aos procedimentos de laboratório e à orientação da bancada.",
+      "missingPackTitle": "Pacote offline não descarregado",
+      "missingPackBody": "Está offline e nenhum pacote de ajuda offline foi descarregado para este laboratório.",
+      "requestFailureTitle": "Erro de ligação",
+      "requestFailureBody": "Não foi possível carregar o guia devido a um erro de rede.",
+      "noTranslationTitle": "Tradução não disponível",
+      "noTranslationBody": "O guia para esta página ainda não está disponível no idioma selecionado.",
+      "zeroPageSub": "Pesquise na base de conhecimento ou explore temas gerais no Centro de Ajuda."
     },
     "support": {
       "title": "Contatar suporte",

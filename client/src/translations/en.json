@@ -898,7 +898,22 @@
       "openFullArticle": "Open full article page",
       "steps": "Required Steps",
       "success": "What success looks like",
-      "caution": "Keep in mind"
+      "caution": "Keep in mind",
+      "unPublishedTitle": "Guidance in Review",
+      "unPublishedEditorBody": "This page is mapped to workflow guides, but they have not been published yet.",
+      "openEditor": "Review Drafts in Admin Editor",
+      "inReviewTitle": "Guidance Coming Soon",
+      "inReviewBody": "Guidance for this page is currently undergoing editorial review and has not yet been published.",
+      "browseGeneral": "Browse Help Centre",
+      "authRequiredTitle": "Authentication Required",
+      "authRequiredBody": "Please sign in to access laboratory procedures and workbench guidance.",
+      "missingPackTitle": "Offline Pack Not Downloaded",
+      "missingPackBody": "You are offline and no offline help pack has been downloaded for this laboratory.",
+      "requestFailureTitle": "Connection Error",
+      "requestFailureBody": "Could not load guidance due to a network error.",
+      "noTranslationTitle": "Translation Unavailable",
+      "noTranslationBody": "Guidance for this page is not yet available in your selected language.",
+      "zeroPageSub": "Search the knowledge base or explore general topics in Help Centre."
     },
     "support": {
       "title": "Contact Support",

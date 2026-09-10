@@ -295,6 +295,8 @@ export const helpClientService = {
                 if (res.data?.success) {
                     return {
                         route: res.data.route,
+                        availability: res.data.availability || (res.data.articles?.length > 0 ? 'AVAILABLE' : 'NO_PAGE_GUIDE'),
+                        draftArticleIds: res.data.draftArticleIds,
                         blockers: res.data.blockers || [],
                         articles: res.data.articles || [],
                         isOffline: false
@@ -304,22 +306,47 @@ export const helpClientService = {
                 if (err.response) {
                     const status = err.response.status;
                     if (status === 401 || status === 403) {
-                        return { route, blockers: [], articles: [], isOffline: false, forbidden: true };
+                        return { route, availability: 'AUTH_REQUIRED', blockers: [], articles: [], isOffline: false, forbidden: true };
                     }
                 }
-                console.warn('[HELP_CLIENT] Network context fetch failed, falling back to offline storage:', err.message);
+                console.warn('[HELP_CLIENT] Network context fetch failed:', err.message);
+                if (typeof navigator !== 'undefined' && navigator.onLine) {
+                    return {
+                        route,
+                        availability: 'REQUEST_FAILURE',
+                        error: err.message,
+                        blockers: [],
+                        articles: [],
+                        isOffline: false
+                    };
+                }
             }
         }
 
         // Offline context fallback using cached routeMap and articles
         const meta = await getOfflineHelpMeta({ user, labId, locale });
+        const allArticles = await getOfflineHelpArticles({ user, labId, locale });
+
+        if (!meta || allArticles.length === 0) {
+            return {
+                route,
+                availability: 'MISSING_OFFLINE_PACK',
+                blockers: [],
+                articles: [],
+                isOffline: true,
+                lastSync: null
+            };
+        }
+
         const routeMap = meta?.routeMap || { routes: [], blockers: {} };
         const normalizedRoute = route.split('?')[0].replace(/\/$/, '') || '/';
 
         let matchedArticleIds = [];
+        let isMappedRoute = false;
         const exactMatch = (routeMap.routes || []).find(r => r.route === normalizedRoute);
         if (exactMatch) {
             matchedArticleIds = [...(exactMatch.articleIds || [])];
+            isMappedRoute = true;
         } else {
             const patternMatch = (routeMap.routes || []).find(r => {
                 if (!r.route.includes(':')) return false;
@@ -328,8 +355,10 @@ export const helpClientService = {
             });
             if (patternMatch) {
                 matchedArticleIds = [...(patternMatch.articleIds || [])];
+                isMappedRoute = true;
             } else {
                 matchedArticleIds = ['manage-load-error', 'manage-support'];
+                isMappedRoute = false;
             }
         }
 
@@ -344,7 +373,6 @@ export const helpClientService = {
             }
         }
 
-        const allArticles = await getOfflineHelpArticles({ user, labId, locale });
         const articleMap = new Map();
         allArticles.forEach(a => articleMap.set(a.id, a));
 
@@ -352,8 +380,13 @@ export const helpClientService = {
             .map(id => articleMap.get(id))
             .filter(Boolean);
 
+        const availability = orderedArticles.length > 0
+            ? 'AVAILABLE'
+            : (isMappedRoute ? 'MAPPED_UNPUBLISHED' : 'NO_PAGE_GUIDE');
+
         return {
             route: normalizedRoute,
+            availability,
             blockers: resolvedBlockers,
             articles: orderedArticles,
             isOffline: true,

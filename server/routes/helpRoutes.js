@@ -63,6 +63,8 @@ router.put('/admin/articles/:articleId/revisions/:revisionNumber/locales/:locale
 router.post('/admin/articles/:articleId/request-review', verifyToken, checkPermission('HELP_EDIT_GLOBAL'), adminHelpController.requestReview);
 router.post('/admin/articles/:articleId/approve', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.approveLocale);
 router.post('/admin/articles/:articleId/publish', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.publishArticleRevision);
+router.post('/admin/batch-publish', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.batchPublish);
+router.get('/admin/release-preview', verifyToken, checkPermission('HELP_PUBLISH_GLOBAL'), adminHelpController.getReleasePreview);
 router.put('/admin/articles/:articleId/lab-note', verifyToken, checkPermission('HELP_EDIT_LAB'), adminHelpController.saveLabNote);
 
 module.exports = router;

@@ -13,7 +13,10 @@ import {
     Building2,
     CheckCircle2,
     ShieldAlert,
-    WifiOff
+    WifiOff,
+    FileEdit,
+    RefreshCw,
+    Globe
 } from 'lucide-react';
 import { useHelp } from '../../context/HelpContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -109,13 +112,8 @@ export const ContextHelpDrawer = () => {
         }
     };
 
-    // Fetch page contextual help when opened or route/blockers change (network-first with offline IndexedDB fallback)
-    useEffect(() => {
-        if (!isDrawerOpen) return;
-
-        let isMounted = true;
+    const loadContext = () => {
         setLoadingContext(true);
-
         helpClientService.getContextHelp({
             route: location.pathname,
             blockerCodes: activeBlockers,
@@ -124,18 +122,29 @@ export const ContextHelpDrawer = () => {
             user
         })
             .then(data => {
-                if (isMounted && data) {
+                if (data) {
                     setContextData(data);
                 }
             })
             .catch(err => {
                 console.warn('[CONTEXT_HELP] Failed to load context:', err.message);
+                setContextData({
+                    route: location.pathname,
+                    availability: 'REQUEST_FAILURE',
+                    error: err.message,
+                    blockers: [],
+                    articles: []
+                });
             })
             .finally(() => {
-                if (isMounted) setLoadingContext(false);
+                setLoadingContext(false);
             });
+    };
 
-        return () => { isMounted = false; };
+    // Fetch page contextual help when opened or route/blockers change (network-first with offline IndexedDB fallback)
+    useEffect(() => {
+        if (!isDrawerOpen) return;
+        loadContext();
     }, [isDrawerOpen, location.pathname, activeBlockers, locale, user]);
 
     // Fetch single article if drilled down inside drawer
@@ -164,6 +173,164 @@ export const ContextHelpDrawer = () => {
 
         return () => { isMounted = false; };
     }, [isDrawerOpen, drawerArticleId, locale, user]);
+
+    const renderEmptyState = () => {
+        const availability = contextData?.availability || 'NO_PAGE_GUIDE';
+
+        if (availability === 'MAPPED_UNPUBLISHED_EDITOR') {
+            return (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs space-y-3 text-center">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+                        <FileText size={16} />
+                    </div>
+                    <div>
+                        <div className="font-bold text-sm text-sf-text mb-1">
+                            {t('help.drawer.unPublishedTitle', 'Guidance in Review')}
+                        </div>
+                        <p className="text-xs text-sf-muted leading-relaxed">
+                            {t('help.drawer.unPublishedEditorBody', 'This page is mapped to workflow guides, but they have not been published yet.')}
+                        </p>
+                    </div>
+                    <Link
+                        to="/admin/help"
+                        onClick={closeDrawer}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-sf-primary text-white font-bold text-xs hover:bg-sf-primary/90 transition-colors shadow-sm"
+                    >
+                        <FileEdit size={14} />
+                        <span>{t('help.drawer.openEditor', 'Review Drafts in Admin Editor')}</span>
+                    </Link>
+                </div>
+            );
+        }
+
+        if (availability === 'MAPPED_UNPUBLISHED') {
+            return (
+                <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider text-xs space-y-2 text-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
+                        <Clock size={16} />
+                    </div>
+                    <div className="font-bold text-sm text-sf-text">
+                        {t('help.drawer.inReviewTitle', 'Guidance Coming Soon')}
+                    </div>
+                    <p className="text-xs text-sf-muted leading-relaxed">
+                        {t('help.drawer.inReviewBody', 'Guidance for this page is currently undergoing editorial review and has not yet been published.')}
+                    </p>
+                    <div className="pt-2">
+                        <Link
+                            to="/help"
+                            onClick={closeDrawer}
+                            className="text-xs font-bold text-sf-primary hover:underline inline-flex items-center gap-1"
+                        >
+                            <span>{t('help.drawer.browseGeneral', 'Browse Help Centre')}</span>
+                            <ExternalLink size={12} />
+                        </Link>
+                    </div>
+                </div>
+            );
+        }
+
+        if (availability === 'AUTH_REQUIRED') {
+            return (
+                <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider text-xs space-y-2 text-center">
+                    <div className="w-8 h-8 rounded-full bg-slate-500/10 text-sf-muted flex items-center justify-center mx-auto">
+                        <ShieldAlert size={16} />
+                    </div>
+                    <div className="font-bold text-sm text-sf-text">
+                        {t('help.drawer.authRequiredTitle', 'Authentication Required')}
+                    </div>
+                    <p className="text-xs text-sf-muted leading-relaxed">
+                        {t('help.drawer.authRequiredBody', 'Please sign in to access laboratory procedures and workbench guidance.')}
+                    </p>
+                    <div className="pt-2">
+                        <Link
+                            to="/login"
+                            onClick={closeDrawer}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-primary text-white font-bold text-xs"
+                        >
+                            <span>{t('auth.login', 'Sign In')}</span>
+                        </Link>
+                    </div>
+                </div>
+            );
+        }
+
+        if (availability === 'MISSING_OFFLINE_PACK') {
+            return (
+                <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider text-xs space-y-2 text-center">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+                        <WifiOff size={16} />
+                    </div>
+                    <div className="font-bold text-sm text-sf-text">
+                        {t('help.drawer.missingPackTitle', 'Offline Pack Not Downloaded')}
+                    </div>
+                    <p className="text-xs text-sf-muted leading-relaxed">
+                        {t('help.drawer.missingPackBody', 'You are offline and no offline help pack has been downloaded for this laboratory.')}
+                    </p>
+                </div>
+            );
+        }
+
+        if (availability === 'REQUEST_FAILURE') {
+            return (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-900 dark:text-red-200 text-xs space-y-3 text-center">
+                    <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
+                        <AlertCircle size={16} />
+                    </div>
+                    <div>
+                        <div className="font-bold text-sm text-sf-text mb-1">
+                            {t('help.drawer.requestFailureTitle', 'Connection Error')}
+                        </div>
+                        <p className="text-xs text-sf-muted leading-relaxed">
+                            {t('help.drawer.requestFailureBody', 'Could not load guidance due to a network error.')}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={loadContext}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface border border-sf-divider text-sf-text hover:bg-sf-hover font-bold text-xs"
+                    >
+                        <RefreshCw size={12} />
+                        <span>{t('common.retry', 'Retry')}</span>
+                    </button>
+                </div>
+            );
+        }
+
+        if (availability === 'UNAVAILABLE_TRANSLATION') {
+            return (
+                <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider text-xs space-y-2 text-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center mx-auto">
+                        <Globe size={16} />
+                    </div>
+                    <div className="font-bold text-sm text-sf-text">
+                        {t('help.drawer.noTranslationTitle', 'Translation Unavailable')}
+                    </div>
+                    <p className="text-xs text-sf-muted leading-relaxed">
+                        {t('help.drawer.noTranslationBody', 'Guidance for this page is not yet available in your selected language.')}
+                    </p>
+                    <div className="pt-2">
+                        <Link
+                            to="/help"
+                            onClick={closeDrawer}
+                            className="text-xs font-bold text-sf-primary hover:underline inline-flex items-center gap-1"
+                        >
+                            <span>{t('help.drawer.browseGeneral', 'Browse Help Centre')}</span>
+                            <ExternalLink size={12} />
+                        </Link>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="text-center py-6 text-sf-muted text-xs bg-sf-inset rounded-xl border border-sf-divider/40 space-y-2">
+                <p className="font-medium">{t('help.zeroPageHelp', 'No specific guide for this page.')}</p>
+                <p className="text-[11px] text-sf-muted">
+                    {t('help.drawer.zeroPageSub', 'Search the knowledge base or explore general topics in Help Centre.')}
+                </p>
+            </div>
+        );
+    };
 
     if (!isDrawerOpen) return null;
 
@@ -408,9 +575,7 @@ export const ContextHelpDrawer = () => {
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-center py-6 text-sf-muted text-xs bg-sf-inset rounded-xl border border-sf-divider/40">
-                                                {t('help.zeroPageHelp', 'No specific guide for this page.')}
-                                            </div>
+                                            renderEmptyState()
                                         )}
                                     </div>
                                 </div>

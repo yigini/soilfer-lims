@@ -38,10 +38,26 @@ describe('Help Content Service Contract Tests', () => {
     });
 
     test('getArticleById returns explicit fallback notice for unreviewed translation', async () => {
-        const article = await helpContentService.getArticleById('start-shift', { role: 'SUPER_ADMIN' }, 'fr', true);
-        expect(article).toBeDefined();
-        expect(article.isFallback).toBe(true);
-        expect(article.localeNotice).toMatch(/anglais/i);
+        const rev = await prisma.helpRevision.findFirst({
+            where: { articleId: 'start-shift' },
+            orderBy: { revisionNumber: 'desc' }
+        });
+        await prisma.helpLocaleRevision.updateMany({
+            where: { revisionId: rev.id, locale: 'fr' },
+            data: { reviewStatus: 'TRANSLATION_REQUIRED' }
+        });
+
+        try {
+            const article = await helpContentService.getArticleById('start-shift', { role: 'SUPER_ADMIN' }, 'fr', true);
+            expect(article).toBeDefined();
+            expect(article.isFallback).toBe(true);
+            expect(article.localeNotice).toMatch(/anglais/i);
+        } finally {
+            await prisma.helpLocaleRevision.updateMany({
+                where: { revisionId: rev.id, locale: 'fr' },
+                data: { reviewStatus: 'APPROVED' }
+            });
+        }
     });
 
     test('searchHelp finds spectra article by MIR keyword in preview', async () => {

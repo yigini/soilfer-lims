@@ -15,7 +15,9 @@ import {
     Loader2,
     Eye,
     Trash2,
-    ShieldCheck
+    ShieldCheck,
+    Layers,
+    CheckSquare
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -38,6 +40,9 @@ export const AdminHelpEditor = () => {
 
     // Structured Editing State
     const [activeArticle, setActiveArticle] = useState(null);
+    const [selectedLocale, setSelectedLocale] = useState('en');
+    const [revisionDetails, setRevisionDetails] = useState(null);
+    const [loadingRevision, setLoadingRevision] = useState(false);
     const [editScope, setEditScope] = useState(canEditGlobal ? 'global' : 'lab');
     const [editTitle, setEditTitle] = useState('');
     const [editSummary, setEditSummary] = useState('');
@@ -49,6 +54,13 @@ export const AdminHelpEditor = () => {
     const [currentReviewStatus, setCurrentReviewStatus] = useState('EDITORIAL_DRAFT');
     const [saveStatus, setSaveStatus] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Multi-article Release Management State
+    const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+    const [releasePreview, setReleasePreview] = useState(null);
+    const [loadingRelease, setLoadingRelease] = useState(false);
+    const [releaseManifestResult, setReleaseManifestResult] = useState(null);
+    const [isPublishingBatch, setIsPublishingBatch] = useState(false);
 
     const fetchArticles = () => {
         setLoading(true);
@@ -84,8 +96,9 @@ export const AdminHelpEditor = () => {
         );
     }
 
-    const openEditor = (article) => {
+    const openEditor = async (article) => {
         setActiveArticle(article);
+        setSelectedLocale('en');
         setEditScope(canEditGlobal ? 'global' : 'lab');
         setEditTitle(article.title || '');
         setEditSummary(article.summary || '');
@@ -96,6 +109,47 @@ export const AdminHelpEditor = () => {
         setLabNoteText(article.labNote?.noteText || '');
         setCurrentReviewStatus(article.locales?.en || 'EDITORIAL_DRAFT');
         setSaveStatus(null);
+        setRevisionDetails(null);
+
+        if (article.latestRevisionNumber) {
+            setLoadingRevision(true);
+            try {
+                const res = await axios.get(`/api/help/admin/articles/${article.id}/revisions/${article.latestRevisionNumber}`);
+                if (res.data?.success && res.data.revision) {
+                    setRevisionDetails(res.data.revision);
+                }
+            } catch (e) {
+                console.warn('[ADMIN_HELP] Failed to fetch revision details:', e.message);
+            } finally {
+                setLoadingRevision(false);
+            }
+        }
+    };
+
+    const handleLocaleSwitch = (loc) => {
+        setSelectedLocale(loc);
+        setSaveStatus(null);
+
+        if (loc === 'en') {
+            setEditTitle(revisionDetails?.title || activeArticle?.title || '');
+            setEditSummary(revisionDetails?.summary || activeArticle?.summary || '');
+            let steps = [];
+            try { steps = JSON.parse(revisionDetails?.steps || '[]'); } catch (e) { steps = activeArticle?.steps || []; }
+            setEditSteps(steps);
+            setEditSuccess(revisionDetails?.success || activeArticle?.success || '');
+            setEditCaution(revisionDetails?.caution || activeArticle?.caution || '');
+            setCurrentReviewStatus(activeArticle?.locales?.en || 'EDITORIAL_DRAFT');
+        } else {
+            const locRev = revisionDetails?.locales?.find(l => l.locale === loc);
+            setEditTitle(locRev?.title || '');
+            setEditSummary(locRev?.summary || '');
+            let steps = [];
+            try { steps = JSON.parse(locRev?.steps || '[]'); } catch (e) { steps = []; }
+            setEditSteps(steps);
+            setEditSuccess(locRev?.success || '');
+            setEditCaution(locRev?.caution || '');
+            setCurrentReviewStatus(locRev?.reviewStatus || activeArticle?.locales?.[loc] || 'TRANSLATION_REQUIRED');
+        }
     };
 
     const handleSaveDraft = async (e) => {
@@ -112,7 +166,7 @@ export const AdminHelpEditor = () => {
                 });
                 setSaveStatus({ error: false, message: 'Laboratory note saved successfully.' });
                 fetchArticles();
-            } else {
+            } else if (selectedLocale === 'en') {
                 const cleanedSteps = editSteps.filter(s => typeof s === 'string' && s.trim());
                 await axios.post(`/api/help/admin/articles/${activeArticle.id}/revisions`, {
                     expectedRevisionNumber: activeArticle.latestRevisionNumber,
@@ -127,6 +181,21 @@ export const AdminHelpEditor = () => {
                 setSaveStatus({
                     error: false,
                     message: 'Draft revision created. Changes remain unpublished until approved.'
+                });
+                fetchArticles();
+            } else {
+                const cleanedSteps = editSteps.filter(s => typeof s === 'string' && s.trim());
+                await axios.put(`/api/help/admin/articles/${activeArticle.id}/revisions/${activeArticle.latestRevisionNumber}/locales/${selectedLocale}`, {
+                    title: editTitle,
+                    summary: editSummary,
+                    steps: cleanedSteps,
+                    success: editSuccess,
+                    caution: editCaution,
+                    reviewStatus: currentReviewStatus === 'APPROVED' ? 'IN_REVIEW' : currentReviewStatus
+                });
+                setSaveStatus({
+                    error: false,
+                    message: `Translation draft for ${selectedLocale.toUpperCase()} saved.`
                 });
                 fetchArticles();
             }
@@ -147,12 +216,12 @@ export const AdminHelpEditor = () => {
         try {
             await axios.post(`/api/help/admin/articles/${activeArticle.id}/request-review`, {
                 revisionNumber: activeArticle.latestRevisionNumber,
-                locales: ['en']
+                locales: [selectedLocale]
             });
             setCurrentReviewStatus('IN_REVIEW');
             setSaveStatus({
                 error: false,
-                message: 'Revision submitted for scientific & language review (status: IN_REVIEW).'
+                message: `Revision submitted for review for locale ${selectedLocale.toUpperCase()} (status: IN_REVIEW).`
             });
             fetchArticles();
         } catch (err) {
@@ -172,12 +241,12 @@ export const AdminHelpEditor = () => {
         try {
             await axios.post(`/api/help/admin/articles/${activeArticle.id}/approve`, {
                 revisionNumber: activeArticle.latestRevisionNumber,
-                locale: 'en'
+                locale: selectedLocale
             });
             setCurrentReviewStatus('APPROVED');
             setSaveStatus({
                 error: false,
-                message: 'Revision approved for publication (status: APPROVED).'
+                message: `Revision for locale ${selectedLocale.toUpperCase()} approved for publication (status: APPROVED).`
             });
             fetchArticles();
         } catch (err) {
@@ -194,15 +263,31 @@ export const AdminHelpEditor = () => {
         if (!activeArticle) return;
         setIsSaving(true);
         setSaveStatus(null);
+
+        const allLocales = ['en', 'es', 'es-419', 'fr', 'pt'];
+        const approvedLocales = allLocales.filter(loc => {
+            if (loc === selectedLocale && currentReviewStatus === 'APPROVED') return true;
+            return activeArticle.locales?.[loc] === 'APPROVED';
+        });
+
+        if (approvedLocales.length === 0) {
+            setSaveStatus({
+                error: true,
+                message: 'No approved locales found for this revision. Approve at least one language before publishing.'
+            });
+            setIsSaving(false);
+            return;
+        }
+
         try {
             await axios.post(`/api/help/admin/articles/${activeArticle.id}/publish`, {
                 revisionNumber: activeArticle.latestRevisionNumber || 1,
-                approvedLocales: ['en']
+                approvedLocales
             });
             setCurrentReviewStatus('PUBLISHED');
             setSaveStatus({
                 error: false,
-                message: 'Article revision published atomically.'
+                message: `Article revision published atomically for locales: ${approvedLocales.join(', ')}.`
             });
             fetchArticles();
         } catch (err) {
@@ -212,6 +297,54 @@ export const AdminHelpEditor = () => {
             });
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const openReleaseModal = async () => {
+        setIsReleaseModalOpen(true);
+        setLoadingRelease(true);
+        setReleaseManifestResult(null);
+        try {
+            const res = await axios.get('/api/help/admin/release-preview');
+            if (res.data?.success) {
+                setReleasePreview(res.data);
+            }
+        } catch (e) {
+            console.warn('[ADMIN_HELP] Failed to load release preview:', e.message);
+        } finally {
+            setLoadingRelease(false);
+        }
+    };
+
+    const handleBatchRelease = async (dryRun = false) => {
+        if (!releasePreview?.items) return;
+        setIsPublishingBatch(true);
+        setReleaseManifestResult(null);
+
+        const releases = releasePreview.items.map(item => ({
+            articleId: item.id,
+            revisionNumber: item.revisionNumber,
+            approvedLocales: item.readyToPublishLocales?.length > 0 ? item.readyToPublishLocales : ['en']
+        }));
+
+        try {
+            const res = await axios.post('/api/help/admin/batch-publish', {
+                releases,
+                dryRun
+            });
+            setReleaseManifestResult(res.data);
+            if (!dryRun && res.data?.success) {
+                fetchArticles();
+                const pRes = await axios.get('/api/help/admin/release-preview');
+                if (pRes.data?.success) setReleasePreview(pRes.data);
+            }
+        } catch (err) {
+            setReleaseManifestResult({
+                error: true,
+                message: err.response?.data?.message || err.response?.data?.error || 'Batch release failed.'
+            });
+        } finally {
+            setIsPublishingBatch(false);
         }
     };
 
@@ -240,13 +373,26 @@ export const AdminHelpEditor = () => {
                         </p>
                     </div>
 
-                    <button
-                        onClick={fetchArticles}
-                        className="p-2 rounded-xl border border-sf-divider bg-sf-surface text-sf-muted hover:text-sf-text text-xs font-bold inline-flex items-center gap-1.5 self-start"
-                    >
-                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                        <span>Refresh</span>
-                    </button>
+                    <div className="flex items-center gap-2 self-start">
+                        {canPublishGlobal && (
+                            <button
+                                type="button"
+                                onClick={openReleaseModal}
+                                className="px-3.5 py-2 rounded-xl bg-sf-primary text-white hover:bg-sf-primary/90 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                            >
+                                <Layers size={14} />
+                                <span>Release Management</span>
+                            </button>
+                        )}
+
+                        <button
+                            onClick={fetchArticles}
+                            className="p-2 rounded-xl border border-sf-divider bg-sf-surface text-sf-muted hover:text-sf-text text-xs font-bold inline-flex items-center gap-1.5"
+                        >
+                            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                            <span>Refresh</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Filters */}
@@ -418,6 +564,46 @@ export const AdminHelpEditor = () => {
                                 {canEditLab && <option value="lab">Laboratory-Local SOP Note ({user?.labId || 'Default Lab'})</option>}
                             </select>
                         </div>
+
+                        {/* Multilingual Locale Tab Bar */}
+                        {editScope === 'global' && (
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-2xl bg-sf-inset border border-sf-divider">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-sf-muted">
+                                    <Globe size={14} />
+                                    <span>Translation Locale:</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 overflow-x-auto">
+                                    {['en', 'es', 'es-419', 'fr', 'pt'].map(loc => {
+                                        const isCurrent = selectedLocale === loc;
+                                        const locStatus = loc === 'en'
+                                            ? (revisionDetails ? (revisionDetails.locales?.find(l => l.locale === 'en')?.reviewStatus || 'EDITORIAL_DRAFT') : (activeArticle.locales?.en || 'EDITORIAL_DRAFT'))
+                                            : (revisionDetails ? (revisionDetails.locales?.find(l => l.locale === loc)?.reviewStatus || 'TRANSLATION_REQUIRED') : (activeArticle.locales?.[loc] || 'TRANSLATION_REQUIRED'));
+
+                                        return (
+                                            <button
+                                                key={loc}
+                                                type="button"
+                                                onClick={() => handleLocaleSwitch(loc)}
+                                                className={clsx(
+                                                    "px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border",
+                                                    isCurrent
+                                                        ? "bg-sf-primary text-white border-sf-primary shadow-xs"
+                                                        : "bg-sf-surface border-sf-divider text-sf-muted hover:text-sf-text hover:bg-sf-hover"
+                                                )}
+                                            >
+                                                <span className="uppercase">{loc}</span>
+                                                <span className={clsx(
+                                                    "w-2 h-2 rounded-full",
+                                                    locStatus === 'APPROVED' ? "bg-emerald-400" :
+                                                    locStatus === 'IN_REVIEW' ? "bg-amber-400" :
+                                                    "bg-slate-400"
+                                                )} title={locStatus} />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Editor Form */}
                         {editScope === 'lab' ? (
@@ -621,6 +807,196 @@ export const AdminHelpEditor = () => {
                                 )}
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Release Management Modal */}
+            {isReleaseModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
+                    <div className="w-full max-w-4xl bg-sf-surface border border-sf-divider rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-start justify-between border-b border-sf-divider pb-3">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <Layers size={16} className="text-sf-primary" />
+                                    <span className="text-xs font-bold text-sf-primary uppercase tracking-wider">Release Governance</span>
+                                </div>
+                                <h2 className="text-lg font-black text-sf-text">Multi-Article Release Management</h2>
+                                <p className="text-xs text-sf-muted">
+                                    Review publication readiness, preview approved release manifests, and publish multi-language guides atomically.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsReleaseModalOpen(false)}
+                                className="p-1.5 rounded-lg text-sf-muted hover:text-sf-text"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {loadingRelease ? (
+                            <div className="py-12 flex flex-col items-center justify-center gap-2 text-sf-muted">
+                                <Loader2 size={24} className="animate-spin text-sf-primary" />
+                                <span className="text-xs">Loading release preview...</span>
+                            </div>
+                        ) : releasePreview ? (
+                            <div className="space-y-4">
+                                {/* Summary Metric Cards */}
+                                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                                    <div className="p-3 rounded-xl bg-sf-inset border border-sf-divider text-center">
+                                        <div className="text-[10px] font-bold text-sf-muted uppercase">Total Articles</div>
+                                        <div className="text-lg font-black text-sf-text mt-0.5">{releasePreview.totalArticles}</div>
+                                    </div>
+                                    {['en', 'es', 'es-419', 'fr', 'pt'].map(loc => (
+                                        <div key={loc} className="p-3 rounded-xl bg-sf-inset border border-sf-divider text-center">
+                                            <div className="text-[10px] font-bold text-sf-muted uppercase">{loc} Approved</div>
+                                            <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                                {releasePreview.approvedCounts?.[loc] || 0}
+                                                <span className="text-xs text-sf-muted font-normal"> / {releasePreview.totalArticles}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Manifest Output / Result */}
+                                {releaseManifestResult && (
+                                    <div className={clsx(
+                                        "p-4 rounded-xl border text-xs space-y-2",
+                                        releaseManifestResult.error
+                                            ? "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300"
+                                            : releaseManifestResult.dryRun
+                                                ? "bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-300"
+                                                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
+                                    )}>
+                                        <div className="font-bold flex items-center gap-1.5">
+                                            {releaseManifestResult.error ? (
+                                                <AlertCircle size={16} />
+                                            ) : (
+                                                <CheckCircle2 size={16} />
+                                            )}
+                                            <span>
+                                                {releaseManifestResult.error
+                                                    ? 'Batch Action Error'
+                                                    : releaseManifestResult.dryRun
+                                                        ? 'Release Dry-Run Preview Validated'
+                                                        : 'Batch Release Published Successfully'}
+                                            </span>
+                                        </div>
+                                        <p className="leading-relaxed">
+                                            {releaseManifestResult.message || (releaseManifestResult.dryRun
+                                                ? `Dry-run passed: ${releaseManifestResult.validCount} articles validated with 0 errors.`
+                                                : `Published ${releaseManifestResult.publishedCount} articles.`)}
+                                        </p>
+                                        {releaseManifestResult.errors?.length > 0 && (
+                                            <div className="space-y-1 pt-1">
+                                                <div className="font-bold text-[11px]">Validation Issues:</div>
+                                                <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+                                                    {releaseManifestResult.errors.map((e, idx) => (
+                                                        <li key={idx}>
+                                                            {e.articleId} ({e.locale || 'all'}): {e.error}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Article Release Table */}
+                                <div className="border border-sf-divider rounded-2xl overflow-hidden max-h-60 overflow-y-auto">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead className="bg-sf-inset border-b border-sf-divider sticky top-0">
+                                            <tr>
+                                                <th className="p-2.5 font-bold text-sf-text">Article</th>
+                                                <th className="p-2.5 font-bold text-sf-text">Rev</th>
+                                                <th className="p-2.5 font-bold text-sf-text">Current Status</th>
+                                                <th className="p-2.5 font-bold text-sf-text">Approved Locales</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-sf-divider">
+                                            {releasePreview.items.map(item => (
+                                                <tr key={item.id} className="hover:bg-sf-hover transition-colors">
+                                                    <td className="p-2.5">
+                                                        <div className="font-bold text-sf-text">{item.title}</div>
+                                                        <div className="text-[10px] text-sf-muted font-mono">{item.id}</div>
+                                                    </td>
+                                                    <td className="p-2.5 font-mono text-[11px]">v{item.revisionNumber}</td>
+                                                    <td className="p-2.5">
+                                                        {item.isPublished ? (
+                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                                                                Published
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/20 text-slate-700 dark:text-slate-300">
+                                                                Unpublished Draft
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-2.5">
+                                                        <div className="flex items-center gap-1">
+                                                            {['en', 'es', 'es-419', 'fr', 'pt'].map(loc => {
+                                                                const isReady = item.readyToPublishLocales?.includes(loc);
+                                                                return (
+                                                                    <span
+                                                                        key={loc}
+                                                                        className={clsx(
+                                                                            "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase",
+                                                                            isReady
+                                                                                ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                                                                                : "bg-sf-inset text-sf-muted"
+                                                                        )}
+                                                                        title={`${loc}: ${item.locales?.[loc]}`}
+                                                                    >
+                                                                        {loc}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Modal Actions */}
+                                <div className="flex items-center justify-between pt-2 border-t border-sf-divider">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsReleaseModalOpen(false)}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:text-sf-text"
+                                    >
+                                        Close
+                                    </button>
+
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleBatchRelease(true)}
+                                            disabled={isPublishingBatch}
+                                            className="px-4 py-2 rounded-xl bg-sf-surface border border-sf-divider text-sf-text hover:bg-sf-hover text-xs font-bold transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Search size={14} />
+                                            <span>Validate Manifest (Dry Run)</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleBatchRelease(false)}
+                                            disabled={isPublishingBatch}
+                                            className="px-4 py-2 rounded-xl bg-sf-primary text-white hover:bg-sf-primary/90 text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+                                        >
+                                            {isPublishingBatch ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <CheckCircle2 size={14} />
+                                            )}
+                                            <span>Publish Release to Production</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             )}

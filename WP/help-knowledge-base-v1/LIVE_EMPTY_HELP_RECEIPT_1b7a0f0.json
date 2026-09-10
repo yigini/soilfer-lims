@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-09-10T13:11:19.601Z",
+  "project": "LIMSI",
+  "chat": "LIMS Dev",
+  "liveImage": "soilfer-lims:v3.4.2-1b7a0f0",
+  "productionReadOnlyEvidence": {
+    "articles": 27,
+    "currentPublications": 0,
+    "enEditorialDrafts": 27,
+    "translationRequiredPerLocale": {
+      "es": 27,
+      "es-419": 27,
+      "fr": 27,
+      "pt": 27
+    },
+    "publicLoginContextArticles": 0
+  },
+  "messageCharacters": 7616,
+  "fullMessageVerified": true,
+  "observedFollowup": "Antigravity stopped its hanging external health probe and began inspecting helpContentService.js.",
+  "originalDraftRestored": true
+}
