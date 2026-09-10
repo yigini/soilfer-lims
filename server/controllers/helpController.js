@@ -198,6 +198,21 @@ async function getSupportConfig(req, res) {
     }
 }
 
+/**
+ * GET /api/help/faqs
+ */
+async function getFaqs(req, res) {
+    try {
+        const locale = req.query.locale || req.locale || 'en';
+        const topic = req.query.topic || null;
+        const faqs = await helpContentService.getFaqs({ locale, topic });
+        res.json({ success: true, faqs });
+    } catch (err) {
+        console.error('[HELP_CONTROLLER] getFaqs error:', err);
+        res.status(500).json({ error: 'Failed to fetch help FAQs' });
+    }
+}
+
 module.exports = {
     getTopics,
     getArticles,
@@ -206,5 +221,7 @@ module.exports = {
     getContextHelp,
     recordFeedback,
     getOfflinePack,
-    getSupportConfig
+    getSupportConfig,
+    getFaqs
 };
+

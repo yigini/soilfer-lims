@@ -1,0 +1,66 @@
+{
+  "runAt": "2026-09-10T20:17:37.879Z",
+  "scope": "Standalone design preview only. Does not validate or modify the actual LIMS.",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "Technician home renders the batch task first.",
+      "status": "PASS"
+    },
+    {
+      "name": "All ten role homes have the specified first task; persona changes are local only.",
+      "status": "PASS"
+    },
+    {
+      "name": "All eight full examples render every step, expected outcome and success section.",
+      "status": "PASS"
+    },
+    {
+      "name": "Search finds spectra synonyms; no-match input is safely rendered.",
+      "status": "PASS"
+    },
+    {
+      "name": "All commissioned briefs are browseable and distinguished from complete examples.",
+      "status": "PASS"
+    },
+    {
+      "name": "Result and preparation recovery paths identify safe next actions.",
+      "status": "PASS"
+    },
+    {
+      "name": "Opening, expanding and closing the help companion preserves worksheet input.",
+      "status": "PASS"
+    },
+    {
+      "name": "Translation editing is local, persists during tab navigation and never claims publication.",
+      "status": "PASS"
+    },
+    {
+      "name": "All five navigation locales are selectable with an explicit full-body prototype limitation.",
+      "status": "PASS"
+    },
+    {
+      "name": "All seven scenes fit 320/390/768/1024/1440 px in light and graphite themes.",
+      "status": "PASS"
+    },
+    {
+      "name": "No JavaScript page errors and no HTTP(S) requests from the prototype.",
+      "status": "PASS"
+    },
+    {
+      "name": "Every route has a proposed mapping or explicit institutional classification; context IDs resolve.",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    "01-role-home.png",
+    "02-batch-guide.png",
+    "03-problem-solver.png",
+    "04-context-help.png",
+    "05-translation-editor.png",
+    "06-mobile-home.png",
+    "07-graphite-guide.png"
+  ],
+  "errors": [],
+  "network": []
+}

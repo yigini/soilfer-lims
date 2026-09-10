@@ -55,7 +55,7 @@ describe('Help Offline, Context & Isolation Contract Tests', () => {
         const publicTopics = await helpContentService.getTopics(null, 'en', false);
         expect(Array.isArray(publicTopics)).toBe(true);
         // All categories returned with 5-language titles
-        expect(publicTopics.length).toBe(8);
+        expect(publicTopics.length).toBe(12);
         expect(publicTopics[0].title).toBeDefined();
     });
 
@@ -69,7 +69,7 @@ describe('Help Offline, Context & Isolation Contract Tests', () => {
         expect(pack.locale).toBe('fr');
         expect(pack.packVersion).toBe(1);
         expect(Array.isArray(pack.categories)).toBe(true);
-        expect(pack.categories.length).toBe(8);
+        expect(pack.categories.length).toBe(12);
         expect(pack.categories[0].title).toBe('Premiers pas');
         expect(pack.routeMap).toBeDefined();
         expect(pack.routeMap.blockers).toBeDefined();

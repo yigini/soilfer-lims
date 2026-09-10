@@ -2,10 +2,10 @@ const helpContentService = require('../../services/helpContentService');
 const prisma = require('../../prisma');
 
 describe('Help Content Service Contract Tests', () => {
-    test('getTopics returns 8 categories with article counts in authorized preview', async () => {
+    test('getTopics returns 12 categories with article counts in authorized preview', async () => {
         const topics = await helpContentService.getTopics({ role: 'SUPER_ADMIN', labId: 'lab-1' }, 'en', true);
         expect(Array.isArray(topics)).toBe(true);
-        expect(topics.length).toBe(8);
+        expect(topics.length).toBe(12);
         const startTopic = topics.find(t => t.id === 'start');
         expect(startTopic).toBeDefined();
         expect(startTopic.articleCount).toBeGreaterThan(0);
@@ -106,5 +106,40 @@ describe('Help Content Service Contract Tests', () => {
 
         // Clean up feedback
         await prisma.helpFeedback.delete({ where: { id: feedback.id } });
+    });
+
+    test('getArticleById returns rich v2 blocks for bench-batch and prep-drying', async () => {
+        const batchArticle = await helpContentService.getArticleById('bench-batch', { role: 'SUPER_ADMIN' }, 'en', true);
+        expect(batchArticle).toBeDefined();
+        expect(batchArticle.id).toBe('bench-batch');
+        expect(Array.isArray(batchArticle.steps)).toBe(true);
+        expect(batchArticle.steps.length).toBeGreaterThan(0);
+        expect(batchArticle.quick).toBeDefined();
+        expect(Array.isArray(batchArticle.sections)).toBe(true);
+        expect(batchArticle.sections.length).toBeGreaterThan(0);
+        expect(batchArticle.nextActor).toMatch(/manager|reviewer/i);
+
+        const dryingArticle = await helpContentService.getArticleById('prep-drying', { role: 'SUPER_ADMIN' }, 'en', true);
+        expect(dryingArticle).toBeDefined();
+        expect(dryingArticle.id).toBe('prep-drying');
+        expect(Array.isArray(dryingArticle.steps)).toBe(true);
+        expect(dryingArticle.quick).toMatch(/Confirm Complete/i);
+        expect(dryingArticle.sections.length).toBeGreaterThan(0);
+    });
+
+    test('getArticleById resolves legacy article ID via alias', async () => {
+        const legacyRun = await helpContentService.getArticleById('bench-run', { role: 'SUPER_ADMIN' }, 'en', true);
+        expect(legacyRun).toBeDefined();
+        expect(legacyRun.steps.length).toBeGreaterThan(0);
+    });
+
+    test('getFaqs returns problem symptoms across topics', async () => {
+        const faqs = await helpContentService.getFaqs({ locale: 'en' });
+        expect(Array.isArray(faqs)).toBe(true);
+        expect(faqs.length).toBeGreaterThan(0);
+        const dryingFaq = faqs.find(f => f.articleId === 'prep-drying');
+        expect(dryingFaq).toBeDefined();
+        expect(dryingFaq.question).toBeDefined();
+        expect(dryingFaq.action).toBeDefined();
     });
 });

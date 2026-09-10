@@ -49,6 +49,7 @@ async function optionalAuth(req, res, next) {
 router.get('/topics', optionalAuth, helpController.getTopics);
 router.get('/articles', optionalAuth, helpController.getArticles);
 router.get('/articles/:articleId', optionalAuth, helpController.getArticleById);
+router.get('/faqs', optionalAuth, helpController.getFaqs);
 router.get('/search', optionalAuth, helpController.searchHelp);
 router.get('/context', optionalAuth, helpController.getContextHelp);
 router.get('/pack', optionalAuth, helpController.getOfflinePack);

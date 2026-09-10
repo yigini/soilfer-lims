@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-09-10T20:07:50.556Z",
+  "commit": "691582487e04b5e29bccbf338d54ea9bf4e1434d",
+  "scope": "Read-only evidence snapshot; all changes in WP/help-knowledge-base-v2.",
+  "observedContent": {
+    "englishArticleCount": 27,
+    "averageApproximateWords": 112,
+    "minimumApproximateWords": 85,
+    "maximumApproximateWords": 135,
+    "countNote": "Audit of current English title, summary, steps, success and caution fields; not a reading-time claim."
+  },
+  "files": [
+    {
+      "file": "client/src/App.jsx",
+      "sha256": "6980789abb38bc0cbf87991d0b87c1d716ddc5dc450ae4e873580e9b6114437e"
+    },
+    {
+      "file": "server/config/roles.js",
+      "sha256": "d9147a6ffa7c26023d94e175aea72f4c7f954e8c34933108e8207975a42a1685"
+    },
+    {
+      "file": "client/src/pages/help/HelpCentre.jsx",
+      "sha256": "c034071579477f9d909582d7f940d1292a75161a6457432820363ff12de2832a"
+    },
+    {
+      "file": "client/src/pages/help/ArticleReader.jsx",
+      "sha256": "7427e7324632dac683ca84fc42826bf31e4999d2c7f736ea277f126b3283007e"
+    },
+    {
+      "file": "client/src/pages/help/AdminHelpEditor.jsx",
+      "sha256": "e8ab89a76e3b1b161e79fd3026246517611d3f7f545d177e50ef76c85fcc9f6d"
+    },
+    {
+      "file": "server/data/help/content.en.json",
+      "sha256": "503466172e959c99a3dc31e752e9122291d026f42cbc7434acb06c41869b5678"
+    },
+    {
+      "file": "server/data/help/content.es.json",
+      "sha256": "a2d941ba5bac51d3caa54080015a96f3619385e5af553cae33c2ccbc5aeafaa7"
+    },
+    {
+      "file": "server/data/help/content.es-419.json",
+      "sha256": "c015ad9a4f40a084f4cae5c68df81f943fbe66da68bdf053807ae91e44168e21"
+    },
+    {
+      "file": "server/data/help/content.fr.json",
+      "sha256": "a18d34391e5bbd5d772378704122b698ff8e5906d130a4126127d47f07ad0a1d"
+    },
+    {
+      "file": "server/data/help/content.pt.json",
+      "sha256": "f773fc0222292d98cdc30dda4cc1a8dd0fd0e835d67473efbd9bb25f22230430"
+    },
+    {
+      "file": "server/data/help/route-help-map.json",
+      "sha256": "f27298023b4264bfdc36c84332e5937686941893ba0a44ff772ec35a5f3d3687"
+    },
+    {
+      "file": "client/src/pages/Profile.jsx",
+      "sha256": "010b062f940f04baad653ae14aa8b25f6dd41c43d82aca5d2e145ba31bf2a647"
+    },
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "sha256": "74d61687bd764c9ad120ed7a208cc8353c1d22bbdfa572703e909d5ccaf1d4ed"
+    },
+    {
+      "file": "client/src/components/reception/FieldProvenanceCard.jsx",
+      "sha256": "b04701020bc40f34439bceb119be4d88556e94e3c61a67560882f701a158bdcb"
+    },
+    {
+      "file": "client/src/components/reception/ComplianceChecklist.jsx",
+      "sha256": "1f6d76177657ce05440982c41e7cce0c9db6781ee487a450e96e359cb7927a66"
+    },
+    {
+      "file": "client/src/components/reception/BatchIntake.jsx",
+      "sha256": "641ee4958108ea50f720e4fa76622f88ba672d21d313a633e5ac189f1f793edd"
+    },
+    {
+      "file": "client/src/pages/SampleDetail.jsx",
+      "sha256": "d34937eb55081cb856e8b486d98d4e70c969f49085bfe941f9bdcc1c5b32736d"
+    },
+    {
+      "file": "client/src/pages/SampleWorkflowMap.jsx",
+      "sha256": "3e096787074a554f40db5592e6f6a5f9624cec00853f4ef01d7962784051df8c"
+    },
+    {
+      "file": "client/src/components/sample/WorkItemsTable.jsx",
+      "sha256": "f758f949981006d6315bdfa9d2f7c55957226c2c765f03ce9880a1c10b561e96"
+    },
+    {
+      "file": "client/src/components/workbench/OperationalTaskEditor.jsx",
+      "sha256": "d1856cc913f3bd1b2b4fe25c1c6b9fc24f955996d1e2bb8c99455118a9ccd80b"
+    },
+    {
+      "file": "client/src/components/workbench/WorksheetArea.jsx",
+      "sha256": "bea983e6e2b192467ae1246816f05ac41f57585de455aab94c7534a9c52e4a87"
+    },
+    {
+      "file": "client/src/components/workbench/WorkbenchShell.jsx",
+      "sha256": "e21c7adc5b788c84d59b223310b2bcfab7caa0428ef722d89df9a20ad580c4ca"
+    },
+    {
+      "file": "server/services/workbenchReadinessService.js",
+      "sha256": "4bad6fb434a1db5d1be66774bfbad28b3e138b15fc2eb40968cc0f6775ee25e8"
+    },
+    {
+      "file": "client/src/components/workbench/PastePreviewModal.jsx",
+      "sha256": "f9aecdf6868eb7c01b224b6b20cd1f994e67e710b1dd5393f84d985049a8110f"
+    },
+    {
+      "file": "client/src/components/workbench/ReviewSubmissionView.jsx",
+      "sha256": "3eb4223d0634a7e577317385b9af7e3bc90250bec729ec93bcfd4015e2e3cb74"
+    },
+    {
+      "file": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "sha256": "7d35ffd76337e2058a4bcd1bc324e4b69476571f16f911ca5226b396e4024feb"
+    },
+    {
+      "file": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "sha256": "1651533ae5c31a828ae5f4fdd557a44ab333b5e1ed645533986b24901076dd5a"
+    },
+    {
+      "file": "client/src/pages/SpectralLibrary.jsx",
+      "sha256": "addfb29420828eb7bb45d642639cb9aaab2bddab1e8038511f7d1b168d624edb"
+    },
+    {
+      "file": "client/src/context/AnalysisCatalogueContext.jsx",
+      "sha256": "d736267f8989059ec278b7e0925091074293801f659f836885ecf6fa2db78092"
+    },
+    {
+      "file": "client/src/pages/ManagerQueue.jsx",
+      "sha256": "fa48a87661e9c8674f6fc76c71f9756e995fa3217c1c304f8c340f6fcdedfa27"
+    },
+    {
+      "file": "client/src/components/sample/SubmissionPanel.jsx",
+      "sha256": "2298889e5bdb00598f4f3d930e7af6c9153292baca856d486f965b16ead88717"
+    },
+    {
+      "file": "client/src/pages/ResultReports.jsx",
+      "sha256": "6ae8d1e037923cdc768216023eb92abf20ba9415025b34c6dec28af37d1f0702"
+    },
+    {
+      "file": "client/src/pages/Equipment.jsx",
+      "sha256": "8fbcc621f1938430373edd93dbfca3ae6cf76c732a9805dffc67da286418c42d"
+    },
+    {
+      "file": "client/src/pages/Inventory.jsx",
+      "sha256": "8b8f18ca1122e927276866cb294c8d5929389e41c0a9ea19c8ec4faa60fe703c"
+    },
+    {
+      "file": "client/src/context/SyncContext.jsx",
+      "sha256": "859876497c874dd51e3ef194e58b3e25e68e3a78ad366d34dd1b5e4eaa06be08"
+    },
+    {
+      "file": "client/src/services/offline/offlineDb.js",
+      "sha256": "b3a945c00ebd9008241cafeaa7b55bcdb1d72d9caf913cd935f0dd24e29b23d5"
+    },
+    {
+      "file": "client/src/components/mobile",
+      "status": "CANDIDATE_DIRECTORY: trace the specific handlers and controls"
+    },
+    {
+      "file": "client/src/pages/Projects.jsx",
+      "sha256": "12d15b9d3cf775993033b052932b25d8b05e3bb71ca6b817b8180e81e0ec711d"
+    },
+    {
+      "file": "client/src/pages/DataResults.jsx",
+      "sha256": "63d29a0fbe109ef5a9de5d9b4876c5fe3ecf0de39b07d7fb2bd21b9c12452629"
+    },
+    {
+      "file": "client/src/pages/CountryData.jsx",
+      "sha256": "307ef103fa015a45ad0f9f726988bd378759e417dde2cb8a0dbce15f1f376f95"
+    },
+    {
+      "file": "docs/book/src/usage/kobotoolbox.md",
+      "sha256": "37526c874687644415b38cb30d46aed9fa471586a1936744e0a228f9a475b873"
+    },
+    {
+      "file": "client/src/pages/AdminPanel.jsx",
+      "sha256": "04946d68cfce0d7c5aefc3b645230e09e0d855730d82efb1d5037fbd70155945"
+    },
+    {
+      "file": "client/src/pages/admin/LabManagement.jsx",
+      "sha256": "9daf8b70673c4fadd4c49039c035fce2f33748e209e11d0605332e4540d7c2dc"
+    },
+    {
+      "file": "client/src/components/TranslationEditor.jsx",
+      "sha256": "262a499bd176ea36631b0ce614fa35e797aa3a3c5f215cdb0e1a26c7f7947446"
+    },
+    {
+      "file": "client/src/pages/QADashboard.jsx",
+      "sha256": "3557657cb5101c0a3f42364530fbc52d8eaa2c316996c132f2ac7a0f6527e824"
+    },
+    {
+      "file": "client/src/pages/AuditLogs.jsx",
+      "sha256": "8e40282f6cb21416c251449de312c4af488416b5e291918844d3c54da18cdd1a"
+    },
+    {
+      "file": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "sha256": "634ec7b997fbfe001f678eacfc6934e897b7eecd4e0dd9762fc81b6b7c4df984"
+    },
+    {
+      "file": "docs/book/src/usage/qc-management.md",
+      "sha256": "268145b19c1866c55d02ef8bd0c6a8f290dbd869ae6ca2ce4d41b4735123b0fb"
+    }
+  ]
+}

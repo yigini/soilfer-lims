@@ -1,0 +1,42 @@
+Please implement the complete Help & lab guide v2 replacement now in project LIMSI, this LIMS Dev chat, working folder C:\Users\yigin\Documents\soilfer-lims.
+
+The user has reviewed the v2 design and explicitly authorized full implementation and replacement of the existing Knowledge Base/Help. This is the new task, beyond the completed v3.4.3 content-publication fix. They disliked the old design and weak instructions. Carry the replacement through actual implementation, content writing, all five languages, testing, GitHub push, publication and production deployment under their existing authorization.
+
+The complete local handoff is:
+C:\Users\yigin\Documents\soilfer-lims\WP\help-knowledge-base-v2
+
+Read 11_REPLACEMENT_AUTHORIZATION.md first; it supersedes earlier design-review-only wording. Then read README.md, 08_ANTIGRAVITY_PROMPT.md and every numbered document in the package. The key assets are:
+- 01_AUDIT_AND_DIRECTION.md
+- 02_IMPLEMENTATION_PLAN.md
+- 03_CONTENT_STANDARD.md
+- 04_CONTENT_INVENTORY.md and .json: 96 commissioned task scopes, all ten roles.
+- 05_GUIDE_EXAMPLES.md and guide-examples.json: eight substantial English examples with exact actions, fields, outcomes, recovery and next actor.
+- 06_TECHNICAL_CONTRACT.md
+- 07_VALIDATION_AND_RELEASE.md
+- 09_RESEARCH_AND_TERMINOLOGY.md and terminology.json
+- 10_MIGRATION_AND_FAQ.md and migration-map.json: all 27 existing articles mapped and 17 worked FAQ answers.
+- traceability.json: 42 audited routes plus important tab/control/blocker contexts.
+- source-baseline.json
+- review-preview.html, preview.template.html and screenshots/: interactive design and visual references.
+- preview-qa.json and verify-preview.cjs: prototype checks only, not proof of application readiness.
+
+The package is currently untracked local work; read it from this exact folder. At handoff only WP/help-knowledge-base-v2 was changed. The source baseline is 691582487e04b5e29bccbf338d54ea9bf4e1434d. Reconcile your actual current branch and any newer changes before editing.
+
+Replacement/removal:
+The user suggested rolling back/removing the previous Help. Achieve one coherent new experience without reverting unrelated LIMS fixes. Replace the old home, reader, shallow bodies, weak context mappings and editor experience at the existing Help entry points. After verification, remove obsolete and unreachable old components/styles/loaders/assets and eliminate duplicate Help entry points. Produce a keep/replace/remove list.
+Do not start with a broad git rollback, database reset or deleting article/publication history. Keep the existing usable content visible until verified replacements publish. Preserve stable article identities, meaningful URLs, revision history, local lab notes, feedback and permissions; supersede/archive old bodies through the publication model. Keep a compatible rollback release. Do not leave two competing Knowledge Bases or ship an empty Help shell.
+
+Quality and completeness:
+Implement the new design in the actual React/LIMS components, not an iframe containing the prototype. Provide role-specific My tasks, Solve a problem, Learn the workflow, Browse the guide, contextual help beside real work, and a usable content studio.
+Each guide must name the real controls, explain every important input, show synthetic worked examples and annotated actual-UI figures, tell users how to verify success, explain common failures and identify who acts next.
+Complete all 96 task scopes for enabled capabilities; reasonable merging/splitting is allowed with explicit coverage. The inventory briefs are not finished articles. Eight examples are a writing standard, not the complete deliverable. Do not reduce the content back to generic four-step summaries.
+Use all ten actual roles and real effective permissions. Cover preparation receipts, batch entry and exclusions, draft/record/submit distinctions, manager review/final approval, texture and derived results, spectra/QC/predictions, equipment/inventory, intake/source location, mobile/offline, KoBo/SIS, configuration, translations and audit.
+Finish complete en, es, es-419, fr and pt bodies, examples, captions, alternative text, glossary, recovery and editor/UI strings. The preview deliberately has partial translations; these are not production-ready language packs.
+Bind help to real route/tab/control/blocker signals. Generic support links do not satisfy specialist-page coverage. Preserve unsaved worksheet values and pending offline work when users open, navigate and close Help. Do not move readiness, approvals or laboratory mutations into Help.
+Verify scientific terms and supported method/instrument behavior against the actual configuration, controlled SOP and applicable primary sources. Keep application review distinct from scientific approval, and never fabricate either.
+
+Start with the full batch-result and drying journeys in the real app, demonstrate progress, then continue to the whole authorized scope. Do not stop after a cosmetic slice or another implementation plan. Use reviewable commits and the validation/release gates. Test the real UI/API, role boundaries, five-language publication, mobile/graphite, offline/account scope, existing links and migration compatibility.
+
+Push intentional implementation/content/tests/documentation to the correct GitHub repository, deploy through the established secure backup and rollback process, publish the verified content, and verify live page-specific guides and full bodies. Update relevant issues (inspect #92 and related issues to avoid duplicates); close only actually completed scope. Report exact code/content/image revisions and remaining exceptions. Keep credentials, backups, real lab data and unrelated files out of commits and chat.
+
+Use short, friendly, plain-English progress messages that explain the visible improvement and the next check. Acknowledge that this is a complete replacement with richer practical content, confirm you can read the package at the correct path, and begin. The user has already authorized implementation and deployment; no repetitive generic permission question is needed.

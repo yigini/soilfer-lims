@@ -1,0 +1,300 @@
+{
+  "status": "PROPOSED_GLOSSARY_NOT_APPROVED",
+  "locales": [
+    "en",
+    "es",
+    "es-419",
+    "fr",
+    "pt"
+  ],
+  "terms": [
+    {
+      "id": "sample",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Sample",
+        "es": "Muestra",
+        "es-419": "Muestra",
+        "fr": "Échantillon",
+        "pt": "Amostra"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "field-id",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Field sample ID",
+        "es": "ID de muestra de campo",
+        "es-419": "ID de muestra de campo",
+        "fr": "Identifiant de l’échantillon de terrain",
+        "pt": "ID da amostra de campo"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "lab-id",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Laboratory sample ID",
+        "es": "ID de muestra de laboratorio",
+        "es-419": "ID de muestra de laboratorio",
+        "fr": "Identifiant de l’échantillon de laboratoire",
+        "pt": "ID da amostra de laboratório"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "workbench",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Workbench",
+        "es": "Mesa de trabajo",
+        "es-419": "Mesa de trabajo",
+        "fr": "Poste de travail",
+        "pt": "Bancada de trabalho"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "drying",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Sample drying",
+        "es": "Secado de la muestra",
+        "es-419": "Secado de la muestra",
+        "fr": "Séchage de l’échantillon",
+        "pt": "Secagem da amostra"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "preparation",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Sample preparation",
+        "es": "Preparación de la muestra",
+        "es-419": "Preparación de la muestra",
+        "fr": "Préparation de l’échantillon",
+        "pt": "Preparação da amostra"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "receipt",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Confirmation receipt",
+        "es": "Comprobante de confirmación",
+        "es-419": "Comprobante de confirmación",
+        "fr": "Reçu de confirmation",
+        "pt": "Comprovativo de confirmação"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "local-save",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Saved on this device",
+        "es": "Guardado en este dispositivo",
+        "es-419": "Guardado en este dispositivo",
+        "fr": "Enregistré sur cet appareil",
+        "pt": "Guardado neste dispositivo"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "server-save",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Saved on the server",
+        "es": "Guardado en el servidor",
+        "es-419": "Guardado en el servidor",
+        "fr": "Enregistré sur le serveur",
+        "pt": "Guardado no servidor"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "recorded",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Recorded",
+        "es": "Registrado",
+        "es-419": "Registrado",
+        "fr": "Enregistré",
+        "pt": "Registado"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "submitted",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Submitted for review",
+        "es": "Enviado a revisión",
+        "es-419": "Enviado a revisión",
+        "fr": "Soumis à révision",
+        "pt": "Enviado para revisão"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "accepted",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Accepted",
+        "es": "Aceptado",
+        "es-419": "Aceptado",
+        "fr": "Accepté",
+        "pt": "Aceite"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "report-released",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Report released",
+        "es": "Informe publicado",
+        "es-419": "Informe publicado",
+        "fr": "Rapport publié",
+        "pt": "Relatório publicado"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "texture",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Soil texture",
+        "es": "Textura del suelo",
+        "es-419": "Textura del suelo",
+        "fr": "Texture du sol",
+        "pt": "Textura do solo"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "sand",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Sand fraction",
+        "es": "Fracción de arena",
+        "es-419": "Fracción de arena",
+        "fr": "Fraction sableuse",
+        "pt": "Fração de areia"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "silt",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Silt fraction",
+        "es": "Fracción de limo",
+        "es-419": "Fracción de limo",
+        "fr": "Fraction limoneuse",
+        "pt": "Fração de limo"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "clay",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Clay fraction",
+        "es": "Fracción de arcilla",
+        "es-419": "Fracción de arcilla",
+        "fr": "Fraction argileuse",
+        "pt": "Fração de argila"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "spectrum",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Spectrum",
+        "es": "Espectro",
+        "es-419": "Espectro",
+        "fr": "Spectre",
+        "pt": "Espectro"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "absorbance",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Absorbance",
+        "es": "Absorbancia",
+        "es-419": "Absorbancia",
+        "fr": "Absorbance",
+        "pt": "Absorvância"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "reflectance",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Reflectance",
+        "es": "Reflectancia",
+        "es-419": "Reflectancia",
+        "fr": "Réflectance",
+        "pt": "Refletância"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "qc",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Quality control",
+        "es": "Control de calidad",
+        "es-419": "Control de calidad",
+        "fr": "Contrôle qualité",
+        "pt": "Controlo da qualidade"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "calibration",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Calibration",
+        "es": "Calibración",
+        "es-419": "Calibración",
+        "fr": "Étalonnage",
+        "pt": "Calibração"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "nonconformance",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Nonconformance",
+        "es": "No conformidad",
+        "es-419": "No conformidad",
+        "fr": "Non-conformité",
+        "pt": "Não conformidade"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    },
+    {
+      "id": "replicate",
+      "status": "DRAFT_TERMINOLOGY_REVIEW_REQUIRED",
+      "labels": {
+        "en": "Replicate measurement",
+        "es": "Medición replicada",
+        "es-419": "Medición replicada",
+        "fr": "Mesure répétée",
+        "pt": "Medição replicada"
+      },
+      "note": "Align with the existing application glossary, locale variant and lab review. Do not translate identifiers, formula symbols or numeric storage."
+    }
+  ]
+}

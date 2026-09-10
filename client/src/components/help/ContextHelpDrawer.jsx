@@ -16,7 +16,9 @@ import {
     WifiOff,
     FileEdit,
     RefreshCw,
-    Globe
+    Globe,
+    UserCheck,
+    Eye
 } from 'lucide-react';
 import { useHelp } from '../../context/HelpContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -435,8 +437,66 @@ export const ContextHelpDrawer = () => {
                                         </p>
                                     </div>
 
-                                    {/* Action Steps */}
-                                    {articleData.steps?.length > 0 && (
+                                    {/* Quick Answer Highlight */}
+                                    {articleData.quick && (
+                                        <div className="p-3 rounded-xl bg-emerald-500/10 border-l-4 border-l-emerald-600 border border-emerald-500/20 text-emerald-950 dark:text-emerald-100 text-xs shadow-xs">
+                                            <div className="font-bold uppercase tracking-wider text-[10px] text-emerald-700 dark:text-emerald-300 mb-1 flex items-center gap-1">
+                                                <CheckCircle2 size={12} />
+                                                <span>{t('help.quickAnswer', 'Quick Answer')}</span>
+                                            </div>
+                                            <p className="leading-relaxed font-medium">{articleData.quick}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Before You Start Checklist */}
+                                    {articleData.before?.length > 0 && (
+                                        <div className="space-y-1.5 bg-sf-inset p-3 rounded-xl border border-sf-divider/60">
+                                            <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
+                                                {t('help.beforeYouStart', 'Before you start')}
+                                            </div>
+                                            <ul className="space-y-1 text-xs text-sf-text">
+                                                {articleData.before.map((b, bIdx) => (
+                                                    <li key={bIdx} className="flex items-start gap-1.5">
+                                                        <span className="text-sf-primary font-bold">✓</span>
+                                                        <span className="leading-relaxed">{b}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Action Steps - Structured Sections or Legacy Steps */}
+                                    {articleData.sections?.length > 0 && articleData.sections.some(s => s.steps?.length > 0) ? (
+                                        <div className="space-y-4">
+                                            {articleData.sections.map((sec, secIdx) => (
+                                                <div key={secIdx} className="space-y-2">
+                                                    <div className="text-xs font-bold text-sf-text border-b border-sf-divider pb-1">
+                                                        {sec.title}
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {sec.steps.map((st, stIdx) => (
+                                                            <div key={stIdx} className="bg-sf-inset p-3 rounded-xl border border-sf-divider/60 space-y-1.5">
+                                                                <div className="flex items-start gap-2 text-xs text-sf-text">
+                                                                    <span className="w-5 h-5 rounded-full bg-sf-primary text-white font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
+                                                                        {stIdx + 1}
+                                                                    </span>
+                                                                    <span className="flex-1 font-semibold leading-relaxed">{st.action || st}</span>
+                                                                </div>
+                                                                {st.expected && (
+                                                                    <div className="ml-7 pl-2 border-l-2 border-sf-primary/50 text-[11px] text-sf-muted">
+                                                                        <span className="font-bold text-sf-primary text-[10px] uppercase block">
+                                                                            {t('help.whatYouShouldSee', 'What you should see')}
+                                                                        </span>
+                                                                        <span className="text-sf-text">{st.expected}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : articleData.steps?.length > 0 ? (
                                         <div className="space-y-2">
                                             <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
                                                 {t('help.drawer.steps', 'Required Steps')}
@@ -452,6 +512,23 @@ export const ContextHelpDrawer = () => {
                                                 ))}
                                             </ol>
                                         </div>
+                                    ) : null}
+
+                                    {/* Field Guide */}
+                                    {articleData.fields?.length > 0 && (
+                                        <div className="space-y-1.5 bg-sf-inset p-3 rounded-xl border border-sf-divider/60">
+                                            <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
+                                                {t('help.fieldGuide', 'Field Guide')}
+                                            </div>
+                                            <div className="space-y-1.5 text-xs">
+                                                {articleData.fields.map((f, fIdx) => (
+                                                    <div key={fIdx} className="border-b border-sf-divider/40 pb-1.5 last:border-0 last:pb-0">
+                                                        <span className="font-bold text-sf-text">{f[0]}</span>: <span className="text-sf-muted">{f[1]}</span>
+                                                        {f[2] && <div className="text-[10px] font-mono text-sf-primary mt-0.5">Ex: {f[2]}</div>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
 
                                     {/* Success Criteria */}
@@ -461,6 +538,42 @@ export const ContextHelpDrawer = () => {
                                             <div>
                                                 <div className="font-bold mb-0.5">{t('help.drawer.success', 'What success looks like')}</div>
                                                 <div className="leading-relaxed">{articleData.success}</div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Who Acts Next */}
+                                    {articleData.nextActor && (
+                                        <div className="p-2.5 rounded-xl bg-sf-inset border border-sf-divider text-xs flex items-center gap-2">
+                                            <UserCheck size={14} className="text-sf-primary shrink-0" />
+                                            <div>
+                                                <span className="text-[10px] font-bold uppercase text-sf-muted block">{t('help.whoActsNext', 'Who acts next')}</span>
+                                                <span className="font-semibold text-sf-text">{articleData.nextActor}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Troubleshooting Accordion (If something differs) */}
+                                    {articleData.problems?.length > 0 && (
+                                        <div className="space-y-2">
+                                            <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
+                                                {t('help.ifSomethingDiffers', 'If something differs')}
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                {articleData.problems.map((prob, pIdx) => (
+                                                    <details key={pIdx} className="group bg-sf-inset p-2.5 rounded-xl border border-sf-divider/60 text-xs">
+                                                        <summary className="font-semibold text-sf-text cursor-pointer flex items-center justify-between gap-2 select-none">
+                                                            <span className="text-amber-700 dark:text-amber-300">{prob.symptom}</span>
+                                                            <ChevronRight size={12} className="text-sf-muted group-open:rotate-90 transition-transform" />
+                                                        </summary>
+                                                        <div className="mt-2 pt-2 border-t border-sf-divider/40 space-y-1 text-[11px]">
+                                                            <div className="text-sf-muted">{prob.why}</div>
+                                                            <div className="font-medium text-sf-text bg-sf-surface p-2 rounded-lg border border-sf-divider/40">
+                                                                {prob.action}
+                                                            </div>
+                                                        </div>
+                                                    </details>
+                                                ))}
                                             </div>
                                         </div>
                                     )}

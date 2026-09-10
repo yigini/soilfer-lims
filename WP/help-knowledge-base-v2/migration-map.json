@@ -1,0 +1,301 @@
+{
+  "status": "PROPOSED_MIGRATION_REQUIRES_CURRENT_DB_ID_VERIFICATION",
+  "baseline": "6915824",
+  "articles": [
+    {
+      "legacyArticleId": "start-shift",
+      "title": "Start your shift with the right work",
+      "successorBriefIds": [
+        "start-technician",
+        "start-reception",
+        "start-manager"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "intake-project",
+      "title": "Receive a project sample",
+      "successorBriefIds": [
+        "intake-project",
+        "intake-handover"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "intake-location",
+      "title": "Why is the location missing from an intake draft?",
+      "successorBriefIds": [
+        "intake-location",
+        "intake-draft"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "intake-identity",
+      "title": "Which sample identifier should I use?",
+      "successorBriefIds": [
+        "tracking-identifiers",
+        "intake-duplicate"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-blocked",
+      "title": "Why can't I start this analysis?",
+      "successorBriefIds": [
+        "bench-blocked",
+        "tracking-map"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-drying",
+      "title": "Record sample drying",
+      "successorBriefIds": [
+        "prep-drying"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-preparation",
+      "title": "Why does preparation still need attention after I confirm it?",
+      "successorBriefIds": [
+        "prep-receipt",
+        "prep-preparation"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-run",
+      "title": "Record a run of samples for one method",
+      "successorBriefIds": [
+        "bench-batch",
+        "bench-paste"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-save-submit",
+      "title": "Was my result saved or submitted?",
+      "successorBriefIds": [
+        "bench-states",
+        "bench-submit"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-texture",
+      "title": "Why are sand, silt and clay entered together?",
+      "successorBriefIds": [
+        "method-texture",
+        "method-derived"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "bench-spectra",
+      "title": "What should I upload for MIR or NIR analysis?",
+      "successorBriefIds": [
+        "method-spectral-import",
+        "method-spectral-inspect"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "review-results",
+      "title": "Review submitted work before approval",
+      "successorBriefIds": [
+        "review-submission",
+        "review-final"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "review-returned",
+      "title": "What should I do when work is returned?",
+      "successorBriefIds": [
+        "bench-returned",
+        "review-return"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "review-amend",
+      "title": "Can I change an approved result?",
+      "successorBriefIds": [
+        "review-amend"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "review-report",
+      "title": "Find and share the correct report",
+      "successorBriefIds": [
+        "review-report",
+        "review-share"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "assets-instrument",
+      "title": "Why can't I select this instrument?",
+      "successorBriefIds": [
+        "assets-find",
+        "assets-calibration",
+        "assets-maintain"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "assets-stock",
+      "title": "Record materials used at the bench",
+      "successorBriefIds": [
+        "assets-stock",
+        "assets-trace"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "offline-prepare",
+      "title": "Prepare for a supported offline shift",
+      "successorBriefIds": [
+        "offline-prepare",
+        "offline-install"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "offline-sync",
+      "title": "What does saved on this device mean?",
+      "successorBriefIds": [
+        "offline-sync",
+        "offline-record"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "offline-files",
+      "title": "Has my photo or spectrum really been saved?",
+      "successorBriefIds": [
+        "offline-record",
+        "method-spectral-import"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "connect-kobo",
+      "title": "Does a KoBo submission mean the sample was received?",
+      "successorBriefIds": [
+        "connect-kobo",
+        "connect-field-fix"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "connect-library",
+      "title": "How is the spectral library related to sample results?",
+      "successorBriefIds": [
+        "method-spectral-inspect",
+        "method-predictions"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "connect-sis",
+      "title": "Has the result reached the Soil Information System?",
+      "successorBriefIds": [
+        "connect-sis"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "manage-catalogue",
+      "title": "Change an analysis definition responsibly",
+      "successorBriefIds": [
+        "admin-catalogue",
+        "admin-methods"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "manage-language",
+      "title": "How do I change the language or report a translation?",
+      "successorBriefIds": [
+        "start-settings",
+        "admin-translation"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "manage-load-error",
+      "title": "What should I do if a page fails to load?",
+      "successorBriefIds": [
+        "quality-loading"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    },
+    {
+      "legacyArticleId": "manage-support",
+      "title": "Ask for help with the right information",
+      "successorBriefIds": [
+        "quality-support",
+        "admin-support"
+      ],
+      "identityPolicy": "Retain the existing immutable identity, URL, revisions, feedback and publication history. Brief IDs describe scopes, not compulsory new database identities.",
+      "rollout": "Keep the published v1 revision readable until its verified replacement is in the published manifest. Where splitting, preserve the old relevant landing/section and explicit successor links; never redirect all old articles to home.",
+      "review": "Rewrite and verify all five locale bodies and figures. Existing v1 publication does not constitute v2 review."
+    }
+  ]
+}

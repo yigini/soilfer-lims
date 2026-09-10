@@ -36,111 +36,183 @@
     }
   },
   {
+    "id": "tracking",
+    "icon": "network",
+    "titles": {
+      "en": "Sample identity and tracking",
+      "es": "Identidad y seguimiento de muestras",
+      "es-419": "Identidad y seguimiento de muestras",
+      "fr": "Identité et traçabilité des échantillons",
+      "pt": "Identidade e rastreabilidade de amostras"
+    },
+    "descriptions": {
+      "en": "Identifiers, locations, workflow maps and labels.",
+      "es": "Identificadores, ubicaciones, mapas de flujo y etiquetas.",
+      "es-419": "Identificadores, ubicaciones, mapas de flujo y etiquetas.",
+      "fr": "Identifiants, emplacements, schémas de parcours et étiquettes.",
+      "pt": "Identificadores, localizações, mapas de fluxo e etiquetas."
+    }
+  },
+  {
+    "id": "preparation",
+    "icon": "clipboard-check",
+    "titles": {
+      "en": "Drying and preparation",
+      "es": "Secado y preparación",
+      "es-419": "Secado y preparación",
+      "fr": "Séchage et préparation",
+      "pt": "Secagem e preparação"
+    },
+    "descriptions": {
+      "en": "Checklist confirmation, receipts and evidence.",
+      "es": "Confirmación por lista de verificación, comprobantes y evidencia.",
+      "es-419": "Confirmación por lista de verificación, comprobantes y evidencia.",
+      "fr": "Validation des listes de contrôle, reçus et preuves.",
+      "pt": "Confirmação por lista de verificação, comprovativos e evidência."
+    }
+  },
+  {
     "id": "bench",
     "icon": "flask-conical",
     "titles": {
-      "en": "Working at the bench",
-      "es": "Trabajo analítico",
-      "es-419": "Trabajo analítico",
-      "fr": "Travail à la paillasse",
-      "pt": "Trabalho analítico"
+      "en": "Results at the bench",
+      "es": "Resultados en la mesa de trabajo",
+      "es-419": "Resultados en la mesa de trabajo",
+      "fr": "Résultats à la paillasse",
+      "pt": "Resultados na bancada"
     },
     "descriptions": {
-      "en": "Preparation, method runs and result entry.",
-      "es": "Preparación, series analíticas y registro de resultados.",
-      "es-419": "Preparación, corridas analíticas y captura de resultados.",
-      "fr": "Préparation, séries d'analyses et saisie des résultats.",
-      "pt": "Preparação, ensaios de métodos e registo de resultados."
+      "en": "Batch entry, worksheets, paste preview and reviewer handoff.",
+      "es": "Captura por lote, hojas de trabajo, vista previa de pegado y envío a revisión.",
+      "es-419": "Captura por lote, hojas de trabajo, vista previa de pegado y envío a revisión.",
+      "fr": "Saisie par lot, feuilles de travail, aperçu du collage et transmission pour révision.",
+      "pt": "Registo por lote, folhas de cálculo, pré-visualização de colagem e envio para revisão."
+    }
+  },
+  {
+    "id": "methods",
+    "icon": "microscope",
+    "titles": {
+      "en": "Methods, panels and spectra",
+      "es": "Métodos, paneles y espectros",
+      "es-419": "Métodos, paneles y espectros",
+      "fr": "Méthodes, séries et spectres",
+      "pt": "Métodos, painéis e espectros"
+    },
+    "descriptions": {
+      "en": "pH, EC, texture panels, spectral files and prediction.",
+      "es": "pH, CE, paneles de textura, archivos espectrales y predicción.",
+      "es-419": "pH, CE, paneles de textura, archivos espectrales y predicción.",
+      "fr": "pH, CE, fractions texturales, spectres et prédictions.",
+      "pt": "pH, CE, painéis de textura, ficheiros espectrais e predição."
     }
   },
   {
     "id": "review",
     "icon": "clipboard-check",
     "titles": {
-      "en": "Review & reports",
+      "en": "Review and reporting",
       "es": "Revisión e informes",
       "es-419": "Revisión e informes",
       "fr": "Révision et rapports",
       "pt": "Revisão e relatórios"
     },
     "descriptions": {
-      "en": "Check evidence, return work and release reports.",
-      "es": "Comprobar evidencias, devolver análisis y emitir informes.",
-      "es-419": "Verificar evidencias, devolver trabajo y emitir reportes.",
-      "fr": "Vérification des preuves, renvoi des analyses et diffusion des rapports.",
-      "pt": "Verificar evidências, devolver análises e emitir relatórios."
+      "en": "Inspect evidence, accept, return with reasons and release reports.",
+      "es": "Inspeccionar evidencia, aceptar, devolver con motivos y emitir informes.",
+      "es-419": "Inspeccionar evidencia, aceptar, devolver con motivos y emitir informes.",
+      "fr": "Examiner les preuves, accepter, renvoyer avec motif et publier les rapports.",
+      "pt": "Inspecionar evidência, aceitar, devolver com motivos e emitir relatórios."
     }
   },
   {
     "id": "assets",
     "icon": "microscope",
     "titles": {
-      "en": "Equipment & stock",
+      "en": "Equipment and stock",
       "es": "Equipos e inventario",
       "es-419": "Equipos e inventario",
       "fr": "Équipements et stocks",
       "pt": "Equipamentos e inventário"
     },
     "descriptions": {
-      "en": "Use eligible instruments and traceable materials.",
-      "es": "Utilizar equipos aptos y materiales trazables.",
-      "es-419": "Utilizar instrumentos aptos y materiales trazables.",
-      "fr": "Utiliser des instruments conformes et des consommables traçables.",
-      "pt": "Utilizar instrumentos elegíveis e reagentes rastreáveis."
+      "en": "Instrument eligibility, calibration, maintenance and reagent lots.",
+      "es": "Aptitud de instrumentos, calibración, mantenimiento y lotes de reactivos.",
+      "es-419": "Aptitud de instrumentos, calibración, mantenimiento y lotes de reactivos.",
+      "fr": "Conformité des appareils, étalonnage, maintenance et lots de réactifs.",
+      "pt": "Elegibilidade de instrumentos, calibração, manutenção e lotes de reagentes."
     }
   },
   {
     "id": "offline",
     "icon": "cloud-download",
     "titles": {
-      "en": "Mobile & offline",
+      "en": "Mobile and offline work",
       "es": "Móvil y sin conexión",
       "es-419": "Móvil y sin conexión",
       "fr": "Mobile et hors connexion",
       "pt": "Dispositivos móveis e sem ligação"
     },
     "descriptions": {
-      "en": "Device saves, synchronization and recovery.",
-      "es": "Guardado local, sincronización y recuperación.",
-      "es-419": "Almacenamiento en dispositivo, sincronización y recuperación.",
-      "fr": "Sauvegarde sur l'appareil, synchronisation et récupération.",
-      "pt": "Gravação no dispositivo, sincronização e recuperação."
+      "en": "PWA layout, work packs, queued actions, sync and conflicts.",
+      "es": "Diseño PWA, paquetes de trabajo, acciones en cola, sincronización y conflictos.",
+      "es-419": "Diseño PWA, paquetes de trabajo, acciones en cola, sincronización y conflictos.",
+      "fr": "Format PWA, lots de travail, actions en attente, synchronisation et conflits.",
+      "pt": "Disposição PWA, pacotes de trabalho, ações em fila, sincronização e conflitos."
     }
   },
   {
     "id": "connect",
     "icon": "network",
     "titles": {
-      "en": "Projects & connections",
-      "es": "Proyectos y conexiones",
-      "es-419": "Proyectos y conexiones",
-      "fr": "Projets et connexions",
-      "pt": "Projetos e ligações"
+      "en": "Projects, fieldwork and connections",
+      "es": "Proyectos, campo y conexiones",
+      "es-419": "Proyectos, campo y conexiones",
+      "fr": "Projets, terrain et connexions",
+      "pt": "Projetos, campo e ligações"
     },
     "descriptions": {
-      "en": "KoBo field records, projects and SIS exchange.",
-      "es": "Registros de campo KoBo, proyectos e intercambio SIS.",
-      "es-419": "Registros de campo KoBo, proyectos e intercambio con SIS.",
-      "fr": "Données de terrain KoBo, projets et échanges avec le SIS.",
-      "pt": "Registos de campo KoBo, projetos e integração SIS."
+      "en": "KoBo toolbox, surveyor provenance, progress and SIS exports.",
+      "es": "KoBo toolbox, procedencia de campo, avance y exportaciones SIS.",
+      "es-419": "KoBo toolbox, procedencia de campo, avance y exportaciones SIS.",
+      "fr": "KoBo toolbox, origine terrain, avancement et exportations SIS.",
+      "pt": "KoBo toolbox, proveniência de campo, progresso e exportações SIS."
     }
   },
   {
-    "id": "manage",
+    "id": "admin",
     "icon": "settings-2",
     "titles": {
-      "en": "Managing the laboratory",
-      "es": "Gestión del laboratorio",
-      "es-419": "Gestión del laboratorio",
-      "fr": "Gestion du laboratoire",
-      "pt": "Gestão do laboratório"
+      "en": "Management and configuration",
+      "es": "Gestión y configuración",
+      "es-419": "Gestión y configuración",
+      "fr": "Gestion et configuration",
+      "pt": "Gestão e configuração"
     },
     "descriptions": {
-      "en": "Assignments, configuration and language.",
-      "es": "Asignaciones, configuración e idioma.",
-      "es-419": "Asignaciones, configuración e idioma.",
-      "fr": "Affectations, configuration et langue.",
-      "pt": "Atribuições, parametrização e idioma."
+      "en": "Labs, users, analysis catalogue, methods, translations and Help.",
+      "es": "Laboratorios, usuarios, catálogo de análisis, métodos, traducciones y Ayuda.",
+      "es-419": "Laboratorios, usuarios, catálogo de análisis, métodos, traducciones y Ayuda.",
+      "fr": "Laboratoires, utilisateurs, catalogue d'analyses, méthodes, traductions et Aide.",
+      "pt": "Laboratórios, utilizadores, catálogo de análises, métodos, traduções e Ajuda."
+    }
+  },
+  {
+    "id": "quality",
+    "icon": "clipboard-check",
+    "titles": {
+      "en": "Quality, audit and recovery",
+      "es": "Calidad, auditoría y recuperación",
+      "es-419": "Calidad, auditoría y recuperación",
+      "fr": "Qualité, audit et reprise",
+      "pt": "Qualidade, auditoria e recuperação"
+    },
+    "descriptions": {
+      "en": "Audit logs, nonconformance, QC alerts, history and support.",
+      "es": "Registros de auditoría, no conformidades, alertas de CC, historial y soporte.",
+      "es-419": "Registros de auditoría, no conformidades, alertas de CC, historial y soporte.",
+      "fr": "Journaux d'audit, non-conformités, alertes CQ, historique et support.",
+      "pt": "Registos de auditoria, não conformidades, alertas de CQ, histórico e suporte."
     }
   }
 ]

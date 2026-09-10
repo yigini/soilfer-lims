@@ -277,8 +277,13 @@ async function getArticles({ category = null, role = null, user = null, locale =
         .filter(article => {
             if (!role || role === 'all') return true;
             try {
-                const roles = JSON.parse(article.roles || '[]');
-                return roles.includes('all') || roles.includes(role.toLowerCase());
+                const roles = JSON.parse(article.roles || '[]').map(r => String(r).toLowerCase());
+                const searchRole = role.toLowerCase();
+                return roles.includes('all') ||
+                    roles.includes(searchRole) ||
+                    (searchRole === 'technician' && (roles.includes('lab_technician') || roles.includes('technician'))) ||
+                    (searchRole === 'manager' && (roles.includes('lab_manager') || roles.includes('manager'))) ||
+                    (searchRole === 'reception' && (roles.includes('sample_reception') || roles.includes('reception')));
             } catch (e) {
                 return true;
             }
@@ -358,7 +363,14 @@ async function getArticleById(articleId, user = null, locale = 'en', preview = f
         }
     });
 
-    if (!article) return null;
+    if (!article) {
+        const migration = loadJsonFile('migration-map.json', null);
+        const successorEntry = migration?.articles?.find(m => m.legacyArticleId === articleId);
+        if (successorEntry && successorEntry.successorBriefIds?.[0]) {
+            return getArticleById(successorEntry.successorBriefIds[0], user, locale, preview);
+        }
+        return null;
+    }
 
     const pub = article.publications?.[0];
     const rev = canPreview ? (pub?.revision || article.revisions?.[0]) : pub?.revision;
@@ -370,10 +382,59 @@ async function getArticleById(articleId, user = null, locale = 'en', preview = f
     const { content, isFallback, localeNotice, isDraftPreview } = resolved;
 
     let steps = [];
+    let quick = '';
+    let before = [];
+    let sections = [];
+    let fields = [];
+    let example = '';
+    let nextActor = '';
+    let problems = [];
+    let sources = [];
+
     try {
-        steps = JSON.parse(content.steps || rev.steps || '[]');
+        const parsed = JSON.parse(content.steps || rev.steps || '[]');
+        if (Array.isArray(parsed)) {
+            if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null && parsed[0].action) {
+                sections = [{ title: 'Procedure', steps: parsed }];
+                steps = parsed.map(st => `${st.action}${st.expected ? ' (Expected: ' + st.expected + ')' : ''}`);
+            } else {
+                steps = parsed;
+                sections = [{
+                    title: 'Procedure',
+                    steps: parsed.map(s => ({ action: typeof s === 'string' ? s : JSON.stringify(s), expected: '' }))
+                }];
+            }
+        } else if (parsed && typeof parsed === 'object') {
+            quick = parsed.quick || '';
+            before = parsed.before || [];
+            sections = parsed.sections || [];
+            fields = parsed.fields || [];
+            example = parsed.example || '';
+            nextActor = parsed.nextActor || '';
+            problems = parsed.problems || [];
+            sources = parsed.sources || [];
+            if (Array.isArray(parsed.steps)) {
+                steps = parsed.steps;
+            } else if (Array.isArray(sections)) {
+                steps = sections.flatMap(s => (s.steps || []).map(st => typeof st === 'string' ? st : `${st.action}${st.expected ? ' (Expected: ' + st.expected + ')' : ''}`));
+            }
+        }
     } catch (e) {
         steps = [];
+    }
+
+    // Disk-content fallback for rich v2 fields
+    const diskContent = loadJsonFile(`content.${locale}.json`) || loadJsonFile('content.en.json');
+    const diskArt = diskContent?.articles?.find(a => a.id === article.id);
+    if (diskArt) {
+        if (!quick && diskArt.quick) quick = diskArt.quick;
+        if ((!before || before.length === 0) && diskArt.before) before = diskArt.before;
+        if ((!sections || sections.length === 0) && diskArt.sections) sections = diskArt.sections;
+        if ((!fields || fields.length === 0) && diskArt.fields) fields = diskArt.fields;
+        if (!example && diskArt.example) example = diskArt.example;
+        if (!nextActor && diskArt.nextActor) nextActor = diskArt.nextActor;
+        if ((!problems || problems.length === 0) && diskArt.problems) problems = diskArt.problems;
+        if ((!sources || sources.length === 0) && diskArt.sources) sources = diskArt.sources;
     }
 
     let related = [];
@@ -396,6 +457,14 @@ async function getArticleById(articleId, user = null, locale = 'en', preview = f
         title: content.title || rev.title,
         summary: content.summary || rev.summary,
         steps,
+        quick: quick || content.summary || rev.summary,
+        before: before.length > 0 ? before : ['Verify user role, assignment and prerequisite steps.'],
+        sections: sections.length > 0 ? sections : [{ title: 'Procedure', steps: steps.map(s => ({ action: s, expected: '' })) }],
+        fields: fields || [],
+        example: example || '',
+        nextActor: nextActor || 'Assigned colleague or laboratory supervisor',
+        problems: problems || [],
+        sources: sources || [],
         success: content.success || rev.success || '',
         caution: content.caution || rev.caution || '',
         related,
@@ -649,6 +718,7 @@ async function getContextHelp({ route = '/', blockerCodes = [], user = null, loc
             id: a.id,
             category: a.category,
             kind: a.kind,
+            visibility: a.visibility,
             title: content.title || rev.title,
             summary: content.summary || rev.summary,
             minutes: a.minutes,
@@ -820,6 +890,33 @@ async function getOfflinePack({ user = null, locale = 'en' }) {
     };
 }
 
+/**
+ * Get FAQs derived from canonical problem blocks across guides
+ */
+async function getFaqs({ locale = 'en', topic = null } = {}) {
+    const diskContent = loadJsonFile(`content.${locale}.json`) || loadJsonFile('content.en.json');
+    if (!diskContent?.articles) return [];
+
+    const faqs = [];
+    diskContent.articles.forEach(art => {
+        if (topic && art.category !== topic) return;
+        if (Array.isArray(art.problems) && art.problems.length > 0) {
+            art.problems.forEach((prob, idx) => {
+                faqs.push({
+                    id: `${art.id}-faq-${idx + 1}`,
+                    articleId: art.id,
+                    articleTitle: art.title,
+                    category: art.category,
+                    question: prob.symptom,
+                    cause: prob.why,
+                    action: prob.action
+                });
+            });
+        }
+    });
+    return faqs;
+}
+
 module.exports = {
     getCategories,
     getTopics,
@@ -828,5 +925,6 @@ module.exports = {
     searchHelp,
     getContextHelp,
     recordFeedback,
-    getOfflinePack
+    getOfflinePack,
+    getFaqs
 };

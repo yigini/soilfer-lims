@@ -1,11 +1,14 @@
 {
-  "status": "PROPOSED_REGISTRY_NOT_RUNTIME_AUTHORITY",
+  "status": "AUDITED_V2_ROUTE_REGISTRY",
   "source": "client/src/App.jsx",
+  "baseline": "6915824",
   "routeCount": 42,
   "routes": [
     {
       "route": "/login",
+      "canonical": "/login",
       "articleIds": [
+        "start-first-login",
         "start-shift",
         "manage-support"
       ],
@@ -16,10 +19,15 @@
     },
     {
       "route": "/",
+      "canonical": "/",
       "articleIds": [
-        "start-shift",
-        "bench-blocked",
-        "review-results"
+        "start-technician",
+        "start-reception",
+        "start-manager",
+        "start-project",
+        "start-auditor",
+        "start-viewer",
+        "connect-progress"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -28,9 +36,11 @@
     },
     {
       "route": "/samples",
+      "canonical": "/samples",
       "articleIds": [
-        "intake-identity",
-        "start-shift"
+        "start-viewer",
+        "tracking-identifiers",
+        "tracking-find"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -39,10 +49,24 @@
     },
     {
       "route": "/samples/:id",
+      "canonical": "/samples/:id",
       "articleIds": [
-        "bench-save-submit",
-        "review-results",
-        "review-amend"
+        "intake-location",
+        "tracking-identifiers",
+        "tracking-workspace",
+        "tracking-labels",
+        "tracking-storage",
+        "prep-receipt",
+        "prep-repeat",
+        "bench-states",
+        "method-texture",
+        "method-derived",
+        "review-final",
+        "review-amend",
+        "connect-field-fix",
+        "connect-map",
+        "quality-audit",
+        "quality-history"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -51,9 +75,11 @@
     },
     {
       "route": "/scan",
+      "canonical": "/scan",
       "articleIds": [
-        "intake-identity",
-        "offline-prepare"
+        "intake-duplicate",
+        "tracking-identifiers",
+        "tracking-labels"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -62,10 +88,9 @@
     },
     {
       "route": "/samples/:id/map",
+      "canonical": "/samples/:id/map",
       "articleIds": [
-        "bench-blocked",
-        "bench-drying",
-        "bench-preparation"
+        "tracking-map"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -74,10 +99,9 @@
     },
     {
       "route": "/workflow-map",
+      "canonical": "/workflow-map",
       "articleIds": [
-        "bench-blocked",
-        "bench-drying",
-        "bench-preparation"
+        "tracking-map"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -86,174 +110,121 @@
     },
     {
       "route": "/my-work",
+      "canonical": "/workbench",
       "articleIds": [
-        "bench-run",
-        "bench-save-submit"
+        "start-technician",
+        "prep-drying",
+        "prep-preparation",
+        "prep-receipt",
+        "prep-batch",
+        "prep-evidence",
+        "prep-repeat",
+        "bench-find",
+        "bench-batch",
+        "bench-single",
+        "bench-paste",
+        "bench-states",
+        "bench-submit",
+        "bench-returned",
+        "bench-blocked",
+        "bench-qualifiers",
+        "bench-concurrent",
+        "method-ph",
+        "method-ec",
+        "method-texture",
+        "method-derived",
+        "method-other-inputs",
+        "method-spectral-import",
+        "method-qc",
+        "assets-find",
+        "assets-lots",
+        "offline-prepare",
+        "offline-record",
+        "offline-sync",
+        "offline-conflict"
       ],
       "auth": "authenticated",
-      "currentPermission": "ENTER_RESULTS",
+      "currentPermission": null,
       "currentRole": null,
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/workbench",
+      "canonical": "/workbench",
       "articleIds": [
-        "bench-blocked",
+        "bench-batch",
         "bench-run",
+        "prep-receipt",
         "bench-save-submit",
-        "bench-spectra"
+        "prep-drying",
+        "bench-paste",
+        "bench-submit",
+        "method-spectral-import",
+        "start-technician",
+        "prep-preparation",
+        "prep-batch",
+        "prep-evidence",
+        "prep-repeat",
+        "bench-find",
+        "bench-single",
+        "bench-states",
+        "bench-returned",
+        "bench-blocked",
+        "bench-qualifiers",
+        "bench-concurrent",
+        "method-ph",
+        "method-ec",
+        "method-texture",
+        "method-derived",
+        "method-other-inputs",
+        "method-qc",
+        "assets-find",
+        "assets-lots",
+        "offline-prepare",
+        "offline-record",
+        "offline-sync",
+        "offline-conflict"
       ],
       "auth": "authenticated",
-      "currentPermission": "ENTER_RESULTS",
+      "currentPermission": null,
       "currentRole": null,
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/manager-queue",
+      "canonical": "/manager-queue",
       "articleIds": [
         "review-results",
-        "review-returned",
-        "review-report"
+        "review-submission",
+        "start-manager",
+        "prep-evidence",
+        "bench-returned",
+        "review-intake",
+        "review-assign",
+        "review-return",
+        "review-final",
+        "review-partial",
+        "quality-nc"
       ],
       "auth": "authenticated",
-      "currentPermission": "APPROVE_RESULTS",
+      "currentPermission": null,
       "currentRole": null,
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/reception",
+      "canonical": "/reception",
       "articleIds": [
+        "start-reception",
         "intake-project",
+        "intake-batch",
+        "intake-draft",
         "intake-location",
-        "intake-identity"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "RECEIVE_SAMPLE",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/inventory",
-      "articleIds": [
-        "assets-stock"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "VIEW_INVENTORY",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/equipment",
-      "articleIds": [
-        "assets-instrument"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "VIEW_EQUIPMENT",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/users",
-      "articleIds": [
-        "manage-support",
-        "start-shift"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "MANAGE_USERS",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/projects",
-      "articleIds": [
-        "connect-kobo",
-        "intake-project",
-        "connect-sis"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "MANAGE_PROJECTS",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/admin",
-      "articleIds": [
-        "manage-catalogue",
-        "manage-language"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "MANAGE_ANALYSES",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/admin/methods",
-      "articleIds": [
-        "manage-catalogue"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "MANAGE_ANALYSES",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/lab-methods",
-      "articleIds": [
-        "manage-catalogue"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "MANAGE_ANALYSES",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/admin/audit",
-      "articleIds": [
-        "review-amend",
-        "review-results"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "VIEW_AUDIT",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/admin/labs",
-      "articleIds": [
-        "manage-support",
-        "manage-language"
-      ],
-      "auth": "authenticated",
-      "currentPermission": null,
-      "currentRole": "SUPER_ADMIN",
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/admin/legacy-import",
-      "articleIds": [
-        "intake-identity",
-        "manage-support"
-      ],
-      "auth": "authenticated",
-      "currentPermission": "RECEIVE_SAMPLE",
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/datasheet",
-      "articleIds": [
-        "review-results",
-        "review-report"
-      ],
-      "auth": "authenticated",
-      "currentPermission": null,
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/maps",
-      "articleIds": [
-        "intake-location",
+        "intake-condition",
+        "intake-analysis",
+        "intake-duplicate",
+        "intake-handover",
+        "offline-record",
         "connect-kobo"
       ],
       "auth": "authenticated",
@@ -262,21 +233,182 @@
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
-      "route": "/qa",
+      "route": "/inventory",
+      "canonical": "/inventory",
       "articleIds": [
-        "review-results",
-        "assets-instrument"
+        "assets-lots",
+        "assets-stock",
+        "assets-expiry",
+        "assets-trace"
       ],
       "auth": "authenticated",
-      "currentPermission": "VIEW_AUDIT",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/equipment",
+      "canonical": "/equipment",
+      "articleIds": [
+        "assets-find",
+        "assets-calibration",
+        "assets-maintain",
+        "assets-register",
+        "assets-trace"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/users",
+      "canonical": "/users",
+      "articleIds": [
+        "admin-users",
+        "admin-role-reference"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/projects",
+      "canonical": "/projects",
+      "articleIds": [
+        "start-project",
+        "connect-project",
+        "connect-kobo",
+        "connect-field-fix",
+        "connect-surveyor",
+        "connect-progress"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin",
+      "canonical": "/admin",
+      "articleIds": [
+        "method-other-inputs",
+        "connect-sis",
+        "admin-catalogue",
+        "admin-translation",
+        "admin-branding",
+        "admin-integrations",
+        "admin-support"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/methods",
+      "canonical": "/admin/methods",
+      "articleIds": [
+        "method-ph",
+        "admin-methods"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/lab-methods",
+      "canonical": "/admin/methods",
+      "articleIds": [
+        "method-ph",
+        "admin-methods"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/audit",
+      "canonical": "/admin/audit",
+      "articleIds": [
+        "start-auditor",
+        "quality-audit"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/labs",
+      "canonical": "/admin/labs",
+      "articleIds": [
+        "admin-labs"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/admin/legacy-import",
+      "canonical": "/admin/legacy-import",
+      "articleIds": [
+        "admin-legacy"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/datasheet",
+      "canonical": "/datasheet",
+      "articleIds": [
+        "connect-export",
+        "connect-field-fix"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/maps",
+      "canonical": "/maps",
+      "articleIds": [
+        "connect-map",
+        "connect-surveyor"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/qa",
+      "canonical": "/qa",
+      "articleIds": [
+        "start-auditor",
+        "method-qc",
+        "assets-trace",
+        "quality-qc",
+        "quality-nc"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
       "currentRole": null,
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/spectral-library",
+      "canonical": "/spectral-library",
       "articleIds": [
-        "connect-library",
-        "bench-spectra"
+        "method-spectral-inspect",
+        "method-predictions"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -285,9 +417,10 @@
     },
     {
       "route": "/spectral",
+      "canonical": "/spectral-library",
       "articleIds": [
-        "connect-library",
-        "bench-spectra"
+        "method-spectral-inspect",
+        "method-predictions"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -296,20 +429,12 @@
     },
     {
       "route": "/data-results",
+      "canonical": "/data-results",
       "articleIds": [
-        "review-results",
-        "review-report",
-        "bench-texture"
-      ],
-      "auth": "authenticated",
-      "currentPermission": null,
-      "currentRole": null,
-      "publicationRule": "Approved audience/lab/release-filtered revision only"
-    },
-    {
-      "route": "/result-reports",
-      "articleIds": [
-        "review-report",
+        "start-project",
+        "method-predictions",
+        "connect-progress",
+        "connect-export",
         "connect-sis"
       ],
       "auth": "authenticated",
@@ -318,31 +443,58 @@
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
-      "route": "/reports",
+      "route": "/result-reports",
+      "canonical": "/result-reports",
       "articleIds": [
-        "review-report"
+        "start-viewer",
+        "review-report",
+        "review-amend",
+        "review-share",
+        "review-partial",
+        "quality-history"
       ],
-      "auth": "redirect-to-authenticated",
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
+    },
+    {
+      "route": "/reports",
+      "canonical": "/result-reports",
+      "articleIds": [
+        "start-viewer",
+        "review-report",
+        "review-amend",
+        "review-share",
+        "review-partial",
+        "quality-history"
+      ],
+      "auth": "authenticated",
+      "currentPermission": null,
+      "currentRole": null,
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/report/:token",
+      "canonical": "/report/:token",
       "articleIds": [
-        "review-report",
-        "manage-support"
+        "review-share",
+        "review-report"
       ],
-      "auth": "public-or-error",
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/profile",
+      "canonical": "/profile",
       "articleIds": [
-        "manage-language",
-        "offline-prepare"
+        "start-first-login",
+        "start-settings",
+        "offline-install",
+        "offline-account",
+        "admin-role-reference"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -351,9 +503,8 @@
     },
     {
       "route": "/about",
-      "articleIds": [
-        "manage-support"
-      ],
+      "canonical": "/about",
+      "articleIds": [],
       "auth": "public-or-error",
       "currentPermission": null,
       "currentRole": null,
@@ -361,9 +512,8 @@
     },
     {
       "route": "/techstack",
-      "articleIds": [
-        "manage-support"
-      ],
+      "canonical": "/techstack",
+      "articleIds": [],
       "auth": "public-or-error",
       "currentPermission": null,
       "currentRole": null,
@@ -371,29 +521,30 @@
     },
     {
       "route": "/tech-stack",
-      "articleIds": [
-        "manage-support"
-      ],
-      "auth": "public-or-error",
+      "canonical": "/techstack",
+      "articleIds": [],
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/credits",
-      "articleIds": [
-        "manage-support"
-      ],
-      "auth": "public-or-error",
+      "canonical": "/techstack",
+      "articleIds": [],
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/help",
+      "canonical": "/help",
       "articleIds": [
-        "start-shift",
-        "manage-support"
+        "offline-help",
+        "start-settings",
+        "quality-loading",
+        "quality-support"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -402,9 +553,11 @@
     },
     {
       "route": "/help/faq",
+      "canonical": "/help/faq",
       "articleIds": [
-        "start-shift",
-        "manage-support"
+        "prep-receipt",
+        "bench-states",
+        "quality-loading"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -413,20 +566,22 @@
     },
     {
       "route": "/faq",
+      "canonical": "/help/faq",
       "articleIds": [
-        "start-shift",
-        "manage-support"
+        "prep-receipt",
+        "bench-states",
+        "quality-loading"
       ],
-      "auth": "public-or-error",
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "/help/articles/:articleId",
+      "canonical": "/help/articles/:articleId",
       "articleIds": [
-        "start-shift",
-        "manage-support"
+        "offline-help"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -435,9 +590,9 @@
     },
     {
       "route": "/help/topics/:topicId",
+      "canonical": "/help/topics/:topicId",
       "articleIds": [
-        "start-shift",
-        "manage-support"
+        "offline-help"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -446,27 +601,27 @@
     },
     {
       "route": "/admin/help",
+      "canonical": "/admin/help",
       "articleIds": [
-        "manage-catalogue",
-        "manage-language"
+        "admin-help",
+        "admin-support"
       ],
       "auth": "authenticated",
-      "currentPermission": "HELP_EDIT_LAB",
+      "currentPermission": null,
       "currentRole": null,
       "publicationRule": "Approved audience/lab/release-filtered revision only"
     },
     {
       "route": "*",
-      "articleIds": [
-        "manage-load-error",
-        "manage-support"
-      ],
-      "auth": "public-or-error",
+      "canonical": "*",
+      "articleIds": [],
+      "auth": "authenticated",
       "currentPermission": null,
       "currentRole": null,
-      "publicationRule": "Explicitly public approved excerpt only; referenced full articles remain restricted unless separately approved as public"
+      "publicationRule": "Approved audience/lab/release-filtered revision only"
     }
   ],
+  "unknownCodeArticle": "bench-blocked",
   "blockers": {
     "UNASSIGNED_TO_USER": "bench-blocked",
     "ITEM_SEALED": "review-amend",
@@ -482,14 +637,13 @@
     "INSTRUMENT_NOT_ELIGIBLE": "assets-instrument",
     "INSTRUMENT_OUT_OF_SERVICE": "assets-instrument",
     "INSTRUMENT_CALIBRATION_OVERDUE": "assets-instrument",
-    "INSTRUMENT_CALIBRATION_DUE_SOON": "assets-instrument"
-  },
-  "unknownCodeArticle": "bench-blocked",
-  "notes": [
-    "Never derive readiness or permissions from help metadata. Use server decisions.",
-    "Roles in content.en.json are editorial audiences, not authorization grants.",
-    "Match routes using the router, most specific first. Discard query tokens and sample identifiers from help analytics.",
-    "Inspect nested tabs, panels and controls in addition to these route declarations.",
-    "Some admin subjects use generic help for now; see launch backlog for task-specific pages."
-  ]
+    "INSTRUMENT_CALIBRATION_DUE_SOON": "assets-instrument",
+    "PREREQUISITE_DRYING_PENDING": "prep-drying",
+    "PREREQUISITE_PREPARATION_PENDING": "prep-receipt",
+    "CALIBRATION_OVERDUE": "assets-find",
+    "INSTRUMENT_UNAVAILABLE": "assets-find",
+    "NOT_ASSIGNED_TO_USER": "bench-find",
+    "RESULT_RETURNED_FOR_CORRECTION": "bench-returned",
+    "OFFLINE_SYNC_REQUIRED": "offline-sync"
+  }
 }

@@ -1,0 +1,910 @@
+{
+  "baseline": "6915824",
+  "routes": [
+    {
+      "route": "/login",
+      "canonical": "/login",
+      "guideIds": [
+        "start-first-login"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/",
+      "canonical": "/",
+      "guideIds": [
+        "start-technician",
+        "start-reception",
+        "start-manager",
+        "start-project",
+        "start-auditor",
+        "start-viewer",
+        "connect-progress"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/samples",
+      "canonical": "/samples",
+      "guideIds": [
+        "start-viewer",
+        "tracking-identifiers",
+        "tracking-find"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/samples/:id",
+      "canonical": "/samples/:id",
+      "guideIds": [
+        "intake-location",
+        "tracking-identifiers",
+        "tracking-workspace",
+        "tracking-labels",
+        "tracking-storage",
+        "prep-receipt",
+        "prep-repeat",
+        "bench-states",
+        "method-texture",
+        "method-derived",
+        "review-final",
+        "review-amend",
+        "connect-field-fix",
+        "connect-map",
+        "quality-audit",
+        "quality-history"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/scan",
+      "canonical": "/scan",
+      "guideIds": [
+        "intake-duplicate",
+        "tracking-identifiers",
+        "tracking-labels"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/samples/:id/map",
+      "canonical": "/samples/:id/map",
+      "guideIds": [
+        "tracking-map"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/workflow-map",
+      "canonical": "/workflow-map",
+      "guideIds": [
+        "tracking-map"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/my-work",
+      "canonical": "/workbench",
+      "guideIds": [
+        "start-technician",
+        "prep-drying",
+        "prep-preparation",
+        "prep-receipt",
+        "prep-batch",
+        "prep-evidence",
+        "prep-repeat",
+        "bench-find",
+        "bench-batch",
+        "bench-single",
+        "bench-paste",
+        "bench-states",
+        "bench-submit",
+        "bench-returned",
+        "bench-blocked",
+        "bench-qualifiers",
+        "bench-concurrent",
+        "method-ph",
+        "method-ec",
+        "method-texture",
+        "method-derived",
+        "method-other-inputs",
+        "method-spectral-import",
+        "method-qc",
+        "assets-find",
+        "assets-lots",
+        "offline-prepare",
+        "offline-record",
+        "offline-sync",
+        "offline-conflict"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/workbench",
+      "canonical": "/workbench",
+      "guideIds": [
+        "start-technician",
+        "prep-drying",
+        "prep-preparation",
+        "prep-receipt",
+        "prep-batch",
+        "prep-evidence",
+        "prep-repeat",
+        "bench-find",
+        "bench-batch",
+        "bench-single",
+        "bench-paste",
+        "bench-states",
+        "bench-submit",
+        "bench-returned",
+        "bench-blocked",
+        "bench-qualifiers",
+        "bench-concurrent",
+        "method-ph",
+        "method-ec",
+        "method-texture",
+        "method-derived",
+        "method-other-inputs",
+        "method-spectral-import",
+        "method-qc",
+        "assets-find",
+        "assets-lots",
+        "offline-prepare",
+        "offline-record",
+        "offline-sync",
+        "offline-conflict"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/manager-queue",
+      "canonical": "/manager-queue",
+      "guideIds": [
+        "start-manager",
+        "prep-evidence",
+        "bench-returned",
+        "review-intake",
+        "review-assign",
+        "review-submission",
+        "review-return",
+        "review-final",
+        "review-partial",
+        "quality-nc"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/reception",
+      "canonical": "/reception",
+      "guideIds": [
+        "start-reception",
+        "intake-project",
+        "intake-batch",
+        "intake-draft",
+        "intake-location",
+        "intake-condition",
+        "intake-analysis",
+        "intake-duplicate",
+        "intake-handover",
+        "offline-record",
+        "connect-kobo"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/inventory",
+      "canonical": "/inventory",
+      "guideIds": [
+        "assets-lots",
+        "assets-stock",
+        "assets-expiry",
+        "assets-trace"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/equipment",
+      "canonical": "/equipment",
+      "guideIds": [
+        "assets-find",
+        "assets-calibration",
+        "assets-maintain",
+        "assets-register",
+        "assets-trace"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/users",
+      "canonical": "/users",
+      "guideIds": [
+        "admin-users",
+        "admin-role-reference"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/projects",
+      "canonical": "/projects",
+      "guideIds": [
+        "start-project",
+        "connect-project",
+        "connect-kobo",
+        "connect-field-fix",
+        "connect-surveyor",
+        "connect-progress"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin",
+      "canonical": "/admin",
+      "guideIds": [
+        "method-other-inputs",
+        "connect-sis",
+        "admin-catalogue",
+        "admin-translation",
+        "admin-branding",
+        "admin-integrations",
+        "admin-support"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin/methods",
+      "canonical": "/admin/methods",
+      "guideIds": [
+        "method-ph",
+        "admin-methods"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/lab-methods",
+      "canonical": "/admin/methods",
+      "guideIds": [
+        "method-ph",
+        "admin-methods"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin/audit",
+      "canonical": "/admin/audit",
+      "guideIds": [
+        "start-auditor",
+        "quality-audit"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin/labs",
+      "canonical": "/admin/labs",
+      "guideIds": [
+        "admin-labs"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin/legacy-import",
+      "canonical": "/admin/legacy-import",
+      "guideIds": [
+        "admin-legacy"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/datasheet",
+      "canonical": "/datasheet",
+      "guideIds": [
+        "connect-export",
+        "connect-field-fix"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/maps",
+      "canonical": "/maps",
+      "guideIds": [
+        "connect-map",
+        "connect-surveyor"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/qa",
+      "canonical": "/qa",
+      "guideIds": [
+        "start-auditor",
+        "method-qc",
+        "assets-trace",
+        "quality-qc",
+        "quality-nc"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/spectral-library",
+      "canonical": "/spectral-library",
+      "guideIds": [
+        "method-spectral-inspect",
+        "method-predictions"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/spectral",
+      "canonical": "/spectral-library",
+      "guideIds": [
+        "method-spectral-inspect",
+        "method-predictions"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/data-results",
+      "canonical": "/data-results",
+      "guideIds": [
+        "start-project",
+        "method-predictions",
+        "connect-progress",
+        "connect-export",
+        "connect-sis"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/result-reports",
+      "canonical": "/result-reports",
+      "guideIds": [
+        "start-viewer",
+        "review-report",
+        "review-amend",
+        "review-share",
+        "review-partial",
+        "quality-history"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/reports",
+      "canonical": "/result-reports",
+      "guideIds": [
+        "start-viewer",
+        "review-report",
+        "review-amend",
+        "review-share",
+        "review-partial",
+        "quality-history"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/report/:token",
+      "canonical": "/report/:token",
+      "guideIds": [
+        "review-share",
+        "review-report"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/profile",
+      "canonical": "/profile",
+      "guideIds": [
+        "start-first-login",
+        "start-settings",
+        "offline-install",
+        "offline-account",
+        "admin-role-reference"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/about",
+      "canonical": "/about",
+      "guideIds": [],
+      "coverageKind": "INSTITUTIONAL_OR_NOT_FOUND: provide relevant navigation and public help; not a laboratory procedure",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/techstack",
+      "canonical": "/techstack",
+      "guideIds": [],
+      "coverageKind": "INSTITUTIONAL_OR_NOT_FOUND: provide relevant navigation and public help; not a laboratory procedure",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/tech-stack",
+      "canonical": "/techstack",
+      "guideIds": [],
+      "coverageKind": "INSTITUTIONAL_OR_NOT_FOUND: provide relevant navigation and public help; not a laboratory procedure",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/credits",
+      "canonical": "/techstack",
+      "guideIds": [],
+      "coverageKind": "INSTITUTIONAL_OR_NOT_FOUND: provide relevant navigation and public help; not a laboratory procedure",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/help",
+      "canonical": "/help",
+      "guideIds": [
+        "offline-help",
+        "start-settings",
+        "quality-loading",
+        "quality-support"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/help/faq",
+      "canonical": "/help/faq",
+      "guideIds": [
+        "prep-receipt",
+        "bench-states",
+        "quality-loading"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/faq",
+      "canonical": "/help/faq",
+      "guideIds": [
+        "prep-receipt",
+        "bench-states",
+        "quality-loading"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/help/articles/:articleId",
+      "canonical": "/help/articles/:articleId",
+      "guideIds": [
+        "offline-help"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/help/topics/:topicId",
+      "canonical": "/help/topics/:topicId",
+      "guideIds": [
+        "offline-help"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "/admin/help",
+      "canonical": "/admin/help",
+      "guideIds": [
+        "admin-help",
+        "admin-support"
+      ],
+      "coverageKind": "REQUIRES_ROLE_AND_CONTEXT_VERIFICATION",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    },
+    {
+      "route": "*",
+      "canonical": "*",
+      "guideIds": [],
+      "coverageKind": "INSTITUTIONAL_OR_NOT_FOUND: provide relevant navigation and public help; not a laboratory procedure",
+      "unresolved": false,
+      "requirement": "A matching route is only a starting point. Verify permitted recommendations, meaningful deep sections, real query tabs and failure states."
+    }
+  ],
+  "contexts": [
+    {
+      "route": "/workbench",
+      "context": "drying or preparation",
+      "guideIds": [
+        "prep-drying",
+        "prep-receipt"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/workbench",
+      "context": "paste preview and exclusions",
+      "guideIds": [
+        "bench-paste",
+        "bench-batch"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/workbench",
+      "context": "Ready to Submit",
+      "guideIds": [
+        "bench-submit",
+        "bench-states"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/workbench",
+      "context": "spectral input",
+      "guideIds": [
+        "method-spectral-import",
+        "method-spectral-inspect"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/workbench",
+      "context": "texture panel",
+      "guideIds": [
+        "method-texture",
+        "method-derived"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/samples/:id",
+      "context": "work tab",
+      "guideIds": [
+        "tracking-workspace",
+        "prep-receipt"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/samples/:id",
+      "context": "results tab",
+      "guideIds": [
+        "review-report",
+        "review-amend"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/samples/:id",
+      "context": "field data / identity",
+      "guideIds": [
+        "tracking-identifiers",
+        "intake-location"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/samples/:id/map",
+      "context": "blocked node",
+      "guideIds": [
+        "tracking-map",
+        "bench-blocked"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/manager-queue",
+      "context": "intake / assignment",
+      "guideIds": [
+        "review-intake",
+        "review-assign"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/manager-queue",
+      "context": "Review Submissions",
+      "guideIds": [
+        "review-submission",
+        "review-return"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/manager-queue",
+      "context": "Final Approvals",
+      "guideIds": [
+        "review-final",
+        "review-partial"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/reception",
+      "context": "ID & Field / draft",
+      "guideIds": [
+        "intake-project",
+        "intake-location"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/reception",
+      "context": "Condition",
+      "guideIds": [
+        "intake-condition"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/reception",
+      "context": "Analyses",
+      "guideIds": [
+        "intake-analysis"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/reception",
+      "context": "Handover",
+      "guideIds": [
+        "intake-handover"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "branding",
+      "guideIds": [
+        "admin-branding"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "languages",
+      "guideIds": [
+        "admin-translation"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "lab-config",
+      "guideIds": [
+        "admin-catalogue"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "audit",
+      "guideIds": [
+        "quality-audit"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "api-keys",
+      "guideIds": [
+        "admin-integrations"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin",
+      "context": "users",
+      "guideIds": [
+        "admin-users"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/admin/help",
+      "context": "editor / review / translation / coverage",
+      "guideIds": [
+        "admin-help",
+        "admin-translation"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/spectral-library",
+      "context": "import / inspect",
+      "guideIds": [
+        "method-spectral-import",
+        "method-spectral-inspect"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "/spectral-library",
+      "context": "prediction / publishing",
+      "guideIds": [
+        "method-predictions",
+        "method-qc"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    },
+    {
+      "route": "GLOBAL",
+      "context": "offline queue / expired session / conflict",
+      "guideIds": [
+        "offline-sync",
+        "offline-account",
+        "offline-conflict"
+      ],
+      "status": "PROPOSED_BINDING: resolve actual UI feature/tab keys; validate after implementation"
+    }
+  ],
+  "roles": [
+    {
+      "id": "LAB_TECHNICIAN",
+      "label": "Laboratory technician",
+      "tasks": [
+        "bench-batch",
+        "prep-drying",
+        "method-spectral-import"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "SAMPLE_RECEPTION",
+      "label": "Intake officer",
+      "tasks": [
+        "intake-project",
+        "intake-draft",
+        "intake-location"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "LAB_MANAGER",
+      "label": "Laboratory manager",
+      "tasks": [
+        "review-submission",
+        "review-assign",
+        "review-final"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "PROJECT_MANAGER",
+      "label": "Project manager",
+      "tasks": [
+        "connect-project",
+        "connect-progress",
+        "connect-sis"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "SURVEYOR",
+      "label": "Field surveyor",
+      "tasks": [
+        "connect-surveyor",
+        "connect-kobo",
+        "connect-field-fix"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "AUDIT_USER",
+      "label": "Quality & audit reader",
+      "tasks": [
+        "quality-audit",
+        "quality-qc",
+        "quality-history"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "VIEWER",
+      "label": "Laboratory viewer",
+      "tasks": [
+        "start-viewer",
+        "tracking-find",
+        "review-report"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "EXTERNAL_VIEWER",
+      "label": "External report viewer",
+      "tasks": [
+        "review-share",
+        "review-report",
+        "start-viewer"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "MASTER_USER",
+      "label": "Platform coordinator",
+      "tasks": [
+        "admin-catalogue",
+        "admin-translation",
+        "admin-help"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    },
+    {
+      "id": "SUPER_ADMIN",
+      "label": "System administrator",
+      "tasks": [
+        "admin-users",
+        "admin-labs",
+        "admin-integrations"
+      ],
+      "note": "Navigation persona only. The implementation must use actual effective permissions and laboratory/project scope."
+    }
+  ],
+  "notes": [
+    "All App.jsx route declarations are included, including aliases and public routes.",
+    "This is a proposed content mapping, not a claim of completed application tests.",
+    "Fallback or role-generic links do not count as context coverage.",
+    "Public report help must never include the report token in diagnostics, URLs shared with support or analytics."
+  ]
+}

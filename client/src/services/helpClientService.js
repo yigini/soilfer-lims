@@ -129,6 +129,26 @@ export const helpClientService = {
     },
 
     /**
+     * Fetch FAQs derived from problem blocks
+     */
+    async getFaqs(options = {}) {
+        const { topic = null, locale = 'en', user = null } = options || {};
+        if (typeof navigator !== 'undefined' && navigator.onLine) {
+            try {
+                const res = await axios.get('/api/help/faqs', {
+                    params: { topic, locale }
+                });
+                if (res.data?.success && Array.isArray(res.data.faqs)) {
+                    return { faqs: res.data.faqs, isOffline: false };
+                }
+            } catch (err) {
+                console.warn('[HELP_CLIENT] Failed to fetch FAQs:', err.message);
+            }
+        }
+        return { faqs: [], isOffline: true };
+    },
+
+    /**
      * Fetch single article by ID.
      * Supports options object { locale, user } or legacy string locale.
      */

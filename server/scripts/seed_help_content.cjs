@@ -10,6 +10,7 @@ const sha256 = (data) => crypto.createHash('sha256').update(typeof data === 'str
 // All bench/operational/method guides remain AUTHENTICATED.
 const EXPLICIT_PUBLIC_ARTICLE_IDS = new Set([
     'start-shift',
+    'start-first-login',
     'manage-support',
     'manage-load-error',
     'manage-language'
@@ -137,6 +138,19 @@ async function seedHelpContent() {
 
             const rev1 = existingArticle.revisions[0];
             if (rev1) {
+                await prisma.helpRevision.update({
+                    where: { id: rev1.id },
+                    data: {
+                        title: article.title,
+                        summary: article.summary,
+                        steps: JSON.stringify(article.steps || []),
+                        success: article.success || '',
+                        caution: article.caution || '',
+                        related: JSON.stringify(article.related || []),
+                        sourceHash
+                    }
+                });
+
                 for (const locale of locales) {
                     const existingLocaleRev = rev1.locales?.find(l => l.locale === locale);
                     const locArt = localizedData[locale]?.[article.id] || article;
@@ -154,8 +168,7 @@ async function seedHelpContent() {
                                 reviewStatus: locale === 'en' ? 'EDITORIAL_DRAFT' : 'TRANSLATION_REQUIRED'
                             }
                         });
-                    } else if (existingLocaleRev.reviewStatus === 'TRANSLATION_REQUIRED' && locale !== 'en') {
-                        // Idempotent upgrade: update placeholder row with latest translation while preserving human edits
+                    } else {
                         await prisma.helpLocaleRevision.update({
                             where: { id: existingLocaleRev.id },
                             data: {
