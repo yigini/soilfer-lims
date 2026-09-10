@@ -167,6 +167,26 @@ const GROUP_DEFINITIONS = [
         tags: ['errors', 'warnings', 'validation', 'notifications', 'dialogs']
     },
     {
+        id: 'help',
+        names: {
+            en: 'Help & Knowledge Base',
+            es: 'Centro de ayuda y base de conocimiento',
+            'es-419': 'Centro de ayuda y base de conocimiento',
+            fr: 'Centre d’aide et base de connaissances',
+            pt: 'Centro de ajuda e base de conhecimento'
+        },
+        descriptions: {
+            en: 'Help Centre interface, FAQs, contextual drawers, and links to article revision management.',
+            es: 'Interfaz del Centro de ayuda, preguntas frecuentes, paneles contextuales y gestión de revisiones.',
+            'es-419': 'Interfaz del Centro de ayuda, preguntas frecuentes, paneles contextuales y gestión de revisiones.',
+            fr: 'Interface du Centre d’aide, FAQ, volets contextuels et gestion des révisions.',
+            pt: 'Interface do Centro de ajuda, perguntas frequentes, painéis contextuais e gestão de revisões.'
+        },
+        icon: 'HelpCircle',
+        prefixes: ['help.'],
+        tags: ['help', 'knowledge_base', 'faq', 'support', 'guidance']
+    },
+    {
         id: 'unclassified',
         names: {
             en: 'Needs classification',
@@ -182,7 +202,7 @@ const GROUP_DEFINITIONS = [
             fr: 'Entrées terminologiques non classifiées nécessitant une catégorie.',
             pt: 'Entradas terminológicas não classificadas que requerem categorização.'
         },
-        icon: 'HelpCircle',
+        icon: 'FileCheck2',
         prefixes: [],
         tags: ['unclassified']
     }

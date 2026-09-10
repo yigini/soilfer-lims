@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from './LanguageContext';
 import { clearStoredSessionOverride } from '../lib/appearance';
+import { clearUserHelpCache } from '../services/offline/offlineDb';
 
 const AuthContext = createContext();
 
@@ -111,6 +112,9 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        if (user?.id) {
+            clearUserHelpCache({ userId: user.id }).catch(() => {});
+        }
         clearStoredSessionOverride();
         try {
             sessionStorage.removeItem('soilfer_locale_override');

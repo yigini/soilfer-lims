@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useHelp } from '../../context/HelpContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import helpClientService from '../../services/helpClientService';
 import clsx from 'clsx';
 
@@ -31,6 +32,7 @@ export const ContextHelpDrawer = () => {
     } = useHelp();
 
     const { t, locale } = useLanguage();
+    const { user } = useAuth();
     const location = useLocation();
 
     const [contextData, setContextData] = useState(null);
@@ -38,7 +40,10 @@ export const ContextHelpDrawer = () => {
     const [loadingContext, setLoadingContext] = useState(false);
     const [loadingArticle, setLoadingArticle] = useState(false);
     const [isDesktop, setIsDesktop] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
+
     const drawerRef = useRef(null);
+    const closeBtnRef = useRef(null);
+    const previouslyFocusedElement = useRef(null);
 
     // Responsive screen width listener
     useEffect(() => {
@@ -49,18 +54,60 @@ export const ContextHelpDrawer = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Escape key listener to close drawer
+    // Escape key listener and focus management
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && isDrawerOpen) {
                 closeDrawer();
             }
         };
+
         if (isDrawerOpen) {
             document.addEventListener('keydown', handleKeyDown);
+            previouslyFocusedElement.current = document.activeElement;
+            if (!isDesktop) {
+                // Focus close button on mobile entry
+                setTimeout(() => {
+                    closeBtnRef.current?.focus();
+                }, 50);
+            }
+        } else {
+            // Restore focus when drawer closes
+            if (previouslyFocusedElement.current && typeof previouslyFocusedElement.current.focus === 'function') {
+                previouslyFocusedElement.current.focus();
+                previouslyFocusedElement.current = null;
+            }
         }
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isDrawerOpen, closeDrawer]);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isDrawerOpen, isDesktop, closeDrawer]);
+
+    // Focus trap on mobile
+    const handleDrawerKeyDown = (e) => {
+        if (isDesktop || !isDrawerOpen) return;
+        if (e.key === 'Tab') {
+            const focusable = drawerRef.current?.querySelectorAll(
+                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            if (!focusable || focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    last.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    first.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    };
 
     // Fetch page contextual help when opened or route/blockers change (network-first with offline IndexedDB fallback)
     useEffect(() => {
@@ -71,8 +118,10 @@ export const ContextHelpDrawer = () => {
 
         helpClientService.getContextHelp({
             route: location.pathname,
+            blockerCodes: activeBlockers,
             blockers: activeBlockers,
-            locale
+            locale,
+            user
         })
             .then(data => {
                 if (isMounted && data) {
@@ -87,7 +136,7 @@ export const ContextHelpDrawer = () => {
             });
 
         return () => { isMounted = false; };
-    }, [isDrawerOpen, location.pathname, activeBlockers, locale]);
+    }, [isDrawerOpen, location.pathname, activeBlockers, locale, user]);
 
     // Fetch single article if drilled down inside drawer
     useEffect(() => {
@@ -99,10 +148,11 @@ export const ContextHelpDrawer = () => {
         let isMounted = true;
         setLoadingArticle(true);
 
-        helpClientService.getArticleById(drawerArticleId, locale)
-            .then(article => {
-                if (isMounted && article) {
-                    setArticleData(article);
+        helpClientService.getArticleById(drawerArticleId, { locale, user })
+            .then(res => {
+                if (isMounted) {
+                    const art = res?.article || (res?.id ? res : null);
+                    setArticleData(art);
                 }
             })
             .catch(err => {
@@ -113,15 +163,18 @@ export const ContextHelpDrawer = () => {
             });
 
         return () => { isMounted = false; };
-    }, [isDrawerOpen, drawerArticleId, locale]);
+    }, [isDrawerOpen, drawerArticleId, locale, user]);
 
     if (!isDrawerOpen) return null;
 
     return (
-        <div className={clsx(
-            "fixed inset-0 z-50 overflow-hidden",
-            isDesktop ? "pointer-events-none" : "pointer-events-auto"
-        )}>
+        <div
+            className={clsx(
+                "fixed inset-0 z-50 overflow-hidden",
+                isDesktop ? "pointer-events-none" : "pointer-events-auto"
+            )}
+            onKeyDown={handleDrawerKeyDown}
+        >
             {/* Backdrop: only visible on mobile (< md) to allow non-intrusive split-screen desktop bench entry */}
             {!isDesktop && (
                 <div
@@ -144,7 +197,7 @@ export const ContextHelpDrawer = () => {
                     {contextData?.isOffline && (
                         <div className="px-3 py-1 bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] flex items-center gap-1.5 font-medium">
                             <WifiOff size={12} />
-                            <span>Serving from offline cache</span>
+                            <span>{t('help.offlineCacheNotice', 'Serving from offline cache')}</span>
                         </div>
                     )}
                     {/* Header */}
@@ -155,7 +208,7 @@ export const ContextHelpDrawer = () => {
                                     type="button"
                                     onClick={navigateBackInDrawer}
                                     className="p-1.5 rounded-lg text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-colors"
-                                    aria-label="Back to page help"
+                                    aria-label={t('help.backToPageHelp', 'Back to page help')}
                                 >
                                     <ArrowLeft size={18} />
                                 </button>
@@ -170,6 +223,7 @@ export const ContextHelpDrawer = () => {
                         </div>
 
                         <button
+                            ref={closeBtnRef}
                             type="button"
                             onClick={closeDrawer}
                             className="p-1.5 rounded-lg text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-colors"
@@ -203,7 +257,7 @@ export const ContextHelpDrawer = () => {
                                             <span>•</span>
                                             <span className="flex items-center gap-1">
                                                 <Clock size={12} />
-                                                {articleData.minutes} min
+                                                {articleData.minutes} {t('help.minutesShort', 'min')}
                                             </span>
                                         </div>
                                         <h3 className="text-base font-black text-sf-text leading-snug">
@@ -218,7 +272,7 @@ export const ContextHelpDrawer = () => {
                                     {articleData.steps?.length > 0 && (
                                         <div className="space-y-2">
                                             <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
-                                                Required Steps
+                                                {t('help.drawer.steps', 'Required Steps')}
                                             </div>
                                             <ol className="space-y-2">
                                                 {articleData.steps.map((step, idx) => (
@@ -238,7 +292,7 @@ export const ContextHelpDrawer = () => {
                                         <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-start gap-2">
                                             <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
                                             <div>
-                                                <div className="font-bold mb-0.5">What success looks like</div>
+                                                <div className="font-bold mb-0.5">{t('help.drawer.success', 'What success looks like')}</div>
                                                 <div className="leading-relaxed">{articleData.success}</div>
                                             </div>
                                         </div>
@@ -249,7 +303,7 @@ export const ContextHelpDrawer = () => {
                                         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2">
                                             <ShieldAlert size={16} className="shrink-0 mt-0.5" />
                                             <div>
-                                                <div className="font-bold mb-0.5">Keep in mind</div>
+                                                <div className="font-bold mb-0.5">{t('help.drawer.caution', 'Keep in mind')}</div>
                                                 <div className="leading-relaxed">{articleData.caution}</div>
                                             </div>
                                         </div>
@@ -267,20 +321,22 @@ export const ContextHelpDrawer = () => {
                                     )}
 
                                     {/* Full Article Link */}
-                                    <div className="pt-2">
-                                        <Link
-                                            to={`/help/articles/${articleData.id}`}
-                                            onClick={closeDrawer}
-                                            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-sf-surface border border-sf-divider hover:bg-sf-hover text-sf-text text-xs font-bold transition-colors"
-                                        >
-                                            <span>Open full article page</span>
-                                            <ExternalLink size={14} />
-                                        </Link>
-                                    </div>
+                                    {articleData.id && (
+                                        <div className="pt-2">
+                                            <Link
+                                                to={`/help/articles/${articleData.id}`}
+                                                onClick={closeDrawer}
+                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-sf-surface border border-sf-divider hover:bg-sf-hover text-sf-text text-xs font-bold transition-colors"
+                                            >
+                                                <span>{t('help.drawer.openFullArticle', 'Open full article page')}</span>
+                                                <ExternalLink size={14} />
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-center py-8 text-sf-muted text-xs">
-                                    Article could not be loaded.
+                                    {t('help.loadError', 'Article could not be loaded.')}
                                 </div>
                             )
                         ) : (
@@ -297,10 +353,10 @@ export const ContextHelpDrawer = () => {
                                         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-900 dark:text-amber-200 space-y-2">
                                             <div className="flex items-center gap-2 font-bold text-xs">
                                                 <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                                                <span>Active Blocker Detected</span>
+                                                <span>{t('help.drawer.activeBlocker', 'Active Blocker Detected')}</span>
                                             </div>
                                             <p className="text-[11px] leading-relaxed">
-                                                One or more conditions are preventing this work item from proceeding. Click below to inspect resolution guidance:
+                                                {t('help.drawer.blockerExplanation', 'One or more conditions are preventing this work item from proceeding. Click below to inspect resolution guidance:')}
                                             </p>
                                             <div className="space-y-1.5 pt-1">
                                                 {contextData.blockers.map(b => (
@@ -321,7 +377,7 @@ export const ContextHelpDrawer = () => {
                                     {/* Recommended Articles for this page */}
                                     <div className="space-y-2">
                                         <div className="text-[11px] font-bold uppercase tracking-wider text-sf-muted">
-                                            Recommended for this task
+                                            {t('help.drawer.recommended', 'Recommended for this task')}
                                         </div>
 
                                         {contextData?.articles?.length > 0 ? (
@@ -345,44 +401,17 @@ export const ContextHelpDrawer = () => {
                                                         {article.labNote && (
                                                             <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                                                                 <Building2 size={12} />
-                                                                <span>Includes lab-specific guidance</span>
+                                                                <span>{t('help.drawer.includesLabGuidance', 'Includes lab-specific guidance')}</span>
                                                             </div>
                                                         )}
                                                     </button>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-xs text-sf-muted p-3 bg-sf-inset rounded-xl">
-                                                {t('help.zero', 'No specific guidance for this section.')}
+                                            <div className="text-center py-6 text-sf-muted text-xs bg-sf-inset rounded-xl border border-sf-divider/40">
+                                                {t('help.zeroPageHelp', 'No specific guide for this page.')}
                                             </div>
                                         )}
-                                    </div>
-
-                                    {/* Quick Explore Links */}
-                                    <div className="pt-2 border-t border-sf-divider space-y-2">
-                                        <Link
-                                            to="/help"
-                                            onClick={closeDrawer}
-                                            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-sf-inset hover:bg-sf-hover text-sf-text text-xs font-medium transition-colors"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <FileText size={16} className="text-sf-primary" />
-                                                <span>{t('help.centre', 'Browse Help Centre')}</span>
-                                            </div>
-                                            <ChevronRight size={14} className="text-sf-muted" />
-                                        </Link>
-
-                                        <Link
-                                            to="/help/faq"
-                                            onClick={closeDrawer}
-                                            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-sf-inset hover:bg-sf-hover text-sf-text text-xs font-medium transition-colors"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <HelpCircle size={16} className="text-sf-primary" />
-                                                <span>{t('help.faq', 'Common questions (FAQs)')}</span>
-                                            </div>
-                                            <ChevronRight size={14} className="text-sf-muted" />
-                                        </Link>
                                     </div>
                                 </div>
                             )
@@ -390,15 +419,16 @@ export const ContextHelpDrawer = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="p-3 border-t border-sf-divider bg-sf-canvas flex items-center justify-between text-xs text-sf-muted">
-                        <span>SoilFER Knowledge Base</span>
+                    <div className="p-3 border-t border-sf-divider bg-sf-canvas flex items-center justify-between text-xs">
                         <Link
                             to="/help"
                             onClick={closeDrawer}
-                            className="text-sf-primary font-bold hover:underline"
+                            className="font-bold text-sf-primary hover:underline flex items-center gap-1"
                         >
-                            {t('help.searchAll', 'Search all help')}
+                            <span>{t('help.centre', 'Help Centre')}</span>
+                            <ExternalLink size={12} />
                         </Link>
+                        <span className="text-[11px] text-sf-muted">SoilFER Knowledge Base</span>
                     </div>
                 </aside>
             </div>

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ICON_MAP = {
     compass: Compass,
@@ -33,6 +34,7 @@ const ICON_MAP = {
 export const TopicExplorer = () => {
     const { topicId } = useParams();
     const { t, locale } = useLanguage();
+    const { user } = useAuth();
 
     const [articles, setArticles] = useState([]);
     const [topicMeta, setTopicMeta] = useState(null);
@@ -42,27 +44,37 @@ export const TopicExplorer = () => {
     useEffect(() => {
         let isMounted = true;
         setLoading(true);
+        // Clear stale data on topic/locale change
+        setArticles([]);
+        setTopicMeta(null);
 
         Promise.all([
-            helpClientService.getTopics(locale),
-            helpClientService.getArticles({ category: topicId, locale })
+            helpClientService.getTopics({ locale, user }),
+            helpClientService.getArticles({ category: topicId, locale, user })
         ])
-            .then(([topics, arts]) => {
+            .then(([topicsRes, artsRes]) => {
                 if (!isMounted) return;
-                const found = (topics || []).find(tp => tp.id === topicId);
+                const topicsList = Array.isArray(topicsRes?.topics) ? topicsRes.topics : (Array.isArray(topicsRes) ? topicsRes : []);
+                const found = topicsList.find(tp => tp.id === topicId);
                 setTopicMeta(found || null);
-                setArticles(Array.isArray(arts) ? arts : []);
-                setIsOffline((Array.isArray(arts) && arts.length > 0 && arts[0].isOffline) || false);
+
+                const artsList = Array.isArray(artsRes?.articles) ? artsRes.articles : (Array.isArray(artsRes) ? artsRes : []);
+                setArticles(artsList);
+                setIsOffline(!!artsRes?.isOffline || !!topicsRes?.isOffline);
             })
             .catch(err => {
                 console.warn('[TOPIC_EXPLORER] Failed to load topic:', err.message);
+                if (isMounted) {
+                    setArticles([]);
+                    setTopicMeta(null);
+                }
             })
             .finally(() => {
                 if (isMounted) setLoading(false);
             });
 
         return () => { isMounted = false; };
-    }, [topicId, locale]);
+    }, [topicId, locale, user]);
 
     const IconComponent = (topicMeta && ICON_MAP[topicMeta.icon]) || HelpCircle;
     const translatedTitle = t(`help.categories.${topicId}`, topicMeta?.title || topicId);
@@ -89,12 +101,12 @@ export const TopicExplorer = () => {
                                 {translatedTitle}
                             </h1>
                             <p className="text-xs md:text-sm text-sf-muted mt-0.5">
-                                {topicMeta?.description || 'Task guides and standard operational procedures.'}
+                                {topicMeta?.description || t('help.topicDefaultDesc', 'Task guides and standard operational procedures.')}
                             </p>
                             {isOffline && (
                                 <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
                                     <WifiOff size={14} />
-                                    <span>Offline mode: served from local workpack cache</span>
+                                    <span>{t('help.offlineCacheNotice', 'Offline mode: served from local workpack cache')}</span>
                                 </div>
                             )}
                         </div>
@@ -123,7 +135,7 @@ export const TopicExplorer = () => {
                                         <span>•</span>
                                         <span className="flex items-center gap-1">
                                             <Clock size={12} />
-                                            {art.minutes} min
+                                            {art.minutes} {t('help.minutesShort', 'min')}
                                         </span>
                                     </div>
                                     <h3 className="font-bold text-sm text-sf-text group-hover:text-sf-primary transition-colors">

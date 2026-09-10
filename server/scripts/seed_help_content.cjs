@@ -141,6 +141,7 @@ async function seedHelpContent() {
                     const existingLocaleRev = rev1.locales?.find(l => l.locale === locale);
                     const locArt = localizedData[locale]?.[article.id] || article;
                     if (!existingLocaleRev) {
+                        // Insert missing locale row
                         await prisma.helpLocaleRevision.create({
                             data: {
                                 revisionId: rev1.id,
@@ -153,6 +154,18 @@ async function seedHelpContent() {
                                 reviewStatus: locale === 'en' ? 'EDITORIAL_DRAFT' : 'TRANSLATION_REQUIRED'
                             }
                         });
+                    } else if (existingLocaleRev.reviewStatus === 'TRANSLATION_REQUIRED' && locale !== 'en') {
+                        // Idempotent upgrade: update placeholder row with latest translation while preserving human edits
+                        await prisma.helpLocaleRevision.update({
+                            where: { id: existingLocaleRev.id },
+                            data: {
+                                title: locArt.title || article.title,
+                                summary: locArt.summary || article.summary,
+                                steps: JSON.stringify(locArt.steps || article.steps || []),
+                                success: locArt.success || article.success || '',
+                                caution: locArt.caution || article.caution || ''
+                            }
+                        });
                     }
                 }
             }
@@ -161,12 +174,32 @@ async function seedHelpContent() {
         }
     }
 
-    // Clean up any accidental seed publications created by previous ungated seeder (Finding 1)
-    const deletedPublications = await prisma.helpPublication.deleteMany({
-        where: { publishedBy: 'system' }
+    // Targeted audited supersession: supersede accidental seed publications while preserving history (Finding 4)
+    const accidentalSeedPubs = await prisma.helpPublication.findMany({
+        where: {
+            publishedBy: 'system',
+            isCurrent: true
+        },
+        include: {
+            revision: {
+                include: { locales: true }
+            }
+        }
     });
-    if (deletedPublications.count > 0) {
-        console.log(`[HELP_SEED] Revoked ${deletedPublications.count} unreviewed seed publications.`);
+
+    let supersededCount = 0;
+    for (const pub of accidentalSeedPubs) {
+        const hasHumanApproval = pub.revision?.locales?.some(l => l.reviewStatus === 'APPROVED');
+        if (!hasHumanApproval) {
+            await prisma.helpPublication.update({
+                where: { id: pub.id },
+                data: { isCurrent: false }
+            });
+            supersededCount++;
+        }
+    }
+    if (supersededCount > 0) {
+        console.log(`[HELP_SEED] Superseded ${supersededCount} unreviewed accidental seed publications (audit history preserved).`);
     }
 
     console.log(`[HELP_SEED] Seeding completed: ${createdCount} created, ${updatedCount} updated. 0 unreviewed drafts published.`);

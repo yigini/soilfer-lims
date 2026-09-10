@@ -532,22 +532,43 @@ async function publishArticleRevision(req, res) {
             }
         }
 
-        // Transactionally supersede older publications and set new current publication
-        await prisma.$transaction([
-            prisma.helpPublication.updateMany({
-                where: { articleId, isCurrent: true },
-                data: { isCurrent: false }
-            }),
-            prisma.helpPublication.create({
-                data: {
-                    articleId,
-                    revisionId: rev.id,
-                    approvedLocales: JSON.stringify(localesList),
-                    publishedBy: req.user.username || req.user.id,
-                    isCurrent: true
+        // Transactionally supersede older publications and set new current publication with concurrency defense
+        try {
+            await prisma.$transaction(async (tx) => {
+                if (expectedRevisionNumber !== undefined) {
+                    const currentPub = await tx.helpPublication.findFirst({
+                        where: { articleId, isCurrent: true },
+                        include: { revision: true }
+                    });
+                    if (currentPub && currentPub.revision?.revisionNumber !== expectedRevisionNumber) {
+                        throw new Error('CONCURRENCY_CONFLICT');
+                    }
                 }
-            })
-        ]);
+
+                await tx.helpPublication.updateMany({
+                    where: { articleId, isCurrent: true },
+                    data: { isCurrent: false }
+                });
+
+                await tx.helpPublication.create({
+                    data: {
+                        articleId,
+                        revisionId: rev.id,
+                        approvedLocales: JSON.stringify(localesList),
+                        publishedBy: req.user.username || req.user.id,
+                        isCurrent: true
+                    }
+                });
+            });
+        } catch (txErr) {
+            if (txErr.message === 'CONCURRENCY_CONFLICT') {
+                return res.status(409).json({
+                    error: 'CONCURRENCY_CONFLICT',
+                    message: `Publication conflict: revision was concurrently updated.`
+                });
+            }
+            throw txErr;
+        }
 
         res.json({
             success: true,
@@ -561,22 +582,42 @@ async function publishArticleRevision(req, res) {
 
 /**
  * PUT /api/help/admin/articles/:articleId/lab-note
- * Save or update lab-scoped procedural note (Lab Manager / Super Admin)
+ * Save or publish lab-scoped procedural note with governed draft vs publish workflow
  */
 async function saveLabNote(req, res) {
     try {
         const { articleId } = req.params;
-        const { noteText, isActive = true } = req.body;
+        const { noteText, action = 'save_draft', isActive = true } = req.body;
         const user = req.user;
 
-        // Lab Manager can only edit note for their assigned labId
-        const targetLabId = user.role === 'SUPER_ADMIN' ? (req.body.labId || user.labId) : user.labId;
+        // Verify lab scope
+        const isSuperAdmin = user.role === 'SUPER_ADMIN';
+        const targetLabId = isSuperAdmin ? (req.body.labId || user.labId) : user.labId;
 
         if (!targetLabId) {
             return res.status(400).json({ error: 'No labId specified or associated with user account' });
         }
 
+        // Capability and role checks
+        const userPermissions = user.permissions || [];
+        const canEditLab = isSuperAdmin || user.role === 'LAB_MANAGER' || userPermissions.includes('HELP_EDIT_LAB');
+        const canPublishLab = isSuperAdmin || user.role === 'LAB_MANAGER' || userPermissions.includes('HELP_PUBLISH_LAB');
+
+        if (!canEditLab) {
+            return res.status(403).json({ error: 'UNAUTHORIZED', message: 'You do not have permission to edit lab guidance.' });
+        }
+
+        // Action determines publishing vs draft saving
+        const isPublishing = action === 'publish' || (action !== 'save_draft' && isActive === true);
+        if (isPublishing && !canPublishLab) {
+            return res.status(403).json({
+                error: 'UNAUTHORIZED',
+                message: 'You do not have permission to publish laboratory guidance. You may save drafts for Lab Manager approval.'
+            });
+        }
+
         const sanitizedNote = sanitizeHtml(noteText);
+        const shouldBeActive = isPublishing;
 
         const labNote = await prisma.helpLabNote.upsert({
             where: {
@@ -588,21 +629,25 @@ async function saveLabNote(req, res) {
             update: {
                 noteText: sanitizedNote,
                 authorId: user.username || user.id,
-                isActive: !!isActive
+                isActive: shouldBeActive
             },
             create: {
                 articleId,
                 labId: targetLabId,
                 noteText: sanitizedNote,
                 authorId: user.username || user.id,
-                isActive: !!isActive
+                isActive: shouldBeActive
             }
         });
 
         res.json({
             success: true,
+            action: isPublishing ? 'publish' : 'save_draft',
             labNote,
-            message: `Laboratory note saved for lab ${targetLabId}.`
+            status: shouldBeActive ? 'PUBLISHED' : 'DRAFT',
+            message: shouldBeActive
+                ? `Laboratory note published for lab ${targetLabId}.`
+                : `Laboratory note draft saved for lab ${targetLabId} (pending review/publication).`
         });
     } catch (err) {
         console.error('[ADMIN_HELP_CONTROLLER] saveLabNote error:', err);

@@ -13,10 +13,12 @@ import {
 } from 'lucide-react';
 import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
 
 export const FAQPage = () => {
     const { t, locale } = useLanguage();
+    const { user } = useAuth();
     const location = useLocation();
 
     const [articles, setArticles] = useState([]);
@@ -29,22 +31,24 @@ export const FAQPage = () => {
         let isMounted = true;
         setLoading(true);
 
-        helpClientService.getArticles({ locale })
+        helpClientService.getArticles({ locale, user })
             .then(data => {
                 if (isMounted) {
-                    setArticles(Array.isArray(data) ? data : []);
-                    setIsOffline(Array.isArray(data) && data.length > 0 && data[0].isOffline);
+                    const arts = Array.isArray(data?.articles) ? data.articles : (Array.isArray(data) ? data : []);
+                    setArticles(arts);
+                    setIsOffline(!!data?.isOffline);
                 }
             })
             .catch(err => {
                 console.warn('[FAQ_PAGE] Failed to load articles:', err.message);
+                if (isMounted) setArticles([]);
             })
             .finally(() => {
                 if (isMounted) setLoading(false);
             });
 
         return () => { isMounted = false; };
-    }, [locale]);
+    }, [locale, user]);
 
     // Filter FAQs by category and query
     const filteredArticles = articles.filter(a => {
@@ -63,13 +67,13 @@ export const FAQPage = () => {
 
     const categories = [
         { id: 'all', label: t('help.all', 'All Topics') },
-        { id: 'bench', label: 'Workbench & Methods' },
-        { id: 'intake', label: 'Intake & Reception' },
-        { id: 'review', label: 'Review & Approvals' },
-        { id: 'assets', label: 'Equipment & Stock' },
-        { id: 'offline', label: 'Mobile & Offline' },
-        { id: 'connect', label: 'Connections & KoBo' },
-        { id: 'manage', label: 'Management' }
+        { id: 'bench', label: t('help.categories.bench', 'Workbench & Methods') },
+        { id: 'intake', label: t('help.categories.intake', 'Intake & Reception') },
+        { id: 'review', label: t('help.categories.review', 'Review & Approvals') },
+        { id: 'assets', label: t('help.categories.assets', 'Equipment & Stock') },
+        { id: 'offline', label: t('help.categories.offline', 'Mobile & Offline') },
+        { id: 'connect', label: t('help.categories.connect', 'Connections & KoBo') },
+        { id: 'manage', label: t('help.categories.manage', 'Management') }
     ];
 
     return (
@@ -91,12 +95,12 @@ export const FAQPage = () => {
                                 {t('help.faq', 'Common Questions (FAQs)')}
                             </h1>
                             <p className="text-xs md:text-sm text-sf-muted mt-1">
-                                Concise answers and resolutions for daily laboratory work.
+                                {t('help.faqSubtitle', 'Concise answers and resolutions for daily laboratory work.')}
                             </p>
                             {isOffline && (
                                 <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
                                     <WifiOff size={14} />
-                                    <span>Offline mode: served from local workpack cache</span>
+                                    <span>{t('help.offlineCacheNotice', 'Offline mode: served from local workpack cache')}</span>
                                 </div>
                             )}
                         </div>
@@ -108,7 +112,7 @@ export const FAQPage = () => {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Filter questions..."
+                                placeholder={t('help.filterQuestions', 'Filter questions...')}
                                 className="w-full pl-9 pr-8 py-2 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-text focus:outline-none focus:ring-2 focus:ring-sf-primary"
                             />
                             {searchQuery && (
@@ -174,11 +178,13 @@ export const FAQPage = () => {
 
                                     <div className="flex items-center justify-between pt-1">
                                         <div className="flex items-center gap-2 text-[11px] text-sf-muted">
-                                            <span className="capitalize font-bold text-sf-primary">{article.category}</span>
+                                            <span className="capitalize font-bold text-sf-primary">
+                                                {t(`help.categories.${article.category}`, article.category)}
+                                            </span>
                                             <span>•</span>
                                             <span className="flex items-center gap-1">
                                                 <Clock size={12} />
-                                                {article.minutes} min guide
+                                                {article.minutes} min {t('help.guideSuffix', 'guide')}
                                             </span>
                                         </div>
 

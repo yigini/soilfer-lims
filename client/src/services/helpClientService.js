@@ -3,7 +3,11 @@ import {
     saveOfflineHelpPack,
     getOfflineHelpArticles,
     getOfflineHelpArticle,
-    getOfflineHelpMeta
+    getOfflineHelpMeta,
+    purgeOfflineHelpArticle,
+    saveOfflineHelpFeedback,
+    getPendingOfflineHelpFeedback,
+    deleteOfflineHelpFeedback
 } from './offline/offlineDb';
 
 /**
@@ -21,13 +25,23 @@ function normalizeString(str = '') {
  * Unified Help Client Service
  * Provides network-first access with transparent IndexedDB offline fallback
  * across HelpCentre, FAQPage, ArticleReader, TopicExplorer, and ContextHelpDrawer.
+ *
+ * Strict Access Enforcement:
+ * HTTP 401, 403, 404, 410 are authoritative server decisions and NEVER fall back
+ * to offline cache or resurrect restricted/withdrawn content.
  */
 export const helpClientService = {
     /**
-     * Fetch topics / categories with article counts
+     * Fetch topics / categories with article counts.
+     * Supports options object { locale, user } or legacy string locale.
      */
-    async getTopics({ locale = 'en', user = null } = {}) {
+    async getTopics(optionsOrLocale = {}) {
+        const options = typeof optionsOrLocale === 'string'
+            ? { locale: optionsOrLocale }
+            : (optionsOrLocale || {});
+        const { locale = 'en', user = null } = options;
         const labId = user?.labId || null;
+
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 const res = await axios.get('/api/help/topics', { params: { locale } });
@@ -35,14 +49,20 @@ export const helpClientService = {
                     return { topics: res.data.topics, isOffline: false };
                 }
             } catch (err) {
+                if (err.response) {
+                    const status = err.response.status;
+                    if (status === 401 || status === 403) {
+                        return { topics: [], isOffline: false, status, forbidden: true };
+                    }
+                }
                 console.warn('[HELP_CLIENT] Network fetch topics failed, falling back to offline storage:', err.message);
             }
         }
 
         // Offline fallback
-        const meta = await getOfflineHelpMeta({ labId, locale });
+        const meta = await getOfflineHelpMeta({ user, labId, locale });
         const categories = meta?.categories || [];
-        const offlineArticles = await getOfflineHelpArticles({ labId, locale });
+        const offlineArticles = await getOfflineHelpArticles({ user, labId, locale });
 
         const countByCategory = {};
         offlineArticles.forEach(a => {
@@ -67,8 +87,10 @@ export const helpClientService = {
     /**
      * Fetch articles list by category or role
      */
-    async getArticles({ category = null, role = null, locale = 'en', user = null } = {}) {
+    async getArticles(options = {}) {
+        const { category = null, role = null, locale = 'en', user = null } = options || {};
         const labId = user?.labId || null;
+
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 const res = await axios.get('/api/help/articles', {
@@ -78,13 +100,19 @@ export const helpClientService = {
                     return { articles: res.data.articles, isOffline: false };
                 }
             } catch (err) {
+                if (err.response) {
+                    const status = err.response.status;
+                    if (status === 401 || status === 403) {
+                        return { articles: [], isOffline: false, status, forbidden: true };
+                    }
+                }
                 console.warn('[HELP_CLIENT] Network fetch articles failed, falling back to offline storage:', err.message);
             }
         }
 
         // Offline fallback
-        const meta = await getOfflineHelpMeta({ labId, locale });
-        let articles = await getOfflineHelpArticles({ category, labId, locale });
+        const meta = await getOfflineHelpMeta({ user, labId, locale });
+        let articles = await getOfflineHelpArticles({ category, user, labId, locale });
 
         if (role && role !== 'all') {
             articles = articles.filter(a => {
@@ -101,10 +129,16 @@ export const helpClientService = {
     },
 
     /**
-     * Fetch single article by ID
+     * Fetch single article by ID.
+     * Supports options object { locale, user } or legacy string locale.
      */
-    async getArticleById(articleId, { locale = 'en', user = null } = {}) {
+    async getArticleById(articleId, optionsOrLocale = {}) {
+        const options = typeof optionsOrLocale === 'string'
+            ? { locale: optionsOrLocale }
+            : (optionsOrLocale || {});
+        const { locale = 'en', user = null } = options;
         const labId = user?.labId || null;
+
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 const res = await axios.get(`/api/help/articles/${articleId}`, {
@@ -114,16 +148,41 @@ export const helpClientService = {
                     return { article: res.data.article, isOffline: false };
                 }
             } catch (err) {
+                if (err.response) {
+                    const status = err.response.status;
+                    if (status === 401 || status === 403) {
+                        // Authoritative access rejection: NEVER FALL BACK TO CACHE
+                        return {
+                            article: null,
+                            status,
+                            forbidden: true,
+                            isOffline: false,
+                            error: err.response.data?.error || 'Access denied'
+                        };
+                    }
+                    if (status === 404 || status === 410) {
+                        // Authoritative not found or withdrawn: purge from local cache
+                        purgeOfflineHelpArticle(articleId, { user, labId, locale }).catch(() => {});
+                        return {
+                            article: null,
+                            status,
+                            notFound: true,
+                            isOffline: false,
+                            error: 'Article not found or withdrawn'
+                        };
+                    }
+                }
                 console.warn(`[HELP_CLIENT] Network fetch article ${articleId} failed, falling back to offline storage:`, err.message);
             }
         }
 
         // Offline fallback
-        const meta = await getOfflineHelpMeta({ labId, locale });
-        const article = await getOfflineHelpArticle(articleId, { labId, locale });
+        const meta = await getOfflineHelpMeta({ user, labId, locale });
+        const article = await getOfflineHelpArticle(articleId, { user, labId, locale });
 
         return {
-            article,
+            article: article || null,
+            notFound: !article,
             isOffline: true,
             lastSync: meta?.lastSync || null
         };
@@ -132,8 +191,10 @@ export const helpClientService = {
     /**
      * Search help articles (online API with client-side offline scoring)
      */
-    async searchHelp({ query = '', topic = null, role = null, locale = 'en', user = null, limit = 20, offset = 0 } = {}) {
+    async searchHelp(options = {}) {
+        const { query = '', topic = null, role = null, locale = 'en', user = null, limit = 20, offset = 0 } = options || {};
         const labId = user?.labId || null;
+
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 const res = await axios.get('/api/help/search', {
@@ -147,13 +208,19 @@ export const helpClientService = {
                     };
                 }
             } catch (err) {
+                if (err.response) {
+                    const status = err.response.status;
+                    if (status === 401 || status === 403) {
+                        return { total: 0, results: [], isOffline: false, forbidden: true };
+                    }
+                }
                 console.warn('[HELP_CLIENT] Network search failed, falling back to offline search:', err.message);
             }
         }
 
         // Client-side offline search fallback
-        const meta = await getOfflineHelpMeta({ labId, locale });
-        const allArticles = await getOfflineHelpArticles({ category: topic, labId, locale });
+        const meta = await getOfflineHelpMeta({ user, labId, locale });
+        const allArticles = await getOfflineHelpArticles({ category: topic, user, labId, locale });
         const normQuery = normalizeString(query);
 
         if (!normQuery) {
@@ -206,16 +273,22 @@ export const helpClientService = {
     },
 
     /**
-     * Resolve contextual help for page and live blockers
+     * Resolve contextual help for page and live blockers.
+     * Supports both blockerCodes and blockers parameter names defensively.
      */
-    async getContextHelp({ route = '/', blockerCodes = [], locale = 'en', user = null } = {}) {
+    async getContextHelp(options = {}) {
+        const { route = '/', blockerCodes = [], blockers = [], locale = 'en', user = null } = options || {};
+        const effectiveBlockers = (Array.isArray(blockerCodes) && blockerCodes.length > 0)
+            ? blockerCodes
+            : (Array.isArray(blockers) ? blockers : []);
         const labId = user?.labId || null;
+
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             try {
                 const res = await axios.get('/api/help/context', {
                     params: {
                         route,
-                        blockers: blockerCodes.length > 0 ? JSON.stringify(blockerCodes) : undefined,
+                        blockers: effectiveBlockers.length > 0 ? JSON.stringify(effectiveBlockers) : undefined,
                         locale
                     }
                 });
@@ -228,12 +301,18 @@ export const helpClientService = {
                     };
                 }
             } catch (err) {
+                if (err.response) {
+                    const status = err.response.status;
+                    if (status === 401 || status === 403) {
+                        return { route, blockers: [], articles: [], isOffline: false, forbidden: true };
+                    }
+                }
                 console.warn('[HELP_CLIENT] Network context fetch failed, falling back to offline storage:', err.message);
             }
         }
 
         // Offline context fallback using cached routeMap and articles
-        const meta = await getOfflineHelpMeta({ labId, locale });
+        const meta = await getOfflineHelpMeta({ user, labId, locale });
         const routeMap = meta?.routeMap || { routes: [], blockers: {} };
         const normalizedRoute = route.split('?')[0].replace(/\/$/, '') || '/';
 
@@ -255,8 +334,8 @@ export const helpClientService = {
         }
 
         const resolvedBlockers = [];
-        if (Array.isArray(blockerCodes) && blockerCodes.length > 0) {
-            for (const code of blockerCodes) {
+        if (Array.isArray(effectiveBlockers) && effectiveBlockers.length > 0) {
+            for (const code of effectiveBlockers) {
                 const mappedId = routeMap.blockers?.[code] || routeMap.unknownCodeArticle || 'bench-blocked';
                 resolvedBlockers.push({ code, articleId: mappedId });
                 if (!matchedArticleIds.includes(mappedId)) {
@@ -265,7 +344,7 @@ export const helpClientService = {
             }
         }
 
-        const allArticles = await getOfflineHelpArticles({ labId, locale });
+        const allArticles = await getOfflineHelpArticles({ user, labId, locale });
         const articleMap = new Map();
         allArticles.forEach(a => articleMap.set(a.id, a));
 
@@ -283,21 +362,100 @@ export const helpClientService = {
     },
 
     /**
-     * Submit feedback
+     * Submit feedback.
+     * Supports both object options { articleId, revisionId, locale, useful, comment, category, user }
+     * and positional arguments (articleId, useful, comment, locale).
+     *
+     * In offline mode: durably stores feedback in IndexedDB helpFeedback store with
+     * honest queued state.
      */
-    async recordFeedback({ articleId, revisionId, locale, useful, comment, category, user }) {
-        if (typeof navigator !== 'undefined' && navigator.onLine) {
-            return axios.post('/api/help/feedback', {
-                articleId,
-                revisionId,
-                locale,
-                useful,
-                comment,
-                category
-            });
+    async recordFeedback(arg1, arg2, arg3, arg4) {
+        let payload = {};
+        if (typeof arg1 === 'object' && arg1 !== null) {
+            payload = arg1;
+        } else {
+            payload = {
+                articleId: arg1,
+                useful: arg2,
+                comment: arg3 || '',
+                locale: arg4 || 'en'
+            };
         }
-        // Offline: acknowledge locally
-        return { data: { success: true, offlineQueued: true } };
+
+        const {
+            articleId,
+            revisionId = null,
+            locale = 'en',
+            useful = true,
+            comment = '',
+            category = null,
+            user = null
+        } = payload;
+
+        if (typeof navigator !== 'undefined' && navigator.onLine) {
+            try {
+                return await axios.post('/api/help/feedback', {
+                    articleId,
+                    revisionId,
+                    locale,
+                    useful,
+                    comment,
+                    category
+                });
+            } catch (err) {
+                if (err.response) {
+                    throw err;
+                }
+                // Network error: fall through to offline storage
+            }
+        }
+
+        // Offline storage in IndexedDB
+        await saveOfflineHelpFeedback({
+            articleId,
+            revisionId,
+            locale,
+            useful,
+            comment,
+            category,
+            userId: user?.id || null
+        });
+
+        return {
+            data: {
+                success: true,
+                offlineQueued: true,
+                queuedAt: new Date().toISOString()
+            }
+        };
+    },
+
+    /**
+     * Synchronize pending offline feedback items to server when connectivity is restored
+     */
+    async syncPendingHelpFeedback() {
+        if (typeof navigator === 'undefined' || !navigator.onLine) return { synced: 0 };
+        const pending = await getPendingOfflineHelpFeedback();
+        let synced = 0;
+
+        for (const item of pending) {
+            try {
+                await axios.post('/api/help/feedback', {
+                    articleId: item.articleId,
+                    revisionId: item.revisionId,
+                    locale: item.locale,
+                    useful: item.useful,
+                    comment: item.comment,
+                    category: item.category
+                });
+                await deleteOfflineHelpFeedback(item.id);
+                synced++;
+            } catch (e) {
+                console.warn('[HELP_CLIENT] Failed to sync offline feedback item:', item.id, e.message);
+            }
+        }
+
+        return { synced };
     },
 
     /**

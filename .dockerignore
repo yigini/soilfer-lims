@@ -21,6 +21,9 @@ server/data/*
 !server/data/analysisDisplayNames.json
 !server/data/operationalChecklists.json
 !server/data/importedParameterNames.json
+!server/data/help
+!server/data/help/*
+!server/data/help/**
 server/uploads
 server/database.json
 

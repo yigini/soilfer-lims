@@ -177,7 +177,7 @@ const PERMISSIONS = {
         'SUPER_ADMIN'
     ],
     'HELP_EDIT_LAB': [
-        'SUPER_ADMIN', 'LAB_MANAGER'
+        'SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN'
     ],
     'HELP_PUBLISH_GLOBAL': [
         'SUPER_ADMIN'

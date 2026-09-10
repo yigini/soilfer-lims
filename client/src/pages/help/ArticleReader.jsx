@@ -14,19 +14,23 @@ import {
     ChevronRight,
     Loader2,
     Check,
-    WifiOff
+    WifiOff,
+    Lock
 } from 'lucide-react';
 import helpClientService from '../../services/helpClientService';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
 
 export const ArticleReader = () => {
     const { articleId } = useParams();
     const { t, locale } = useLanguage();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [errorState, setErrorState] = useState(null);
     const [feedbackStatus, setFeedbackStatus] = useState(null);
     const [copied, setCopied] = useState(false);
     const [linkModalOpen, setLinkModalOpen] = useState(false);
@@ -35,35 +39,67 @@ export const ArticleReader = () => {
         let isMounted = true;
         setLoading(true);
         setFeedbackStatus(null);
+        setErrorState(null);
         setCopied(false);
+        setArticle(null);
 
-        helpClientService.getArticleById(articleId, locale)
-            .then(art => {
-                if (isMounted && art) {
-                    setArticle(art);
+        helpClientService.getArticleById(articleId, { locale, user })
+            .then(res => {
+                if (!isMounted) return;
+                if (res?.forbidden) {
+                    setErrorState({ code: 403, message: res.error || t('help.accessDenied', 'Access denied to this guidance.') });
+                    setArticle(null);
+                } else if (res?.notFound || !res?.article) {
+                    setErrorState({ code: 404, message: t('help.notFound', 'Article not found or not published.') });
+                    setArticle(null);
+                } else {
+                    setArticle({
+                        ...res.article,
+                        isOffline: !!res.isOffline,
+                        lastSync: res.lastSync
+                    });
                 }
             })
             .catch(err => {
                 console.warn('[ARTICLE_READER] Failed to load article:', err.message);
+                if (isMounted) {
+                    setErrorState({ code: 500, message: err.message });
+                    setArticle(null);
+                }
             })
             .finally(() => {
                 if (isMounted) setLoading(false);
             });
 
         return () => { isMounted = false; };
-    }, [articleId, locale]);
+    }, [articleId, locale, user, t]);
 
+    // Handle feedback submission with truthful online / offline status
     const handleFeedback = (useful) => {
-        helpClientService.recordFeedback(articleId, useful, '', locale)
-            .then(() => {
-                setFeedbackStatus(
-                    useful
-                        ? 'Thank you! Your feedback helps improve laboratory instructions. This action does not send records or personal data.'
-                        : 'Thank you for letting us know. You can also contact your lab manager to report a wording issue.'
-                );
+        if (!article) return;
+        helpClientService.recordFeedback({
+            articleId: article.id,
+            revisionId: article.revisionId || article.revisionNumber || null,
+            locale,
+            useful,
+            comment: '',
+            category: article.category,
+            user
+        })
+            .then(res => {
+                if (res?.data?.offlineQueued) {
+                    setFeedbackStatus(t('help.offlineFeedbackQueued', 'You are offline. Your feedback has been saved locally on this device and will be submitted when connection is restored.'));
+                } else {
+                    setFeedbackStatus(
+                        useful
+                            ? t('help.feedbackUseful', 'Thank you! Your feedback helps improve laboratory instructions. This action does not send records or personal data.')
+                            : t('help.feedbackNotUseful', 'Thank you for letting us know. You can also contact your lab manager to report a wording issue.')
+                    );
+                }
             })
-            .catch(() => {
-                setFeedbackStatus('Feedback noted.');
+            .catch(err => {
+                console.warn('[ARTICLE_READER] Feedback recording error:', err);
+                setFeedbackStatus(t('help.feedbackError', 'Could not submit feedback at this time. Please try again later.'));
             });
     };
 
@@ -89,17 +125,35 @@ export const ArticleReader = () => {
         );
     }
 
-    if (!article) {
+    if (errorState?.code === 403) {
         return (
             <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-4">
-                <AlertCircle size={40} className="mx-auto text-amber-500" />
-                <h2 className="text-lg font-bold text-sf-text">Article Not Found</h2>
-                <p className="text-xs text-sf-muted">
-                    This article may not be published yet, or is not accessible in your current scope.
+                <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
+                    <Lock size={28} />
+                </div>
+                <h2 className="text-lg font-bold text-sf-text">{t('help.restrictedTitle', 'Restricted Operational Guidance')}</h2>
+                <p className="text-xs text-sf-muted max-w-md mx-auto">
+                    {errorState.message || t('help.restrictedBody', 'This article requires an authenticated account with appropriate laboratory privileges.')}
                 </p>
                 <Link to="/help" className="inline-flex items-center gap-1 text-xs font-bold text-sf-primary hover:underline">
                     <ArrowLeft size={14} />
-                    <span>Return to Help Centre</span>
+                    <span>{t('help.centre', 'Return to Help Centre')}</span>
+                </Link>
+            </div>
+        );
+    }
+
+    if (!article || errorState?.code === 404) {
+        return (
+            <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-4">
+                <AlertCircle size={40} className="mx-auto text-amber-500" />
+                <h2 className="text-lg font-bold text-sf-text">{t('help.notFoundTitle', 'Article Not Found')}</h2>
+                <p className="text-xs text-sf-muted">
+                    {t('help.notFoundDesc', 'This article may not be published yet, or is not accessible in your current scope.')}
+                </p>
+                <Link to="/help" className="inline-flex items-center gap-1 text-xs font-bold text-sf-primary hover:underline">
+                    <ArrowLeft size={14} />
+                    <span>{t('help.centre', 'Return to Help Centre')}</span>
                 </Link>
             </div>
         );
@@ -131,7 +185,7 @@ export const ArticleReader = () => {
                             title="Copy clean article link"
                         >
                             {copied ? <Check size={14} className="text-emerald-500" /> : <Share2 size={14} />}
-                            <span className="hidden sm:inline">Share</span>
+                            <span className="hidden sm:inline">{t('help.share', 'Share')}</span>
                         </button>
 
                         <button
@@ -141,7 +195,7 @@ export const ArticleReader = () => {
                             title="Print guidance"
                         >
                             <Printer size={14} />
-                            <span className="hidden sm:inline">Print</span>
+                            <span className="hidden sm:inline">{t('help.print', 'Print')}</span>
                         </button>
                     </div>
                 </div>
@@ -153,7 +207,7 @@ export const ArticleReader = () => {
                 {article.isOffline && (
                     <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-800 dark:text-amber-200 text-xs flex items-center gap-2">
                         <WifiOff size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
-                        <span>Offline mode: reading locally synchronized copy.</span>
+                        <span>{t('help.offlineNotice', 'Offline mode: reading locally synchronized copy.')}</span>
                     </div>
                 )}
 
@@ -162,7 +216,7 @@ export const ArticleReader = () => {
                     <div className="hc-notice p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-800 dark:text-amber-200 text-xs flex items-start gap-2.5">
                         <AlertCircle size={18} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                         <div>
-                            <div className="font-bold mb-0.5">Translation Notice</div>
+                            <div className="font-bold mb-0.5">{t('help.translationNotice', 'Translation Notice')}</div>
                             <div>{article.localeNotice}</div>
                         </div>
                     </div>
@@ -177,10 +231,10 @@ export const ArticleReader = () => {
                         <span>•</span>
                         <span className="flex items-center gap-1">
                             <Clock size={12} />
-                            {article.minutes} min read
+                            {article.minutes} {t('help.minutesShort', 'min')}
                         </span>
                         <span>•</span>
-                        <span>Review lead: {article.reviewOwner}</span>
+                        <span>{t('help.reviewLead', 'Review lead')}: {article.reviewOwner}</span>
                     </div>
 
                     <h1 className="text-2xl md:text-3xl font-black text-sf-text tracking-tight">
@@ -196,7 +250,7 @@ export const ArticleReader = () => {
                 {article.steps?.length > 0 && (
                     <section className="space-y-3">
                         <h2 className="text-sm font-bold uppercase tracking-wider text-sf-muted">
-                            Action Steps
+                            {t('help.drawer.steps', 'Required Steps')}
                         </h2>
                         <ol className="space-y-3">
                             {article.steps.map((step, idx) => (
@@ -219,7 +273,7 @@ export const ArticleReader = () => {
                     <section className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 dark:text-emerald-200 text-xs md:text-sm flex items-start gap-3">
                         <CheckCircle2 size={20} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                         <div className="space-y-1">
-                            <div className="font-bold">What success looks like</div>
+                            <div className="font-bold">{t('help.drawer.success', 'What success looks like')}</div>
                             <div className="leading-relaxed">{article.success}</div>
                         </div>
                     </section>
@@ -230,7 +284,7 @@ export const ArticleReader = () => {
                     <section className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs md:text-sm flex items-start gap-3">
                         <ShieldAlert size={20} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
                         <div className="space-y-1">
-                            <div className="font-bold">Keep in mind</div>
+                            <div className="font-bold">{t('help.drawer.caution', 'Keep in mind')}</div>
                             <div className="leading-relaxed">{article.caution}</div>
                         </div>
                     </section>
@@ -251,7 +305,7 @@ export const ArticleReader = () => {
                 <div className="pt-6 border-t border-sf-divider space-y-3">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl bg-sf-surface border border-sf-divider">
                         <span className="font-bold text-xs text-sf-text">
-                            {t('help.useful', 'Was this useful?')}
+                            {t('help.feedbackPrompt', 'Was this guidance helpful?')}
                         </span>
                         <div className="flex items-center gap-2">
                             <button
@@ -270,7 +324,7 @@ export const ArticleReader = () => {
                                 className="px-3 py-1.5 rounded-xl border border-sf-divider hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                             >
                                 <ThumbsDown size={13} />
-                                <span>{t('help.no', 'Not yet')}</span>
+                                <span>{t('help.no', 'No')}</span>
                             </button>
                         </div>
                     </div>
@@ -286,7 +340,7 @@ export const ArticleReader = () => {
                 {article.relatedArticles?.length > 0 && (
                     <div className="pt-4 border-t border-sf-divider space-y-3">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted">
-                            Related Guidance
+                            {t('help.relatedGuidance', 'Related Guidance')}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 hc-article">
                             {article.relatedArticles.map(rel => (
@@ -313,7 +367,7 @@ export const ArticleReader = () => {
             {linkModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
                     <div className="w-full max-w-sm bg-sf-surface border border-sf-divider rounded-2xl shadow-2xl p-5 space-y-3">
-                        <div className="font-bold text-sm text-sf-text">Article link copied</div>
+                        <div className="font-bold text-sm text-sf-text">{t('help.linkCopied', 'Article link copied')}</div>
                         <input
                             type="text"
                             readOnly
@@ -326,7 +380,7 @@ export const ArticleReader = () => {
                             onClick={() => setLinkModalOpen(false)}
                             className="w-full py-2 rounded-xl bg-sf-primary text-white text-xs font-bold"
                         >
-                            Done
+                            {t('common.done', 'Done')}
                         </button>
                     </div>
                 </div>

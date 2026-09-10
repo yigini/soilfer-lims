@@ -19,7 +19,8 @@ const ICON_MAP = {
     FolderGit2,
     Settings,
     Bell,
-    HelpCircle
+    HelpCircle,
+    FileCheck2
 };
 
 const ITEMS_PER_PAGE = 25;
@@ -754,6 +755,28 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Help Centre Dedicated Article & Revision Editor Banner */}
+                            {activeGroupId === 'help' && (
+                                <div className="p-4 rounded-2xl bg-sf-primary/10 border border-sf-primary/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="space-y-1">
+                                        <div className="font-bold text-xs text-sf-primary flex items-center gap-1.5">
+                                            <HelpCircle size={16} />
+                                            <span>{t('help.articleEditorIntegration', 'Knowledge Base Full Article & Revision Editor')}</span>
+                                        </div>
+                                        <p className="text-xs text-sf-muted">
+                                            {t('help.articleEditorIntegrationDesc', 'Interface labels and drawers are translated below. For full structured articles, multi-locale review workflows, and publications, open the dedicated Help Article Editor.')}
+                                        </p>
+                                    </div>
+                                    <a
+                                        href="/admin/help"
+                                        className="shrink-0 px-3.5 py-2 rounded-xl bg-sf-primary text-white text-xs font-bold hover:bg-sf-primary/90 transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+                                    >
+                                        <span>{t('help.openArticleEditor', 'Open Article & Revision Editor')}</span>
+                                        <ChevronRight size={14} />
+                                    </a>
+                                </div>
+                            )}
 
                             {/* Filters Bar: Status Tabs + Module Subfilters + In-group Search */}
                             <div className="flex flex-wrap items-center justify-between gap-3 bg-sf-surface p-3 rounded-2xl border border-sf-divider">

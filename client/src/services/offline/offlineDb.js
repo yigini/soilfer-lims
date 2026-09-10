@@ -9,7 +9,7 @@
  */
 
 const DB_NAME = 'soilfer_lims_offline';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise = null;
 
@@ -75,15 +75,23 @@ export function getOfflineDb() {
                 db.createObjectStore('device', { keyPath: 'key' });
             }
 
-            // 8. Offline Help Knowledge Base store: keyed by article id
+            // 8. Offline Help Knowledge Base store: keyed by scoped article id
             if (!db.objectStoreNames.contains('helpArticles')) {
                 const helpStore = db.createObjectStore('helpArticles', { keyPath: 'id' });
                 helpStore.createIndex('category', 'category', { unique: false });
+                helpStore.createIndex('scopeKey', 'scopeKey', { unique: false });
             }
 
             // 9. Offline Help metadata (lastSync, blockers, categories)
             if (!db.objectStoreNames.contains('helpMeta')) {
                 db.createObjectStore('helpMeta', { keyPath: 'key' });
+            }
+
+            // 10. Offline Help Feedback queue: queued non-laboratory feedback
+            if (!db.objectStoreNames.contains('helpFeedback')) {
+                const feedbackStore = db.createObjectStore('helpFeedback', { keyPath: 'id', autoIncrement: true });
+                feedbackStore.createIndex('createdAt', 'createdAt', { unique: false });
+                feedbackStore.createIndex('userId', 'userId', { unique: false });
             }
         };
 
@@ -322,27 +330,33 @@ export async function setEnrolledDevice(deviceData) {
 
 // ─── OFFLINE HELP PACK OPERATIONS ───
 
-export async function saveOfflineHelpPack(pack, { labId = null, locale = null } = {}) {
+export async function saveOfflineHelpPack(pack, { user = null, labId = null, locale = null } = {}) {
     if (!pack || !Array.isArray(pack.articles)) return;
 
     const packLocale = locale || pack.locale || 'en';
-    const packLabId = labId || pack.labId || 'global';
-    const scopeKey = `${packLabId}::${packLocale}`;
+    const accountId = user?.id || user?.username || 'public';
+    const packLabId = user?.labId || labId || pack.labId || 'global';
+    const scopeKey = `${accountId}::${packLabId}::${packLocale}`;
     const newArticleIds = new Set(pack.articles.map(a => a.id));
 
     await withStore('helpArticles', 'readwrite', (store) => {
-        // 1. Fetch existing to reconcile withdrawals for this scope
+        // 1. Fetch existing to reconcile withdrawals for this scope and purge legacy direct IDs
         const req = store.getAll();
         req.onsuccess = () => {
             const allItems = req.result || [];
             allItems.forEach(item => {
+                // Remove legacy un-namespaced IDs that cause cross-scope leaks
+                if (!item.id || !item.id.includes('::')) {
+                    store.delete(item.id);
+                    return;
+                }
+                // Reconcile withdrawal: delete removed/withdrawn article within THIS scope only
                 if (item.scopeKey === scopeKey && !newArticleIds.has(item.articleId || item.id)) {
-                    // Reconcile withdrawal: delete removed/withdrawn article
                     store.delete(item.id);
                 }
             });
 
-            // 2. Put incoming articles with scoped identifiers
+            // 2. Put incoming articles with strictly scoped identifiers (NO direct-ID leakage)
             pack.articles.forEach(article => {
                 const scopedId = `${scopeKey}::${article.id}`;
                 const record = {
@@ -350,22 +364,12 @@ export async function saveOfflineHelpPack(pack, { labId = null, locale = null } 
                     id: scopedId,
                     articleId: article.id,
                     scopeKey,
+                    accountId,
                     labId: packLabId,
                     locale: packLocale,
                     cachedAt: new Date().toISOString()
                 };
                 store.put(record);
-
-                // Also maintain legacy direct id lookup for active session
-                store.put({
-                    ...article,
-                    id: article.id,
-                    articleId: article.id,
-                    scopeKey,
-                    labId: packLabId,
-                    locale: packLocale,
-                    cachedAt: new Date().toISOString()
-                });
             });
         };
     });
@@ -374,6 +378,7 @@ export async function saveOfflineHelpPack(pack, { labId = null, locale = null } 
         const metaPayload = {
             lastSync: new Date().toISOString(),
             locale: packLocale,
+            accountId,
             labId: packLabId,
             packVersion: pack.packVersion || 1,
             categories: pack.categories || [],
@@ -381,43 +386,44 @@ export async function saveOfflineHelpPack(pack, { labId = null, locale = null } 
         };
 
         store.put({ key: `meta::${scopeKey}`, value: metaPayload });
-        store.put({ key: 'current', value: metaPayload });
-        store.put({ key: 'lastSync', value: metaPayload.lastSync });
-        store.put({ key: 'locale', value: packLocale });
-        store.put({ key: 'categories', value: pack.categories || [] });
-        store.put({ key: 'routeMap', value: pack.routeMap || {} });
+        if (accountId === 'public' && packLabId === 'global') {
+            store.put({ key: `meta::public::global::${packLocale}`, value: metaPayload });
+        }
     });
 }
 
-export async function getOfflineHelpArticles({ category = null, labId = null, locale = 'en' } = {}) {
+export async function getOfflineHelpArticles({ category = null, user = null, labId = null, locale = 'en' } = {}) {
     return withStore('helpArticles', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const req = store.getAll();
             req.onsuccess = () => {
                 const list = req.result || [];
-                const targetScope = `${labId || 'global'}::${locale}`;
-                const globalScope = `global::${locale}`;
+                const accountId = user?.id || user?.username || 'public';
+                const targetLabId = user?.labId || labId || 'global';
+                const targetScope = `${accountId}::${targetLabId}::${locale}`;
+                const publicGlobalScope = `public::global::${locale}`;
 
-                // Filter by scope (specific lab/locale -> global/locale -> all unique by articleId)
+                // Filter by scope strictly (NEVER fall back to unpartitioned direct IDs or other accounts)
                 let scoped = list.filter(a => a.scopeKey === targetScope);
+
+                // If user's scope has no articles, check publicGlobalScope (only explicitly PUBLIC articles)
                 if (scoped.length === 0) {
-                    scoped = list.filter(a => a.scopeKey === globalScope);
-                }
-                if (scoped.length === 0) {
-                    scoped = list.filter(a => !a.id.includes('::'));
+                    scoped = list.filter(a => a.scopeKey === publicGlobalScope && a.visibility === 'PUBLIC');
                 }
 
-                // Deduplicate by articleId
+                // Deduplicate by articleId and sanitize
                 const seen = new Set();
                 const deduped = [];
                 for (const art of scoped) {
                     const artId = art.articleId || art.id;
                     if (!seen.has(artId)) {
                         seen.add(artId);
-                        deduped.push({
-                            ...art,
-                            id: artId
-                        });
+                        const sanitized = { ...art, id: artId };
+                        // Ensure labNote is not leaked from other labs
+                        if (user && user.labId && sanitized.labId && sanitized.labId !== user.labId && sanitized.labId !== 'global') {
+                            sanitized.labNote = null;
+                        }
+                        deduped.push(sanitized);
                     }
                 }
 
@@ -432,66 +438,125 @@ export async function getOfflineHelpArticles({ category = null, labId = null, lo
     });
 }
 
-export async function getOfflineHelpArticle(id, { labId = null, locale = 'en' } = {}) {
+export async function getOfflineHelpArticle(id, { user = null, labId = null, locale = 'en' } = {}) {
     return withStore('helpArticles', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
-            const scopedKey = `${labId || 'global'}::${locale}::${id}`;
-            const globalKey = `global::${locale}::${id}`;
+            const accountId = user?.id || user?.username || 'public';
+            const targetLabId = user?.labId || labId || 'global';
+            const scopedKey = `${accountId}::${targetLabId}::${locale}::${id}`;
+            const publicGlobalKey = `public::global::${locale}::${id}`;
 
             const tryScoped = store.get(scopedKey);
             tryScoped.onsuccess = () => {
                 if (tryScoped.result) {
                     return resolve({ ...tryScoped.result, id });
                 }
-                // Try global key
-                const tryGlobal = store.get(globalKey);
-                tryGlobal.onsuccess = () => {
-                    if (tryGlobal.result) {
-                        return resolve({ ...tryGlobal.result, id });
+                // Try public global key only for public articles
+                const tryPublic = store.get(publicGlobalKey);
+                tryPublic.onsuccess = () => {
+                    if (tryPublic.result && tryPublic.result.visibility === 'PUBLIC') {
+                        const sanitized = { ...tryPublic.result, id };
+                        if (!user || (sanitized.labId && sanitized.labId !== user.labId && sanitized.labId !== 'global')) {
+                            sanitized.labNote = null;
+                        }
+                        return resolve(sanitized);
                     }
-                    // Fall back to direct ID lookup
-                    const tryDirect = store.get(id);
-                    tryDirect.onsuccess = () => {
-                        resolve(tryDirect.result ? { ...tryDirect.result, id } : null);
-                    };
-                    tryDirect.onerror = () => reject(tryDirect.error);
+                    resolve(null);
                 };
-                tryGlobal.onerror = () => reject(tryGlobal.error);
+                tryPublic.onerror = () => reject(tryPublic.error);
             };
             tryScoped.onerror = () => reject(tryScoped.error);
         });
     });
 }
 
-export async function getOfflineHelpMeta({ labId = null, locale = 'en' } = {}) {
+export async function getOfflineHelpMeta({ user = null, labId = null, locale = 'en' } = {}) {
     return withStore('helpMeta', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
-            const scopedKey = `meta::${labId || 'global'}::${locale}`;
+            const accountId = user?.id || user?.username || 'public';
+            const targetLabId = user?.labId || labId || 'global';
+            const scopedKey = `meta::${accountId}::${targetLabId}::${locale}`;
+            const publicGlobalKey = `meta::public::global::${locale}`;
+
             const reqScoped = store.get(scopedKey);
             reqScoped.onsuccess = () => {
                 if (reqScoped.result && reqScoped.result.value) {
                     return resolve(reqScoped.result.value);
                 }
-                // Try current
-                const reqCurrent = store.get('current');
-                reqCurrent.onsuccess = () => {
-                    if (reqCurrent.result && reqCurrent.result.value) {
-                        return resolve(reqCurrent.result.value);
+                const reqPublic = store.get(publicGlobalKey);
+                reqPublic.onsuccess = () => {
+                    if (reqPublic.result && reqPublic.result.value) {
+                        return resolve(reqPublic.result.value);
                     }
-                    // Fall back to legacy flat map
-                    const reqAll = store.getAll();
-                    reqAll.onsuccess = () => {
-                        const map = {};
-                        (reqAll.result || []).forEach(item => {
-                            map[item.key] = item.value;
-                        });
-                        resolve(map);
-                    };
-                    reqAll.onerror = () => reject(reqAll.error);
+                    resolve(null);
                 };
-                reqCurrent.onerror = () => reject(reqCurrent.error);
+                reqPublic.onerror = () => reject(reqPublic.error);
             };
             reqScoped.onerror = () => reject(reqScoped.error);
         });
     });
 }
+
+export async function purgeOfflineHelpArticle(id, { user = null, labId = null, locale = 'en' } = {}) {
+    const accountId = user?.id || user?.username || 'public';
+    const targetLabId = user?.labId || labId || 'global';
+    const scopedKey = `${accountId}::${targetLabId}::${locale}::${id}`;
+    return withStore('helpArticles', 'readwrite', (store) => {
+        store.delete(scopedKey);
+    });
+}
+
+export async function clearUserHelpCache({ userId = null } = {}) {
+    if (!userId) return;
+    await withStore('helpArticles', 'readwrite', (store) => {
+        const req = store.getAll();
+        req.onsuccess = () => {
+            const items = req.result || [];
+            items.forEach(item => {
+                if (item.accountId === userId || (item.scopeKey && item.scopeKey.startsWith(`${userId}::`))) {
+                    store.delete(item.id);
+                }
+            });
+        };
+    });
+
+    await withStore('helpMeta', 'readwrite', (store) => {
+        const req = store.getAll();
+        req.onsuccess = () => {
+            const items = req.result || [];
+            items.forEach(item => {
+                if (item.key && item.key.startsWith(`meta::${userId}::`)) {
+                    store.delete(item.key);
+                }
+            });
+        };
+    });
+}
+
+export async function saveOfflineHelpFeedback(feedback) {
+    return withStore('helpFeedback', 'readwrite', (store) => {
+        const record = {
+            ...feedback,
+            createdAt: new Date().toISOString(),
+            synced: false
+        };
+        store.add(record);
+    });
+}
+
+export async function getPendingOfflineHelpFeedback() {
+    return withStore('helpFeedback', 'readonly', (store) => {
+        return new Promise((resolve, reject) => {
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => reject(req.error);
+        });
+    });
+}
+
+export async function deleteOfflineHelpFeedback(id) {
+    return withStore('helpFeedback', 'readwrite', (store) => {
+        store.delete(id);
+    });
+}
+

@@ -115,11 +115,25 @@ export const HelpCentre = () => {
         return () => clearTimeout(timer);
     }, [searchQuery, selectedRole, locale, user]);
 
+    // Escape key listener for support modal
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isSupportOpen) {
+                setIsSupportOpen(false);
+                setSupportStatus(null);
+            }
+        };
+        if (isSupportOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+        }
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isSupportOpen]);
+
     // Load support config when opening support modal
     const handleOpenSupport = async () => {
         setIsSupportOpen(true);
-        setSupportStatus(null);
         setLoadingSupport(true);
+        setSupportStatus(null);
         try {
             const res = await helpClientService.getSupportConfig(user);
             setSupportConfig(res);
@@ -137,7 +151,7 @@ export const HelpCentre = () => {
             return;
         }
 
-        // Honest review & delivery flow (Finding 8)
+        // Truthful support flow: creates email client draft
         if (supportConfig?.support?.contactMethod === 'EMAIL') {
             const email = supportConfig.support.contactValue;
             const subject = encodeURIComponent(`[SoilFER LIMS Support] ${supportSubject || 'Laboratory Issue'} (${user?.labId || 'General'})`);
@@ -146,13 +160,12 @@ export const HelpCentre = () => {
                 `Lab: ${user?.labId || 'Unassigned'}\n` +
                 `URL: ${window.location.href}\n` +
                 `Time: ${new Date().toISOString()}\n\n` +
-                `Description:\n${supportText}\n\n` +
-                `---\nNote: Confidential tokens and passwords were excluded.`
+                `Description:\n${supportText}`
             );
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
             setSupportStatus({
                 error: false,
-                message: 'Your email client has been opened with the pre-formatted support message.'
+                message: 'Your email application was opened with this draft. Please review and send it from your email application.'
             });
         } else {
             setSupportStatus({
@@ -160,6 +173,16 @@ export const HelpCentre = () => {
                 message: 'Support request prepared for laboratory supervisor review. Please forward the details below.'
             });
         }
+    };
+
+    const handleCopySupportDraft = () => {
+        const email = supportConfig?.support?.contactValue || '';
+        const bodyText = `To: ${email}\nSubject: [SoilFER LIMS Support] ${supportSubject || 'Laboratory Issue'} (${user?.labId || 'General'})\n\nUser: ${user?.username || 'Anonymous'}\nLab: ${user?.labId || 'Unassigned'}\nURL: ${window.location.href}\nTime: ${new Date().toISOString()}\n\nDescription:\n${supportText}`;
+        navigator.clipboard?.writeText(bodyText);
+        setSupportStatus({
+            error: false,
+            message: 'Support draft copied to clipboard. You can paste it into your email provider.'
+        });
     };
 
     return (
@@ -503,30 +526,41 @@ export const HelpCentre = () => {
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-end gap-2 pt-2 border-t border-sf-divider">
-                                    <button
-                                        type="button"
-                                        onClick={() => { setIsSupportOpen(false); setSupportStatus(null); }}
-                                        className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:text-sf-text"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="px-4 py-2 rounded-xl bg-sf-primary text-white text-xs font-bold hover:bg-sf-primary/90 transition-colors flex items-center gap-1.5"
-                                    >
-                                        {supportConfig.support?.contactMethod === 'EMAIL' ? (
-                                            <>
-                                                <ExternalLink size={14} />
-                                                <span>Draft in Email Client</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Send size={14} />
-                                                <span>Review & Send Request</span>
-                                            </>
-                                        )}
-                                    </button>
+                                <div className="flex items-center justify-between pt-2 border-t border-sf-divider">
+                                    {supportConfig.support?.contactMethod === 'EMAIL' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleCopySupportDraft}
+                                            className="px-3 py-1.5 rounded-xl border border-sf-divider text-xs font-semibold text-sf-muted hover:text-sf-text hover:bg-sf-hover transition-colors"
+                                        >
+                                            Copy draft to clipboard
+                                        </button>
+                                    )}
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setIsSupportOpen(false); setSupportStatus(null); }}
+                                            className="px-4 py-2 rounded-xl text-xs font-bold text-sf-muted hover:text-sf-text"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-4 py-2 rounded-xl bg-sf-primary text-white text-xs font-bold hover:bg-sf-primary/90 transition-colors flex items-center gap-1.5"
+                                        >
+                                            {supportConfig.support?.contactMethod === 'EMAIL' ? (
+                                                <>
+                                                    <ExternalLink size={14} />
+                                                    <span>Open Draft in Email</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send size={14} />
+                                                    <span>Review & Send Request</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         )}
