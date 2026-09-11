@@ -145,7 +145,40 @@ export async function queueOutboxOperation(op) {
     op.retries = op.retries || 0;
 
     await withStore('outbox', 'readwrite', (store) => {
-        store.put(op);
+        return new Promise((resolve, reject) => {
+            if (op.type === 'SAVE_WORK_DRAFT') {
+                const targetId = op.target || op.payload?.workItemId;
+                const req = store.getAll();
+                req.onsuccess = () => {
+                    const existingOps = req.result || [];
+                    let maxSeq = op.draftSeq || op.payload?.draftVersion || 0;
+                    for (const prev of existingOps) {
+                        if (
+                            prev.type === 'SAVE_WORK_DRAFT' &&
+                            (prev.target === targetId || prev.payload?.workItemId === targetId) &&
+                            (prev.userId === op.userId || (typeof prev.userId === 'string' && prev.userId.trim() === String(op.userId).trim())) &&
+                            prev.status === 'PENDING'
+                        ) {
+                            const prevSeq = prev.draftSeq || prev.payload?.draftVersion || prev.payload?.clientDraftVersion || 0;
+                            if (prevSeq > maxSeq) maxSeq = prevSeq;
+                            // Coalesce: remove superseded pending draft operation on this device
+                            store.delete(prev.operationId);
+                        }
+                    }
+                    if (!op.payload) op.payload = {};
+                    const newSeq = Math.max(maxSeq + 1, op.payload.draftVersion || 1);
+                    op.draftSeq = newSeq;
+                    op.payload.draftVersion = newSeq;
+                    op.payload.clientDraftVersion = newSeq;
+                    store.put(op);
+                    resolve(op);
+                };
+                req.onerror = () => reject(req.error);
+            } else {
+                store.put(op);
+                resolve(op);
+            }
+        });
     });
 
     return op;

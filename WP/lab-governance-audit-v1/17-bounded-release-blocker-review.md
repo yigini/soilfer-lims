@@ -32,3 +32,18 @@ Make a narrowly scoped fix that preserves the newer draft and safely handles pen
 - Correct the release summary rather than claiming more than the evidence supports. A40 proves current-build refresh, not old/new client compatibility; A11 receiving-queue text currently uses a broad OR including 'Active', and A06 is not an exhaustive all-resource/all-role isolation proof. Keep those evidence limits visible. They must not disappear behind '42/42'. Do not start a new broad testing campaign to fill every documentation gap in this pass.
 - Provide a short release candidate summary: exact commit/CI, verified fixes, remaining risks or unverified requirements, migration/backup/rollback steps, and whether any concrete security/data-integrity blocker remains.
 - Push corrective commits to PR #94. Keep merge/deployment on hold; this monitor cannot merge or deploy.
+
+## Follow-up at e9acdad — same ordering contract remains incomplete
+
+The original newer-online-value probe now passes in Antigravity's run. However, an independent production-browser companion run found ordinary sequential offline edits are not preserved:
+
+- Enter 6.85 offline, wait for its normal queued save, then change to 7.25 offline and wait for the second queued save.
+- Real logout/login and editor recovery correctly restore 7.25.
+- Production sync processes both operations, but final database value is **6.85**, not 7.25.
+- Probe: `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-sequence-review.cjs`; output `draft-sequence-results.json`, 11/12 passed. Console explicitly recorded `INDEPENDENT FINAL SYNCED VALUE: 6.85`. The reused A20_10 description/expected field still says 6.85, but the actual assertion in this companion script is `recoveredValA === '7.25'` and passed; do not mistake that reused text for the tested value.
+
+Reason: the first replay writes a server `updatedAt` later than the capture times of **both** offline edits. The new `serverDraftTime > opTime` guard then misclassifies the second, newer offline edit as obsolete. It records SUCCESS and the sync engine removes that operation. A client clock is not a reliable draft revision either.
+
+This is the same release blocker, not a new scope expansion. The narrow fix must preserve both newer online edits and the newest sequential offline edit, with explicit conflict handling when their order cannot be established. Do not solve one by breaking the other or treating an unapplied edit as silently successful. Prefer a real draft revision contract and safe same-device queue ordering/coalescing. Preserve structured draft payloads on conflicts as well as numeric values. Run the two existing focused independent probes plus relevant CI; no broader campaign is requested.
+
+CI at e9acdad also failed `workbench_draft_integrity.test.js` test 6 (expected two replicate results, received one). Antigravity is already investigating; preserve the substantive replicate assertion rather than removing it.

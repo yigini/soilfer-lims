@@ -159,8 +159,8 @@ class SyncService {
                             const opCapturedAt = op.capturedAtLocal || op.payload?.capturedAtLocal || op.payload?.capturedAt;
                             const opTime = opCapturedAt ? new Date(opCapturedAt).getTime() : 0;
                             const serverDraftTime = existingDraft?.updatedAt ? new Date(existingDraft.updatedAt).getTime() : 0;
-                            const opDraftVersion = op.payload?.clientDraftVersion || op.payload?.draftVersion || 0;
-                            const serverDraftVersion = existingDraft?.draftVersion || 0;
+                            const opDraftVersion = Number(op.payload?.draftVersion || op.payload?.clientDraftVersion || op.draftSeq || 0);
+                            const serverDraftVersion = Number(existingDraft?.draftVersion || 0);
 
                             // 1. Check if draft was explicitly discarded on server after this operation was captured
                             let wasDiscardedAfterOp = false;
@@ -181,7 +181,7 @@ class SyncService {
                                     commandType: op.type,
                                     targetResource: workItemId,
                                     actor: user.username,
-                                    status: 'SUCCESS',
+                                    status: 'REJECTED',
                                     outcome: {
                                         saved: false,
                                         discarded: true,
@@ -189,56 +189,118 @@ class SyncService {
                                         workItemId
                                     }
                                 });
-                                outcome = { saved: false, discarded: true, workItemId };
+                                outcome = { saved: false, discarded: true, workItemId, reason: 'Draft was discarded on server prior to sync replay' };
                                 return;
                             }
 
-                            // 2. Concurrency check: does a newer draft already exist on the server?
-                            const isServerDraftNewer = existingDraft && (
-                                (serverDraftTime > opTime) ||
-                                (opDraftVersion > 0 && serverDraftVersion > opDraftVersion)
-                            );
+                            // 2. Check if existingDraft was written by an earlier offline replay or by an online save
+                            let lastAppliedOpTime = 0;
+                            let isOfflineOrigin = false;
+                            if (existingDraft?.notes && existingDraft.notes.includes('[SYNC_OP:')) {
+                                const match = existingDraft.notes.match(/\[SYNC_OP:(\d+)\]/);
+                                if (match) {
+                                    lastAppliedOpTime = Number(match[1]);
+                                    isOfflineOrigin = true;
+                                }
+                            }
 
-                            if (isServerDraftNewer) {
+                            // Concurrency evaluation:
+                            let isServerDraftNewer = false;
+                            if (existingDraft) {
+                                if (isOfflineOrigin) {
+                                    // Both were offline operations replaying sequentially on server
+                                    if (opDraftVersion > 0 && serverDraftVersion > 0) {
+                                        isServerDraftNewer = serverDraftVersion > opDraftVersion;
+                                    } else if (lastAppliedOpTime > 0 && opTime > 0) {
+                                        isServerDraftNewer = lastAppliedOpTime > opTime;
+                                    }
+                                } else {
+                                    // Existing draft was saved online via batch-save
+                                    // Server draft is newer if saved online after this op was captured, or has higher revision
+                                    if (opDraftVersion > 0 && serverDraftVersion > opDraftVersion) {
+                                        isServerDraftNewer = true;
+                                    } else if (serverDraftTime > opTime) {
+                                        isServerDraftNewer = true;
+                                    }
+                                }
+                            }
+
+                            if (isServerDraftNewer && existingDraft.value !== draftVal) {
                                 // Server draft was saved more recently than this offline operation.
                                 // Preserve the newer server draft without overwriting it with older data.
-                                draftRecord = existingDraft;
-                                if (draftVal !== null && draftVal !== existingDraft.value && !existingDraft.conflictValue) {
-                                    draftRecord = await tx.workItemDraft.update({
-                                        where: { workItemId },
-                                        data: { conflictValue: draftVal }
-                                    });
+                                const conflictPayload = {
+                                    attemptedValue: draftVal,
+                                    attemptedValues: op.payload?.values || null,
+                                    attemptedChecks: op.payload?.checks || null,
+                                    attemptedBasis: op.payload?.basis || null,
+                                    attemptedEquipmentId: op.payload?.equipmentId || null,
+                                    attemptedAt: opCapturedAt || new Date().toISOString(),
+                                    actor: user.username
+                                };
+
+                                const conflictUpdate = {
+                                    conflictValue: draftVal !== null ? draftVal : (op.payload?.values ? JSON.stringify(op.payload.values) : null)
+                                };
+
+                                // Preserve unapplied structured payload in notes
+                                let currentNotes = existingDraft.notes || '';
+                                try {
+                                    const parsed = currentNotes ? JSON.parse(currentNotes) : {};
+                                    parsed._conflictPayload = conflictPayload;
+                                    conflictUpdate.notes = JSON.stringify(parsed);
+                                } catch (_) {
+                                    conflictUpdate.notes = JSON.stringify({ _rawNotes: currentNotes, _conflictPayload: conflictPayload });
                                 }
+
+                                draftRecord = await tx.workItemDraft.update({
+                                    where: { workItemId },
+                                    data: conflictUpdate
+                                });
 
                                 savedReceipt = await CommandReceiptService.recordReceipt(tx, {
                                     idempotencyKey: opId,
                                     commandType: op.type,
                                     targetResource: workItemId,
                                     actor: user.username,
-                                    status: 'SUCCESS',
+                                    status: 'CONFLICT',
                                     outcome: {
                                         saved: false,
+                                        conflict: true,
                                         superseded: true,
                                         newerPreserved: true,
                                         currentValue: existingDraft.value,
                                         attemptedValue: draftVal,
+                                        attemptedPayload: conflictPayload,
                                         workItemId,
-                                        draftId: existingDraft.id
+                                        draftId: existingDraft.id,
+                                        reason: 'Draft was superseded by newer work on server'
                                     }
                                 });
                                 outcome = {
                                     saved: false,
+                                    conflict: true,
+                                    status: 'CONFLICT',
                                     superseded: true,
                                     newerPreserved: true,
                                     currentValue: existingDraft.value,
                                     attemptedValue: draftVal,
+                                    attemptedPayload: conflictPayload,
                                     workItemId,
-                                    draftId: existingDraft.id
+                                    draftId: existingDraft.id,
+                                    reason: 'Draft was superseded by newer work on server'
                                 };
                                 return;
                             }
 
-                            // 3. Normal path: existing draft is older or does not exist
+                            // 3. Normal path: op is newer or equal (sequential offline edit or first save)
+                            const cleanNotes = (op.payload?.notes || existingDraft?.notes || '')
+                                .replace(/\[SYNC_OP:\d+\]/g, '')
+                                .trim();
+                            const syncNotes = cleanNotes ? `${cleanNotes} [SYNC_OP:${opTime || Date.now()}]` : `[SYNC_OP:${opTime || Date.now()}]`;
+                            const resolvedDraftVersion = opDraftVersion > 0
+                                ? Math.max(opDraftVersion, (existingDraft?.draftVersion || 0) + 1)
+                                : ((existingDraft?.draftVersion || 0) + 1);
+
                             draftRecord = await tx.workItemDraft.upsert({
                                 where: { workItemId },
                                 create: {
@@ -248,17 +310,21 @@ class SyncService {
                                     labId: workLab || user.labId,
                                     analysis: item.analysis,
                                     value: draftVal,
-                                    values: op.payload?.values ? JSON.stringify(op.payload.values) : null,
-                                    checks: op.payload?.checks ? JSON.stringify(op.payload.checks) : null,
+                                    values: op.payload?.values ? (typeof op.payload.values === 'string' ? op.payload.values : JSON.stringify(op.payload.values)) : null,
+                                    checks: op.payload?.checks ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks)) : null,
+                                    basis: op.payload?.basis || 'AIR_DRY',
+                                    replicateNo: Number(op.payload?.replicateNo) || 1,
+                                    instrumentId: op.payload?.equipmentId || null,
                                     baseVersion: op.baseVersion || item.version || 0,
-                                    notes: op.payload?.notes || null
+                                    draftVersion: resolvedDraftVersion,
+                                    notes: syncNotes
                                 },
                                 update: {
                                     value: draftVal !== null ? draftVal : undefined,
-                                    values: op.payload?.values ? JSON.stringify(op.payload.values) : undefined,
-                                    checks: op.payload?.checks ? JSON.stringify(op.payload.checks) : undefined,
-                                    notes: op.payload?.notes !== undefined ? op.payload.notes : undefined,
-                                    draftVersion: { increment: 1 },
+                                    values: op.payload?.values ? (typeof op.payload.values === 'string' ? op.payload.values : JSON.stringify(op.payload.values)) : undefined,
+                                    checks: op.payload?.checks ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks)) : undefined,
+                                    notes: syncNotes,
+                                    draftVersion: resolvedDraftVersion,
                                     updatedAt: new Date()
                                 }
                             });
@@ -703,6 +769,31 @@ class SyncService {
                         status: 'REJECTED',
                         reason: `Unsupported domain command type: '${op.type}'.`,
                         serverTimestamp
+                    });
+                    continue;
+                }
+
+                // Check if outcome was a conflict or discarded
+                if (outcome?.conflict || outcome?.status === 'CONFLICT') {
+                    receipts.push({
+                        operationId: opId,
+                        status: 'CONFLICT',
+                        receiptId: savedReceiptId || ('rcpt_' + Date.now()),
+                        serverTimestamp,
+                        outcome,
+                        reason: outcome.reason || 'Draft was superseded by newer work on server'
+                    });
+                    continue;
+                }
+
+                if (outcome?.discarded) {
+                    receipts.push({
+                        operationId: opId,
+                        status: 'REJECTED',
+                        receiptId: savedReceiptId || ('rcpt_' + Date.now()),
+                        serverTimestamp,
+                        outcome,
+                        reason: outcome.reason || 'Draft was discarded on server prior to sync replay'
                     });
                     continue;
                 }

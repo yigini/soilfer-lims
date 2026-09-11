@@ -199,7 +199,6 @@ async function discardDraft(user, workItemId) {
             data: {
                 status: draft.workItem.status === 'IN_PROGRESS' ? 'ASSIGNED' : draft.workItem.status,
                 history: JSON.stringify(history),
-                version: { increment: 1 },
                 updatedAt: new Date()
             }
         }).catch(err => console.error('[draftService] Failed to revert WorkItem to ASSIGNED:', err));

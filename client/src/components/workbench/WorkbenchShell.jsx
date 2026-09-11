@@ -112,6 +112,7 @@ export default function WorkbenchShell({
                                             checks: localDraft.extra?.checks || item.draft?.checks,
                                             basis: localDraft.extra?.basis || item.draft?.basis || 'AIR_DRY',
                                             replicateNo: localDraft.extra?.replicateNo || item.draft?.replicateNo || 1,
+                                            draftVersion: localDraft.draftVersion || item.draft?.draftVersion || 1,
                                             updatedAt: localDraft.updatedAt
                                         };
                                     }
@@ -243,6 +244,17 @@ export default function WorkbenchShell({
     // Debounced Draft Persistence
     // ─────────────────────────────────────────────────────────────────────────
     const handleDraftChange = useCallback((workItemId, value, extra = {}) => {
+        // Look up current draft version
+        let currentItemSnapshot = null;
+        for (const g of groups) {
+            const match = g.items?.find(i => i.workItemId === workItemId);
+            if (match) {
+                currentItemSnapshot = match;
+                break;
+            }
+        }
+        const nextDraftVersion = (Number(currentItemSnapshot?.draft?.draftVersion) || 0) + 1;
+
         // Immediately patch in local UI state
         setGroups(prevGroups => {
             return prevGroups.map(group => ({
@@ -261,6 +273,7 @@ export default function WorkbenchShell({
                             basis: extra.basis || existingDraft.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || existingDraft.replicateNo || 1,
                             instrumentId: extra.instrumentId || existingDraft.instrumentId || item.equipmentId,
+                            draftVersion: nextDraftVersion,
                             updatedAt: new Date().toISOString()
                         }
                     };
@@ -274,6 +287,7 @@ export default function WorkbenchShell({
                 workItemId,
                 value,
                 extra,
+                draftVersion: nextDraftVersion,
                 updatedAt: new Date().toISOString()
             }).catch(e => console.warn('[workbench] Failed to persist local draft:', e));
         }
@@ -313,7 +327,9 @@ export default function WorkbenchShell({
                                 checks: extra.checks || currentItem?.draft?.checks,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
-                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId
+                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                draftVersion: nextDraftVersion,
+                                clientDraftVersion: nextDraftVersion
                             },
                             userId: user.id,
                             labId: user.labId
@@ -337,7 +353,8 @@ export default function WorkbenchShell({
                             basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
                             equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
-                            version: currentItem?.version || 0
+                            version: currentItem?.version || 0,
+                            draftVersion: nextDraftVersion
                         }
                     ]
                 });
@@ -359,7 +376,9 @@ export default function WorkbenchShell({
                                 checks: extra.checks || currentItem?.draft?.checks,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
-                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId
+                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                draftVersion: nextDraftVersion,
+                                clientDraftVersion: nextDraftVersion
                             },
                             userId: user.id,
                             labId: user.labId
