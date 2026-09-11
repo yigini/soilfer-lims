@@ -437,9 +437,37 @@ exports.getDirectory = async (req, res) => {
 
 exports.createInvitation = async (req, res) => {
     try {
-        const { name, email, role, labId, projects } = req.body;
-        const result = await staffLifecycleService.createInvitation(req.user, { name, email, role, labId, projects });
+        const { name, email, role, labId, projects, reissue } = req.body;
+        const result = await staffLifecycleService.createInvitation(req.user, { name, email, role, labId, projects, reissue });
         res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code, existingInvitationId: err.existingInvitationId });
+    }
+};
+
+exports.getPendingInvitations = async (req, res) => {
+    try {
+        const labId = req.query.labId || req.user.labId;
+        const result = await staffLifecycleService.getPendingInvitations(req.user, labId);
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.reissueInvitation = async (req, res) => {
+    try {
+        const result = await staffLifecycleService.reissueInvitation(req.user, req.params.id, req.body);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.revokeInvitation = async (req, res) => {
+    try {
+        const result = await staffLifecycleService.revokeInvitation(req.user, req.params.id, req.body);
+        res.json(result);
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
     }

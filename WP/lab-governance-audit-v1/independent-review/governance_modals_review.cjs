@@ -65,6 +65,28 @@ function record(id, description, expected, actual, passed) {
     results.push({ id, description, expected, actual, passed });
 }
 
+function getLuminance(r, g, b) {
+    const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function getContrastRatio(rgb1, rgb2) {
+    const parseRgb = str => {
+        const m = (str || '').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        return m ? [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)] : [0, 0, 0];
+    };
+    const [r1, g1, b1] = parseRgb(rgb1);
+    const [r2, g2, b2] = parseRgb(rgb2);
+    const l1 = getLuminance(r1, g1, b1);
+    const l2 = getLuminance(r2, g2, b2);
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
 const token = (u) => jwt.sign({ id: u.id, username: u.username, role: u.role, tokenVersion: u.tokenVersion || 0 }, process.env.JWT_SECRET, { expiresIn: '1h' });
 const makeUser = (id, role, labId, name = id) => prisma.user.create({
     data: {
@@ -146,13 +168,56 @@ async function main() {
             await page.screenshot({ path: screenshotPath });
         }
 
-        // Test Tab / Shift+Tab wrapping
-        await page.keyboard.press('Tab');
-        await page.keyboard.press('Tab');
-        const focusInsideAfterTab = await dialog.evaluate(el => el.contains(document.activeElement));
+        // Test true boundary focus wrapping:
+        // 1. Shift+Tab on first focusable element wraps to last focusable element
+        await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length > 0) focusable[0].focus();
+        });
 
         await page.keyboard.press('Shift+Tab');
-        const focusInsideAfterShiftTab = await dialog.evaluate(el => el.contains(document.activeElement));
+        const wrappedFirstToLast = await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length < 2) return true;
+            return document.activeElement === focusable[focusable.length - 1];
+        });
+
+        // 2. Tab on last focusable element wraps to first focusable element
+        await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length > 0) focusable[focusable.length - 1].focus();
+        });
+
+        await page.keyboard.press('Tab');
+        const wrappedLastToFirst = await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length < 2) return true;
+            return document.activeElement === focusable[0];
+        });
 
         // Test Escape dismissal and focus restoration
         await page.keyboard.press('Escape');
@@ -165,8 +230,9 @@ async function main() {
         return {
             metrics,
             contained,
-            focusInsideAfterTab,
-            focusInsideAfterShiftTab,
+            wrappedFirstToLast,
+            wrappedLastToFirst,
+            focusTrapped: wrappedFirstToLast && wrappedLastToFirst,
             dialogClosed,
             focusReturned
         };
@@ -191,10 +257,10 @@ async function main() {
             { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
-        record('TRAP-INVITE-320', 'InviteStaffModal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-INVITE-320', 'InviteStaffModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: res.focusInsideAfterTab && res.focusInsideAfterShiftTab, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
-            res.focusInsideAfterTab && res.focusInsideAfterShiftTab && res.dialogClosed && res.focusReturned);
+            { focusTrapped: res.focusTrapped, wrappedFirstToLast: res.wrappedFirstToLast, wrappedLastToFirst: res.wrappedLastToFirst, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
+            res.focusTrapped && res.dialogClosed && res.focusReturned);
 
         await page.close();
     }
@@ -218,10 +284,10 @@ async function main() {
             { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
-        record('TRAP-REVIEW-320', 'AccessReviewModal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-REVIEW-320', 'AccessReviewModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: res.focusInsideAfterTab && res.focusInsideAfterShiftTab, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
-            res.focusInsideAfterTab && res.focusInsideAfterShiftTab && res.dialogClosed && res.focusReturned);
+            { focusTrapped: res.focusTrapped, wrappedFirstToLast: res.wrappedFirstToLast, wrappedLastToFirst: res.wrappedLastToFirst, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
+            res.focusTrapped && res.dialogClosed && res.focusReturned);
 
         await page.close();
     }
@@ -245,10 +311,10 @@ async function main() {
             { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
-        record('TRAP-RECOVERY-320', 'RecoveryLinkModal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-RECOVERY-320', 'RecoveryLinkModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: res.focusInsideAfterTab && res.focusInsideAfterShiftTab, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
-            res.focusInsideAfterTab && res.focusInsideAfterShiftTab && res.dialogClosed && res.focusReturned);
+            { focusTrapped: res.focusTrapped, wrappedFirstToLast: res.wrappedFirstToLast, wrappedLastToFirst: res.wrappedLastToFirst, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
+            res.focusTrapped && res.dialogClosed && res.focusReturned);
 
         await page.close();
     }
@@ -272,10 +338,10 @@ async function main() {
             { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
-        record('TRAP-SUSPEND-320', 'SuspendUserModal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-SUSPEND-320', 'SuspendUserModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: res.focusInsideAfterTab && res.focusInsideAfterShiftTab, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
-            res.focusInsideAfterTab && res.focusInsideAfterShiftTab && res.dialogClosed && res.focusReturned);
+            { focusTrapped: res.focusTrapped, wrappedFirstToLast: res.wrappedFirstToLast, wrappedLastToFirst: res.wrappedLastToFirst, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
+            res.focusTrapped && res.dialogClosed && res.focusReturned);
 
         await page.close();
     }
@@ -299,10 +365,10 @@ async function main() {
             { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
-        record('TRAP-LIFECYCLE-320', 'LabLifecycleModal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-LIFECYCLE-320', 'LabLifecycleModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: res.focusInsideAfterTab && res.focusInsideAfterShiftTab, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
-            res.focusInsideAfterTab && res.focusInsideAfterShiftTab && res.dialogClosed && res.focusReturned);
+            { focusTrapped: res.focusTrapped, wrappedFirstToLast: res.wrappedFirstToLast, wrappedLastToFirst: res.wrappedLastToFirst, dialogClosed: res.dialogClosed, focusReturned: res.focusReturned },
+            res.focusTrapped && res.dialogClosed && res.focusReturned);
 
         await page.close();
     }
@@ -394,21 +460,67 @@ async function main() {
         await page.screenshot({ path: shot });
 
         const contained = darkCheck.top >= -2 && darkCheck.bottom <= darkCheck.viewportHeight + 2;
-        // Verify surface background is dark (not light/white)
+        // Calculate WCAG contrast ratio between dark surface and text/heading
+        const contrastRatio = getContrastRatio(darkCheck.backgroundColor, darkCheck.headingColor);
+        const contrastMeetsAAA = contrastRatio >= 7.0;
         const bgIsDark = darkCheck.backgroundColor !== 'rgb(255, 255, 255)' && !darkCheck.backgroundColor.includes('255, 255, 255');
-        const darkValid = darkCheck.isDark && bgIsDark && contained && darkCheck.allButtonsContained;
+        const darkValid = darkCheck.isDark && bgIsDark && contrastMeetsAAA && contained && darkCheck.allButtonsContained;
 
-        record('MODAL-THEME-DARK-320', 'Modal renders correctly in authentic Dark Theme with dark surface tokens at 320x568',
-            { isDark: true, bgIsDark: true, insideViewport: true, allButtonsContained: true },
-            { isDark: darkCheck.isDark, bgIsDark, backgroundColor: darkCheck.backgroundColor, headingColor: darkCheck.headingColor, insideViewport: contained, allButtonsContained: darkCheck.allButtonsContained, height: darkCheck.height, screenshot: shot },
+        record('MODAL-THEME-DARK-320', 'Modal renders correctly in authentic Dark Theme with dark surface tokens and WCAG AAA contrast >= 7:1 at 320x568',
+            { isDark: true, bgIsDark: true, contrastMeetsAAA: true, insideViewport: true, allButtonsContained: true },
+            { isDark: darkCheck.isDark, bgIsDark, backgroundColor: darkCheck.backgroundColor, headingColor: darkCheck.headingColor, contrastRatio: Math.round(contrastRatio * 100) / 100, contrastMeetsAAA, insideViewport: contained, allButtonsContained: darkCheck.allButtonsContained, height: darkCheck.height, screenshot: shot },
             darkValid);
 
-        // Test Tab / Shift+Tab wrapping
-        await page.keyboard.press('Tab');
-        await page.keyboard.press('Tab');
-        const focusInsideAfterTab = await dialog.evaluate(el => el.contains(document.activeElement));
+        // Test true boundary focus wrapping in dark mode:
+        // 1. Shift+Tab on first focusable element wraps to last focusable element
+        await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length > 0) focusable[0].focus();
+        });
+
         await page.keyboard.press('Shift+Tab');
-        const focusInsideAfterShiftTab = await dialog.evaluate(el => el.contains(document.activeElement));
+        const darkWrappedFirstToLast = await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length < 2) return true;
+            return document.activeElement === focusable[focusable.length - 1];
+        });
+
+        // 2. Tab on last focusable element wraps to first focusable element
+        await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length > 0) focusable[focusable.length - 1].focus();
+        });
+
+        await page.keyboard.press('Tab');
+        const darkWrappedLastToFirst = await dialog.evaluate(el => {
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusable = Array.from(el.querySelectorAll(focusableSelector)).filter(n => {
+                if (n.disabled || n.getAttribute('aria-disabled') === 'true') return false;
+                if (n.offsetParent === null && n.getClientRects().length === 0) return false;
+                if (n.closest('[aria-hidden="true"]')) return false;
+                return true;
+            });
+            if (focusable.length < 2) return true;
+            return document.activeElement === focusable[0];
+        });
 
         // Test Escape dismissal and focus restoration
         await page.keyboard.press('Escape');
@@ -418,10 +530,10 @@ async function main() {
         const dialogClosed = (await page.locator('[role="dialog"]').count()) === 0;
         const focusReturned = await trigger.evaluate(el => el === document.activeElement);
 
-        record('TRAP-THEME-DARK-320', 'Dark Theme modal traps Tab/Shift+Tab and restores trigger focus on Escape',
+        record('TRAP-THEME-DARK-320', 'Dark Theme modal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape',
             { focusTrapped: true, dialogClosed: true, focusReturned: true },
-            { focusTrapped: focusInsideAfterTab && focusInsideAfterShiftTab, dialogClosed, focusReturned },
-            focusInsideAfterTab && focusInsideAfterShiftTab && dialogClosed && focusReturned);
+            { focusTrapped: darkWrappedFirstToLast && darkWrappedLastToFirst, wrappedFirstToLast: darkWrappedFirstToLast, wrappedLastToFirst: darkWrappedLastToFirst, dialogClosed, focusReturned },
+            darkWrappedFirstToLast && darkWrappedLastToFirst && dialogClosed && focusReturned);
 
         await page.close();
     }

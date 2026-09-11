@@ -6,7 +6,7 @@ import {
     Settings, History, Shield, CheckCircle2, AlertTriangle, Clock,
     Power, KeyRound, Globe, MapPin, Mail, Phone, BarChart3, HelpCircle,
     FileText, ExternalLink, RefreshCw, X, PlayCircle, PauseCircle, Archive,
-    Sliders, Monitor, Package, Award, AlertCircle
+    Sliders, Monitor, Package, Award, AlertCircle, Copy
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -69,6 +69,12 @@ export default function LabManagement() {
     const [lifecycleTargetState, setLifecycleTargetState] = useState(null);
     const [targetUser, setTargetUser] = useState(null);
     const [showHelpModal, setShowHelpModal] = useState(false);
+
+    // Pending Invitations state
+    const [reissuedModalData, setReissuedModalData] = useState(null);
+    const [reissuedCopied, setReissuedCopied] = useState(false);
+    const [reissuingInviteId, setReissuingInviteId] = useState(null);
+    const [revokingInviteId, setRevokingInviteId] = useState(null);
 
     // People & Projects tab search/filter/paging in workspace
     const [staffSearch, setStaffSearchState] = useState(() => searchParams.get('staffSearch') || '');
@@ -272,6 +278,49 @@ export default function LabManagement() {
         } finally {
             setSavingSettings(false);
         }
+    };
+
+    // Reissue staff invitation
+    const handleReissueInvite = async (inv) => {
+        setReissuingInviteId(inv.id);
+        try {
+            const res = await axios.post(`/api/staff/invitations/${encodeURIComponent(inv.id)}/reissue`);
+            setReissuedModalData(res.data);
+            fetchWorkspace(selectedLabId);
+        } catch (err) {
+            console.error('Failed to reissue invitation:', err);
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message;
+            showDialog({ title: 'Reissue Failed', message: msg, type: 'error' });
+        } finally {
+            setReissuingInviteId(null);
+        }
+    };
+
+    // Revoke staff invitation
+    const handleRevokeInvite = async (inv) => {
+        if (!window.confirm(`Revoke invitation for ${inv.email}? The activation link will immediately become invalid.`)) {
+            return;
+        }
+        setRevokingInviteId(inv.id);
+        try {
+            await axios.post(`/api/staff/invitations/${encodeURIComponent(inv.id)}/revoke`);
+            showDialog({ title: 'Invitation Revoked', message: `Invitation for ${inv.email} has been revoked.`, type: 'success' });
+            fetchWorkspace(selectedLabId);
+        } catch (err) {
+            console.error('Failed to revoke invitation:', err);
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message;
+            showDialog({ title: 'Revoke Failed', message: msg, type: 'error' });
+        } finally {
+            setRevokingInviteId(null);
+        }
+    };
+
+    const copyReissuedUrl = () => {
+        if (!reissuedModalData) return;
+        const url = reissuedModalData.activationUrl || `${window.location.origin}/activate?token=${reissuedModalData.token}`;
+        navigator.clipboard.writeText(url);
+        setReissuedCopied(true);
+        setTimeout(() => setReissuedCopied(false), 2500);
     };
 
     // Submit Onboard Lab
@@ -1025,6 +1074,91 @@ export default function LabManagement() {
                         </button>
                     </div>
 
+                    {/* Pending Staff Invitations Roster */}
+                    {workspace?.pendingInvitations && workspace.pendingInvitations.length > 0 && (
+                        <div id="pending-invitations-section" className="bg-sf-surface border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sf-divider/60 pb-3">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={16} className="text-amber-600 dark:text-amber-400" />
+                                        <h3 className="text-sm font-black text-sf-text">
+                                            Pending Staff Invitations ({workspace.pendingInvitations.length})
+                                        </h3>
+                                    </div>
+                                    <p className="text-[11px] text-sf-muted mt-0.5">
+                                        Active, unconsumed invitation links. Share activation links directly; automated email delivery is not configured.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-sf-divider bg-sf-canvas/50 text-[10px] font-black uppercase tracking-wider text-sf-muted">
+                                            <th className="py-2.5 px-3">Invitee</th>
+                                            <th className="py-2.5 px-3">Role & Projects</th>
+                                            <th className="py-2.5 px-3">Delivery Status</th>
+                                            <th className="py-2.5 px-3">Expires</th>
+                                            <th className="py-2.5 px-3 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-sf-divider text-xs">
+                                        {workspace.pendingInvitations.map(inv => {
+                                            const roleBadge = getRoleBadge(inv.role);
+                                            const expiresDate = new Date(inv.expiresAt);
+                                            return (
+                                                <tr key={inv.id} className="hover:bg-sf-canvas/40 transition">
+                                                    <td className="py-3 px-3">
+                                                        <div className="font-bold text-sf-text">{inv.name}</div>
+                                                        <div className="text-[11px] text-sf-muted font-mono">{inv.email}</div>
+                                                    </td>
+                                                    <td className="py-3 px-3">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide border ${roleBadge.bg} ${roleBadge.text} ${roleBadge.border}`}>
+                                                            {roleBadge.label}
+                                                        </span>
+                                                        {inv.projects && inv.projects.length > 0 && (
+                                                            <div className="text-[10px] text-sf-muted mt-1 font-mono">
+                                                                Projects: {inv.projects.join(', ')}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-3 px-3">
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                                                            Manual Link Generated
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-3 text-sf-muted text-[11px]">
+                                                        {expiresDate.toLocaleDateString()} {expiresDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </td>
+                                                    <td className="py-3 px-3 text-right space-x-2">
+                                                        <button
+                                                            id={`btn-reissue-invite-${inv.id}`}
+                                                            onClick={() => handleReissueInvite(inv)}
+                                                            disabled={reissuingInviteId === inv.id}
+                                                            className="px-2.5 py-1 bg-sf-raised hover:bg-sf-divider text-sf-text rounded-lg text-[11px] font-bold transition inline-flex items-center gap-1"
+                                                        >
+                                                            <RefreshCw size={12} className={reissuingInviteId === inv.id ? 'animate-spin' : ''} />
+                                                            Reissue
+                                                        </button>
+                                                        <button
+                                                            id={`btn-revoke-invite-${inv.id}`}
+                                                            onClick={() => handleRevokeInvite(inv)}
+                                                            disabled={revokingInviteId === inv.id}
+                                                            className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg text-[11px] font-bold border border-rose-200 dark:border-rose-800/60 transition inline-flex items-center gap-1"
+                                                        >
+                                                            <X size={12} />
+                                                            Revoke
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Filter toolbar */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                         <div className="relative flex-1 max-w-md">
@@ -1656,6 +1790,68 @@ export default function LabManagement() {
                         fetchLabs();
                     }}
                 />
+            )}
+
+            {/* Reissued Invitation Modal */}
+            {reissuedModalData && (
+                <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="reissued-dialog-title"
+                        className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider p-5 sm:p-6 space-y-4 max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
+                    >
+                        <div className="flex items-center justify-between border-b border-sf-divider pb-3 shrink-0">
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                                    Single-Use Activation Token
+                                </div>
+                                <h3 id="reissued-dialog-title" className="font-black text-base text-sf-text">
+                                    Invitation Reissued
+                                </h3>
+                            </div>
+                            <button onClick={() => setReissuedModalData(null)} aria-label="Close" className="p-1 text-sf-muted hover:text-sf-text">
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0 text-xs">
+                            <p className="text-sf-muted">
+                                A fresh single-use activation link has been generated for <strong className="text-sf-text">{reissuedModalData.email}</strong>. The previous link was revoked and can no longer be used.
+                            </p>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
+                                    Fresh Activation Link
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        readOnly
+                                        value={reissuedModalData.activationUrl || `${window.location.origin}/activate?token=${reissuedModalData.token}`}
+                                        className="w-full font-mono text-xs p-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sf-text truncate"
+                                    />
+                                    <button
+                                        onClick={copyReissuedUrl}
+                                        className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
+                                    >
+                                        <Copy size={13} />
+                                        {reissuedCopied ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
+                                <div className="text-[11px] text-sf-muted flex items-center gap-1.5 mt-1">
+                                    <Clock size={12} />
+                                    <span>Expires in 24 hours. Manual link: share directly with invitee (no automated email was sent).</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="pt-2 border-t border-sf-divider flex justify-end shrink-0">
+                            <button
+                                onClick={() => setReissuedModalData(null)}
+                                className="px-5 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition"
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Contextual Help Modal */}

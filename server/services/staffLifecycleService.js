@@ -32,6 +32,12 @@ async function ensureTables(tx = prisma) {
         `);
 
         await tx.$executeRawUnsafe(`
+            CREATE UNIQUE INDEX IF NOT EXISTS "idx_staff_invitation_active_email"
+            ON "StaffInvitation" ("email")
+            WHERE "isConsumed" = 0 AND "isRevoked" = 0;
+        `);
+
+        await tx.$executeRawUnsafe(`
             CREATE TABLE IF NOT EXISTS "StaffRecoveryGrant" (
                 "id" TEXT PRIMARY KEY,
                 "userId" TEXT NOT NULL,
@@ -114,132 +120,250 @@ async function withTransaction(callback) {
 /**
  * Creates a pending staff invitation.
  */
-async function createInvitation(actor, { name, email, role, labId, projects }, tx = prisma) {
-    await ensureTables(tx);
+async function createInvitation(actor, { name, email, role, labId, projects, reissue = false }, outerTx = null) {
+    await ensureTables(outerTx || prisma);
+    const run = async (tx) => {
 
-    if (!actor || actor.isActive === false) {
-        const err = new Error('Actor account is inactive or missing');
-        err.statusCode = 401;
-        err.code = 'UNAUTHORIZED';
-        throw err;
-    }
-
-    if (!name || !email || !role || !labId) {
-        const err = new Error('name, email, role, and labId are required');
-        err.statusCode = 400;
-        err.code = 'VALIDATION_ERROR';
-        throw err;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // Verify role is valid
-    if (!ALL_ROLES.includes(role)) {
-        const err = new Error(`Invalid role '${role}'`);
-        err.statusCode = 400;
-        err.code = 'VALIDATION_ERROR';
-        throw err;
-    }
-
-    // Resolve target lab first before authorization
-    const targetLab = await tx.lab.findUnique({ where: { id: labId } });
-    if (!targetLab) {
-        const err = new Error(`Laboratory '${labId}' not found`);
-        err.statusCode = 404;
-        err.code = 'LAB_NOT_FOUND';
-        throw err;
-    }
-
-    // Role hierarchy & lab scoping with targetLab country
-    const decision = canManageUser(
-        actor,
-        { role, labId, labCountry: targetLab.country, country: targetLab.country },
-        { role, labId, proposedLabCountry: targetLab.country, labCountry: targetLab.country }
-    );
-    if (!decision.allowed) {
-        const err = new Error(decision.message);
-        err.statusCode = 403;
-        err.code = decision.code;
-        throw err;
-    }
-
-    // Check target lab operational status
-    const { getLabOperationalState } = require('./labLifecycleService');
-    const opState = await getLabOperationalState(labId, tx);
-    if (opState.operationalStatus === 'PAUSED') {
-        const err = new Error('Laboratory is currently inactive or paused.');
-        err.statusCode = 400;
-        err.code = 'LAB_PAUSED';
-        throw err;
-    }
-    if (opState.operationalStatus === 'RETIRED') {
-        const err = new Error('Laboratory is retired.');
-        err.statusCode = 400;
-        err.code = 'LAB_RETIRED';
-        throw err;
-    }
-
-    // Check existing account collision
-    const existing = await tx.user.findFirst({
-        where: {
-            OR: [
-                { email: normalizedEmail },
-                { email: email.trim() }
-            ]
+        if (!actor || actor.isActive === false) {
+            const err = new Error('Actor account is inactive or missing');
+            err.statusCode = 401;
+            err.code = 'UNAUTHORIZED';
+            throw err;
         }
-    });
-    if (existing) {
-        const err = new Error('Account with this email already exists. Use access review to modify scope.');
-        err.statusCode = 409;
-        err.code = 'ACCOUNT_ALREADY_EXISTS';
-        throw err;
-    }
 
-    // Generate random single-use token (24h expiry)
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const inviteId = 'inv_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await tx.$executeRawUnsafe(
-        `INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "projects", "tokenHash", "expiresAt", "createdBy")
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        inviteId,
-        normalizedEmail,
-        name.trim(),
-        role,
-        labId,
-        projects ? (typeof projects === 'string' ? projects : JSON.stringify(projects)) : null,
-        tokenHash,
-        expiresAt.toISOString(),
-        actor.username
-    );
-
-    // Audit log with collision-safe UUID
-    await tx.auditLog.create({
-        data: {
-            id: `audit-inv-${Date.now()}-${crypto.randomUUID()}`,
-            entity: 'USER',
-            entityId: inviteId,
-            action: 'INVITE_CREATED',
-            details: `Created pending invitation for ${normalizedEmail} with role ${role} in lab ${labId}`,
-            performedBy: actor.username,
-            timestamp: new Date()
+        if (!email || !role || !labId) {
+            const err = new Error('email, role, and labId are required');
+            err.statusCode = 400;
+            err.code = 'VALIDATION_ERROR';
+            throw err;
         }
-    });
 
-    return {
-        id: inviteId,
-        email: normalizedEmail,
-        name: name.trim(),
-        role,
-        labId,
-        expiresAt,
-        deliveryStatus: 'LINK_GENERATED',
-        token: rawToken,
-        activationLink: `/activate?token=${rawToken}`,
-        activationUrl: `/activate?token=${rawToken}`
+        const normalizedEmail = email.trim().toLowerCase();
+        const resolvedName = (name && typeof name === 'string' && name.trim()) ? name.trim() : (email.trim().split('@')[0] || 'Staff');
+
+        // Verify role is valid
+        if (!ALL_ROLES.includes(role)) {
+            const err = new Error(`Invalid role '${role}'`);
+            err.statusCode = 400;
+            err.code = 'VALIDATION_ERROR';
+            throw err;
+        }
+
+        // Resolve target lab first before authorization
+        const targetLab = await tx.lab.findUnique({ where: { id: labId } });
+        if (!targetLab) {
+            const err = new Error(`Laboratory '${labId}' not found`);
+            err.statusCode = 404;
+            err.code = 'LAB_NOT_FOUND';
+            throw err;
+        }
+
+        // Role hierarchy & lab scoping with targetLab country
+        const decision = canManageUser(
+            actor,
+            { role, labId, labCountry: targetLab.country, country: targetLab.country },
+            { role, labId, proposedLabCountry: targetLab.country, labCountry: targetLab.country }
+        );
+        if (!decision.allowed) {
+            const err = new Error(decision.message);
+            err.statusCode = 403;
+            err.code = decision.code;
+            throw err;
+        }
+
+        // Check target lab operational status
+        const { getLabOperationalState } = require('./labLifecycleService');
+        const opState = await getLabOperationalState(labId, tx);
+        if (opState.operationalStatus === 'PAUSED') {
+            const err = new Error('Laboratory is currently inactive or paused.');
+            err.statusCode = 400;
+            err.code = 'LAB_PAUSED';
+            throw err;
+        }
+        if (opState.operationalStatus === 'RETIRED') {
+            const err = new Error('Laboratory is retired.');
+            err.statusCode = 400;
+            err.code = 'LAB_RETIRED';
+            throw err;
+        }
+
+        // Check existing account collision
+        const existing = await tx.user.findFirst({
+            where: {
+                OR: [
+                    { email: normalizedEmail },
+                    { email: email.trim() }
+                ]
+            }
+        });
+        if (existing) {
+            const err = new Error('Account with this email already exists. Use access review to modify scope.');
+            err.statusCode = 409;
+            err.code = 'ACCOUNT_ALREADY_EXISTS';
+            throw err;
+        }
+
+        // Revoke any expired unconsumed invitations for this email so they don't block
+        await tx.$executeRawUnsafe(
+            `UPDATE "StaffInvitation" SET "isRevoked" = 1
+             WHERE "email" = ? AND "isConsumed" = 0 AND "expiresAt" <= CURRENT_TIMESTAMP`,
+            normalizedEmail
+        );
+
+        // Check existing pending live invitation collision
+        const existingPending = await tx.$queryRawUnsafe(
+            `SELECT "id", "email", "name", "role", "labId", "expiresAt"
+             FROM "StaffInvitation"
+             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > CURRENT_TIMESTAMP
+             LIMIT 1`,
+            normalizedEmail
+        );
+
+        if (existingPending && existingPending.length > 0) {
+            if (reissue) {
+                // Safely revoke the prior pending invitation
+                await tx.$executeRawUnsafe(
+                    `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "id" = ?`,
+                    existingPending[0].id
+                );
+            } else {
+                const err = new Error('An active invitation for this email already exists. Reissue or revoke the existing invitation.');
+                err.statusCode = 409;
+                err.code = 'PENDING_INVITATION_EXISTS';
+                err.existingInvitationId = existingPending[0].id;
+                throw err;
+            }
+        }
+
+        // Validate requested projects against canonical authority
+        let approvedProjects = [];
+        if (projects) {
+            const rawProjects = Array.isArray(projects)
+                ? projects
+                : (typeof projects === 'string' ? (() => {
+                    try {
+                        const parsed = JSON.parse(projects);
+                        return Array.isArray(parsed) ? parsed : [projects];
+                    } catch {
+                        return [projects];
+                    }
+                })() : []);
+
+            const requestedProjectCodes = rawProjects
+                .filter(p => p && typeof p === 'string')
+                .map(p => p.trim())
+                .filter(Boolean);
+
+            if (requestedProjectCodes.length > 0) {
+                const { resolveProjectLabs } = require('./projectMembershipService');
+                for (const pCode of requestedProjectCodes) {
+                    const proj = await tx.project.findFirst({
+                        where: {
+                            OR: [
+                                { code: pCode },
+                                { id: pCode }
+                            ]
+                        }
+                    });
+                    if (!proj) {
+                        const err = new Error(`Project '${pCode}' not found`);
+                        err.statusCode = 404;
+                        err.code = 'PROJECT_NOT_FOUND';
+                        throw err;
+                    }
+
+                    let canAssign = false;
+                    if (actor.role === 'SUPER_ADMIN') {
+                        canAssign = true;
+                    } else if (actor.role === 'MASTER_USER') {
+                        const countries = Array.isArray(actor.countries)
+                            ? actor.countries
+                            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+                        const labCountries = [];
+                        if (proj.labId) {
+                            const pLab = await tx.lab.findUnique({ where: { id: proj.labId } });
+                            if (pLab?.country) labCountries.push(pLab.country);
+                        }
+                        canAssign = labCountries.some(c => countries.includes(c));
+                    } else if (actor.role === 'LAB_MANAGER') {
+                        const relations = await resolveProjectLabs(proj, tx);
+                        canAssign = relations.isMember(actor.labId);
+                    }
+
+                    if (!canAssign) {
+                        const err = new Error(`Cannot assign project '${pCode}' outside actor laboratory or country scope`);
+                        err.statusCode = 403;
+                        err.code = 'PROJECT_OUTSIDE_SCOPE';
+                        throw err;
+                    }
+
+                    approvedProjects.push(proj.code);
+                }
+            }
+        }
+
+        // Generate random single-use token (24h expiry)
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const inviteId = 'inv_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const projectsJson = approvedProjects.length > 0 ? JSON.stringify(approvedProjects) : null;
+
+        try {
+            await tx.$executeRawUnsafe(
+                `INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "projects", "tokenHash", "expiresAt", "createdBy")
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                inviteId,
+                normalizedEmail,
+                resolvedName,
+                role,
+                labId,
+                projectsJson,
+                tokenHash,
+                expiresAt.toISOString(),
+                actor.username
+            );
+        } catch (dbErr) {
+            if (dbErr.message && (dbErr.message.includes('UNIQUE constraint failed') || dbErr.message.includes('idx_staff_invitation_active_email'))) {
+                const err = new Error('An active invitation for this email already exists. Reissue or revoke the existing invitation.');
+                err.statusCode = 409;
+                err.code = 'PENDING_INVITATION_EXISTS';
+                throw err;
+            }
+            throw dbErr;
+        }
+
+        // Audit log with collision-safe UUID in the same transaction
+        await tx.auditLog.create({
+            data: {
+                id: `audit-inv-${Date.now()}-${crypto.randomUUID()}`,
+                entity: 'USER',
+                entityId: inviteId,
+                action: 'INVITE_CREATED',
+                details: `Created pending invitation for ${normalizedEmail} with role ${role} in lab ${labId}${approvedProjects.length > 0 ? ' with projects: ' + JSON.stringify(approvedProjects) : ''}`,
+                performedBy: actor.username,
+                labId: labId,
+                timestamp: new Date()
+            }
+        });
+
+        return {
+            id: inviteId,
+            email: normalizedEmail,
+            name: resolvedName,
+            role,
+            labId,
+            projects: approvedProjects,
+            expiresAt,
+            deliveryStatus: 'LINK_GENERATED',
+            token: rawToken,
+            activationLink: `/activate?token=${rawToken}`,
+            activationUrl: `/activate?token=${rawToken}`
+        };
     };
+
+    if (outerTx && outerTx !== prisma) return run(outerTx);
+    return prisma.$transaction(run);
 }
 
 function normalizeChanges(changes = {}) {
@@ -796,7 +920,7 @@ async function verifyInvitationToken(rawToken, tx = prisma) {
     }
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const rows = await tx.$queryRawUnsafe(
-        `SELECT "id", "email", "name", "role", "labId", "expiresAt", "isConsumed", "isRevoked"
+        `SELECT "id", "email", "name", "role", "labId", "projects", "expiresAt", "isConsumed", "isRevoked"
          FROM "StaffInvitation" WHERE "tokenHash" = ? LIMIT 1`,
         tokenHash
     );
@@ -831,12 +955,20 @@ async function verifyInvitationToken(rawToken, tx = prisma) {
         select: { id: true, name: true, code: true, country: true, isActive: true }
     });
 
+    let parsedProjects = [];
+    if (invite.projects) {
+        try {
+            parsedProjects = typeof invite.projects === 'string' ? JSON.parse(invite.projects) : invite.projects;
+        } catch (_) {}
+    }
+
     return {
         id: invite.id,
         email: invite.email,
         name: invite.name,
         role: invite.role,
         labId: invite.labId,
+        projects: parsedProjects,
         labName: lab?.name || invite.labId,
         expiresAt: invite.expiresAt
     };
@@ -895,6 +1027,17 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
             throw err;
         }
 
+        let userProjectsJson = '[]';
+        if (metadata.projects && Array.isArray(metadata.projects) && metadata.projects.length > 0) {
+            // Re-validate against database
+            const validProjects = await tx.project.findMany({
+                where: { code: { in: metadata.projects } },
+                select: { code: true }
+            });
+            const validCodes = validProjects.map(p => p.code);
+            userProjectsJson = JSON.stringify(validCodes);
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const userId = 'usr_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
 
@@ -907,6 +1050,7 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
                 password: hashedPassword,
                 role: metadata.role,
                 labId: metadata.labId,
+                projects: userProjectsJson,
                 isActive: true,
                 tokenVersion: 1
             }
@@ -933,6 +1077,7 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
 
         const safeUser = { ...newUser };
         delete safeUser.password;
+        safeUser.projects = typeof newUser.projects === 'string' ? JSON.parse(newUser.projects) : (newUser.projects || []);
         return safeUser;
     };
 
@@ -1052,28 +1197,293 @@ async function consumeRecoveryGrant(rawToken, { newPassword }, outerTx = null) {
 
 /**
  * Returns pending invitations for a laboratory.
+ * Enforces canonical actor scoping:
+ * - SUPER_ADMIN can view any lab.
+ * - MASTER_USER can view labs in authorized countries.
+ * - LAB_MANAGER can only view invitations in their own lab.
  */
 async function getPendingInvitations(actor, labId, tx = prisma) {
     await ensureTables(tx);
-    return tx.$queryRawUnsafe(
-        `SELECT "id", "email", "name", "role", "labId", "expiresAt", "createdAt", "createdBy"
+
+    if (!actor || actor.isActive === false) {
+        const err = new Error('Actor account is inactive or missing');
+        err.statusCode = 401;
+        err.code = 'UNAUTHORIZED';
+        throw err;
+    }
+
+    if (!labId) {
+        const err = new Error('labId is required');
+        err.statusCode = 400;
+        err.code = 'VALIDATION_ERROR';
+        throw err;
+    }
+
+    const lab = await tx.lab.findUnique({ where: { id: labId } });
+    if (!lab) {
+        const err = new Error(`Laboratory '${labId}' not found`);
+        err.statusCode = 404;
+        err.code = 'LAB_NOT_FOUND';
+        throw err;
+    }
+
+    let allowed = false;
+    if (actor.role === 'SUPER_ADMIN') {
+        allowed = true;
+    } else if (actor.role === 'MASTER_USER') {
+        const countries = Array.isArray(actor.countries)
+            ? actor.countries
+            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+        if (countries.includes(lab.country)) {
+            allowed = true;
+        }
+    } else if (actor.role === 'LAB_MANAGER' && actor.labId === labId) {
+        allowed = true;
+    }
+
+    if (!allowed) {
+        const err = new Error(`Unauthorized to view invitations for laboratory '${labId}'`);
+        err.statusCode = 403;
+        err.code = 'TARGET_OUTSIDE_SCOPE';
+        throw err;
+    }
+
+    const invitations = await tx.$queryRawUnsafe(
+        `SELECT "id", "email", "name", "role", "labId", "projects", "expiresAt", "createdAt", "createdBy"
          FROM "StaffInvitation"
          WHERE "labId" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > CURRENT_TIMESTAMP
          ORDER BY "createdAt" DESC`,
         labId
     );
+
+    return invitations.map(inv => {
+        let parsedProjects = [];
+        if (inv.projects) {
+            try {
+                parsedProjects = typeof inv.projects === 'string' ? JSON.parse(inv.projects) : inv.projects;
+            } catch (_) {}
+        }
+        return {
+            id: inv.id,
+            email: inv.email,
+            name: inv.name,
+            role: inv.role,
+            labId: inv.labId,
+            projects: parsedProjects,
+            expiresAt: inv.expiresAt,
+            createdAt: inv.createdAt,
+            createdBy: inv.createdBy,
+            deliveryStatus: 'MANUAL_LINK',
+            isExpired: false
+        };
+    });
 }
 
 /**
  * Revokes an existing invitation.
+ * Enforces canonical authority checks on actor vs target invitation/lab.
  */
-async function revokeInvitation(actor, invitationId, tx = prisma) {
-    await ensureTables(tx);
-    await tx.$executeRawUnsafe(
-        `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "id" = ?`,
-        invitationId
-    );
-    return { success: true, invitationId };
+async function revokeInvitation(actor, invitationId, options = {}, outerTx = null) {
+    await ensureTables(outerTx || prisma);
+    const run = async (tx) => {
+
+        if (!actor || actor.isActive === false) {
+            const err = new Error('Actor account is inactive or missing');
+            err.statusCode = 401;
+            err.code = 'UNAUTHORIZED';
+            throw err;
+        }
+
+        if (!invitationId) {
+            const err = new Error('invitationId is required');
+            err.statusCode = 400;
+            err.code = 'VALIDATION_ERROR';
+            throw err;
+        }
+
+        const rows = await tx.$queryRawUnsafe(
+            `SELECT "id", "email", "name", "role", "labId", "isConsumed", "isRevoked"
+             FROM "StaffInvitation" WHERE "id" = ?`,
+            invitationId
+        );
+
+        if (!rows || rows.length === 0) {
+            const err = new Error(`Invitation '${invitationId}' not found`);
+            err.statusCode = 404;
+            err.code = 'INVITATION_NOT_FOUND';
+            throw err;
+        }
+
+        const invitation = rows[0];
+
+        if (invitation.isConsumed) {
+            const err = new Error('Cannot revoke an invitation that has already been consumed');
+            err.statusCode = 400;
+            err.code = 'INVITATION_ALREADY_CONSUMED';
+            throw err;
+        }
+
+        const targetLab = await tx.lab.findUnique({ where: { id: invitation.labId } });
+
+        // Authority check
+        const decision = canManageUser(
+            actor,
+            { role: invitation.role, labId: invitation.labId, labCountry: targetLab?.country },
+            { role: invitation.role, labId: invitation.labId }
+        );
+
+        if (!decision.allowed) {
+            const err = new Error(decision.message || 'Unauthorized to revoke this invitation');
+            err.statusCode = 403;
+            err.code = decision.code || 'TARGET_OUTSIDE_SCOPE';
+            throw err;
+        }
+
+        await tx.$executeRawUnsafe(
+            `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "id" = ?`,
+            invitationId
+        );
+
+        await tx.auditLog.create({
+            data: {
+                id: `audit-inv-rev-${Date.now()}-${crypto.randomUUID()}`,
+                entity: 'USER',
+                entityId: invitationId,
+                action: 'INVITE_REVOKED',
+                details: `Revoked invitation for ${invitation.email} (role: ${invitation.role}, lab: ${invitation.labId}) by ${actor.username}. Reason: ${options.reason || 'Manual revocation'}`,
+                performedBy: actor.username,
+                labId: invitation.labId,
+                timestamp: new Date()
+            }
+        });
+
+        return { success: true, invitationId, revokedEmail: invitation.email };
+    };
+
+    if (outerTx && outerTx !== prisma) return run(outerTx);
+    return prisma.$transaction(run);
+}
+
+/**
+ * Reissues an invitation: revokes the previous token and generates a new active invitation.
+ */
+async function reissueInvitation(actor, invitationId, options = {}, outerTx = null) {
+    await ensureTables(outerTx || prisma);
+    const run = async (tx) => {
+
+        if (!actor || actor.isActive === false) {
+            const err = new Error('Actor account is inactive or missing');
+            err.statusCode = 401;
+            err.code = 'UNAUTHORIZED';
+            throw err;
+        }
+
+        if (!invitationId) {
+            const err = new Error('invitationId is required');
+            err.statusCode = 400;
+            err.code = 'VALIDATION_ERROR';
+            throw err;
+        }
+
+        const rows = await tx.$queryRawUnsafe(
+            `SELECT "id", "email", "name", "role", "labId", "projects", "isConsumed", "isRevoked"
+             FROM "StaffInvitation" WHERE "id" = ?`,
+            invitationId
+        );
+
+        if (!rows || rows.length === 0) {
+            const err = new Error(`Invitation '${invitationId}' not found`);
+            err.statusCode = 404;
+            err.code = 'INVITATION_NOT_FOUND';
+            throw err;
+        }
+
+        const existing = rows[0];
+
+        if (existing.isConsumed) {
+            const err = new Error('Cannot reissue an invitation that has already been consumed');
+            err.statusCode = 400;
+            err.code = 'INVITATION_ALREADY_CONSUMED';
+            throw err;
+        }
+
+        const targetLab = await tx.lab.findUnique({ where: { id: existing.labId } });
+
+        const decision = canManageUser(
+            actor,
+            { role: existing.role, labId: existing.labId, labCountry: targetLab?.country },
+            { role: existing.role, labId: existing.labId }
+        );
+
+        if (!decision.allowed) {
+            const err = new Error(decision.message || 'Unauthorized to reissue this invitation');
+            err.statusCode = 403;
+            err.code = decision.code || 'TARGET_OUTSIDE_SCOPE';
+            throw err;
+        }
+
+        // Revoke all prior pending invitations for this email
+        await tx.$executeRawUnsafe(
+            `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "email" = ? AND "isConsumed" = 0`,
+            existing.email
+        );
+
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const newInviteId = 'inv_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        await tx.$executeRawUnsafe(
+            `INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "projects", "tokenHash", "expiresAt", "createdBy")
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            newInviteId,
+            existing.email,
+            existing.name,
+            existing.role,
+            existing.labId,
+            existing.projects,
+            tokenHash,
+            expiresAt.toISOString(),
+            actor.username
+        );
+
+        await tx.auditLog.create({
+            data: {
+                id: `audit-inv-reis-${Date.now()}-${crypto.randomUUID()}`,
+                entity: 'USER',
+                entityId: newInviteId,
+                action: 'INVITE_REISSUED',
+                details: `Reissued invitation for ${existing.email} (superseded: ${invitationId}) by ${actor.username}`,
+                performedBy: actor.username,
+                labId: existing.labId,
+                timestamp: new Date()
+            }
+        });
+
+        let parsedProjects = [];
+        if (existing.projects) {
+            try {
+                parsedProjects = typeof existing.projects === 'string' ? JSON.parse(existing.projects) : existing.projects;
+            } catch (_) {}
+        }
+
+        return {
+            id: newInviteId,
+            email: existing.email,
+            name: existing.name,
+            role: existing.role,
+            labId: existing.labId,
+            projects: parsedProjects,
+            expiresAt,
+            deliveryStatus: 'LINK_GENERATED',
+            token: rawToken,
+            activationLink: `/activate?token=${rawToken}`,
+            activationUrl: `/activate?token=${rawToken}`
+        };
+    };
+
+    if (outerTx && outerTx !== prisma) return run(outerTx);
+    return prisma.$transaction(run);
 }
 
 module.exports = {
@@ -1090,6 +1500,7 @@ module.exports = {
     consumeRecoveryGrant,
     getPendingInvitations,
     revokeInvitation,
+    reissueInvitation,
     UNFINISHED_WORK_STATUSES,
     getUnfinishedWorkWhere
 };

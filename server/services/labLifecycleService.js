@@ -379,6 +379,14 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         staff,
         pagination,
         staffPagination: pagination,
+        pendingInvitations: capabilities.canManageStaff ? await (async () => {
+            try {
+                const { getPendingInvitations } = require('./staffLifecycleService');
+                return await getPendingInvitations(actor, labId, transaction);
+            } catch (_) {
+                return [];
+            }
+        })() : [],
         projects,
         projectsPagination,
         workload,
