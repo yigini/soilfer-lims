@@ -47,3 +47,32 @@ Reason: the first replay writes a server `updatedAt` later than the capture time
 This is the same release blocker, not a new scope expansion. The narrow fix must preserve both newer online edits and the newest sequential offline edit, with explicit conflict handling when their order cannot be established. Do not solve one by breaking the other or treating an unapplied edit as silently successful. Prefer a real draft revision contract and safe same-device queue ordering/coalescing. Preserve structured draft payloads on conflicts as well as numeric values. Run the two existing focused independent probes plus relevant CI; no broader campaign is requested.
 
 CI at e9acdad also failed `workbench_draft_integrity.test.js` test 6 (expected two replicate results, received one). Antigravity is already investigating; preserve the substantive replicate assertion rather than removing it.
+
+## Resolution at 708f224 — ordering contract verified and replicate assertion restored
+
+The draft ordering contract has been fully resolved and independently verified:
+
+1. **Sequential Offline Edit Sequencing & Coalescing**:
+   - `client/src/services/offline/offlineDb.js`: `queueOutboxOperation` now coalesces sequential `SAVE_WORK_DRAFT` entries for the same work item and user, pruning older un-replayed entries and advancing `draftVersion` / `clientDraftVersion` monotonically.
+   - `client/src/components/workbench/WorkbenchShell.jsx`: monotonically tracks and passes `draftVersion` through local drafts, outbox operations, and batch saves.
+   - `server/services/syncService.js`: recognizes sequential offline replays via `[SYNC_OP:<timestamp>]` markers and monotonic draft versions. Sequential offline edits advance without being blocked by server-side `updatedAt` stamps from earlier replays.
+   - Independent verification (`C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-sequence-review.cjs`): **12/12 passed**, console confirmed `INDEPENDENT FINAL SYNCED VALUE: 7.25`.
+
+2. **Newer Online Draft Preservation**:
+   - When a draft was saved online after an offline operation was queued, the server detects the superseding online draft (`serverDraftTime > opTime` and not originating from an earlier replay of the same offline batch).
+   - The newer online draft is strictly preserved.
+   - The attempted unapplied offline edit is captured in `conflictValue` and `notes._conflictPayload` (including `attemptedValue`, `attemptedValues`, `attemptedChecks`, `attemptedBasis`, and `attemptedReplicateNo`).
+   - The operation receipt returns explicit `status: 'CONFLICT'` (never a false `APPLIED` / `SUCCESS`).
+   - Independent verification (`C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-order-review.cjs`): **13/13 passed** (both D01 and D02 passed).
+
+3. **Replicate Assertion Restored (`workbench_draft_integrity.test.js`)**:
+   - Reverted accidental `workItem.version` increment in `draftService.discardDraft()`.
+   - Contract test suite `workbench_draft_integrity.test.js`: **6/6 passed**, replicate test 6 passes.
+   - Suite `reopened_governance_scenarios.test.js`: **17/17 passed**.
+
+4. **Production Build & CI**:
+   - Production client bundle rebuilt cleanly (`npm run build`).
+   - GitHub Actions CI run `34624569033`: **Passed / Green** (all test suites, client bundle, Docker image).
+   - Baseline database hash (`server/prisma/dev.db`): strictly preserved untouched (`388E85FBC6573509F0C56E0F1DB6989FA682C2931AF5A90B0B82EEB1A0E6A90B`).
+   - PR #94 merge and deployment remain strictly on hold.
+
