@@ -901,3 +901,25 @@ exports.getProjectKoboConfig = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch Kobo config' });
     }
 };
+
+
+const projectMembershipService = require('../services/projectMembershipService');
+
+exports.getProjectLabAccess = async (req, res) => {
+    try {
+        const access = await projectMembershipService.getProjectLabAccess(req.user, req.params.id);
+        res.json(access);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.updateProjectLabAccess = async (req, res) => {
+    try {
+        const { servicingLabIds, reason } = req.body;
+        const result = await projectMembershipService.updateProjectLabAccess(req.user, req.params.id, { servicingLabIds, reason });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};

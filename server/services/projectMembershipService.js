@@ -197,8 +197,144 @@ function canManageProject(actor, project) {
     return false;
 }
 
+
+/**
+ * Reads canonical project lab membership and servicing relationships.
+ */
+async function getProjectLabAccess(actor, projectId, tx = prisma) {
+    const project = await tx.project.findUnique({
+        where: { id: projectId }
+    });
+    if (!project) {
+        const err = new Error('Project not found');
+        err.statusCode = 404;
+        err.code = 'PROJECT_NOT_FOUND';
+        throw err;
+    }
+
+    const { ownerLabId, servicingLabIds, allMemberLabIds } = await resolveProjectLabs(project, tx);
+
+    // Fetch details for member labs
+    const memberLabs = await tx.lab.findMany({
+        where: { id: { in: allMemberLabIds } },
+        select: { id: true, code: true, name: true, country: true, isActive: true }
+    });
+
+    return {
+        projectId: project.id,
+        projectCode: project.code,
+        name: project.name,
+        ownerLabId,
+        servicingLabIds,
+        memberLabs,
+        canManage: canManageProject(actor, project)
+    };
+}
+
+/**
+ * Updates project servicing laboratories with safety and discrepancy repair.
+ */
+async function updateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx = prisma) {
+    const project = await tx.project.findUnique({
+        where: { id: projectId }
+    });
+    if (!project) {
+        const err = new Error('Project not found');
+        err.statusCode = 404;
+        err.code = 'PROJECT_NOT_FOUND';
+        throw err;
+    }
+
+    if (!canManageProject(actor, project)) {
+        const err = new Error('Only the project owner laboratory manager or Super Administrator may manage servicing laboratories');
+        err.statusCode = 403;
+        err.code = 'PROJECT_OWNER_REQUIRED';
+        throw err;
+    }
+
+    if (!Array.isArray(servicingLabIds)) {
+        const err = new Error('servicingLabIds must be an array of laboratory IDs');
+        err.statusCode = 400;
+        err.code = 'VALIDATION_ERROR';
+        throw err;
+    }
+
+    // Verify all target labs exist
+    if (servicingLabIds.length > 0) {
+        const existingLabs = await tx.lab.findMany({
+            where: { id: { in: servicingLabIds } },
+            select: { id: true }
+        });
+        const existingIds = existingLabs.map(l => l.id);
+        const missing = servicingLabIds.filter(id => !existingIds.includes(id));
+        if (missing.length > 0) {
+            const err = new Error(`Laboratories not found: ${missing.join(', ')}`);
+            err.statusCode = 404;
+            err.code = 'LAB_NOT_FOUND';
+            throw err;
+        }
+    }
+
+    const currentRelations = await resolveProjectLabs(project, tx);
+    const removedLabs = currentRelations.servicingLabIds.filter(id => !servicingLabIds.includes(id));
+    const addedLabs = servicingLabIds.filter(id => !currentRelations.servicingLabIds.includes(id));
+
+    // Synchronize ProjectLab junction table
+    if (removedLabs.length > 0) {
+        await tx.projectLab.deleteMany({
+            where: {
+                projectCode: project.code,
+                labId: { in: removedLabs }
+            }
+        });
+    }
+
+    for (const addId of addedLabs) {
+        await tx.projectLab.create({
+            data: {
+                id: 'pl-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+                projectCode: project.code,
+                labId: addId,
+                role: 'SERVICING'
+            }
+        });
+    }
+
+    // Synchronize legacy assignedLabIds JSON array
+    const updated = await tx.project.update({
+        where: { id: projectId },
+        data: {
+            assignedLabIds: JSON.stringify(servicingLabIds)
+        }
+    });
+
+    await tx.auditLog.create({
+        data: {
+            id: 'audit-proj-labs-' + Date.now(),
+            entity: 'PROJECT',
+            entityId: projectId,
+            action: 'LAB_ACCESS_UPDATED',
+            details: `Updated servicing labs by ${actor.username}. Added: [${addedLabs.join(', ')}], Removed: [${removedLabs.join(', ')}]. Reason: ${reason || 'Access update'}`,
+            performedBy: actor.username,
+            timestamp: new Date()
+        }
+    });
+
+    return {
+        status: 'APPLIED',
+        projectId: project.id,
+        projectCode: project.code,
+        ownerLabId: project.labId,
+        servicingLabIds,
+        addedLabs,
+        removedLabs
+    };
+}
+
 module.exports = {
     resolveProjectLabs,
     getDiscrepancyReport,
-    canManageProject
+    canManageProject,
+    getProjectLabAccess,
+    updateProjectLabAccess
 };

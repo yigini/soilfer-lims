@@ -19,4 +19,7 @@ router.get('/:id/samples', checkPermission('VIEW_SAMPLES'), projectController.ge
 router.get('/:id/kobo-config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 
+router.get('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.getProjectLabAccess);
+router.patch('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.updateProjectLabAccess);
+
 module.exports = router;

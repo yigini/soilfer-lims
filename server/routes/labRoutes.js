@@ -1,3 +1,4 @@
+const labLifecycleService = require('../services/labLifecycleService');
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prisma');
@@ -449,6 +450,49 @@ router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
         console.error(e);
         if (e.code === 'P2025') return res.status(404).json({ error: 'Lab not found' });
         res.status(500).json({ error: 'Update failed' });
+    }
+});
+
+
+// ─── GET /api/labs/:id/workspace ─── Detailed operational workspace
+router.get('/:id/workspace', async (req, res) => {
+    try {
+        const workspace = await labLifecycleService.getLabWorkspace(req.user, req.params.id);
+        res.json(workspace);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+});
+
+// ─── PATCH /api/labs/:id/profile ─── Strict allowlist profile updates
+router.patch('/:id/profile', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    try {
+        const updated = await labLifecycleService.updateLabProfile(req.user, req.params.id, req.body);
+        res.json(updated);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+});
+
+// ─── POST /api/labs/:id/lifecycle-preview ─── Preview lifecycle transition impact
+router.post('/:id/lifecycle-preview', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    try {
+        const { targetState } = req.body;
+        const preview = await labLifecycleService.getLifecyclePreview(req.user, req.params.id, targetState);
+        res.json(preview);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+});
+
+// ─── POST /api/labs/:id/lifecycle ─── Transition laboratory operational lifecycle state
+router.post('/:id/lifecycle', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    try {
+        const { targetState, reason, reviewToken } = req.body;
+        const result = await labLifecycleService.transitionLifecycle(req.user, req.params.id, { targetState, reason, reviewToken });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
     }
 });
 

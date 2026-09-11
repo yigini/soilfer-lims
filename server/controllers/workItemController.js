@@ -565,7 +565,7 @@ exports.assignWork = async (req, res) => {
             }
             const owningLabRecord = await prisma.lab.findUnique({ where: { id: owningLab } });
             if (owningLabRecord && owningLabRecord.isActive === false) {
-                return res.status(400).json({ error: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
+                return res.status(400).json({ error: 'LAB_PAUSED', code: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
             }
         }
 
