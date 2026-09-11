@@ -84,11 +84,26 @@ router.get('/', async (req, res) => {
             };
         });
 
-        const isPrivileged = ['SUPER_ADMIN', 'MASTER_USER'].includes(req.user.role);
+        let userCountries = [];
+        if (req.user.countries) {
+            userCountries = Array.isArray(req.user.countries)
+                ? req.user.countries
+                : (typeof req.user.countries === 'string' ? JSON.parse(req.user.countries) : []);
+        }
+
+        const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
         const userLabId = req.user.labId;
 
         const sanitized = enriched.map(lab => {
-            const canSeeNotes = isPrivileged || (userLabId && userLabId === lab.id);
+            let canSeeNotes = false;
+            if (isSuperAdmin) {
+                canSeeNotes = true;
+            } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(req.user.role)) {
+                canSeeNotes = userCountries.includes(lab.country);
+            } else if (userLabId && userLabId === lab.id) {
+                canSeeNotes = true;
+            }
+
             if (!canSeeNotes) {
                 const { notes, ...safeLab } = lab;
                 return safeLab;
@@ -177,6 +192,15 @@ router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (re
                 where: { id: req.params.id },
                 data: { isActive: newActive }
             });
+
+            await tx.$executeRawUnsafe(`
+                INSERT INTO "LabLifecycleState" ("labId", "operationalStatus", "revision", "updatedAt")
+                VALUES (?, ?, 1, CURRENT_TIMESTAMP)
+                ON CONFLICT("labId") DO UPDATE SET
+                    "operationalStatus" = excluded."operationalStatus",
+                    "revision" = "LabLifecycleState"."revision" + 1,
+                    "updatedAt" = CURRENT_TIMESTAMP
+            `, req.params.id, newActive ? 'ACTIVE' : 'PAUSED');
 
             await tx.auditLog.create({
                 data: {
@@ -352,9 +376,18 @@ router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
                     id, code, name, country, location, address, city, phone, email, website,
                     capacity: parseInt(capacity) || null,
                     timezone, notes,
-                    projectCode: projectId
+                    projectCode: projectId,
+                    isActive: false
                 }
             });
+
+            await tx.$executeRawUnsafe(`
+                INSERT INTO "LabLifecycleState" ("labId", "operationalStatus", "revision", "updatedAt")
+                VALUES (?, 'SETUP', 1, CURRENT_TIMESTAMP)
+                ON CONFLICT("labId") DO UPDATE SET
+                    "operationalStatus" = 'SETUP',
+                    "updatedAt" = CURRENT_TIMESTAMP
+            `, id);
 
             await tx.auditLog.create({
                 data: {

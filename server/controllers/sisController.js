@@ -858,21 +858,22 @@ exports.createApiKey = async (req, res) => {
 
         const expiresAt = expiresDays ? new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000) : null;
 
-        // LG-28: Validate explicit non-empty lab scope
+        // LG-28 / IR-14: Validate explicit non-empty lab scope (no country or wildcard inference)
         if (!labs || !Array.isArray(labs) || labs.length === 0) {
             return res.status(400).json({
                 error: 'INVALID_LAB_SCOPE',
                 message: 'Explicit lab scope (non-empty labs array) is required when issuing an SIS API key.'
             });
         }
+        const effectiveLabs = labs;
 
-        if (!labs.includes('*')) {
+        if (!effectiveLabs.includes('*')) {
             const existingLabs = await prisma.lab.findMany({
-                where: { id: { in: labs } },
+                where: { id: { in: effectiveLabs } },
                 select: { id: true }
             });
             const existingLabIds = new Set(existingLabs.map(l => l.id));
-            const missing = labs.filter(l => !existingLabIds.has(l));
+            const missing = effectiveLabs.filter(l => !existingLabIds.has(l));
             if (missing.length > 0) {
                 return res.status(400).json({
                     error: 'INVALID_LAB_ID',
@@ -890,7 +891,7 @@ exports.createApiKey = async (req, res) => {
                 role,
                 countries: countries && Array.isArray(countries) ? JSON.stringify(countries) : null,
                 projects: projects && Array.isArray(projects) ? JSON.stringify(projects) : null,
-                labs: JSON.stringify(labs),
+                labs: JSON.stringify(effectiveLabs),
                 isActive: true,
                 createdBy: req.user?.username || 'admin',
                 expiresAt
@@ -903,7 +904,7 @@ exports.createApiKey = async (req, res) => {
                 entity: 'SIS_API_KEY',
                 entityId: newKey.id,
                 action: 'SIS_KEY_CREATED',
-                details: `Created API key '${name}' with labs: ${JSON.stringify(labs)}`,
+                details: `Created API key '${name}' with labs: ${JSON.stringify(effectiveLabs)}`,
                 performedBy: req.user?.username || 'admin',
                 timestamp: new Date()
             }

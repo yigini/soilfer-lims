@@ -611,6 +611,12 @@ exports.transferLot = async (req, res) => {
 
         const newLocation = await prisma.inventoryLocation.findUnique({ where: { id: locationId } });
         if (!newLocation) return res.status(404).json({ error: 'Location not found' });
+        if (newLocation.labId && lot.labId && newLocation.labId !== lot.labId) {
+            return res.status(403).json({
+                error: 'CROSS_LAB_LOCATION_TRANSFER_FORBIDDEN',
+                message: 'Cannot transfer inventory lot to a location belonging to another laboratory.'
+            });
+        }
 
         const updated = await prisma.$transaction(async (tx) => {
             const updatedLot = await tx.inventoryLot.update({

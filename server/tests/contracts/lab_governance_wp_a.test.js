@@ -370,12 +370,12 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
             expect(res.status).toBe(403);
         });
 
-        test('A33: Inactive lab technician is rejected by HTTP auth with 401 LAB_INACTIVE', async () => {
+        test('A33: Inactive lab technician can access /api/auth/me for read/history access with labIsActive=false (IR-10)', async () => {
             const res = await request(app)
                 .get('/api/auth/me')
                 .set('Authorization', 'Bearer ' + tokens.techC);
-            expect(res.status).toBe(401);
-            expect(res.body.error).toBe('LAB_INACTIVE');
+            expect(res.status).toBe(200);
+            expect(res.body.labIsActive).toBe(false);
         });
     });
 

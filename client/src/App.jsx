@@ -61,6 +61,8 @@ const FAQPage = React.lazy(() => import('./pages/help/FAQPage'));
 const ArticleReader = React.lazy(() => import('./pages/help/ArticleReader'));
 const TopicExplorer = React.lazy(() => import('./pages/help/TopicExplorer'));
 const AdminHelpEditor = React.lazy(() => import('./pages/help/AdminHelpEditor'));
+const ActivateAccount = React.lazy(() => import('./pages/auth/ActivateAccount'));
+const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -339,6 +341,8 @@ function App() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />
+            <Route path="/reset-password" element={<React.Suspense fallback={<LazyFallback />}><ResetPassword /></React.Suspense>} />
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
             <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />

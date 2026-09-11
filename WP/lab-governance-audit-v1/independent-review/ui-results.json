@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-09-11T10:34:31.757Z",
+  "origin": "http://127.0.0.1:54834",
+  "staffCount": 3,
+  "emptyPeopleShown": false,
+  "selects": [
+    {
+      "value": "all",
+      "options": [
+        {
+          "value": "all",
+          "text": "All Account States"
+        },
+        {
+          "value": "Active",
+          "text": "Active Only"
+        },
+        {
+          "value": "Suspended",
+          "text": "Suspended Only"
+        }
+      ]
+    },
+    {
+      "value": "REVIEW-A",
+      "options": [
+        {
+          "value": "",
+          "text": "No specific laboratory (Global)"
+        },
+        {
+          "value": "REVIEW-NEW",
+          "text": "New unconfigured laboratory (REVIEW-NEW)"
+        },
+        {
+          "value": "REVIEW-B",
+          "text": "REVIEW-B (REVIEW-B)"
+        },
+        {
+          "value": "REVIEW-A",
+          "text": "REVIEW-A (REVIEW-A)"
+        }
+      ]
+    },
+    {
+      "value": "LAB_TECHNICIAN",
+      "options": [
+        {
+          "value": "LAB_TECHNICIAN",
+          "text": "Laboratory Technician"
+        },
+        {
+          "value": "SAMPLE_RECEPTION",
+          "text": "Sample Reception"
+        },
+        {
+          "value": "SURVEYOR",
+          "text": "Field Surveyor"
+        },
+        {
+          "value": "AUDIT_USER",
+          "text": "Quality & Audit Officer"
+        },
+        {
+          "value": "EXTERNAL_VIEWER",
+          "text": "External Partner"
+        },
+        {
+          "value": "VIEWER",
+          "text": "General Viewer"
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "type": "text",
+      "placeholder": "Search people by name, username, or role..."
+    },
+    {
+      "type": "text",
+      "placeholder": "e.g. María González"
+    },
+    {
+      "type": "email",
+      "placeholder": "e.g. mgonzalez@soilfer.org"
+    }
+  ],
+  "modalText": "Dashboard\nSamples\nManager Queue\nSample Reception\nSpectral Library\nReports\nLaboratory Staff\nEquipment\nQA Dashboard\nInventory\nProjects\nData Results\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nHelp\nU\nUser\nLAB MANAGER\nLaboratories\n/\nREVIEW-A\nHelp with this lab\nREVIEW-A · GUATEMALA\nREVIEW-A\nⅡ Lab Paused\n10:34 UTC\nYour laboratory. Manage your team, local assignments, and settings. Shared project access is managed by its owner.\nSCOPED\nThis Laboratory is Currently Paused\nNew sample intake, batch assignments, and operational result writes are held. Historical records and recoverable drafts are preserved.\nOverview\nPeople\n3\nProjects\n1\nMethods & Resources\nSettings\nHistory\nPeople and Access\n\nSingle authoritative roster for invitations, capability reviews, and open assignment handovers.\n\nInvite a Person\nAll Account States\nActive Only\nSuspended Only\nPERSON\tROLE & SCOPE\tSTATUS\tCURRENT WORK\tACTIONS\n\nRE\nreview-manager\nreview-manager@example.invalid\n\tLAB MANAGER\nLab: REVIEW-A\n\t\nActive\t0 open tasks\t\nReview Access\n\n\nRE\nreview-tech\nreview-tech@example.invalid\n\tTECHNICIAN\nLab: REVIEW-A\n\t\nActive\t2 assignments\t\nReview Access\n\n\nRE\nreview-viewer\nreview-viewer@example.invalid\n\tVIEWER\nLab: REVIEW-A\n\t\nActive\t0 open tasks\t\nReview Access\nNAMED STAFF ONBOARDING\nInvite a Team Member\nFULL NAME *\nVERIFIED WORK EMAIL *\nLABORATORY SCOPE\nNo specific laboratory (Global)\nNew unconfigured laboratory (REVIEW-NEW)\nREVIEW-B (REVIEW-B)\nREVIEW-A (REVIEW-A)\nASSIGNED SYSTEM ROLE *\nLaboratory Technician\nSample Reception\nField Surveyor\nQuality & Audit Officer\nExternal Partner\nGeneral Viewer\nAnalytical bench measurements and queue execution\nAn activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access.\nCancel\nPrepare Invitation\nMessages & Alerts\nNotifications\nChats\n\nNo notifications yet\n\nOpen Full Messaging Center\nLIMS\n•\nLaboratory Information Management System\nAbout SoilFER\n•\nTech Stack & Releases\n© 2026\n•\nBuilt with\ncare",
+  "errors": []
+}

@@ -57,8 +57,9 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
                 labId: 'LAB-TEST-SYNC',
                 assignedLab: 'LAB-TEST-SYNC',
                 status: 'ACCEPTED',
+                receptionDate: new Date(),
                 dryingStatus: 'PENDING',
-                preparationStatus: 'PENDING'
+                preparationStatus: 'DONE'
             }
         });
 

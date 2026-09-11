@@ -66,3 +66,4 @@ server/prisma/*pre_reconciliation_bak*
 scratch/
 server/tests/.tmp/
 server/tests/.tmp*
+preflight-summary.json

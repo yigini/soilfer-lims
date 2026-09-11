@@ -37,16 +37,13 @@ const verifyToken = async (req, res, next) => {
             return res.status(401).json({ error: 'Account has been deactivated' });
         }
 
-        // Check lab operational status (LG-05, P21, A33)
+        // Resolve lab operational status without blocking basic authentication (IR-10)
         if (user.labId && user.role !== 'SUPER_ADMIN') {
             const lab = await prisma.lab.findUnique({
                 where: { id: user.labId },
                 select: { isActive: true }
             });
-            if (lab && lab.isActive === false) {
-                console.warn(`[AUTH] Access denied: lab ${user.labId} is inactive for user ${user.id}`);
-                return res.status(401).json({ error: 'LAB_INACTIVE', message: 'Laboratory is currently inactive or suspended.' });
-            }
+            user.labIsActive = lab ? lab.isActive : true;
         }
 
         // Check session tokenVersion invalidation

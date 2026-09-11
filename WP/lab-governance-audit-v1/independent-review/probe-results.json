@@ -1,0 +1,305 @@
+{
+  "head": "bb989312b505492d169ae82ea1f153ef8c347957",
+  "timestamp": "2026-09-11T10:34:20.848Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-1d614b76-1107-48f7-abd1-b0b8bf5d1b4f.db",
+  "schemaSource": "SQL schema only, read-only source; no source rows copied",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "C01",
+      "kind": "positive-control",
+      "description": "Own-lab manager denied a foreign staff mutation",
+      "reproduced": true,
+      "http": 403
+    },
+    {
+      "id": "R01",
+      "kind": "defect",
+      "description": "National lead changed foreign-country staff without review token",
+      "reproduced": false,
+      "http": 403,
+      "savedRole": "LAB_TECHNICIAN",
+      "returnedPasswordField": false
+    },
+    {
+      "id": "R02",
+      "kind": "defect",
+      "description": "National lead expanded own countries",
+      "reproduced": false,
+      "http": 403,
+      "savedCountries": "[\"Guatemala\"]"
+    },
+    {
+      "id": "R03",
+      "kind": "defect",
+      "description": "Invalid review token accepted despite outstanding assignments",
+      "reproduced": false,
+      "http": 400,
+      "role": "LAB_TECHNICIAN"
+    },
+    {
+      "id": "R04",
+      "kind": "defect",
+      "description": "Access endpoint persisted an invalid role and nonexistent lab",
+      "reproduced": false,
+      "http": 400,
+      "savedRole": "LAB_TECHNICIAN",
+      "savedLab": "REVIEW-B"
+    },
+    {
+      "id": "R05",
+      "kind": "defect",
+      "description": "Workspace omits the staff/projects/workload fields consumed by its new page",
+      "reproduced": false,
+      "http": 200,
+      "keys": [
+        "lab",
+        "operationalStatus",
+        "revision",
+        "pauseReason",
+        "pausedAt",
+        "pausedBy",
+        "responsibleManager",
+        "staff",
+        "projects",
+        "workload",
+        "counts",
+        "attention",
+        "capabilities"
+      ],
+      "staffCount": 3,
+      "hasStaff": true,
+      "hasProjects": true,
+      "hasWorkload": true
+    },
+    {
+      "id": "R06",
+      "kind": "defect",
+      "description": "Role entries use key, while both modals bind r.role",
+      "reproduced": false,
+      "http": 200,
+      "firstEntry": {
+        "key": "LAB_TECHNICIAN",
+        "role": "LAB_TECHNICIAN",
+        "displayName": "Laboratory Technician",
+        "description": "Analytical bench measurements and queue execution",
+        "isManageable": true,
+        "scopeRequirements": [
+          "labId"
+        ]
+      }
+    },
+    {
+      "id": "R07",
+      "kind": "defect",
+      "description": "Invitation response has activationLink but UI reads activationUrl or token",
+      "reproduced": false,
+      "http": 201,
+      "hasActivationLink": true,
+      "hasActivationUrl": true,
+      "hasToken": true
+    },
+    {
+      "id": "R08",
+      "kind": "defect",
+      "description": "Recovery response has recoveryLink but UI reads recoveryUrl or token",
+      "reproduced": false,
+      "http": 201,
+      "hasRecoveryLink": true,
+      "hasRecoveryUrl": true,
+      "hasToken": true
+    },
+    {
+      "id": "R09",
+      "kind": "defect",
+      "description": "Read-only viewer saved another technician draft",
+      "reproduced": false,
+      "http": 200,
+      "receipt": {
+        "operationId": "review-op-draft",
+        "status": "REJECTED",
+        "code": "PERMISSION_DENIED",
+        "reason": "User lacks ENTER_RESULTS permission for work draft"
+      },
+      "bodyKeys": [
+        "protocolVersion",
+        "serverTimestamp",
+        "receipts"
+      ]
+    },
+    {
+      "id": "R10",
+      "kind": "defect",
+      "description": "Viewer with no lab saved foreign-lab draft",
+      "reproduced": false,
+      "http": 200,
+      "receipt": {
+        "operationId": "review-op-foreign-draft",
+        "status": "REJECTED",
+        "code": "PERMISSION_DENIED",
+        "reason": "User lacks ENTER_RESULTS permission for work draft"
+      },
+      "bodyKeys": [
+        "protocolVersion",
+        "serverTimestamp",
+        "receipts"
+      ]
+    },
+    {
+      "id": "R11",
+      "kind": "defect",
+      "description": "Authorized offline intake fails Prisma validation on nonexistent Sample.notes field",
+      "reproduced": false,
+      "http": 200,
+      "status": "APPLIED"
+    },
+    {
+      "id": "R12",
+      "kind": "defect",
+      "description": "MIR task accepted scalar completion while preparation pending",
+      "reproduced": false,
+      "http": 200,
+      "receipt": {
+        "operationId": "review-op-spectral",
+        "status": "REJECTED",
+        "code": "SPECTRAL_SCALAR_REJECTED",
+        "reason": "Mid-Infrared and NIR spectroscopy require spectrum upload or scan linkage; scalar value entry is not permitted"
+      },
+      "bodyKeys": [
+        "protocolVersion",
+        "serverTimestamp",
+        "receipts"
+      ]
+    },
+    {
+      "id": "C02",
+      "kind": "positive-control",
+      "description": "Viewer denied COMPLETE_WORK",
+      "reproduced": true,
+      "http": 200,
+      "receipt": {
+        "operationId": "review-op-complete-deny",
+        "status": "REJECTED",
+        "code": "PERMISSION_DENIED",
+        "reason": "User lacks ENTER_RESULTS permission for work completion"
+      },
+      "bodyKeys": [
+        "protocolVersion",
+        "serverTimestamp",
+        "receipts"
+      ]
+    },
+    {
+      "id": "R13",
+      "kind": "defect",
+      "description": "Servicing lab manager changed foreign-owned project metadata",
+      "reproduced": false,
+      "http": 403,
+      "savedName": "Foreign owned project"
+    },
+    {
+      "id": "C03",
+      "kind": "positive-control",
+      "description": "Servicing lab manager denied deleting foreign-owned project",
+      "reproduced": true,
+      "http": 403
+    },
+    {
+      "id": "R14",
+      "kind": "defect",
+      "description": "Lab list still exposes full lab management data",
+      "reproduced": false,
+      "http": 200,
+      "containsForeignNotes": false
+    },
+    {
+      "id": "R19",
+      "kind": "defect",
+      "description": "National project list fails due to nonexistent Project.country query",
+      "reproduced": false,
+      "http": 200
+    },
+    {
+      "id": "R20",
+      "kind": "defect",
+      "description": "Manager transferred own lot into foreign laboratory location",
+      "reproduced": false,
+      "http": 403,
+      "lotLab": "REVIEW-A",
+      "location": null
+    },
+    {
+      "id": "R21",
+      "kind": "defect",
+      "description": "Existing SIS creation form payload lacks newly required labs",
+      "reproduced": true,
+      "http": 400,
+      "error": "INVALID_LAB_SCOPE"
+    },
+    {
+      "id": "C04",
+      "kind": "positive-control",
+      "description": "Lab manager cannot create global language",
+      "reproduced": true,
+      "http": 403
+    },
+    {
+      "id": "C05",
+      "kind": "positive-control",
+      "description": "Spring DST day correctly has 23 hours",
+      "reproduced": true,
+      "durationHours": 23
+    },
+    {
+      "id": "R15",
+      "kind": "defect",
+      "description": "New unconfigured lab starts ACTIVE instead of SETUP",
+      "reproduced": false,
+      "http": 200,
+      "isActive": false,
+      "state": "SETUP"
+    },
+    {
+      "id": "R16",
+      "kind": "defect",
+      "description": "Pause accepts invalid preview and blocks read access with 401",
+      "reproduced": false,
+      "pauseHttp": 400,
+      "readHttp": 200
+    },
+    {
+      "id": "R17",
+      "kind": "defect",
+      "description": "Legacy toggle contradicts lifecycle state",
+      "reproduced": false,
+      "http": 200,
+      "isActive": false,
+      "lifecycleState": "PAUSED"
+    },
+    {
+      "id": "R22",
+      "kind": "defect",
+      "description": "Revoked token rejected by HTTP but accepted by WebSocket",
+      "reproduced": false,
+      "http": 401,
+      "socketOutcome": "CLOSED"
+    },
+    {
+      "id": "R18",
+      "kind": "defect",
+      "description": "Concurrent mutual suspension leaves no active administrator",
+      "reproduced": false,
+      "outcomes": [
+        {
+          "status": "fulfilled"
+        },
+        {
+          "status": "rejected",
+          "errorCode": "LAST_ADMIN_PROTECTED"
+        }
+      ],
+      "activeAdmins": 1
+    }
+  ]
+}

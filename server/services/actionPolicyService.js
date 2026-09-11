@@ -34,14 +34,20 @@ function canManageUser(actor, target, requestedChanges = {}) {
 
     // Self-mutation checks
     if (isSelf) {
-        if (requestedChanges.role && requestedChanges.role !== target.role) {
-            return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own role' };
-        }
-        if (requestedChanges.labId && requestedChanges.labId !== target.labId) {
-            return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own lab assignment' };
-        }
         if (!isSuperAdmin) {
-            return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'Self-profile update permitted' };
+            if (requestedChanges.role && requestedChanges.role !== target.role) {
+                return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own role' };
+            }
+            if (requestedChanges.labId && requestedChanges.labId !== target.labId) {
+                return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own lab assignment' };
+            }
+            if (requestedChanges.countries) {
+                return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own country assignments' };
+            }
+            if (requestedChanges.projects) {
+                return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Cannot modify your own project assignments' };
+            }
+            return { allowed: false, code: POLICY_CODES.SELF_MANAGEMENT_FORBIDDEN, message: 'Administrative self-mutation is forbidden' };
         }
     }
 
@@ -77,6 +83,27 @@ function canManageUser(actor, target, requestedChanges = {}) {
         if (requestedChanges.role === 'SUPER_ADMIN') {
             return { allowed: false, code: POLICY_CODES.TARGET_ROLE_NOT_MANAGEABLE, message: 'National users cannot appoint Super Administrators' };
         }
+
+        const actorCountries = Array.isArray(actor.countries)
+            ? actor.countries
+            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries || '[]') : []);
+
+        if (actorCountries.length === 0) {
+            return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'National user has no authorized countries' };
+        }
+
+        // Scope check target country
+        const targetCountry = target.labCountry || target.country;
+        if (targetCountry && !actorCountries.includes(targetCountry)) {
+            return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: `Target country '${targetCountry}' outside authorized national scope` };
+        }
+
+        // Scope check proposed lab country
+        const proposedCountry = requestedChanges.proposedLabCountry;
+        if (proposedCountry && !actorCountries.includes(proposedCountry)) {
+            return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: `Proposed laboratory country '${proposedCountry}' outside authorized national scope` };
+        }
+
         return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'National user authorized' };
     }
 
@@ -99,18 +126,20 @@ function canManageLab(actor, targetLabId, labCountry = null) {
     }
 
     if (actor.role === 'LAB_MANAGER') {
-        if (actor.labId === targetLabId) {
-            return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'Own lab management authorized' };
+        if (actor.labId && actor.labId === targetLabId) {
+            return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'Lab Manager authorized for own lab' };
         }
-        return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Cannot manage another laboratory' };
+        return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Lab Manager cannot manage another laboratory' };
     }
 
-    if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role) && labCountry) {
-        const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
-        if (Array.isArray(countryList) && countryList.includes(labCountry)) {
-            return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'National laboratory oversight authorized' };
+    if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
+        const actorCountries = Array.isArray(actor.countries)
+            ? actor.countries
+            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries || '[]') : []);
+        if (labCountry && actorCountries.includes(labCountry)) {
+            return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'National user authorized for country' };
         }
-        return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Laboratory is outside actor national country scope' };
+        return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Laboratory outside authorized country scope' };
     }
 
     return { allowed: false, code: POLICY_CODES.INSUFFICIENT_PERMISSIONS, message: 'Insufficient permissions to manage laboratory' };
@@ -123,16 +152,16 @@ function getAssignableRolesCatalogue(actor, targetLabId = null) {
     if (!actor || !actor.role) return { assignableRoles: [], unmanageableRoles: [] };
 
     const roleDefinitions = [
-        { key: 'SUPER_ADMIN', displayName: 'Super Administrator', description: 'Global cross-lab administration' },
-        { key: 'MASTER_USER', displayName: 'National Master User', description: 'National multi-lab program lead' },
-        { key: 'PROJECT_MANAGER', displayName: 'Project Manager', description: 'Project tracking and coordination' },
-        { key: 'LAB_MANAGER', displayName: 'Laboratory Manager', description: 'Laboratory operations and approval' },
-        { key: 'LAB_TECHNICIAN', displayName: 'Laboratory Technician', description: 'Analytical bench measurements and queue execution' },
-        { key: 'SAMPLE_RECEPTION', displayName: 'Sample Reception', description: 'Physical intake, labeling, and batch registration' },
-        { key: 'SURVEYOR', displayName: 'Field Surveyor', description: 'Field sampling intake and provenance' },
-        { key: 'AUDIT_USER', displayName: 'Quality & Audit Officer', description: 'Compliance auditing and read-only QA' },
-        { key: 'EXTERNAL_VIEWER', displayName: 'External Partner', description: 'Read-only result inspection' },
-        { key: 'VIEWER', displayName: 'General Viewer', description: 'Read-only platform viewer' }
+        { key: 'SUPER_ADMIN', role: 'SUPER_ADMIN', displayName: 'Super Administrator', description: 'Global cross-lab administration' },
+        { key: 'MASTER_USER', role: 'MASTER_USER', displayName: 'National Master User', description: 'National multi-lab program lead' },
+        { key: 'PROJECT_MANAGER', role: 'PROJECT_MANAGER', displayName: 'Project Manager', description: 'Project tracking and coordination' },
+        { key: 'LAB_MANAGER', role: 'LAB_MANAGER', displayName: 'Laboratory Manager', description: 'Laboratory operations and approval' },
+        { key: 'LAB_TECHNICIAN', role: 'LAB_TECHNICIAN', displayName: 'Laboratory Technician', description: 'Analytical bench measurements and queue execution' },
+        { key: 'SAMPLE_RECEPTION', role: 'SAMPLE_RECEPTION', displayName: 'Sample Reception', description: 'Physical intake, labeling, and batch registration' },
+        { key: 'SURVEYOR', role: 'SURVEYOR', displayName: 'Field Surveyor', description: 'Field sampling intake and provenance' },
+        { key: 'AUDIT_USER', role: 'AUDIT_USER', displayName: 'Quality & Audit Officer', description: 'Compliance auditing and read-only QA' },
+        { key: 'EXTERNAL_VIEWER', role: 'EXTERNAL_VIEWER', displayName: 'External Partner', description: 'Read-only result inspection' },
+        { key: 'VIEWER', role: 'VIEWER', displayName: 'General Viewer', description: 'Read-only platform viewer' }
     ];
 
     if (actor.role === 'SUPER_ADMIN') {

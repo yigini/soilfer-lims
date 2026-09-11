@@ -47,11 +47,18 @@ function init(server) {
                 const prisma = require('./prisma');
                 const user = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { id: true, username: true, role: true, isActive: true, labId: true }
+                    select: { id: true, username: true, role: true, isActive: true, labId: true, tokenVersion: true }
                 });
 
                 if (!user || user.isActive === false) {
                     ws.close(4003, 'Account deactivated or invalid');
+                    return;
+                }
+
+                const dbTokenVersion = user.tokenVersion || 0;
+                const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
+                if (jwtTokenVersion < dbTokenVersion) {
+                    ws.close(4004, 'Session token invalidated');
                     return;
                 }
 
@@ -226,4 +233,16 @@ function broadcastToAll(eventType, payload) {
     return count;
 }
 
-module.exports = { init, broadcastToUser, broadcastToUsers, broadcastToLab, broadcastToAll };
+function revokeUserSockets(userId) {
+    const userSockets = clients.get(String(userId));
+    if (userSockets) {
+        userSockets.forEach(sock => {
+            try {
+                sock.close(4004, 'Session revoked');
+            } catch (e) {}
+        });
+        clients.delete(String(userId));
+    }
+}
+
+module.exports = { init, broadcastToUser, broadcastToUsers, broadcastToLab, broadcastToAll, revokeUserSockets };

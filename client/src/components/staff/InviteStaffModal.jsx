@@ -37,8 +37,9 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
             if (res.data?.assignableRoles) {
                 setAssignableRoles(res.data.assignableRoles);
                 if (res.data.assignableRoles.length > 0) {
-                    const hasTech = res.data.assignableRoles.some(r => r.role === 'LAB_TECHNICIAN');
-                    setRole(hasTech ? 'LAB_TECHNICIAN' : res.data.assignableRoles[0].role);
+                    const hasTech = res.data.assignableRoles.some(r => (r.key || r.role) === 'LAB_TECHNICIAN');
+                    const firstVal = res.data.assignableRoles[0].key || res.data.assignableRoles[0].role;
+                    setRole(hasTech ? 'LAB_TECHNICIAN' : firstVal);
                 }
             }
         } catch (err) {
@@ -228,14 +229,17 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                 disabled={loadingRoles}
                                 className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                             >
-                                {assignableRoles.map(r => (
-                                    <option key={r.role} value={r.role}>
-                                        {r.displayName || r.role}
-                                    </option>
-                                ))}
+                                {assignableRoles.map(r => {
+                                    const roleVal = r.key || r.role;
+                                    return (
+                                        <option key={roleVal} value={roleVal}>
+                                            {r.displayName || roleVal}
+                                        </option>
+                                    );
+                                })}
                             </select>
                             <div className="mt-1.5 text-xs text-sf-muted">
-                                {assignableRoles.find(r => r.role === role)?.description || 'Role permissions are governed strictly by the server RBAC policy.'}
+                                {assignableRoles.find(r => (r.key || r.role) === role)?.description || 'Role permissions are governed strictly by the server RBAC policy.'}
                             </div>
                         </div>
 

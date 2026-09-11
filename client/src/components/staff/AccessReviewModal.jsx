@@ -155,11 +155,14 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                             disabled={loadingPreview}
                             className="w-full px-3.5 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm font-semibold text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         >
-                            {assignableRoles.map(r => (
-                                <option key={r.role} value={r.role}>
-                                    {r.displayName || r.role}
-                                </option>
-                            ))}
+                            {assignableRoles.map(r => {
+                                const roleVal = r.key || r.role;
+                                return (
+                                    <option key={roleVal} value={roleVal}>
+                                        {r.displayName || roleVal}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <p className="text-xs text-sf-muted mt-1.5">
                             Only roles you can assign within this laboratory scope are offered.

@@ -26,14 +26,25 @@ exports.getProjects = async (req, res) => {
                     select: { id: true }
                 });
                 const labIds = labs.map(l => l.id);
-                const where = {
-                    OR: [
-                        { labId: { in: labIds } },
-                        { country: { in: countryList } }
-                    ]
-                };
-                if (!includeDeleted) where.status = { not: 'DELETED' };
-                projects = await prisma.project.findMany({ where });
+                const allProjects = await prisma.project.findMany({
+                    where: includeDeleted ? {} : { status: { not: 'DELETED' } }
+                });
+                projects = allProjects.filter(p => {
+                    if (p.labId && labIds.includes(p.labId)) return true;
+                    if (p.assignedLabIds) {
+                        try {
+                            const assigned = JSON.parse(p.assignedLabIds);
+                            if (Array.isArray(assigned) && assigned.some(id => labIds.includes(id))) return true;
+                        } catch (e) {}
+                    }
+                    if (p.countries) {
+                        try {
+                            const cList = JSON.parse(p.countries);
+                            if (Array.isArray(cList) && cList.some(c => countryList.includes(c))) return true;
+                        } catch (e) {}
+                    }
+                    return false;
+                });
             }
         } else if (user.role === 'LAB_MANAGER' || user.role === 'SAMPLE_RECEPTION' || user.role === 'LAB_TECHNICIAN') {
             const userLabId = user.labId;
@@ -345,26 +356,9 @@ exports.updateProject = async (req, res) => {
 
         // Lab Isolation Check
         const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Cannot modify projects from another lab. Access denied.' });
-        }
-
-        // Managers cannot modify global projects UNLESS they are assigned to them
-        if (req.user.role === 'LAB_MANAGER' && !project.labId) {
-            // Re-verify assignment specifically for this check
-            let isAssigned = false;
-            if (project.assignedLabIds) {
-                try {
-                    const ids = JSON.parse(project.assignedLabIds);
-                    isAssigned = Array.isArray(ids) && ids.includes(req.user.labId);
-                } catch (e) {
-                    isAssigned = project.assignedLabIds.includes(`"${req.user.labId}"`);
-                }
-            }
-
-            if (!isAssigned) {
-                return res.status(403).json({ error: 'Cannot modify Global/SoilFER projects that are not assigned to your lab.' });
-            }
+        const { canManageProject } = require('../services/projectMembershipService');
+        if (!canManageProject(req.user, project)) {
+            return res.status(403).json({ error: 'PROJECT_UPDATE_FORBIDDEN', message: 'Only the project owner laboratory manager or Super Administrator can modify project metadata.' });
         }
 
         if (updates.code && updates.code !== project.code) {

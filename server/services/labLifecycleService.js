@@ -149,6 +149,92 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         canManageProjects: isSuperAdmin || isOwnManager
     };
 
+    // Fetch staff roster with open task counts
+    const staffUsers = await tx.user.findMany({
+        where: { labId },
+        select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            labId: true,
+            countries: true,
+            projects: true,
+            isActive: true,
+            createdAt: true
+        },
+        orderBy: { username: 'asc' }
+    });
+
+    const openWorkCounts = await tx.workItem.groupBy({
+        by: ['assignedTo'],
+        where: {
+            labId,
+            status: { in: ['ASSIGNED', 'IN_PROGRESS'] },
+            assignedTo: { in: staffUsers.map(u => u.username).filter(Boolean) }
+        },
+        _count: { _all: true }
+    });
+    const countMap = {};
+    for (const row of openWorkCounts) {
+        if (row.assignedTo) countMap[row.assignedTo] = row._count._all;
+    }
+    const staff = staffUsers.map(u => ({
+        ...u,
+        openWorkCount: countMap[u.username] || 0
+    }));
+
+    // Fetch projects served by this laboratory
+    const allProjects = await tx.project.findMany({
+        where: { status: { not: 'DELETED' } },
+        select: {
+            id: true,
+            code: true,
+            name: true,
+            status: true,
+            labId: true,
+            assignedLabIds: true,
+            createdAt: true
+        }
+    });
+    const projects = allProjects.filter(p => {
+        if (p.labId === labId) return true;
+        try {
+            const assigned = JSON.parse(p.assignedLabIds || '[]');
+            return Array.isArray(assigned) && assigned.includes(labId);
+        } catch {
+            return false;
+        }
+    }).map(p => ({
+        ...p,
+        isOwned: p.labId === labId
+    }));
+
+    const workload = {
+        samples: {
+            total: totalSamples,
+            active: activeSamples,
+            expected: expectedSamples,
+            received: receivedSamples,
+            inAnalysis: inAnalysisSamples,
+            review: reviewSamples,
+            released: releasedSamples
+        },
+        workItems: {
+            total: totalWorkItems,
+            open: openWorkItems,
+            completed: completedWorkItems
+        },
+        staff: {
+            total: totalStaff,
+            active: activeStaff
+        },
+        equipment: {
+            total: totalEquipment
+        }
+    };
+
     return {
         lab: {
             id: lab.id,
@@ -172,29 +258,10 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         pausedAt: state.pausedAt,
         pausedBy: state.pausedBy,
         responsibleManager,
-        counts: {
-            samples: {
-                total: totalSamples,
-                active: activeSamples,
-                expected: expectedSamples,
-                received: receivedSamples,
-                inAnalysis: inAnalysisSamples,
-                review: reviewSamples,
-                released: releasedSamples
-            },
-            workItems: {
-                total: totalWorkItems,
-                open: openWorkItems,
-                completed: completedWorkItems
-            },
-            staff: {
-                total: totalStaff,
-                active: activeStaff
-            },
-            equipment: {
-                total: totalEquipment
-            }
-        },
+        staff,
+        projects,
+        workload,
+        counts: workload,
         attention,
         capabilities
     };
@@ -369,6 +436,31 @@ async function getLifecyclePreview(actor, labId, targetState, tx = prisma) {
     };
 }
 
+function verifyLabReviewToken(token, actorId, labId, targetState, currentRevision) {
+    if (!token || typeof token !== 'string') return false;
+    const parts = token.split('.');
+    if (parts.length !== 2) return false;
+    const [signature, payloadBase64] = parts;
+    try {
+        const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
+        const expectedSig = crypto.createHmac('sha256', JWT_SECRET || 'secret').update(payloadJson).digest('hex');
+        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+            return false;
+        }
+        const payload = JSON.parse(payloadJson);
+        if (!payload.ts || (Date.now() - payload.ts) > 15 * 60 * 1000) return false;
+        if (payload.actorId !== actorId) return false;
+        if (payload.labId !== labId) return false;
+        if (targetState && payload.targetState !== targetState) return false;
+        if (currentRevision !== undefined && payload.revision !== undefined) {
+            if (Number(currentRevision) !== Number(payload.revision)) return false;
+        }
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Commits a laboratory operational lifecycle state transition.
  */
@@ -380,6 +472,18 @@ async function transitionLifecycle(actor, labId, { targetState, reason, reviewTo
         err.statusCode = 403;
         err.code = 'INSUFFICIENT_PERMISSIONS';
         throw err;
+    }
+
+    const currentState = await getLabOperationalState(labId, tx);
+
+    if (reviewToken) {
+        const isValid = verifyLabReviewToken(reviewToken, actor.id, labId, targetState, currentState?.revision);
+        if (!isValid) {
+            const err = new Error('Invalid, altered, or expired review token');
+            err.statusCode = 400;
+            err.code = 'INVALID_REVIEW_TOKEN';
+            throw err;
+        }
     }
 
     if (!VALID_STATES.includes(targetState)) {
@@ -404,7 +508,6 @@ async function transitionLifecycle(actor, labId, { targetState, reason, reviewTo
         throw err;
     }
 
-    const currentState = await getLabOperationalState(labId, tx);
     const newRevision = (currentState.revision || 1) + 1;
     const isLabActive = targetState === 'ACTIVE';
 
