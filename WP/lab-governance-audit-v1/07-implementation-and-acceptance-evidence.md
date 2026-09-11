@@ -235,11 +235,31 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - Empty search state renders explicit empty message (`PASS`)
   - Search race condition protection verifies stale out-of-order responses are safely discarded (`PASS`)
   - Report saved to `independent-review/a39-a38-matrix-results.json`.
+- **Report 12 Small-Screen Dialog Geometry & Trigger Focus Lifecycle (M320, K320, M390, K390)**: 4 / 4 passed in reviewer reproduction `modal-review.cjs` (`allPassed: true`):
+  - M320: Staff invitation modal at 320x568 is vertically centered (`top: 14.25px`, `bottom: 553.75px`, `height: 539.5px`), fits completely within the 568px viewport with no clipping of header or footer action buttons (Cancel at 502.75px, Prepare Invitation at 503.75px; `PASS`)
+  - K320: Escape dismisses invitation modal and restores focus to triggering `#btn-invite-staff` button (`focusReturned: true`, `dialogClosed: true`; `PASS`)
+  - M390: Staff invitation modal at 390x640 fits within viewport (`top: 66.5px`, `bottom: 573.5px`, `height: 507px`; `PASS`)
+  - K390: Escape dismisses modal and restores trigger focus (`PASS`)
+  - Source database untouched (`388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b`).
+  - Active reviewer files and screenshots in `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/` preserved without modification or deletion.
+- **Comprehensive 5-Modal Responsive & Focus Trap Suite**: 12 / 12 passed in `governance_modals_review.cjs` in native Google Chrome:
+  - `InviteStaffModal` at 320x568: Viewport contained (`height: 539.5px`, all buttons visible; `PASS`), Tab/Shift+Tab cycle trapped, Escape closes and restores focus (`PASS`)
+  - `AccessReviewModal` at 320x568: Viewport contained (`height: 552px`, `top: 8px`, `bottom: 560px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
+  - `RecoveryLinkModal` at 320x568: Viewport contained (`height: 395.5px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
+  - `SuspendUserModal` at 320x568: Viewport contained (`height: 367.5px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
+  - `LabLifecycleModal` at 320x568: Viewport contained (`height: 552px`, `top: 8px`, `bottom: 560px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
+  - Long localized labels (Spanish `es`) at 320x568: Viewport contained with longer translated strings (`height: 552px`, `top: 8px`, `bottom: 560px`; `PASS`)
+  - Dark theme at 320x568: Viewport contained, readable styling tokens, no layout blowout (`height: 539.5px`; `PASS`)
+  - Evidence report saved to `independent-review/governance-modals-results.json` and screenshots captured to `independent-review/modal-all-*.png`.
+- **Architecture & Root Cause Summary**:
+  - *Tailwind `space-y-*` Margin Bleed*: Modals rendered inside `space-y-6` containers previously had `margin-top: 24px` applied to `position: fixed` overlays, offsetting the overlay downwards to `top: 24px`. Added `!m-0` to all modal overlays across the five governance dialogs and inline modals, ensuring fixed overlays accurately span `top: 0` to `bottom: 0` across viewports.
+  - *Viewport-Constrained Scroll Hierarchy*: All five modals enforce `max-h-[calc(100dvh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden`, `shrink-0` header, `overflow-y-auto flex-1 custom-scrollbar min-h-0` scroll body, and `shrink-0` sticky action footer, guaranteeing footer buttons remain on-screen even on 320x568 mobile devices.
+  - *Focus Trap Restoration Resilience*: `useFocusTrap.js` captures opening trigger synchronously during render and effect mounting, records element identity fallback metadata (`id`, `text`, `tagName`), and executes multi-pass focus restoration (immediate, `requestAnimationFrame`, and microtask fallback) so that trigger focus is faithfully restored even when parent components re-render or re-instantiate DOM nodes.
 
 ### Automated Tests vs. Browser Journeys & Static Verification:
 - **Automated Headless Tests**: 102 Jest suites (823 tests) cover server business logic, transaction rollback, API routing, SQLite schema compliance, offline sync engine rules, and real loopback WebSocket connections.
 - **Static Client Verification**:
-  - React Vite production bundle built cleanly in 7.04s with 0 syntax or bundling errors (`npm run build`). Note: this confirms static module compilation and dependency graph resolution.
+  - React Vite production bundle built cleanly in 6.69s with 0 syntax or bundling errors (`cmd.exe /c npm run build`). Note: this confirms static module compilation and dependency graph resolution.
   - `verify_multilang_render.cjs` honestly labeled as a static key-presence check; verifies all 41 governance dictionary keys are non-empty across all 5 JSON translation files.
 - **End-to-End Real Browser Automation**:
   - Validates actual React components, routing, language context, theme provider, and pagination controls running in real headless Google Chrome with Chromium devtools protocol.
@@ -252,14 +272,14 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 ## 8. Release Sign-Off & Status
 
 - [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`.
-- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, and Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix).
+- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix), and Report 12 requirements (M320 small-screen geometry, K320/K390 trigger focus restoration, and 5-modal viewport-constrained scrolling).
 - [x] **Exact JSON Membership**: SQLite query uses `json_valid = 1`, `json_type = 'array'`, and `type = 'text'` with CASE expression failing closed on malformed and non-array JSON.
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
 - [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Tested**: 102 test suites (823 tests) and 42 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
+- [x] **Tested**: 102 test suites (823 tests) and 58 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
-- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 7.04s).
+- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.69s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.
 
 

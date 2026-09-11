@@ -1,0 +1,184 @@
+{
+  "head": "5b07d3d3aa634b04dcf85b440417874f5bf76e4c",
+  "timestamp": "2026-09-11T13:51:36.489Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-modal-all-e44371c6-4f71-4ec4-9fb8-616c221afa1c.db",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "dbUntouched": true,
+  "allPassed": true,
+  "results": [
+    {
+      "id": "MODAL-INVITE-320",
+      "description": "InviteStaffModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 539.5
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-INVITE-320",
+      "description": "InviteStaffModal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-REVIEW-320",
+      "description": "AccessReviewModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-REVIEW-320",
+      "description": "AccessReviewModal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-RECOVERY-320",
+      "description": "RecoveryLinkModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 395.5
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-RECOVERY-320",
+      "description": "RecoveryLinkModal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-SUSPEND-320",
+      "description": "SuspendUserModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 367.5
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-SUSPEND-320",
+      "description": "SuspendUserModal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-LIFECYCLE-320",
+      "description": "LabLifecycleModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-LIFECYCLE-320",
+      "description": "LabLifecycleModal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-LONG-LABEL-ES",
+      "description": "Modal layout in Spanish with longer translated strings fits 320x568 viewport",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-THEME-DARK-320",
+      "description": "Modal renders correctly in Dark Theme without layout blowout at 320x568",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 539.5
+      },
+      "passed": true
+    }
+  ]
+}

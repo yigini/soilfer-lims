@@ -101,166 +101,170 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
             <div
                 ref={modalRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="invite-staff-title"
-                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
             >
-                <div className="p-6 border-b border-sf-divider flex items-center justify-between">
+                <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                             {t('staffManagement.invite.title', 'Named Staff Onboarding')}
                         </div>
-                        <h2 id="invite-staff-title" className="text-xl font-black text-sf-text">
+                        <h2 id="invite-staff-title" className="text-lg sm:text-xl font-black text-sf-text">
                             {t('staffManagement.invite.button', 'Invite a Team Member')}
                         </h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
+                    <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />
                     </button>
                 </div>
 
                 {invitationResult ? (
-                    <div className="p-6 space-y-5">
-                        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start gap-3">
-                            <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                            <div className="text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
-                                <strong className="font-bold block text-sm">{t('staffManagement.invite.successTitle', 'Invitation Created')}</strong>
-                                <p>
-                                    {t('staffManagement.invite.successDetails', 'A single-use, cryptographically verified invitation token was generated. No plain-text or shared passwords are ever created.')}
-                                </p>
+                    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0">
+                            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start gap-3">
+                                <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                                <div className="text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
+                                    <strong className="font-bold block text-sm">{t('staffManagement.invite.successTitle', 'Invitation Created')}</strong>
+                                    <p>
+                                        {t('staffManagement.invite.successDetails', 'A single-use, cryptographically verified invitation token was generated. No plain-text or shared passwords are ever created.')}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
+                                    {t('staffManagement.invite.activationLinkLabel', 'One-Time Activation Link')}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        readOnly
+                                        value={invitationResult.activationUrl || `${window.location.origin}/activate?token=${invitationResult.token}`}
+                                        className="w-full font-mono text-xs p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sf-text truncate"
+                                    />
+                                    <button
+                                        onClick={copyActivationUrl}
+                                        className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
+                                    >
+                                        <Copy size={14} />
+                                        {copied ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px] text-sf-muted mt-2">
+                                    <Clock size={13} />
+                                    <span>{t('staffManagement.invite.expiresNotice', 'Expires in 24 hours. The recipient will set their own password upon activation.')}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
-                                {t('staffManagement.invite.activationLinkLabel', 'One-Time Activation Link')}
-                            </label>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    readOnly
-                                    value={invitationResult.activationUrl || `${window.location.origin}/activate?token=${invitationResult.token}`}
-                                    className="w-full font-mono text-xs p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sf-text truncate"
-                                />
-                                <button
-                                    onClick={copyActivationUrl}
-                                    className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
-                                >
-                                    <Copy size={14} />
-                                    {copied ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
-                                </button>
-                            </div>
-                            <div className="flex items-center gap-2 text-[11px] text-sf-muted mt-2">
-                                <Clock size={13} />
-                                <span>{t('staffManagement.invite.expiresNotice', 'Expires in 24 hours. The recipient will set their own password upon activation.')}</span>
-                            </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-sf-divider flex justify-end">
+                        <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex justify-end shrink-0">
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition"
+                                className="px-6 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20"
                             >
                                 {t('common.done', 'Done')}
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                        {error && (
-                            <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
-                                <AlertTriangle size={15} className="shrink-0" />
-                                <span>{error}</span>
-                            </div>
-                        )}
+                    <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0">
+                            {error && (
+                                <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                                    <AlertTriangle size={15} className="shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
 
-                        <div>
-                            <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                {t('staffManagement.invite.fullName', 'Full Name')} <span className="text-rose-500">*</span>
-                            </label>
-                            <div className="relative">
-                                <User size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder={t('staffManagement.invite.namePlaceholder', 'e.g. María González')}
-                                    required
-                                    className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                {t('staffManagement.invite.email', 'Verified Work Email')} <span className="text-rose-500">*</span>
-                            </label>
-                            <div className="relative">
-                                <Mail size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder={t('staffManagement.invite.emailPlaceholder', 'e.g. mgonzalez@soilfer.org')}
-                                    required
-                                    className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
-                                />
-                            </div>
-                        </div>
-
-                        {availableLabs.length > 1 && (
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    {t('staffManagement.invite.labScope', 'Laboratory Scope')}
+                                    {t('staffManagement.invite.fullName', 'Full Name')} <span className="text-rose-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <User size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder={t('staffManagement.invite.namePlaceholder', 'e.g. María González')}
+                                        required
+                                        className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    {t('staffManagement.invite.email', 'Verified Work Email')} <span className="text-rose-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <Mail size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder={t('staffManagement.invite.emailPlaceholder', 'e.g. mgonzalez@soilfer.org')}
+                                        required
+                                        className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
+                                    />
+                                </div>
+                            </div>
+
+                            {availableLabs.length > 1 && (
+                                <div>
+                                    <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                        {t('staffManagement.invite.labScope', 'Laboratory Scope')}
+                                    </label>
+                                    <select
+                                        value={labId}
+                                        onChange={(e) => handleLabChange(e.target.value)}
+                                        className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
+                                    >
+                                        <option value="">{t('staffManagement.invite.globalScope', 'No specific laboratory (Global)')}</option>
+                                        {availableLabs.map(l => (
+                                            <option key={l.id} value={l.id}>{l.name} ({l.code})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    {t('staffManagement.invite.role', 'Assigned System Role')} <span className="text-rose-500">*</span>
                                 </label>
                                 <select
-                                    value={labId}
-                                    onChange={(e) => handleLabChange(e.target.value)}
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    disabled={loadingRoles}
                                     className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                 >
-                                    <option value="">{t('staffManagement.invite.globalScope', 'No specific laboratory (Global)')}</option>
-                                    {availableLabs.map(l => (
-                                        <option key={l.id} value={l.id}>{l.name} ({l.code})</option>
-                                    ))}
+                                    {assignableRoles.map(r => {
+                                        const roleVal = r.key || r.role;
+                                        return (
+                                            <option key={roleVal} value={roleVal}>
+                                                {r.displayName || roleVal}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
+                                <div className="mt-1.5 text-xs text-sf-muted">
+                                    {assignableRoles.find(r => (r.key || r.role) === role)?.description || t('staffManagement.invite.rbacNotice', 'Role permissions are governed strictly by the server RBAC policy.')}
+                                </div>
                             </div>
-                        )}
 
-                        <div>
-                            <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                {t('staffManagement.invite.role', 'Assigned System Role')} <span className="text-rose-500">*</span>
-                            </label>
-                            <select
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
-                                disabled={loadingRoles}
-                                className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
-                            >
-                                {assignableRoles.map(r => {
-                                    const roleVal = r.key || r.role;
-                                    return (
-                                        <option key={roleVal} value={roleVal}>
-                                            {r.displayName || roleVal}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            <div className="mt-1.5 text-xs text-sf-muted">
-                                {assignableRoles.find(r => (r.key || r.role) === role)?.description || t('staffManagement.invite.rbacNotice', 'Role permissions are governed strictly by the server RBAC policy.')}
+                            <div className="p-3 bg-sf-raised/50 rounded-xl border border-sf-divider text-[11px] text-sf-muted flex items-start gap-2">
+                                <Shield size={15} className="shrink-0 text-sf-primary mt-0.5" />
+                                <span>
+                                    {t('staffManagement.invite.securityBanner', 'An activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access.')}
+                                </span>
                             </div>
                         </div>
 
-                        <div className="p-3 bg-sf-raised/50 rounded-xl border border-sf-divider text-[11px] text-sf-muted flex items-start gap-2">
-                            <Shield size={15} className="shrink-0 text-sf-primary mt-0.5" />
-                            <span>
-                                {t('staffManagement.invite.securityBanner', 'An activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access.')}
-                            </span>
-                        </div>
-
-                        <div className="pt-3 border-t border-sf-divider flex items-center justify-end gap-3">
+                        <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-end gap-3 shrink-0">
                             <button
                                 type="button"
                                 onClick={onClose}

@@ -55,7 +55,7 @@ export default function LabManagement() {
     const selectedLabId = queryLabId || (user?.role === 'LAB_MANAGER' ? user.labId : null);
     const activeTab = queryTab;
     const [workspace, setWorkspace] = useState(null);
-    const [loadingWorkspace, setLoadingWorkspace] = useState(false);
+    const [loadingWorkspace, setLoadingWorkspace] = useState(() => !!(queryLabId || (user?.role === 'LAB_MANAGER' ? user?.labId : null)));
     const [workspaceError, setWorkspaceError] = useState(null);
     const latestWorkspaceReqId = useRef(0);
 
@@ -153,9 +153,13 @@ export default function LabManagement() {
         fetchLabs();
     }, [fetchLabs]);
 
+    const initialWorkspaceFetched = useRef(false);
+
     // Debounced workspace fetch on lab or search/filter/paging change
     useEffect(() => {
         if (!selectedLabId) return;
+        const delay = initialWorkspaceFetched.current ? 150 : 0;
+        initialWorkspaceFetched.current = true;
         const timer = setTimeout(() => {
             fetchWorkspace(selectedLabId, {
                 staffPage,
@@ -163,7 +167,7 @@ export default function LabManagement() {
                 staffStatus: staffStatusFilter,
                 projectPage
             });
-        }, 150);
+        }, delay);
         return () => clearTimeout(timer);
     }, [selectedLabId, staffPage, staffSearch, staffStatusFilter, projectPage, fetchWorkspace]);
 
@@ -491,21 +495,27 @@ export default function LabManagement() {
 
                 {/* Onboard Laboratory Modal */}
                 {showOnboardModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                        <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[90vh] flex flex-col overflow-hidden">
-                            <div className="p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
+                    <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+                        <div
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="onboard-lab-title"
+                            className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
+                        >
+                            <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                                 <div>
                                     <div className="text-[10px] font-black uppercase tracking-widest text-sf-primary">
                                         Facility Provisioning
                                     </div>
-                                    <h2 className="text-xl font-black text-sf-text">Onboard New Laboratory</h2>
+                                    <h2 id="onboard-lab-title" className="text-lg sm:text-xl font-black text-sf-text">Onboard New Laboratory</h2>
                                 </div>
-                                <button onClick={() => setShowOnboardModal(false)} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted">
+                                <button onClick={() => setShowOnboardModal(false)} aria-label="Close" className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                                     <X size={18} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleOnboardSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+                            <form onSubmit={handleOnboardSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                                <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0">
                                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
                                     <Shield size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                                     <span>
@@ -625,7 +635,9 @@ export default function LabManagement() {
                                     </div>
                                 </div>
 
-                                <div className="pt-4 border-t border-sf-divider flex items-center justify-end gap-3">
+                                </div>
+
+                                <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-end gap-3 shrink-0">
                                     <button
                                         type="button"
                                         onClick={() => setShowOnboardModal(false)}
@@ -1005,6 +1017,7 @@ export default function LabManagement() {
                         </div>
 
                         <button
+                            id="btn-invite-staff"
                             onClick={() => setShowInviteModal(true)}
                             className="px-4 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 flex items-center gap-2 self-start sm:self-auto"
                         >
@@ -1115,6 +1128,7 @@ export default function LabManagement() {
                                                                     setShowRecoveryModal(true);
                                                                 }}
                                                                 title={t('staffManagement.recovery.title', 'One-Time Recovery Link')}
+                                                                aria-label={t('staffManagement.recovery.title', 'One-Time Recovery Link')}
                                                                 className="p-1.5 text-sf-muted hover:text-amber-600 hover:bg-sf-raised rounded-lg transition"
                                                             >
                                                                 <KeyRound size={14} />
@@ -1126,6 +1140,7 @@ export default function LabManagement() {
                                                                     setShowSuspendModal(true);
                                                                 }}
                                                                 title={isSuspended ? t('labManagement.people.reactivateUser', 'Reactivate User') : t('labManagement.people.suspendUser', 'Suspend User')}
+                                                                aria-label={isSuspended ? t('labManagement.people.reactivateUser', 'Reactivate User') : t('labManagement.people.suspendUser', 'Suspend User')}
                                                                 className={`p-1.5 rounded-lg transition ${
                                                                     isSuspended
                                                                         ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
@@ -1503,6 +1518,7 @@ export default function LabManagement() {
                             {(user?.role === 'SUPER_ADMIN' || user?.role === 'MASTER_USER') ? (
                                 <div className="space-y-2 pt-2">
                                     <button
+                                        id="btn-lifecycle-action"
                                         type="button"
                                         onClick={() => {
                                             setLifecycleTargetState(isPaused ? 'ACTIVE' : 'PAUSED');
@@ -1644,15 +1660,20 @@ export default function LabManagement() {
 
             {/* Contextual Help Modal */}
             {showHelpModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden">
-                        <div className="p-6 border-b border-sf-divider flex items-center justify-between">
-                            <h3 className="font-black text-base text-sf-text">Laboratory Guidance</h3>
-                            <button onClick={() => setShowHelpModal(false)} className="p-1 text-sf-muted hover:text-sf-text">
+                <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="help-guidance-title"
+                        className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
+                    >
+                        <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
+                            <h3 id="help-guidance-title" className="font-black text-base text-sf-text">Laboratory Guidance</h3>
+                            <button onClick={() => setShowHelpModal(false)} aria-label="Close" className="p-1 text-sf-muted hover:text-sf-text">
                                 <X size={16} />
                             </button>
                         </div>
-                        <div className="p-6 space-y-4 text-xs text-sf-muted">
+                        <div className="p-4 sm:p-6 space-y-4 text-xs text-sf-muted overflow-y-auto flex-1 custom-scrollbar min-h-0">
                             <p>
                                 <strong>People & Access:</strong> Use named invitations for new staff. Changing roles preserves existing authorship and unfinished tasks.
                             </p>
@@ -1663,7 +1684,7 @@ export default function LabManagement() {
                                 <strong>Lifecycle:</strong> Pausing a laboratory halts new entries but never deactivates staff accounts.
                             </p>
                         </div>
-                        <div className="p-4 border-t border-sf-divider flex justify-end">
+                        <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex justify-end shrink-0">
                             <button
                                 onClick={() => setShowHelpModal(false)}
                                 className="px-5 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold"

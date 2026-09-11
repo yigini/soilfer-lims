@@ -52,15 +52,15 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
     if (!isOpen || !user) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
             <div
                 ref={modalRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="suspend-user-title"
-                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md border border-sf-divider overflow-hidden"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
             >
-                <div className="p-6 border-b border-sf-divider flex items-center justify-between">
+                <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2.5">
                         <div className={`p-2 rounded-xl ${isSuspending ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-600' : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600'}`}>
                             <ShieldAlert size={20} />
@@ -74,51 +74,53 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                             </h2>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
+                    <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    {error && (
-                        <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
-                            <AlertTriangle size={15} className="shrink-0" />
-                            <span>{error}</span>
-                        </div>
-                    )}
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                    <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0">
+                        {error && (
+                            <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                                <AlertTriangle size={15} className="shrink-0" />
+                                <span>{error}</span>
+                            </div>
+                        )}
 
-                    <div className="text-xs text-sf-muted space-y-1.5">
-                        <p>
-                            Target user: <strong>{user.name || user.username}</strong> ({user.role})
-                        </p>
-                        {isSuspending ? (
+                        <div className="text-xs text-sf-muted space-y-1.5">
                             <p>
-                                Suspending will immediately revoke all active sessions. Unfinished tasks remain attributed and must be reassigned. Past results keep their authorship.
+                                Target user: <strong>{user.name || user.username}</strong> ({user.role})
                             </p>
-                        ) : (
-                            <p>
-                                Reactivating restores login capabilities. Previously revoked sessions remain invalid; user must log in again with their established credentials.
-                            </p>
+                            {isSuspending ? (
+                                <p>
+                                    Suspending will immediately revoke all active sessions. Unfinished tasks remain attributed and must be reassigned. Past results keep their authorship.
+                                </p>
+                            ) : (
+                                <p>
+                                    Reactivating restores login capabilities. Previously revoked sessions remain invalid; user must log in again with their established credentials.
+                                </p>
+                            )}
+                        </div>
+
+                        {isSuspending && (
+                            <div>
+                                <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    Suspension Reason <span className="text-rose-500">*</span>
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    placeholder="e.g. Placement concluded / Security concern"
+                                    required
+                                    className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-rose-500 outline-none transition resize-none"
+                                />
+                            </div>
                         )}
                     </div>
 
-                    {isSuspending && (
-                        <div>
-                            <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                Suspension Reason <span className="text-rose-500">*</span>
-                            </label>
-                            <textarea
-                                rows={2}
-                                value={reason}
-                                onChange={(e) => setReason(e.target.value)}
-                                placeholder="e.g. Placement concluded / Security concern"
-                                required
-                                className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-rose-500 outline-none transition resize-none"
-                            />
-                        </div>
-                    )}
-
-                    <div className="pt-3 border-t border-sf-divider flex items-center justify-end gap-3">
+                    <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-end gap-3 shrink-0">
                         <button
                             type="button"
                             onClick={onClose}

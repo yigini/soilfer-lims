@@ -70,27 +70,27 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
     const title = isPausing ? 'Review Pausing Laboratory' : isResuming ? 'Resume Laboratory Operations' : 'Retire Laboratory';
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
             <div
                 ref={modalRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="lab-lifecycle-title"
-                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
             >
-                <div className="p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
+                <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
                             {t('lifecycle.title', 'Laboratory Operational Lifecycle')}
                         </div>
-                        <h2 id="lab-lifecycle-title" className="text-xl font-black text-sf-text">{title}</h2>
+                        <h2 id="lab-lifecycle-title" className="text-lg sm:text-xl font-black text-sf-text">{title}</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
+                    <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 custom-scrollbar min-h-0">
                     {error && (
                         <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
                             <AlertTriangle size={15} className="shrink-0" />
@@ -186,7 +186,7 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                     </label>
                 </div>
 
-                <div className="p-4 px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-between shrink-0">
+                <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={onClose}

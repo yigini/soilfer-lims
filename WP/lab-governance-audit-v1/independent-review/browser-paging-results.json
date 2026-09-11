@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-11T13:24:22.843Z",
-  "head": "63e4d0e5a7d9d0fc40da0a69d7871f6cda1c366d",
+  "timestamp": "2026-09-11T13:44:00.709Z",
+  "head": "5b07d3d3aa634b04dcf85b440417874f5bf76e4c",
   "browser": "Google Chrome (Headless via Puppeteer-Core)",
   "sourcePath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
   "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "dbUntouched": true,
-  "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-browser-478c57f6-68c8-4fb5-b49b-0bbe9ec5a31c.db",
+  "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-browser-7327ca68-51eb-4471-8f6f-9a18c7a63d45.db",
   "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\browser-paging-evidence.png",
   "allPassed": true,
   "results": [

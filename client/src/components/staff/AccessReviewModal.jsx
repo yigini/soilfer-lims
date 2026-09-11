@@ -105,31 +105,31 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
     const openTasks = preview?.impact?.openWorkItems ?? preview?.current?.openWorkCount ?? 0;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
             <div
                 ref={modalRef}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="access-review-title"
-                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
             >
                 {/* Modal Head */}
-                <div className="p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
+                <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
                             {t('staffManagement.review.title', 'Pre-Change Access Review')}
                         </div>
-                        <h2 id="access-review-title" className="text-xl font-black text-sf-text">
+                        <h2 id="access-review-title" className="text-lg sm:text-xl font-black text-sf-text">
                             Review Access: {user.name || user.username}
                         </h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
+                    <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Modal Body */}
-                <div className="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 custom-scrollbar min-h-0">
                     {conflictError && (
                         <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl space-y-2">
                             <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200 text-xs font-bold">
@@ -264,7 +264,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                 </div>
 
                 {/* Modal Foot */}
-                <div className="p-4 px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-between shrink-0">
+                <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={onClose}
