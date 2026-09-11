@@ -858,6 +858,29 @@ exports.createApiKey = async (req, res) => {
 
         const expiresAt = expiresDays ? new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000) : null;
 
+        // LG-28: Validate explicit non-empty lab scope
+        if (!labs || !Array.isArray(labs) || labs.length === 0) {
+            return res.status(400).json({
+                error: 'INVALID_LAB_SCOPE',
+                message: 'Explicit lab scope (non-empty labs array) is required when issuing an SIS API key.'
+            });
+        }
+
+        if (!labs.includes('*')) {
+            const existingLabs = await prisma.lab.findMany({
+                where: { id: { in: labs } },
+                select: { id: true }
+            });
+            const existingLabIds = new Set(existingLabs.map(l => l.id));
+            const missing = labs.filter(l => !existingLabIds.has(l));
+            if (missing.length > 0) {
+                return res.status(400).json({
+                    error: 'INVALID_LAB_ID',
+                    message: `Specified laboratories do not exist: ${missing.join(', ')}`
+                });
+            }
+        }
+
         const newKey = await prisma.apiKey.create({
             data: {
                 id: crypto.randomUUID(),
@@ -867,10 +890,22 @@ exports.createApiKey = async (req, res) => {
                 role,
                 countries: countries && Array.isArray(countries) ? JSON.stringify(countries) : null,
                 projects: projects && Array.isArray(projects) ? JSON.stringify(projects) : null,
-                labs: labs && Array.isArray(labs) ? JSON.stringify(labs) : JSON.stringify([]),
+                labs: JSON.stringify(labs),
                 isActive: true,
                 createdBy: req.user?.username || 'admin',
                 expiresAt
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-sis-key-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                entity: 'SIS_API_KEY',
+                entityId: newKey.id,
+                action: 'SIS_KEY_CREATED',
+                details: `Created API key '${name}' with labs: ${JSON.stringify(labs)}`,
+                performedBy: req.user?.username || 'admin',
+                timestamp: new Date()
             }
         });
 
@@ -884,6 +919,7 @@ exports.createApiKey = async (req, res) => {
                 name: newKey.name,
                 keyPrefix: newKey.keyPrefix,
                 role: newKey.role,
+                labs,
                 expiresAt: newKey.expiresAt
             }
         });
@@ -900,10 +936,23 @@ exports.revokeApiKey = async (req, res) => {
 
     try {
         const { id } = req.params;
-        await prisma.apiKey.update({
+        const updatedKey = await prisma.apiKey.update({
             where: { id },
             data: { isActive: false }
         });
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-sis-revoke-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                entity: 'SIS_API_KEY',
+                entityId: id,
+                action: 'SIS_KEY_REVOKED',
+                details: `Revoked API key '${updatedKey.name}'`,
+                performedBy: req.user?.username || 'admin',
+                timestamp: new Date()
+            }
+        });
+
         res.json({ status: 'success', message: 'API Key revoked successfully.' });
     } catch (err) {
         console.error('[SIS_REVOKE_KEY_ERR]', err);
