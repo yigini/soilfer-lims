@@ -15,7 +15,7 @@ import ReviewCompletionView from './ReviewCompletionView';
 import ReviewSubmissionView from './ReviewSubmissionView';
 import ActivityReceiptsView from './ActivityReceiptsView';
 import SpectralIntakeModal from './SpectralIntakeModal';
-import { saveLocalDraft, getLocalDraft, deleteLocalDraft } from '../../services/offline/offlineDb';
+import { saveLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations } from '../../services/offline/offlineDb';
 import { recordSyncOperation } from '../../services/offline/syncEngine';
 
 /**
@@ -390,6 +390,7 @@ export default function WorkbenchShell({
         try {
             if (user?.id) {
                 deleteLocalDraft(`draft:${user.id}:${workItemId}`).catch(() => {});
+                removePendingDraftOperations(workItemId, user.id).catch(() => {});
             }
             await axios.delete(`/api/workbench/drafts/item/${workItemId}`);
             addToast('Draft discarded successfully', 'info');

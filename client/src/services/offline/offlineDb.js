@@ -241,6 +241,26 @@ export async function removeOutboxOperation(operationId) {
     });
 }
 
+export async function removePendingDraftOperations(workItemId, userId = null) {
+    return withStore('outbox', 'readwrite', (store) => {
+        return new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const ops = request.result || [];
+                for (const op of ops) {
+                    if (op.type === 'SAVE_WORK_DRAFT' && (op.target === workItemId || op.payload?.workItemId === workItemId)) {
+                        if (!userId || op.userId === userId || (typeof op.userId === 'string' && op.userId.trim() === String(userId).trim())) {
+                            store.delete(op.operationId);
+                        }
+                    }
+                }
+                resolve();
+            };
+            request.onerror = () => reject(request.error);
+        });
+    });
+}
+
 // ─── WORK PACK STORAGE ───
 
 export async function saveWorkPack(pack) {

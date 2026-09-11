@@ -152,6 +152,93 @@ class SyncService {
 
                     await prisma.$transaction(async (tx) => {
                         if (tx.workItemDraft) {
+                            const existingDraft = await tx.workItemDraft.findUnique({
+                                where: { workItemId }
+                            });
+
+                            const opCapturedAt = op.capturedAtLocal || op.payload?.capturedAtLocal || op.payload?.capturedAt;
+                            const opTime = opCapturedAt ? new Date(opCapturedAt).getTime() : 0;
+                            const serverDraftTime = existingDraft?.updatedAt ? new Date(existingDraft.updatedAt).getTime() : 0;
+                            const opDraftVersion = op.payload?.clientDraftVersion || op.payload?.draftVersion || 0;
+                            const serverDraftVersion = existingDraft?.draftVersion || 0;
+
+                            // 1. Check if draft was explicitly discarded on server after this operation was captured
+                            let wasDiscardedAfterOp = false;
+                            if (item.history) {
+                                const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
+                                const discardEvent = Array.isArray(history) && history.slice().reverse().find(h => h.action === 'DRAFT_DISCARDED');
+                                if (discardEvent && discardEvent.timestamp) {
+                                    const discardTime = new Date(discardEvent.timestamp).getTime();
+                                    if (discardTime > opTime) {
+                                        wasDiscardedAfterOp = true;
+                                    }
+                                }
+                            }
+
+                            if (wasDiscardedAfterOp) {
+                                savedReceipt = await CommandReceiptService.recordReceipt(tx, {
+                                    idempotencyKey: opId,
+                                    commandType: op.type,
+                                    targetResource: workItemId,
+                                    actor: user.username,
+                                    status: 'SUCCESS',
+                                    outcome: {
+                                        saved: false,
+                                        discarded: true,
+                                        message: 'Draft was discarded on server prior to sync replay',
+                                        workItemId
+                                    }
+                                });
+                                outcome = { saved: false, discarded: true, workItemId };
+                                return;
+                            }
+
+                            // 2. Concurrency check: does a newer draft already exist on the server?
+                            const isServerDraftNewer = existingDraft && (
+                                (serverDraftTime > opTime) ||
+                                (opDraftVersion > 0 && serverDraftVersion > opDraftVersion)
+                            );
+
+                            if (isServerDraftNewer) {
+                                // Server draft was saved more recently than this offline operation.
+                                // Preserve the newer server draft without overwriting it with older data.
+                                draftRecord = existingDraft;
+                                if (draftVal !== null && draftVal !== existingDraft.value && !existingDraft.conflictValue) {
+                                    draftRecord = await tx.workItemDraft.update({
+                                        where: { workItemId },
+                                        data: { conflictValue: draftVal }
+                                    });
+                                }
+
+                                savedReceipt = await CommandReceiptService.recordReceipt(tx, {
+                                    idempotencyKey: opId,
+                                    commandType: op.type,
+                                    targetResource: workItemId,
+                                    actor: user.username,
+                                    status: 'SUCCESS',
+                                    outcome: {
+                                        saved: false,
+                                        superseded: true,
+                                        newerPreserved: true,
+                                        currentValue: existingDraft.value,
+                                        attemptedValue: draftVal,
+                                        workItemId,
+                                        draftId: existingDraft.id
+                                    }
+                                });
+                                outcome = {
+                                    saved: false,
+                                    superseded: true,
+                                    newerPreserved: true,
+                                    currentValue: existingDraft.value,
+                                    attemptedValue: draftVal,
+                                    workItemId,
+                                    draftId: existingDraft.id
+                                };
+                                return;
+                            }
+
+                            // 3. Normal path: existing draft is older or does not exist
                             draftRecord = await tx.workItemDraft.upsert({
                                 where: { workItemId },
                                 create: {
@@ -200,7 +287,9 @@ class SyncService {
                         });
                     });
 
-                    outcome = { saved: true, workItemId, draftId: draftRecord?.id };
+                    if (!outcome) {
+                        outcome = { saved: true, workItemId, draftId: draftRecord?.id };
+                    }
                     savedReceiptId = savedReceipt?.id;
                 } else if (op.type === 'COMPLETE_WORK') {
                     // Scientific determination completion

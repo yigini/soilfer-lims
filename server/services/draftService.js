@@ -181,8 +181,8 @@ async function discardDraft(user, workItemId) {
         where: { workItemId }
     });
 
-    // 2. Revert WorkItem status to ASSIGNED if currently IN_PROGRESS and no final result exists
-    if (draft.workItem && draft.workItem.status === 'IN_PROGRESS' && !draft.workItem.completedAt) {
+    // 2. Record discard event and revert status to ASSIGNED if currently IN_PROGRESS
+    if (draft.workItem && !draft.workItem.completedAt) {
         const history = typeof draft.workItem.history === 'string'
             ? JSON.parse(draft.workItem.history)
             : (draft.workItem.history || []);
@@ -197,8 +197,9 @@ async function discardDraft(user, workItemId) {
         await prisma.workItem.update({
             where: { id: workItemId },
             data: {
-                status: 'ASSIGNED',
+                status: draft.workItem.status === 'IN_PROGRESS' ? 'ASSIGNED' : draft.workItem.status,
                 history: JSON.stringify(history),
+                version: { increment: 1 },
                 updatedAt: new Date()
             }
         }).catch(err => console.error('[draftService] Failed to revert WorkItem to ASSIGNED:', err));
