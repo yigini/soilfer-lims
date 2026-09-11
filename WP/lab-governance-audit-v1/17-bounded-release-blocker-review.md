@@ -109,51 +109,70 @@ Both narrow conflict defects reported at 708f224 have been resolved and verified
 
 ## Production Rollback & Recovery Procedure
 
-A release rollback cannot merely revert a single commit on the feature branch. The following procedure defines the pre-deployment inventory and step-by-step restoration to the running production release while accounting for post-deploy writes.
+A release rollback cannot merely revert a commit on the feature branch. The following procedure defines the pre-deployment inventory and step-by-step restoration to the running production release while accounting for post-deploy writes and governance semantics.
 
-### 1. Pre-Deployment Snapshot Inventory
-- **Running Production Commit**: `ecb7c91aee041febfb60de51d248f322b6d6376c` (current HEAD of `main`).
-- **Production Container Image Tag**: Tag running production container before deployment as `soilfer-lims:pre-governance-ecb7c91`.
-- **Database Backup**: Immediately before executing migrations, take an atomic snapshot of the production SQLite database:
+### 1. Mandatory Pre-Deployment Gate: Production Inventory & WAL-Consistent Backup
+- **Running Production Revision (UNVERIFIED)**: While `origin/main` is at `ecb7c91`, the actual running container image and digest on the live production host have not been directly inspected from this workspace. Inspecting and recording the running image ID, image digest, environment configuration, network bindings, and volume mounts is a **mandatory pre-deployment gate**.
+- **WAL-Consistent Database Snapshot**: SQLite running in WAL mode stores recent writes in `-wal` and `-shm` sidecar files. A raw filesystem copy without checkpointing can yield a stale or corrupt restore. Operators must take a consistent snapshot using the SQLite backup API or force a truncate checkpoint before snapshotting:
   ```bash
-  # Take consistent snapshot using SQLite backup API or CLI
-  sqlite3 /path/to/production/dev.db ".backup '/path/to/backups/dev.db.pre-deploy-ecb7c91.bak'"
+  # Option A: Online SQLite backup API (safe during concurrent reads/writes)
+  sqlite3 /path/to/production/dev.db ".backup '/path/to/backups/dev.db.pre-deploy.bak'"
+
+  # Option B: Checkpoint followed by atomic copy of database + sidecars
+  sqlite3 /path/to/production/dev.db "PRAGMA wal_checkpoint(TRUNCATE);"
+  cp /path/to/production/dev.db /path/to/backups/dev.db.pre-deploy.bak
   ```
 
-### 2. Schema Compatibility Assessment
-- Migrations introduced in PR #94:
-  - `20260911000000_lab_governance_v1`: adds nullable columns `conflictValue`, `notes` to `WorkItemDraft`; adds nullable audit columns.
-  - `20260911140000_invitation_expiry_index`: adds index on `Invitation(expiresAt)`.
-- Because all schema changes are **strictly additive** with nullable columns and indexes, the pre-release production codebase (`ecb7c91`) is **forward-compatible** with the migrated database: it queries only its expected columns and will not fail if additional nullable columns exist.
-
-### 3. Scenario A: Immediate Rollback (Zero Post-Deploy Writes)
-If release failure is detected during smoke tests before production traffic is enabled:
-1. Stop the application container.
-2. Restore the pre-deploy database snapshot:
-   ```bash
-   cp /path/to/backups/dev.db.pre-deploy-ecb7c91.bak /path/to/production/dev.db
-   ```
-3. Restart the application using the pre-release production image (`soilfer-lims:pre-governance-ecb7c91`).
-4. Verify health endpoints and application availability.
-
-### 4. Scenario B: Rollback After Post-Deployment Writes
-If rollback is triggered after technicians or managers have recorded samples, results, or work attempts:
-1. **Do NOT overwrite `dev.db` with the pre-deploy snapshot**, as this would erase valid analytical data entered after release.
-2. Since schema migrations are purely additive, the pre-release image (`ecb7c91`) can run directly against the current database without data loss or schema conflict.
-3. Redeploy the pre-release container image:
-   ```bash
-   docker stop soilfer-lims-app
-   docker run -d --name soilfer-lims-app -v /path/to/production:/data soilfer-lims:pre-governance-ecb7c91
-   ```
-4. If a down-migration is strictly required by infrastructure policies:
-   - Extract all delta records written since deployment:
+### 2. Verified PR #94 Migrations & Preflight Behavior
+The actual migrations introduced in PR #94 are:
+1. `20260911130000_add_governance_lifecycle_and_grants`:
+   - Creates `LabLifecycleState` (operational status, revision, pause reason/actor/timestamps).
+   - Creates `StaffInvitation` (pending invitations with hashed single-use tokens, roles, lab scope).
+   - Creates `StaffRecoveryGrant` (emergency admin recovery tokens).
+   - Creates unique indexes on `StaffInvitation(tokenHash)` and `StaffRecoveryGrant(tokenHash)`.
+   - **Preflight & Failure Behavior**: Uses `CREATE TABLE IF NOT EXISTS` and `CREATE UNIQUE INDEX IF NOT EXISTS`. Fails only if the SQLite catalog is locked by long-running transactions or filesystem I/O errors occur.
+2. `20260911160000_add_active_invitation_unique_index`:
+   - Creates partial unique index `idx_staff_invitation_active_email` on `StaffInvitation("email") WHERE "isConsumed" = 0 AND "isRevoked" = 0`.
+   - **Preflight & Failure Behavior**: Enforces that at most one active, unrevoked invitation exists per email. If pre-existing dirty records with duplicate active invitations exist, index creation intentionally **fails closed** rather than arbitrarily deleting historical records.
+   - **Preflight Query**:
      ```sql
-     -- Delta export for post-deploy records
-     SELECT * FROM Result WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
-     SELECT * FROM WorkAttempt WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
-     SELECT * FROM Sample WHERE receptionDate >= '<DEPLOY_TIMESTAMP>';
-     SELECT * FROM AuditLog WHERE timestamp >= '<DEPLOY_TIMESTAMP>';
+     SELECT email, COUNT(*) FROM "StaffInvitation" WHERE "isConsumed" = 0 AND "isRevoked" = 0 GROUP BY email HAVING COUNT(*) > 1;
      ```
-   - Retain delta records in an external audit export before any schema alterations.
+     Must return 0 rows before applying.
+
+### 3. Semantic Compatibility Caveat
+- **DDL Compatibility vs Semantic Governance**: While the new tables and partial index are additive and do not break basic SQL queries on existing tables (`WorkItem`, `Sample`, `Result`), additive DDL alone does **not** equal semantic compatibility.
+- The pre-release application code lacks awareness of `LabLifecycleState` (paused vs active) and `StaffRecoveryGrant`. If the application container is rolled back to the pre-release image while pointing to the active database, the older application will **ignore** administrative laboratory pauses and governance boundaries, allowing unrestricted operations in laboratories intended to be paused.
+
+### 4. Non-Executable Rollback Checklist
+
+> [!CAUTION]
+> Do not execute generic `docker run` commands that discard production networking, volume mounts, or secret environments. Use your verified deployment mechanism (e.g., Docker Compose, Kubernetes manifest, or deployment pipeline) following this operational checklist:
+
+#### Scenario A: Immediate Rollback (Zero Post-Deployment Writes)
+1. Drain incoming web traffic / put proxy into maintenance mode.
+2. Stop the application container service using the production orchestrator (`docker compose down` or orchestrator stop).
+3. Restore the pre-deployment WAL-consistent database snapshot:
+   ```bash
+   cp /path/to/backups/dev.db.pre-deploy.bak /path/to/production/dev.db
+   rm -f /path/to/production/dev.db-wal /path/to/production/dev.db-shm
+   ```
+4. Update the service specification to reference the recorded pre-release image digest.
+5. Launch service using the production deployment mechanism with verified environment configuration.
+6. Verify health and read-only endpoints before reopening traffic.
+
+#### Scenario B: Rollback After Post-Deployment Writes
+1. **Do NOT overwrite `dev.db` with the pre-deploy backup**: Any determinations, sample receptions, or audit logs recorded after deployment would be destroyed.
+2. Verify whether post-deployment analytical records exist:
+   ```sql
+   SELECT COUNT(*) FROM Result WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
+   SELECT COUNT(*) FROM WorkAttempt WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
+   SELECT COUNT(*) FROM Sample WHERE receptionDate >= '<DEPLOY_TIMESTAMP>';
+   ```
+3. Export post-deployment delta records to an external backup before making any container or database changes.
+4. If reverting the container image while retaining the migrated database:
+   - Be aware of the **semantic compatibility caveat**: laboratories marked PAUSED in `LabLifecycleState` will become operational under the old code.
+   - If emergency administrative pause must be maintained, revoke user sessions or block network ingress for affected laboratory subnets.
 5. Merge and deployment remain strictly on hold until explicit release sign-off.
+
 
