@@ -1,3 +1,4 @@
+'use strict';
 
 const express = require('express');
 const router = express.Router();
@@ -14,8 +15,13 @@ router.use(checkPermission('MANAGE_USERS'));
 
 router.get('/', userController.getUsers);
 router.post('/', userController.createUser);
+router.post('/invitations', checkPermission('MANAGE_USERS'), userController.createInvitation);
+router.post('/:id/access-preview', checkPermission('MANAGE_USERS'), userController.getAccessPreview);
+router.patch('/:id/access', checkPermission('MANAGE_USERS'), userController.applyAccess);
+router.post('/:id/suspend', checkPermission('MANAGE_USERS'), userController.suspendUser);
+router.post('/:id/reactivate', checkPermission('MANAGE_USERS'), userController.reactivateUser);
+router.post('/:id/recovery', checkPermission('MANAGE_USERS'), userController.createRecovery);
 router.put('/:id', userController.updateUser);
 router.delete('/:id', userController.deleteUser);
-
 
 module.exports = router;

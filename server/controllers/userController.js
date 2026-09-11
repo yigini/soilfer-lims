@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
 const { ALL_ROLES, ALLOWED_SUB_ROLES } = require('../config/roles');
+const staffLifecycleService = require('../services/staffLifecycleService');
 
 const canManage = (actor, target) => {
     if (!actor || !target) return false;
@@ -419,5 +420,70 @@ exports.getDirectory = async (req, res) => {
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+
+exports.createInvitation = async (req, res) => {
+    try {
+        const { name, email, role, labId, projects } = req.body;
+        const result = await staffLifecycleService.createInvitation(req.user, { name, email, role, labId, projects });
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.getAccessPreview = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const changes = req.body || {};
+        const preview = await staffLifecycleService.getAccessPreview(req.user, targetUserId, changes);
+        res.json(preview);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.applyAccess = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { changes, reviewToken, reason } = req.body || {};
+        const result = await staffLifecycleService.applyAccessChanges(req.user, targetUserId, { changes, reviewToken, reason });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.suspendUser = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { reason } = req.body || {};
+        const result = await staffLifecycleService.suspendUser(req.user, targetUserId, { reason });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.reactivateUser = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const result = await staffLifecycleService.reactivateUser(req.user, targetUserId);
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.createRecovery = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { reason } = req.body || {};
+        const result = await staffLifecycleService.createRecoveryGrant(req.user, targetUserId, { reason });
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
     }
 };

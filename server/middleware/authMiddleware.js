@@ -54,7 +54,7 @@ const verifyToken = async (req, res, next) => {
         const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
         if (jwtTokenVersion < dbTokenVersion) {
             console.warn(`[AUTH] Token invalidated by password change for user ID: ${user.id}`);
-            return res.status(401).json({ error: 'SESSION_INVALIDATED', message: 'Token has been invalidated. Please log in again.' });
+            return res.status(401).json({ error: 'SESSION_INVALIDATED', code: 'SESSION_INVALIDATED', message: 'Token has been invalidated. Please log in again.' });
         }
 
         // Revalidate original actor if session is impersonated (LG-16, A14)

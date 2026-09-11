@@ -6,6 +6,7 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 router.post('/login', authController.login);
 router.get('/me', verifyToken, authController.me);
 router.patch('/preferences', verifyToken, authController.updatePreferences);
+router.patch('/profile', verifyToken, authController.updateProfile);
 router.post('/change-password', verifyToken, authController.changePassword);
 router.post('/impersonate', verifyToken, checkPermission('MANAGE_BRANDING'), authController.impersonate);
 
