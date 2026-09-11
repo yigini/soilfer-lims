@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-11T15:38:22.754Z",
-  "totalTests": 14,
-  "passed": 14,
+  "timestamp": "2026-09-11T16:19:13.194Z",
+  "totalTests": 15,
+  "passed": 15,
   "failed": 0,
   "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
@@ -36,9 +36,16 @@
     },
     {
       "id": "A11_05",
-      "description": "Open work item successfully reassigned to active colleague",
-      "expected": "tech_bernardo",
-      "actual": "tech_bernardo",
+      "description": "Open work item successfully reassigned via authorized command with audit trail",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_05_RECEIVING",
+      "description": "Receiving technician Bernardo opens work queue and sees the reassigned task",
+      "expected": true,
+      "actual": true,
       "passed": true
     },
     {
@@ -57,16 +64,16 @@
     },
     {
       "id": "A11_08",
-      "description": "Emergency suspension without mandatory reason is rejected (400 Bad Request)",
-      "expected": 400,
-      "actual": 400,
+      "description": "Emergency suspension confirmation form rejects submission on empty reason with validation warning",
+      "expected": true,
+      "actual": true,
       "passed": true
     },
     {
       "id": "A11_09",
-      "description": "Emergency suspension succeeds with valid reason (HTTP 200)",
-      "expected": 200,
-      "actual": 200,
+      "description": "Emergency suspension submitted through UI confirmation sets user inactive and increments tokenVersion",
+      "expected": true,
+      "actual": true,
       "passed": true
     },
     {

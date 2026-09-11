@@ -118,12 +118,27 @@ export const SyncProvider = ({ children }) => {
         };
     }, [refreshCounts, refreshPack]);
 
-    const performSync = async () => {
+    const performSync = useCallback(async () => {
         setSyncStatus('syncing');
         const res = await triggerSync(null, user);
         refreshCounts();
         return res;
-    };
+    }, [user, refreshCounts]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.soilferSync = {
+                recordSyncOperation,
+                triggerSync: performSync,
+                refreshCounts
+            };
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                delete window.soilferSync;
+            }
+        };
+    }, [performSync, refreshCounts]);
 
     const downloadPack = async (options) => {
         const bundle = await downloadAndActivateWorkPack(options);

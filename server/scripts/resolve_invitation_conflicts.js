@@ -1,13 +1,14 @@
 'use strict';
 
 /**
- * Controlled Staff Invitation Conflict Resolution Utility (Report 15)
+ * Controlled Staff Invitation Conflict Resolution Utility (Report 15 & 16)
  * 
- * Provides an explicit, audited resolution path for duplicate active staff invitations:
- * 1. Read-only conflict detection and preflight reporting.
- * 2. Normalization of emails and accurate expiration handling.
- * 3. Audited resolution: preserves chosen intended invitation or revokes all to allow fresh issuance.
- * 4. Safe application of partial unique index after conflict resolution.
+ * Provides an explicit, strictly validated, audited resolution path for duplicate active staff invitations:
+ * 1. Read-only conflict detection and preflight reporting (findInvitationConflicts).
+ * 2. Strict pre-validation: every conflict must have an explicit plan with an authorized action ('retain' or 'revoke_all'),
+ *    a non-empty reason, and a valid retainId matching an actual conflicting invitation.
+ * 3. Zero implicit fallbacks: missing or invalid plans throw before any mutation occurs.
+ * 4. Atomic transactional execution: all revocations and audit log entries commit together or roll back completely.
  */
 
 const crypto = require('crypto');
@@ -58,18 +59,75 @@ function findInvitationConflicts(db) {
     return conflicts;
 }
 
+/**
+ * Resolves conflicting active invitations using explicit, pre-validated resolution plans.
+ * 
+ * @param {object} db better-sqlite3 database connection
+ * @param {object} resolutions map of email -> { action: 'retain' | 'revoke_all', retainId?: string, reason: string }
+ * @param {string} actor user identifier performing the audited resolution
+ * @returns {Array} array of resolution outcomes
+ */
 function resolveConflicts(db, resolutions = {}, actor = 'SYSTEM_ADMIN') {
+    if (!actor || typeof actor !== 'string' || !actor.trim()) {
+        throw new Error('An authorized actor identity is required for conflict resolution.');
+    }
+
     const conflicts = findInvitationConflicts(db);
+    if (conflicts.length === 0) {
+        return [];
+    }
+
+    // Step 1: Strict preflight validation of all plans before ANY database mutation
+    const validatedPlans = new Map();
+
+    for (const conflict of conflicts) {
+        const email = conflict.email;
+        const plan = resolutions[email];
+
+        if (!plan || typeof plan !== 'object') {
+            throw new Error(`Missing explicit resolution plan for conflicting email "${email}". No default action is permitted.`);
+        }
+
+        if (!plan.reason || typeof plan.reason !== 'string' || !plan.reason.trim()) {
+            throw new Error(`Non-empty justification reason is required for resolving conflict for "${email}".`);
+        }
+
+        if (plan.action !== 'retain' && plan.action !== 'revoke_all') {
+            throw new Error(`Invalid action "${plan.action}" for "${email}". Allowed actions are 'retain' or 'revoke_all'.`);
+        }
+
+        if (plan.action === 'retain') {
+            if (!plan.retainId || typeof plan.retainId !== 'string' || !plan.retainId.trim()) {
+                throw new Error(`A valid retainId is required when action is 'retain' for "${email}".`);
+            }
+            const matchingInvite = conflict.invitations.find(i => i.id === plan.retainId.trim());
+            if (!matchingInvite) {
+                throw new Error(`retainId "${plan.retainId}" does not match any existing conflicting invitation for "${email}".`);
+            }
+            validatedPlans.set(email, {
+                action: 'retain',
+                retainId: plan.retainId.trim(),
+                reason: plan.reason.trim(),
+                conflict
+            });
+        } else if (plan.action === 'revoke_all') {
+            validatedPlans.set(email, {
+                action: 'revoke_all',
+                reason: plan.reason.trim(),
+                conflict
+            });
+        }
+    }
+
+    // Step 2: Atomic transactional execution
     const resolvedSummary = [];
 
     db.transaction(() => {
-        for (const conflict of conflicts) {
-            const email = conflict.email;
-            const plan = resolutions[email] || { action: 'auto_expire_or_revoke_all' };
+        for (const [email, validated] of validatedPlans.entries()) {
+            const { action, conflict, reason } = validated;
 
-            if (plan.action === 'retain' && plan.retainId) {
-                // Retain specific reviewed invitation, revoke all others for this email
-                const toRevoke = conflict.invitations.filter(i => i.id !== plan.retainId);
+            if (action === 'retain') {
+                const toRevoke = conflict.invitations.filter(i => i.id !== validated.retainId);
                 for (const inv of toRevoke) {
                     db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
                 }
@@ -80,13 +138,18 @@ function resolveConflicts(db, resolutions = {}, actor = 'SYSTEM_ADMIN') {
                     VALUES (?, 'USER', ?, 'INVITATION_CONFLICT_RESOLVED', ?, ?, CURRENT_TIMESTAMP)
                 `).run(
                     auditId,
-                    plan.retainId,
-                    `Retained invitation ${plan.retainId} for ${email}; revoked ${toRevoke.length}. Reason: ${plan.reason || 'Reviewed manual retention'}`,
-                    actor
+                    validated.retainId,
+                    `Audited conflict resolution: retained invitation ${validated.retainId} for ${email}; revoked ${toRevoke.length} conflicting invitation(s). Reason: ${reason}`,
+                    actor.trim()
                 );
 
-                resolvedSummary.push({ email, action: 'retain', retainedId: plan.retainId, revokedCount: toRevoke.length });
-            } else if (plan.action === 'revoke_all') {
+                resolvedSummary.push({
+                    email,
+                    action: 'retain',
+                    retainedId: validated.retainId,
+                    revokedCount: toRevoke.length
+                });
+            } else if (action === 'revoke_all') {
                 for (const inv of conflict.invitations) {
                     db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
                 }
@@ -98,46 +161,15 @@ function resolveConflicts(db, resolutions = {}, actor = 'SYSTEM_ADMIN') {
                 `).run(
                     auditId,
                     email,
-                    `Revoked all ${conflict.invitations.length} conflicting invitations for ${email}. Fresh reviewed invitation required. Reason: ${plan.reason || 'Admin reset'}`,
-                    actor
+                    `Audited conflict resolution: revoked all ${conflict.invitations.length} conflicting invitations for ${email}. Fresh reviewed invitation required. Reason: ${reason}`,
+                    actor.trim()
                 );
 
-                resolvedSummary.push({ email, action: 'revoke_all', revokedCount: conflict.invitations.length });
-            } else {
-                const expired = conflict.invitations.filter(i => i.isExpired);
-                for (const inv of expired) {
-                    db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
-                }
-
-                const remainingActive = conflict.invitations.filter(i => !i.isExpired);
-                if (remainingActive.length === 1) {
-                    const auditId = 'audit-conf-exp-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
-                    db.prepare(`
-                        INSERT INTO "AuditLog" (id, entity, entityId, action, details, performedBy, timestamp)
-                        VALUES (?, 'USER', ?, 'INVITATION_CONFLICT_RESOLVED', ?, ?, CURRENT_TIMESTAMP)
-                    `).run(
-                        auditId,
-                        remainingActive[0].id,
-                        `Expired ${expired.length} stale duplicate invitations for ${email}; retained sole active unexpired invitation ${remainingActive[0].id}`,
-                        actor
-                    );
-                    resolvedSummary.push({ email, action: 'expired_duplicates', retainedId: remainingActive[0].id, revokedCount: expired.length });
-                } else if (remainingActive.length > 1) {
-                    for (const inv of remainingActive) {
-                        db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
-                    }
-                    const auditId = 'audit-conf-saferev-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
-                    db.prepare(`
-                        INSERT INTO "AuditLog" (id, entity, entityId, action, details, performedBy, timestamp)
-                        VALUES (?, 'USER', ?, 'INVITATION_CONFLICT_RESOLVED', ?, ?, CURRENT_TIMESTAMP)
-                    `).run(
-                        auditId,
-                        email,
-                        `Revoked ${remainingActive.length} active conflicting invitations for ${email} with differing grants. Fresh invitation required.`,
-                        actor
-                    );
-                    resolvedSummary.push({ email, action: 'revoked_conflicting', revokedCount: remainingActive.length });
-                }
+                resolvedSummary.push({
+                    email,
+                    action: 'revoke_all',
+                    revokedCount: conflict.invitations.length
+                });
             }
         }
     })();

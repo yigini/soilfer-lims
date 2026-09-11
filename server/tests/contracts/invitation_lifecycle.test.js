@@ -651,3 +651,228 @@ describe('Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)'
         expect(gtmHours).toBe(24);
     });
 });
+
+describe('Controlled Staff Invitation Conflict Resolution (Report 15 & 16 Contract)', () => {
+    const Database = require('better-sqlite3');
+    const { findInvitationConflicts, resolveConflicts } = require('../../scripts/resolve_invitation_conflicts');
+    let memDb;
+
+    function setupTestSchema(db) {
+        db.exec(`
+            CREATE TABLE "StaffInvitation" (
+                id TEXT PRIMARY KEY,
+                email TEXT NOT NULL,
+                name TEXT,
+                role TEXT NOT NULL,
+                labId TEXT NOT NULL,
+                projects TEXT,
+                expiresAt TEXT NOT NULL,
+                isConsumed INTEGER DEFAULT 0,
+                isRevoked INTEGER DEFAULT 0,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                createdBy TEXT NOT NULL
+            );
+            CREATE TABLE "AuditLog" (
+                id TEXT PRIMARY KEY,
+                entity TEXT NOT NULL,
+                entityId TEXT NOT NULL,
+                action TEXT NOT NULL,
+                details TEXT,
+                performedBy TEXT NOT NULL,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+    }
+
+    beforeEach(() => {
+        memDb = new Database(':memory:');
+        setupTestSchema(memDb);
+    });
+
+    afterEach(() => {
+        if (memDb) {
+            memDb.close();
+        }
+    });
+
+    test('Preflight detection identifies conflicts without mutating data', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, isConsumed, isRevoked, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 0, 0, 'admin'),
+            ('inv-2', 'CONFLICT@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 0, 0, 'admin'),
+            ('inv-3', 'other@example.org', 'Bob', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 0, 0, 'admin');
+        `).run();
+
+        const conflicts = findInvitationConflicts(memDb);
+        expect(conflicts).toHaveLength(1);
+        expect(conflicts[0].email).toBe('conflict@example.org');
+        expect(conflicts[0].totalCount).toBe(2);
+        expect(conflicts[0].hasDifferingGrants).toBe(true);
+
+        // Verify read-only invariant: zero rows modified, zero audit logs
+        const revokedCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 1').get().c;
+        const auditCount = memDb.prepare('SELECT COUNT(*) as c FROM "AuditLog"').get().c;
+        expect(revokedCount).toBe(0);
+        expect(auditCount).toBe(0);
+    });
+
+    test('Missing plan for conflicting email throws and makes zero changes', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        expect(() => {
+            resolveConflicts(memDb, {}, 'ADMIN_USER');
+        }).toThrow(/Missing explicit resolution plan for conflicting email "conflict@example.org"/);
+
+        const revokedCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 1').get().c;
+        const auditCount = memDb.prepare('SELECT COUNT(*) as c FROM "AuditLog"').get().c;
+        expect(revokedCount).toBe(0);
+        expect(auditCount).toBe(0);
+    });
+
+    test('Empty justification reason throws and makes zero changes', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        expect(() => {
+            resolveConflicts(memDb, {
+                'conflict@example.org': { action: 'revoke_all', reason: '   ' }
+            }, 'ADMIN_USER');
+        }).toThrow(/Non-empty justification reason is required/);
+
+        const revokedCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 1').get().c;
+        expect(revokedCount).toBe(0);
+    });
+
+    test('Invalid action or invalid retainId throws and makes zero changes', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        // Invalid action
+        expect(() => {
+            resolveConflicts(memDb, {
+                'conflict@example.org': { action: 'auto_expire', reason: 'Attempted fallback' }
+            }, 'ADMIN_USER');
+        }).toThrow(/Invalid action "auto_expire"/);
+
+        // Invalid retainId (not matching conflict)
+        expect(() => {
+            resolveConflicts(memDb, {
+                'conflict@example.org': { action: 'retain', retainId: 'inv-nonexistent', reason: 'Wrong ID' }
+            }, 'ADMIN_USER');
+        }).toThrow(/retainId "inv-nonexistent" does not match any existing conflicting invitation/);
+
+        const revokedCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 1').get().c;
+        expect(revokedCount).toBe(0);
+    });
+
+    test('Valid retain choice revokes unselected duplicates and records audit log transactionally', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        const result = resolveConflicts(memDb, {
+            'conflict@example.org': {
+                action: 'retain',
+                retainId: 'inv-2',
+                reason: 'Retain reviewed Lab Manager role per ticket #123'
+            }
+        }, 'GOVERNANCE_OFFICER');
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toEqual({
+            email: 'conflict@example.org',
+            action: 'retain',
+            retainedId: 'inv-2',
+            revokedCount: 1
+        });
+
+        const inv1 = memDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-1');
+        const inv2 = memDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-2');
+        expect(inv1.isRevoked).toBe(1);
+        expect(inv2.isRevoked).toBe(0);
+
+        const audit = memDb.prepare('SELECT * FROM "AuditLog"').get();
+        expect(audit).toBeTruthy();
+        expect(audit.entityId).toBe('inv-2');
+        expect(audit.action).toBe('INVITATION_CONFLICT_RESOLVED');
+        expect(audit.performedBy).toBe('GOVERNANCE_OFFICER');
+        expect(audit.details).toContain('Retain reviewed Lab Manager role');
+    });
+
+    test('Valid revoke_all choice revokes all conflicting rows and records audit log', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        const result = resolveConflicts(memDb, {
+            'conflict@example.org': {
+                action: 'revoke_all',
+                reason: 'Security reset; issuing fresh single invitation'
+            }
+        }, 'SECURITY_ADMIN');
+
+        expect(result).toHaveLength(1);
+        expect(result[0].action).toBe('revoke_all');
+        expect(result[0].revokedCount).toBe(2);
+
+        const activeCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 0').get().c;
+        expect(activeCount).toBe(0);
+
+        const audit = memDb.prepare('SELECT * FROM "AuditLog"').get();
+        expect(audit.performedBy).toBe('SECURITY_ADMIN');
+        expect(audit.entityId).toBe('conflict@example.org');
+        expect(audit.details).toContain('Security reset');
+    });
+
+    test('Transactional rollback on audit failure leaves 0 mutations', () => {
+        memDb.prepare(`
+            INSERT INTO "StaffInvitation" (id, email, name, role, labId, expiresAt, createdBy)
+            VALUES 
+            ('inv-1', 'conflict@example.org', 'Alice', 'LAB_TECHNICIAN', 'lab-1', '2030-01-01T00:00:00Z', 'admin'),
+            ('inv-2', 'conflict@example.org', 'Alice', 'LAB_MANAGER', 'lab-2', '2030-01-01T00:00:00Z', 'admin');
+        `).run();
+
+        // Create a trigger on AuditLog that fails to simulate transaction failure
+        memDb.exec(`
+            CREATE TRIGGER fail_audit_insert BEFORE INSERT ON "AuditLog"
+            BEGIN
+                SELECT RAISE(ABORT, 'Simulated AuditLog disk failure');
+            END;
+        `);
+
+        expect(() => {
+            resolveConflicts(memDb, {
+                'conflict@example.org': {
+                    action: 'retain',
+                    retainId: 'inv-1',
+                    reason: 'Testing atomic rollback'
+                }
+            }, 'AUDITOR');
+        }).toThrow(/Simulated AuditLog disk failure/);
+
+        // Verify entire transaction rolled back: inv-2 is NOT revoked
+        const revokedCount = memDb.prepare('SELECT COUNT(*) as c FROM "StaffInvitation" WHERE isRevoked = 1').get().c;
+        expect(revokedCount).toBe(0);
+    });
+});
+

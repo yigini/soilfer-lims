@@ -1,104 +1,90 @@
 {
-  "timestamp": "2026-09-11T15:35:55.455Z",
-  "totalTests": 14,
-  "passed": 14,
+  "timestamp": "2026-09-11T16:20:02.451Z",
+  "totalTests": 12,
+  "passed": 12,
   "failed": 0,
   "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "results": [
     {
       "id": "A20_01",
-      "description": "Technician A authenticated on shared workstation",
+      "description": "Technician A authenticated via /login UI on shared workstation",
       "expected": "usr-a20-tech-a",
       "actual": "usr-a20-tech-a",
       "passed": true
     },
     {
       "id": "A20_02",
-      "description": "Technician A unsynced draft and outbox operation committed to real IndexedDB",
-      "expected": true,
-      "actual": true,
+      "description": "Technician A enters draft determination in actual editor while offline",
+      "expected": "6.85",
+      "actual": "6.85",
       "passed": true
     },
     {
       "id": "A20_03",
-      "description": "Workstation in offline state retains Tech A pending outbox operation in IndexedDB",
-      "expected": 1,
-      "actual": 1,
-      "passed": true
-    },
-    {
-      "id": "A20_04",
-      "description": "Technician A logged out and local session cleared cleanly",
+      "description": "Technician A logged out via application UI; session cleared",
       "expected": null,
       "actual": null,
       "passed": true
     },
     {
-      "id": "A20_05",
-      "description": "Technician B successfully authenticated on same physical device after reconnect",
+      "id": "A20_04",
+      "description": "Technician B authenticated via application UI on shared device",
       "expected": "usr-a20-tech-b",
       "actual": "usr-a20-tech-b",
       "passed": true
     },
     {
+      "id": "A20_05",
+      "description": "Rendered Technician B workbench view contains none of Tech A draft",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
       "id": "A20_06",
-      "description": "Technician B outbox query partitions strictly and returns 0 pending operations",
+      "description": "Shipped sync under Tech B sends 0 Tech A operations (no cross-account replay)",
       "expected": 0,
       "actual": 0,
       "passed": true
     },
     {
       "id": "A20_07",
-      "description": "Workstation reconnect sends 0 Tech A operations under Tech B session (no cross-account replay)",
-      "expected": 0,
-      "actual": 0,
+      "description": "Technician B companion work synced and attributed strictly to Tech B",
+      "expected": true,
+      "actual": true,
       "passed": true
     },
     {
       "id": "A20_08",
-      "description": "Technician B work synced successfully and applied on server",
+      "description": "Technician B logged out via application UI",
       "expected": true,
       "actual": true,
       "passed": true
     },
     {
       "id": "A20_09",
-      "description": "Server command receipt recorded strictly under Tech B username",
+      "description": "Technician A re-authenticated via application UI on shared device",
       "expected": true,
       "actual": true,
       "passed": true
     },
     {
       "id": "A20_10",
-      "description": "Technician A unsynced draft intact and recoverable in IndexedDB after B logout",
-      "expected": true,
-      "actual": true,
+      "description": "Technician A recovers draft determination 6.85 in actual editor input",
+      "expected": "6.85",
+      "actual": "6.85",
       "passed": true
     },
     {
       "id": "A20_11",
-      "description": "Technician A queued outbox operation intact and pending in IndexedDB",
+      "description": "Technician A recovered draft synced and attributed strictly to Tech A in database",
       "expected": true,
       "actual": true,
       "passed": true
     },
     {
       "id": "A20_12",
-      "description": "Technician A recovered work syncs successfully and applies on server",
-      "expected": true,
-      "actual": true,
-      "passed": true
-    },
-    {
-      "id": "A20_13",
-      "description": "Server command receipt for recovered work attributed strictly to Tech A",
-      "expected": true,
-      "actual": true,
-      "passed": true
-    },
-    {
-      "id": "A20_14",
       "description": "Baseline database dev.db hash strictly preserved untouched",
       "expected": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
       "actual": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",

@@ -6,7 +6,7 @@
 **Execution Date**: 11 September 2026  
 **Release Status**: **STRICT MERGE & DEPLOYMENT HOLD** ([PR #94](https://github.com/yigini/soilfer-lims/pull/94) remains open; no staging, merge, or deployment)  
 **Auditor Finding Coverage**: All 16 original review items (IR-01 – IR-16), all 7 follow-up review findings (F01 – F07 + C01), and acceptance follow-up scenarios (S01 – S03, P01, C02, T01 – T03) fully resolved and verified  
-**Server Contract Test Suites**: 103 Test Suites (830 tests total, 0 failures; including 10 dedicated governance suites with 160 contract tests)  
+**Server Contract Test Suites**: 103 Test Suites (844 tests total, 0 failures; including 10 dedicated governance suites with 167 contract tests)  
 **Client Build Status**: Clean Production Build (0 Errors, Vite build: 7.64s; static bundle verification)  
 **Sample Preservation Invariant**: `server/prisma/dev.db` (local dev baseline DB with 35,192 historical samples) verified read-only and preserved across all preflight audits and migration rehearsals.  
 
@@ -199,12 +199,12 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A03** | Manager creates own allowed subordinate / viewer tries same call | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 11–12), `server/tests/contracts/invitation_lifecycle.test.js` (I00) | Permitted subordinate roles (`LAB_TECHNICIAN`, `ANALYST`) allowed for Lab Manager; Viewer role denied. |
 | **A04** | National scope GTM opens FRA lab by direct ID, query selector, pagination/filter, export and cached URL | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 17–18), `final_governance_probes.test.js` (F01, C01), `final-review-probes.cjs` (F01) | Rejected with 403 TARGET_OUTSIDE_SCOPE before exposing lab name, staff, or counts. Authorized GTM labs remain accessible. |
 | **A05** | National scope empty/malformed; unknown role; no lab | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 19–21), `final_governance_probes.test.js` (F01 companion) | Empty `countries: []` fails closed with 0 records; never falls back to global query. Unknown roles fail closed. |
-| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `passed` | `WP/lab-governance-audit-v1/independent-review/a06_all_roles_matrix_journey.cjs` (26/26 passed), `a06-all-roles-results.json`, screenshots (`browser-a06-technician.png`, `browser-a06-reception.png`, `browser-a06-auditor.png`, `browser-a06-project-manager.png`, `browser-paging-evidence.png`, `browser-invitation-national-lead.png`), `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/contracts/rbac_sample_registry.test.js` | Full positive and negative role journeys executed across all 10 roles (`SUPER_ADMIN`, `PROJECT_MANAGER`, `SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `SURVEYOR`, `AUDIT_USER`, `EXTERNAL_VIEWER`, `VIEWER`, `LAB_MANAGER`, `MASTER_USER`) across user, lab, project, sample, equipment, and audit list/detail/search/count/export endpoints. Visual browser artifacts captured for non-manager interfaces. |
+| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `passed` | `WP/lab-governance-audit-v1/independent-review/a06_all_roles_matrix_journey.cjs` (26/26 passed), `independent-review/a06-all-roles-results.json`, `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/contracts/rbac_sample_registry.test.js` | Headless Chrome browser journeys (Technician Workbench, Reception Desk, Audit Logs Dashboard, Project Manager Projects) and API matrix checks across all 8 remaining roles (`SUPER_ADMIN`, `PROJECT_MANAGER`, `SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `SURVEYOR`, `AUDIT_USER`, `EXTERNAL_VIEWER`, `VIEWER`). Scoped listings verify authorized fixture presence and foreign absence. Denied mutations assert HTTP 403, 0 DB mutations, and 0 audit mutations. Baseline `dev.db` hash preserved untouched. |
 | **A07** | Lab PUT injects ID/isActive/createdAt/unknown fields; user role empty, boolean string or invalid locale | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 7–12), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 1–4) | Strict allowlist prevents parameter tampering; immutable ID, createdAt, and lifecycle flags ignored/rejected. |
 | **A08** | User creation/transfer targets nonexistent, paused or unauthorized lab/project | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 5–8), `final_governance_probes.test.js` (F02), `server/tests/contracts/invitation_lifecycle.test.js` (I03) | Nonexistent lab returns 404; paused lab returns 400 `LAB_PAUSED`; appointment in `SETUP` status allowed. |
 | **A09** | Attempt to disable/delete/demote last admin in both staff interfaces and lab lifecycle | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 9–10), `final_governance_probes.test.js` | Atomic transaction check blocks demotion/suspension with `LAST_ADMIN_PROTECTED`; recovery admin account verified. |
 | **A10** | Two concurrent admins demote/suspend each other using the same initial snapshot | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Test 11) | Atomic transactional serialization ensures at least one effective admin remains; conflicting request rejected with 409 / `LAST_ADMIN_PROTECTED`. |
-| **A11** | Planned departure with work / immediate emergency disable with work | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a11_handover_journey.cjs` (14/14 passed), `browser-a11-results.json`, screenshots (`browser-a11-handover-modal.png`, `browser-a11-suspension-modal.png`), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 12–15), `final_governance_probes.test.js` (F05) | Full interactive browser and server journey: pre-flight open work detection, capability diff review, handover acknowledgment checkbox, access update, reassignment of open work to colleague, historical authorship preservation, emergency suspension with mandatory justification, immediate tokenVersion increment and JWT invalidation (401), open work flagged for reassignment, and last-admin protection. |
+| **A11** | Planned departure with work / immediate emergency disable with work | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a11_handover_journey.cjs` (15/15 passed), `independent-review/browser-a11-results.json`, `server/tests/contracts/lab_governance_wp_c.test.js`, `final_governance_probes.test.js` | Pre-flight open work accounting detected in UI (`A11_02`, `A11_03`), planned access update executes with `reviewToken` (`A11_04`), workitem reassigned via authentic `POST /api/work/:id/reassign` with audit trail (`A11_05`), receiving technician Bernardo logs into headless Chrome and opens reassigned task in his queue (`A11_05_RECEIVING`), historical sample determination authorship preserved (`A11_06`), emergency suspension modal enforces non-empty justification (`A11_07`, `A11_08`), user deactivated and `tokenVersion` incremented (`A11_09`), remaining open work flagged for reassignment (`A11_10`), active JWT immediately revoked with HTTP 401 (`A11_11`), audit trail immutably records `USER_SUSPENDED` with actor and justification (`A11_12`), last Super Admin protection guard blocks demotion (`A11_13`), and baseline `dev.db` hash preserved untouched (`A11_14`). |
 | **A12** | Invitation create/resend/expire/reuse/revoke, duplicate email, delivery failure | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (I00–I04, Reissue, Roster), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 16–19), `invitation-review.cjs` | Transactional rollback on audit failure leaves 0 records; active duplicate returns 409 `PENDING_INVITATION_EXISTS`; reissue revokes old token; delivery status reported honestly as `MANUAL_LINK`. Email transport mocked. |
 | **A13** | Admin recovery and password change, old JWT, reactivated user | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 20–22), `final_governance_probes.test.js` (F06, F07), `session_and_coverage.test.js` (S01) | `tokenVersion` increment invalidates prior sessions across HTTP, SIS, and WebSocket. Reactivation does not revive old tokens. |
 | **A14** | Impersonation target has nonzero version; original admin later disabled | `passed` | `server/tests/contracts/session_and_coverage.test.js` (C02, S02, S03) | Actor identity `decoded.act` validated on every request; suspending impersonating administrator immediately terminates session and closes active WebSockets. |
@@ -213,7 +213,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A17** | Pack requested without a required lab or for somebody else’s work | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 19–20) | Denied with 403; no global sample queries; bundle contains strictly authorized items. |
 | **A18** | Offline viewer or revoked technician completes foreign-lab/accepted work | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Sync engine replays through canonical `workEligibility.canRecord`; unassigned/revoked technician rejected with `NOT_ASSIGNED_TECHNICIAN`. |
 | **A19** | Offline draft save then restart server / duplicate replay | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Drafts durable in IndexedDB; idempotency receipt returned on replay; duplicate mutations prevented. Node VM environment. |
-| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a20_shared_device_journey.cjs` (14/14 passed), `browser-a20-results.json`, screenshots (`browser-a20-techA-draft.png`, `browser-a20-techB-login.png`, `browser-a20-techA-recovered.png`), `server/tests/contracts/reopened_governance_scenarios.test.js` | Full shared-device lifecycle in native Headless Chrome with real `window.indexedDB`: Tech A unsynced draft & outbox -> offline state -> A logout -> B login on same device -> reconnect -> B outbox returns 0 (zero cross-account replay) -> B executes/syncs own work -> B logout -> A re-login -> A draft and outbox recovered intact -> A syncs recovered work -> server attribution verified to A. |
+| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a20_shared_device_journey.cjs` (12/12 passed), `independent-review/browser-a20-results.json`, `server/tests/contracts/reopened_governance_scenarios.test.js` | Technician A logs in via `/login` UI (`A20_01`), opens Workbench offline and enters draft determination `6.85` in the actual `NumericEditor` input (`A20_02`), logs out via application UI `UserMenu` (`A20_03`), Technician B logs in via `/login` UI on shared workstation (`A20_04`), verified rendered Technician B workbench view contains none of Tech A's draft (`A20_05`), shipped sync (`window.soilferSync.triggerSync()`) triggered under Tech B sends 0 Tech A operations (`A20_06`), Tech B enters and syncs companion work on Sample B attributed strictly to Tech B (`A20_07`), Tech B logs out via UI (`A20_08`), Tech A logs back in via `/login` UI (`A20_09`), Tech A opens workbench and recovers `6.85` in the actual editor input (`A20_10`), Tech A syncs recovered work via shipped sync mechanism with DB attribution strictly to Tech A (`A20_11`), and baseline `dev.db` hash preserved untouched (`A20_12`). |
 | **A21** | Offline transfer/suspension, stale method revision, equipment now blocked, expired lease | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Domain rules evaluated on sync; rejected operations marked with explicit error codes; no silent auto-approval or actor substitution. |
 | **A22** | Missing prerequisites, scalar versus checklist, texture group and spectral upload | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Operational gate scalar entry rejected (`OPERATIONAL_GATE_REJECTED`), spectral scalar entry rejected (`SPECTRAL_SCALAR_REJECTED`), texture closure sum 100% enforced (`TEXTURE_CLOSURE_FAILED`). |
 | **A23** | Assignment to inactive technician, wrong lab, unauthorized national actor | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 13–16), `reopened_governance_scenarios.test.js` | `assignmentEligibilityService` validates active status, lab assignment, and actor scope before assignment. Past work remains attributed. |
@@ -233,7 +233,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A37** | Lab midnight, browser in other timezone, DST 23/25-hour day | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A37`), `server/tests/contracts/lab_governance_wp_a.test.js` (Section 8, Tests 13–14) | Half-open next-local-midnight interval calculated using lab's IANA timezone; verifies 23-hour spring-forward (`Europe/London`), 25-hour fall-back (`Europe/London`), and 24-hour standard (`America/Guatemala`). Old UTC timestamps unchanged. |
 | **A38** | Search/race/error/empty roster; 40 staff and 200+ rows | `passed` | `WP/lab-governance-audit-v1/independent-review/a39_a38_matrix_review.cjs`, `browser_paging_review.cjs` | Server-side pagination bounded; out-of-order search responses discarded via `latestWorkspaceReqId`; 403 and 500 render explicit error cards (never "No staff"). |
 | **A39** | 320, 390, 768, 1440 px; both themes; all five locales with long labels | `passed` | `WP/lab-governance-audit-v1/independent-review/governance_modals_review.cjs`, `a39_a38_matrix_review.cjs`, `modal-review.cjs` | Tested in native headless Chrome across 4 viewports, theme toggle, WCAG AAA contrast (11.67:1 >= 7:1), true focus boundary wrapping (`Shift+Tab` first->last, `Tab` last->first), and all 5 locales. Physical screen readers (NVDA/VoiceOver) with human users unverified. |
-| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a40_deep_links_journey.cjs` (8/8 passed), `browser-a40-deep-links-results.json`, screenshots (`browser-a40-deep-link-lab.png`, `browser-a40-deep-link-help.png`, `browser-a40-deep-link-reports.png`, `browser-a40-sample-map.png`, `browser-a40-draft-after-refresh.png`), Vite production build | Authentic browser deep link and draft continuity journey in native Headless Chrome: scoped lab deep link (`/admin/labs?labId=...&tab=people`), Help Centre (`/help`), Reports (`/reports`), Sample Workflow Map (`/workflow-map`), and Technician Workbench (`/workbench`). Offline bench draft committed to IndexedDB survives client reload/refresh with 100% continuity. |
+| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a40_deep_links_journey.cjs` (8/8 passed), `independent-review/browser-a40-deep-links-results.json`, Vite production build | Scoped lab deep link (`/admin/labs?labId=...&tab=people`) loads target lab view (`A40_01`), `/help` connects and renders knowledge base guide content (`A40_02`), `/reports` navigates to result reports interface (`A40_03`), `/samples/:id/map` renders authentic sample workflow graph with stages and sample code (rejecting "No Sample Specified"; `A40_04`), `/workbench` connects and renders assigned method and numeric determination editor (`A40_05`), technician enters draft `6.45` directly in `NumericEditor` input (`A40_06`), draft survives full page reload and is restored in the actual editor input (`A40_07`), and baseline `dev.db` hash preserved untouched (`A40_08`). |
 | **A41** | Project update handler and retry | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A41`) | Redundant `res.json` call eliminated; single HTTP response returned; idempotent retry tested without headers-already-sent error. |
 | **A42** | Migration rerun, rollback-compatible code, partial failure and restore rehearsal | `passed` | `server/scripts/disposable_migration_rehearsal.js`, `server/scripts/preflight_governance_report.js`, `server/scripts/resolve_invitation_conflicts.js` | Enhanced rehearsal uses `origDb.backup` for online WAL-consistent snapshot, applies multi-step migrations, tests real failure during the migration sequence, verifies safe transaction rollback without record mutation, executes forward repair via audited conflict resolution, enforces unique partial index, and verifies rerun idempotency. dev.db 35,192 samples strictly untouched. |
 
@@ -253,7 +253,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 ```text
 ================================================================================
 Test Suites: 103 passed, 103 total
-Tests:       837 passed, 837 total
+Tests:       844 passed, 844 total
 Snapshots:   0 total
 Database:    Strict isolated disposable SQLite databases only.
 Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
@@ -313,51 +313,76 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - Runtime schema initialization in `ensureTables()` contains 0 business-data mutation queries.
   - Conflicting duplicate invitations remain intact without arbitrary `max(rowid)` deletion until controlled, audited resolution.
   - Results saved to `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/migration-read-results.json`.
-- **Real Browser Shared-Device Journey (A20)**: 14 / 14 passed in `browser_a20_shared_device_journey.cjs` in native Google Chrome (headless):
-  - Step 1: Technician A creates offline bench draft and queues pending sync operation (`PASS`)
-  - Step 2: Technician A outbox confirms 1 pending operation partitioned to A (`PASS`)
-  - Step 3: Network switches offline (`PASS`)
-  - Step 4: Technician A logs out of shared device (`PASS`)
-  - Step 5: Technician B logs into same device and reconnects to network (`PASS`)
-  - Step 6: Technician B pending outbox returns 0 items — zero cross-account replay (`PASS`)
-  - Step 7: Technician B executes and syncs independent work attributed strictly to B (`PASS`)
-  - Step 8: Technician B logs out of shared device (`PASS`)
-  - Step 9: Technician A logs back into shared device (`PASS`)
-  - Step 10: Technician A offline bench draft recovered intact (`PASS`)
-  - Step 11: Technician A outbox recovered intact (`PASS`)
-  - Step 12: Technician A syncs recovered work to server (`PASS`)
-  - Step 13: Server verifies determinations and command receipts attributed strictly to A (`PASS`)
-  - Step 14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+- **Real Browser Shared-Device Journey (A20)**: 12 / 12 passed in `browser_a20_shared_device_journey.cjs` in native Google Chrome (headless):
+  - A20_01: Technician A authenticated via /login UI on shared workstation (`PASS`)
+  - A20_02: Technician A enters draft determination in actual editor while offline (`PASS`)
+  - A20_03: Technician A logged out via application UI; session cleared (`PASS`)
+  - A20_04: Technician B authenticated via application UI on shared device (`PASS`)
+  - A20_05: Rendered Technician B workbench view contains none of Tech A draft (`PASS`)
+  - A20_06: Shipped sync under Tech B sends 0 Tech A operations (no cross-account replay; `PASS`)
+  - A20_07: Technician B companion work synced and attributed strictly to Tech B (`PASS`)
+  - A20_08: Technician B logged out via application UI (`PASS`)
+  - A20_09: Technician A re-authenticated via application UI on shared device (`PASS`)
+  - A20_10: Technician A recovers draft determination 6.85 in actual editor input (`PASS`)
+  - A20_11: Technician A recovered draft synced and attributed strictly to Tech A in database (`PASS`)
+  - A20_12: Baseline database dev.db hash strictly preserved untouched (`PASS`)
   - Visual evidence captured in `browser-a20-techA-draft.png`, `browser-a20-techB-login.png`, `browser-a20-techA-recovered.png`. Results saved to `independent-review/browser-a20-results.json`.
-- **Real Browser Handover & Emergency Suspension Journey (A11)**: 14 / 14 passed in `browser_a11_handover_journey.cjs` in native Google Chrome (headless):
-  - A11_01: Open work accounting detects active work items before handover (`PASS`)
-  - A11_02: Opening access review modal presents capability diff and warning banner (`PASS`)
-  - A11_03: Handover acknowledgment checkbox is interactive (`PASS`)
-  - A11_04: Updating access completes without deleting user identity (`PASS`)
-  - A11_05: Open work successfully reassigned to colleague (`PASS`)
-  - A11_06: Historical sample determination authorship preserved under departing user (`PASS`)
-  - A11_07: Suspension dialog enforces non-empty justification input (returns 400 on empty; `PASS`)
-  - A11_08: Submitting suspension sets user to inactive and increments tokenVersion (`PASS`)
-  - A11_09: Suspended user token is rejected immediately with HTTP 401 across endpoints (`PASS`)
-  - A11_10: Remaining work flagged for reassignment (`PASS`)
-  - A11_11: USER_SUSPENDED audit log recorded with actor and reason (`PASS`)
-  - A11_12: Reassignment preserves original historical determination author (`PASS`)
-  - A11_13: Attempt to suspend sole Super Administrator rejected with LAST_ADMIN_PROTECTED (`PASS`)
-  - A11_14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+- **Real Browser Handover & Emergency Suspension Journey (A11)**: 15 / 15 passed in `browser_a11_handover_journey.cjs` in native Google Chrome (headless):
+  - A11_01: Manager views staff roster including Technician Alma (`PASS`)
+  - A11_02: Access Review modal displays pre-flight open work accounting and handover notice (`PASS`)
+  - A11_03: Access preview endpoint accounts for open work items (`PASS`)
+  - A11_04: Planned access update succeeds with reviewToken and justification (HTTP 200; `PASS`)
+  - A11_05: Open work item successfully reassigned via authorized command with audit trail (`PASS`)
+  - A11_05_RECEIVING: Receiving technician Bernardo opens work queue and sees the reassigned task (`PASS`)
+  - A11_06: Historical completed work retains original technician authorship intact (`PASS`)
+  - A11_07: Emergency Staff Suspension modal opens cleanly from UI (`PASS`)
+  - A11_08: Emergency suspension confirmation form rejects submission on empty reason with validation warning (`PASS`)
+  - A11_09: Emergency suspension submitted through UI confirmation sets user inactive and increments tokenVersion (`PASS`)
+  - A11_10: Emergency suspension flags unfinished work requiring reassignment (`PASS`)
+  - A11_11: Suspended technician active JWT is immediately revoked and rejected (HTTP 401; `PASS`)
+  - A11_12: Audit log immutably records USER_SUSPENDED with actor and reason (`PASS`)
+  - A11_13: Attempt to suspend sole Super Admin fails closed with protective rejection (`PASS`)
+  - A11_14: Baseline database dev.db hash strictly preserved untouched (`PASS`)
   - Visual evidence captured in `browser-a11-handover-modal.png`, `browser-a11-suspension-modal.png`. Results saved to `independent-review/browser-a11-results.json`.
 - **All-Roles Matrix Journey (A06)**: 26 / 26 passed in `a06_all_roles_matrix_journey.cjs` in native Google Chrome (headless):
-  - Positive and negative authorization journeys executed across all 8 remaining roles (`SUPER_ADMIN`, `PROJECT_MANAGER`, `SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `SURVEYOR`, `AUDIT_USER`, `EXTERNAL_VIEWER`, `VIEWER`) across user, lab, project, sample, equipment, and audit domains (`PASS`).
-  - Browser screenshots captured for distinct role views: `browser-a06-technician.png` (Workbench), `browser-a06-reception.png` (Sample Reception), `browser-a06-auditor.png` (Audit Log), `browser-a06-project-manager.png` (Project Management).
-  - Results saved to `independent-review/a06-all-roles-results.json`. Baseline `dev.db` hash strictly preserved untouched.
+  - Part 1 Browser UI Journeys:
+    - A06_UI_01: Technician Workbench renders assigned method, authorized sample, and excludes foreign samples (`PASS`)
+    - A06_UI_02: Reception Desk renders intake interface and strictly excludes foreign lab samples (`PASS`)
+    - A06_UI_03: Audit Logs Dashboard renders audit records table without admin mutation controls (`PASS`)
+    - A06_UI_04: Project Manager UI renders assigned project and excludes foreign Kenya project (`PASS`)
+  - Part 2 Scoped API Matrix & Denied Mutation Verification:
+    - A06_SA_01: SUPER_ADMIN lists all laboratories across countries (`PASS`)
+    - A06_SA_02: SUPER_ADMIN lists global staff roster (`PASS`)
+    - A06_SA_03: SUPER_ADMIN inspects equipment details across any laboratory globally (`PASS`)
+    - A06_PM_01: PROJECT_MANAGER lists assigned projects and excludes foreign projects (`PASS`)
+    - A06_PM_02: PROJECT_MANAGER accesses own project; denied foreign project (HTTP 403/404; `PASS`)
+    - A06_PM_03: PROJECT_MANAGER denied user suspension: HTTP 403, 0 DB mutations, 0 audit mutations (`PASS`)
+    - A06_REC_01: SAMPLE_RECEPTION lists own-lab samples and excludes foreign Kenya samples (`PASS`)
+    - A06_REC_02: SAMPLE_RECEPTION accesses own-lab sample; denied foreign sample detail (`PASS`)
+    - A06_REC_03: SAMPLE_RECEPTION denied work reassignment: HTTP 403, 0 DB mutations, 0 audit mutations (`PASS`)
+    - A06_TECH_01: LAB_TECHNICIAN lists own-lab samples and excludes foreign Kenya samples (`PASS`)
+    - A06_TECH_02: LAB_TECHNICIAN accesses own equipment; denied foreign lab equipment (`PASS`)
+    - A06_TECH_03: LAB_TECHNICIAN denied lab profile mutation: HTTP 403, 0 DB mutations, 0 audit mutations (`PASS`)
+    - A06_SURV_01: SURVEYOR successfully retrieves own authorized profile context (`PASS`)
+    - A06_SURV_02: SURVEYOR denied internal laboratory equipment roster (HTTP 403/404; `PASS`)
+    - A06_AUD_01: AUDIT_USER successfully reads system audit logs (`PASS`)
+    - A06_AUD_02: AUDIT_USER inspects sample analytical trail and results (`PASS`)
+    - A06_AUD_03: AUDIT_USER denied sample data mutations: HTTP 403, 0 DB mutations, 0 audit mutations (`PASS`)
+    - A06_EXT_01: EXTERNAL_VIEWER retrieves authorized profile context (`PASS`)
+    - A06_EXT_02: EXTERNAL_VIEWER denied laboratory staff management roster (HTTP 403; `PASS`)
+    - A06_VIEW_01: VIEWER lists read-only sample status scoped to own lab, excluding foreign samples (`PASS`)
+    - A06_VIEW_02: VIEWER denied sample creation: HTTP 403, 0 DB mutations, 0 audit mutations (`PASS`)
+    - A06_HASH: Baseline database dev.db hash strictly preserved untouched (`PASS`)
+  - Browser screenshots captured for distinct role views: `browser-a06-technician.png` (Workbench), `browser-a06-reception.png` (Sample Reception), `browser-a06-auditor.png` (Audit Log), `browser-a06-project-manager.png` (Project Management). Results saved to `independent-review/a06-all-roles-results.json`.
 - **Real Browser Deep Links & Draft Continuity Journey (A40)**: 8 / 8 passed in `browser_a40_deep_links_journey.cjs` in native Google Chrome (headless):
   - A40_01: Scoped lab deep link (`/admin/labs?labId=...&tab=people`) loads target laboratory view (`PASS`)
-  - A40_02: Help Centre route (`/help`) connects and renders knowledge base (`PASS`)
+  - A40_02: Help Centre route (`/help`) connects and renders knowledge base guide content (`PASS`)
   - A40_03: Reports route (`/reports`) navigates to result reports interface (`PASS`)
-  - A40_04: Sample Workflow Map route (`/workflow-map`) mounts view canvas (`PASS`)
-  - A40_05: Technician Workbench connects and renders active workspace (`PASS`)
-  - A40_06: Offline bench draft committed to IndexedDB before client reload (`PASS`)
-  - A40_07: Offline bench draft survives client reload/refresh with 100% continuity (`PASS`)
-  - A40_08: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+  - A40_04: Sample Workflow Map route (`/samples/:id/map`) renders sample graph with stages, rejecting missing-sample error (`PASS`)
+  - A40_05: Technician Workbench renders assigned method and numeric determination editor (`PASS`)
+  - A40_06: Technician enters draft determination through the actual editor input (`PASS`)
+  - A40_07: Offline draft survives client reload and is restored in the actual editor input (`PASS`)
+  - A40_08: Baseline database dev.db hash strictly preserved untouched (`PASS`)
   - Visual evidence captured in `browser-a40-deep-link-lab.png`, `browser-a40-deep-link-help.png`, `browser-a40-deep-link-reports.png`, `browser-a40-sample-map.png`, `browser-a40-draft-after-refresh.png`. Results saved to `independent-review/browser-a40-deep-links-results.json`.
 - **Exact-Membership Scope & Paging Probes (P02, P03)**: 16 / 16 passed in `workspace-paging-probes.cjs`:
   - 10 negative controls pass: similar-prefix, malformed JSON, object key, object value, scalar string, scalar number, numeric array, object array, escaped identifier, and substring suffix all fail closed and do not grant access.
@@ -428,9 +453,8 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 - [x] **Exact JSON Membership**: SQLite query uses `json_valid = 1`, `json_type = 'array'`, and `type = 'text'` with CASE expression failing closed on malformed and non-array JSON.
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
-- [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Acceptance Matrix 100% Verified**: 42 / 42 acceptance scenarios passed (0 partial, 0 failed, 0 untested) with executable browser, contract, or probe evidence.
-- [x] **Tested**: 103 test suites (837 tests) and 188 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
+- [x] **Acceptance Matrix Reconciliation**: 42 / 42 passed, 0 / 42 partial, 0 failed, 0 untested (A06, A11, A20, A40 fully validated via authentic headless Chrome browser journeys and scoped API matrices per Report 16 instructions).
+- [x] **Tested**: 103 test suites (844 tests) passing on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
 - [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.58s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.

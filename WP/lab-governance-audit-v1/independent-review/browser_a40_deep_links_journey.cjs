@@ -150,7 +150,8 @@ async function runJourney() {
             status: 'PROCESSING',
             receptionDate: new Date(),
             dryingStatus: 'DONE',
-            preparationStatus: 'DONE'
+            preparationStatus: 'DONE',
+            requiredAnalyses: JSON.stringify(['PH_H2O'])
         }
     });
 
@@ -162,7 +163,7 @@ async function runJourney() {
             labId: labA.id,
             assignedLab: labA.id,
             analysis: 'PH_H2O',
-            status: 'ASSIGNED'
+            status: 'IN_PROGRESS'
         }
     });
 
@@ -210,14 +211,19 @@ async function runJourney() {
         // ─── STEP 2: Help Centre Deep Link Connection (/help) ───
         console.log('Step 2: Testing Help Centre connection (/help)...');
         await page.goto(`${baseUrl}/help`, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1500));
 
-        const helpRendered = await page.evaluate(() => {
-            return document.body.textContent.toLowerCase().includes('help') ||
-                   document.body.textContent.toLowerCase().includes('guide') ||
-                   document.body.textContent.toLowerCase().includes('knowledge');
+        const helpContentVerified = await page.evaluate(() => {
+            const main = document.querySelector('main') || document.body;
+            const text = main.textContent || '';
+            return text.includes('Laboratory technician') ||
+                   text.includes('Knowledge Base') ||
+                   text.includes('Problem Solver') ||
+                   text.includes('Intake') ||
+                   text.includes('Preparation') ||
+                   text.includes('Methods');
         });
-        record('A40_02', 'Help Centre route connects and renders knowledge base', true, helpRendered, helpRendered);
+        record('A40_02', 'Help Centre route connects and renders knowledge base guide content', true, helpContentVerified, helpContentVerified);
         await page.screenshot({ path: path.join(outputDir, 'browser-a40-deep-link-help.png') });
 
         // ─── STEP 3: Reports Connection (/reports -> /result-reports) ───
@@ -230,15 +236,35 @@ async function runJourney() {
         record('A40_03', 'Reports route /reports safely navigates to result reports interface', true, reportsNavigated, reportsNavigated);
         await page.screenshot({ path: path.join(outputDir, 'browser-a40-deep-link-reports.png') });
 
-        // ─── STEP 4: Sample Workflow Map Route (/workflow-map) ───
-        console.log('Step 4: Testing Sample Workflow Map route (/workflow-map)...');
-        await page.goto(`${baseUrl}/workflow-map`, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 1200));
+        // ─── STEP 4: Sample Workflow Map Route (/samples/:id/map) ───
+        console.log('Step 4: Testing Sample Workflow Map route (/samples/:id/map)...');
+        const mapUrl = `${baseUrl}/samples/${sample.id}/map`;
+        await page.goto(mapUrl, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
 
-        const workflowMapRendered = await page.evaluate(() => {
-            return document.querySelector('main') !== null;
-        });
-        record('A40_04', 'Sample Workflow Map route connects and mounts view canvas', true, workflowMapRendered, workflowMapRendered);
+        const workflowMapVerification = await page.evaluate((sampleId, sampleCode) => {
+            const body = document.body.textContent || '';
+            const isMissingSample = body.includes('No Sample Specified');
+            const isError = body.includes('Workflow Unavailable');
+            const showsSample = body.includes(sampleId) || body.includes(sampleCode);
+            const hasWorkflowStages = body.includes('Reception') ||
+                                     body.includes('Preparation') ||
+                                     body.includes('Analysis') ||
+                                     document.querySelector('.workflow-overview-graph') !== null ||
+                                     document.querySelector('.workflow-stage-node') !== null;
+            return {
+                isMissingSample,
+                isError,
+                showsSample,
+                hasWorkflowStages
+            };
+        }, sample.id, sample.originalId);
+
+        const mapValid = !workflowMapVerification.isMissingSample &&
+                         !workflowMapVerification.isError &&
+                         workflowMapVerification.showsSample &&
+                         workflowMapVerification.hasWorkflowStages;
+        record('A40_04', 'Sample Workflow Map deep link renders sample graph with stages, rejecting missing-sample error', true, mapValid, mapValid);
         await page.screenshot({ path: path.join(outputDir, 'browser-a40-sample-map.png') });
 
         // ─── STEP 5: Workbench Connection & Draft Continuity After Refresh ───
@@ -250,71 +276,45 @@ async function runJourney() {
             localStorage.setItem('language', 'en');
         }, techToken, techA);
 
-        await page.goto(`${baseUrl}/workbench`, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 1200));
+        await page.goto(`${baseUrl}/workbench?sampleId=${sample.id}&workItemId=${workItem.id}&analysis=PH_H2O`, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
 
+        // Inspect assigned method and numeric determination editor
         const workbenchMounted = await page.evaluate(() => {
-            return document.body.textContent.toLowerCase().includes('workbench') ||
-                   document.body.textContent.toLowerCase().includes('queue') ||
-                   document.querySelector('main') !== null;
+            const editorInput = document.querySelector('input[inputmode="decimal"]');
+            const text = document.body.textContent || '';
+            const hasMethod = text.includes('pH') || text.includes('PH_H2O');
+            return !!editorInput && hasMethod;
         });
-        record('A40_05', 'Technician Workbench connects and renders active workspace', true, workbenchMounted, workbenchMounted);
+        record('A40_05', 'Technician Workbench renders assigned method and numeric determination editor', true, workbenchMounted, workbenchMounted);
 
-        // Record a draft in IndexedDB
-        const draftKey = `draft:${techA.id}:${sample.id}:${workItem.id}`;
-        const draftData = { sampleId: sample.id, workItemId: workItem.id, ph: 7.15, notes: 'Pre-refresh continuous draft' };
+        // Enter determination value through the actual NumericEditor input
+        console.log('Entering draft determination in editor...');
+        await page.focus('input[inputmode="decimal"]');
+        await page.evaluate(() => {
+            const input = document.querySelector('input[inputmode="decimal"]');
+            if (input) {
+                const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                nativeSetter.call(input, '');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+        await page.type('input[inputmode="decimal"]', '7.15');
+        // Wait for debounced draft save and local IndexedDB write
+        await new Promise(r => setTimeout(r, 1500));
 
-        const draftSaved = await page.evaluate(async (key, data, userId) => {
-            return new Promise((resolve) => {
-                const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                req.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('drafts', 'readwrite');
-                    const store = tx.objectStore('drafts');
-                    store.put({
-                        draftKey: key,
-                        userId,
-                        data,
-                        updatedAt: new Date().toISOString()
-                    });
-                    tx.oncomplete = () => {
-                        db.close();
-                        resolve(true);
-                    };
-                    tx.onerror = () => resolve(false);
-                };
-                req.onerror = () => resolve(false);
-            });
-        }, draftKey, draftData, techA.id);
-        record('A40_06', 'Offline bench draft committed to IndexedDB before client reload', true, draftSaved, draftSaved);
+        const editorValueBefore = await page.$eval('input[inputmode="decimal"]', el => el.value);
+        record('A40_06', 'Technician enters draft determination through the actual editor input', '7.15', editorValueBefore, editorValueBefore === '7.15');
 
-        // Execute full page refresh (simulating client restart / browser refresh)
-        console.log('Reloading page to test offline draft continuity...');
+        // Execute full page refresh (simulating browser reload / service-worker update)
+        console.log('Reloading page to test offline draft recovery in editor...');
         await page.reload({ waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 2500));
 
-        // Verify draft survives refresh intact
-        const draftRecovered = await page.evaluate(async (key) => {
-            return new Promise((resolve) => {
-                const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                req.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('drafts', 'readonly');
-                    const store = tx.objectStore('drafts');
-                    const getReq = store.get(key);
-                    getReq.onsuccess = () => {
-                        const rec = getReq.result;
-                        db.close();
-                        resolve(rec ? rec.data : null);
-                    };
-                    getReq.onerror = () => resolve(null);
-                };
-                req.onerror = () => resolve(null);
-            });
-        }, draftKey);
-
-        const continuityPreserved = draftRecovered !== null && draftRecovered.ph === 7.15 && draftRecovered.notes === 'Pre-refresh continuous draft';
-        record('A40_07', 'Offline bench draft survives client reload/refresh with 100% continuity', true, continuityPreserved, continuityPreserved);
+        // Verify draft is restored in the editor DOM input
+        const editorValueAfter = await page.$eval('input[inputmode="decimal"]', el => el.value);
+        const editorRecovered = editorValueAfter === '7.15';
+        record('A40_07', 'Offline draft survives client reload and is restored in the actual editor input', '7.15', editorValueAfter, editorRecovered);
         await page.screenshot({ path: path.join(outputDir, 'browser-a40-draft-after-refresh.png') });
 
     } finally {

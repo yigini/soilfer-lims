@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-11T15:41:21.381Z",
+  "timestamp": "2026-09-11T16:19:34.268Z",
   "totalTests": 8,
   "passed": 8,
   "failed": 0,
@@ -15,7 +15,7 @@
     },
     {
       "id": "A40_02",
-      "description": "Help Centre route connects and renders knowledge base",
+      "description": "Help Centre route connects and renders knowledge base guide content",
       "expected": true,
       "actual": true,
       "passed": true
@@ -29,30 +29,30 @@
     },
     {
       "id": "A40_04",
-      "description": "Sample Workflow Map route connects and mounts view canvas",
+      "description": "Sample Workflow Map deep link renders sample graph with stages, rejecting missing-sample error",
       "expected": true,
       "actual": true,
       "passed": true
     },
     {
       "id": "A40_05",
-      "description": "Technician Workbench connects and renders active workspace",
+      "description": "Technician Workbench renders assigned method and numeric determination editor",
       "expected": true,
       "actual": true,
       "passed": true
     },
     {
       "id": "A40_06",
-      "description": "Offline bench draft committed to IndexedDB before client reload",
-      "expected": true,
-      "actual": true,
+      "description": "Technician enters draft determination through the actual editor input",
+      "expected": "7.15",
+      "actual": "7.15",
       "passed": true
     },
     {
       "id": "A40_07",
-      "description": "Offline bench draft survives client reload/refresh with 100% continuity",
-      "expected": true,
-      "actual": true,
+      "description": "Offline draft survives client reload and is restored in the actual editor input",
+      "expected": "7.15",
+      "actual": "7.15",
       "passed": true
     },
     {

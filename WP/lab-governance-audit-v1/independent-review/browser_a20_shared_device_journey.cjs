@@ -4,18 +4,20 @@
  * Browser A20 Shared Device Journey Review
  * 
  * Verifies the complete shared-workstation offline draft and outbox lifecycle
- * in native headless Google Chrome with real IndexedDB:
- * 1. Technician A logs in on shared device, creates an unsynced draft and queues outbox operation.
- * 2. Shared device goes offline / disconnects with draft pending.
- * 3. Technician A logs out; session cleared from browser.
- * 4. Technician B logs in on the same physical browser / workstation.
- * 5. Technician B's outbox query verifies 0 pending operations; no Tech A data visible.
- * 6. Device reconnects; Technician B sync dispatches zero Tech A operations (no cross-account replay).
- * 7. Technician B performs and syncs own work; attributed strictly to Tech B.
- * 8. Technician B logs out.
- * 9. Technician A logs back in; unsynced draft and outbox operation are intact and recovered.
- * 10. Technician A reconnects and syncs; work applied and attributed strictly to Tech A.
- * 11. Baseline dev.db hash strictly preserved untouched.
+ * in native headless Google Chrome using the actual application UI and shipped sync engine:
+ * 1. Technician A logs in via /login UI on shared workstation.
+ * 2. Shared device goes offline; Tech A enters determination draft in actual Workbench editor.
+ * 3. Workbench persists draft locally and queues outbox operation via production sync engine.
+ * 4. Technician A logs out through the application UI (UserMenu -> Sign Out).
+ * 5. Device reconnects; Technician B logs in via /login UI on the same shared device.
+ * 6. Technician B views workbench: verified to contain none of Tech A's draft.
+ * 7. Shipped sync mechanism triggered under Tech B: verified to send 0 Tech A operations.
+ * 8. Technician B completes and syncs companion work on Sample B; attributed strictly to Tech B.
+ * 9. Technician B logs out through application UI.
+ * 10. Technician A logs back in via /login UI.
+ * 11. Technician A opens workbench and recovers draft value (6.85) in the actual editor input.
+ * 12. Technician A syncs recovered work via shipped sync mechanism; verified in DB for Tech A.
+ * 13. Baseline dev.db hash strictly preserved untouched.
  */
 
 const fs = require('fs');
@@ -30,6 +32,7 @@ const scratchReq = createRequire(path.join(root, 'scratch/package.json'));
 
 const Database = req('better-sqlite3');
 const jwt = req('jsonwebtoken');
+const bcrypt = req('bcryptjs');
 const express = req('express');
 const puppeteer = scratchReq('puppeteer-core');
 
@@ -72,26 +75,40 @@ if (fs.existsSync(clientDist)) {
     });
 }
 
-function token(user) {
-    return jwt.sign(
-        {
-            id: user.id,
-            userId: user.id,
-            username: user.username,
-            role: user.role,
-            labId: user.labId,
-            tokenVersion: user.tokenVersion || 1
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '2h' }
-    );
-}
-
 const results = [];
 function record(id, description, expected, actual, passed) {
     results.push({ id, description, expected, actual, passed });
     console.log(`[${passed ? 'PASS' : 'FAIL'}] ${id}: ${description}`);
     if (!passed) console.error(`  Expected: ${JSON.stringify(expected)}\n  Actual:   ${JSON.stringify(actual)}`);
+}
+
+async function loginViaUI(page, baseUrl, username, password) {
+    await page.goto(`${baseUrl}/login`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('input#username', { timeout: 10000 });
+    await page.evaluate(() => {
+        const u = document.querySelector('input#username');
+        const p = document.querySelector('input#password');
+        if (u) u.value = '';
+        if (p) p.value = '';
+    });
+    await page.type('input#username', username);
+    await page.type('input#password', password);
+    await page.click('button[type="submit"]');
+    await page.waitForFunction(() => !window.location.pathname.includes('/login'), { timeout: 10000 });
+    await new Promise(r => setTimeout(r, 1000));
+}
+
+async function logoutViaUI(page) {
+    await page.waitForSelector('button[title="User Menu"]', { timeout: 10000 });
+    await page.click('button[title="User Menu"]');
+    await new Promise(r => setTimeout(r, 400));
+    await page.evaluate(() => {
+        const btns = Array.from(document.querySelectorAll('button'));
+        const signOut = btns.find(b => b.textContent && b.textContent.includes('Sign Out'));
+        if (signOut) signOut.click();
+    });
+    await page.waitForFunction(() => window.location.pathname.includes('/login'), { timeout: 10000 });
+    await new Promise(r => setTimeout(r, 500));
 }
 
 async function runJourney() {
@@ -110,13 +127,15 @@ async function runJourney() {
         }
     });
 
+    const passwordHash = bcrypt.hashSync('fictionalPassword123!', 10);
+
     const userTechA = await prisma.user.create({
         data: {
             id: 'usr-a20-tech-a',
             username: 'tech_alpha',
             name: 'Technician Alma Garcia',
             email: 'alma@lab-a.invalid',
-            password: 'FICTIONAL_HASH',
+            password: passwordHash,
             role: 'LAB_TECHNICIAN',
             labId: labA.id,
             countries: JSON.stringify(['Guatemala']),
@@ -131,7 +150,7 @@ async function runJourney() {
             username: 'tech_beta',
             name: 'Technician Bernardo Soto',
             email: 'bernardo@lab-a.invalid',
-            password: 'FICTIONAL_HASH',
+            password: passwordHash,
             role: 'LAB_TECHNICIAN',
             labId: labA.id,
             countries: JSON.stringify(['Guatemala']),
@@ -140,7 +159,7 @@ async function runJourney() {
         }
     });
 
-    const sample = await prisma.sample.create({
+    const sampleA = await prisma.sample.create({
         data: {
             id: 'SMP-A20-001',
             originalId: 'EXT-A20-SAMPLE-01',
@@ -149,14 +168,29 @@ async function runJourney() {
             status: 'PROCESSING',
             receptionDate: new Date(),
             dryingStatus: 'DONE',
-            preparationStatus: 'DONE'
+            preparationStatus: 'DONE',
+            requiredAnalyses: JSON.stringify(['PH_H2O'])
+        }
+    });
+
+    const sampleB = await prisma.sample.create({
+        data: {
+            id: 'SMP-A20-002',
+            originalId: 'EXT-A20-SAMPLE-02',
+            labId: labA.id,
+            assignedLab: labA.id,
+            status: 'PROCESSING',
+            receptionDate: new Date(),
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            requiredAnalyses: JSON.stringify(['PH_H2O'])
         }
     });
 
     const workItemA = await prisma.workItem.create({
         data: {
             id: 'WI-A20-001',
-            sampleId: sample.id,
+            sampleId: sampleA.id,
             assignedTo: userTechA.username,
             labId: labA.id,
             assignedLab: labA.id,
@@ -168,17 +202,14 @@ async function runJourney() {
     const workItemB = await prisma.workItem.create({
         data: {
             id: 'WI-A20-002',
-            sampleId: sample.id,
+            sampleId: sampleB.id,
             assignedTo: userTechB.username,
             labId: labA.id,
             assignedLab: labA.id,
-            analysis: 'EC',
+            analysis: 'PH_H2O',
             status: 'ASSIGNED'
         }
     });
-
-    const tokenA = token(userTechA);
-    const tokenB = token(userTechB);
 
     // Start HTTP server
     const server = http.createServer(app);
@@ -199,392 +230,158 @@ async function runJourney() {
     await page.setViewport({ width: 1280, height: 850 });
 
     try {
-        // ─── STEP 1: Tech A logs in on shared workstation ───
-        console.log('Step 1: Technician A logs in on shared device...');
-        await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
-        await page.evaluate((u, t) => {
-            localStorage.setItem('token', t);
-            localStorage.setItem('user', JSON.stringify(u));
-        }, { id: userTechA.id, username: userTechA.username, role: userTechA.role, labId: userTechA.labId, name: userTechA.name }, tokenA);
-
-        await page.goto(`${baseUrl}/workbench`, { waitUntil: 'domcontentloaded' });
+        // ─── STEP 1: Tech A logs in on shared workstation via actual /login UI ───
+        console.log('Step 1: Technician A logs in on shared device via /login UI...');
+        await loginViaUI(page, baseUrl, userTechA.username, 'fictionalPassword123!');
         const loggedUserA = await page.evaluate(() => {
             const u = localStorage.getItem('user');
             return u ? JSON.parse(u) : null;
         });
-        record('A20_01', 'Technician A authenticated on shared workstation', userTechA.id, loggedUserA?.id, loggedUserA?.id === userTechA.id);
+        record('A20_01', 'Technician A authenticated via /login UI on shared workstation', userTechA.id, loggedUserA?.id, loggedUserA?.id === userTechA.id);
 
-        // ─── STEP 2: Tech A records unsynced draft & outbox operation in real IndexedDB ───
-        console.log('Step 2: Technician A records unsynced draft & queues outbox operation in IndexedDB...');
-        const initIdbResult = await page.evaluate(async (userId, sampleId, wiId) => {
-            return new Promise((resolve) => {
-                try {
-                    const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                    req.onupgradeneeded = (e) => {
-                        const db = e.target.result;
-                        if (!db.objectStoreNames.contains('drafts')) {
-                            db.createObjectStore('drafts', { keyPath: 'draftKey' });
-                        }
-                        if (!db.objectStoreNames.contains('outbox')) {
-                            const outboxStore = db.createObjectStore('outbox', { keyPath: 'operationId' });
-                            outboxStore.createIndex('status', 'status', { unique: false });
-                            outboxStore.createIndex('capturedAtLocal', 'capturedAtLocal', { unique: false });
-                            outboxStore.createIndex('type', 'type', { unique: false });
-                        }
-                        if (!db.objectStoreNames.contains('syncLog')) {
-                            db.createObjectStore('syncLog', { keyPath: 'id', autoIncrement: true });
-                        }
-                    };
-                    req.onerror = (e) => resolve({ error: 'open_error: ' + (e.target.error?.message || 'unknown') });
-                    req.onblocked = () => resolve({ error: 'blocked' });
-                    req.onsuccess = (e) => {
-                        try {
-                            const db = e.target.result;
-                            const tx = db.transaction(['drafts', 'outbox'], 'readwrite');
-                            const draftsStore = tx.objectStore('drafts');
-                            const outboxStore = tx.objectStore('outbox');
+        // ─── STEP 2: Navigate to Workbench, go offline, enter draft in editor ───
+        console.log('Step 2: Technician A opens Workbench, goes offline, enters draft in editor...');
+        await page.goto(`${baseUrl}/workbench?sampleId=${sampleA.id}&workItemId=${workItemA.id}&analysis=PH_H2O`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('input[inputmode="decimal"]', { timeout: 10000 });
 
-                            const draftKey = `draft:${userId}:${sampleId}:${wiId}`;
-                            draftsStore.put({
-                                draftKey,
-                                userId,
-                                data: { sampleId, workItemId: wiId, rawPh: 6.85, notes: 'Tech A preliminary run' },
-                                updatedAt: new Date().toISOString()
-                            });
-
-                            const operationId = 'op-tech-a-001';
-                            outboxStore.put({
-                                operationId,
-                                userId,
-                                type: 'SAVE_WORK_DRAFT',
-                                target: wiId,
-                                payload: { value: 6.85, rawPh: 6.85, notes: 'Tech A draft' },
-                                status: 'PENDING',
-                                capturedAtLocal: new Date().toISOString()
-                            });
-
-                            tx.oncomplete = () => {
-                                db.close();
-                                resolve({ success: true, draftKey, operationId });
-                            };
-                            tx.onerror = (errEvent) => {
-                                db.close();
-                                resolve({ error: 'tx_error: ' + (errEvent.target.error?.message || 'unknown') });
-                            };
-                        } catch (txErr) {
-                            resolve({ error: 'tx_catch: ' + txErr.message });
-                        }
-                    };
-                } catch (outerErr) {
-                    resolve({ error: 'outer_catch: ' + outerErr.message });
-                }
-            });
-        }, userTechA.id, sample.id, workItemA.id);
-
-        record('A20_02', 'Technician A unsynced draft and outbox operation committed to real IndexedDB', true, initIdbResult.success, initIdbResult.success === true);
-
-        // ─── STEP 3: Simulate offline mode / network loss on workstation ───
-        console.log('Step 3: Simulating offline mode on workstation...');
+        // Simulate offline mode on workstation
         await page.setOfflineMode(true);
+        await page.evaluate(() => window.dispatchEvent(new Event('offline')));
 
-        const techAOutboxCheck = await page.evaluate(async (userId) => {
-            return new Promise((resolve) => {
-                const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                req.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('outbox', 'readonly');
-                    const store = tx.objectStore('outbox');
-                    const getReq = store.getAll();
-                    getReq.onsuccess = () => {
-                        const ops = getReq.result || [];
-                        const userOps = ops.filter(o => o.userId === userId && o.status === 'PENDING');
-                        db.close();
-                        resolve({ totalCount: ops.length, userOpsCount: userOps.length });
-                    };
-                    getReq.onerror = () => resolve({ totalCount: 0, userOpsCount: 0 });
-                };
-                req.onerror = () => resolve({ totalCount: 0, userOpsCount: 0 });
-            });
-        }, userTechA.id);
+        // Focus and enter determination value in actual editor input
+        await page.focus('input[inputmode="decimal"]');
+        await page.evaluate(() => {
+            const input = document.querySelector('input[inputmode="decimal"]');
+            if (input) {
+                const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                nativeSetter.call(input, '');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+        await page.type('input[inputmode="decimal"]', '6.85');
+        // Wait for debounced draft save and local outbox queue
+        await new Promise(r => setTimeout(r, 1500));
 
-        record('A20_03', 'Workstation in offline state retains Tech A pending outbox operation in IndexedDB', 1, techAOutboxCheck.userOpsCount, techAOutboxCheck.userOpsCount === 1);
+        const editorValA = await page.$eval('input[inputmode="decimal"]', el => el.value);
+        record('A20_02', 'Technician A enters draft determination in actual editor while offline', '6.85', editorValA, editorValA === '6.85');
         await page.screenshot({ path: path.join(outputDir, 'browser-a20-techA-draft.png') });
 
-        // ─── STEP 4: Tech A logs out of workstation while offline ───
-        console.log('Step 4: Technician A logs out of shared device...');
-        await page.evaluate(() => {
-            localStorage.clear();
-            sessionStorage.clear();
-        });
+        // ─── STEP 3: Tech A logs out via application UI flow ───
+        console.log('Step 3: Technician A logs out of shared device via application UI...');
+        await logoutViaUI(page);
         const sessionAfterLogout = await page.evaluate(() => localStorage.getItem('token'));
-        record('A20_04', 'Technician A logged out and local session cleared cleanly', null, sessionAfterLogout, sessionAfterLogout === null);
+        record('A20_03', 'Technician A logged out via application UI; session cleared', null, sessionAfterLogout, sessionAfterLogout === null);
 
-        // ─── STEP 5: Tech B logs in on same shared physical workstation ───
-        console.log('Step 5: Technician B logs into the shared workstation...');
-        await page.evaluate((u, t) => {
-            localStorage.setItem('token', t);
-            localStorage.setItem('user', JSON.stringify(u));
-        }, { id: userTechB.id, username: userTechB.username, role: userTechB.role, labId: userTechB.labId, name: userTechB.name }, tokenB);
-
-        // Reconnect network after B login
-        console.log('Workstation reconnects network...');
+        // ─── STEP 4: Tech B logs in on same shared physical workstation via /login UI ───
+        console.log('Step 4: Technician B logs into the shared workstation via /login UI...');
         await page.setOfflineMode(false);
-        await page.goto(`${baseUrl}/workbench`, { waitUntil: 'domcontentloaded' });
+        await page.evaluate(() => window.dispatchEvent(new Event('online')));
+        await loginViaUI(page, baseUrl, userTechB.username, 'fictionalPassword123!');
 
         const loggedUserB = await page.evaluate(() => {
             const u = localStorage.getItem('user');
             return u ? JSON.parse(u) : null;
         });
-        record('A20_05', 'Technician B successfully authenticated on same physical device after reconnect', userTechB.id, loggedUserB?.id, loggedUserB?.id === userTechB.id);
+        record('A20_04', 'Technician B authenticated via application UI on shared device', userTechB.id, loggedUserB?.id, loggedUserB?.id === userTechB.id);
         await page.screenshot({ path: path.join(outputDir, 'browser-a20-techB-login.png') });
 
-        // ─── STEP 6: Outbox isolation check for Tech B ───
-        console.log('Step 6: Verifying Technician B outbox partition isolation...');
-        const techBVisibleOps = await page.evaluate(async (userIdB) => {
-            return new Promise((resolve) => {
-                const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                req.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('outbox', 'readonly');
-                    const store = tx.objectStore('outbox');
-                    const getReq = store.getAll();
-                    getReq.onsuccess = () => {
-                        const ops = getReq.result || [];
-                        const pendingForB = ops.filter(o => o.userId === userIdB && o.status === 'PENDING');
-                        db.close();
-                        resolve({ totalInStore: ops.length, pendingForB: pendingForB.length });
-                    };
-                    getReq.onerror = () => resolve({ totalInStore: 0, pendingForB: 0 });
-                };
-                req.onerror = () => resolve({ totalInStore: 0, pendingForB: 0 });
-            });
-        }, userTechB.id);
+        // ─── STEP 5: Verify rendered Workbench view for Tech B contains none of Tech A draft ───
+        console.log('Step 5: Verifying Technician B view contains none of Tech A draft...');
+        await page.goto(`${baseUrl}/workbench?sampleId=${sampleB.id}&workItemId=${workItemB.id}&analysis=PH_H2O`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('input[inputmode="decimal"]', { timeout: 10000 });
 
-        record('A20_06', 'Technician B outbox query partitions strictly and returns 0 pending operations', 0, techBVisibleOps.pendingForB, techBVisibleOps.pendingForB === 0);
+        const techBEditorVal = await page.$eval('input[inputmode="decimal"]', el => el.value);
+        const bodyTextB = await page.evaluate(() => document.body.textContent || '');
+        const bIsolated = !bodyTextB.includes('6.85') && techBEditorVal !== '6.85';
+        record('A20_05', 'Rendered Technician B workbench view contains none of Tech A draft', true, bIsolated, bIsolated);
 
-        // ─── STEP 7: Reconnect workstation & Trigger Sync as Tech B ───
-        console.log('Step 7: Workstation reconnects to network; Tech B triggers sync...');
-        await page.setOfflineMode(false);
-
-        // Perform sync network dispatch under Tech B's credentials
-        const syncBResult = await page.evaluate(async (tokenB, userIdB) => {
-            const dbReq = window.indexedDB.open('soilfer_lims_offline', 3);
-            const opsToSync = await new Promise((resolve) => {
-                dbReq.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('outbox', 'readonly');
-                    const store = tx.objectStore('outbox');
-                    const req = store.getAll();
-                    req.onsuccess = () => {
-                        const all = req.result || [];
-                        const forB = all.filter(o => o.userId === userIdB && (o.status === 'PENDING' || o.status === 'RETRYING'));
-                        db.close();
-                        resolve(forB);
-                    };
-                    req.onerror = () => resolve([]);
-                };
-                dbReq.onerror = () => resolve([]);
-            });
-
-            const res = await fetch('/api/sync/operations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenB}`
-                },
-                body: JSON.stringify({
-                    protocolVersion: 1,
-                    deviceId: 'shared-workstation-01',
-                    operations: opsToSync
-                })
-            });
-
-            const body = await res.json();
-            return {
-                httpStatus: res.status,
-                opsSentCount: opsToSync.length,
-                receiptsCount: (body.receipts || []).length
-            };
-        }, tokenB, userTechB.id);
-
-        record('A20_07', 'Workstation reconnect sends 0 Tech A operations under Tech B session (no cross-account replay)', 0, syncBResult.opsSentCount, syncBResult.opsSentCount === 0);
-
-        // ─── STEP 8: Tech B executes and syncs own work ───
-        console.log('Step 8: Technician B queues and syncs own work...');
-        const techBWorkResult = await page.evaluate(async (userIdB, wiIdB, tokenB) => {
-            const opId = 'op-tech-b-001';
-            const dbReq = window.indexedDB.open('soilfer_lims_offline', 3);
-            await new Promise((resolve) => {
-                dbReq.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction('outbox', 'readwrite');
-                    const store = tx.objectStore('outbox');
-                    store.put({
-                        operationId: opId,
-                        userId: userIdB,
-                        type: 'SAVE_WORK_DRAFT',
-                        target: wiIdB,
-                        payload: { value: 1.45, notes: 'Tech B calibration run' },
-                        status: 'PENDING',
-                        capturedAtLocal: new Date().toISOString()
-                    });
-                    tx.oncomplete = () => {
-                        db.close();
-                        resolve();
-                    };
-                    tx.onerror = () => resolve();
-                };
-                dbReq.onerror = () => resolve();
-            });
-
-            const syncRes = await fetch('/api/sync/operations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenB}`
-                },
-                body: JSON.stringify({
-                    protocolVersion: 1,
-                    deviceId: 'shared-workstation-01',
-                    operations: [{
-                        operationId: opId,
-                        userId: userIdB,
-                        type: 'SAVE_WORK_DRAFT',
-                        target: wiIdB,
-                        payload: { value: 1.45, notes: 'Tech B calibration run' },
-                        status: 'PENDING',
-                        capturedAtLocal: new Date().toISOString()
-                    }]
-                })
-            });
-
-            const syncBody = await syncRes.json();
-            const applied = (syncBody.receipts || []).find(r => r.operationId === opId);
-
-            if (applied && (applied.status === 'SUCCESS' || applied.status === 'APPLIED' || applied.status === 'DUPLICATE_APPLIED')) {
-                const cleanupReq = window.indexedDB.open('soilfer_lims_offline', 3);
-                await new Promise((resolve) => {
-                    cleanupReq.onsuccess = (e) => {
-                        const db = e.target.result;
-                        const tx = db.transaction('outbox', 'readwrite');
-                        const store = tx.objectStore('outbox');
-                        store.delete(opId);
-                        tx.oncomplete = () => {
-                            db.close();
-                            resolve();
-                        };
-                        tx.onerror = () => resolve();
-                    };
-                    cleanupReq.onerror = () => resolve();
-                });
+        // ─── STEP 6: Shipped sync triggered under Tech B: sends 0 Tech A operations ───
+        console.log('Step 6: Triggering sync under Tech B session; verifying zero cross-account replay...');
+        const capturedSyncRequests = [];
+        const syncListener = (request) => {
+            if (request.url().includes('/api/sync/operations') && request.method() === 'POST') {
+                try {
+                    capturedSyncRequests.push(JSON.parse(request.postData() || '{}'));
+                } catch (_) {}
             }
+        };
+        page.on('request', syncListener);
 
-            return {
-                httpStatus: syncRes.status,
-                appliedStatus: applied?.status
-            };
-        }, userTechB.id, workItemB.id, tokenB);
-
-        const techBApplied = techBWorkResult.appliedStatus === 'SUCCESS' || techBWorkResult.appliedStatus === 'APPLIED';
-        record('A20_08', 'Technician B work synced successfully and applied on server', true, techBApplied, techBApplied);
-
-        // Verify server DB attribution
-        const receiptB = await prisma.commandReceipt.findFirst({
-            where: { idempotencyKey: 'op-tech-b-001' }
+        await page.evaluate(async () => {
+            if (window.soilferSync && window.soilferSync.triggerSync) {
+                return await window.soilferSync.triggerSync();
+            }
         });
-        const serverAttributionCorrect = receiptB && receiptB.actor === userTechB.username;
-        record('A20_09', 'Server command receipt recorded strictly under Tech B username', true, serverAttributionCorrect, serverAttributionCorrect);
+        await new Promise(r => setTimeout(r, 1500));
+        page.off('request', syncListener);
 
-        // ─── STEP 9: Tech B logs out ───
-        console.log('Step 9: Technician B logs out of shared device...');
+        const techAOpsUnderB = capturedSyncRequests.flatMap(r => r.operations || []).filter(op => {
+            return op.userId === userTechA.id || op.target === workItemA.id || JSON.stringify(op).includes('6.85');
+        }).length;
+
+        record('A20_06', 'Shipped sync under Tech B sends 0 Tech A operations (no cross-account replay)', 0, techAOpsUnderB, techAOpsUnderB === 0);
+
+        // ─── STEP 7: Tech B completes and syncs companion work on Sample B ───
+        console.log('Step 7: Technician B enters and syncs companion work on Sample B...');
+        await page.focus('input[inputmode="decimal"]');
         await page.evaluate(() => {
-            localStorage.clear();
-            sessionStorage.clear();
+            const input = document.querySelector('input[inputmode="decimal"]');
+            if (input) {
+                const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                nativeSetter.call(input, '');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         });
+        await page.type('input[inputmode="decimal"]', '7.40');
+        await new Promise(r => setTimeout(r, 1500));
 
-        // ─── STEP 10: Tech A logs back into the shared workstation ───
-        console.log('Step 10: Technician A logs back in to recover pending work...');
-        await page.evaluate((u, t) => {
-            localStorage.setItem('token', t);
-            localStorage.setItem('user', JSON.stringify(u));
-        }, { id: userTechA.id, username: userTechA.username, role: userTechA.role, labId: userTechA.labId, name: userTechA.name }, tokenA);
+        await page.evaluate(async () => {
+            if (window.soilferSync && window.soilferSync.triggerSync) {
+                return await window.soilferSync.triggerSync();
+            }
+        });
+        await new Promise(r => setTimeout(r, 2000));
 
-        await page.goto(`${baseUrl}/workbench`, { waitUntil: 'domcontentloaded' });
+        const draftRecordB = await prisma.workItemDraft.findFirst({
+            where: { workItemId: workItemB.id }
+        });
+        const bWorkPersisted = draftRecordB && (draftRecordB.value === '7.40' || draftRecordB.value === '7.4') && draftRecordB.userId === userTechB.username;
+        record('A20_07', 'Technician B companion work synced and attributed strictly to Tech B', true, !!bWorkPersisted, !!bWorkPersisted);
+
+        // ─── STEP 8: Tech B logs out via application UI ───
+        console.log('Step 8: Technician B logs out of shared device via application UI...');
+        await logoutViaUI(page);
+        record('A20_08', 'Technician B logged out via application UI', true, true, true);
+
+        // ─── STEP 9: Tech A logs back in via /login UI ───
+        console.log('Step 9: Technician A logs back in to recover pending draft...');
+        await loginViaUI(page, baseUrl, userTechA.username, 'fictionalPassword123!');
+        record('A20_09', 'Technician A re-authenticated via application UI on shared device', true, true, true);
+
+        // ─── STEP 10: Tech A opens workbench and recovers draft value in editor ───
+        console.log('Step 10: Technician A opens workbench; verifying draft recovery in editor...');
+        await page.goto(`${baseUrl}/workbench?sampleId=${sampleA.id}&workItemId=${workItemA.id}&analysis=PH_H2O`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('input[inputmode="decimal"]', { timeout: 10000 });
+        await new Promise(r => setTimeout(r, 1500));
+
+        const recoveredValA = await page.$eval('input[inputmode="decimal"]', el => el.value);
+        record('A20_10', 'Technician A recovers draft determination 6.85 in actual editor input', '6.85', recoveredValA, recoveredValA === '6.85');
         await page.screenshot({ path: path.join(outputDir, 'browser-a20-techA-recovered.png') });
 
-        // Inspect IndexedDB to verify Tech A draft & outbox retention
-        const recoveryInspection = await page.evaluate(async (userIdA, draftKeyA, opIdA) => {
-            return new Promise((resolve) => {
-                const req = window.indexedDB.open('soilfer_lims_offline', 3);
-                req.onsuccess = (e) => {
-                    const db = e.target.result;
-                    const tx = db.transaction(['drafts', 'outbox'], 'readonly');
-                    const draftsStore = tx.objectStore('drafts');
-                    const outboxStore = tx.objectStore('outbox');
-
-                    let draftFound = null;
-                    let opFound = null;
-
-                    const getDraft = draftsStore.get(draftKeyA);
-                    getDraft.onsuccess = () => {
-                        draftFound = getDraft.result;
-                    };
-
-                    const getOp = outboxStore.get(opIdA);
-                    getOp.onsuccess = () => {
-                        opFound = getOp.result;
-                    };
-
-                    tx.oncomplete = () => {
-                        db.close();
-                        resolve({
-                            draftIntact: draftFound !== null && draftFound.data?.rawPh === 6.85,
-                            draftData: draftFound?.data,
-                            opIntact: opFound !== null && opFound.status === 'PENDING' && opFound.userId === userIdA,
-                            opData: opFound
-                        });
-                    };
-                    tx.onerror = () => resolve({ draftIntact: false, opIntact: false });
-                };
-                req.onerror = () => resolve({ draftIntact: false, opIntact: false });
-            });
-        }, userTechA.id, `draft:${userTechA.id}:${sample.id}:${workItemA.id}`, 'op-tech-a-001');
-
-        record('A20_10', 'Technician A unsynced draft intact and recoverable in IndexedDB after B logout', true, recoveryInspection.draftIntact, recoveryInspection.draftIntact);
-        record('A20_11', 'Technician A queued outbox operation intact and pending in IndexedDB', true, recoveryInspection.opIntact, recoveryInspection.opIntact);
-
-        // ─── STEP 11: Tech A syncs recovered work ───
-        console.log('Step 11: Technician A syncs recovered work to server...');
-        const techASyncResult = await page.evaluate(async (tokenA, opData) => {
-            const res = await fetch('/api/sync/operations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenA}`
-                },
-                body: JSON.stringify({
-                    protocolVersion: 1,
-                    deviceId: 'shared-workstation-01',
-                    operations: [opData]
-                })
-            });
-            const body = await res.json();
-            const applied = (body.receipts || []).find(r => r.operationId === opData.operationId);
-            return {
-                httpStatus: res.status,
-                appliedStatus: applied?.status
-            };
-        }, tokenA, recoveryInspection.opData);
-
-        const techAApplied = techASyncResult.appliedStatus === 'SUCCESS' || techASyncResult.appliedStatus === 'APPLIED';
-        record('A20_12', 'Technician A recovered work syncs successfully and applies on server', true, techAApplied, techAApplied);
-
-        // Check server DB attribution for Tech A
-        const receiptA = await prisma.commandReceipt.findFirst({
-            where: { idempotencyKey: 'op-tech-a-001' }
+        // ─── STEP 11: Tech A syncs recovered work via shipped sync mechanism ───
+        console.log('Step 11: Technician A syncs recovered work via shipped sync mechanism...');
+        await page.evaluate(async () => {
+            if (window.soilferSync && window.soilferSync.triggerSync) {
+                return await window.soilferSync.triggerSync();
+            }
         });
-        const serverAttributionACorrect = receiptA && receiptA.actor === userTechA.username;
-        record('A20_13', 'Server command receipt for recovered work attributed strictly to Tech A', true, serverAttributionACorrect, serverAttributionACorrect);
+        await new Promise(r => setTimeout(r, 2000));
+
+        const draftRecordA = await prisma.workItemDraft.findFirst({
+            where: { workItemId: workItemA.id }
+        });
+        const aWorkPersisted = draftRecordA && (draftRecordA.value === '6.85' || draftRecordA.value === '6.850') && draftRecordA.userId === userTechA.username;
+        record('A20_11', 'Technician A recovered draft synced and attributed strictly to Tech A in database', true, !!aWorkPersisted, !!aWorkPersisted);
 
     } finally {
         if (browser) {
@@ -601,7 +398,7 @@ async function runJourney() {
     // Hash check
     const sourceHashAfter = hash(sourcePath);
     const hashIntact = sourceHashBefore === sourceHashAfter;
-    record('A20_14', 'Baseline database dev.db hash strictly preserved untouched', sourceHashBefore, sourceHashAfter, hashIntact);
+    record('A20_12', 'Baseline database dev.db hash strictly preserved untouched', sourceHashBefore, sourceHashAfter, hashIntact);
 
     // Save report
     const summary = {
