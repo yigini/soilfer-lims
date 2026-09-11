@@ -503,7 +503,13 @@ exports.suspendUser = async (req, res) => {
     try {
         const targetUserId = req.params.id;
         const { reason } = req.body || {};
-        const result = await staffLifecycleService.suspendUser(req.user, targetUserId, { reason });
+        if (!reason || typeof reason !== 'string' || !reason.trim()) {
+            return res.status(400).json({
+                error: 'A justification reason is required to suspend an account',
+                code: 'REASON_REQUIRED'
+            });
+        }
+        const result = await staffLifecycleService.suspendUser(req.user, targetUserId, { reason: reason.trim() });
         res.json(result);
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.message, code: err.code });

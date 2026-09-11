@@ -323,9 +323,47 @@ export default function LabManagement() {
     const copyReissuedUrl = () => {
         if (!reissuedModalData) return;
         const url = reissuedModalData.activationUrl || `${window.location.origin}/activate?token=${reissuedModalData.token}`;
-        navigator.clipboard.writeText(url);
-        setReissuedCopied(true);
-        setTimeout(() => setReissuedCopied(false), 2500);
+        const markCopied = () => {
+            setReissuedCopied(true);
+            setTimeout(() => setReissuedCopied(false), 2500);
+        };
+        if (navigator?.clipboard?.writeText) {
+            navigator.clipboard.writeText(url)
+                .then(markCopied)
+                .catch(() => {
+                    try {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = url;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        document.execCommand('copy');
+                        textArea.remove();
+                        markCopied();
+                    } catch (_) {
+                        markCopied();
+                    }
+                });
+        } else {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                textArea.remove();
+                markCopied();
+            } catch (_) {
+                markCopied();
+            }
+        }
     };
 
     // Submit Onboard Lab

@@ -47,8 +47,9 @@ async function runRehearsal(customDbPath = null) {
     await origDb.backup(rehearsalDbPath);
     origDb.close();
 
+    let rehearsalDb = null;
     try {
-        const rehearsalDb = new Database(rehearsalDbPath, { fileMustExist: true });
+        rehearsalDb = new Database(rehearsalDbPath, { fileMustExist: true });
 
         // Step 2: Execute Migration 1 (additive tables)
         console.log('[REHEARSAL] Executing Migration 1 (lifecycle and grants tables)...');
@@ -64,35 +65,81 @@ async function runRehearsal(customDbPath = null) {
             throw new Error(`Expected 3 tables, but found ${foundTableNames.length}: ${foundTableNames.join(', ')}`);
         }
 
-        // Step 3: Insert intermediate duplicate pending invitations to test conflict normalization
-        console.log('[REHEARSAL] Simulating intermediate state with duplicate pending invitations...');
+        // Step 3: Insert intermediate duplicate pending invitations with conflicting grants
+        console.log('[REHEARSAL] Simulating intermediate state with conflicting duplicate active invitations...');
         rehearsalDb.exec(`
             INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "tokenHash", "expiresAt", "createdBy", "createdAt", "isConsumed", "isRevoked")
-            VALUES ('inv-dup-1', 'conflict@example.com', 'Conflict User 1', 'LAB_TECHNICIAN', 'rehearsal-lab', 'hash-dup-1', datetime('now', '+24 hours'), 'admin', '2026-09-11 10:00:00', 0, 0);
+            VALUES ('inv-conf-1', 'conflict@example.com', 'Conflict User 1', 'LAB_MANAGER', 'lab-alpha', 'hash-conf-1', datetime('now', '+24 hours'), 'admin', '2026-09-11 10:00:00', 0, 0);
 
             INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "tokenHash", "expiresAt", "createdBy", "createdAt", "isConsumed", "isRevoked")
-            VALUES ('inv-dup-2', 'conflict@example.com', 'Conflict User 2', 'LAB_TECHNICIAN', 'rehearsal-lab', 'hash-dup-2', datetime('now', '+24 hours'), 'admin', '2026-09-11 11:00:00', 0, 0);
+            VALUES ('inv-conf-2', 'conflict@example.com', 'Conflict User 2', 'LAB_TECHNICIAN', 'lab-beta', 'hash-conf-2', datetime('now', '+24 hours'), 'admin', '2026-09-11 11:00:00', 0, 0);
         `);
 
-        // Step 4: Execute Migration 2 (normalization + unique partial index)
-        console.log('[REHEARSAL] Executing Migration 2 (duplicate normalization and unique index)...');
+        // Step 4: Test Actual Failure During Migration Sequence
+        console.log('[REHEARSAL] Testing actual migration failure during migration sequence (Migration 2 against unresolved conflicts)...');
         const mig2Sql = fs.readFileSync(mig2Path, 'utf8');
-        rehearsalDb.exec(mig2Sql);
-
-        // Verify that duplicate was normalized: inv-dup-1 should be revoked, inv-dup-2 remains active
-        const dup1 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-dup-1');
-        const dup2 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-dup-2');
-        if (dup1.isRevoked !== 1 || dup2.isRevoked !== 0) {
-            throw new Error(`Duplicate normalization failed: dup1.isRevoked=${dup1.isRevoked}, dup2.isRevoked=${dup2.isRevoked}`);
+        let migrationFailedSafely = false;
+        try {
+            rehearsalDb.transaction(() => {
+                rehearsalDb.exec(mig2Sql);
+            })();
+        } catch (migErr) {
+            if (migErr.message.includes('UNIQUE constraint failed')) {
+                migrationFailedSafely = true;
+            }
         }
-        console.log('[REHEARSAL] Verified duplicate normalization: older pending duplicate revoked, newer kept active.');
+        if (!migrationFailedSafely) {
+            throw new Error('Expected Migration 2 to fail safely on conflicting duplicates, but execution succeeded or threw wrong error');
+        }
 
-        // Verify unique index enforcement on active email
+        // Verify zero mutations / zero silent revocations on migration failure
+        const preConf1 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-conf-1');
+        const preConf2 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-conf-2');
+        if (preConf1.isRevoked !== 0 || preConf2.isRevoked !== 0) {
+            throw new Error(`Migration failure mutated records: conf1.isRevoked=${preConf1.isRevoked}, conf2.isRevoked=${preConf2.isRevoked}`);
+        }
+        console.log('[REHEARSAL] Verified migration failure safety: Migration 2 rolled back cleanly without mutating historical records.');
+
+        // Step 5: Execute Controlled, Audited Conflict Resolution
+        console.log('[REHEARSAL] Applying controlled, audited conflict resolution...');
+        const { resolveConflicts } = require('./resolve_invitation_conflicts');
+        const resolutionSummary = resolveConflicts(
+            rehearsalDb,
+            {
+                'conflict@example.com': {
+                    action: 'retain',
+                    retainId: 'inv-conf-1',
+                    reason: 'Audited rehearsal resolution: retained manager appointment in lab-alpha'
+                }
+            },
+            'REHEARSAL_ADMIN'
+        );
+        console.log('[REHEARSAL] Conflict resolution outcome:', resolutionSummary);
+
+        const postConf1 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-conf-1');
+        const postConf2 = rehearsalDb.prepare('SELECT isRevoked FROM "StaffInvitation" WHERE id = ?').get('inv-conf-2');
+        if (postConf1.isRevoked !== 0 || postConf2.isRevoked !== 1) {
+            throw new Error(`Controlled resolution failed: postConf1=${postConf1.isRevoked}, postConf2=${postConf2.isRevoked}`);
+        }
+
+        // Verify audit record was created
+        const audits = rehearsalDb.prepare(`SELECT * FROM "AuditLog" WHERE action = 'INVITATION_CONFLICT_RESOLVED'`).all();
+        if (audits.length === 0) {
+            throw new Error('Expected AuditLog entry for conflict resolution, but found 0');
+        }
+        console.log('[REHEARSAL] Verified audited conflict resolution: 1 retained, 1 revoked, audit log recorded.');
+
+        // Step 6: Forward Repair — Execute Migration 2 again
+        console.log('[REHEARSAL] Executing forward repair: re-running Migration 2 after audited resolution...');
+        rehearsalDb.exec(mig2Sql);
+        console.log('[REHEARSAL] Forward repair succeeded: unique index idx_staff_invitation_active_email created.');
+
+        // Verify unique index enforcement on new active duplicate insert
         let uniqueConstraintCaught = false;
         try {
             rehearsalDb.exec(`
                 INSERT INTO "StaffInvitation" ("id", "email", "name", "role", "labId", "tokenHash", "expiresAt", "createdBy", "isConsumed", "isRevoked")
-                VALUES ('inv-dup-3', 'conflict@example.com', 'Conflict 3', 'LAB_TECHNICIAN', 'rehearsal-lab', 'hash-dup-3', datetime('now', '+24 hours'), 'admin', 0, 0);
+                VALUES ('inv-conf-3', 'conflict@example.com', 'Conflict 3', 'LAB_TECHNICIAN', 'lab-alpha', 'hash-conf-3', datetime('now', '+24 hours'), 'admin', 0, 0);
             `);
         } catch (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
@@ -104,38 +151,11 @@ async function runRehearsal(customDbPath = null) {
         }
         console.log('[REHEARSAL] Verified unique index enforcement: new active duplicate insert fails closed.');
 
-        // Step 5: Test Migration Rerun Idempotency
+        // Step 7: Test Migration Rerun Idempotency
         console.log('[REHEARSAL] Testing migration rerun idempotency...');
         rehearsalDb.exec(mig1Sql);
         rehearsalDb.exec(mig2Sql);
         console.log('[REHEARSAL] Migration rerun idempotency verified: repeated execution succeeded without error.');
-
-        // Step 6: Test Injected Partial Failure and Rollback
-        console.log('[REHEARSAL] Testing injected partial failure and transactional rollback...');
-        let rollbackVerified = false;
-        try {
-            rehearsalDb.transaction(() => {
-                rehearsalDb.prepare(`
-                    INSERT INTO "LabLifecycleState" ("labId", "operationalStatus", "revision", "updatedAt")
-                    VALUES ('failing-lab', 'ACTIVE', 1, CURRENT_TIMESTAMP)
-                `).run();
-                // Deliberately trigger constraint violation to force rollback
-                rehearsalDb.prepare(`
-                    INSERT INTO "LabLifecycleState" ("labId", "operationalStatus", "revision", "updatedAt")
-                    VALUES ('failing-lab', 'ACTIVE', 1, CURRENT_TIMESTAMP)
-                `).run();
-            })();
-        } catch (e) {
-            // Check that failing-lab was rolled back
-            const row = rehearsalDb.prepare('SELECT * FROM "LabLifecycleState" WHERE "labId" = ?').get('failing-lab');
-            if (!row) {
-                rollbackVerified = true;
-            }
-        }
-        if (!rollbackVerified) {
-            throw new Error('Injected partial failure was not rolled back cleanly');
-        }
-        console.log('[REHEARSAL] Verified injected partial failure: transaction rolled back cleanly leaving 0 records.');
 
         // Step 7: Verify sample integrity on disposable database
         const rehearsalSampleCount = rehearsalDb.prepare('SELECT count(*) as count FROM Sample').get().count;
@@ -148,8 +168,12 @@ async function runRehearsal(customDbPath = null) {
         console.log('[REHEARSAL] Migration rehearsal passed with 100% success.');
     } finally {
         // Step 8: Clean up disposable database
+        if (rehearsalDb) {
+            try { rehearsalDb.close(); } catch (_) {}
+            rehearsalDb = null;
+        }
         if (fs.existsSync(rehearsalDbPath)) {
-            fs.unlinkSync(rehearsalDbPath);
+            try { fs.unlinkSync(rehearsalDbPath); } catch (_) {}
             console.log('[REHEARSAL] Cleaned up disposable rehearsal database.');
         }
 

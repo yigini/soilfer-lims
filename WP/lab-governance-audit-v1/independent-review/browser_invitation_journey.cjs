@@ -196,6 +196,11 @@ async function run() {
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1280,850']
     });
 
+    const context = browser.defaultBrowserContext();
+    try {
+        await context.overridePermissions(baseUrl, ['clipboard-read', 'clipboard-write']);
+    } catch (_) {}
+
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 850 });
 
@@ -260,13 +265,14 @@ async function run() {
             const copyBtn = buttons.find(b => b.textContent.includes('Copy') || b.textContent.includes('Copied'));
             if (copyBtn) copyBtn.click();
         });
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 400));
         const copyBtnText = await page.evaluate(() => {
             const buttons = Array.from(document.querySelectorAll('div[role="dialog"] button'));
             const copyBtn = buttons.find(b => b.textContent.includes('Copied') || b.textContent.includes('Copy'));
             return copyBtn ? copyBtn.textContent.trim() : '';
         });
-        record('B_INV_06', 'Copy button gives immediate visual feedback (Copied!)', true, copyBtnText.includes('Copied') || copyBtnText.includes('Copy'), true);
+        const copyFeedbackWorked = copyBtnText.includes('Copied');
+        record('B_INV_06', 'Copy button gives immediate visual feedback (Copied!)', true, copyFeedbackWorked, copyFeedbackWorked);
 
         // Screenshot open modal
         await page.screenshot({ path: path.join(outputDir, 'browser-invitation-reissue-modal.png') });

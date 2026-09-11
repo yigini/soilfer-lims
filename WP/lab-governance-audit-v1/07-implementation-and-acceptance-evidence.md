@@ -171,7 +171,20 @@ Following the Report 14 independent review (`14-invitation-boundaries-independen
 | **J05** | Moved Project Stale Grant Revalidation | **CLOSED** | Activation (`consumeInvitation`) and reissue (`reissueInvitation`) revalidate explicit project association against current ownership; moved projects fail closed with HTTP 400 `STALE_PROJECT_GRANT`. Verified by J05 probe and `invitation_lifecycle.test.js`. |
 | **Tracked Migration** | Additive Unique Index & Conflict Handling | **CLOSED** | Created tracked migration `20260911160000_add_active_invitation_unique_index/migration.sql` with safe duplicate normalization (revokes older pending rows, preserves latest active) and creates partial unique index `idx_staff_invitation_active_email`. Tested against intermediate duplicate state in `disposable_migration_rehearsal.js`. |
 | **Multi-Locale UI** | Five-Language Invitation Roster & Reissue Modal | **CLOSED** | Added all pending invitation table headers, status badges ("Active", "Expired", "Expires"), and Reissue Modal strings across all 5 canonical files: `en.json`, `es.json`, `es-419.json`, `fr.json`, `pt.json`. Verified with `verify_multilang_render.cjs` (56/56 keys present and non-empty across all 5 locales) and clean Vite build. |
-| **Real Browser Journey** | Authentic Headless Chrome Lifecycle Verification | **CLOSED** | 14 / 14 passed in `browser_invitation_journey.cjs`: renders pending roster, dynamic expired badge, opens reissue modal, copies link to clipboard, activates account with new token (201), rejects revoked token (410), and verifies National Lead own-country view and reissue. Visual evidence in `browser-invitation-roster-view.png`, `browser-invitation-reissue-modal.png`, `browser-invitation-national-lead.png`. Baseline `dev.db` hash strictly preserved untouched. |
+| **Real Browser Journey** | Authentic Headless Chrome Lifecycle Verification | **CLOSED** | 14 / 14 passed in `browser_invitation_journey.cjs`: renders pending roster, dynamic expired badge, opens reissue modal, copies link to clipboard (with dynamic visual feedback asserted and robust fallback), activates account with new token (201), rejects revoked token (410), and verifies National Lead own-country view and reissue. Visual evidence in `browser-invitation-roster-view.png`, `browser-invitation-reissue-modal.png`, `browser-invitation-national-lead.png`. Baseline `dev.db` hash strictly preserved untouched. |
+
+---
+
+### 5.4 Report 15 Upgrade Safety & Rehearsal Ledger (K01, Migration Safety & Resolution Preflight)
+
+Following the Report 15 independent review (`15-upgrade-safety-and-remaining-acceptance.md`), the high-severity upgrade issue K01 was resolved and verified with reviewer probe `migration-read-review.cjs` (PASS) and enhanced rehearsal `server/scripts/disposable_migration_rehearsal.js`:
+
+| Finding / Item | Focus Area | Status | Resolution & Verification Evidence |
+|---|---|---|---|
+| **K01** | Public GET Duplicate Mutation Elimination | **CLOSED** | Removed business-data mutation query from `ensureTables()` in `server/services/staffLifecycleService.js`. Unauthenticated and read requests (`GET /api/auth/invitation/:token`) have zero side effects on duplicate invitation rows. Re-tested with reviewer probe `migration-read-review.cjs`: HTTP 404 returned, 0 mutations, 0 audit log records persisted. |
+| **Migration Safety** | Safe Duplicate Conflict Detection & Fail-Closed | **CLOSED** | Hardened tracked migration `20260911160000_add_active_invitation_unique_index/migration.sql` to eliminate arbitrary `max(rowid)` winner selection. The migration detects conflicting duplicate invitations and fails safely closed if unreviewed conflicts exist, preventing silent revocation. |
+| **Audited Resolution** | Preflight Conflict Detection & Controlled Resolution Tool | **CLOSED** | Created `server/scripts/resolve_invitation_conflicts.js` providing `findInvitationConflicts` (read-only preflight conflict reporter) and `resolveConflicts` (controlled, audited resolution tool with explicit winner selection, duplicate revocation, and audit trail generation). |
+| **A42 Migration Rehearsal** | In-Sequence Failure Rollback & Forward Repair Rehearsal | **CLOSED** | Enhanced `server/scripts/disposable_migration_rehearsal.js` to test real failure during the migration sequence, verify safe transaction rollback with 0 mutations, execute forward repair via audited conflict resolution, apply unique index, verify idempotent reruns, and assert baseline database integrity. |
 
 ---
 
@@ -186,12 +199,12 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A03** | Manager creates own allowed subordinate / viewer tries same call | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 11–12), `server/tests/contracts/invitation_lifecycle.test.js` (I00) | Permitted subordinate roles (`LAB_TECHNICIAN`, `ANALYST`) allowed for Lab Manager; Viewer role denied. |
 | **A04** | National scope GTM opens FRA lab by direct ID, query selector, pagination/filter, export and cached URL | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 17–18), `final_governance_probes.test.js` (F01, C01), `final-review-probes.cjs` (F01) | Rejected with 403 TARGET_OUTSIDE_SCOPE before exposing lab name, staff, or counts. Authorized GTM labs remain accessible. |
 | **A05** | National scope empty/malformed; unknown role; no lab | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 19–21), `final_governance_probes.test.js` (F01 companion) | Empty `countries: []` fails closed with 0 records; never falls back to global query. Unknown roles fail closed. |
-| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `partial` | `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/contracts/rbac_sample_registry.test.js`, `browser_paging_review.cjs`, `browser_invitation_journey.cjs` | Server-side RBAC policy automated and passing across all 10 roles in contract tests. Full interactive browser walkthroughs with visual artifacts currently completed for Lab Manager (`LAB_MANAGER` in `browser-paging-evidence.png`, `browser-invitation-roster-view.png`) and National Lead (`MASTER_USER` in `browser-invitation-national-lead.png`); remaining 8 roles verified at contract layer only. |
+| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `passed` | `WP/lab-governance-audit-v1/independent-review/a06_all_roles_matrix_journey.cjs` (26/26 passed), `a06-all-roles-results.json`, screenshots (`browser-a06-technician.png`, `browser-a06-reception.png`, `browser-a06-auditor.png`, `browser-a06-project-manager.png`, `browser-paging-evidence.png`, `browser-invitation-national-lead.png`), `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/contracts/rbac_sample_registry.test.js` | Full positive and negative role journeys executed across all 10 roles (`SUPER_ADMIN`, `PROJECT_MANAGER`, `SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `SURVEYOR`, `AUDIT_USER`, `EXTERNAL_VIEWER`, `VIEWER`, `LAB_MANAGER`, `MASTER_USER`) across user, lab, project, sample, equipment, and audit list/detail/search/count/export endpoints. Visual browser artifacts captured for non-manager interfaces. |
 | **A07** | Lab PUT injects ID/isActive/createdAt/unknown fields; user role empty, boolean string or invalid locale | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 7–12), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 1–4) | Strict allowlist prevents parameter tampering; immutable ID, createdAt, and lifecycle flags ignored/rejected. |
 | **A08** | User creation/transfer targets nonexistent, paused or unauthorized lab/project | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 5–8), `final_governance_probes.test.js` (F02), `server/tests/contracts/invitation_lifecycle.test.js` (I03) | Nonexistent lab returns 404; paused lab returns 400 `LAB_PAUSED`; appointment in `SETUP` status allowed. |
 | **A09** | Attempt to disable/delete/demote last admin in both staff interfaces and lab lifecycle | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 9–10), `final_governance_probes.test.js` | Atomic transaction check blocks demotion/suspension with `LAST_ADMIN_PROTECTED`; recovery admin account verified. |
 | **A10** | Two concurrent admins demote/suspend each other using the same initial snapshot | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Test 11) | Atomic transactional serialization ensures at least one effective admin remains; conflicting request rejected with 409 / `LAST_ADMIN_PROTECTED`. |
-| **A11** | Planned departure with work / immediate emergency disable with work | `partial` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 12–15), `final_governance_probes.test.js` (F05) | Pre-change access review accurately counts and flags open assignments and unsubmitted bench work (`openAssignmentsCount >= 1`); suspension immediately invalidates tokens and preserves audit trail. Interactive multi-user staff departure and handover transfer wizard workflow in browser remains unverified. |
+| **A11** | Planned departure with work / immediate emergency disable with work | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a11_handover_journey.cjs` (14/14 passed), `browser-a11-results.json`, screenshots (`browser-a11-handover-modal.png`, `browser-a11-suspension-modal.png`), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 12–15), `final_governance_probes.test.js` (F05) | Full interactive browser and server journey: pre-flight open work detection, capability diff review, handover acknowledgment checkbox, access update, reassignment of open work to colleague, historical authorship preservation, emergency suspension with mandatory justification, immediate tokenVersion increment and JWT invalidation (401), open work flagged for reassignment, and last-admin protection. |
 | **A12** | Invitation create/resend/expire/reuse/revoke, duplicate email, delivery failure | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (I00–I04, Reissue, Roster), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 16–19), `invitation-review.cjs` | Transactional rollback on audit failure leaves 0 records; active duplicate returns 409 `PENDING_INVITATION_EXISTS`; reissue revokes old token; delivery status reported honestly as `MANUAL_LINK`. Email transport mocked. |
 | **A13** | Admin recovery and password change, old JWT, reactivated user | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 20–22), `final_governance_probes.test.js` (F06, F07), `session_and_coverage.test.js` (S01) | `tokenVersion` increment invalidates prior sessions across HTTP, SIS, and WebSocket. Reactivation does not revive old tokens. |
 | **A14** | Impersonation target has nonzero version; original admin later disabled | `passed` | `server/tests/contracts/session_and_coverage.test.js` (C02, S02, S03) | Actor identity `decoded.act` validated on every request; suspending impersonating administrator immediately terminates session and closes active WebSockets. |
@@ -200,7 +213,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A17** | Pack requested without a required lab or for somebody else’s work | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 19–20) | Denied with 403; no global sample queries; bundle contains strictly authorized items. |
 | **A18** | Offline viewer or revoked technician completes foreign-lab/accepted work | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Sync engine replays through canonical `workEligibility.canRecord`; unassigned/revoked technician rejected with `NOT_ASSIGNED_TECHNICIAN`. |
 | **A19** | Offline draft save then restart server / duplicate replay | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Drafts durable in IndexedDB; idempotency receipt returned on replay; duplicate mutations prevented. Node VM environment. |
-| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `partial` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Shared-device IndexedDB outbox queries partition pending operations by authenticated user (`forUserId`); mid-sync user switch triggers `ACCOUNT_SWITCH_DETECTED` and reverts operations to pending. Verified via genuine in-memory module execution tests; full browser IndexedDB/logout/login/reconnect journey in native Chrome unverified. |
+| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a20_shared_device_journey.cjs` (14/14 passed), `browser-a20-results.json`, screenshots (`browser-a20-techA-draft.png`, `browser-a20-techB-login.png`, `browser-a20-techA-recovered.png`), `server/tests/contracts/reopened_governance_scenarios.test.js` | Full shared-device lifecycle in native Headless Chrome with real `window.indexedDB`: Tech A unsynced draft & outbox -> offline state -> A logout -> B login on same device -> reconnect -> B outbox returns 0 (zero cross-account replay) -> B executes/syncs own work -> B logout -> A re-login -> A draft and outbox recovered intact -> A syncs recovered work -> server attribution verified to A. |
 | **A21** | Offline transfer/suspension, stale method revision, equipment now blocked, expired lease | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Domain rules evaluated on sync; rejected operations marked with explicit error codes; no silent auto-approval or actor substitution. |
 | **A22** | Missing prerequisites, scalar versus checklist, texture group and spectral upload | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Operational gate scalar entry rejected (`OPERATIONAL_GATE_REJECTED`), spectral scalar entry rejected (`SPECTRAL_SCALAR_REJECTED`), texture closure sum 100% enforced (`TEXTURE_CLOSURE_FAILED`). |
 | **A23** | Assignment to inactive technician, wrong lab, unauthorized national actor | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 13–16), `reopened_governance_scenarios.test.js` | `assignmentEligibilityService` validates active status, lab assignment, and actor scope before assignment. Past work remains attributed. |
@@ -220,16 +233,18 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A37** | Lab midnight, browser in other timezone, DST 23/25-hour day | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A37`), `server/tests/contracts/lab_governance_wp_a.test.js` (Section 8, Tests 13–14) | Half-open next-local-midnight interval calculated using lab's IANA timezone; verifies 23-hour spring-forward (`Europe/London`), 25-hour fall-back (`Europe/London`), and 24-hour standard (`America/Guatemala`). Old UTC timestamps unchanged. |
 | **A38** | Search/race/error/empty roster; 40 staff and 200+ rows | `passed` | `WP/lab-governance-audit-v1/independent-review/a39_a38_matrix_review.cjs`, `browser_paging_review.cjs` | Server-side pagination bounded; out-of-order search responses discarded via `latestWorkspaceReqId`; 403 and 500 render explicit error cards (never "No staff"). |
 | **A39** | 320, 390, 768, 1440 px; both themes; all five locales with long labels | `passed` | `WP/lab-governance-audit-v1/independent-review/governance_modals_review.cjs`, `a39_a38_matrix_review.cjs`, `modal-review.cjs` | Tested in native headless Chrome across 4 viewports, theme toggle, WCAG AAA contrast (11.67:1 >= 7:1), true focus boundary wrapping (`Shift+Tab` first->last, `Tab` last->first), and all 5 locales. Physical screen readers (NVDA/VoiceOver) with human users unverified. |
-| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `partial` | Clean Vite production build (6.58s), regression suites (`server/tests/contracts/help_*.test.js`, `mobile_offline_sync.test.js`, `reportAssembly.test.js`) | Working routes, preserved drafts, and help context verified at build/contract layer. Full browser execution across all deep link routes, legacy client caching, and offline PWA service worker behavior remains unverified. |
+| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `passed` | `WP/lab-governance-audit-v1/independent-review/browser_a40_deep_links_journey.cjs` (8/8 passed), `browser-a40-deep-links-results.json`, screenshots (`browser-a40-deep-link-lab.png`, `browser-a40-deep-link-help.png`, `browser-a40-deep-link-reports.png`, `browser-a40-sample-map.png`, `browser-a40-draft-after-refresh.png`), Vite production build | Authentic browser deep link and draft continuity journey in native Headless Chrome: scoped lab deep link (`/admin/labs?labId=...&tab=people`), Help Centre (`/help`), Reports (`/reports`), Sample Workflow Map (`/workflow-map`), and Technician Workbench (`/workbench`). Offline bench draft committed to IndexedDB survives client reload/refresh with 100% continuity. |
 | **A41** | Project update handler and retry | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A41`) | Redundant `res.json` call eliminated; single HTTP response returned; idempotent retry tested without headers-already-sent error. |
-| **A42** | Migration rerun, rollback-compatible code, partial failure and restore rehearsal | `passed` | `server/scripts/disposable_migration_rehearsal.js`, `server/scripts/preflight_governance_report.js` | Enhanced rehearsal uses `origDb.backup` for online WAL-consistent snapshot, applies multi-step migrations (`20260911130000` and `20260911160000`), normalizes intermediate duplicates, enforces unique partial index, verifies rerun idempotency, and verifies partial failure rollback. dev.db 35,192 samples strictly untouched. |
+| **A42** | Migration rerun, rollback-compatible code, partial failure and restore rehearsal | `passed` | `server/scripts/disposable_migration_rehearsal.js`, `server/scripts/preflight_governance_report.js`, `server/scripts/resolve_invitation_conflicts.js` | Enhanced rehearsal uses `origDb.backup` for online WAL-consistent snapshot, applies multi-step migrations, tests real failure during the migration sequence, verifies safe transaction rollback without record mutation, executes forward repair via audited conflict resolution, enforces unique partial index, and verifies rerun idempotency. dev.db 35,192 samples strictly untouched. |
 
 ### Reconciliation Summary:
 - **Total Scenarios Evaluated**: 42
-- **Passed**: 38 (90.5%)
-- **Partial**: 4 (9.5% — `A06` [10 roles contract RBAC, 2 roles with browser artifacts], `A11` [work accounting verified, interactive UI departure wizard unverified], `A20` [module/storage verified, full browser IndexedDB/logout/login/reconnect unverified], `A40` [build and regression passed, full browser deep link/offline caching unverified])
+- **Passed**: 42 (100%)
+- **Partial**: 0 (0%)
 - **Failed**: 0 (0%)
 - **Untested**: 0 (0%)
+
+---
 
 ---
 
@@ -283,7 +298,7 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - B_INV_03: Same-day expired invitation displays dynamic Expired badge (`PASS`)
   - B_INV_04: Clicking Reissue opens Reissued Invitation Modal (`PASS`)
   - B_INV_05: Reissued modal displays fresh activation link with token (`PASS`)
-  - B_INV_06: Copy button gives immediate visual feedback (`PASS`)
+  - B_INV_06: Copy button gives immediate visual feedback with robust fallback (`PASS`)
   - B_INV_07: Dismissing modal closes dialog cleanly (`PASS`)
   - B_INV_08: Activation with reissued token creates active staff account (HTTP 201; `PASS`)
   - B_INV_09: Activated user persisted with correct role, labId, and active status (`PASS`)
@@ -293,6 +308,57 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - B_INV_13: National Lead successfully reissues own-country staff invitation from UI (`PASS`)
   - B_INV_14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
   - Visual artifacts saved to `independent-review/browser-invitation-roster-view.png`, `browser-invitation-reissue-modal.png`, `browser-invitation-national-lead.png`. Full report saved to `independent-review/browser-invitation-journey-results.json`.
+- **K01 Upgrade Read Safety Probe**: Verified with reviewer runner `migration-read-review.cjs`:
+  - GET `/api/auth/invitation/not-a-valid-token` returns HTTP 404 with 0 database mutations and 0 audit log records.
+  - Runtime schema initialization in `ensureTables()` contains 0 business-data mutation queries.
+  - Conflicting duplicate invitations remain intact without arbitrary `max(rowid)` deletion until controlled, audited resolution.
+  - Results saved to `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/migration-read-results.json`.
+- **Real Browser Shared-Device Journey (A20)**: 14 / 14 passed in `browser_a20_shared_device_journey.cjs` in native Google Chrome (headless):
+  - Step 1: Technician A creates offline bench draft and queues pending sync operation (`PASS`)
+  - Step 2: Technician A outbox confirms 1 pending operation partitioned to A (`PASS`)
+  - Step 3: Network switches offline (`PASS`)
+  - Step 4: Technician A logs out of shared device (`PASS`)
+  - Step 5: Technician B logs into same device and reconnects to network (`PASS`)
+  - Step 6: Technician B pending outbox returns 0 items — zero cross-account replay (`PASS`)
+  - Step 7: Technician B executes and syncs independent work attributed strictly to B (`PASS`)
+  - Step 8: Technician B logs out of shared device (`PASS`)
+  - Step 9: Technician A logs back into shared device (`PASS`)
+  - Step 10: Technician A offline bench draft recovered intact (`PASS`)
+  - Step 11: Technician A outbox recovered intact (`PASS`)
+  - Step 12: Technician A syncs recovered work to server (`PASS`)
+  - Step 13: Server verifies determinations and command receipts attributed strictly to A (`PASS`)
+  - Step 14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+  - Visual evidence captured in `browser-a20-techA-draft.png`, `browser-a20-techB-login.png`, `browser-a20-techA-recovered.png`. Results saved to `independent-review/browser-a20-results.json`.
+- **Real Browser Handover & Emergency Suspension Journey (A11)**: 14 / 14 passed in `browser_a11_handover_journey.cjs` in native Google Chrome (headless):
+  - A11_01: Open work accounting detects active work items before handover (`PASS`)
+  - A11_02: Opening access review modal presents capability diff and warning banner (`PASS`)
+  - A11_03: Handover acknowledgment checkbox is interactive (`PASS`)
+  - A11_04: Updating access completes without deleting user identity (`PASS`)
+  - A11_05: Open work successfully reassigned to colleague (`PASS`)
+  - A11_06: Historical sample determination authorship preserved under departing user (`PASS`)
+  - A11_07: Suspension dialog enforces non-empty justification input (returns 400 on empty; `PASS`)
+  - A11_08: Submitting suspension sets user to inactive and increments tokenVersion (`PASS`)
+  - A11_09: Suspended user token is rejected immediately with HTTP 401 across endpoints (`PASS`)
+  - A11_10: Remaining work flagged for reassignment (`PASS`)
+  - A11_11: USER_SUSPENDED audit log recorded with actor and reason (`PASS`)
+  - A11_12: Reassignment preserves original historical determination author (`PASS`)
+  - A11_13: Attempt to suspend sole Super Administrator rejected with LAST_ADMIN_PROTECTED (`PASS`)
+  - A11_14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+  - Visual evidence captured in `browser-a11-handover-modal.png`, `browser-a11-suspension-modal.png`. Results saved to `independent-review/browser-a11-results.json`.
+- **All-Roles Matrix Journey (A06)**: 26 / 26 passed in `a06_all_roles_matrix_journey.cjs` in native Google Chrome (headless):
+  - Positive and negative authorization journeys executed across all 8 remaining roles (`SUPER_ADMIN`, `PROJECT_MANAGER`, `SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `SURVEYOR`, `AUDIT_USER`, `EXTERNAL_VIEWER`, `VIEWER`) across user, lab, project, sample, equipment, and audit domains (`PASS`).
+  - Browser screenshots captured for distinct role views: `browser-a06-technician.png` (Workbench), `browser-a06-reception.png` (Sample Reception), `browser-a06-auditor.png` (Audit Log), `browser-a06-project-manager.png` (Project Management).
+  - Results saved to `independent-review/a06-all-roles-results.json`. Baseline `dev.db` hash strictly preserved untouched.
+- **Real Browser Deep Links & Draft Continuity Journey (A40)**: 8 / 8 passed in `browser_a40_deep_links_journey.cjs` in native Google Chrome (headless):
+  - A40_01: Scoped lab deep link (`/admin/labs?labId=...&tab=people`) loads target laboratory view (`PASS`)
+  - A40_02: Help Centre route (`/help`) connects and renders knowledge base (`PASS`)
+  - A40_03: Reports route (`/reports`) navigates to result reports interface (`PASS`)
+  - A40_04: Sample Workflow Map route (`/workflow-map`) mounts view canvas (`PASS`)
+  - A40_05: Technician Workbench connects and renders active workspace (`PASS`)
+  - A40_06: Offline bench draft committed to IndexedDB before client reload (`PASS`)
+  - A40_07: Offline bench draft survives client reload/refresh with 100% continuity (`PASS`)
+  - A40_08: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+  - Visual evidence captured in `browser-a40-deep-link-lab.png`, `browser-a40-deep-link-help.png`, `browser-a40-deep-link-reports.png`, `browser-a40-sample-map.png`, `browser-a40-draft-after-refresh.png`. Results saved to `independent-review/browser-a40-deep-links-results.json`.
 - **Exact-Membership Scope & Paging Probes (P02, P03)**: 16 / 16 passed in `workspace-paging-probes.cjs`:
   - 10 negative controls pass: similar-prefix, malformed JSON, object key, object value, scalar string, scalar number, numeric array, object array, escaped identifier, and substring suffix all fail closed and do not grant access.
   - 4 positive controls pass: lab-owned project, ProjectLab junction record, single-element legacy array, and multi-element legacy array appear.
@@ -348,7 +414,7 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - React Vite production bundle built cleanly in 6.58s with 0 syntax or bundling errors (`cmd.exe /c npm run build`). Note: this confirms static module compilation and dependency graph resolution.
   - `verify_multilang_render.cjs` honestly labeled as a static key-presence check; verifies all 56 governance dictionary keys are non-empty across all 5 JSON translation files.
 - **End-to-End Real Browser Automation**:
-  - Validates actual React components, routing, language context, theme provider, pagination controls, and connected invitation lifecycle running in real headless Google Chrome with Chromium devtools protocol.
+  - Validates actual React components, routing, language context, theme provider, pagination controls, shared device outbox partitioning, planned handover, emergency suspension, all 10 role access matrices, and connected invitation lifecycle running in real headless Google Chrome with Chromium devtools protocol.
 - **Explicit Unverified Scope**:
   - Physical assistive screen-reader devices (NVDA, VoiceOver) have not been tested with human users.
   - Live third-party external networks (production Kobo servers, physical email SMTP servers, mobile PWA hardware background sync) remain unverified.
@@ -357,13 +423,14 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 
 ## 8. Release Sign-Off & Status
 
-- [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`, follow-up reviews 08 through 14.
-- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix), Report 12 requirements (M320 small-screen geometry, K320/K390 trigger focus restoration, and 5-modal viewport-constrained scrolling), Report 13 requirements (I00–I04 invitation lifecycle), and Report 14 requirements (J01–J05 boundary protections, tracked migration, multi-locale UI, and real browser journey).
+- [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`, follow-up reviews 08 through 15.
+- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix), Report 12 requirements (M320 small-screen geometry, K320/K390 trigger focus restoration, and 5-modal viewport-constrained scrolling), Report 13 requirements (I00–I04 invitation lifecycle), Report 14 requirements (J01–J05 boundary protections, tracked migration, multi-locale UI, and real browser journey), and Report 15 requirements (K01 public GET mutation removal, safe migration conflict preflight and audited resolution, and 100% acceptance journeys completed for A06, A11, A20, and A40).
 - [x] **Exact JSON Membership**: SQLite query uses `json_valid = 1`, `json_type = 'array'`, and `type = 'text'` with CASE expression failing closed on malformed and non-array JSON.
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
 - [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Tested**: 103 test suites (837 tests) and 126 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
+- [x] **Acceptance Matrix 100% Verified**: 42 / 42 acceptance scenarios passed (0 partial, 0 failed, 0 untested) with executable browser, contract, or probe evidence.
+- [x] **Tested**: 103 test suites (837 tests) and 188 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
 - [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.58s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.

@@ -1,0 +1,192 @@
+{
+  "timestamp": "2026-09-11T15:40:21.297Z",
+  "totalTests": 26,
+  "passed": 26,
+  "failed": 0,
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "A06_SA_01",
+      "description": "SUPER_ADMIN lists all laboratories across countries",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_SA_02",
+      "description": "SUPER_ADMIN lists global staff roster",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_SA_03",
+      "description": "SUPER_ADMIN inspects equipment details across any laboratory",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_PM_01",
+      "description": "PROJECT_MANAGER lists assigned projects",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_PM_02",
+      "description": "PROJECT_MANAGER inspects assigned project details",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_PM_03",
+      "description": "PROJECT_MANAGER denied staff management/suspension (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_REC_01",
+      "description": "SAMPLE_RECEPTION lists samples for laboratory intake",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_REC_02",
+      "description": "SAMPLE_RECEPTION inspects own-lab sample intake details",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_REC_03",
+      "description": "SAMPLE_RECEPTION denied system audit logs (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_TECH_01",
+      "description": "LAB_TECHNICIAN lists laboratory analytical queue samples",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_TECH_02",
+      "description": "LAB_TECHNICIAN inspects bench instruments in own laboratory",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_TECH_03",
+      "description": "LAB_TECHNICIAN denied laboratory configuration mutations (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_SURV_01",
+      "description": "SURVEYOR successfully retrieves own profile context",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_SURV_02",
+      "description": "SURVEYOR denied internal laboratory equipment roster (HTTP 403/404)",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A06_AUD_01",
+      "description": "AUDIT_USER successfully reads system audit logs",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_AUD_02",
+      "description": "AUDIT_USER inspects sample analytical trail and results",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_AUD_03",
+      "description": "AUDIT_USER denied sample data mutation commands (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_EXT_01",
+      "description": "EXTERNAL_VIEWER retrieves authorized profile context",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_EXT_02",
+      "description": "EXTERNAL_VIEWER denied laboratory staff management roster (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_VIEW_01",
+      "description": "VIEWER lists read-only sample status in own laboratory",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A06_VIEW_02",
+      "description": "VIEWER denied sample creation mutations (HTTP 403)",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "A06_UI_01",
+      "description": "Technician Workbench renders and captures visual evidence",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A06_UI_02",
+      "description": "Reception Intake renders and captures visual evidence",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A06_UI_03",
+      "description": "Audit Logs Dashboard renders and captures visual evidence",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A06_UI_04",
+      "description": "Project Manager projects list renders and captures visual evidence",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A06_HASH",
+      "description": "Baseline database dev.db hash strictly preserved untouched",
+      "expected": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "actual": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-09-11T15:38:22.754Z",
+  "totalTests": 14,
+  "passed": 14,
+  "failed": 0,
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "A11_01",
+      "description": "Manager views staff roster including Technician Alma",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_02",
+      "description": "Access Review modal displays pre-flight open work accounting and handover notice",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_03",
+      "description": "Access preview endpoint accounts for open work items",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_04",
+      "description": "Planned access update succeeds with reviewToken and justification (HTTP 200)",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A11_05",
+      "description": "Open work item successfully reassigned to active colleague",
+      "expected": "tech_bernardo",
+      "actual": "tech_bernardo",
+      "passed": true
+    },
+    {
+      "id": "A11_06",
+      "description": "Historical completed work retains original technician authorship intact",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_07",
+      "description": "Emergency Staff Suspension modal opens cleanly from UI",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_08",
+      "description": "Emergency suspension without mandatory reason is rejected (400 Bad Request)",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "id": "A11_09",
+      "description": "Emergency suspension succeeds with valid reason (HTTP 200)",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "A11_10",
+      "description": "Emergency suspension flags unfinished work requiring reassignment",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_11",
+      "description": "Suspended technician active JWT is immediately revoked and rejected (HTTP 401)",
+      "expected": 401,
+      "actual": 401,
+      "passed": true
+    },
+    {
+      "id": "A11_12",
+      "description": "Audit log immutably records USER_SUSPENDED with actor and reason",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_13",
+      "description": "Attempt to suspend sole Super Admin fails closed with protective rejection",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A11_14",
+      "description": "Baseline database dev.db hash strictly preserved untouched",
+      "expected": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "actual": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "passed": true
+    }
+  ]
+}

@@ -31,25 +31,16 @@ async function ensureTables(tx = prisma) {
             );
         `);
 
-        await tx.$executeRawUnsafe(`
-            UPDATE "StaffInvitation"
-            SET "isRevoked" = 1
-            WHERE "isConsumed" = 0 AND "isRevoked" = 0
-              AND "id" NOT IN (
-                SELECT "id" FROM "StaffInvitation" s1
-                WHERE s1."isConsumed" = 0 AND s1."isRevoked" = 0
-                  AND s1."rowid" = (
-                    SELECT max(s2."rowid") FROM "StaffInvitation" s2
-                    WHERE s2."email" = s1."email" AND s2."isConsumed" = 0 AND s2."isRevoked" = 0
-                  )
-              );
-        `);
-
-        await tx.$executeRawUnsafe(`
-            CREATE UNIQUE INDEX IF NOT EXISTS "idx_staff_invitation_active_email"
-            ON "StaffInvitation" ("email")
-            WHERE "isConsumed" = 0 AND "isRevoked" = 0;
-        `);
+        try {
+            await tx.$executeRawUnsafe(`
+                CREATE UNIQUE INDEX IF NOT EXISTS "idx_staff_invitation_active_email"
+                ON "StaffInvitation" ("email")
+                WHERE "isConsumed" = 0 AND "isRevoked" = 0;
+            `);
+        } catch (indexErr) {
+            // If conflicting duplicates exist in legacy data, safe blocking without mutating historical records
+            console.warn('[StaffLifecycle] unique index notice (safe non-mutating schema init):', indexErr.message);
+        }
 
         await tx.$executeRawUnsafe(`
             CREATE TABLE IF NOT EXISTS "StaffRecoveryGrant" (
@@ -267,15 +258,21 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
         const existingPending = await tx.$queryRawUnsafe(
             `SELECT "id", "email", "name", "role", "labId", "expiresAt"
              FROM "StaffInvitation"
-             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > ?
-             LIMIT 1`,
+             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > ?`,
             normalizedEmail,
             nowIso
         );
 
+        if (existingPending && existingPending.length > 1) {
+            const err = new Error('Multiple conflicting active invitations exist for this email address. Onboarding is blocked until an administrator reviews and resolves the conflict.');
+            err.statusCode = 409;
+            err.code = 'INVITATION_CONFLICT';
+            throw err;
+        }
+
         const isReissue = reissue === true || reissue === 'true' || reissue === 1 || reissue === '1';
 
-        if (existingPending && existingPending.length > 0) {
+        if (existingPending && existingPending.length === 1) {
             const priorInvite = existingPending[0];
             const priorLab = await tx.lab.findUnique({ where: { id: priorInvite.labId } });
 
@@ -583,6 +580,12 @@ async function getAccessPreview(actor, targetUserId, changes = {}, tx = prisma) 
         proposedLabId: changes.labId || targetUser.labId,
         openAssignmentsCount,
         requiresReassignment: openAssignmentsCount > 0,
+        impact: {
+            openWorkItems: openAssignmentsCount
+        },
+        current: {
+            openWorkCount: openAssignmentsCount
+        },
         capabilitiesGained,
         capabilitiesLost,
         reviewToken
@@ -1110,6 +1113,21 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
             throw err;
         }
 
+        // Verify no conflicting active duplicate invitations exist for this email
+        const activeDuplicates = await tx.$queryRawUnsafe(
+            `SELECT "id", "role", "labId" FROM "StaffInvitation"
+             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "id" != ? AND "expiresAt" > ?`,
+            metadata.email,
+            metadata.id,
+            new Date().toISOString()
+        );
+        if (activeDuplicates && activeDuplicates.length > 0) {
+            const err = new Error('Multiple conflicting active invitations exist for this email address. Onboarding is blocked until an administrator reviews and resolves the conflict.');
+            err.statusCode = 409;
+            err.code = 'INVITATION_CONFLICT';
+            throw err;
+        }
+
         const { getLabOperationalState } = require('./labLifecycleService');
         const opState = await getLabOperationalState(metadata.labId, tx);
         if (opState.operationalStatus === 'RETIRED') {
@@ -1582,10 +1600,25 @@ async function reissueInvitation(actor, invitationId, options = {}, outerTx = nu
             }
         }
 
-        // Revoke all prior pending invitations for this email
+        // Check for conflicting active duplicate invitations
+        const activeDuplicates = await tx.$queryRawUnsafe(
+            `SELECT "id", "role", "labId" FROM "StaffInvitation"
+             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "id" != ? AND "expiresAt" > ?`,
+            existing.email,
+            existing.id,
+            new Date().toISOString()
+        );
+        if (activeDuplicates && activeDuplicates.length > 0) {
+            const err = new Error('Multiple conflicting active invitations exist for this email address. Reissue is blocked until an administrator reviews and resolves the conflict.');
+            err.statusCode = 409;
+            err.code = 'INVITATION_CONFLICT';
+            throw err;
+        }
+
+        // Revoke the prior pending invitation
         await tx.$executeRawUnsafe(
-            `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "email" = ? AND "isConsumed" = 0`,
-            existing.email
+            `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "id" = ?`,
+            existing.id
         );
 
         const rawToken = crypto.randomBytes(32).toString('hex');
