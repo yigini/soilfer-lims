@@ -165,10 +165,15 @@ const Layout = ({ children }) => {
 
     }
 
+    if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({
+            icon: Beaker,
+            label: user?.role === 'LAB_MANAGER' ? t('nav.myLab', 'My Laboratory') : t('nav.labs', 'Laboratories'),
+            path: user?.role === 'LAB_MANAGER' && user?.labId ? `/admin/labs?labId=${user.labId}` : '/admin/labs'
+        });
+    }
+
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        if (user?.role === 'SUPER_ADMIN') {
-            navItems.push({ icon: Beaker, label: t('nav.labs'), path: '/admin/labs' });
-        }
         navItems.push({ icon: Settings, label: t('nav.admin'), path: '/admin' });
     }
 
@@ -356,7 +361,7 @@ function App() {
             <Route path="/admin/methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
             <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
             <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
-            <Route path="/admin/labs" element={<RequireAuth requiredRole="SUPER_ADMIN"><LabManagement /></RequireAuth>} />
+            <Route path="/admin/labs" element={<RequireAuth permission="MANAGE_USERS"><LabManagement /></RequireAuth>} />
             <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
 
             {/* General Access */}

@@ -75,7 +75,8 @@
     "labStaff": "Personal de Laboratorio",
     "dataResults": "Resultados de datos",
     "about": "Acerca de SoilFER",
-    "techStack": "Arquitectura técnica"
+    "techStack": "Arquitectura técnica",
+    "myLab": "Mi Laboratorio"
   },
   "header": {
     "notifications": "Notificaciones",
@@ -571,7 +572,8 @@
     "impersonateTitle": "¿Suplantar usuario?",
     "impersonateMsg": "¿Está seguro de que desea iniciar sesión como este usuario? Deberá cerrar sesión para regresar a su cuenta de administrador.",
     "impersonateConfirm": "Iniciar sesión como usuario",
-    "impersonate": "Iniciar sesión como usuario"
+    "impersonate": "Iniciar sesión como usuario",
+    "inviteStaff": "Invitar Miembro del Equipo"
   },
   "equipment": {
     "title": "Equipamiento e Instrumentos",

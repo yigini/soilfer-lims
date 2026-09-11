@@ -75,7 +75,8 @@
     "labStaff": "Laboratory Staff",
     "dataResults": "Data Results",
     "about": "About SoilFER",
-    "techStack": "Tech Stack"
+    "techStack": "Tech Stack",
+    "myLab": "My Laboratory"
   },
   "header": {
     "notifications": "Notifications",
@@ -571,7 +572,8 @@
     "impersonateTitle": "Impersonate User?",
     "impersonateMsg": "Are you sure you want to log in as this user? You will need to log out to return to your admin account.",
     "impersonateConfirm": "Log In as User",
-    "impersonate": "Log in as User"
+    "impersonate": "Log in as User",
+    "inviteStaff": "Invite Team Member"
   },
   "equipment": {
     "title": "Equipment & Instruments",
