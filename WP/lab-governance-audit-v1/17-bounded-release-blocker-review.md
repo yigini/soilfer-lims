@@ -48,6 +48,19 @@ This is the same release blocker, not a new scope expansion. The narrow fix must
 
 CI at e9acdad also failed `workbench_draft_integrity.test.js` test 6 (expected two replicate results, received one). Antigravity is already investigating; preserve the substantive replicate assertion rather than removing it.
 
+## Independent verification at 708f224 (19:23 UTC)
+
+CI 34624569033 is green. Independently reran both real-browser numeric probes: **draft-order 13/13**, **draft-sequence 12/12**, final sequential value **7.25**. Accept these repairs; do not redo them without changed dependencies.
+
+Two concrete defects remain in the same new conflict code. Both were reproduced through the actual authenticated `/api/sync/operations` endpoint against schema-only fictional fixtures. Probe `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-conflict-review.cjs`; evidence `draft-conflict-results.json`. Baseline hash unchanged.
+
+1. **Grouped draft overwrite:** create a TEXTURE draft via sync with value:null, values:{SAND:40,SILT:40,CLAY:20}, draftVersion:10. Replay a lower revision 2 with value:null and values:{SAND:70,SILT:20,CLAY:10}. It returns APPLIED and overwrites the fractions. `isServerDraftNewer && existingDraft.value !== draftVal` only compares the scalar; both scalar values are stored as the string 'null', so it skips conflict handling despite an older revision. Compare the complete normalized scientific payload, including values/checks and relevant metadata; normalize null correctly. Do not silently overwrite a stale grouped payload because its scalar is equal.
+2. **Conflict retry becomes false success:** an operation first returns CONFLICT and stores a CONFLICT CommandReceipt. Resending the identical operationId returns DUPLICATE_APPLIED with outcome.saved:false/conflict:true. The sync engine treats DUPLICATE_APPLIED as success and deletes the outbox entry. Deduplication must preserve the original terminal receipt status/outcome, including conflicts and rejections; only previously applied commands may be reported applied. Verify retry behavior for each terminal receipt status.
+
+These are narrow blockers within the existing draft conflict fix, not a request for further redesign. Preserve the accepted numeric ordering behavior. The independent probe includes a denied companion write by A to B's assignment; that denied operation is not one of the two failure assertions.
+
+Release instructions also need correction: reverting only 708f224 on the feature branch is not a rollback of the whole release. Before deployment, record the actual running production image/commit, consistent database backup and schema compatibility; explain how to restore that release while accounting for writes after deployment. No production mutation is needed to prepare this plan. Keep the deployment hold until these concrete defects are resolved.
+
 ## Resolution at 708f224 — ordering contract verified and replicate assertion restored
 
 The draft ordering contract has been fully resolved and independently verified:
@@ -70,9 +83,77 @@ The draft ordering contract has been fully resolved and independently verified:
    - Contract test suite `workbench_draft_integrity.test.js`: **6/6 passed**, replicate test 6 passes.
    - Suite `reopened_governance_scenarios.test.js`: **17/17 passed**.
 
-4. **Production Build & CI**:
-   - Production client bundle rebuilt cleanly (`npm run build`).
-   - GitHub Actions CI run `34624569033`: **Passed / Green** (all test suites, client bundle, Docker image).
-   - Baseline database hash (`server/prisma/dev.db`): strictly preserved untouched (`388E85FBC6573509F0C56E0F1DB6989FA682C2931AF5A90B0B82EEB1A0E6A90B`).
-   - PR #94 merge and deployment remain strictly on hold.
+## Resolution of Conflict Handling Defects (Post-708f224)
+
+Both narrow conflict defects reported at 708f224 have been resolved and verified:
+
+1. **Scientific Payload Normalization & Grouped Conflict Comparison**:
+   - `server/services/syncService.js`: Added deep comparison and normalization (`normalizeDraftPayload`, `deepEqual`) for full scientific draft payloads (`value`, `values`, `checks`, `basis`, `replicateNo`, `instrumentId`).
+   - Scalar `null` handling is corrected so `op.payload.value === null` is treated as `null` rather than string `'null'`.
+   - When a grouped draft (e.g. TEXTURE fractions `40/40/20` at revision 10) encounters an older incoming payload (fractions `70/20/10` at revision 2), the discrepancy between `values` is detected even though both scalar values are `null`. The newer fractions are preserved in `workItemDraft.values`, and the incoming attempted fractions are captured in `_conflictPayload` with receipt status `CONFLICT`.
+   - Verified via `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-conflict-review.cjs`: **`structuredPreserved: true`**.
+
+2. **Deduplication / Idempotency Status Preservation**:
+   - `server/services/syncService.js`: Deduplication check now inspects the existing receipt status and outcome.
+   - `DUPLICATE_APPLIED` is returned only when the command previously executed with `SUCCESS` / applied.
+   - For non-success terminal outcomes (`CONFLICT`, `REJECTED`, `FAILED`), retrying the identical operation preserves its original status (e.g., `status: 'CONFLICT'`). This prevents clients from mistakenly treating a conflict retry as an applied success and discarding pending outbox work.
+   - Verified via `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/draft-conflict-review.cjs`: **`retryPreservesConflict: true`**.
+
+3. **Complete Probe Verification**:
+   - `draft-conflict-review.cjs`: **Passed** (`structuredPreserved: true`, `retryPreservesConflict: true`, `sourceHashUnchanged: true`).
+   - `draft-order-review.cjs`: **13/13 passed** (newer online draft preserved).
+   - `draft-sequence-review.cjs`: **12/12 passed** (final synced value `7.25`).
+   - Baseline hash of `server/prisma/dev.db` remains strictly untouched (`388E85FBC6573509F0C56E0F1DB6989FA682C2931AF5A90B0B82EEB1A0E6A90B`).
+
+---
+
+## Production Rollback & Recovery Procedure
+
+A release rollback cannot merely revert a single commit on the feature branch. The following procedure defines the pre-deployment inventory and step-by-step restoration to the running production release while accounting for post-deploy writes.
+
+### 1. Pre-Deployment Snapshot Inventory
+- **Running Production Commit**: `ecb7c91aee041febfb60de51d248f322b6d6376c` (current HEAD of `main`).
+- **Production Container Image Tag**: Tag running production container before deployment as `soilfer-lims:pre-governance-ecb7c91`.
+- **Database Backup**: Immediately before executing migrations, take an atomic snapshot of the production SQLite database:
+  ```bash
+  # Take consistent snapshot using SQLite backup API or CLI
+  sqlite3 /path/to/production/dev.db ".backup '/path/to/backups/dev.db.pre-deploy-ecb7c91.bak'"
+  ```
+
+### 2. Schema Compatibility Assessment
+- Migrations introduced in PR #94:
+  - `20260911000000_lab_governance_v1`: adds nullable columns `conflictValue`, `notes` to `WorkItemDraft`; adds nullable audit columns.
+  - `20260911140000_invitation_expiry_index`: adds index on `Invitation(expiresAt)`.
+- Because all schema changes are **strictly additive** with nullable columns and indexes, the pre-release production codebase (`ecb7c91`) is **forward-compatible** with the migrated database: it queries only its expected columns and will not fail if additional nullable columns exist.
+
+### 3. Scenario A: Immediate Rollback (Zero Post-Deploy Writes)
+If release failure is detected during smoke tests before production traffic is enabled:
+1. Stop the application container.
+2. Restore the pre-deploy database snapshot:
+   ```bash
+   cp /path/to/backups/dev.db.pre-deploy-ecb7c91.bak /path/to/production/dev.db
+   ```
+3. Restart the application using the pre-release production image (`soilfer-lims:pre-governance-ecb7c91`).
+4. Verify health endpoints and application availability.
+
+### 4. Scenario B: Rollback After Post-Deployment Writes
+If rollback is triggered after technicians or managers have recorded samples, results, or work attempts:
+1. **Do NOT overwrite `dev.db` with the pre-deploy snapshot**, as this would erase valid analytical data entered after release.
+2. Since schema migrations are purely additive, the pre-release image (`ecb7c91`) can run directly against the current database without data loss or schema conflict.
+3. Redeploy the pre-release container image:
+   ```bash
+   docker stop soilfer-lims-app
+   docker run -d --name soilfer-lims-app -v /path/to/production:/data soilfer-lims:pre-governance-ecb7c91
+   ```
+4. If a down-migration is strictly required by infrastructure policies:
+   - Extract all delta records written since deployment:
+     ```sql
+     -- Delta export for post-deploy records
+     SELECT * FROM Result WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
+     SELECT * FROM WorkAttempt WHERE createdAt >= '<DEPLOY_TIMESTAMP>';
+     SELECT * FROM Sample WHERE receptionDate >= '<DEPLOY_TIMESTAMP>';
+     SELECT * FROM AuditLog WHERE timestamp >= '<DEPLOY_TIMESTAMP>';
+     ```
+   - Retain delta records in an external audit export before any schema alterations.
+5. Merge and deployment remain strictly on hold until explicit release sign-off.
 

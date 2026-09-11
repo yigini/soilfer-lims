@@ -8,6 +8,62 @@ const { canRecord } = require('./workEligibility');
 const { hasPermission } = require('../config/roles');
 const { randomUUID } = require('crypto');
 
+function deepEqual(a, b) {
+    if (a === b) return true;
+    if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+    for (const key of keysA) {
+        if (!keysB.includes(key) || !deepEqual(a[key], b[key])) return false;
+    }
+    return true;
+}
+
+function parseJsonSafe(val) {
+    if (!val) return null;
+    if (typeof val === 'object') return val;
+    try {
+        return JSON.parse(val);
+    } catch (_) {
+        return val;
+    }
+}
+
+function normalizeDraftPayload(p) {
+    if (!p) return null;
+    let raw = p.value !== undefined ? p.value
+        : (p.result !== undefined ? p.result
+        : (p.draftValue !== undefined ? p.draftValue : null));
+    if (raw === 'null' || raw === undefined) raw = null;
+    const value = raw !== null ? String(raw).trim() : null;
+
+    let values = null;
+    const rawValues = p.values !== undefined ? p.values : null;
+    if (rawValues !== null && rawValues !== undefined && rawValues !== 'null') {
+        values = parseJsonSafe(rawValues);
+    }
+
+    let checks = null;
+    const rawChecks = p.checks !== undefined ? p.checks : null;
+    if (rawChecks !== null && rawChecks !== undefined && rawChecks !== 'null') {
+        checks = parseJsonSafe(rawChecks);
+    }
+
+    const basis = (p.basis || 'AIR_DRY').toUpperCase();
+    const replicateNo = Number(p.replicateNo) || 1;
+    const instrumentId = p.instrumentId || p.equipmentId || null;
+
+    return {
+        value,
+        values,
+        checks,
+        basis,
+        replicateNo,
+        instrumentId
+    };
+}
+
 /**
  * SoilFER LIMS - Server-side Synchronization Service
  * Atomic, idempotent domain command processing boundary for offline-capable clients.
@@ -57,13 +113,38 @@ class SyncService {
                             continue;
                         }
 
-                        // Duplicate already applied successfully
+                        const existingStatus = check.receipt?.status;
+                        const parsedOutcome = check.receipt?.parsedOutcome;
+
+                        // Only claim applied for a previously applied / successful command
+                        const wasApplied = existingStatus === 'SUCCESS'
+                            || (parsedOutcome?.saved === true && !parsedOutcome?.conflict && !parsedOutcome?.discarded && parsedOutcome?.status !== 'CONFLICT' && parsedOutcome?.status !== 'REJECTED');
+
+                        if (wasApplied) {
+                            receipts.push({
+                                operationId: opId,
+                                status: 'DUPLICATE_APPLIED',
+                                receiptId: check.receipt?.id,
+                                serverTimestamp,
+                                outcome: parsedOutcome
+                            });
+                            continue;
+                        }
+
+                        // Preserve original terminal receipt status for non-applied commands (CONFLICT, REJECTED, FAILED)
+                        const preservedStatus = existingStatus === 'CONFLICT' || parsedOutcome?.conflict || parsedOutcome?.status === 'CONFLICT'
+                            ? 'CONFLICT'
+                            : (existingStatus === 'REJECTED' || parsedOutcome?.discarded || parsedOutcome?.status === 'REJECTED'
+                                ? 'REJECTED'
+                                : (existingStatus || 'FAILED'));
+
                         receipts.push({
                             operationId: opId,
-                            status: 'DUPLICATE_APPLIED',
+                            status: preservedStatus,
                             receiptId: check.receipt?.id,
                             serverTimestamp,
-                            outcome: check.receipt?.parsedOutcome
+                            outcome: parsedOutcome,
+                            reason: parsedOutcome?.reason || parsedOutcome?.message || (preservedStatus === 'CONFLICT' ? 'Draft was superseded by newer work on server' : 'Operation previously processed with non-success outcome')
                         });
                         continue;
                     }
@@ -148,7 +229,21 @@ class SyncService {
                     // Store draft in database atomically with CommandReceipt (LG-14, P26)
                     let draftRecord = null;
                     let savedReceipt = null;
-                    const draftVal = op.payload?.value !== undefined ? String(op.payload.value) : (op.payload?.result !== undefined ? String(op.payload.result) : (op.payload?.draftValue !== undefined ? String(op.payload.draftValue) : null));
+                    let rawVal = op.payload?.value !== undefined ? op.payload.value
+                        : (op.payload?.result !== undefined ? op.payload.result
+                        : (op.payload?.draftValue !== undefined ? op.payload.draftValue : null));
+                    if (rawVal === 'null' || rawVal === undefined) rawVal = null;
+                    const draftVal = rawVal !== null ? String(rawVal).trim() : null;
+
+                    const incomingValuesStr = op.payload?.values !== undefined && op.payload?.values !== null && op.payload?.values !== 'null'
+                        ? (typeof op.payload.values === 'string' ? op.payload.values : JSON.stringify(op.payload.values))
+                        : null;
+                    const incomingChecksStr = op.payload?.checks !== undefined && op.payload?.checks !== null && op.payload?.checks !== 'null'
+                        ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks))
+                        : null;
+                    const incomingBasis = op.payload?.basis || 'AIR_DRY';
+                    const incomingRepNo = Number(op.payload?.replicateNo) || 1;
+                    const incomingInstrumentId = op.payload?.equipmentId || op.payload?.instrumentId || null;
 
                     await prisma.$transaction(async (tx) => {
                         if (tx.workItemDraft) {
@@ -225,21 +320,43 @@ class SyncService {
                                 }
                             }
 
-                            if (isServerDraftNewer && existingDraft.value !== draftVal) {
+                            const serverNorm = normalizeDraftPayload(existingDraft);
+                            const incomingNorm = normalizeDraftPayload({
+                                value: draftVal,
+                                values: op.payload?.values,
+                                checks: op.payload?.checks,
+                                basis: incomingBasis,
+                                replicateNo: incomingRepNo,
+                                equipmentId: incomingInstrumentId
+                            });
+
+                            const isValueEqual = (serverNorm?.value === incomingNorm?.value)
+                                || (!serverNorm?.value && !incomingNorm?.value);
+                            const isValuesEqual = deepEqual(serverNorm?.values, incomingNorm?.values);
+                            const isChecksEqual = deepEqual(serverNorm?.checks, incomingNorm?.checks);
+                            const isBasisEqual = (serverNorm?.basis || 'AIR_DRY') === (incomingNorm?.basis || 'AIR_DRY');
+                            const isRepEqual = (Number(serverNorm?.replicateNo) || 1) === (Number(incomingNorm?.replicateNo) || 1);
+                            const isEquipEqual = (serverNorm?.instrumentId || null) === (incomingNorm?.instrumentId || null);
+
+                            const isPayloadEqual = isValueEqual && isValuesEqual && isChecksEqual && isBasisEqual && isRepEqual && isEquipEqual;
+
+                            if (isServerDraftNewer && !isPayloadEqual) {
                                 // Server draft was saved more recently than this offline operation.
                                 // Preserve the newer server draft without overwriting it with older data.
                                 const conflictPayload = {
-                                    attemptedValue: draftVal,
+                                    attemptedValue: incomingNorm?.value || null,
                                     attemptedValues: op.payload?.values || null,
                                     attemptedChecks: op.payload?.checks || null,
-                                    attemptedBasis: op.payload?.basis || null,
-                                    attemptedEquipmentId: op.payload?.equipmentId || null,
+                                    attemptedBasis: incomingNorm?.basis || 'AIR_DRY',
+                                    attemptedReplicateNo: incomingNorm?.replicateNo || 1,
+                                    attemptedEquipmentId: incomingNorm?.instrumentId || null,
                                     attemptedAt: opCapturedAt || new Date().toISOString(),
                                     actor: user.username
                                 };
 
+                                const conflictValStr = incomingNorm?.value !== null ? incomingNorm?.value : (incomingValuesStr || null);
                                 const conflictUpdate = {
-                                    conflictValue: draftVal !== null ? draftVal : (op.payload?.values ? JSON.stringify(op.payload.values) : null)
+                                    conflictValue: conflictValStr
                                 };
 
                                 // Preserve unapplied structured payload in notes
@@ -266,10 +383,13 @@ class SyncService {
                                     outcome: {
                                         saved: false,
                                         conflict: true,
+                                        status: 'CONFLICT',
                                         superseded: true,
                                         newerPreserved: true,
-                                        currentValue: existingDraft.value,
-                                        attemptedValue: draftVal,
+                                        currentValue: serverNorm?.value || null,
+                                        currentValues: existingDraft.values,
+                                        attemptedValue: incomingNorm?.value || null,
+                                        attemptedValues: op.payload?.values || null,
                                         attemptedPayload: conflictPayload,
                                         workItemId,
                                         draftId: existingDraft.id,
@@ -282,13 +402,33 @@ class SyncService {
                                     status: 'CONFLICT',
                                     superseded: true,
                                     newerPreserved: true,
-                                    currentValue: existingDraft.value,
-                                    attemptedValue: draftVal,
+                                    currentValue: serverNorm?.value || null,
+                                    currentValues: existingDraft.values,
+                                    attemptedValue: incomingNorm?.value || null,
+                                    attemptedValues: op.payload?.values || null,
                                     attemptedPayload: conflictPayload,
                                     workItemId,
                                     draftId: existingDraft.id,
                                     reason: 'Draft was superseded by newer work on server'
                                 };
+                                return;
+                            }
+
+                            if (isServerDraftNewer && isPayloadEqual) {
+                                savedReceipt = await CommandReceiptService.recordReceipt(tx, {
+                                    idempotencyKey: opId,
+                                    commandType: op.type,
+                                    targetResource: workItemId,
+                                    actor: user.username,
+                                    status: 'SUCCESS',
+                                    outcome: {
+                                        saved: true,
+                                        unchanged: true,
+                                        workItemId,
+                                        draftId: existingDraft.id
+                                    }
+                                });
+                                outcome = { saved: true, unchanged: true, workItemId, draftId: existingDraft.id };
                                 return;
                             }
 
@@ -310,19 +450,22 @@ class SyncService {
                                     labId: workLab || user.labId,
                                     analysis: item.analysis,
                                     value: draftVal,
-                                    values: op.payload?.values ? (typeof op.payload.values === 'string' ? op.payload.values : JSON.stringify(op.payload.values)) : null,
-                                    checks: op.payload?.checks ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks)) : null,
-                                    basis: op.payload?.basis || 'AIR_DRY',
-                                    replicateNo: Number(op.payload?.replicateNo) || 1,
-                                    instrumentId: op.payload?.equipmentId || null,
+                                    values: incomingValuesStr,
+                                    checks: incomingChecksStr,
+                                    basis: incomingBasis,
+                                    replicateNo: incomingRepNo,
+                                    instrumentId: incomingInstrumentId,
                                     baseVersion: op.baseVersion || item.version || 0,
                                     draftVersion: resolvedDraftVersion,
                                     notes: syncNotes
                                 },
                                 update: {
-                                    value: draftVal !== null ? draftVal : undefined,
-                                    values: op.payload?.values ? (typeof op.payload.values === 'string' ? op.payload.values : JSON.stringify(op.payload.values)) : undefined,
-                                    checks: op.payload?.checks ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks)) : undefined,
+                                    value: draftVal,
+                                    values: incomingValuesStr !== null ? incomingValuesStr : undefined,
+                                    checks: incomingChecksStr !== null ? incomingChecksStr : undefined,
+                                    basis: incomingBasis,
+                                    replicateNo: incomingRepNo,
+                                    instrumentId: incomingInstrumentId !== null ? incomingInstrumentId : undefined,
                                     notes: syncNotes,
                                     draftVersion: resolvedDraftVersion,
                                     updatedAt: new Date()
