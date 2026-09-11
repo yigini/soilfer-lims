@@ -25,6 +25,26 @@ describe('Translation Scoping, Lab Isolation & Report Freeze Contracts', () => {
             });
         }
 
+        const languages = [
+            { code: 'en', name: 'English', isDefault: true },
+            { code: 'es', name: 'Español', isDefault: false },
+            { code: 'es-419', name: 'Español (Latinoamérica)', isDefault: false },
+            { code: 'fr', name: 'Français', isDefault: false },
+            { code: 'pt', name: 'Português', isDefault: false }
+        ];
+        for (const lang of languages) {
+            await prisma.language.upsert({
+                where: { code: lang.code },
+                update: {},
+                create: {
+                    code: lang.code,
+                    name: lang.name,
+                    isDefault: lang.isDefault,
+                    translations: '{}'
+                }
+            });
+        }
+
         superAdminToken = await getAuthToken('SUPER_ADMIN');
         labManagerToken = await getAuthToken('LAB_MANAGER', testLab.code || testLab.id);
         technicianToken = await getAuthToken('LAB_TECHNICIAN', testLab.code || testLab.id);
