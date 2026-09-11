@@ -1,0 +1,194 @@
+{
+  "head": "63e4d0e5a7d9d0fc40da0a69d7871f6cda1c366d",
+  "timestamp": "2026-09-11T13:20:33.787Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-final-2fb8bfa5-c204-4b30-90d8-6f05223961b3.db",
+  "schemaSource": "Read-only schema; fictional fixtures only",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "P02-P-FOREIGN-PREFIX",
+      "description": "Negative control: Similar prefix in array must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-MALFORMED-JSON",
+      "description": "Negative control: Malformed JSON syntax must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-OBJ-KEY",
+      "description": "Negative control: Valid non-array JSON (object key) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-OBJ-VAL",
+      "description": "Negative control: Valid non-array JSON (object value) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-SCALAR-STR",
+      "description": "Negative control: Valid non-array JSON (scalar string) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-SCALAR-NUM",
+      "description": "Negative control: Valid non-array JSON (scalar number) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-ARR-NUM",
+      "description": "Negative control: Non-string array elements (numbers) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-ARR-OBJ",
+      "description": "Negative control: Non-string array elements (objects) must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-ESCAPED-ID",
+      "description": "Negative control: Escaped quote identifier must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-P-SUB-SUFFIX",
+      "description": "Negative control: Substring suffix in array must not grant access",
+      "expected": {
+        "visible": false
+      },
+      "actual": {
+        "visible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-POS-OWNER",
+      "description": "Positive control: Lab-owned project must appear",
+      "expected": {
+        "visible": true
+      },
+      "actual": {
+        "visible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-POS-JUNCTION",
+      "description": "Positive control: ProjectLab junction assigned project must appear",
+      "expected": {
+        "visible": true
+      },
+      "actual": {
+        "visible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-POS-LEGACY-SINGLE",
+      "description": "Positive control: Single exact assignedLabIds must appear",
+      "expected": {
+        "visible": true
+      },
+      "actual": {
+        "visible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "P02-POS-LEGACY-MULTI",
+      "description": "Positive control: Multi-element assignedLabIds containing labId must appear",
+      "expected": {
+        "visible": true
+      },
+      "actual": {
+        "visible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "P02",
+      "description": "Exact legacy lab membership guarded against substring, malformed, non-array, and non-string JSON",
+      "expected": {
+        "allNegativesPassed": true,
+        "allPositivesPassed": true
+      },
+      "actual": {
+        "allNegativesPassed": true,
+        "allPositivesPassed": true
+      },
+      "passed": true
+    },
+    {
+      "id": "P03",
+      "description": "Project collection is bounded with accurate total and navigation metadata",
+      "expected": {
+        "http": 200,
+        "returnedAtMost": 20,
+        "hasPagination": true,
+        "totalProjects": 209
+      },
+      "actual": {
+        "http": 200,
+        "returned": 20,
+        "hasPagination": true,
+        "totalProjects": 209
+      },
+      "passed": true
+    }
+  ]
+}

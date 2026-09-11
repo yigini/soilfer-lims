@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Beaker, Plus, Search, ChevronRight, ArrowLeft, Users, FolderOpen,
+    Beaker, Plus, Search, ChevronRight, ChevronLeft, ArrowLeft, Users, FolderOpen,
     Settings, History, Shield, CheckCircle2, AlertTriangle, Clock,
     Power, KeyRound, Globe, MapPin, Mail, Phone, BarChart3, HelpCircle,
     FileText, ExternalLink, RefreshCw, X, PlayCircle, PauseCircle, Archive,
@@ -57,6 +57,7 @@ export default function LabManagement() {
     const [workspace, setWorkspace] = useState(null);
     const [loadingWorkspace, setLoadingWorkspace] = useState(false);
     const [workspaceError, setWorkspaceError] = useState(null);
+    const latestWorkspaceReqId = useRef(0);
 
     // Modals
     const [showOnboardModal, setShowOnboardModal] = useState(false);
@@ -69,9 +70,11 @@ export default function LabManagement() {
     const [targetUser, setTargetUser] = useState(null);
     const [showHelpModal, setShowHelpModal] = useState(false);
 
-    // People tab search/filter in workspace
-    const [staffSearch, setStaffSearch] = useState('');
-    const [staffStatusFilter, setStaffStatusFilter] = useState('all');
+    // People & Projects tab search/filter/paging in workspace
+    const [staffSearch, setStaffSearchState] = useState(() => searchParams.get('staffSearch') || '');
+    const [staffStatusFilter, setStaffStatusFilterState] = useState(() => searchParams.get('staffStatus') || 'all');
+    const [staffPage, setStaffPageState] = useState(() => Math.max(1, parseInt(searchParams.get('staffPage') || '1', 10)));
+    const [projectPage, setProjectPageState] = useState(() => Math.max(1, parseInt(searchParams.get('projectPage') || '1', 10)));
 
     // Lab Settings form state
     const [settingsForm, setSettingsForm] = useState({
@@ -100,13 +103,25 @@ export default function LabManagement() {
         }
     }, []);
 
-    // Load Workspace for selected lab
-    const fetchWorkspace = useCallback(async (id) => {
+    // Load Workspace for selected lab with query-aware server-side filtering and paging
+    const fetchWorkspace = useCallback(async (id, overrideParams = {}) => {
         if (!id) return;
+        const reqId = ++latestWorkspaceReqId.current;
         setLoadingWorkspace(true);
         setWorkspaceError(null);
         try {
-            const res = await axios.get(`/api/labs/${encodeURIComponent(id)}/workspace`);
+            const queryParams = {
+                staffPage: overrideParams.staffPage ?? staffPage,
+                staffLimit: 50,
+                staffSearch: (overrideParams.staffSearch !== undefined ? overrideParams.staffSearch : staffSearch).trim(),
+                staffStatus: (overrideParams.staffStatus !== undefined ? overrideParams.staffStatus : staffStatusFilter),
+                projectPage: overrideParams.projectPage ?? projectPage,
+                projectLimit: 20
+            };
+            const res = await axios.get(`/api/labs/${encodeURIComponent(id)}/workspace`, {
+                params: queryParams
+            });
+            if (latestWorkspaceReqId.current !== reqId) return;
             setWorkspace(res.data);
             if (res.data?.lab) {
                 setSettingsForm({
@@ -122,23 +137,35 @@ export default function LabManagement() {
                 });
             }
         } catch (err) {
+            if (latestWorkspaceReqId.current !== reqId) return;
             console.error('Failed to load workspace:', err);
+            const status = err.response?.status;
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            setWorkspaceError(msg || 'Failed to load laboratory workspace');
+            setWorkspaceError({ status, message: msg || 'Failed to load laboratory workspace' });
         } finally {
-            setLoadingWorkspace(false);
+            if (latestWorkspaceReqId.current === reqId) {
+                setLoadingWorkspace(false);
+            }
         }
-    }, []);
+    }, [staffPage, staffSearch, staffStatusFilter, projectPage]);
 
     useEffect(() => {
         fetchLabs();
     }, [fetchLabs]);
 
+    // Debounced workspace fetch on lab or search/filter/paging change
     useEffect(() => {
-        if (selectedLabId) {
-            fetchWorkspace(selectedLabId);
-        }
-    }, [selectedLabId, fetchWorkspace]);
+        if (!selectedLabId) return;
+        const timer = setTimeout(() => {
+            fetchWorkspace(selectedLabId, {
+                staffPage,
+                staffSearch,
+                staffStatus: staffStatusFilter,
+                projectPage
+            });
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [selectedLabId, staffPage, staffSearch, staffStatusFilter, projectPage, fetchWorkspace]);
 
     // Handle tab change
     const setTab = (newTab) => {
@@ -148,9 +175,66 @@ export default function LabManagement() {
         setSearchParams(params);
     };
 
+    // Filter and paging setters that keep URL params in sync
+    const setStaffPage = (valOrFn) => {
+        setStaffPageState(prev => {
+            const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+            const p = Math.max(1, next);
+            const params = new URLSearchParams(searchParams);
+            params.set('staffPage', String(p));
+            if (selectedLabId) params.set('labId', selectedLabId);
+            setSearchParams(params, { replace: true });
+            return p;
+        });
+    };
+
+    const setProjectPage = (valOrFn) => {
+        setProjectPageState(prev => {
+            const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+            const p = Math.max(1, next);
+            const params = new URLSearchParams(searchParams);
+            params.set('projectPage', String(p));
+            if (selectedLabId) params.set('labId', selectedLabId);
+            setSearchParams(params, { replace: true });
+            return p;
+        });
+    };
+
+    const setStaffSearch = (term) => {
+        setStaffSearchState(term);
+        setStaffPageState(1);
+        const params = new URLSearchParams(searchParams);
+        if (term && term.trim()) {
+            params.set('staffSearch', term);
+        } else {
+            params.delete('staffSearch');
+        }
+        params.set('staffPage', '1');
+        if (selectedLabId) params.set('labId', selectedLabId);
+        setSearchParams(params, { replace: true });
+    };
+
+    const setStaffStatusFilter = (status) => {
+        setStaffStatusFilterState(status);
+        setStaffPageState(1);
+        const params = new URLSearchParams(searchParams);
+        if (status && status !== 'all') {
+            params.set('staffStatus', status);
+        } else {
+            params.delete('staffStatus');
+        }
+        params.set('staffPage', '1');
+        if (selectedLabId) params.set('labId', selectedLabId);
+        setSearchParams(params, { replace: true });
+    };
+
     // Handle selecting a lab from directory
     const selectLab = (labId) => {
-        const params = new URLSearchParams(searchParams);
+        setStaffPageState(1);
+        setProjectPageState(1);
+        setStaffSearchState('');
+        setStaffStatusFilterState('all');
+        const params = new URLSearchParams();
         params.set('labId', labId);
         params.set('tab', 'overview');
         setSearchParams(params);
@@ -158,6 +242,10 @@ export default function LabManagement() {
 
     // Return to all labs
     const backToDirectory = () => {
+        setStaffPageState(1);
+        setProjectPageState(1);
+        setStaffSearchState('');
+        setStaffStatusFilterState('all');
         const params = new URLSearchParams();
         setSearchParams(params);
         setWorkspace(null);
@@ -242,20 +330,8 @@ export default function LabManagement() {
         });
     }, [labs, searchQuery, statusFilter]);
 
-    // Filter staff in People tab
-    const filteredStaff = useMemo(() => {
-        const staffList = workspace?.staff || [];
-        return staffList.filter(s => {
-            const matchesSearch = !staffSearch.trim() ||
-                s.name?.toLowerCase().includes(staffSearch.toLowerCase()) ||
-                s.username?.toLowerCase().includes(staffSearch.toLowerCase()) ||
-                s.role?.toLowerCase().includes(staffSearch.toLowerCase());
-            const matchesStatus = staffStatusFilter === 'all' ||
-                (staffStatusFilter === 'Active' && s.isActive !== false) ||
-                (staffStatusFilter === 'Suspended' && s.isActive === false);
-            return matchesSearch && matchesStatus;
-        });
-    }, [workspace?.staff, staffSearch, staffStatusFilter]);
+    // Staff in People tab (server-filtered and bounded)
+    const staffList = workspace?.staff || [];
 
     // ══════════════════════════════════════════════════════════════
     // VIEW 1: LABORATORIES DIRECTORY (Table / Cards for Super Admin & National Lead)
@@ -576,6 +652,50 @@ export default function LabManagement() {
     // ══════════════════════════════════════════════════════════════
     // VIEW 2: LABORATORY 6-TAB WORKSPACE
     // ══════════════════════════════════════════════════════════════
+    if (loadingWorkspace && !workspace) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-sf-muted space-y-3">
+                <RefreshCw size={28} className="animate-spin text-sf-primary" />
+                <p className="text-xs font-medium">{t('labManagement.loading', 'Loading laboratory workspace...')}</p>
+            </div>
+        );
+    }
+
+    if (workspaceError && !workspace) {
+        const is403 = workspaceError.status === 403;
+        return (
+            <div className="p-8 max-w-xl mx-auto my-12 bg-sf-surface border border-sf-divider rounded-2xl text-center space-y-4 shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto">
+                    <AlertTriangle size={24} />
+                </div>
+                <h2 className="text-lg font-black text-sf-text">
+                    {is403 ? t('labManagement.errors.accessDeniedTitle', 'Access Denied') : t('labManagement.errors.errorTitle', 'Workspace Error')}
+                </h2>
+                <p className="text-xs text-sf-muted">
+                    {workspaceError.message || (is403
+                        ? t('labManagement.errors.accessDenied', 'You do not have permission to view this laboratory workspace.')
+                        : t('labManagement.errors.loadError', 'Failed to load laboratory workspace'))}
+                </p>
+                <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                        onClick={backToDirectory}
+                        className="px-4 py-2 border border-sf-divider rounded-xl text-xs font-bold text-sf-text hover:bg-sf-raised transition"
+                    >
+                        {t('labManagement.errors.returnToDirectory', 'Return to Laboratories')}
+                    </button>
+                    {!is403 && (
+                        <button
+                            onClick={() => fetchWorkspace(selectedLabId)}
+                            className="px-4 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-sm"
+                        >
+                            {t('labManagement.errors.retry', 'Retry')}
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     const lab = workspace?.lab;
     const workload = workspace?.workload;
     const isPaused = workspace?.isPaused || lab?.isActive === false;
@@ -585,6 +705,19 @@ export default function LabManagement() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Top error banner for background refresh failures */}
+            {workspaceError && (
+                <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-900 dark:text-rose-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                        <span>{workspaceError.message || t('labManagement.errors.loadError', 'Failed to refresh laboratory workspace')}</span>
+                    </div>
+                    <button onClick={() => setWorkspaceError(null)} className="text-rose-600 hover:text-rose-800 p-1">
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             {/* Breadcrumb & Navigation Back */}
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs text-sf-muted">
@@ -594,10 +727,10 @@ export default function LabManagement() {
                             className="hover:text-sf-primary font-bold flex items-center gap-1 transition"
                         >
                             <ArrowLeft size={13} />
-                            Laboratories
+                            {t('labManagement.laboratories', 'Laboratories')}
                         </button>
                     ) : (
-                        <span className="font-bold">Laboratories</span>
+                        <span className="font-bold">{t('labManagement.laboratories', 'Laboratories')}</span>
                     )}
                     <span>/</span>
                     <span className="text-sf-text font-semibold truncate">{lab?.name || selectedLabId}</span>
@@ -608,7 +741,7 @@ export default function LabManagement() {
                     className="px-3 py-1.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:text-sf-text hover:bg-sf-surface transition flex items-center gap-1.5"
                 >
                     <HelpCircle size={14} />
-                    Help with this lab
+                    {t('labManagement.helpWithLab', 'Help with this lab')}
                 </button>
             </div>
 
@@ -628,7 +761,7 @@ export default function LabManagement() {
                                 {lab?.code || selectedLabId} · {lab?.country || 'Facility'}
                             </div>
                             <h1 className="text-2xl sm:text-3xl font-black text-sf-text tracking-tight">
-                                {lab?.name || 'Laboratory Workspace'}
+                                {lab?.name || t('labManagement.title', 'Laboratory Workspace')}
                             </h1>
                             <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
@@ -637,7 +770,7 @@ export default function LabManagement() {
                                         : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
                                 }`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${isPaused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                                    {isPaused ? 'Ⅱ Lab Paused' : '● Operational'}
+                                    {isPaused ? t('labManagement.status.pausedBadge', 'Ⅱ Lab Paused') : t('labManagement.status.operationalBadge', '● Operational')}
                                 </span>
                                 <span className="text-xs text-sf-muted flex items-center gap-1 font-mono">
                                     <Clock size={12} />
@@ -652,15 +785,15 @@ export default function LabManagement() {
                 <div className="p-3 bg-sf-canvas border border-sf-divider rounded-xl flex items-center justify-between gap-3 text-xs text-sf-muted">
                     <span>
                         {user?.role === 'LAB_MANAGER' ? (
-                            <><strong>Your laboratory.</strong> Manage your team, local assignments, and settings. Shared project access is managed by its owner.</>
+                            <><strong>{t('labManagement.scopeHint.manager', 'Your laboratory. Manage your team, local assignments, and settings. Shared project access is managed by its owner.')}</strong></>
                         ) : user?.role === 'SUPER_ADMIN' ? (
-                            <><strong>Administrator view.</strong> Reviewing {lab?.code}. Operational changes require target scope and recorded audit reason.</>
+                            <><strong>{t('labManagement.scopeHint.admin', 'Administrator view. Operational changes require target scope and recorded audit reason.')}</strong> ({lab?.code})</>
                         ) : (
-                            <><strong>National lead view · {lab?.country}.</strong> Viewing authorized regional laboratory. Staff administration requires explicit delegation.</>
+                            <><strong>{t('labManagement.scopeHint.nationalLead', 'National lead view. Viewing authorized regional laboratory. Staff administration requires explicit delegation.')}</strong> ({lab?.country})</>
                         )}
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-sf-raised text-[10px] font-bold text-sf-muted uppercase tracking-wider shrink-0">
-                        Scoped
+                        {t('labManagement.scopedBadge', 'Scoped')}
                     </span>
                 </div>
             </div>
@@ -670,8 +803,8 @@ export default function LabManagement() {
                 <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
                     <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                        <strong className="font-bold block mb-0.5">This Laboratory is Currently Paused</strong>
-                        New sample intake, batch assignments, and operational result writes are held. Historical records and recoverable drafts are preserved.
+                        <strong className="font-bold block mb-0.5">{t('labManagement.paused.title', 'This Laboratory is Currently Paused')}</strong>
+                        {t('labManagement.paused.desc', 'New sample intake, batch assignments, and operational result writes are held. Historical records and recoverable drafts are preserved.')}
                     </div>
                 </div>
             )}
@@ -679,12 +812,12 @@ export default function LabManagement() {
             {/* Tab Navigation */}
             <div className="flex border-b border-sf-divider gap-4 sm:gap-8 overflow-x-auto custom-scrollbar">
                 {[
-                    { id: 'overview', label: 'Overview' },
-                    { id: 'people', label: 'People', count: workspace?.workload?.staff?.total },
-                    { id: 'projects', label: 'Projects', count: workspace?.projects?.length },
-                    { id: 'resources', label: 'Methods & Resources' },
-                    { id: 'settings', label: 'Settings' },
-                    { id: 'history', label: 'History' }
+                    { id: 'overview', label: t('labManagement.tabs.overview', 'Overview') },
+                    { id: 'people', label: t('labManagement.tabs.people', 'People & Access'), count: workspace?.workload?.staff?.total ?? workspace?.staffPagination?.total ?? workspace?.staff?.length },
+                    { id: 'projects', label: t('labManagement.tabs.projects', 'Projects'), count: workspace?.projectsPagination?.total ?? workspace?.projects?.length },
+                    { id: 'resources', label: t('labManagement.tabs.resources', 'Methods & Resources') },
+                    { id: 'settings', label: t('labManagement.tabs.settings', 'Settings') },
+                    { id: 'history', label: t('labManagement.tabs.history', 'History') }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -904,7 +1037,7 @@ export default function LabManagement() {
 
                     {/* Staff Table */}
                     <div className="bg-sf-surface border border-sf-divider rounded-2xl overflow-hidden shadow-sm">
-                        {filteredStaff.length === 0 ? (
+                        {staffList.length === 0 ? (
                             <div className="py-16 text-center text-sf-muted text-xs">
                                 {t('labManagement.people.noStaff', 'No staff accounts matching the selected criteria.')}
                             </div>
@@ -921,7 +1054,7 @@ export default function LabManagement() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-sf-divider text-xs sm:text-sm">
-                                        {filteredStaff.map(member => {
+                                        {staffList.map(member => {
                                             const roleBadge = getRoleBadge(member.role);
                                             const isSuspended = member.isActive === false;
                                             return (
@@ -1011,6 +1144,40 @@ export default function LabManagement() {
                             </div>
                         )}
                     </div>
+
+                    {/* Staff Pagination Toolbar */}
+                    {workspace?.staffPagination && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-sf-surface p-4 rounded-2xl border border-sf-divider shadow-xs">
+                            <div className="text-xs text-sf-muted">
+                                {t('common.showingRange', {
+                                    from: workspace.staffPagination.total > 0 ? ((workspace.staffPagination.page || staffPage) - 1) * (workspace.staffPagination.limit || 50) + 1 : 0,
+                                    to: Math.min((workspace.staffPagination.page || staffPage) * (workspace.staffPagination.limit || 50), workspace.staffPagination.total),
+                                    total: workspace.staffPagination.total
+                                }, `Showing ${workspace.staffPagination.total > 0 ? ((workspace.staffPagination.page || staffPage) - 1) * (workspace.staffPagination.limit || 50) + 1 : 0} - ${Math.min((workspace.staffPagination.page || staffPage) * (workspace.staffPagination.limit || 50), workspace.staffPagination.total)} of ${workspace.staffPagination.total} people`)}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    disabled={staffPage <= 1 || loadingWorkspace}
+                                    onClick={() => setStaffPage(p => Math.max(1, p - 1))}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronLeft size={14} />
+                                    {t('common.previous', 'Previous')}
+                                </button>
+                                <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                                    {t('common.pageOf', { page: workspace.staffPagination.page || staffPage, totalPages: workspace.staffPagination.totalPages || 1 }, `Page ${workspace.staffPagination.page || staffPage} of ${workspace.staffPagination.totalPages || 1}`)}
+                                </span>
+                                <button
+                                    disabled={staffPage >= (workspace.staffPagination.totalPages || 1) || loadingWorkspace}
+                                    onClick={() => setStaffPage(p => p + 1)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {t('common.next', 'Next')}
+                                    <ChevronRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -1019,53 +1186,102 @@ export default function LabManagement() {
             {/* ────────────────────────────────────────────────────────── */}
             {activeTab === 'projects' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
-                    <div>
-                        <h2 className="text-lg font-black text-sf-text">Projects Served by this Laboratory</h2>
-                        <p className="text-xs text-sf-muted mt-0.5">
-                            Separation of project ownership from laboratory servicing responsibility.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {(workspace?.projects || []).map((p, idx) => (
-                            <div key={idx} className="p-5 rounded-2xl bg-sf-surface border border-sf-divider space-y-3">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div className="text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                                            {p.isOwned ? 'LAB-OWNED PROJECT' : 'SHARED PROGRAMME'}
-                                        </div>
-                                        <h3 className="font-black text-base text-sf-text">{p.name || p.code}</h3>
-                                        <div className="text-xs text-sf-muted font-mono">{p.code}</div>
-                                    </div>
-                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                                        p.isOwned ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
-                                    }`}>
-                                        {p.isOwned ? 'Owner' : 'Servicing Lab'}
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-sf-divider">
-                                    <div>
-                                        <span className="text-sf-muted block text-[10px] uppercase">Status</span>
-                                        <span className="font-semibold text-sf-text">{p.status || 'ACTIVE'}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-sf-muted block text-[10px] uppercase">Workload</span>
-                                        <span className="font-semibold text-sf-text">{p.sampleCount || 0} samples</span>
-                                    </div>
-                                </div>
-
-                                <div className="pt-2">
-                                    <Link
-                                        to={`/projects?code=${encodeURIComponent(p.code)}`}
-                                        className="text-xs font-bold text-sf-primary hover:underline flex items-center gap-1"
-                                    >
-                                        View Project Workspace <ChevronRight size={13} />
-                                    </Link>
-                                </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-black text-sf-text">{t('labManagement.projects.title', 'Projects Served by this Laboratory')}</h2>
+                            <p className="text-xs text-sf-muted mt-0.5">
+                                {t('labManagement.projects.subtitle', 'Separation of project ownership from laboratory servicing responsibility.')}
+                            </p>
+                        </div>
+                        {workspace?.projectsPagination?.total !== undefined && (
+                            <div className="text-xs text-sf-muted font-medium">
+                                {t('labManagement.projects.totalCount', { count: workspace.projectsPagination.total }, `${workspace.projectsPagination.total} projects total`)}
                             </div>
-                        ))}
+                        )}
                     </div>
+
+                    {(!workspace?.projects || workspace.projects.length === 0) ? (
+                        <div className="py-16 text-center text-sf-muted text-xs bg-sf-surface border border-sf-divider rounded-2xl">
+                            {t('labManagement.projects.noProjects', 'No projects associated with this laboratory.')}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {workspace.projects.map((p, idx) => (
+                                <div key={p.id || idx} className="p-5 rounded-2xl bg-sf-surface border border-sf-divider space-y-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase tracking-wider text-sf-muted">
+                                                {p.isOwned ? t('labManagement.projects.ownedProject', 'LAB-OWNED PROJECT') : t('labManagement.projects.sharedProgramme', 'SHARED PROGRAMME')}
+                                            </div>
+                                            <h3 className="font-black text-base text-sf-text">{p.name || p.code}</h3>
+                                            <div className="text-xs text-sf-muted font-mono">{p.code}</div>
+                                        </div>
+                                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                            p.isOwned ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
+                                        }`}>
+                                            {p.isOwned ? t('labManagement.projects.ownerTag', 'Owner') : t('labManagement.projects.servicingTag', 'Servicing Lab')}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-sf-divider">
+                                        <div>
+                                            <span className="text-sf-muted block text-[10px] uppercase">{t('labManagement.projects.status', 'Status')}</span>
+                                            <span className="font-semibold text-sf-text">{p.status || 'ACTIVE'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-sf-muted block text-[10px] uppercase">{t('labManagement.projects.workload', 'Workload')}</span>
+                                            <span className="font-semibold text-sf-text">
+                                                {t('labManagement.projects.sampleCount', { count: p.sampleCount || 0 }, `${p.sampleCount || 0} samples`)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <Link
+                                            to={`/projects?code=${encodeURIComponent(p.code)}`}
+                                            className="text-xs font-bold text-sf-primary hover:underline flex items-center gap-1"
+                                        >
+                                            {t('labManagement.projects.viewWorkspace', 'View Project Workspace')} <ChevronRight size={13} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Projects Pagination Toolbar */}
+                    {workspace?.projectsPagination && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-sf-surface p-4 rounded-2xl border border-sf-divider shadow-xs">
+                            <div className="text-xs text-sf-muted">
+                                {t('common.showingRange', {
+                                    from: workspace.projectsPagination.total > 0 ? ((workspace.projectsPagination.page || projectPage) - 1) * (workspace.projectsPagination.limit || 20) + 1 : 0,
+                                    to: Math.min((workspace.projectsPagination.page || projectPage) * (workspace.projectsPagination.limit || 20), workspace.projectsPagination.total),
+                                    total: workspace.projectsPagination.total
+                                }, `Showing ${workspace.projectsPagination.total > 0 ? ((workspace.projectsPagination.page || projectPage) - 1) * (workspace.projectsPagination.limit || 20) + 1 : 0} - ${Math.min((workspace.projectsPagination.page || projectPage) * (workspace.projectsPagination.limit || 20), workspace.projectsPagination.total)} of ${workspace.projectsPagination.total} projects`)}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    disabled={projectPage <= 1 || loadingWorkspace}
+                                    onClick={() => setProjectPage(p => Math.max(1, p - 1))}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronLeft size={14} />
+                                    {t('common.previous', 'Previous')}
+                                </button>
+                                <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold text-xs rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                                    {t('common.pageOf', { page: workspace.projectsPagination.page || projectPage, totalPages: workspace.projectsPagination.totalPages || 1 }, `Page ${workspace.projectsPagination.page || projectPage} of ${workspace.projectsPagination.totalPages || 1}`)}
+                                </span>
+                                <button
+                                    disabled={projectPage >= (workspace.projectsPagination.totalPages || 1) || loadingWorkspace}
+                                    onClick={() => setProjectPage(p => p + 1)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border border-sf-divider rounded-lg hover:bg-sf-raised text-sf-muted disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {t('common.next', 'Next')}
+                                    <ChevronRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

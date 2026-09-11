@@ -161,8 +161,18 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` m
 - **A27–A29 (Kobo & SIS Integration Controls)**: Verified in automated contract tests `lab_governance_wp_f.test.js`, `interim_gaps_verification.test.js`, and `session_and_coverage.test.js`. Target-lab assertions on Kobo configs; explicit lab scopes and audit logging on SIS API keys. *Coverage status: Contract tests pass; live external Kobo webhook delivery unverified.*
 - **A30–A32 (Equipment, Inventory & Locales)**: Verified in automated contract tests `lab_governance_wp_a.test.js` and multi-locale verification `verify_multilang_render.cjs`. Resource lab checks on equipment/inventory; all 5 canonical locales preserved with 100% key coverage.
 - **A33–A35 (Lab State & Work Dispatch)**: Verified in automated contract tests `lab_governance_wp_d.test.js` and `reopened_governance_scenarios.test.js`. Pausing lab preserves records without cascading to staff; notifications target receiving lab.
-- **A36–A38 (Workload Pipeline, Timezones & Pagination)**: Verified in automated contract tests `lab_governance_wp_b.test.js`, `lab_governance_wp_d.test.js`, `final_governance_probes.test.js` (F04), and `session_and_coverage.test.js` (P01). Mutually exclusive counts excluding expected/released; bounded pagination clamped to max 100 with pagination metadata.
-- **A39–A40 (UI & Accessibility)**: Verified via automated static Vite bundle compilation, accessible modal attributes (focus traps, Escape listeners, `aria-*`), and CSS tokens across responsive viewports. *Coverage status: Static compilation and DOM attributes verified; end-to-end interactive browser journeys with assistive screen-reader software (NVDA/VoiceOver) unverified.*
+- **A36–A38 (Workload Pipeline, Timezones, Pagination & Error/Race Resilience)**:
+  - Verified in automated contract tests `lab_governance_wp_b.test.js`, `lab_governance_wp_d.test.js`, `final_governance_probes.test.js` (F04), and `session_and_coverage.test.js` (P01).
+  - P02 exact legacy JSON membership verified in `workspace-paging-probes.cjs`: guarded with `json_valid = 1`, `json_type = 'array'`, and `type = 'text'`. Fails closed on malformed JSON, valid non-array JSON (object key, object value, scalar string, scalar number), non-string array elements (numbers, objects), similar-prefix (`["PAGING-A-OTHER"]`), substring suffix, and escaped-ID (`["\"PAGING-A\""]`). Positive controls verified: lab ownership (`labId`), junction servicing (`ProjectLab`), single-element array, and multi-element array.
+  - P03 bounded scoped querying verified in `workspace-paging-probes.cjs`: clamped to requested limit, accurate `projectsPagination` metadata (`page: 1, limit: 20, total: 209, totalPages: 11`).
+  - A38 error and search-race states verified in real browser test `a39_a38_matrix_review.cjs`: 403 Forbidden renders Access Denied card (never "No staff"); 500 Server Error renders retry card (never "No staff"); empty search renders clean empty state; rapid consecutive queries protected against stale response overwrite via `latestWorkspaceReqId`.
+- **A39–A40 (UI, Responsive Viewports, Themes, Locales & Keyboard Accessibility)**:
+  - Responsive Viewport Matrix verified in real browser (`a39_a38_matrix_review.cjs`): 320px mobile small, 390px mobile modern, 768px tablet portrait, and 1440px desktop widescreen render without horizontal blowout (`document.documentElement.scrollWidth <= window.innerWidth`).
+  - Appearance Themes verified in real browser (`a39_a38_matrix_review.cjs`): Light theme and Dark theme toggled via live `ThemeToggle` component, validating root `.dark` classes and styling tokens.
+  - Multi-Locale Rendering verified in real browser (`a39_a38_matrix_review.cjs`): all 5 canonical locales (`en`, `es`, `es-419`, `fr`, `pt`) verified rendering authentic translated tab captions, table headers, and pagination indicators with 0 raw key fallbacks.
+  - Accessible Keyboard Navigation verified in real browser (`a39_a38_matrix_review.cjs`): Tab navigation to interactive elements, `Enter` key activation of management modal, accessible dialog focus trapping (`[role="dialog"]`), and `Escape` key clean dialog dismissal.
+  - Real browser end-to-end paging verified in `browser_paging_review.cjs`: 10/10 checks passing with authentic Lab Manager role on a 205-staff, 209-project fictional database; verifies page navigation beyond index 50, server-side search finding later-page staff (Zoe LaterPerson, index 145), opening review modal, foreign scope negative control, and project pagination.
+  - *Coverage status: Automated browser journey, multi-viewport layout, theme toggle, multi-locale rendering, and keyboard focus trap verified in real Google Chrome; live testing with physical screen-reader software (NVDA/VoiceOver) with human assistive users remains unverified.*
 - **A41 (Project Update Handler)**: Verified in automated contract tests `lab_governance_wp_d.test.js`. Single response returned without error.
 - **A42 (Migration & Preflight Safety)**: Verified in `server/scripts/preflight_governance_report.js`, `server/scripts/disposable_migration_rehearsal.js`, and `lab_governance_wp_f.test.js`. Zero sample loss verified; local dev baseline database verified untouched.
 
@@ -199,17 +209,41 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 - **Defect Probe R21**: Verified (`reproduced: true` on legacy missing-labs payload, returning HTTP 400 `INVALID_LAB_SCOPE`, confirming no wildcard/country fallback occurs; real form tested with explicit lab selector and non-empty `labs` array).
 - **Follow-Up Review Probes (F01–F07, C01)**: 8 / 8 passed in `final-review-probes.cjs` against schema-only disposable database with source database opened strictly read-only.
 - **Session & Acceptance Probes (S01–S03, P01, C02, T01–T03)**: 8 / 8 passed in `session-and-coverage-probes.cjs` against schema-only disposable database with source database opened strictly read-only.
+- **Exact-Membership Scope & Paging Probes (P02, P03)**: 16 / 16 passed in `workspace-paging-probes.cjs`:
+  - 10 negative controls pass: similar-prefix, malformed JSON, object key, object value, scalar string, scalar number, numeric array, object array, escaped identifier, and substring suffix all fail closed and do not grant access.
+  - 4 positive controls pass: lab-owned project, ProjectLab junction record, single-element legacy array, and multi-element legacy array appear.
+  - Bounded querying (20 per page out of 209) and pagination metadata verified.
+- **Real Browser Paging Journey (B01–B10)**: 10 / 10 passed in `browser_paging_review.cjs` in native Google Chrome (headless):
+  - B01: Authentic Lab Manager role workspace load (`PASS`)
+  - B02: Page 1 bounded to 50 staff rows (`PASS`)
+  - B03: Accurate pagination indicator (`Page 1 of 5`, `PASS`)
+  - B04: Page 2 navigation beyond index 50 (`PASS`)
+  - B05: Server-side search finds Zoe LaterPerson (index 145) without local memory cutoff (`PASS`)
+  - B06: Access Review modal binds and manages later-page person (`PASS`)
+  - B07: Foreign-scope negative control: `PAGING-00-FOREIGN` is NOT rendered (`PASS`)
+  - B08: Shared project positive control: `PAGING-00-VALID` is rendered (`PASS`)
+  - B09: Projects collection bounded and reports `Page 1 of 11` (`PASS`)
+  - B10: Projects page 2 navigates to subsequent batch (`PASS`)
+  - Visual evidence captured to `independent-review/browser-paging-evidence.png` and report saved to `independent-review/browser-paging-results.json`.
+- **A39 & A38 Responsive/Theme/Locale/Keyboard Matrix**: 16 / 16 passed in `a39_a38_matrix_review.cjs` in native Google Chrome:
+  - 4 Responsive Viewports (320px, 390px, 768px, 1440px) render without unmanaged overflow (`PASS`)
+  - Both Themes (Light and Dark) toggled via `ThemeToggle` apply correct root attributes and styling (`PASS`)
+  - All 5 Canonical Locales (`en`, `es`, `es-419`, `fr`, `pt`) render authentic translations with 0 missing keys (`PASS`)
+  - Keyboard focus trap (`Tab`), action activation (`Enter`), and dialog dismissal (`Escape`) verified (`PASS`)
+  - 403 Forbidden state renders Access Denied message without false "No staff" claim (`PASS`)
+  - 500 Server Error state renders error recovery card with Retry button without false empty state (`PASS`)
+  - Empty search state renders explicit empty message (`PASS`)
+  - Search race condition protection verifies stale out-of-order responses are safely discarded (`PASS`)
+  - Report saved to `independent-review/a39-a38-matrix-results.json`.
 
 ### Automated Tests vs. Browser Journeys & Static Verification:
 - **Automated Headless Tests**: 102 Jest suites (823 tests) cover server business logic, transaction rollback, API routing, SQLite schema compliance, offline sync engine rules, and real loopback WebSocket connections.
 - **Static Client Verification**:
-  - React Vite production bundle built in 7.64s with 0 syntax or bundling errors (`npm run build`). Note: this confirms static module compilation and dependency graph resolution; it is not an interactive browser journey.
-- **Headless UI Probes & Localization**:
-  - `independent-review-ui.cjs` verifies rendering of the People and Access tab with 3 laboratory staff members and validates that modal dropdowns bind canonical role keys (`r.key`/`r.role`), rejecting display names.
-  - Multi-locale rendering verified across all 5 canonical languages (`en`, `es`, `es-419`, `fr`, `pt`) with 0 missing localization keys via committed test script `WP/lab-governance-audit-v1/verify_multilang_render.cjs`.
-  - Accessible modal markup verified in code (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`, focus trapping with `useFocusTrap`, and Escape key listeners across all 5 governance modals).
+  - React Vite production bundle built cleanly in 7.04s with 0 syntax or bundling errors (`npm run build`). Note: this confirms static module compilation and dependency graph resolution.
+  - `verify_multilang_render.cjs` honestly labeled as a static key-presence check; verifies all 41 governance dictionary keys are non-empty across all 5 JSON translation files.
+- **End-to-End Real Browser Automation**:
+  - Validates actual React components, routing, language context, theme provider, and pagination controls running in real headless Google Chrome with Chromium devtools protocol.
 - **Explicit Unverified Scope**:
-  - Real end-to-end interactive browser journeys across all 10 roles in physical desktop/mobile browsers have not been fully executed.
   - Physical assistive screen-reader devices (NVDA, VoiceOver) have not been tested with human users.
   - Live third-party external networks (production Kobo servers, physical email SMTP servers, mobile PWA hardware background sync) remain unverified.
 
@@ -218,14 +252,16 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 ## 8. Release Sign-Off & Status
 
 - [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`.
-- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, and acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03.
+- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, and Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix).
+- [x] **Exact JSON Membership**: SQLite query uses `json_valid = 1`, `json_type = 'array'`, and `type = 'text'` with CASE expression failing closed on malformed and non-array JSON.
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
 - [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Tested**: 102 test suites (823 tests) and 16 probe scenarios passing with 100% success rate on strict-schema environments.
+- [x] **Tested**: 102 test suites (823 tests) and 42 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
-- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 7.64s).
+- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 7.04s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.
+
 
 
 

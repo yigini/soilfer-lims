@@ -44,7 +44,8 @@
     "copy": "Copiar",
     "copied": "Copiado!",
     "done": "Concluído",
-    "generating": "Gerando..."
+    "generating": "Gerando...",
+    "showingRange": "Exibindo {{from}} - {{to}} de {{total}}"
   },
   "login": {
     "title": "Entrar no SoilFER LIMS",
@@ -975,16 +976,20 @@
     "subtitle": "Gerencie instalações laboratoriais, autorizações de equipe e ciclo de vida operacional.",
     "tabs": {
       "overview": "Visão Geral",
-      "people": "Equipe e Autorizações",
+      "people": "Equipe e Acessos",
       "equipment": "Equipamentos e Instrumentação",
       "inventory": "Inventário e Reagentes",
-      "projects": "Projetos Associados",
-      "settings": "Configurações da Instalação"
+      "projects": "Projetos",
+      "settings": "Configurações",
+      "resources": "Métodos e Recursos",
+      "history": "Histórico"
     },
     "status": {
       "active": "Ativo",
       "paused": "Pausado",
-      "retired": "Desativado"
+      "retired": "Desativado",
+      "operationalBadge": "● Operacional",
+      "pausedBadge": "Ⅱ Laboratório em pausa"
     },
     "onboard": {
       "button": "Cadastrar Laboratório",
@@ -1016,6 +1021,47 @@
       "reviewAccess": "Revisar Acesso",
       "reactivateUser": "Reativar Usuário",
       "suspendUser": "Suspender Usuário"
+    },
+    "laboratories": "Laboratórios",
+    "helpWithLab": "Ajuda para este laboratório",
+    "scopedBadge": "Delimitado",
+    "loading": "Carregando espaço de trabalho do laboratório...",
+    "scopeHint": {
+      "manager": "Seu laboratório. Gerencie sua equipe, atribuições locais e configurações. O acesso a projetos compartilhados é gerenciado pelo proprietário.",
+      "admin": "Visualização do administrador. Alterações operacionais exigem escopo de destino e motivo de auditoria registrado.",
+      "nationalLead": "Visualização de liderança nacional. Visualizando laboratório regional autorizado. A administração de pessoal requer delegação explícita."
+    },
+    "paused": {
+      "title": "Este laboratório está pausado no momento",
+      "desc": "Nova recepção de amostras, atribuições de lotes e gravações de resultados operacionais estão suspensas. Registros históricos e rascunhos recuperáveis são preservados."
+    },
+    "projects": {
+      "title": "Projetos atendidos por este laboratório",
+      "subtitle": "Separação entre a propriedade do projeto e a responsabilidade de serviço do laboratório.",
+      "ownedProject": "PROJETO PRÓPRIO DO LABORATÓRIO",
+      "sharedProgramme": "PROGRAMA COMPARTILHADO",
+      "ownerTag": "Proprietário",
+      "servicingTag": "Laboratório de Serviço",
+      "status": "Status",
+      "workload": "Carga de trabalho",
+      "sampleCount": "{{count}} amostras",
+      "viewWorkspace": "Ver espaço do projeto",
+      "noProjects": "Nenhum projeto associado a este laboratório.",
+      "totalCount": "{{count}} projetos no total"
+    },
+    "pagination": {
+      "showingRange": "Exibindo {{from}} - {{to}} de {{total}}",
+      "pageOf": "Página {{page}} de {{totalPages}}",
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "errors": {
+      "accessDeniedTitle": "Acesso Negado",
+      "accessDenied": "Você não tem permissão para visualizar este espaço de trabalho do laboratório.",
+      "errorTitle": "Erro no espaço de trabalho",
+      "loadError": "Falha ao carregar o espaço de trabalho do laboratório",
+      "returnToDirectory": "Voltar aos laboratórios",
+      "retry": "Tentar novamente"
     }
   },
   "staffManagement": {

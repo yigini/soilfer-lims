@@ -44,7 +44,8 @@
     "copy": "Copy",
     "copied": "Copied!",
     "done": "Done",
-    "generating": "Generating..."
+    "generating": "Generating...",
+    "showingRange": "Showing {{from}} - {{to}} of {{total}}"
   },
   "login": {
     "title": "Sign in to SoilFER LIMS",
@@ -975,16 +976,20 @@
     "subtitle": "Manage laboratory facilities, staff authorizations, and operational lifecycle.",
     "tabs": {
       "overview": "Overview",
-      "people": "Staff & Authorizations",
+      "people": "People & Access",
       "equipment": "Equipment & Instruments",
       "inventory": "Inventory & Reagents",
-      "projects": "Associated Projects",
-      "settings": "Facility Settings"
+      "projects": "Projects",
+      "settings": "Settings",
+      "resources": "Methods & Resources",
+      "history": "History"
     },
     "status": {
       "active": "Active",
       "paused": "Paused",
-      "retired": "Retired"
+      "retired": "Retired",
+      "operationalBadge": "● Operational",
+      "pausedBadge": "Ⅱ Lab Paused"
     },
     "onboard": {
       "button": "Onboard Laboratory",
@@ -1016,6 +1021,47 @@
       "reviewAccess": "Review Access",
       "reactivateUser": "Reactivate User",
       "suspendUser": "Suspend User"
+    },
+    "laboratories": "Laboratories",
+    "helpWithLab": "Help with this lab",
+    "scopedBadge": "Scoped",
+    "loading": "Loading laboratory workspace...",
+    "scopeHint": {
+      "manager": "Your laboratory. Manage your team, local assignments, and settings. Shared project access is managed by its owner.",
+      "admin": "Administrator view. Operational changes require target scope and recorded audit reason.",
+      "nationalLead": "National lead view. Viewing authorized regional laboratory. Staff administration requires explicit delegation."
+    },
+    "paused": {
+      "title": "This Laboratory is Currently Paused",
+      "desc": "New sample intake, batch assignments, and operational result writes are held. Historical records and recoverable drafts are preserved."
+    },
+    "projects": {
+      "title": "Projects Served by this Laboratory",
+      "subtitle": "Separation of project ownership from laboratory servicing responsibility.",
+      "ownedProject": "LAB-OWNED PROJECT",
+      "sharedProgramme": "SHARED PROGRAMME",
+      "ownerTag": "Owner",
+      "servicingTag": "Servicing Lab",
+      "status": "Status",
+      "workload": "Workload",
+      "sampleCount": "{{count}} samples",
+      "viewWorkspace": "View Project Workspace",
+      "noProjects": "No projects associated with this laboratory.",
+      "totalCount": "{{count}} projects total"
+    },
+    "pagination": {
+      "showingRange": "Showing {{from}} - {{to}} of {{total}}",
+      "pageOf": "Page {{page}} of {{totalPages}}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "accessDeniedTitle": "Access Denied",
+      "accessDenied": "You do not have permission to view this laboratory workspace.",
+      "errorTitle": "Workspace Error",
+      "loadError": "Failed to load laboratory workspace",
+      "returnToDirectory": "Return to Laboratories",
+      "retry": "Retry"
     }
   },
   "staffManagement": {

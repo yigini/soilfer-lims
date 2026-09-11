@@ -1,0 +1,248 @@
+{
+  "timestamp": "2026-09-11T13:24:12.271Z",
+  "head": "63e4d0e5a7d9d0fc40da0a69d7871f6cda1c366d",
+  "browser": "Google Chrome (Headless via Puppeteer-Core)",
+  "sourcePath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "dbUntouched": true,
+  "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-a39-cf9d7b30-0845-4d06-a0b5-aca60757988d.db",
+  "allPassed": true,
+  "results": [
+    {
+      "id": "A39-VP-320",
+      "description": "Responsive layout at 320px Mobile Small renders without unmanaged page overflow",
+      "expected": {
+        "noBlowout": true,
+        "rowsRendered": 50
+      },
+      "actual": {
+        "noBlowout": true,
+        "rowsRendered": 50,
+        "bodyWidth": 320,
+        "windowWidth": 320
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-VP-390",
+      "description": "Responsive layout at 390px Mobile Modern renders without unmanaged page overflow",
+      "expected": {
+        "noBlowout": true,
+        "rowsRendered": 50
+      },
+      "actual": {
+        "noBlowout": true,
+        "rowsRendered": 50,
+        "bodyWidth": 390,
+        "windowWidth": 390
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-VP-768",
+      "description": "Responsive layout at 768px Tablet Portrait renders without unmanaged page overflow",
+      "expected": {
+        "noBlowout": true,
+        "rowsRendered": 50
+      },
+      "actual": {
+        "noBlowout": true,
+        "rowsRendered": 50,
+        "bodyWidth": 768,
+        "windowWidth": 768
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-VP-1440",
+      "description": "Responsive layout at 1440px Desktop Widescreen renders without unmanaged page overflow",
+      "expected": {
+        "noBlowout": true,
+        "rowsRendered": 50
+      },
+      "actual": {
+        "noBlowout": true,
+        "rowsRendered": 50,
+        "bodyWidth": 1440,
+        "windowWidth": 1440
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-THEME-LIGHT",
+      "description": "Light theme renders cleanly without dark root class",
+      "expected": {
+        "isDark": false
+      },
+      "actual": {
+        "isDark": false
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-THEME-DARK",
+      "description": "Dark theme applies dark root class and dark styling tokens",
+      "expected": {
+        "isDark": true
+      },
+      "actual": {
+        "isDark": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-LOCALE-en",
+      "description": "Locale en renders authentic translated strings without missing-key fallback",
+      "expected": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "actual": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-LOCALE-es",
+      "description": "Locale es renders authentic translated strings without missing-key fallback",
+      "expected": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "actual": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-LOCALE-es-419",
+      "description": "Locale es-419 renders authentic translated strings without missing-key fallback",
+      "expected": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "actual": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-LOCALE-fr",
+      "description": "Locale fr renders authentic translated strings without missing-key fallback",
+      "expected": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "actual": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-LOCALE-pt",
+      "description": "Locale pt renders authentic translated strings without missing-key fallback",
+      "expected": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "actual": {
+        "tabMatched": true,
+        "pageMatched": true,
+        "noRawKey": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-KEYBOARD-ENTER",
+      "description": "Keyboard Enter opens modal and moves focus inside accessible dialog",
+      "expected": {
+        "dialogOpen": true,
+        "focusInDialog": true
+      },
+      "actual": {
+        "dialogOpen": true,
+        "focusInDialog": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A39-KEYBOARD-ESCAPE",
+      "description": "Keyboard Escape dismisses modal cleanly without unhandled rejection",
+      "expected": {
+        "dialogClosed": true
+      },
+      "actual": {
+        "dialogClosed": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A38-403-FORBIDDEN",
+      "description": "403 Forbidden renders Access Denied message without falsely claiming laboratory has no staff",
+      "expected": {
+        "has403Title": true,
+        "noFalseEmpty": true
+      },
+      "actual": {
+        "has403Title": true,
+        "noFalseEmpty": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A38-500-SERVER-ERROR",
+      "description": "500 Server Error renders error recovery card with Retry button and never false empty state",
+      "expected": {
+        "has500Title": true,
+        "hasRetryBtn": true,
+        "noFalseEmpty": true
+      },
+      "actual": {
+        "has500Title": true,
+        "hasRetryBtn": true,
+        "noFalseEmpty": true
+      },
+      "passed": true
+    },
+    {
+      "id": "A38-EMPTY-SEARCH",
+      "description": "Search with no matching records cleanly renders explicit empty state message",
+      "expected": {
+        "emptyMsgRendered": true,
+        "rowsCount": 0
+      },
+      "actual": {
+        "emptyMsgRendered": true,
+        "rowsCount": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "A38-SEARCH-RACE-PROTECTION",
+      "description": "Stale out-of-order response cannot replace latest search result",
+      "expected": {
+        "expectedFinalTarget": "Staff Member 001",
+        "containsStale": false
+      },
+      "actual": {
+        "finalTargetRendered": true,
+        "containsStale": false
+      },
+      "passed": true
+    }
+  ]
+}

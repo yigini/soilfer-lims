@@ -1,0 +1,132 @@
+{
+  "timestamp": "2026-09-11T13:24:22.843Z",
+  "head": "63e4d0e5a7d9d0fc40da0a69d7871f6cda1c366d",
+  "browser": "Google Chrome (Headless via Puppeteer-Core)",
+  "sourcePath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "dbUntouched": true,
+  "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-browser-478c57f6-68c8-4fb5-b49b-0bbe9ec5a31c.db",
+  "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\browser-paging-evidence.png",
+  "allPassed": true,
+  "results": [
+    {
+      "id": "B01",
+      "description": "Workspace loads with authentic Lab Manager role",
+      "expected": {
+        "contains": "Laboratory PAGING-A"
+      },
+      "actual": {
+        "actual": "Laboratory PAGING-A"
+      },
+      "passed": true
+    },
+    {
+      "id": "B02",
+      "description": "People tab bounded to first 50 staff rows on Page 1",
+      "expected": {
+        "rowCount": 50,
+        "targetPresent": false
+      },
+      "actual": {
+        "rowCount": 50,
+        "targetPresent": false
+      },
+      "passed": true
+    },
+    {
+      "id": "B03",
+      "description": "Staff pagination indicator reports accurate total pages",
+      "expected": {
+        "contains": "Page 1 of 5"
+      },
+      "actual": {
+        "actual": "Page 1 of 5"
+      },
+      "passed": true
+    },
+    {
+      "id": "B04",
+      "description": "Page 2 navigates and displays staff accounts beyond index 50",
+      "expected": {
+        "rowCount": 50,
+        "containsBeyond50": true
+      },
+      "actual": {
+        "rowCount": 50,
+        "firstMember": "STStaff Member 050staff_050@soilfer.invalidQuality & AuditLab: PAGING-AActive0 open tasksReview Access"
+      },
+      "passed": true
+    },
+    {
+      "id": "B05",
+      "description": "Server-side search locates staff on later pages without local memory cutoff",
+      "expected": {
+        "rowCount": 1,
+        "targetFound": true
+      },
+      "actual": {
+        "rowCount": 1,
+        "targetFound": true
+      },
+      "passed": true
+    },
+    {
+      "id": "B06",
+      "description": "Management modal successfully binds and manages later-page person",
+      "expected": {
+        "modalOpened": true,
+        "targetInModal": true
+      },
+      "actual": {
+        "modalOpened": true,
+        "targetInModal": true
+      },
+      "passed": true
+    },
+    {
+      "id": "B07",
+      "description": "Foreign-scope negative control: PAGING-00-FOREIGN is NOT rendered",
+      "expected": {
+        "foreignVisible": false
+      },
+      "actual": {
+        "foreignVisible": false
+      },
+      "passed": true
+    },
+    {
+      "id": "B08",
+      "description": "Shared project positive control: PAGING-00-VALID is rendered",
+      "expected": {
+        "validVisible": true
+      },
+      "actual": {
+        "validVisible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "B09",
+      "description": "Projects collection is bounded and reports pagination (Page 1 of 11)",
+      "expected": {
+        "contains": "1 of 11"
+      },
+      "actual": {
+        "actual": "Page 1 of 11"
+      },
+      "passed": true
+    },
+    {
+      "id": "B10",
+      "description": "Project page 2 navigates and renders subsequent project batches",
+      "expected": {
+        "contains": "2 of 11"
+      },
+      "actual": {
+        "actual": "Page 2 of 11"
+      },
+      "passed": true
+    }
+  ]
+}

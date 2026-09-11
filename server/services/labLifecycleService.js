@@ -179,15 +179,35 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         canManageProjects: isSuperAdmin || isOwnManager
     };
 
-    // Bounded staff roster query with pagination metadata (P01)
-    const page = Math.max(1, parseInt(query.page, 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 50));
-    const skip = (page - 1) * limit;
+    // Staff filtering & bounded roster query with pagination metadata (P01)
+    const staffSearch = (query.staffSearch || query.search || '').trim();
+    const staffStatus = (query.staffStatus || query.status || '').toUpperCase();
+
+    const staffWhere = { labId };
+    if (staffStatus === 'ACTIVE') {
+        staffWhere.isActive = true;
+    } else if (staffStatus === 'SUSPENDED' || staffStatus === 'INACTIVE') {
+        staffWhere.isActive = false;
+    }
+    if (staffSearch) {
+        staffWhere.OR = [
+            { name: { contains: staffSearch } },
+            { username: { contains: staffSearch } },
+            { email: { contains: staffSearch } }
+        ];
+    }
+
+    const filteredStaffCount = await transaction.user.count({ where: staffWhere });
+
+    const staffPage = Math.max(1, parseInt(query.staffPage || query.page, 10) || 1);
+    const staffLimit = Math.min(100, Math.max(1, parseInt(query.staffLimit || query.limit, 10) || 50));
+    const staffSkip = (staffPage - 1) * staffLimit;
 
     const staffUsers = await transaction.user.findMany({
-        where: { labId },
-        skip,
-        take: limit,
+        where: staffWhere,
+        orderBy: { id: 'asc' },
+        skip: staffSkip,
+        take: staffLimit,
         select: {
             id: true,
             name: true,
@@ -221,27 +241,66 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
     }));
 
     const pagination = {
-        page,
-        limit,
-        total: totalStaff,
-        totalPages: Math.ceil(totalStaff / limit)
+        page: staffPage,
+        limit: staffLimit,
+        total: filteredStaffCount,
+        totalPages: Math.ceil(filteredStaffCount / staffLimit) || 1
     };
 
-    // Scoped projects query (owned, ProjectLab junction, or assignedLabIds) without full table in-memory scans
+    // Scoped projects query (owned, ProjectLab junction, or exact legacy assignedLabIds)
     const junctionRecords = await transaction.projectLab.findMany({
         where: { labId },
         select: { projectCode: true }
     });
     const junctionProjectCodes = junctionRecords.map(j => j.projectCode).filter(Boolean);
 
+    // Exact normalized/guarded JSON membership query (fails closed on malformed JSON; no substring leakage)
+    const legacyMatchingProjects = await transaction.$queryRaw`
+        SELECT id FROM "Project"
+        WHERE status != 'DELETED'
+          AND (
+            CASE
+              WHEN assignedLabIds IS NOT NULL
+                   AND json_valid(assignedLabIds) = 1
+                   AND json_type(assignedLabIds) = 'array'
+              THEN EXISTS (
+                SELECT 1 FROM json_each(assignedLabIds)
+                WHERE type = 'text' AND value = ${labId}
+              )
+              ELSE 0
+            END = 1
+          )
+    `;
+    const legacyProjectIds = Array.isArray(legacyMatchingProjects) ? legacyMatchingProjects.map(p => p.id) : [];
+
+    const projectSearch = (query.projectSearch || '').trim();
+    const projectStatus = (query.projectStatus || '').toUpperCase();
+
     const projectWhere = {
-        status: { not: 'DELETED' },
+        status: projectStatus && projectStatus !== 'ALL' ? projectStatus : { not: 'DELETED' },
         OR: [
             { labId },
             ...(junctionProjectCodes.length > 0 ? [{ code: { in: junctionProjectCodes } }] : []),
-            { assignedLabIds: { contains: labId } }
+            ...(legacyProjectIds.length > 0 ? [{ id: { in: legacyProjectIds } }] : [])
         ]
     };
+
+    if (projectSearch) {
+        projectWhere.AND = [
+            {
+                OR: [
+                    { name: { contains: projectSearch } },
+                    { code: { contains: projectSearch } }
+                ]
+            }
+        ];
+    }
+
+    const filteredProjectCount = await transaction.project.count({ where: projectWhere });
+
+    const projectPage = Math.max(1, parseInt(query.projectPage || query.page, 10) || 1);
+    const projectLimit = Math.min(100, Math.max(1, parseInt(query.projectLimit || query.limit, 10) || 50));
+    const projectSkip = (projectPage - 1) * projectLimit;
 
     const projectsList = await transaction.project.findMany({
         where: projectWhere,
@@ -254,12 +313,21 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
             assignedLabIds: true,
             createdAt: true
         },
-        orderBy: { code: 'asc' }
+        orderBy: { code: 'asc' },
+        skip: projectSkip,
+        take: projectLimit
     });
     const projects = projectsList.map(p => ({
         ...p,
         isOwned: p.labId === labId
     }));
+
+    const projectsPagination = {
+        page: projectPage,
+        limit: projectLimit,
+        total: filteredProjectCount,
+        totalPages: Math.ceil(filteredProjectCount / projectLimit) || 1
+    };
 
     const workload = {
         samples: {
@@ -312,6 +380,7 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         pagination,
         staffPagination: pagination,
         projects,
+        projectsPagination,
         workload,
         counts: workload,
         attention,

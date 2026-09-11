@@ -44,7 +44,8 @@
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "done": "Listo",
-    "generating": "Generando..."
+    "generating": "Generando...",
+    "showingRange": "Mostrando {{from}} - {{to}} de {{total}}"
   },
   "login": {
     "title": "Iniciar sesión en SoilFER LIMS",
@@ -974,17 +975,21 @@
     "title": "Espacio de Trabajo del Laboratorio",
     "subtitle": "Gestione las instalaciones del laboratorio, las autorizaciones del personal y el ciclo de vida operativo.",
     "tabs": {
-      "overview": "Resumen General",
-      "people": "Personal y Autorizaciones",
+      "overview": "Resumen",
+      "people": "Personal y accesos",
       "equipment": "Equipos e Instrumentación",
       "inventory": "Inventario y Reactivos",
-      "projects": "Proyectos Asociados",
-      "settings": "Configuración de la Instalación"
+      "projects": "Proyectos",
+      "settings": "Configuración",
+      "resources": "Métodos y recursos",
+      "history": "Historial"
     },
     "status": {
       "active": "Activo",
       "paused": "Pausado",
-      "retired": "Retirado"
+      "retired": "Retirado",
+      "operationalBadge": "● Operativo",
+      "pausedBadge": "Ⅱ Laboratorio en pausa"
     },
     "onboard": {
       "button": "Dar de Alta Laboratorio",
@@ -1016,6 +1021,47 @@
       "reviewAccess": "Revisar Acceso",
       "reactivateUser": "Reactivar Usuario",
       "suspendUser": "Suspender Usuario"
+    },
+    "laboratories": "Laboratorios",
+    "helpWithLab": "Ayuda sobre este laboratorio",
+    "scopedBadge": "Delimitado",
+    "loading": "Cargando espacio de trabajo del laboratorio...",
+    "scopeHint": {
+      "manager": "Su laboratorio. Gestione su equipo, asignaciones locales y configuración. El acceso a proyectos compartidos lo gestiona su propietario.",
+      "admin": "Vista de administrador. Los cambios operativos requieren ámbito de destino y motivo de auditoría registrado.",
+      "nationalLead": "Vista de responsable nacional. Consultando laboratorio regional autorizado. La administración de personal requiere delegación explícita."
+    },
+    "paused": {
+      "title": "Este laboratorio está actualmente en pausa",
+      "desc": "La recepción de nuevas muestras, asignación de lotes y registro de resultados operativos están suspendidos. Se conservan los registros históricos y borradores recuperables."
+    },
+    "projects": {
+      "title": "Proyectos atendidos por este laboratorio",
+      "subtitle": "Separación de la titularidad del proyecto respecto a la responsabilidad operativa del laboratorio.",
+      "ownedProject": "PROYECTO PROPIO DEL LABORATORIO",
+      "sharedProgramme": "PROGRAMA COMPARTIDO",
+      "ownerTag": "Propietario",
+      "servicingTag": "Laboratorio de servicio",
+      "status": "Estado",
+      "workload": "Carga de trabajo",
+      "sampleCount": "{{count}} muestras",
+      "viewWorkspace": "Ver espacio de trabajo del proyecto",
+      "noProjects": "No hay proyectos asociados a este laboratorio.",
+      "totalCount": "{{count}} proyectos en total"
+    },
+    "pagination": {
+      "showingRange": "Mostrando {{from}} - {{to}} de {{total}}",
+      "pageOf": "Página {{page}} de {{totalPages}}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "errors": {
+      "accessDeniedTitle": "Acceso denegado",
+      "accessDenied": "No dispone de autorización para ver este espacio de trabajo del laboratorio.",
+      "errorTitle": "Error en el espacio de trabajo",
+      "loadError": "Error al cargar el espacio de trabajo del laboratorio",
+      "returnToDirectory": "Volver a laboratorios",
+      "retry": "Reintentar"
     }
   },
   "staffManagement": {

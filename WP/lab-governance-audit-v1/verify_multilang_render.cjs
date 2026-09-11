@@ -19,7 +19,8 @@ function t(locale, key, fallback) {
     return val !== undefined ? val : fallback;
 }
 
-console.log('--- MULTI-LOCALE GOVERNANCE RENDERING VERIFICATION ---');
+console.log('--- STATIC MULTI-LOCALE GOVERNANCE KEY-PRESENCE CHECK ---');
+console.log('NOTE: This check verifies dictionary key presence and non-emptiness across all 5 JSON translation files. It does NOT assert component DOM rendering, layout measurement, or browser interaction (see browser_paging_review.cjs for end-to-end browser verification).\n');
 
 const testCases = [
     { key: 'labManagement.people.title', name: 'People & Access Header' },
@@ -34,6 +35,22 @@ const testCases = [
     { key: 'labManagement.people.colStatus', name: 'Table Header: Status' },
     { key: 'labManagement.people.colWork', name: 'Table Header: Work' },
     { key: 'labManagement.people.reviewAccess', name: 'Action: Review Access' },
+    { key: 'labManagement.tabs.overview', name: 'Tab: Overview' },
+    { key: 'labManagement.tabs.people', name: 'Tab: People & Access' },
+    { key: 'labManagement.tabs.projects', name: 'Tab: Projects' },
+    { key: 'labManagement.tabs.resources', name: 'Tab: Methods & Resources' },
+    { key: 'labManagement.tabs.settings', name: 'Tab: Settings' },
+    { key: 'labManagement.tabs.history', name: 'Tab: History' },
+    { key: 'labManagement.projects.title', name: 'Projects: Title' },
+    { key: 'labManagement.projects.subtitle', name: 'Projects: Subtitle' },
+    { key: 'labManagement.projects.ownedProject', name: 'Projects: Owned Tag' },
+    { key: 'labManagement.projects.sharedProgramme', name: 'Projects: Shared Tag' },
+    { key: 'labManagement.projects.ownerTag', name: 'Projects: Owner Label' },
+    { key: 'labManagement.projects.servicingTag', name: 'Projects: Servicing Lab Label' },
+    { key: 'labManagement.projects.status', name: 'Projects: Status Label' },
+    { key: 'labManagement.projects.workload', name: 'Projects: Workload Label' },
+    { key: 'labManagement.projects.viewWorkspace', name: 'Projects: View Workspace Link' },
+    { key: 'labManagement.projects.noProjects', name: 'Projects: Empty State' },
     { key: 'staffManagement.invite.successTitle', name: 'Invite: Success Title' },
     { key: 'staffManagement.invite.successDetails', name: 'Invite: Success Details' },
     { key: 'staffManagement.invite.activationLinkLabel', name: 'Invite: Activation Link' },
@@ -52,7 +69,7 @@ const testCases = [
 let allPassed = true;
 
 for (const loc of locales) {
-    console.log(`\nChecking Locale: [${loc}]`);
+    console.log(`Checking Locale: [${loc}]`);
     let localeMissing = 0;
     for (const tc of testCases) {
         const rendered = t(loc, tc.key, null);
@@ -61,27 +78,22 @@ for (const loc of locales) {
             localeMissing++;
             allPassed = false;
         } else {
-            // Verify no unexpanded interpolation like {{something}}
-            if (rendered.includes('{{') && rendered.includes('}}')) {
-                console.error(`  FAIL: Unexpanded template in [${tc.key}] for ${loc}: "${rendered}"`);
+            // Verify no unexpanded interpolation like {{something}} without a valid template
+            if (rendered.includes('{{') && rendered.includes('}}') && !rendered.includes('{{from}}') && !rendered.includes('{{to}}') && !rendered.includes('{{total}}') && !rendered.includes('{{count}}')) {
+                console.error(`  FAIL: Unexpanded unexpected template in [${tc.key}] for ${loc}: "${rendered}"`);
                 allPassed = false;
             }
         }
     }
     if (localeMissing === 0) {
-        console.log(`  PASSED: All ${testCases.length} governance keys fully rendered in ${loc}`);
-        // Print representative sample:
-        console.log(`    Header: "${t(loc, 'labManagement.people.title')}"`);
-        console.log(`    Invite: "${t(loc, 'labManagement.people.invite')}"`);
-        console.log(`    Success Title: "${t(loc, 'staffManagement.invite.successTitle')}"`);
-        console.log(`    Lab Scope: "${t(loc, 'staffManagement.invite.labScope')}"`);
-        console.log(`    Prepare Button: "${t(loc, 'staffManagement.invite.prepareButton')}"`);
+        console.log(`  PASSED: All ${testCases.length} static keys present and non-empty in ${loc}`);
     }
 }
 
 if (!allPassed) {
-    console.error('\nMulti-locale verification FAILED!');
+    console.error('\nStatic multi-locale key verification FAILED!');
     process.exit(1);
 } else {
-    console.log('\nALL 5 LOCALES VERIFIED AND RENDERED SUCCESSFULLY WITH 100% ACCURACY!');
+    console.log('\nALL 5 LOCALES: STATIC GOVERNANCE TRANSLATION KEYS VERIFIED PRESENT AND NON-EMPTY');
+    console.log('(Static dictionary presence only; does not assert component DOM rendering, layout bounding, or browser interaction).\n');
 }
