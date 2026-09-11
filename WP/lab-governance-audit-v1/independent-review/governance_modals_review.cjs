@@ -10,11 +10,13 @@
  * Verifies:
  * - Small-screen viewport containment (320x568, 390x640)
  * - Header and footer button reachability (no clipping)
+ * - Screenshots captured WHILE dialog is open (not after closure)
  * - Keyboard Tab / Shift+Tab focus trapping
  * - Keyboard Escape dismissal
  * - Focus restoration back to the exact opening trigger
  * - Long localized labels (Spanish 'es')
- * - Dark theme rendering and usability
+ * - Authentic Dark Theme activation via ThemeToggle appearance popover
+ * - Computed dark styling tokens (background / text colors)
  * - Source database read-only immutability
  */
 const fs = require('fs');
@@ -111,7 +113,7 @@ async function main() {
         executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     });
 
-    async function checkModalInteraction(page, triggerSelector, modalName) {
+    async function checkModalInteraction(page, triggerSelector, modalName, screenshotPath = null) {
         const trigger = page.locator(triggerSelector).first();
         await trigger.waitFor({ state: 'attached', timeout: 15000 });
         await trigger.scrollIntoViewIfNeeded();
@@ -138,6 +140,11 @@ async function main() {
         });
 
         const contained = metrics.top >= -2 && metrics.bottom <= metrics.viewportHeight + 2;
+
+        // Capture screenshot of the OPEN dialog before any dismissal
+        if (screenshotPath) {
+            await page.screenshot({ path: screenshotPath });
+        }
 
         // Test Tab / Shift+Tab wrapping
         await page.keyboard.press('Tab');
@@ -176,12 +183,12 @@ async function main() {
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, '#btn-invite-staff', 'InviteStaffModal');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-invite-320.png') });
+        const shot = path.join(outputDir, 'modal-all-invite-320.png');
+        const res = await checkModalInteraction(page, '#btn-invite-staff', 'InviteStaffModal', shot);
 
         record('MODAL-INVITE-320', 'InviteStaffModal stays within 320x568 viewport with visible buttons',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         record('TRAP-INVITE-320', 'InviteStaffModal traps Tab/Shift+Tab and restores trigger focus on Escape',
@@ -203,12 +210,12 @@ async function main() {
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, 'button:has-text("Review Access")', 'AccessReviewModal');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-access-review-320.png') });
+        const shot = path.join(outputDir, 'modal-all-access-review-320.png');
+        const res = await checkModalInteraction(page, 'button:has-text("Review Access")', 'AccessReviewModal', shot);
 
         record('MODAL-REVIEW-320', 'AccessReviewModal stays within 320x568 viewport with visible buttons',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         record('TRAP-REVIEW-320', 'AccessReviewModal traps Tab/Shift+Tab and restores trigger focus on Escape',
@@ -230,12 +237,12 @@ async function main() {
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, 'button[aria-label*="Recovery Link"]', 'RecoveryLinkModal');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-recovery-320.png') });
+        const shot = path.join(outputDir, 'modal-all-recovery-320.png');
+        const res = await checkModalInteraction(page, 'button[aria-label*="Recovery Link"]', 'RecoveryLinkModal', shot);
 
         record('MODAL-RECOVERY-320', 'RecoveryLinkModal stays within 320x568 viewport with visible buttons',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         record('TRAP-RECOVERY-320', 'RecoveryLinkModal traps Tab/Shift+Tab and restores trigger focus on Escape',
@@ -257,12 +264,12 @@ async function main() {
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, 'button[aria-label*="Suspend"]', 'SuspendUserModal');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-suspend-320.png') });
+        const shot = path.join(outputDir, 'modal-all-suspend-320.png');
+        const res = await checkModalInteraction(page, 'button[aria-label*="Suspend"]', 'SuspendUserModal', shot);
 
         record('MODAL-SUSPEND-320', 'SuspendUserModal stays within 320x568 viewport with visible buttons',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         record('TRAP-SUSPEND-320', 'SuspendUserModal traps Tab/Shift+Tab and restores trigger focus on Escape',
@@ -284,12 +291,12 @@ async function main() {
         }, { u: admin, tok: token(admin) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=settings');
-        const res = await checkModalInteraction(page, '#btn-lifecycle-action', 'LabLifecycleModal');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-lifecycle-320.png') });
+        const shot = path.join(outputDir, 'modal-all-lifecycle-320.png');
+        const res = await checkModalInteraction(page, '#btn-lifecycle-action', 'LabLifecycleModal', shot);
 
         record('MODAL-LIFECYCLE-320', 'LabLifecycleModal stays within 320x568 viewport with visible buttons',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         record('TRAP-LIFECYCLE-320', 'LabLifecycleModal traps Tab/Shift+Tab and restores trigger focus on Escape',
@@ -311,37 +318,110 @@ async function main() {
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, '#btn-invite-staff', 'InviteStaffModal-Spanish');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-invite-es-320.png') });
+        const shot = path.join(outputDir, 'modal-all-invite-es-320.png');
+        const res = await checkModalInteraction(page, '#btn-invite-staff', 'InviteStaffModal-Spanish', shot);
 
         record('MODAL-LONG-LABEL-ES', 'Modal layout in Spanish with longer translated strings fits 320x568 viewport',
             { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
+            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height, screenshot: shot },
             res.contained && res.metrics.allButtonsContained);
 
         await page.close();
     }
 
-    // 7. Dark Theme at 320x568
+    // 7. Authentic Dark Theme at 320x568 via ThemeToggle appearance popover
     {
-        const page = await browser.newPage({ viewport: { width: 320, height: 568 } });
+        const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
         await page.route('**/*', r => new URL(r.request().url()).hostname === '127.0.0.1' ? r.continue() : r.abort());
         await page.addInitScript(({ u, tok }) => {
             localStorage.setItem('token', tok);
             localStorage.setItem('user', JSON.stringify(u));
             sessionStorage.setItem('soilfer_locale_override', 'en');
-            localStorage.setItem('theme', 'dark');
-            document.documentElement.classList.add('dark');
         }, { u: manager, tok: token(manager) });
 
         await page.goto(origin + '/admin/labs?labId=MODAL-ALL&tab=people');
-        const res = await checkModalInteraction(page, '#btn-invite-staff', 'InviteStaffModal-Dark');
-        await page.screenshot({ path: path.join(outputDir, 'modal-all-invite-dark-320.png') });
+        await page.waitForSelector('button[aria-label*="Appearance"]', { timeout: 10000 });
 
-        record('MODAL-THEME-DARK-320', 'Modal renders correctly in Dark Theme without layout blowout at 320x568',
-            { insideViewport: true, allButtonsContained: true },
-            { insideViewport: res.contained, allButtonsContained: res.metrics.allButtonsContained, height: res.metrics.height },
-            res.contained && res.metrics.allButtonsContained);
+        // Activate Dark Mode via the real Appearance control
+        const appearanceBtn = page.locator('button[aria-label*="Appearance"]').first();
+        await appearanceBtn.click();
+        const popover = page.locator('#appearance-popover');
+        await popover.waitFor({ timeout: 5000 });
+        await popover.locator('button:has-text("Dark")').click();
+        await page.waitForFunction(() => document.documentElement.classList.contains('dark'), { timeout: 5000 });
+
+        // Resize viewport to 320x568 for small-screen modal testing
+        await page.setViewportSize({ width: 320, height: 568 });
+        await page.waitForTimeout(200);
+
+        // Open modal in dark mode
+        const trigger = page.locator('#btn-invite-staff').first();
+        await trigger.waitFor({ state: 'attached', timeout: 15000 });
+        await trigger.scrollIntoViewIfNeeded();
+        await trigger.click();
+
+        const dialog = page.locator('[role="dialog"]');
+        await dialog.waitFor({ timeout: 5000 });
+        await page.waitForTimeout(350);
+
+        // Evaluate dark state and computed colors while dialog is OPEN
+        const darkCheck = await dialog.evaluate(el => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const rect = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            const heading = el.querySelector('h2, h3') || el;
+            const hs = getComputedStyle(heading);
+            const buttons = [...el.querySelectorAll('button')].map(b => {
+                const r = b.getBoundingClientRect();
+                return { text: b.textContent.trim(), top: r.top, bottom: r.bottom, visible: r.bottom <= window.innerHeight + 2 && r.top >= -2 };
+            });
+            return {
+                isDark,
+                backgroundColor: cs.backgroundColor,
+                textColor: cs.color,
+                headingColor: hs.color,
+                top: rect.top,
+                bottom: rect.bottom,
+                height: rect.height,
+                viewportHeight: window.innerHeight,
+                buttons,
+                allButtonsContained: buttons.every(b => b.visible)
+            };
+        });
+
+        // Capture screenshot of the OPEN dialog in authentic dark mode
+        const shot = path.join(outputDir, 'modal-all-invite-dark-320.png');
+        await page.screenshot({ path: shot });
+
+        const contained = darkCheck.top >= -2 && darkCheck.bottom <= darkCheck.viewportHeight + 2;
+        // Verify surface background is dark (not light/white)
+        const bgIsDark = darkCheck.backgroundColor !== 'rgb(255, 255, 255)' && !darkCheck.backgroundColor.includes('255, 255, 255');
+        const darkValid = darkCheck.isDark && bgIsDark && contained && darkCheck.allButtonsContained;
+
+        record('MODAL-THEME-DARK-320', 'Modal renders correctly in authentic Dark Theme with dark surface tokens at 320x568',
+            { isDark: true, bgIsDark: true, insideViewport: true, allButtonsContained: true },
+            { isDark: darkCheck.isDark, bgIsDark, backgroundColor: darkCheck.backgroundColor, headingColor: darkCheck.headingColor, insideViewport: contained, allButtonsContained: darkCheck.allButtonsContained, height: darkCheck.height, screenshot: shot },
+            darkValid);
+
+        // Test Tab / Shift+Tab wrapping
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Tab');
+        const focusInsideAfterTab = await dialog.evaluate(el => el.contains(document.activeElement));
+        await page.keyboard.press('Shift+Tab');
+        const focusInsideAfterShiftTab = await dialog.evaluate(el => el.contains(document.activeElement));
+
+        // Test Escape dismissal and focus restoration
+        await page.keyboard.press('Escape');
+        await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+        await page.waitForTimeout(150);
+
+        const dialogClosed = (await page.locator('[role="dialog"]').count()) === 0;
+        const focusReturned = await trigger.evaluate(el => el === document.activeElement);
+
+        record('TRAP-THEME-DARK-320', 'Dark Theme modal traps Tab/Shift+Tab and restores trigger focus on Escape',
+            { focusTrapped: true, dialogClosed: true, focusReturned: true },
+            { focusTrapped: focusInsideAfterTab && focusInsideAfterShiftTab, dialogClosed, focusReturned },
+            focusInsideAfterTab && focusInsideAfterShiftTab && dialogClosed && focusReturned);
 
         await page.close();
     }

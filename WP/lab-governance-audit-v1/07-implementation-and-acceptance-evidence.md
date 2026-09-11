@@ -242,15 +242,17 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - K390: Escape dismisses modal and restores trigger focus (`PASS`)
   - Source database untouched (`388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b`).
   - Active reviewer files and screenshots in `C:/Users/yigin/AppData/Local/Temp/codex-lab-ui-review/` preserved without modification or deletion.
-- **Comprehensive 5-Modal Responsive & Focus Trap Suite**: 12 / 12 passed in `governance_modals_review.cjs` in native Google Chrome:
+- **Comprehensive 5-Modal Responsive & Focus Trap Suite**: 13 / 13 passed in `governance_modals_review.cjs` in native Google Chrome:
+  - Open-Dialog Screenshot Capture Lifecycle: `checkModalInteraction(page, triggerSelector, modalName, screenshotPath)` captures visual screenshot evidence *while each dialog is open, settled, and fully mounted*, prior to testing Tab/Shift+Tab focus wrapping or triggering Escape dismissal. All 7 visual artifacts (`modal-all-*.png`) depict authentic open dialogs and action buttons rather than unmounted page backgrounds.
   - `InviteStaffModal` at 320x568: Viewport contained (`height: 539.5px`, all buttons visible; `PASS`), Tab/Shift+Tab cycle trapped, Escape closes and restores focus (`PASS`)
   - `AccessReviewModal` at 320x568: Viewport contained (`height: 552px`, `top: 8px`, `bottom: 560px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
   - `RecoveryLinkModal` at 320x568: Viewport contained (`height: 395.5px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
   - `SuspendUserModal` at 320x568: Viewport contained (`height: 367.5px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
   - `LabLifecycleModal` at 320x568: Viewport contained (`height: 552px`, `top: 8px`, `bottom: 560px`, all buttons visible; `PASS`), Tab/Shift+Tab trapped, Escape closes and restores focus (`PASS`)
-  - Long localized labels (Spanish `es`) at 320x568: Viewport contained with longer translated strings (`height: 552px`, `top: 8px`, `bottom: 560px`; `PASS`)
-  - Dark theme at 320x568: Viewport contained, readable styling tokens, no layout blowout (`height: 539.5px`; `PASS`)
-  - Evidence report saved to `independent-review/governance-modals-results.json` and screenshots captured to `independent-review/modal-all-*.png`.
+  - Long localized labels (Spanish `es`) at 320x568: Viewport contained with longer translated strings (`height: 552px`, `top: 8px`, `bottom: 560px`, all buttons visible; `PASS`)
+  - Authentic Dark Theme Contract at 320x568: Activated via genuine `ThemeToggle` appearance control popover (`button[aria-label*="Appearance"]` -> `#appearance-popover` -> `Dark` button), awaiting hydration and asserting `document.documentElement.classList.contains('dark')` (rather than obsolete `localStorage.theme` or manually adding `.dark` which `ThemeProvider` clears on hydration). Evaluates computed styling tokens on the open dialog (`backgroundColor: "rgb(46, 50, 54)"` matching `--sf-surface: #2E3236`, `headingColor: "rgb(241, 244, 243)"` matching `--sf-text: #F1F4F3`), viewport containment (`height: 539.5px`), and visible action buttons (`PASS`). Visual screenshot captured of the open dark modal.
+  - Dark Theme Keyboard Focus Trap: Tab/Shift+Tab trapped inside dark modal; Escape dismisses modal and restores trigger focus to `#btn-invite-staff` (`PASS`).
+  - Evidence report saved to `independent-review/governance-modals-results.json` and 7 open-dialog screenshots captured to `independent-review/modal-all-*.png`.
 - **Architecture & Root Cause Summary**:
   - *Tailwind `space-y-*` Margin Bleed*: Modals rendered inside `space-y-6` containers previously had `margin-top: 24px` applied to `position: fixed` overlays, offsetting the overlay downwards to `top: 24px`. Added `!m-0` to all modal overlays across the five governance dialogs and inline modals, ensuring fixed overlays accurately span `top: 0` to `bottom: 0` across viewports.
   - *Viewport-Constrained Scroll Hierarchy*: All five modals enforce `max-h-[calc(100dvh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden`, `shrink-0` header, `overflow-y-auto flex-1 custom-scrollbar min-h-0` scroll body, and `shrink-0` sticky action footer, guaranteeing footer buttons remain on-screen even on 320x568 mobile devices.
@@ -277,7 +279,7 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
 - [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Tested**: 102 test suites (823 tests) and 58 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
+- [x] **Tested**: 102 test suites (823 tests) and 102 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
 - [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.69s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.

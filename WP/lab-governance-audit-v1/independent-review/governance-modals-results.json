@@ -1,7 +1,7 @@
 {
-  "head": "5b07d3d3aa634b04dcf85b440417874f5bf76e4c",
-  "timestamp": "2026-09-11T13:51:36.489Z",
-  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-modal-all-e44371c6-4f71-4ec4-9fb8-616c221afa1c.db",
+  "head": "877526ae8781c4e29e7f74e0b82f94512bbfd61f",
+  "timestamp": "2026-09-11T13:57:13.859Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-modal-all-30f58cea-4c0e-44f2-8472-d8e35da26550.db",
   "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
   "dbUntouched": true,
@@ -17,7 +17,8 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 539.5
+        "height": 539.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-320.png"
       },
       "passed": true
     },
@@ -46,7 +47,8 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 552
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-access-review-320.png"
       },
       "passed": true
     },
@@ -75,7 +77,8 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 395.5
+        "height": 395.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-recovery-320.png"
       },
       "passed": true
     },
@@ -104,7 +107,8 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 367.5
+        "height": 367.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-suspend-320.png"
       },
       "passed": true
     },
@@ -133,7 +137,8 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 552
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-lifecycle-320.png"
       },
       "passed": true
     },
@@ -162,21 +167,44 @@
       "actual": {
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 552
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-es-320.png"
       },
       "passed": true
     },
     {
       "id": "MODAL-THEME-DARK-320",
-      "description": "Modal renders correctly in Dark Theme without layout blowout at 320x568",
+      "description": "Modal renders correctly in authentic Dark Theme with dark surface tokens at 320x568",
       "expected": {
+        "isDark": true,
+        "bgIsDark": true,
         "insideViewport": true,
         "allButtonsContained": true
       },
       "actual": {
+        "isDark": true,
+        "bgIsDark": true,
+        "backgroundColor": "rgb(46, 50, 54)",
+        "headingColor": "rgb(241, 244, 243)",
         "insideViewport": true,
         "allButtonsContained": true,
-        "height": 539.5
+        "height": 539.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-dark-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-THEME-DARK-320",
+      "description": "Dark Theme modal traps Tab/Shift+Tab and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
       },
       "passed": true
     }
