@@ -429,15 +429,20 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         let syncEngine;
         let memoryDb;
         let storageMap;
+        let mockNavigator;
         let originalFetch;
         let originalLocalStorage;
+        let originalNavigator;
 
         beforeAll(() => {
             originalFetch = global.fetch;
             originalLocalStorage = global.localStorage;
+            originalNavigator = global.navigator;
 
             memoryDb = new MemoryIDBDatabase();
             storageMap = new Map();
+            mockNavigator = { onLine: true, userAgent: 'NodeTest/1.0' };
+            global.navigator = mockNavigator;
 
             const mockLocalStorage = {
                 getItem: (k) => storageMap.get(k) || null,
@@ -460,7 +465,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
                         }
                     }
                 },
-                navigator: { onLine: true, userAgent: 'NodeTest/1.0' },
+                navigator: mockNavigator,
                 localStorage: mockLocalStorage,
                 fetch: (url, opts) => global.fetch(url, opts),
                 console,
@@ -488,10 +493,12 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         afterAll(() => {
             global.fetch = originalFetch;
             global.localStorage = originalLocalStorage;
+            global.navigator = originalNavigator;
         });
 
         beforeEach(() => {
             storageMap.clear();
+            if (mockNavigator) mockNavigator.onLine = true;
             if (syncEngine._resetSyncingState) syncEngine._resetSyncingState();
         });
 
@@ -520,51 +527,91 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         test('Simulated shared device: User A logout -> User B login dispatches only User B ops and preserves User A & ownerless ops intact', async () => {
-            // 1. User A logs in and records domain work into outbox
-            localStorage.setItem('user', JSON.stringify({ id: userTechA.username, username: userTechA.username }));
-            const opA = await syncEngine.recordSyncOperation({
+            // Verify test fixtures have DIFFERENT id and username values
+            expect(userTechA.id).not.toBe(userTechA.username);
+            expect(userTechB.id).not.toBe(userTechB.username);
+            expect(userTechA.id).not.toBe(userTechB.id);
+
+            // 1. Simulate field/offline mode on shared device
+            mockNavigator.onLine = false;
+
+            // User A logs in
+            localStorage.setItem('user', JSON.stringify({
+                id: userTechA.id,
+                username: userTechA.username,
+                labId: labA.id
+            }));
+            localStorage.setItem('token', tokenTechA);
+
+            // 2. Exercise actual Reception-style call WITHOUT explicit userId (offline)
+            const opA_reception = await syncEngine.recordSyncOperation({
+                type: 'RECORD_INTAKE',
+                target: { originalId: 'EXT-SAMP-A01' },
+                payload: { sampleName: 'Tech A Intake' }
+            });
+            // Must record under canonical ID, not username
+            expect(opA_reception.userId).toBe(userTechA.id);
+
+            // 3. Add a previously queued legacy operation stored by username (legacy format)
+            const opA_legacy = await offlineDb.queueOutboxOperation({
+                operationId: 'op-legacy-username-' + Date.now(),
+                userId: userTechA.username, // stored as username in legacy queue
                 type: 'SAVE_WORK_DRAFT',
                 target: workItemNormal.id,
-                payload: { notes: 'Tech A draft' }
+                payload: { notes: 'Tech A legacy work draft' },
+                status: 'PENDING',
+                capturedAtLocal: new Date(Date.now() - 30000).toISOString()
             });
-            expect(opA.userId).toBe(userTechA.username);
 
-            // 2. Add a legacy ownerless operation (null userId) directly to outbox store
-            await offlineDb.queueOutboxOperation({
+            // 4. Add a legacy ownerless operation (null userId) directly to outbox store
+            const op_ownerless = await offlineDb.queueOutboxOperation({
                 operationId: 'op-legacy-ownerless-' + Date.now(),
                 userId: null,
                 type: 'SAVE_WORK_DRAFT',
                 target: workItemNormal.id,
                 payload: { notes: 'Legacy operation with null userId' },
                 status: 'PENDING',
-                capturedAtLocal: new Date().toISOString()
+                capturedAtLocal: new Date(Date.now() - 60000).toISOString()
             });
 
-            // 3. User A logs out (localStorage cleared)
+            // Verify User A pending query returns both canonical and legacy records, but not ownerless
+            const initialAPending = await offlineDb.getPendingOutboxOperations(userTechA.id, userTechA.username);
+            expect(initialAPending).toHaveLength(2);
+            const aPendingIds = initialAPending.map(o => o.operationId);
+            expect(aPendingIds).toContain(opA_reception.operationId);
+            expect(aPendingIds).toContain(opA_legacy.operationId);
+            expect(aPendingIds).not.toContain(op_ownerless.operationId);
+
+            // 5. User A logs out (localStorage cleared)
             localStorage.clear();
 
-            // 4. User B logs into shared device
-            localStorage.setItem('user', JSON.stringify({ id: userTechB.username, username: userTechB.username }));
-            localStorage.setItem('token', tokenMgrA); // any valid test token
+            // 6. User B logs into shared device with DIFFERENT id and username
+            localStorage.setItem('user', JSON.stringify({
+                id: userTechB.id,
+                username: userTechB.username,
+                labId: labB.id
+            }));
+            localStorage.setItem('token', tokenTechB);
 
             // User B pending query returns 0 before User B performs work
-            const initialBPending = await offlineDb.getPendingOutboxOperations(userTechB.username);
+            const initialBPending = await offlineDb.getPendingOutboxOperations(userTechB.id, userTechB.username);
             expect(initialBPending).toHaveLength(0);
 
-            // User B records an operation
-            const opB = await syncEngine.recordSyncOperation({
-                type: 'COMPLETE_WORK',
-                target: workItemNormal.id,
-                payload: { result: 'Tech B work' }
+            // User B records an operation Reception-style (WITHOUT explicit userId while offline)
+            const opB_reception = await syncEngine.recordSyncOperation({
+                type: 'RECORD_INTAKE',
+                target: { originalId: 'EXT-SAMP-B01' },
+                payload: { sampleName: 'Tech B Intake' }
             });
-            expect(opB.userId).toBe(userTechB.username);
+            expect(opB_reception.userId).toBe(userTechB.id);
 
             // Verify User B pending query returns ONLY User B's operation
-            const bPending = await offlineDb.getPendingOutboxOperations(userTechB.username);
+            const bPending = await offlineDb.getPendingOutboxOperations(userTechB.id, userTechB.username);
             expect(bPending).toHaveLength(1);
-            expect(bPending[0].operationId).toBe(opB.operationId);
+            expect(bPending[0].operationId).toBe(opB_reception.operationId);
 
-            // 5. User B triggers sync
+            // 7. Reconnect: device comes back online
+            mockNavigator.onLine = true;
             let dispatchedOps = null;
             global.fetch = jest.fn().mockImplementation(async (url, opts) => {
                 const body = JSON.parse(opts.body);
@@ -583,39 +630,102 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             expect(syncResult.status).toBe('COMPLETED');
             expect(syncResult.applied).toBe(1);
 
-            // Verify network dispatch ONLY sent User B's operations
+            // Verify network dispatch ONLY sent User B's operation with canonical id
             expect(dispatchedOps).toHaveLength(1);
-            expect(dispatchedOps[0].userId).toBe(userTechB.username);
+            expect(dispatchedOps[0].operationId).toBe(opB_reception.operationId);
+            expect(dispatchedOps[0].userId).toBe(userTechB.id);
 
-            // 6. Verify User A's un-synced work and legacy ownerless work remain safely preserved in outbox
-            const allRemaining = await offlineDb.getAllOutboxOperations();
-            const userAInStore = allRemaining.find(o => o.operationId === opA.operationId);
-            const ownerlessInStore = allRemaining.find(o => o.userId === null);
+            // 8. Verify successful receipts clear User B's operation from outbox
+            const afterBSyncAll = await offlineDb.getAllOutboxOperations();
+            const bInStore = afterBSyncAll.find(o => o.operationId === opB_reception.operationId);
+            expect(bInStore).toBeUndefined();
 
-            expect(userAInStore).toBeDefined();
-            expect(userAInStore.userId).toBe(userTechA.username);
-            expect(userAInStore.status).toBe('PENDING');
+            // Verify User A's un-synced work (both canonical and legacy) and ownerless work remain safely preserved
+            const userACanonicalInStore = afterBSyncAll.find(o => o.operationId === opA_reception.operationId);
+            const userALegacyInStore = afterBSyncAll.find(o => o.operationId === opA_legacy.operationId);
+            const ownerlessInStore = afterBSyncAll.find(o => o.operationId === op_ownerless.operationId);
+
+            expect(userACanonicalInStore).toBeDefined();
+            expect(userACanonicalInStore.userId).toBe(userTechA.id);
+            expect(userACanonicalInStore.status).toBe('PENDING');
+
+            expect(userALegacyInStore).toBeDefined();
+            expect(userALegacyInStore.userId).toBe(userTechA.username);
+            expect(userALegacyInStore.status).toBe('PENDING');
 
             expect(ownerlessInStore).toBeDefined();
             expect(ownerlessInStore.userId).toBeNull();
             expect(ownerlessInStore.status).toBe('PENDING');
+
+            // 9. User B logs out -> User A logs back in and syncs
+            localStorage.clear();
+            localStorage.setItem('user', JSON.stringify({
+                id: userTechA.id,
+                username: userTechA.username,
+                labId: labA.id
+            }));
+            localStorage.setItem('token', tokenTechA);
+
+            let userADispatched = null;
+            global.fetch = jest.fn().mockImplementation(async (url, opts) => {
+                const body = JSON.parse(opts.body);
+                userADispatched = body.operations;
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        receipts: userADispatched.map(o => ({ operationId: o.operationId, status: 'APPLIED' }))
+                    })
+                };
+            });
+
+            if (syncEngine._resetSyncingState) syncEngine._resetSyncingState();
+            const aSyncResult = await syncEngine.triggerSync();
+            expect(aSyncResult.status).toBe('COMPLETED');
+            expect(aSyncResult.applied).toBe(2);
+
+            // Both canonical and legacy records of User A were dispatched and cleared
+            expect(userADispatched).toHaveLength(2);
+            const aDispatchedIds = userADispatched.map(o => o.operationId);
+            expect(aDispatchedIds).toContain(opA_reception.operationId);
+            expect(aDispatchedIds).toContain(opA_legacy.operationId);
+
+            const finalStore = await offlineDb.getAllOutboxOperations();
+            expect(finalStore.find(o => o.operationId === opA_reception.operationId)).toBeUndefined();
+            expect(finalStore.find(o => o.operationId === opA_legacy.operationId)).toBeUndefined();
+
+            // Legacy ownerless operation remains intact
+            const finalOwnerless = finalStore.find(o => o.operationId === op_ownerless.operationId);
+            expect(finalOwnerless).toBeDefined();
+            expect(finalOwnerless.userId).toBeNull();
+            expect(finalOwnerless.status).toBe('PENDING');
         });
 
         test('Mid-sync account switch is detected and safely aborted without cross-account attribution', async () => {
             // User A queues work
-            localStorage.setItem('user', JSON.stringify({ id: userTechA.username, username: userTechA.username }));
-            localStorage.setItem('token', tokenMgrA);
+            localStorage.setItem('user', JSON.stringify({
+                id: userTechA.id,
+                username: userTechA.username,
+                labId: labA.id
+            }));
+            localStorage.setItem('token', tokenTechA);
 
             const opA = await syncEngine.recordSyncOperation({
                 type: 'SAVE_WORK_DRAFT',
                 target: workItemNormal.id,
                 payload: { notes: 'Tech A in-flight operation' }
             });
+            expect(opA.userId).toBe(userTechA.id);
 
             // Simulate account switch during in-flight network call
             global.fetch = jest.fn().mockImplementation(async () => {
                 // User switches to User B while fetch is in-flight!
-                localStorage.setItem('user', JSON.stringify({ id: userTechB.username, username: userTechB.username }));
+                localStorage.setItem('user', JSON.stringify({
+                    id: userTechB.id,
+                    username: userTechB.username,
+                    labId: labB.id
+                }));
+                localStorage.setItem('token', tokenTechB);
                 return {
                     ok: true,
                     status: 200,
@@ -625,12 +735,13 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
                 };
             });
 
-            const syncResult = await syncEngine.triggerSync(tokenMgrA, { id: userTechA.username });
+            if (syncEngine._resetSyncingState) syncEngine._resetSyncingState();
+            const syncResult = await syncEngine.triggerSync(tokenTechA, { id: userTechA.id, username: userTechA.username });
             expect(syncResult.status).toBe('ABORTED');
             expect(syncResult.code).toBe('ACCOUNT_SWITCH_DETECTED');
 
             // User A's operation must be reverted to PENDING and NOT deleted
-            const userAOps = await offlineDb.getPendingOutboxOperations(userTechA.username);
+            const userAOps = await offlineDb.getPendingOutboxOperations(userTechA.id, userTechA.username);
             const opInStore = userAOps.find(o => o.operationId === opA.operationId);
             expect(opInStore).toBeDefined();
             expect(opInStore.status).toBe('PENDING');

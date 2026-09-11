@@ -151,11 +151,41 @@ export async function queueOutboxOperation(op) {
     return op;
 }
 
-export async function getPendingOutboxOperations(forUserId) {
-    if (!forUserId || typeof forUserId !== 'string' || !forUserId.trim()) {
+export async function getPendingOutboxOperations(userOrId, legacyUsername = null) {
+    let canonicalId = null;
+    let legacyUser = null;
+
+    if (typeof userOrId === 'string' && userOrId.trim()) {
+        canonicalId = userOrId.trim();
+        if (typeof legacyUsername === 'string' && legacyUsername.trim()) {
+            legacyUser = legacyUsername.trim();
+        }
+    } else if (userOrId && typeof userOrId === 'object') {
+        const candidateId = userOrId.id || userOrId.userId;
+        if (typeof candidateId === 'string' && candidateId.trim()) {
+            canonicalId = candidateId.trim();
+        }
+        const candidateUser = userOrId.username || legacyUsername;
+        if (typeof candidateUser === 'string' && candidateUser.trim()) {
+            legacyUser = candidateUser.trim();
+        }
+        // If object only has username, use as canonical
+        if (!canonicalId && legacyUser) {
+            canonicalId = legacyUser;
+            legacyUser = null;
+        }
+    }
+
+    // Fail closed if no verified canonical identity
+    if (!canonicalId) {
         return [];
     }
-    const targetUserId = forUserId.trim();
+
+    const allowedIdentities = new Set([canonicalId]);
+    if (legacyUser && legacyUser !== canonicalId) {
+        allowedIdentities.add(legacyUser);
+    }
+
     return withStore('outbox', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const request = store.getAll();
@@ -165,7 +195,9 @@ export async function getPendingOutboxOperations(forUserId) {
                 all.sort((a, b) => new Date(a.capturedAtLocal) - new Date(b.capturedAtLocal));
                 const pending = all.filter(o => 
                     (o.status === 'PENDING' || o.status === 'RETRYING') &&
-                    o.userId === targetUserId
+                    typeof o.userId === 'string' &&
+                    o.userId.trim() !== '' &&
+                    allowedIdentities.has(o.userId.trim())
                 );
                 resolve(pending);
             };

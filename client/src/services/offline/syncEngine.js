@@ -73,14 +73,18 @@ export async function recordSyncOperation({
     const payloadHash = await computePayloadHash(payload);
 
     // Resolve user and lab context from session if not explicitly provided
-    let opUser = userId;
+    // Canonical ownership identity: ALWAYS prefer id over username
+    let opUser = resolveCanonicalUserId(userId);
     let opLab = labId;
-    if (!opUser && typeof localStorage !== 'undefined') {
-        try {
-            const stored = JSON.parse(localStorage.getItem('user') || '{}');
-            opUser = stored.username || stored.id || null;
-            opLab = opLab || stored.labId || null;
-        } catch {}
+
+    if (!opUser || !opLab) {
+        const storedUser = getActiveSessionUser();
+        if (storedUser) {
+            if (!opUser) {
+                opUser = resolveCanonicalUserId(storedUser);
+            }
+            opLab = opLab || storedUser.labId || null;
+        }
     }
 
     const operation = {
@@ -106,7 +110,7 @@ export async function recordSyncOperation({
     notifyListeners({ type: 'OPERATION_QUEUED', operation });
 
     // Trigger background sync attempt if online
-    if (navigator.onLine) {
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
         triggerSync().catch(err => {
             console.warn('[SYNC_BACKGROUND_FAIL] Sync will retry later:', err.message);
         });
@@ -121,18 +125,39 @@ export function _resetSyncingState() {
     isSyncing = false;
 }
 
-function getActiveSessionUserId() {
+export function resolveCanonicalUserId(userOrId) {
+    if (!userOrId) return null;
+    if (typeof userOrId === 'string') {
+        const trimmed = userOrId.trim();
+        return trimmed.length > 0 ? trimmed : null;
+    }
+    if (typeof userOrId === 'object') {
+        const candidate = userOrId.id || userOrId.userId || userOrId.username;
+        if (typeof candidate === 'string') {
+            const trimmed = candidate.trim();
+            return trimmed.length > 0 ? trimmed : null;
+        }
+    }
+    return null;
+}
+
+export function getActiveSessionUser() {
     if (typeof localStorage !== 'undefined') {
         try {
             const raw = localStorage.getItem('user');
             if (raw) {
                 const parsed = JSON.parse(raw);
-                const id = parsed.id || parsed.username || parsed.userId;
-                if (typeof id === 'string' && id.trim()) return id.trim();
+                if (parsed && typeof parsed === 'object') {
+                    return parsed;
+                }
             }
         } catch {}
     }
     return null;
+}
+
+export function getActiveSessionUserId() {
+    return resolveCanonicalUserId(getActiveSessionUser());
 }
 
 /**
@@ -144,14 +169,27 @@ export async function triggerSync(authToken = null, userContext = null) {
         return { status: 'OFFLINE', code: 'OFFLINE', count: 0 };
     }
 
-    // Resolve user identity strictly
+    // Resolve user identity strictly and canonically
+    let activeUserObj = null;
     let resolvedUserId = null;
-    if (typeof userContext === 'string' && userContext.trim()) {
-        resolvedUserId = userContext.trim();
-    } else if (userContext && typeof userContext === 'object') {
-        const candidate = userContext.id || userContext.username || userContext.userId;
-        if (typeof candidate === 'string' && candidate.trim()) {
-            resolvedUserId = candidate.trim();
+    let legacyUsername = null;
+
+    if (userContext) {
+        if (typeof userContext === 'string' && userContext.trim()) {
+            resolvedUserId = userContext.trim();
+            const sessionUser = getActiveSessionUser();
+            if (sessionUser && (sessionUser.id === resolvedUserId || sessionUser.userId === resolvedUserId)) {
+                activeUserObj = sessionUser;
+                if (sessionUser.username && typeof sessionUser.username === 'string') {
+                    legacyUsername = sessionUser.username.trim();
+                }
+            }
+        } else if (typeof userContext === 'object') {
+            activeUserObj = userContext;
+            resolvedUserId = resolveCanonicalUserId(userContext);
+            if (userContext.username && typeof userContext.username === 'string') {
+                legacyUsername = userContext.username.trim();
+            }
         }
     }
 
@@ -167,7 +205,11 @@ export async function triggerSync(authToken = null, userContext = null) {
 
     // If no userContext provided and no authToken provided, attempt resolution from localStorage session
     if (!resolvedUserId) {
-        resolvedUserId = getActiveSessionUserId();
+        activeUserObj = getActiveSessionUser();
+        resolvedUserId = resolveCanonicalUserId(activeUserObj);
+        if (activeUserObj && activeUserObj.username && typeof activeUserObj.username === 'string') {
+            legacyUsername = activeUserObj.username.trim();
+        }
     }
 
     // Fail closed if user identity is missing or malformed
@@ -190,8 +232,8 @@ export async function triggerSync(authToken = null, userContext = null) {
         };
     }
 
-    // Query pending operations partitioned strictly for resolvedUserId
-    const pending = await getPendingOutboxOperations(resolvedUserId);
+    // Query pending operations partitioned strictly for resolvedUserId, preserving verified legacy username records
+    const pending = await getPendingOutboxOperations(resolvedUserId, legacyUsername);
     if (!pending || pending.length === 0) {
         return { status: 'UP_TO_DATE', count: 0 };
     }
@@ -202,7 +244,7 @@ export async function triggerSync(authToken = null, userContext = null) {
     try {
         // Account switch check before network dispatch
         const activeBefore = getActiveSessionUserId();
-        if (activeBefore && activeBefore !== resolvedUserId) {
+        if (activeBefore && activeBefore !== resolvedUserId && activeBefore !== legacyUsername) {
             return {
                 status: 'ABORTED',
                 code: 'ACCOUNT_SWITCH_DETECTED',
@@ -235,7 +277,7 @@ export async function triggerSync(authToken = null, userContext = null) {
 
         // Account switch check after network response
         const activeAfter = getActiveSessionUserId();
-        if (activeAfter && activeAfter !== resolvedUserId) {
+        if (activeAfter && activeAfter !== resolvedUserId && activeAfter !== legacyUsername) {
             // Revert SYNCING back to PENDING so User A's ops remain safe and un-synced under User B
             for (const op of pending) {
                 await updateOutboxOperation(op.operationId, { status: 'PENDING' });
