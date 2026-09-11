@@ -6,12 +6,13 @@ const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../../config/auth');
 const staffLifecycleService = require('../../services/staffLifecycleService');
+const { getLocalDayInterval } = require('../../services/dashboardScope');
 
 describe('Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)', () => {
     const SUFFIX = 'INV-' + Date.now();
     let labA, labB, testProject;
-    let superAdmin, managerA, managerB;
-    let tokenSA, tokenMgrA, tokenMgrB;
+    let superAdmin, managerA, managerB, nationalLeadGTM;
+    let tokenSA, tokenMgrA, tokenMgrB, tokenGTM;
 
     beforeAll(async () => {
         labA = await prisma.lab.create({
@@ -90,9 +91,24 @@ describe('Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)'
             }
         });
 
+        nationalLeadGTM = await prisma.user.create({
+            data: {
+                id: 'nl-gtm-' + SUFFIX,
+                username: 'nlgtm_' + SUFFIX,
+                name: 'National Lead GTM',
+                email: `nlgtm_${SUFFIX.toLowerCase()}@example.org`,
+                password: 'hash',
+                role: 'MASTER_USER',
+                countries: JSON.stringify(['Guatemala']),
+                isActive: true,
+                tokenVersion: 1
+            }
+        });
+
         tokenSA = jwt.sign({ id: superAdmin.id, username: superAdmin.username, role: superAdmin.role, tokenVersion: 1 }, JWT_SECRET, { expiresIn: '1h' });
         tokenMgrA = jwt.sign({ id: managerA.id, username: managerA.username, role: managerA.role, labId: labA.id, tokenVersion: 1 }, JWT_SECRET, { expiresIn: '1h' });
         tokenMgrB = jwt.sign({ id: managerB.id, username: managerB.username, role: managerB.role, labId: labB.id, tokenVersion: 1 }, JWT_SECRET, { expiresIn: '1h' });
+        tokenGTM = jwt.sign({ id: nationalLeadGTM.id, username: nationalLeadGTM.username, role: nationalLeadGTM.role, countries: ['Guatemala'], tokenVersion: 1 }, JWT_SECRET, { expiresIn: '1h' });
     });
 
     afterAll(async () => {
@@ -103,10 +119,10 @@ describe('Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)'
             }).catch(() => {});
         }
         await prisma.auditLog.deleteMany({
-            where: { actorId: { in: [superAdmin?.id, managerA?.id, managerB?.id].filter(Boolean) } }
+            where: { actorId: { in: [superAdmin?.id, managerA?.id, managerB?.id, nationalLeadGTM?.id].filter(Boolean) } }
         }).catch(() => {});
         await prisma.user.deleteMany({
-            where: { id: { in: [superAdmin?.id, managerA?.id, managerB?.id].filter(Boolean) } }
+            where: { id: { in: [superAdmin?.id, managerA?.id, managerB?.id, nationalLeadGTM?.id].filter(Boolean) } }
         }).catch(() => {});
         await prisma.lab.deleteMany({
             where: { id: { in: [labA?.id, labB?.id].filter(Boolean) } }
@@ -337,5 +353,301 @@ describe('Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)'
         // Must NOT expose raw tokens or hashes
         expect(found.token).toBeUndefined();
         expect(found.tokenHash).toBeUndefined();
+    });
+
+    test('J01: Same-day expired invitation returns 410 on verify, is marked expired in roster, and does not block new creation', async () => {
+        const email = `tech_sameday_${SUFFIX.toLowerCase()}@example.org`;
+        const inv = await staffLifecycleService.createInvitation(managerA, {
+            email,
+            role: 'LAB_TECHNICIAN',
+            name: 'Same Day Tech',
+            labId: labA.id
+        });
+        const rawToken = inv.token;
+
+        // Set expiresAt to 2 hours ago (earlier today)
+        const earlierToday = new Date(Date.now() - 2 * 3600 * 1000).toISOString();
+        await prisma.$executeRawUnsafe(
+            `UPDATE "StaffInvitation" SET "expiresAt" = ? WHERE "id" = ?`,
+            earlierToday,
+            inv.id
+        );
+
+        // 1. Verify token returns 410
+        await expect(
+            staffLifecycleService.verifyInvitationToken(rawToken)
+        ).rejects.toMatchObject({ statusCode: 410 });
+
+        // 2. Pending roster marks isExpired: true
+        const pending = await staffLifecycleService.getPendingInvitations(managerA, labA.id);
+        const found = pending.find(p => p.id === inv.id);
+        expect(found).toBeDefined();
+        expect(found.isExpired).toBe(true);
+
+        // 3. Creating a new invitation for same email returns 201 (not blocked by 409)
+        const newInvRes = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email,
+                role: 'LAB_TECHNICIAN',
+                name: 'Renewed Tech',
+                labId: labA.id
+            });
+        expect(newInvRes.status).toBe(201);
+        expect(newInvRes.body.token).toBeDefined();
+    });
+
+    test('J02: Reissue shortcut cannot revoke or replace foreign lab invitation, handles boolean tampering, and prevents audit side effects', async () => {
+        const emailB = `tech_b_sc_${SUFFIX.toLowerCase()}@example.org`;
+        const bInv = await staffLifecycleService.createInvitation(managerB, {
+            email: emailB,
+            role: 'LAB_TECHNICIAN',
+            name: 'Lab B Tech',
+            labId: labB.id
+        });
+
+        // 1. Manager A tries to POST to /api/staff/invitations with reissue: true for emailB into Lab A -> 403
+        const stealAttempt = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email: emailB,
+                role: 'LAB_TECHNICIAN',
+                name: 'Stolen Tech',
+                labId: labA.id,
+                reissue: true
+            });
+        expect(stealAttempt.status).toBe(403);
+        expect(stealAttempt.body.code).toBe('TARGET_OUTSIDE_SCOPE');
+
+        // Verify Lab B invitation remains unrevoked
+        const bRows = await prisma.$queryRawUnsafe(
+            `SELECT "isRevoked" FROM "StaffInvitation" WHERE "id" = ?`,
+            bInv.id
+        );
+        expect(Boolean(bRows[0].isRevoked)).toBe(false);
+
+        // 2. Test /api/users/invitations alias -> also 403
+        const stealAliasAttempt = await request(app)
+            .post('/api/users/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email: emailB,
+                role: 'LAB_TECHNICIAN',
+                name: 'Stolen Tech Alias',
+                labId: labA.id,
+                reissue: true
+            });
+        expect(stealAliasAttempt.status).toBe(403);
+        expect(stealAliasAttempt.body.code).toBe('TARGET_OUTSIDE_SCOPE');
+
+        // 3. Boolean string tampering: reissue: "false" on existing Lab A invitation must NOT reissue
+        const emailA = `tech_a_sc_${SUFFIX.toLowerCase()}@example.org`;
+        await staffLifecycleService.createInvitation(managerA, {
+            email: emailA,
+            role: 'LAB_TECHNICIAN',
+            name: 'Lab A Tech',
+            labId: labA.id
+        });
+
+        const tamperAttempt = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email: emailA,
+                role: 'LAB_TECHNICIAN',
+                name: 'Tamper Tech',
+                labId: labA.id,
+                reissue: 'false'
+            });
+        expect(tamperAttempt.status).toBe(409);
+        expect(['INVITATION_ALREADY_EXISTS', 'PENDING_INVITATION_EXISTS']).toContain(tamperAttempt.body.code);
+
+        // 4. Privileged same-lab target: pending invitation for SUPER_ADMIN cannot be reissued by LAB_MANAGER
+        const emailPriv = `admin_priv_${SUFFIX.toLowerCase()}@example.org`;
+        const privInv = await staffLifecycleService.createInvitation(superAdmin, {
+            email: emailPriv,
+            role: 'SUPER_ADMIN',
+            name: 'Privileged Admin',
+            labId: labA.id
+        });
+
+        const privReissueAttempt = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email: emailPriv,
+                role: 'LAB_TECHNICIAN',
+                name: 'Demote Attempt',
+                labId: labA.id,
+                reissue: true
+            });
+        expect([403, 409]).toContain(privReissueAttempt.status);
+
+        // Verify privInv was NOT revoked
+        const privRows = await prisma.$queryRawUnsafe(
+            `SELECT "isRevoked" FROM "StaffInvitation" WHERE "id" = ?`,
+            privInv.id
+        );
+        expect(Boolean(privRows[0].isRevoked)).toBe(false);
+    });
+
+    test('J03: National Lead reissues own-country technician invitation (201) and is denied for foreign lab (403)', async () => {
+        const emailGTM = `tech_gtm_${SUFFIX.toLowerCase()}@example.org`;
+        // National Lead creates invitation in Lab A (Guatemala)
+        const createRes = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenGTM}`)
+            .send({
+                email: emailGTM,
+                role: 'LAB_TECHNICIAN',
+                name: 'GTM Tech',
+                labId: labA.id
+            });
+        expect(createRes.status).toBe(201);
+        const inviteId = createRes.body.id;
+
+        // National Lead reissues own-country invitation -> 201
+        const reissueRes = await request(app)
+            .post(`/api/staff/invitations/${inviteId}/reissue`)
+            .set('Authorization', `Bearer ${tokenGTM}`);
+        expect(reissueRes.status).toBe(201);
+        expect(reissueRes.body.token).toBeDefined();
+
+        // Foreign lab denial: National Lead attempts to reissue an invitation in Lab B (Honduras) -> 403
+        const emailHND = `tech_hnd_${SUFFIX.toLowerCase()}@example.org`;
+        const hndInv = await staffLifecycleService.createInvitation(superAdmin, {
+            email: emailHND,
+            role: 'LAB_TECHNICIAN',
+            name: 'HND Tech',
+            labId: labB.id
+        });
+
+        const foreignReissue = await request(app)
+            .post(`/api/staff/invitations/${hndInv.id}/reissue`)
+            .set('Authorization', `Bearer ${tokenGTM}`);
+        expect(foreignReissue.status).toBe(403);
+        expect(foreignReissue.body.code).toBe('TARGET_OUTSIDE_SCOPE');
+    });
+
+    test('J04: Country coincidence alone does not authorize Lab Manager to grant project access', async () => {
+        const coincProject = await prisma.project.create({
+            data: {
+                id: 'proj-coinc-' + SUFFIX,
+                code: 'COINC-' + SUFFIX.slice(-4),
+                name: 'Coincidence Project ' + SUFFIX,
+                status: 'ACTIVE',
+                labId: labB.id,
+                countries: JSON.stringify(['Guatemala', 'Honduras']),
+                assignedLabIds: '[]'
+            }
+        });
+
+        const email = `tech_j04_${SUFFIX.toLowerCase()}@example.org`;
+        const res = await request(app)
+            .post('/api/staff/invitations')
+            .set('Authorization', `Bearer ${tokenMgrA}`)
+            .send({
+                email,
+                role: 'LAB_TECHNICIAN',
+                name: 'Coinc Tech',
+                labId: labA.id,
+                projects: [coincProject.code]
+            });
+
+        expect(res.status).toBe(403);
+        expect(res.body.code).toBe('PROJECT_OUTSIDE_SCOPE');
+
+        await prisma.project.delete({ where: { id: coincProject.id } }).catch(() => {});
+    });
+
+    test('J05: Stale project grant rejected on activation and reissue with 400 STALE_PROJECT_GRANT', async () => {
+        const movedProj = await prisma.project.create({
+            data: {
+                id: 'proj-moved-' + SUFFIX,
+                code: 'MVD-' + SUFFIX.slice(-4),
+                name: 'Moved Project ' + SUFFIX,
+                status: 'ACTIVE',
+                labId: labA.id,
+                assignedLabIds: '[]'
+            }
+        });
+
+        const email = `tech_j05_${SUFFIX.toLowerCase()}@example.org`;
+        const inv = await staffLifecycleService.createInvitation(managerA, {
+            email,
+            role: 'LAB_TECHNICIAN',
+            name: 'Moved Tech',
+            labId: labA.id,
+            projects: [movedProj.code]
+        });
+
+        // Move project ownership to Lab B with no Lab A link
+        await prisma.project.update({
+            where: { id: movedProj.id },
+            data: { labId: labB.id, assignedLabIds: '[]' }
+        });
+
+        // 1. Activation fails closed with 400 STALE_PROJECT_GRANT
+        const actRes = await request(app)
+            .post('/api/auth/activate')
+            .send({
+                token: inv.token,
+                username: ('moved_tech_' + SUFFIX).toLowerCase().replace(/[^a-z0-9]/g, ''),
+                password: 'Password123!Secure',
+                name: 'Moved Tech Person'
+            });
+        expect(actRes.status).toBe(400);
+        expect(actRes.body.code).toBe('STALE_PROJECT_GRANT');
+
+        // 2. Reissue also detects moved project and rejects with 400 STALE_PROJECT_GRANT
+        const reisRes = await request(app)
+            .post(`/api/staff/invitations/${inv.id}/reissue`)
+            .set('Authorization', `Bearer ${tokenMgrA}`);
+        expect(reisRes.status).toBe(400);
+        expect(reisRes.body.code).toBe('STALE_PROJECT_GRANT');
+
+        await prisma.project.delete({ where: { id: movedProj.id } }).catch(() => {});
+    });
+
+    test('A41: Project update handler returns single HTTP response and idempotent retry without headers error', async () => {
+        const updatePayload = {
+            name: 'Updated Project Name ' + SUFFIX,
+            description: 'Updated Description'
+        };
+
+        // First update call
+        const res1 = await request(app)
+            .put(`/api/projects/${testProject.id}`)
+            .set('Authorization', `Bearer ${tokenSA}`)
+            .send(updatePayload);
+        expect(res1.status).toBe(200);
+        expect(res1.body.name).toBe(updatePayload.name);
+
+        // Immediate retry of identical update
+        const res2 = await request(app)
+            .put(`/api/projects/${testProject.id}`)
+            .set('Authorization', `Bearer ${tokenSA}`)
+            .send(updatePayload);
+        expect(res2.status).toBe(200);
+        expect(res2.body.name).toBe(updatePayload.name);
+    });
+
+    test('A37: Lab local day interval and DST 23/25-hour calculation (Europe/London and America/Guatemala)', () => {
+        // Spring forward: 23 hours
+        const spring = getLocalDayInterval('Europe/London', new Date('2026-03-29T12:00:00Z'));
+        const springHours = (spring.dayEnd.getTime() - spring.dayStart.getTime()) / (1000 * 3600);
+        expect(springHours).toBe(23);
+
+        // Fall back: 25 hours
+        const fall = getLocalDayInterval('Europe/London', new Date('2026-10-25T12:00:00Z'));
+        const fallHours = (fall.dayEnd.getTime() - fall.dayStart.getTime()) / (1000 * 3600);
+        expect(fallHours).toBe(25);
+
+        // Non-DST Guatemala standard: 24 hours
+        const gtm = getLocalDayInterval('America/Guatemala', new Date('2026-06-15T12:00:00Z'));
+        const gtmHours = (gtm.dayEnd.getTime() - gtm.dayStart.getTime()) / (1000 * 3600);
+        expect(gtmHours).toBe(24);
     });
 });

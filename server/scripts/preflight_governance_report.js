@@ -190,6 +190,37 @@ async function runPreflight(customDbPath = null) {
             orphanEquipment = assets.filter(a => a.labId && !validLabIds.has(a.labId));
         }
 
+        // 5b. Staff Invitations Audit
+        let totalInvitations = 0;
+        let activePendingInvitations = 0;
+        let expiredPendingInvitations = 0;
+        let duplicatePendingEmails = [];
+        const invitationTableExists = db.prepare(`
+            SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='StaffInvitation'
+        `).get().count > 0;
+
+        if (invitationTableExists) {
+            const invitations = db.prepare(`
+                SELECT id, email, expiresAt, isConsumed, isRevoked FROM "StaffInvitation"
+            `).all();
+            totalInvitations = invitations.length;
+            const now = Date.now();
+            const pending = invitations.filter(i => (i.isConsumed === 0 || i.isConsumed === false) && (i.isRevoked === 0 || i.isRevoked === false));
+            const activePending = pending.filter(i => new Date(i.expiresAt).getTime() > now);
+            const expiredPending = pending.filter(i => new Date(i.expiresAt).getTime() <= now);
+            activePendingInvitations = activePending.length;
+            expiredPendingInvitations = expiredPending.length;
+
+            const pendingSeen = new Map();
+            for (const inv of activePending) {
+                const norm = (inv.email || '').trim().toLowerCase();
+                if (norm) {
+                    if (pendingSeen.has(norm)) duplicatePendingEmails.push({ email: inv.email, id: inv.id, duplicateOf: pendingSeen.get(norm) });
+                    else pendingSeen.set(norm, inv.id);
+                }
+            }
+        }
+
         // 6. Total samples verification
         const sampleCountRow = db.prepare('SELECT count(*) as count FROM "Sample"').get();
         const totalSampleCount = sampleCountRow ? sampleCountRow.count : 0;
@@ -238,6 +269,14 @@ async function runPreflight(customDbPath = null) {
             equipment: {
                 totalAssets: totalEquipment,
                 orphanAssetsCount: orphanEquipment.length
+            },
+            invitations: {
+                tableExists: invitationTableExists,
+                totalInvitations,
+                activePendingCount: activePendingInvitations,
+                expiredPendingCount: expiredPendingInvitations,
+                duplicatePendingEmailsCount: duplicatePendingEmails.length,
+                duplicates: duplicatePendingEmails
             },
             securityVerification: {
                 zeroSecretsEmitted: true,

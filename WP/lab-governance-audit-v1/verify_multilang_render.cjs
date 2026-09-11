@@ -63,7 +63,22 @@ const testCases = [
     { key: 'roles.sampleReception', name: 'Role: Intake Officer' },
     { key: 'roles.labTechnician', name: 'Role: Lab Tech' },
     { key: 'roles.auditUser', name: 'Role: Quality & Audit' },
-    { key: 'roles.superAdmin', name: 'Role: Super Admin' }
+    { key: 'roles.superAdmin', name: 'Role: Super Admin' },
+    { key: 'labManagement.invitations.title', name: 'Invitations: Title' },
+    { key: 'labManagement.invitations.subtitle', name: 'Invitations: Subtitle' },
+    { key: 'labManagement.invitations.colInvitee', name: 'Invitations: Col Invitee' },
+    { key: 'labManagement.invitations.colRole', name: 'Invitations: Col Role' },
+    { key: 'labManagement.invitations.colDelivery', name: 'Invitations: Col Delivery' },
+    { key: 'labManagement.invitations.colExpires', name: 'Invitations: Col Expires' },
+    { key: 'labManagement.invitations.colActions', name: 'Invitations: Col Actions' },
+    { key: 'labManagement.invitations.statusManualLink', name: 'Invitations: Status Manual Link' },
+    { key: 'labManagement.invitations.statusExpired', name: 'Invitations: Status Expired' },
+    { key: 'labManagement.invitations.btnReissue', name: 'Invitations: Btn Reissue' },
+    { key: 'labManagement.invitations.btnRevoke', name: 'Invitations: Btn Revoke' },
+    { key: 'labManagement.invitations.reissue.title', name: 'Invitations: Reissue Title' },
+    { key: 'labManagement.invitations.reissue.badge', name: 'Invitations: Reissue Badge' },
+    { key: 'labManagement.invitations.reissue.link', name: 'Invitations: Reissue Link' },
+    { key: 'labManagement.invitations.reissue.done', name: 'Invitations: Reissue Done' }
 ];
 
 let allPassed = true;

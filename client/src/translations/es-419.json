@@ -1022,6 +1022,42 @@
       "reactivateUser": "Reactivar Usuario",
       "suspendUser": "Suspender Usuario"
     },
+    "invitations": {
+      "title": "Invitaciones de Personal Pendientes",
+      "subtitle": "Enlaces de invitación activos y no consumidos. Comparta los enlaces de activación directamente; el envío automatizado por correo no está configurado.",
+      "colInvitee": "Invitado",
+      "colRole": "Rol y Proyectos",
+      "colDelivery": "Estado de Entrega",
+      "colExpires": "Vence",
+      "colActions": "Acciones",
+      "statusManualLink": "Enlace Manual Generado",
+      "statusExpired": "Vencida",
+      "btnReissue": "Reemitir",
+      "btnRevoke": "Revocar",
+      "projects": "Proyectos",
+      "reissue": {
+        "title": "Invitación Reemitida",
+        "badge": "Token de Activación de Un Solo Uso",
+        "description": "Se generó un nuevo enlace de activación de un solo uso para {{email}}. El enlace anterior fue revocado y ya no puede ser utilizado.",
+        "link": "Nuevo Enlace de Activación",
+        "expiryNotice": "Vence en 24 horas. Enlace manual: compartir directamente con la persona invitada (no se envió correo automático).",
+        "copied": "¡Copiado!",
+        "copy": "Copiar",
+        "done": "Listo",
+        "failed": "Error al Reemitir"
+      },
+      "revoke": {
+        "confirm": "¿Revocar la invitación para {{email}}? El enlace de activación quedará invalidado de inmediato.",
+        "successTitle": "Invitación Revocada",
+        "successMessage": "La invitación para {{email}} ha sido revocada.",
+        "failed": "Error al Revocar"
+      },
+      "pagination": {
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "page": "Página {{page}}"
+      }
+    },
     "laboratories": "Laboratorios",
     "helpWithLab": "Ayuda sobre este laboratorio",
     "scopedBadge": "Delimitado",
@@ -1103,6 +1139,15 @@
       "title": "Enlace de Recuperación de Credenciales",
       "description": "Emite un enlace de recuperación de contraseña de un solo uso válido por 1 hora. La sesión anterior se invalida de inmediato.",
       "copyLink": "Copiar Enlace de Recuperación"
+    },
+    "reissue": {
+      "title": "Invitación Reemitida",
+      "badge": "Token de Activación de Un Solo Uso",
+      "description": "Se generó un nuevo enlace de activación de un solo uso para {{email}}. El enlace anterior fue revocado y ya no puede ser utilizado.",
+      "linkLabel": "Nuevo Enlace de Activación",
+      "copied": "¡Copiado!",
+      "copy": "Copiar",
+      "done": "Listo"
     }
   }
 }

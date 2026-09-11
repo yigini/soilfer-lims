@@ -1022,6 +1022,42 @@
       "reactivateUser": "Reactivate User",
       "suspendUser": "Suspend User"
     },
+    "invitations": {
+      "title": "Pending Staff Invitations",
+      "subtitle": "Active, unconsumed invitation links. Share activation links directly; automated email delivery is not configured.",
+      "colInvitee": "Invitee",
+      "colRole": "Role & Projects",
+      "colDelivery": "Delivery Status",
+      "colExpires": "Expires",
+      "colActions": "Actions",
+      "statusManualLink": "Manual Link Generated",
+      "statusExpired": "Expired",
+      "btnReissue": "Reissue",
+      "btnRevoke": "Revoke",
+      "projects": "Projects",
+      "reissue": {
+        "title": "Invitation Reissued",
+        "badge": "Single-Use Activation Token",
+        "description": "A fresh single-use activation link has been generated for {{email}}. The previous link was revoked and can no longer be used.",
+        "link": "Fresh Activation Link",
+        "expiryNotice": "Expires in 24 hours. Manual link: share directly with invitee (no automated email was sent).",
+        "copied": "Copied!",
+        "copy": "Copy",
+        "done": "Done",
+        "failed": "Reissue Failed"
+      },
+      "revoke": {
+        "confirm": "Revoke invitation for {{email}}? The activation link will immediately become invalid.",
+        "successTitle": "Invitation Revoked",
+        "successMessage": "Invitation for {{email}} has been revoked.",
+        "failed": "Revoke Failed"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {{page}}"
+      }
+    },
     "laboratories": "Laboratories",
     "helpWithLab": "Help with this lab",
     "scopedBadge": "Scoped",
@@ -1103,6 +1139,15 @@
       "title": "Credential Recovery Link",
       "description": "Issues a single-use 1-hour password recovery link. The previous session is invalidated immediately.",
       "copyLink": "Copy Recovery Link"
+    },
+    "reissue": {
+      "title": "Invitation Reissued",
+      "badge": "Single-Use Activation Token",
+      "description": "A fresh single-use activation link has been generated for {{email}}. The previous link was revoked and can no longer be used.",
+      "linkLabel": "Fresh Activation Link",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "done": "Done"
     }
   }
 }

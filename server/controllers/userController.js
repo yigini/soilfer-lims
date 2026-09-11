@@ -448,7 +448,11 @@ exports.createInvitation = async (req, res) => {
 exports.getPendingInvitations = async (req, res) => {
     try {
         const labId = req.query.labId || req.user.labId;
-        const result = await staffLifecycleService.getPendingInvitations(req.user, labId);
+        const options = {
+            page: req.query.page,
+            limit: req.query.limit
+        };
+        const result = await staffLifecycleService.getPendingInvitations(req.user, labId, options);
         res.json(result);
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.message, code: err.code });

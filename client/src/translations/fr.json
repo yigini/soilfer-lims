@@ -1022,6 +1022,42 @@
       "reactivateUser": "Réactiver l'Utilisateur",
       "suspendUser": "Suspendre l'Utilisateur"
     },
+    "invitations": {
+      "title": "Invitations de Personnel en Attente",
+      "subtitle": "Liens d'invitation actifs et non consommés. Partagez les liens d'activation directement ; l'envoi automatisé par e-mail n'est pas configuré.",
+      "colInvitee": "Invité",
+      "colRole": "Rôle et Projets",
+      "colDelivery": "Statut de Remise",
+      "colExpires": "Expire",
+      "colActions": "Actions",
+      "statusManualLink": "Lien Manuel Généré",
+      "statusExpired": "Expirée",
+      "btnReissue": "Réémettre",
+      "btnRevoke": "Révoquer",
+      "projects": "Projets",
+      "reissue": {
+        "title": "Invitation Réémise",
+        "badge": "Jeton d'Activation à Usage Unique",
+        "description": "Un nouveau lien d'activation à usage unique a été généré pour {{email}}. Le lien précédent a été révoqué et ne peut plus être utilisé.",
+        "link": "Nouveau Lien d'Activation",
+        "expiryNotice": "Expire dans 24 heures. Lien manuel : transmettez-le directement à la personne invitée (aucun e-mail automatisé n'a été envoyé).",
+        "copied": "Copié !",
+        "copy": "Copier",
+        "done": "Terminé",
+        "failed": "Échec de la Réémission"
+      },
+      "revoke": {
+        "confirm": "Révoquer l'invitation pour {{email}} ? Le lien d'activation sera immédiatement invalidé.",
+        "successTitle": "Invitation Révoquée",
+        "successMessage": "L'invitation pour {{email}} a été révoquée.",
+        "failed": "Échec de la Révocation"
+      },
+      "pagination": {
+        "prev": "Précédent",
+        "next": "Suivant",
+        "page": "Page {{page}}"
+      }
+    },
     "laboratories": "Laboratoires",
     "helpWithLab": "Aide pour ce laboratoire",
     "scopedBadge": "Délimité",
@@ -1103,6 +1139,15 @@
       "title": "Lien de Récupération des Identifiants",
       "description": "Émet un lien de récupération de mot de passe à usage unique valable 1 heure. La session précédente est invalidée immédiatement.",
       "copyLink": "Copier le Lien de Récupération"
+    },
+    "reissue": {
+      "title": "Invitation Réémise",
+      "badge": "Jeton d'Activation à Usage Unique",
+      "description": "Un nouveau lien d'activation à usage unique a été généré pour {{email}}. Le lien précédent a été révoqué et ne peut plus être utilisé.",
+      "linkLabel": "Nouveau Lien d'Activation",
+      "copied": "Copié !",
+      "copy": "Copier",
+      "done": "Terminé"
     }
   }
 }

@@ -144,6 +144,37 @@ Following the session and acceptance follow-up audit (`10-session-and-acceptance
 
 ---
 
+### 5.2 Report 13 Independent Review Ledger (I00 through I04)
+
+Following the Report 13 independent review (`13-invitation-and-acceptance-independent-review.md`), all 5 findings were reproduced and remediated, verified by reviewer script `invitation-review.cjs` (5/5 passed) and Jest contract suite `server/tests/contracts/invitation_lifecycle.test.js`:
+
+| Finding | Focus Area | Status | Resolution & Verification Evidence |
+|---|---|---|---|
+| **I00** | Staff Invitation Creation | **CLOSED** | Manager creates allowed staff invitation (HTTP 201) returning manual link; email delivery mocked without network dependencies. Verified by I00 probe and `invitation_lifecycle.test.js`. |
+| **I01** | Duplicate Active Invitation Conflict | **CLOSED** | Re-inviting active pending email returns HTTP 409 `PENDING_INVITATION_EXISTS`; partial unique index `idx_staff_invitation_active_email` prevents concurrent duplicate active rows. Verified by I01 probe and `invitation_lifecycle.test.js`. |
+| **I02** | Transactional Rollback on Audit Failure | **CLOSED** | Synthetic audit write failure rolls back invitation creation atomically inside `prisma.$transaction`, persisting 0 invitation records. Verified by I02 probe and `invitation_lifecycle.test.js`. |
+| **I03** | Explicit Project Grant Preservation | **CLOSED** | Account activation preserves explicit project grants assigned during invitation creation. Verified by I03 probe and `invitation_lifecycle.test.js`. |
+| **I04** | Unwired Service Authority Enforcement | **CLOSED** | `getPendingInvitations` and `revokeInvitation` enforce actor laboratory scope, rejecting foreign managers with `TARGET_OUTSIDE_SCOPE`. Verified by I04 probe and `invitation_lifecycle.test.js`. |
+
+---
+
+### 5.3 Report 14 Independent Review Ledger (J01 through J05, Migration & UI)
+
+Following the Report 14 independent review (`14-invitation-boundaries-independent-review.md`), all 5 boundary defects, migration requirements, multi-locale translations, and real browser verification were completed, verified by reviewer probe `invitation-boundaries-review.cjs` (5/5 passed), automated contract suite `invitation_lifecycle.test.js` (14/14 passed), and real browser journey `browser_invitation_journey.cjs` (14/14 passed):
+
+| Finding / Item | Focus Area | Status | Resolution & Verification Evidence |
+|---|---|---|---|
+| **J01** | Expiry Boundary Normalization | **CLOSED** | Fixed ISO vs SQLite lexical comparison using normalized `nowIso` parameter. Same-day expired invitations return 410 on verify, display dynamic `isExpired: true` in UI roster, and do not block new creations (returns 201). Verified by J01 probe and `invitation_lifecycle.test.js`. |
+| **J02** | Create-Endpoint Reissue Bypass | **CLOSED** | `createInvitation` verifies actor authority over existing invitation before honoring `reissue: true`, rejecting foreign managers with 403 `TARGET_OUTSIDE_SCOPE`. Strictly evaluates boolean types/strings (`reissue: "false"` does not trigger reissue), blocks demoting privileged accounts (403), and guarantees 0 audit/DB side effects on denial. Verified by J02 probe and `invitation_lifecycle.test.js`. |
+| **J03** | National Lead Own-Country Staff Reissue | **CLOSED** | In `actionPolicyService.js`, falls back to target's existing country when `requestedChanges.labId === target.labId`, enabling National Leads to reissue own-country staff invitations (HTTP 201) while preserving foreign-lab rejection (HTTP 403 `TARGET_OUTSIDE_SCOPE`). Verified by J03 probe and `invitation_lifecycle.test.js`. |
+| **J04** | Country Fallback Grant Authority Removal | **CLOSED** | Replaced legacy country fallback with `isProjectExplicitlyAssociatedWithLab`, requiring lab ownership (`project.labId === labId`) or explicit assignment (`ProjectLab` junction / `assignedLabIds`). Prevents Lab Managers from granting projects based purely on country coincidence (HTTP 403 `PROJECT_OUTSIDE_SCOPE`). Verified by J04 probe and `invitation_lifecycle.test.js`. |
+| **J05** | Moved Project Stale Grant Revalidation | **CLOSED** | Activation (`consumeInvitation`) and reissue (`reissueInvitation`) revalidate explicit project association against current ownership; moved projects fail closed with HTTP 400 `STALE_PROJECT_GRANT`. Verified by J05 probe and `invitation_lifecycle.test.js`. |
+| **Tracked Migration** | Additive Unique Index & Conflict Handling | **CLOSED** | Created tracked migration `20260911160000_add_active_invitation_unique_index/migration.sql` with safe duplicate normalization (revokes older pending rows, preserves latest active) and creates partial unique index `idx_staff_invitation_active_email`. Tested against intermediate duplicate state in `disposable_migration_rehearsal.js`. |
+| **Multi-Locale UI** | Five-Language Invitation Roster & Reissue Modal | **CLOSED** | Added all pending invitation table headers, status badges ("Active", "Expired", "Expires"), and Reissue Modal strings across all 5 canonical files: `en.json`, `es.json`, `es-419.json`, `fr.json`, `pt.json`. Verified with `verify_multilang_render.cjs` (56/56 keys present and non-empty across all 5 locales) and clean Vite build. |
+| **Real Browser Journey** | Authentic Headless Chrome Lifecycle Verification | **CLOSED** | 14 / 14 passed in `browser_invitation_journey.cjs`: renders pending roster, dynamic expired badge, opens reissue modal, copies link to clipboard, activates account with new token (201), rejects revoked token (410), and verifies National Lead own-country view and reissue. Visual evidence in `browser-invitation-roster-view.png`, `browser-invitation-reissue-modal.png`, `browser-invitation-national-lead.png`. Baseline `dev.db` hash strictly preserved untouched. |
+
+---
+
 ## 6. Acceptance Matrix Reconciliation (A01 through A42)
 
 The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` are reconciled below against named automated contract test suites, independent execution probes, and browser verification scripts. Each row provides an explicit status (`passed`, `partial`, `failed`, `untested`), the exact evidence files and test cases, and honest boundary notes / limitations:
@@ -155,12 +186,12 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A03** | Manager creates own allowed subordinate / viewer tries same call | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 11–12), `server/tests/contracts/invitation_lifecycle.test.js` (I00) | Permitted subordinate roles (`LAB_TECHNICIAN`, `ANALYST`) allowed for Lab Manager; Viewer role denied. |
 | **A04** | National scope GTM opens FRA lab by direct ID, query selector, pagination/filter, export and cached URL | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 17–18), `final_governance_probes.test.js` (F01, C01), `final-review-probes.cjs` (F01) | Rejected with 403 TARGET_OUTSIDE_SCOPE before exposing lab name, staff, or counts. Authorized GTM labs remain accessible. |
 | **A05** | National scope empty/malformed; unknown role; no lab | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 19–21), `final_governance_probes.test.js` (F01 companion) | Empty `countries: []` fails closed with 0 records; never falls back to global query. Unknown roles fail closed. |
-| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `partial` | `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/security/` role matrix test suites | Server-side RBAC policy automated and passing across all 10 roles. Full interactive end-to-end browser walkthroughs currently completed for 4 core operational roles (`SUPER_ADMIN`, `MASTER_USER`, `LAB_MANAGER`, `LAB_TECHNICIAN`); remaining 6 roles verified at contract layer only. |
+| **A06** | All ten roles use list/detail/search/count/export for user/lab/project/sample/equipment | `partial` | `server/tests/contracts/lab_governance_wp_b.test.js`, `server/tests/contracts/rbac_sample_registry.test.js`, `browser_paging_review.cjs`, `browser_invitation_journey.cjs` | Server-side RBAC policy automated and passing across all 10 roles in contract tests. Full interactive browser walkthroughs with visual artifacts currently completed for Lab Manager (`LAB_MANAGER` in `browser-paging-evidence.png`, `browser-invitation-roster-view.png`) and National Lead (`MASTER_USER` in `browser-invitation-national-lead.png`); remaining 8 roles verified at contract layer only. |
 | **A07** | Lab PUT injects ID/isActive/createdAt/unknown fields; user role empty, boolean string or invalid locale | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 7–12), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 1–4) | Strict allowlist prevents parameter tampering; immutable ID, createdAt, and lifecycle flags ignored/rejected. |
 | **A08** | User creation/transfer targets nonexistent, paused or unauthorized lab/project | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 5–8), `final_governance_probes.test.js` (F02), `server/tests/contracts/invitation_lifecycle.test.js` (I03) | Nonexistent lab returns 404; paused lab returns 400 `LAB_PAUSED`; appointment in `SETUP` status allowed. |
 | **A09** | Attempt to disable/delete/demote last admin in both staff interfaces and lab lifecycle | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 9–10), `final_governance_probes.test.js` | Atomic transaction check blocks demotion/suspension with `LAST_ADMIN_PROTECTED`; recovery admin account verified. |
 | **A10** | Two concurrent admins demote/suspend each other using the same initial snapshot | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Test 11) | Atomic transactional serialization ensures at least one effective admin remains; conflicting request rejected with 409 / `LAST_ADMIN_PROTECTED`. |
-| **A11** | Planned departure with work / immediate emergency disable with work | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 12–15), `final_governance_probes.test.js` (F05) | Pre-change access review flags open and unsubmitted work; suspension immediately invalidates tokens and preserves audit trail. |
+| **A11** | Planned departure with work / immediate emergency disable with work | `partial` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 12–15), `final_governance_probes.test.js` (F05) | Pre-change access review accurately counts and flags open assignments and unsubmitted bench work (`openAssignmentsCount >= 1`); suspension immediately invalidates tokens and preserves audit trail. Interactive multi-user staff departure and handover transfer wizard workflow in browser remains unverified. |
 | **A12** | Invitation create/resend/expire/reuse/revoke, duplicate email, delivery failure | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (I00–I04, Reissue, Roster), `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 16–19), `invitation-review.cjs` | Transactional rollback on audit failure leaves 0 records; active duplicate returns 409 `PENDING_INVITATION_EXISTS`; reissue revokes old token; delivery status reported honestly as `MANUAL_LINK`. Email transport mocked. |
 | **A13** | Admin recovery and password change, old JWT, reactivated user | `passed` | `server/tests/contracts/lab_governance_wp_c.test.js` (Tests 20–22), `final_governance_probes.test.js` (F06, F07), `session_and_coverage.test.js` (S01) | `tokenVersion` increment invalidates prior sessions across HTTP, SIS, and WebSocket. Reactivation does not revive old tokens. |
 | **A14** | Impersonation target has nonzero version; original admin later disabled | `passed` | `server/tests/contracts/session_and_coverage.test.js` (C02, S02, S03) | Actor identity `decoded.act` validated on every request; suspending impersonating administrator immediately terminates session and closes active WebSockets. |
@@ -169,7 +200,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A17** | Pack requested without a required lab or for somebody else’s work | `passed` | `server/tests/contracts/lab_governance_wp_a.test.js` (Tests 19–20) | Denied with 403; no global sample queries; bundle contains strictly authorized items. |
 | **A18** | Offline viewer or revoked technician completes foreign-lab/accepted work | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Sync engine replays through canonical `workEligibility.canRecord`; unassigned/revoked technician rejected with `NOT_ASSIGNED_TECHNICIAN`. |
 | **A19** | Offline draft save then restart server / duplicate replay | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Drafts durable in IndexedDB; idempotency receipt returned on replay; duplicate mutations prevented. Node VM environment. |
-| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | IndexedDB outbox partitioned by `forUserId`; mid-sync user switch triggers `ACCOUNT_SWITCH_DETECTED` and reverts operations to pending. |
+| **A20** | Account A’s unsynced draft, logout, login B, reconnect | `partial` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Shared-device IndexedDB outbox queries partition pending operations by authenticated user (`forUserId`); mid-sync user switch triggers `ACCOUNT_SWITCH_DETECTED` and reverts operations to pending. Verified via genuine in-memory module execution tests; full browser IndexedDB/logout/login/reconnect journey in native Chrome unverified. |
 | **A21** | Offline transfer/suspension, stale method revision, equipment now blocked, expired lease | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Domain rules evaluated on sync; rejected operations marked with explicit error codes; no silent auto-approval or actor substitution. |
 | **A22** | Missing prerequisites, scalar versus checklist, texture group and spectral upload | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Operational gate scalar entry rejected (`OPERATIONAL_GATE_REJECTED`), spectral scalar entry rejected (`SPECTRAL_SCALAR_REJECTED`), texture closure sum 100% enforced (`TEXTURE_CLOSURE_FAILED`). |
 | **A23** | Assignment to inactive technician, wrong lab, unauthorized national actor | `passed` | `server/tests/contracts/lab_governance_wp_b.test.js` (Tests 13–16), `reopened_governance_scenarios.test.js` | `assignmentEligibilityService` validates active status, lab assignment, and actor scope before assignment. Past work remains attributed. |
@@ -186,17 +217,17 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 | **A34** | Audit write fails / mail delivery fails / event broadcaster fails | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (I02), `server/tests/contracts/lab_governance_wp_d.test.js` (Test 7) | Synthetic audit failure in transaction rolls back entire operation; zero records persisted. Retry uses same command ID. |
 | **A35** | Admin with no home lab assigns work in A | `passed` | `server/tests/contracts/reopened_governance_scenarios.test.js` | Event broadcaster routes real-time notifications to receiving laboratory sockets (`targetLabIds`), not actor's home lab. |
 | **A36** | Expected samples, released samples, waiting gates, cancelled/waived tasks | `passed` | `server/tests/contracts/final_governance_probes.test.js` (F04), `server/tests/contracts/lab_governance_wp_d.test.js` | Pipeline buckets mutually exclusive; `EXPECTED` and `RELEASED` samples excluded from active analytical workload. Count units clear. |
-| **A37** | Lab midnight, browser in other timezone, DST 23/25-hour day | `passed` | `server/tests/contracts/lab_governance_wp_d.test.js` (Tests 15–16) | Half-open next-local-midnight interval calculated using lab's IANA timezone; old UTC timestamps unchanged. |
+| **A37** | Lab midnight, browser in other timezone, DST 23/25-hour day | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A37`), `server/tests/contracts/lab_governance_wp_a.test.js` (Section 8, Tests 13–14) | Half-open next-local-midnight interval calculated using lab's IANA timezone; verifies 23-hour spring-forward (`Europe/London`), 25-hour fall-back (`Europe/London`), and 24-hour standard (`America/Guatemala`). Old UTC timestamps unchanged. |
 | **A38** | Search/race/error/empty roster; 40 staff and 200+ rows | `passed` | `WP/lab-governance-audit-v1/independent-review/a39_a38_matrix_review.cjs`, `browser_paging_review.cjs` | Server-side pagination bounded; out-of-order search responses discarded via `latestWorkspaceReqId`; 403 and 500 render explicit error cards (never "No staff"). |
 | **A39** | 320, 390, 768, 1440 px; both themes; all five locales with long labels | `passed` | `WP/lab-governance-audit-v1/independent-review/governance_modals_review.cjs`, `a39_a38_matrix_review.cjs`, `modal-review.cjs` | Tested in native headless Chrome across 4 viewports, theme toggle, WCAG AAA contrast (11.67:1 >= 7:1), true focus boundary wrapping (`Shift+Tab` first->last, `Tab` last->first), and all 5 locales. Physical screen readers (NVDA/VoiceOver) with human users unverified. |
-| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `passed` | Clean Vite production build (6.69s), regression suites (`server/tests/contracts/help_*.test.js`, `mobile_offline_sync.test.js`, `reportAssembly.test.js`) | Working routes, preserved drafts, and help context verified. Physical field mobile device PWA execution unverified. |
-| **A41** | Project update handler and retry | `passed` | `server/tests/contracts/lab_governance_wp_d.test.js` (Test 17) | Redundant `res.json` call eliminated; single HTTP response returned; no headers-already-sent error. |
-| **A42** | Migration rerun, rollback-compatible code, partial failure and restore rehearsal | `passed` | `server/scripts/disposable_migration_rehearsal.js`, `server/scripts/preflight_governance_report.js` | Migration rehearsal executed on isolated database; verified 0 sample loss across all 35,192 historical samples; baseline `dev.db` hash untouched. |
+| **A40** | Existing deep links, Help context, Reports, sample map, mobile workbench and recent/offline client build | `partial` | Clean Vite production build (6.58s), regression suites (`server/tests/contracts/help_*.test.js`, `mobile_offline_sync.test.js`, `reportAssembly.test.js`) | Working routes, preserved drafts, and help context verified at build/contract layer. Full browser execution across all deep link routes, legacy client caching, and offline PWA service worker behavior remains unverified. |
+| **A41** | Project update handler and retry | `passed` | `server/tests/contracts/invitation_lifecycle.test.js` (named test `A41`) | Redundant `res.json` call eliminated; single HTTP response returned; idempotent retry tested without headers-already-sent error. |
+| **A42** | Migration rerun, rollback-compatible code, partial failure and restore rehearsal | `passed` | `server/scripts/disposable_migration_rehearsal.js`, `server/scripts/preflight_governance_report.js` | Enhanced rehearsal uses `origDb.backup` for online WAL-consistent snapshot, applies multi-step migrations (`20260911130000` and `20260911160000`), normalizes intermediate duplicates, enforces unique partial index, verifies rerun idempotency, and verifies partial failure rollback. dev.db 35,192 samples strictly untouched. |
 
 ### Reconciliation Summary:
 - **Total Scenarios Evaluated**: 42
-- **Passed**: 41 (97.6%)
-- **Partial**: 1 (2.4% — `A06`, automated RBAC suite passed across all 10 roles, full manual browser walkthroughs completed on 4 core roles)
+- **Passed**: 38 (90.5%)
+- **Partial**: 4 (9.5% — `A06` [10 roles contract RBAC, 2 roles with browser artifacts], `A11` [work accounting verified, interactive UI departure wizard unverified], `A20` [module/storage verified, full browser IndexedDB/logout/login/reconnect unverified], `A40` [build and regression passed, full browser deep link/offline caching unverified])
 - **Failed**: 0 (0%)
 - **Untested**: 0 (0%)
 
@@ -207,7 +238,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` a
 ```text
 ================================================================================
 Test Suites: 103 passed, 103 total
-Tests:       830 passed, 830 total
+Tests:       837 passed, 837 total
 Snapshots:   0 total
 Database:    Strict isolated disposable SQLite databases only.
 Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
@@ -216,7 +247,7 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 ```
 
 ### Dedicated Lab Governance Contract Test Breakdown:
-- `lab_governance_wp_a.test.js`: 29 passed (Alternative write & secret paths)
+- `lab_governance_wp_a.test.js`: 29 passed (Alternative write & secret paths, local day and DST boundaries)
 - `lab_governance_wp_b.test.js`: 21 passed (Unified action and scope model)
 - `lab_governance_wp_c.test.js`: 19 passed (Staff lifecycle, recovery, last-admin)
 - `lab_governance_wp_d.test.js`: 19 passed (Lab lifecycle, pipeline, project ownership, mandatory reviewToken, rollback)
@@ -225,8 +256,8 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 - `reopened_governance_scenarios.test.js`: 17 passed (Offline draft gating, texture closure, spectral scalar rejection, shared outbox partition with real module execution, pack lease, receiving lab broadcasts)
 - `final_governance_probes.test.js`: 17 passed (F01–F07 scenarios, companion controls, onboarding in SETUP, unsubmitted bench work, rollback safety, unsupported outer contract fail-closed, and committed outer transaction socket termination)
 - `session_and_coverage.test.js`: 8 passed (S01–S03 multi-channel session validation, impersonation actor suspension, actor-aware socket termination, and P01 bounded workspace pagination)
-- `invitation_lifecycle.test.js`: 7 passed (I00–I04 staff invitation contract, deduplication, audit rollback, explicit project grant preservation, foreign manager scope denial, safe reissue/revoke, deliveryStatus)
-- **Total Governance Contract Tests**: 160 tests, 0 failures.
+- `invitation_lifecycle.test.js`: 14 passed (I00–I04 invitation contract, deduplication, audit rollback, explicit project grant preservation, foreign manager scope denial, safe reissue/revoke, deliveryStatus; J01–J05 boundary protections, same-day expiry boundary, create-endpoint reissue authority, national lead own-country reissue, country coincidence project grant removal, stale project revalidation; A41 idempotent project update retry; A37 local day & DST calculation)
+- **Total Governance Contract Tests**: 167 tests, 0 failures.
 
 ### Independent Review Probes:
 - **Positive Controls (C01–C05)**: 5 / 5 verified (`reproduced: true`).
@@ -234,6 +265,34 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 - **Defect Probe R21**: Verified (`reproduced: true` on legacy missing-labs payload, returning HTTP 400 `INVALID_LAB_SCOPE`, confirming no wildcard/country fallback occurs; real form tested with explicit lab selector and non-empty `labs` array).
 - **Follow-Up Review Probes (F01–F07, C01)**: 8 / 8 passed in `final-review-probes.cjs` against schema-only disposable database with source database opened strictly read-only.
 - **Session & Acceptance Probes (S01–S03, P01, C02, T01–T03)**: 8 / 8 passed in `session-and-coverage-probes.cjs` against schema-only disposable database with source database opened strictly read-only.
+- **Report 13 Invitation Probes (I00–I04)**: 5 / 5 passed in `invitation-review.cjs` against schema-only disposable database:
+  - I00: Valid staff invitation creation returns HTTP 201 with manual delivery link (`PASS`)
+  - I01: Duplicate invitation for active pending email returns 409 conflict and leaves single pending record (`PASS`)
+  - I02: Transaction rollback on audit failure leaves 0 persisted invitation records (`PASS`)
+  - I03: Activation preserves explicit project grant assigned during invitation (`PASS`)
+  - I04: Unwired service boundary denies foreign lab manager from listing or revoking invitations (`PASS`)
+- **Report 14 Boundaries Probes (J01–J05)**: 5 / 5 passed in `invitation-boundaries-review.cjs` against schema-only disposable database:
+  - J01: Same-day expired invitation returns 410 on verify, is marked expired in roster, and does not block new creation (`PASS`)
+  - J02: Create-endpoint reissue flag cannot replace foreign laboratory invitation, handles boolean tampering, and prevents audit side effects (`PASS`)
+  - J03: National Lead reissues own-country technician invitation (201) and is denied for foreign lab (`PASS`)
+  - J04: Country coincidence alone does not authorize Lab Manager to grant project access (`PASS`)
+  - J05: Activation and reissue reject moved projects with 400 STALE_PROJECT_GRANT (`PASS`)
+- **Real Browser Invitation Journey (B_INV_01–B_INV_14)**: 14 / 14 passed in `browser_invitation_journey.cjs` in native Google Chrome (headless):
+  - B_INV_01: Pending invitations roster renders on People Tab (`PASS`)
+  - B_INV_02: Both active and same-day expired invitations are listed in table (`PASS`)
+  - B_INV_03: Same-day expired invitation displays dynamic Expired badge (`PASS`)
+  - B_INV_04: Clicking Reissue opens Reissued Invitation Modal (`PASS`)
+  - B_INV_05: Reissued modal displays fresh activation link with token (`PASS`)
+  - B_INV_06: Copy button gives immediate visual feedback (`PASS`)
+  - B_INV_07: Dismissing modal closes dialog cleanly (`PASS`)
+  - B_INV_08: Activation with reissued token creates active staff account (HTTP 201; `PASS`)
+  - B_INV_09: Activated user persisted with correct role, labId, and active status (`PASS`)
+  - B_INV_10: Invitation record is flagged as consumed (`PASS`)
+  - B_INV_11: Prior revoked invitation token is rejected on activation attempt (410; `PASS`)
+  - B_INV_12: National Lead can view pending invitations roster for authorized country lab (`PASS`)
+  - B_INV_13: National Lead successfully reissues own-country staff invitation from UI (`PASS`)
+  - B_INV_14: Baseline database `dev.db` hash strictly preserved untouched (`PASS`)
+  - Visual artifacts saved to `independent-review/browser-invitation-roster-view.png`, `browser-invitation-reissue-modal.png`, `browser-invitation-national-lead.png`. Full report saved to `independent-review/browser-invitation-journey-results.json`.
 - **Exact-Membership Scope & Paging Probes (P02, P03)**: 16 / 16 passed in `workspace-paging-probes.cjs`:
   - 10 negative controls pass: similar-prefix, malformed JSON, object key, object value, scalar string, scalar number, numeric array, object array, escaped identifier, and substring suffix all fail closed and do not grant access.
   - 4 positive controls pass: lab-owned project, ProjectLab junction record, single-element legacy array, and multi-element legacy array appear.
@@ -284,12 +343,12 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
   - *Focus Trap Restoration Resilience*: `useFocusTrap.js` captures opening trigger synchronously during render and effect mounting, records element identity fallback metadata (`id`, `text`, `tagName`), and executes multi-pass focus restoration (immediate, `requestAnimationFrame`, and microtask fallback) so that trigger focus is faithfully restored even when parent components re-render or re-instantiate DOM nodes.
 
 ### Automated Tests vs. Browser Journeys & Static Verification:
-- **Automated Headless Tests**: 103 Jest suites (830 tests) cover server business logic, transaction rollback, API routing, SQLite schema compliance, offline sync engine rules, and real loopback WebSocket connections.
+- **Automated Headless Tests**: 103 Jest suites (837 tests) cover server business logic, transaction rollback, API routing, SQLite schema compliance, offline sync engine rules, and real loopback WebSocket connections.
 - **Static Client Verification**:
-  - React Vite production bundle built cleanly in 6.69s with 0 syntax or bundling errors (`cmd.exe /c npm run build`). Note: this confirms static module compilation and dependency graph resolution.
-  - `verify_multilang_render.cjs` honestly labeled as a static key-presence check; verifies all 41 governance dictionary keys are non-empty across all 5 JSON translation files.
+  - React Vite production bundle built cleanly in 6.58s with 0 syntax or bundling errors (`cmd.exe /c npm run build`). Note: this confirms static module compilation and dependency graph resolution.
+  - `verify_multilang_render.cjs` honestly labeled as a static key-presence check; verifies all 56 governance dictionary keys are non-empty across all 5 JSON translation files.
 - **End-to-End Real Browser Automation**:
-  - Validates actual React components, routing, language context, theme provider, and pagination controls running in real headless Google Chrome with Chromium devtools protocol.
+  - Validates actual React components, routing, language context, theme provider, pagination controls, and connected invitation lifecycle running in real headless Google Chrome with Chromium devtools protocol.
 - **Explicit Unverified Scope**:
   - Physical assistive screen-reader devices (NVDA, VoiceOver) have not been tested with human users.
   - Live third-party external networks (production Kobo servers, physical email SMTP servers, mobile PWA hardware background sync) remain unverified.
@@ -298,15 +357,15 @@ Baseline:    server/prisma/dev.db (local dev baseline DB with 35,192 samples)
 
 ## 8. Release Sign-Off & Status
 
-- [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`.
-- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix), and Report 12 requirements (M320 small-screen geometry, K320/K390 trigger focus restoration, and 5-modal viewport-constrained scrolling).
+- [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`, follow-up reviews 08 through 14.
+- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, follow-up review findings F01 through F07 and C01, acceptance follow-up scenarios S01 through S03, P01, C02, and T01 through T03, Report 11 requirements (P02, P03, LabManagement.jsx pagination/filtering/stale-request protection, A38 error/race states, and A39 responsive/theme/locale/keyboard matrix), Report 12 requirements (M320 small-screen geometry, K320/K390 trigger focus restoration, and 5-modal viewport-constrained scrolling), Report 13 requirements (I00–I04 invitation lifecycle), and Report 14 requirements (J01–J05 boundary protections, tracked migration, multi-locale UI, and real browser journey).
 - [x] **Exact JSON Membership**: SQLite query uses `json_valid = 1`, `json_type = 'array'`, and `type = 'text'` with CASE expression failing closed on malformed and non-array JSON.
 - [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
 - [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
 - [x] **WebSocket Lifecycle Contract**: Explicit disposal contract on `wsServer.js`, clearing instance-bound heartbeat timers on teardown and closing server-side sockets, preventing hanging timers in test environments and CI.
-- [x] **Tested**: 103 test suites (830 tests) and 102 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
+- [x] **Tested**: 103 test suites (837 tests) and 126 independent probe/browser assertions passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Local baseline database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
-- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.69s).
+- [x] **Client Static Verification**: Verified. Clean Vite build (0 errors, 6.58s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.
 
 

@@ -105,7 +105,7 @@ function canManageUser(actor, target, requestedChanges = {}) {
         // Scope check proposed lab country only when a lab/scope change is requested
         const isLabScopeChangeRequested = requestedChanges.labId !== undefined || requestedChanges.proposedLabCountry !== undefined || requestedChanges.countries !== undefined;
         if (isLabScopeChangeRequested) {
-            const proposedCountry = requestedChanges.proposedLabCountry || requestedChanges.labCountry || requestedChanges.country;
+            const proposedCountry = requestedChanges.proposedLabCountry || requestedChanges.labCountry || requestedChanges.country || (requestedChanges.labId === target.labId ? targetCountry : null);
             if (!proposedCountry) {
                 return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Proposed laboratory country scope could not be resolved' };
             }

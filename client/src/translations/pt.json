@@ -1022,6 +1022,42 @@
       "reactivateUser": "Reativar Usuário",
       "suspendUser": "Suspender Usuário"
     },
+    "invitations": {
+      "title": "Convites de Colaboradores Pendentes",
+      "subtitle": "Links de convite ativos e não utilizados. Compartilhe os links de ativação diretamente; o envio automatizado por e-mail não está configurado.",
+      "colInvitee": "Convidado",
+      "colRole": "Função e Projetos",
+      "colDelivery": "Status de Entrega",
+      "colExpires": "Expira em",
+      "colActions": "Ações",
+      "statusManualLink": "Link Manual Gerado",
+      "statusExpired": "Expirado",
+      "btnReissue": "Reemitir",
+      "btnRevoke": "Revogar",
+      "projects": "Projetos",
+      "reissue": {
+        "title": "Convite Reemitido",
+        "badge": "Token de Ativação de Uso Único",
+        "description": "Um novo link de ativação de uso único foi gerado para {{email}}. O link anterior foi revogado e não pode mais ser utilizado.",
+        "link": "Novo Link de Ativação",
+        "expiryNotice": "Expira em 24 horas. Link manual: compartilhe diretamente com o convidado (nenhum e-mail automatizado foi enviado).",
+        "copied": "Copiado!",
+        "copy": "Copiar",
+        "done": "Concluído",
+        "failed": "Falha na Reemissão"
+      },
+      "revoke": {
+        "confirm": "Revogar o convite para {{email}}? O link de ativação será invalidado imediatamente.",
+        "successTitle": "Convite Revogado",
+        "successMessage": "O convite para {{email}} foi revogado.",
+        "failed": "Falha na Revogação"
+      },
+      "pagination": {
+        "prev": "Anterior",
+        "next": "Próximo",
+        "page": "Página {{page}}"
+      }
+    },
     "laboratories": "Laboratórios",
     "helpWithLab": "Ajuda para este laboratório",
     "scopedBadge": "Delimitado",
@@ -1103,6 +1139,15 @@
       "title": "Link de Recuperação de Credenciais",
       "description": "Emite um link de recuperação de senha de uso único válido por 1 hora. A sessão anterior é invalidada imediatamente.",
       "copyLink": "Copiar Link de Recuperação"
+    },
+    "reissue": {
+      "title": "Convite Reemitido",
+      "badge": "Token de Ativação de Uso Único",
+      "description": "Um novo link de ativação de uso único foi gerado para {{email}}. O link anterior foi revogado e não pode mais ser utilizado.",
+      "linkLabel": "Novo Link de Ativação",
+      "copied": "Copiado!",
+      "copy": "Copiar",
+      "done": "Concluído"
     }
   }
 }

@@ -18,7 +18,7 @@ router.get('/invitation/:token', async (req, res) => {
         const info = await staffLifecycleService.verifyInvitationToken(req.params.token);
         res.json(info);
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.code || 'INVITATION_ERROR', message: err.message });
+        res.status(err.statusCode || 500).json({ error: err.code || 'INVITATION_ERROR', code: err.code || 'INVITATION_ERROR', message: err.message });
     }
 });
 
@@ -28,7 +28,7 @@ router.post('/activate', async (req, res) => {
         const user = await staffLifecycleService.consumeInvitation(token, { username, password });
         res.status(201).json({ success: true, user, message: 'Account activated successfully. You can now log in.' });
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.code || 'ACTIVATION_ERROR', message: err.message });
+        res.status(err.statusCode || 500).json({ error: err.code || 'ACTIVATION_ERROR', code: err.code || 'ACTIVATION_ERROR', message: err.message });
     }
 });
 
@@ -37,7 +37,7 @@ router.get('/recovery/:token', async (req, res) => {
         const info = await staffLifecycleService.verifyRecoveryToken(req.params.token);
         res.json(info);
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.code || 'RECOVERY_ERROR', message: err.message });
+        res.status(err.statusCode || 500).json({ error: err.code || 'RECOVERY_ERROR', code: err.code || 'RECOVERY_ERROR', message: err.message });
     }
 });
 

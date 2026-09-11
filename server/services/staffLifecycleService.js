@@ -32,6 +32,20 @@ async function ensureTables(tx = prisma) {
         `);
 
         await tx.$executeRawUnsafe(`
+            UPDATE "StaffInvitation"
+            SET "isRevoked" = 1
+            WHERE "isConsumed" = 0 AND "isRevoked" = 0
+              AND "id" NOT IN (
+                SELECT "id" FROM "StaffInvitation" s1
+                WHERE s1."isConsumed" = 0 AND s1."isRevoked" = 0
+                  AND s1."rowid" = (
+                    SELECT max(s2."rowid") FROM "StaffInvitation" s2
+                    WHERE s2."email" = s1."email" AND s2."isConsumed" = 0 AND s2."isRevoked" = 0
+                  )
+              );
+        `);
+
+        await tx.$executeRawUnsafe(`
             CREATE UNIQUE INDEX IF NOT EXISTS "idx_staff_invitation_active_email"
             ON "StaffInvitation" ("email")
             WHERE "isConsumed" = 0 AND "isRevoked" = 0;
@@ -54,6 +68,42 @@ async function ensureTables(tx = prisma) {
     } catch (err) {
         console.warn('[StaffLifecycle] ensureTables notice:', err.message);
     }
+}
+ 
+/**
+ * Verifies whether a laboratory is explicitly associated with a project.
+ * Explicit association requires:
+ * 1. Project.labId === labId (owning lab), OR
+ * 2. ProjectLab junction record exists for (projectCode, labId), OR
+ * 3. Project.assignedLabIds (JSON array) explicitly includes labId.
+ * Country coincidence alone is strictly NOT an explicit lab association (J04).
+ */
+async function isProjectExplicitlyAssociatedWithLab(project, labId, tx = prisma) {
+    if (!project || !labId) return false;
+    if (project.labId && project.labId === labId) return true;
+
+    // Check ProjectLab junction
+    const pCode = project.code;
+    if (pCode) {
+        const junction = await tx.projectLab.findFirst({
+            where: { projectCode: pCode, labId }
+        });
+        if (junction) return true;
+    }
+
+    // Check assignedLabIds legacy array
+    if (project.assignedLabIds) {
+        try {
+            const parsed = typeof project.assignedLabIds === 'string'
+                ? JSON.parse(project.assignedLabIds)
+                : project.assignedLabIds;
+            if (Array.isArray(parsed) && parsed.includes(labId)) {
+                return true;
+            }
+        } catch (_) {}
+    }
+
+    return false;
 }
 
 const txHookRegistry = new WeakMap();
@@ -203,34 +253,74 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
             throw err;
         }
 
+        const nowIso = new Date().toISOString();
+
         // Revoke any expired unconsumed invitations for this email so they don't block
         await tx.$executeRawUnsafe(
             `UPDATE "StaffInvitation" SET "isRevoked" = 1
-             WHERE "email" = ? AND "isConsumed" = 0 AND "expiresAt" <= CURRENT_TIMESTAMP`,
-            normalizedEmail
+             WHERE "email" = ? AND "isConsumed" = 0 AND "expiresAt" <= ?`,
+            normalizedEmail,
+            nowIso
         );
 
         // Check existing pending live invitation collision
         const existingPending = await tx.$queryRawUnsafe(
             `SELECT "id", "email", "name", "role", "labId", "expiresAt"
              FROM "StaffInvitation"
-             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > CURRENT_TIMESTAMP
+             WHERE "email" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > ?
              LIMIT 1`,
-            normalizedEmail
+            normalizedEmail,
+            nowIso
         );
 
+        const isReissue = reissue === true || reissue === 'true' || reissue === 1 || reissue === '1';
+
         if (existingPending && existingPending.length > 0) {
-            if (reissue) {
+            const priorInvite = existingPending[0];
+            const priorLab = await tx.lab.findUnique({ where: { id: priorInvite.labId } });
+
+            // Check actor authority over the existing invitation (J02)
+            const priorDecision = canManageUser(
+                actor,
+                {
+                    role: priorInvite.role,
+                    labId: priorInvite.labId,
+                    labCountry: priorLab?.country,
+                    country: priorLab?.country
+                },
+                {}
+            );
+
+            if (!priorDecision.allowed) {
+                const err = new Error(priorDecision.message || 'Unauthorized to modify or replace existing invitation');
+                err.statusCode = 403;
+                err.code = priorDecision.code || 'TARGET_OUTSIDE_SCOPE';
+                throw err;
+            }
+
+            if (isReissue) {
                 // Safely revoke the prior pending invitation
                 await tx.$executeRawUnsafe(
                     `UPDATE "StaffInvitation" SET "isRevoked" = 1 WHERE "id" = ?`,
-                    existingPending[0].id
+                    priorInvite.id
                 );
+                await tx.auditLog.create({
+                    data: {
+                        id: `audit-inv-reis-sc-${Date.now()}-${crypto.randomUUID()}`,
+                        entity: 'USER',
+                        entityId: priorInvite.id,
+                        action: 'INVITE_REISSUED',
+                        details: `Reissued invitation for ${priorInvite.email} via create shortcut by ${actor.username}`,
+                        performedBy: actor.username,
+                        labId: priorInvite.labId,
+                        timestamp: new Date()
+                    }
+                });
             } else {
                 const err = new Error('An active invitation for this email already exists. Reissue or revoke the existing invitation.');
                 err.statusCode = 409;
                 err.code = 'PENDING_INVITATION_EXISTS';
-                err.existingInvitationId = existingPending[0].id;
+                err.existingInvitationId = priorInvite.id;
                 throw err;
             }
         }
@@ -255,7 +345,6 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
                 .filter(Boolean);
 
             if (requestedProjectCodes.length > 0) {
-                const { resolveProjectLabs } = require('./projectMembershipService');
                 for (const pCode of requestedProjectCodes) {
                     const proj = await tx.project.findFirst({
                         where: {
@@ -272,22 +361,31 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
                         throw err;
                     }
 
+                    // Check explicit association with target lab (J04: country coincidence alone is NOT grant authority)
+                    const isAssociatedWithTarget = await isProjectExplicitlyAssociatedWithLab(proj, labId, tx);
+                    if (!isAssociatedWithTarget) {
+                        const err = new Error(`Project '${pCode}' is not associated with laboratory '${labId}'`);
+                        err.statusCode = 403;
+                        err.code = 'PROJECT_OUTSIDE_SCOPE';
+                        throw err;
+                    }
+
                     let canAssign = false;
                     if (actor.role === 'SUPER_ADMIN') {
                         canAssign = true;
                     } else if (actor.role === 'MASTER_USER') {
                         const countries = Array.isArray(actor.countries)
                             ? actor.countries
-                            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+                            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries || '[]') : []);
                         const labCountries = [];
                         if (proj.labId) {
                             const pLab = await tx.lab.findUnique({ where: { id: proj.labId } });
                             if (pLab?.country) labCountries.push(pLab.country);
                         }
+                        if (targetLab?.country) labCountries.push(targetLab.country);
                         canAssign = labCountries.some(c => countries.includes(c));
                     } else if (actor.role === 'LAB_MANAGER') {
-                        const relations = await resolveProjectLabs(proj, tx);
-                        canAssign = relations.isMember(actor.labId);
+                        canAssign = (actor.labId === labId && isAssociatedWithTarget);
                     }
 
                     if (!canAssign) {
@@ -1029,13 +1127,26 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
 
         let userProjectsJson = '[]';
         if (metadata.projects && Array.isArray(metadata.projects) && metadata.projects.length > 0) {
-            // Re-validate against database
-            const validProjects = await tx.project.findMany({
-                where: { code: { in: metadata.projects } },
-                select: { code: true }
-            });
-            const validCodes = validProjects.map(p => p.code);
-            userProjectsJson = JSON.stringify(validCodes);
+            // Re-validate against database and verify explicit lab association (J05)
+            for (const pCode of metadata.projects) {
+                const proj = await tx.project.findFirst({
+                    where: { OR: [{ code: pCode }, { id: pCode }] }
+                });
+                if (!proj) {
+                    const err = new Error(`Cannot activate account: Project '${pCode}' not found. A fresh invitation must be issued.`);
+                    err.statusCode = 400;
+                    err.code = 'STALE_PROJECT_GRANT';
+                    throw err;
+                }
+                const isStillAssociated = await isProjectExplicitlyAssociatedWithLab(proj, metadata.labId, tx);
+                if (!isStillAssociated) {
+                    const err = new Error(`Cannot activate account: Project '${pCode}' is no longer associated with laboratory '${metadata.labId}'. A fresh invitation must be issued.`);
+                    err.statusCode = 400;
+                    err.code = 'STALE_PROJECT_GRANT';
+                    throw err;
+                }
+            }
+            userProjectsJson = JSON.stringify(metadata.projects);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -1202,8 +1313,18 @@ async function consumeRecoveryGrant(rawToken, { newPassword }, outerTx = null) {
  * - MASTER_USER can view labs in authorized countries.
  * - LAB_MANAGER can only view invitations in their own lab.
  */
-async function getPendingInvitations(actor, labId, tx = prisma) {
-    await ensureTables(tx);
+async function getPendingInvitations(actor, labId, options = {}, tx = prisma) {
+    let effectiveOptions = {};
+    let effectiveTx = prisma;
+
+    if (options && typeof options.$queryRawUnsafe === 'function') {
+        effectiveTx = options;
+        effectiveOptions = {};
+    } else {
+        effectiveOptions = options || {};
+        effectiveTx = tx || prisma;
+    }
+    await ensureTables(effectiveTx);
 
     if (!actor || actor.isActive === false) {
         const err = new Error('Actor account is inactive or missing');
@@ -1219,7 +1340,7 @@ async function getPendingInvitations(actor, labId, tx = prisma) {
         throw err;
     }
 
-    const lab = await tx.lab.findUnique({ where: { id: labId } });
+    const lab = await effectiveTx.lab.findUnique({ where: { id: labId } });
     if (!lab) {
         const err = new Error(`Laboratory '${labId}' not found`);
         err.statusCode = 404;
@@ -1248,14 +1369,21 @@ async function getPendingInvitations(actor, labId, tx = prisma) {
         throw err;
     }
 
-    const invitations = await tx.$queryRawUnsafe(
+    // Bounded pagination support
+    const page = Math.max(1, parseInt(effectiveOptions.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(effectiveOptions.limit) || 50));
+    const offset = (page - 1) * limit;
+
+    const invitations = await effectiveTx.$queryRawUnsafe(
         `SELECT "id", "email", "name", "role", "labId", "projects", "expiresAt", "createdAt", "createdBy"
          FROM "StaffInvitation"
-         WHERE "labId" = ? AND "isConsumed" = 0 AND "isRevoked" = 0 AND "expiresAt" > CURRENT_TIMESTAMP
-         ORDER BY "createdAt" DESC`,
+         WHERE "labId" = ? AND "isConsumed" = 0 AND "isRevoked" = 0
+         ORDER BY "createdAt" DESC
+         LIMIT ${limit} OFFSET ${offset}`,
         labId
     );
 
+    const now = Date.now();
     return invitations.map(inv => {
         let parsedProjects = [];
         if (inv.projects) {
@@ -1263,6 +1391,8 @@ async function getPendingInvitations(actor, labId, tx = prisma) {
                 parsedProjects = typeof inv.projects === 'string' ? JSON.parse(inv.projects) : inv.projects;
             } catch (_) {}
         }
+        const expDate = new Date(inv.expiresAt);
+        const isExpired = Number.isFinite(expDate.getTime()) ? expDate.getTime() <= now : false;
         return {
             id: inv.id,
             email: inv.email,
@@ -1274,7 +1404,7 @@ async function getPendingInvitations(actor, labId, tx = prisma) {
             createdAt: inv.createdAt,
             createdBy: inv.createdBy,
             deliveryStatus: 'MANUAL_LINK',
-            isExpired: false
+            isExpired
         };
     });
 }
@@ -1325,11 +1455,11 @@ async function revokeInvitation(actor, invitationId, options = {}, outerTx = nul
 
         const targetLab = await tx.lab.findUnique({ where: { id: invitation.labId } });
 
-        // Authority check
+        // Authority check: no changes requested during revocation
         const decision = canManageUser(
             actor,
-            { role: invitation.role, labId: invitation.labId, labCountry: targetLab?.country },
-            { role: invitation.role, labId: invitation.labId }
+            { role: invitation.role, labId: invitation.labId, labCountry: targetLab?.country, country: targetLab?.country },
+            {}
         );
 
         if (!decision.allowed) {
@@ -1409,10 +1539,11 @@ async function reissueInvitation(actor, invitationId, options = {}, outerTx = nu
 
         const targetLab = await tx.lab.findUnique({ where: { id: existing.labId } });
 
+        // Authority check: if options.changes is not provided, no transfer is proposed
         const decision = canManageUser(
             actor,
-            { role: existing.role, labId: existing.labId, labCountry: targetLab?.country },
-            { role: existing.role, labId: existing.labId }
+            { role: existing.role, labId: existing.labId, labCountry: targetLab?.country, country: targetLab?.country },
+            options.changes || {}
         );
 
         if (!decision.allowed) {
@@ -1420,6 +1551,35 @@ async function reissueInvitation(actor, invitationId, options = {}, outerTx = nu
             err.statusCode = 403;
             err.code = decision.code || 'TARGET_OUTSIDE_SCOPE';
             throw err;
+        }
+
+        let parsedProjects = [];
+        if (existing.projects) {
+            try {
+                parsedProjects = typeof existing.projects === 'string' ? JSON.parse(existing.projects) : existing.projects;
+            } catch (_) {}
+        }
+
+        // Revalidate project grants on reissue (J05)
+        if (Array.isArray(parsedProjects) && parsedProjects.length > 0) {
+            for (const pCode of parsedProjects) {
+                const proj = await tx.project.findFirst({
+                    where: { OR: [{ code: pCode }, { id: pCode }] }
+                });
+                if (!proj) {
+                    const err = new Error(`Cannot reissue invitation: Project '${pCode}' not found. Please create a new invitation.`);
+                    err.statusCode = 400;
+                    err.code = 'STALE_PROJECT_GRANT';
+                    throw err;
+                }
+                const isStillAssociated = await isProjectExplicitlyAssociatedWithLab(proj, existing.labId, tx);
+                if (!isStillAssociated) {
+                    const err = new Error(`Cannot reissue invitation: Project '${pCode}' is no longer associated with laboratory '${existing.labId}'. Please create a new invitation.`);
+                    err.statusCode = 400;
+                    err.code = 'STALE_PROJECT_GRANT';
+                    throw err;
+                }
+            }
         }
 
         // Revoke all prior pending invitations for this email
@@ -1459,14 +1619,6 @@ async function reissueInvitation(actor, invitationId, options = {}, outerTx = nu
                 timestamp: new Date()
             }
         });
-
-        let parsedProjects = [];
-        if (existing.projects) {
-            try {
-                parsedProjects = typeof existing.projects === 'string' ? JSON.parse(existing.projects) : existing.projects;
-            } catch (_) {}
-        }
-
         return {
             id: newInviteId,
             email: existing.email,

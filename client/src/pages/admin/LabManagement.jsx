@@ -290,7 +290,7 @@ export default function LabManagement() {
         } catch (err) {
             console.error('Failed to reissue invitation:', err);
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            showDialog({ title: 'Reissue Failed', message: msg, type: 'error' });
+            showDialog({ title: t('labManagement.invitations.reissue.failed', 'Reissue Failed'), message: msg, type: 'error' });
         } finally {
             setReissuingInviteId(null);
         }
@@ -298,18 +298,23 @@ export default function LabManagement() {
 
     // Revoke staff invitation
     const handleRevokeInvite = async (inv) => {
-        if (!window.confirm(`Revoke invitation for ${inv.email}? The activation link will immediately become invalid.`)) {
+        const confirmMsg = t('labManagement.invitations.revoke.confirm', 'Revoke invitation for {{email}}? The activation link will immediately become invalid.').replace('{{email}}', inv.email);
+        if (!window.confirm(confirmMsg)) {
             return;
         }
         setRevokingInviteId(inv.id);
         try {
             await axios.post(`/api/staff/invitations/${encodeURIComponent(inv.id)}/revoke`);
-            showDialog({ title: 'Invitation Revoked', message: `Invitation for ${inv.email} has been revoked.`, type: 'success' });
+            showDialog({
+                title: t('labManagement.invitations.revoke.successTitle', 'Invitation Revoked'),
+                message: t('labManagement.invitations.revoke.successMessage', 'Invitation for {{email}} has been revoked.').replace('{{email}}', inv.email),
+                type: 'success'
+            });
             fetchWorkspace(selectedLabId);
         } catch (err) {
             console.error('Failed to revoke invitation:', err);
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            showDialog({ title: 'Revoke Failed', message: msg, type: 'error' });
+            showDialog({ title: t('labManagement.invitations.revoke.failed', 'Revoke Failed'), message: msg, type: 'error' });
         } finally {
             setRevokingInviteId(null);
         }
@@ -1082,11 +1087,11 @@ export default function LabManagement() {
                                     <div className="flex items-center gap-2">
                                         <Clock size={16} className="text-amber-600 dark:text-amber-400" />
                                         <h3 className="text-sm font-black text-sf-text">
-                                            Pending Staff Invitations ({workspace.pendingInvitations.length})
+                                            {t('labManagement.invitations.title', 'Pending Staff Invitations')} ({workspace.pendingInvitations.length})
                                         </h3>
                                     </div>
                                     <p className="text-[11px] text-sf-muted mt-0.5">
-                                        Active, unconsumed invitation links. Share activation links directly; automated email delivery is not configured.
+                                        {t('labManagement.invitations.subtitle', 'Active, unconsumed invitation links. Share activation links directly; automated email delivery is not configured.')}
                                     </p>
                                 </div>
                             </div>
@@ -1095,11 +1100,11 @@ export default function LabManagement() {
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="border-b border-sf-divider bg-sf-canvas/50 text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                                            <th className="py-2.5 px-3">Invitee</th>
-                                            <th className="py-2.5 px-3">Role & Projects</th>
-                                            <th className="py-2.5 px-3">Delivery Status</th>
-                                            <th className="py-2.5 px-3">Expires</th>
-                                            <th className="py-2.5 px-3 text-right">Actions</th>
+                                            <th className="py-2.5 px-3">{t('labManagement.invitations.colInvitee', 'Invitee')}</th>
+                                            <th className="py-2.5 px-3">{t('labManagement.invitations.colRole', 'Role & Projects')}</th>
+                                            <th className="py-2.5 px-3">{t('labManagement.invitations.colDelivery', 'Delivery Status')}</th>
+                                            <th className="py-2.5 px-3">{t('labManagement.invitations.colExpires', 'Expires')}</th>
+                                            <th className="py-2.5 px-3 text-right">{t('labManagement.invitations.colActions', 'Actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-sf-divider text-xs">
@@ -1118,14 +1123,20 @@ export default function LabManagement() {
                                                         </span>
                                                         {inv.projects && inv.projects.length > 0 && (
                                                             <div className="text-[10px] text-sf-muted mt-1 font-mono">
-                                                                Projects: {inv.projects.join(', ')}
+                                                                {t('labManagement.invitations.projects', 'Projects')}: {inv.projects.join(', ')}
                                                             </div>
                                                         )}
                                                     </td>
                                                     <td className="py-3 px-3">
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                                                            Manual Link Generated
-                                                        </span>
+                                                        {inv.isExpired ? (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60">
+                                                                {t('labManagement.invitations.statusExpired', 'Expired')}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                                                                {t('labManagement.invitations.statusManualLink', 'Manual Link Generated')}
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="py-3 px-3 text-sf-muted text-[11px]">
                                                         {expiresDate.toLocaleDateString()} {expiresDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -1138,7 +1149,7 @@ export default function LabManagement() {
                                                             className="px-2.5 py-1 bg-sf-raised hover:bg-sf-divider text-sf-text rounded-lg text-[11px] font-bold transition inline-flex items-center gap-1"
                                                         >
                                                             <RefreshCw size={12} className={reissuingInviteId === inv.id ? 'animate-spin' : ''} />
-                                                            Reissue
+                                                            {t('labManagement.invitations.btnReissue', 'Reissue')}
                                                         </button>
                                                         <button
                                                             id={`btn-revoke-invite-${inv.id}`}
@@ -1147,7 +1158,7 @@ export default function LabManagement() {
                                                             className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg text-[11px] font-bold border border-rose-200 dark:border-rose-800/60 transition inline-flex items-center gap-1"
                                                         >
                                                             <X size={12} />
-                                                            Revoke
+                                                            {t('labManagement.invitations.btnRevoke', 'Revoke')}
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -1804,10 +1815,10 @@ export default function LabManagement() {
                         <div className="flex items-center justify-between border-b border-sf-divider pb-3 shrink-0">
                             <div>
                                 <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                                    Single-Use Activation Token
+                                    {t('labManagement.invitations.reissue.badge', 'Single-Use Activation Token')}
                                 </div>
                                 <h3 id="reissued-dialog-title" className="font-black text-base text-sf-text">
-                                    Invitation Reissued
+                                    {t('labManagement.invitations.reissue.title', 'Invitation Reissued')}
                                 </h3>
                             </div>
                             <button onClick={() => setReissuedModalData(null)} aria-label="Close" className="p-1 text-sf-muted hover:text-sf-text">
@@ -1816,11 +1827,11 @@ export default function LabManagement() {
                         </div>
                         <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar min-h-0 text-xs">
                             <p className="text-sf-muted">
-                                A fresh single-use activation link has been generated for <strong className="text-sf-text">{reissuedModalData.email}</strong>. The previous link was revoked and can no longer be used.
+                                {t('labManagement.invitations.reissue.description', 'A fresh single-use activation link has been generated for {{email}}. The previous link was revoked and can no longer be used.').replace('{{email}}', reissuedModalData.email)}
                             </p>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
-                                    Fresh Activation Link
+                                    {t('labManagement.invitations.reissue.link', 'Fresh Activation Link')}
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <input
@@ -1833,12 +1844,12 @@ export default function LabManagement() {
                                         className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
                                     >
                                         <Copy size={13} />
-                                        {reissuedCopied ? 'Copied!' : 'Copy'}
+                                        {reissuedCopied ? t('labManagement.invitations.reissue.copied', 'Copied!') : t('labManagement.invitations.reissue.copy', 'Copy')}
                                     </button>
                                 </div>
                                 <div className="text-[11px] text-sf-muted flex items-center gap-1.5 mt-1">
                                     <Clock size={12} />
-                                    <span>Expires in 24 hours. Manual link: share directly with invitee (no automated email was sent).</span>
+                                    <span>{t('labManagement.invitations.reissue.expiryNotice', 'Expires in 24 hours. Manual link: share directly with invitee (no automated email was sent).')}</span>
                                 </div>
                             </div>
                         </div>
@@ -1847,7 +1858,7 @@ export default function LabManagement() {
                                 onClick={() => setReissuedModalData(null)}
                                 className="px-5 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition"
                             >
-                                Done
+                                {t('labManagement.invitations.reissue.done', 'Done')}
                             </button>
                         </div>
                     </div>

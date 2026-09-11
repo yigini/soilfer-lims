@@ -382,11 +382,17 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         pendingInvitations: capabilities.canManageStaff ? await (async () => {
             try {
                 const { getPendingInvitations } = require('./staffLifecycleService');
-                return await getPendingInvitations(actor, labId, transaction);
+                const invitationPage = Math.max(1, parseInt(query.invitationPage, 10) || 1);
+                const invitationLimit = Math.min(100, Math.max(1, parseInt(query.invitationLimit, 10) || 20));
+                return await getPendingInvitations(actor, labId, { page: invitationPage, limit: invitationLimit }, transaction);
             } catch (_) {
                 return [];
             }
         })() : [],
+        invitationPagination: {
+            page: Math.max(1, parseInt(query.invitationPage, 10) || 1),
+            limit: Math.min(100, Math.max(1, parseInt(query.invitationLimit, 10) || 20))
+        },
         projects,
         projectsPagination,
         workload,
