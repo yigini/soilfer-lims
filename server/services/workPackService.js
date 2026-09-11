@@ -16,6 +16,12 @@ class WorkPackService {
     static async preparePack(user, { deviceId, labId, methodCodes = [], sampleIds = [] }) {
         const effectiveLabId = user.role === 'SUPER_ADMIN' ? (labId || user.labId) : user.labId;
 
+        if (user.role !== 'SUPER_ADMIN' && !effectiveLabId) {
+            const err = new Error('Laboratory scope is required to prepare offline work pack');
+            err.status = 403;
+            throw err;
+        }
+
         const packId = 'pack_' + Date.now() + '_' + (randomUUID ? randomUUID().substring(0, 8) : Math.random().toString(36).substring(2, 8));
         const now = new Date();
         const expiresAt = new Date(now.getTime() + 12 * 60 * 60 * 1000); // 12-hour shift lease
@@ -27,7 +33,9 @@ class WorkPackService {
                     { labId: effectiveLabId },
                     { assignedLab: effectiveLabId }
                 ]
-            } : {}),
+            } : {
+                labId: { not: null }
+            }),
             status: { in: ['ACCEPTED', 'PROCESSING', 'RECEIVED', 'ANALYSIS', 'PARTIALLY_COMPLETE'] }
         };
 

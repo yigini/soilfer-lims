@@ -18,6 +18,23 @@ exports.getProjects = async (req, res) => {
                 if (!includeDeleted) where.status = { not: 'DELETED' };
                 projects = await prisma.project.findMany({ where });
             }
+        } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(user.role)) {
+            const countryList = user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : [];
+            if (countryList.length > 0) {
+                const labs = await prisma.lab.findMany({
+                    where: { country: { in: countryList } },
+                    select: { id: true }
+                });
+                const labIds = labs.map(l => l.id);
+                const where = {
+                    OR: [
+                        { labId: { in: labIds } },
+                        { country: { in: countryList } }
+                    ]
+                };
+                if (!includeDeleted) where.status = { not: 'DELETED' };
+                projects = await prisma.project.findMany({ where });
+            }
         } else if (user.role === 'LAB_MANAGER' || user.role === 'SAMPLE_RECEPTION' || user.role === 'LAB_TECHNICIAN') {
             const userLabId = user.labId;
             if (!userLabId) return res.json([]);
@@ -108,15 +125,24 @@ exports.getProject = async (req, res) => {
         const project = await prisma.project.findUnique({ where: { id: String(id) } });
         if (!project) return error(res, 404, 'PROJECT_NOT_FOUND', { id }, 'Project not found');
 
+        // Check junction table ProjectLab (LG-10, P18)
+        let inProjectLab = false;
+        let assignedLabs = [];
+        try {
+            assignedLabs = await prisma.$queryRaw`
+                SELECT labId FROM ProjectLab WHERE projectCode = ${project.code}
+            `;
+            if (req.user.labId) {
+                inProjectLab = assignedLabs.some(l => l.labId === req.user.labId);
+            }
+        } catch (e) {}
+
         // Lab Isolation Check (Phase 1 - Scope Guard)
         const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
+        if (!inProjectLab && !scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
             return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: Project belongs to another lab');
         }
 
-        const assignedLabs = await prisma.$queryRaw`
-            SELECT labId FROM ProjectLab WHERE projectCode = ${project.code}
-        `;
         const labList = assignedLabs.map(l => l.labId);
         const resolvedAssignedLabIds = (project.assignedLabIds && project.assignedLabIds !== '[]')
             ? project.assignedLabIds
@@ -494,7 +520,6 @@ exports.updateProject = async (req, res) => {
         });
 
         res.json(updated);
-        res.json(updated);
     } catch (err) {
         console.error('[updateProject] Error:', err);
         return error(res, 500, 'PROJECT_UPDATE_ERROR', null, err.message);
@@ -639,25 +664,13 @@ exports.deleteProject = async (req, res) => {
         const project = await prisma.project.findUnique({ where: { id: String(id) } });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Cannot delete projects from another lab. Access denied.' });
-        }
-
-        // Additional check: Managers cannot delete global projects UNLESS assigned
-        if (req.user.role === 'LAB_MANAGER' && !project.labId) {
-            let isAssigned = false;
-            if (project.assignedLabIds) {
-                try {
-                    const ids = JSON.parse(project.assignedLabIds);
-                    isAssigned = Array.isArray(ids) && ids.includes(req.user.labId);
-                } catch (e) {
-                    isAssigned = project.assignedLabIds.includes(`"${req.user.labId}"`);
-                }
+        // Lab Isolation & Ownership Check (LG-11)
+        if (req.user.role !== 'SUPER_ADMIN') {
+            if (!project.labId) {
+                return res.status(403).json({ error: 'Only Super Administrators can delete Global/Shared SoilFER projects.' });
             }
-            if (!isAssigned) {
-                return res.status(403).json({ error: 'Cannot delete Global/SoilFER projects that are not assigned to your lab.' });
+            if (project.labId !== req.user.labId) {
+                return res.status(403).json({ error: 'PROJECT_DELETE_FORBIDDEN', message: 'Cannot delete projects owned by another laboratory.' });
             }
         }
 
@@ -845,14 +858,23 @@ exports.getProjectSamples = async (req, res) => {
 exports.getProjectKoboConfig = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: {
+                OR: [{ id: String(id) }, { code: String(id) }]
+            }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
+            return res.status(403).json({ error: 'Access denied: Project belongs to another laboratory scope' });
+        }
 
         if (project.projectType !== 'KOBO_LINKED') {
             return res.json({ configured: false });
         }
 
-        // Find all KoboConfigs for this project (there may be multiple for global projects with multiple labs)
+        // Find all KoboConfigs for this project
         const configs = await prisma.koboConfig.findMany({
             where: { projectCode: project.code }
         });
@@ -861,18 +883,18 @@ exports.getProjectKoboConfig = async (req, res) => {
             return res.json({ configured: false });
         }
 
-        const isAdmin = ['SUPER_ADMIN', 'MASTER_USER', 'ADMIN'].includes(req.user.role);
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
 
-        // Return the first config (primary), masking sensitive data for non-admins
         const config = configs[0];
+        // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
         res.json({
             configured: true,
             koboServerUrl: config.koboServerUrl,
             koboFormId: config.formId,
-            koboApiToken: isAdmin ? config.apiToken : ('••••••••' + config.apiToken.slice(-4)),
             isActive: config.isActive,
             lastSyncAt: config.lastSyncAt,
-            canEdit: isAdmin
+            canEdit: isAdmin || isOwnerManager
         });
     } catch (error) {
         console.error('[getProjectKoboConfig] Error:', error);

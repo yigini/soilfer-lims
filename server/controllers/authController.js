@@ -148,13 +148,14 @@ exports.impersonate = async (req, res) => {
             return error(res, 403, 'AUTH.FORBIDDEN', 'Cannot impersonate another Super Admin');
         }
 
-        // Mint short-lived token (30m) with actor claim
+        // Mint short-lived token (30m) with actor claim and tokenVersions
         const token = jwt.sign(
             {
                 id: targetUser.id,
                 username: targetUser.username,
                 role: targetUser.role,
-                act: { id: adminUser.id, username: adminUser.username }
+                tokenVersion: targetUser.tokenVersion || 0,
+                act: { id: adminUser.id, username: adminUser.username, tokenVersion: adminUser.tokenVersion || 0 }
             },
             SECRET_KEY,
             { expiresIn: '30m' }

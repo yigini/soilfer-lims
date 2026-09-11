@@ -20,16 +20,19 @@ exports.preparePack = async (req, res) => {
 
 exports.getPack = async (req, res) => {
     const { id } = req.params;
-    let pack = packCache.get(id);
+    const pack = packCache.get(id);
 
     if (!pack) {
-        // Try regenerating or return 404
-        try {
-            pack = await WorkPackService.preparePack(req.user, { labId: req.user.labId });
-            packCache.set(pack.packId, pack);
-        } catch (e) {
-            return res.status(404).json({ error: `Offline pack '${id}' not found or expired` });
-        }
+        return res.status(404).json({ error: `Offline pack '${id}' not found or expired` });
+    }
+
+    // Verify pack ownership & lab scope (LG-15, P23)
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwner = pack.userId === req.user.id || pack.userId === req.user.username;
+    const isSameLab = !req.user.labId || !pack.labId || req.user.labId === pack.labId;
+
+    if (!isSuperAdmin && (!isOwner || !isSameLab)) {
+        return res.status(403).json({ error: 'Access denied to this offline work pack' });
     }
 
     return res.json(pack);

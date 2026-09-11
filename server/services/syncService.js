@@ -84,18 +84,104 @@ class SyncService {
                     const workItemId = op.target?.workItemId;
                     if (!workItemId) throw new Error('Target workItemId is required');
 
-                    // Store draft in database or result
-                    outcome = { saved: true, workItemId };
+                    const item = await prisma.workItem.findUnique({
+                        where: { id: workItemId },
+                        include: { sample: true }
+                    });
+                    if (!item) throw new Error(`Work item '${workItemId}' not found`);
+
+                    // Check work item lab scope
+                    const workLab = item.assignedLab || item.labId || item.sample?.assignedLab || item.sample?.labId;
+                    if (user.role !== 'SUPER_ADMIN' && user.labId && workLab && user.labId !== workLab) {
+                        receipts.push({
+                            operationId: opId,
+                            status: 'REJECTED',
+                            code: 'WORK_ITEM_OUTSIDE_LAB_SCOPE',
+                            reason: 'Cross-lab draft save forbidden'
+                        });
+                        continue;
+                    }
+
+                    // Store draft in database atomically (LG-14, P26)
+                    let draftRecord = null;
+                    const draftVal = op.payload?.value !== undefined ? String(op.payload.value) : (op.payload?.result !== undefined ? String(op.payload.result) : (op.payload?.draftValue !== undefined ? String(op.payload.draftValue) : null));
+                    if (prisma.workItemDraft) {
+                        draftRecord = await prisma.workItemDraft.upsert({
+                            where: { workItemId },
+                            create: {
+                                workItemId,
+                                sampleId: item.sampleId,
+                                userId: user.username,
+                                labId: workLab || user.labId,
+                                analysis: item.analysis,
+                                value: draftVal,
+                                values: op.payload?.values ? JSON.stringify(op.payload.values) : null,
+                                checks: op.payload?.checks ? JSON.stringify(op.payload.checks) : null,
+                                baseVersion: op.baseVersion || item.version || 0,
+                                notes: op.payload?.notes || null
+                            },
+                            update: {
+                                value: draftVal !== null ? draftVal : undefined,
+                                values: op.payload?.values ? JSON.stringify(op.payload.values) : undefined,
+                                checks: op.payload?.checks ? JSON.stringify(op.payload.checks) : undefined,
+                                notes: op.payload?.notes !== undefined ? op.payload.notes : undefined,
+                                draftVersion: { increment: 1 },
+                                updatedAt: new Date()
+                            }
+                        });
+                    } else {
+                        draftRecord = await prisma.workItem.update({
+                            where: { id: workItemId },
+                            data: { updatedAt: new Date() }
+                        });
+                    }
+
+                    outcome = { saved: true, workItemId, draftId: draftRecord?.id };
                 } else if (op.type === 'COMPLETE_WORK') {
                     // Scientific determination completion
                     const workItemId = op.target?.workItemId;
                     if (!workItemId) throw new Error('Target workItemId is required');
+
+                    // Check user permissions (LG-14, P25)
+                    const { hasPermission } = require('../config/roles');
+                    if (!hasPermission(user, 'ENTER_RESULTS')) {
+                        receipts.push({
+                            operationId: opId,
+                            status: 'REJECTED',
+                            code: 'PERMISSION_DENIED',
+                            reason: 'User lacks ENTER_RESULTS permission for work completion'
+                        });
+                        continue;
+                    }
 
                     const item = await prisma.workItem.findUnique({
                         where: { id: workItemId },
                         include: { sample: true }
                     });
                     if (!item) throw new Error(`Work item '${workItemId}' not found`);
+
+                    // Lab isolation & assignment check (LG-14, P25)
+                    const workLab = item.assignedLab || item.labId || item.sample?.assignedLab || item.sample?.labId;
+                    if (user.role !== 'SUPER_ADMIN' && user.labId && workLab && user.labId !== workLab) {
+                        receipts.push({
+                            operationId: opId,
+                            status: 'REJECTED',
+                            code: 'WORK_ITEM_OUTSIDE_LAB_SCOPE',
+                            reason: 'Cross-lab work completion forbidden'
+                        });
+                        continue;
+                    }
+
+                    // Work item state check (LG-14, P25)
+                    if (['ACCEPTED', 'APPROVED'].includes(item.status) || (item.sample && ['APPROVED', 'RELEASED'].includes(item.sample.status))) {
+                        receipts.push({
+                            operationId: opId,
+                            status: 'REJECTED',
+                            code: 'TERMINAL_STATE_REJECTED',
+                            reason: `Cannot complete work item in terminal/approved state '${item.status}'. Use canonical amendment process.`
+                        });
+                        continue;
+                    }
 
                     // Check for version conflict if baseVersion supplied
                     if (op.baseVersion && item.version && item.version > op.baseVersion) {

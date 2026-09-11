@@ -199,6 +199,10 @@ exports.createLanguage = async (req, res) => {
     const { code, name } = req.body;
     if (!code || !name) return res.error(400, 'VALIDATION_ERROR', 'Code and Name required');
 
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.error(403, 'ACTION_FORBIDDEN', 'Only Super Administrators can create global platform languages');
+    }
+
     try {
         const existing = await prisma.language.findUnique({ where: { code } });
         if (existing) return res.error(400, 'DUPLICATE_ENTRY', 'Language code already exists');
@@ -219,6 +223,15 @@ exports.createLanguage = async (req, res) => {
 
 exports.deleteLanguage = async (req, res) => {
     const { code } = req.params;
+
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.error(403, 'ACTION_FORBIDDEN', 'Only Super Administrators can delete platform languages');
+    }
+
+    const PROTECTED_LOCALES = ['en', 'es', 'es-419', 'fr', 'pt'];
+    if (PROTECTED_LOCALES.includes(code.toLowerCase())) {
+        return res.status(400).json({ error: 'CORE_LOCALE_PROTECTED', message: `Cannot delete core platform locale '${code}'` });
+    }
 
     try {
         const lang = await prisma.language.findUnique({ where: { code } });

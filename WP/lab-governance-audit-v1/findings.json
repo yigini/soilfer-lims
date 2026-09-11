@@ -1,0 +1,495 @@
+{
+  "baseline": "ecb7c91aee041febfb60de51d248f322b6d6376c",
+  "reviewedAt": "2026-09-11",
+  "findings": [
+    {
+      "id": "LG-01",
+      "severity": "Critical",
+      "title": "Laboratory staff actions bypass target scope and role hierarchy",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 202,
+        "anchor": "router.patch('/:id/staff/:userId/reset-password'",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P01",
+        "P02",
+        "P03",
+        "P06"
+      ],
+      "observation": "MANAGE_BRANDING grants lab managers sensitive actions for arbitrary laboratory IDs. The staff reset checks target membership in the path lab, but never the acting manager’s lab or target role. The ordinary Users update correctly denies the equivalent cross-lab operation.",
+      "remedy": "Introduce action-specific server policy for every lab/user mutation. Reuse the same staff service behind both entry points; no authority from a client lab ID. Protect management targets and the actor."
+    },
+    {
+      "id": "LG-02",
+      "severity": "High",
+      "title": "Lab update accepts immutable identity and lifecycle fields",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 347,
+        "anchor": "router.put('/:id'",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P05"
+      ],
+      "observation": "The body is spread into the lab update. A caller can forward id, isActive and other Prisma-recognized fields; capacity is cleared when absent and no audit is recorded.",
+      "remedy": "Typed PATCH allowlist, reject immutable and unknown fields, preserve omitted values. Separate versioned lifecycle command; never rename IDs through profile editing."
+    },
+    {
+      "id": "LG-03",
+      "severity": "Critical",
+      "title": "Staff recovery and generated accounts share a predictable secret",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 201,
+        "anchor": "// ─── PATCH /api/labs/:id/staff/:userId/reset-password",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P02"
+      ],
+      "observation": "Reset uses a fixed shared password and returns it; generated active accounts use the same pattern. Resets do not increment tokenVersion. The forced-password-change gate exists but does not replace revocation or secure recovery.",
+      "remedy": "Replace with single-use expiring activation/recovery. Invalidate sessions and other reset grants on administrative reset. No passwords in responses, bulk-copy panels, logs, email templates or screenshots."
+    },
+    {
+      "id": "LG-04",
+      "severity": "High",
+      "title": "Lab creation can leave partial setup and fabricated users",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 238,
+        "anchor": "router.post('/'",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P06"
+      ],
+      "observation": "A lab is created before six staff accounts; per-user errors are swallowed and a test project is created afterward. Real people, valid addresses and a responsible manager are not prerequisites.",
+      "remedy": "Create a draft lab transactionally, then invite named people and configure approved project access. Report readiness accurately; no automatic active test projects or invented identities."
+    },
+    {
+      "id": "LG-05",
+      "severity": "High",
+      "title": "Lab suspension and restoration can strand the whole staff",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 124,
+        "anchor": "router.patch('/:id/toggle-active'",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P04",
+        "P08",
+        "P21"
+      ],
+      "observation": "Disabling a lab disables all users in separate writes; re-enabling it does not restore them. HTTP auth only checks user status, allowing an individually enabled user in an inactive lab. Audit failure can return 500 after state changed.",
+      "remedy": "Separate lab operational access from individual account status; use explicit target status, transaction and impact review. Do not bulk-enable existing disabled users during migration or recovery."
+    },
+    {
+      "id": "LG-06",
+      "severity": "High",
+      "title": "User deletion and role changes lack last-admin and dependency protection",
+      "evidence": {
+        "file": "server/controllers/userController.js",
+        "line": 277,
+        "anchor": "exports.deleteUser =",
+        "sha256": "0b7f7dafc02bbe9ec9e16f4433c6861c2f6613c1dcc277eefdb81e1e91fc0851",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P09",
+        "P15"
+      ],
+      "observation": "Hard deletion permits self/last-admin attempts. FK constraints may reject referenced users, but there is no intentional recovery policy. A lab manager can manage a same-lab project manager. Role/lab changes do not reconcile unfinished work.",
+      "remedy": "Archive identities; protect self and last eligible administrator atomically. Restrict target roles explicitly. Route work transfer separately, preserve all historical authorship."
+    },
+    {
+      "id": "LG-07",
+      "severity": "High",
+      "title": "Invalid lab, role and scope values can be stored",
+      "evidence": {
+        "file": "server/controllers/userController.js",
+        "line": 183,
+        "anchor": "exports.updateUser =",
+        "sha256": "0b7f7dafc02bbe9ec9e16f4433c6861c2f6613c1dcc277eefdb81e1e91fc0851",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P10",
+        "P11",
+        "P14"
+      ],
+      "observation": "User labId has no Lab relation and API validation permits nonexistent labs. Empty role bypasses truthy validation. Boolean strings are coerced. Self-profile saves containing unchanged arrays are rejected.",
+      "remedy": "Strict request schemas and entity checks; dedicated self-profile endpoint; exact booleans and recognized roles/locales. Validate explicit scope sets, require a real lab for lab-bound staff."
+    },
+    {
+      "id": "LG-08",
+      "severity": "High",
+      "title": "National staff administration alternates between invalid query and global scope",
+      "evidence": {
+        "file": "server/controllers/userController.js",
+        "line": 30,
+        "anchor": "exports.getUsers =",
+        "sha256": "0b7f7dafc02bbe9ec9e16f4433c6861c2f6613c1dcc277eefdb81e1e91fc0851",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P12",
+        "P13"
+      ],
+      "observation": "Country-scoped national users generate a User.country predicate, but the schema has countries. Empty country lists yield no restriction. National users can list staff but cannot create/manage them consistently.",
+      "remedy": "Resolve authorized labs from explicit national scope and lab country; empty means none. Join staff through those labs. Publish capabilities that match permitted national administration."
+    },
+    {
+      "id": "LG-09",
+      "severity": "Medium",
+      "title": "Roles and staff screens disagree",
+      "evidence": {
+        "file": "client/src/components/UserDialog.jsx",
+        "line": 42,
+        "anchor": "getRoleOptions",
+        "sha256": "d2be5bbb0229ac8b39cb4eaa1d4dfb77f70107d36387e4ddd94f9168944b8300",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P14"
+      ],
+      "observation": "User dialog omits Quality & Audit and External Partner roles available in the server registry; national role choices are empty. Laboratory management is super-admin-only while some staff endpoints allow managers. Raw role codes and free-text lab IDs undermine safe entry.",
+      "remedy": "Server-owned role catalogue and assignable-role API; lab selector with names/country; shared staff components with scoped routes. Display account status, scope and pending work."
+    },
+    {
+      "id": "LG-10",
+      "severity": "High",
+      "title": "Project-to-lab membership has four conflicting representations",
+      "evidence": {
+        "file": "server/controllers/projectController.js",
+        "line": 105,
+        "anchor": "exports.getProject =",
+        "sha256": "ec644a737fb9fabb41741a3d3dac327c176ca799a6dc7c31698ca6699abceeab",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P17",
+        "P18",
+        "P19"
+      ],
+      "observation": "Lab.projectCode, Project.labId, Project.assignedLabIds and ProjectLab compete. Junction membership is checked after detail authorization. National users fall through to empty project lists; project-manager membership does not satisfy the detail guard.",
+      "remedy": "Canonical ProjectLab service relationships plus explicit project ownership and project-user grants. Reconcile legacy conflicts without taking their union automatically; list, detail, selectors and reports use one resolver."
+    },
+    {
+      "id": "LG-11",
+      "severity": "High",
+      "title": "Shared-project read access authorizes global mutations",
+      "evidence": {
+        "file": "server/controllers/projectController.js",
+        "line": 635,
+        "anchor": "exports.deleteProject =",
+        "sha256": "ec644a737fb9fabb41741a3d3dac327c176ca799a6dc7c31698ca6699abceeab",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "A manager assigned to a global project can reach its soft-delete path, which unlinks samples across the whole project. Archive/restore and update similarly rely on generic read access. Updating assignedLabIds can alter other labs’ access.",
+      "remedy": "Separate project ownership, service access and delegation. Lab managers change local execution settings only on shared projects. Global archive/restore/manifest/membership commands require owner authority and impact checks."
+    },
+    {
+      "id": "LG-12",
+      "severity": "High",
+      "title": "Country metadata broadens ordinary laboratory access",
+      "evidence": {
+        "file": "server/utils/scopeGuard.js",
+        "line": 166,
+        "anchor": "function canAccessEntity",
+        "sha256": "7fe3cac465ed87740ab5a78a77b4e1f33a5152a09faa0cae1254dac13a76ac93",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P16"
+      ],
+      "observation": "Country match is an OR grant in generic entity checks, including ordinary lab roles; project membership is missing. A same-country sample from another lab may become readable, and callers reuse this predicate for writes.",
+      "remedy": "Use resource-specific policy: role capability AND resource relationship AND state. Country is a national-role scope only, not an alternative grant for every staff member."
+    },
+    {
+      "id": "LG-13",
+      "severity": "Critical",
+      "title": "Kobo configuration endpoint lacks project scope and returns credentials",
+      "evidence": {
+        "file": "server/controllers/projectController.js",
+        "line": 845,
+        "anchor": "exports.getProjectKoboConfig =",
+        "sha256": "ec644a737fb9fabb41741a3d3dac327c176ca799a6dc7c31698ca6699abceeab",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P28"
+      ],
+      "observation": "Any role with MANAGE_PROJECTS reaches a project’s config without project authorization. National users are considered admin and receive the raw token. The first config is selected across labs; update also finds by project only.",
+      "remedy": "Return configured/health metadata only. Never return stored secrets. Scope every config by project and lab, require integration-admin authority, preserve existing secret on unchanged edit, audit rotation without secret values."
+    },
+    {
+      "id": "LG-14",
+      "severity": "Critical",
+      "title": "Offline synchronization bypasses normal result authorization and can falsely acknowledge drafts",
+      "evidence": {
+        "file": "server/services/syncService.js",
+        "line": 89,
+        "anchor": "op.type === 'COMPLETE_WORK'",
+        "sha256": "fcdcd7b14c5ddf581d62effabf5681e91c664f4b935bb49bdd3a4c17e487c952",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P25",
+        "P26"
+      ],
+      "observation": "Actual sync handler reaches completion writes without role, current assignment, lab, workflow-state or method gates; route requires authentication only. SAVE_WORK_DRAFT reports APPLIED without storing a draft. Synthetic probes demonstrate handler decisions, not a real DB commit.",
+      "remedy": "Delegate every offline command to the canonical online domain services. Revalidate current grants, ownership, prerequisites and versions. Persist receipt and result atomically. Never report APPLIED before durable persistence."
+    },
+    {
+      "id": "LG-15",
+      "severity": "High",
+      "title": "Offline packs and queued work are not consistently bound to user and lab",
+      "evidence": {
+        "file": "server/controllers/offlineController.js",
+        "line": 21,
+        "anchor": "exports.getPack =",
+        "sha256": "9168eda7cfc06e181692e4a9ee1fd55659a8a8613d0b815de0538930e781d9e4",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P23",
+        "P24"
+      ],
+      "observation": "A cached pack is returned by ID without owner/lab/expiry checks. A missing pack regenerates a different one. A non-admin missing lab can request an unscoped pack. Client sync sends all pending operations using the currently stored token.",
+      "remedy": "Bind pack, device, account, lab, authorization version and lease. Missing/expired means explicit error. Partition local outbox/drafts by immutable actor and lab; never replay another operator’s work after account switch. Preserve rejected evidence for authorized recovery."
+    },
+    {
+      "id": "LG-16",
+      "severity": "High",
+      "title": "Session revocation differs between HTTP, impersonation and WebSocket",
+      "evidence": {
+        "file": "server/middleware/authMiddleware.js",
+        "line": 14,
+        "anchor": "const verifyToken =",
+        "sha256": "dd45bd955bd03d3acd32795e3ecf65e4bfd07643ad77544d3f565ea8d2966877",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P20",
+        "P21",
+        "P22"
+      ],
+      "observation": "HTTP checks current user status and tokenVersion, which is useful. Impersonation omits target version and does not recheck the original actor. WebSocket checks active status only when connecting and caches lab/role; no tokenVersion validation or ongoing revocation.",
+      "remedy": "Shared authentication context and authorization version; revoke active sockets on changes, validate actor and target in support sessions, include current versions. Offline leases cannot be instantly revoked while disconnected: state this limit and reject unauthorized replay."
+    },
+    {
+      "id": "LG-17",
+      "severity": "High",
+      "title": "Assignment can target inactive staff and misses national bounds",
+      "evidence": {
+        "file": "server/controllers/workItemController.js",
+        "line": 494,
+        "anchor": "exports.assignWork =",
+        "sha256": "97d13ee3419c65288c85a26791d772688be30e719ce5961baa60caad8def5727",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Assignment correctly checks technician role and receiving-lab equality, but does not reject inactive assignees; actor ownership restriction is only for LAB_MANAGER. National scope and staff transfer impact are missing.",
+      "remedy": "Eligible-assignee query and command must require active account/lab, correct receiving lab, actor scope, method authorization where configured and current work state. Reassignment preserves attempts and history."
+    },
+    {
+      "id": "LG-18",
+      "severity": "High",
+      "title": "Equipment management has inconsistent lab checks",
+      "evidence": {
+        "file": "server/controllers/equipmentController.js",
+        "line": 158,
+        "anchor": "exports.updateStatus =",
+        "sha256": "3aacf410ca83bfb2362f5db85a818243c8a4266e47a6a7c70e08ec8e732b44e4",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P27"
+      ],
+      "observation": "Detail and event creation use scope guards, but registration trusts body labId, status/metadata updates target arbitrary IDs, and event list/disposition omit parent-lab checks. Missing lab yields an unfiltered equipment list.",
+      "remedy": "Apply equipment policy to every lookup/write/event/eligibility endpoint. Validate referenced location and instrument ownership. Recompute readiness using existing equipment rules and invalidate affected bench rows."
+    },
+    {
+      "id": "LG-19",
+      "severity": "High",
+      "title": "Inventory location transfer does not validate destination lab",
+      "evidence": {
+        "file": "server/controllers/inventoryController.js",
+        "line": 599,
+        "anchor": "exports.transferLot =",
+        "sha256": "bc662406919d69a928ab6f3eb72e9d7557c7b241145bc60846a1e52884023829",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Transfer checks the source lot belongs to the actor’s lab, but only checks destination location existence. This can create a cross-lab lot/location mismatch. Generic list scope uses undefined labId without an explicit missing-scope denial.",
+      "remedy": "Require destination and source same lab for location moves; real inter-lab stock transfer is a separate approved, balanced-ledger workflow. Fail closed on missing scope; preserve existing transactional quantity/audit rules."
+    },
+    {
+      "id": "LG-20",
+      "severity": "High",
+      "title": "Global language management is exposed through branding permission",
+      "evidence": {
+        "file": "server/controllers/adminController.js",
+        "line": 220,
+        "anchor": "exports.deleteLanguage =",
+        "sha256": "2c441aeadb067fce3cf233168fabb7e283125104232debe53afe6b65ce68b04a",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Create/delete language routes use MANAGE_BRANDING and lack a global-role check inside their handlers. In contrast, translation update and default selection already distinguish global and lab scopes.",
+      "remedy": "Separate MANAGE_GLOBAL_LANGUAGES from lab overrides. Protect all five supported locales and existing content; no locale deletion through ordinary lab management. Preserve local translation overrides."
+    },
+    {
+      "id": "LG-21",
+      "severity": "Medium",
+      "title": "Audit records do not consistently explain staff and scope changes",
+      "evidence": {
+        "file": "server/controllers/userController.js",
+        "line": 183,
+        "anchor": "exports.updateUser =",
+        "sha256": "0b7f7dafc02bbe9ec9e16f4433c6861c2f6613c1dcc277eefdb81e1e91fc0851",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "User change audit records list field names but omit labId and meaningful before/after values. Lab PUT is unaudited. Several mutations occur before audit, so audit failures can leave successful state changes reported as failures. Impersonated operations can appear under the target only.",
+      "remedy": "Append redacted before/after, actor/subject, reason, lab/project scope, command ID and revision transactionally. Authorize audit reads and retain immutable history. Never log passwords, recovery tokens or integration keys."
+    },
+    {
+      "id": "LG-22",
+      "severity": "Medium",
+      "title": "Common lab picker endpoint exposes a full management DTO",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 10,
+        "anchor": "router.get('/'",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P07"
+      ],
+      "observation": "Authenticated GET /labs returns every lab with notes/settings and aggregate staff/sample/project information. Common forms depend on this endpoint, so simply denying it would break normal selection.",
+      "remedy": "Split a minimal scoped lab directory from management summaries. Enumerate consumers and migrate them together; cache keys include actor scope and revision."
+    },
+    {
+      "id": "LG-23",
+      "severity": "Medium",
+      "title": "Lab workspace mixes setup, access and status in unsafe small controls",
+      "evidence": {
+        "file": "client/src/pages/admin/LabManagement.jsx",
+        "line": 243,
+        "anchor": "InfoTab",
+        "sha256": "9daf8b70673c4fadd4c49039c035fce2f33748e209e11d0605332e4540d7c2dc",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Tiny activation dot, inline staff actions, hardcoded English, generic project links, no impact review and a staff fetch failure presented as an empty roster. Missing configuration disappears from info display.",
+      "remedy": "Use a focused lab workspace with Overview, People, Projects, Methods & resources, Settings and History. Named actions with inline reasons, real error/empty states, mobile rows, translated human labels and one staff editor."
+    },
+    {
+      "id": "LG-24",
+      "severity": "Medium",
+      "title": "Lab workload counts and time-zone setup can mislead managers",
+      "evidence": {
+        "file": "server/routes/labRoutes.js",
+        "line": 36,
+        "anchor": "const TERMINAL_STATUSES",
+        "sha256": "ba4f60eb112833a76d0e3ec5664599d7ebd293a9e5956d5255c1973da8f31f9c",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Lab active-sample count includes every status except ARCHIVED/DISPOSED, including expected/unreceived samples. Live admin showed timezone gaps in eight labs; the existing Configure deep link worked. Static timezone offsets in the lab form can mislead around daylight saving.",
+      "remedy": "Define mutually exclusive operational counts from canonical workflow/readiness; use explicit IANA zone, localized dates and current offset preview. Reuse existing dashboard contracts; do not add another pipeline calculator."
+    },
+    {
+      "id": "LG-25",
+      "severity": "High",
+      "title": "Lab identifier semantics require a controlled migration",
+      "evidence": {
+        "file": "server/prisma/schema.prisma",
+        "line": 13,
+        "anchor": "model User {",
+        "sha256": "0717c0f3daa68ff10b4af8838718aae56d369908cd5830045f8e72c304f4b99b",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "User.labId is an unconstrained string. Sample.labId is also used as a generated sample/lab accession identifier; Sample.assignedLab is receiving-lab ownership. A bulk rename/relation migration could corrupt labels or access.",
+      "remedy": "Document each field’s meaning, reconcile orphan user lab IDs against real Lab IDs, retain public sample accession IDs. Add relations only after a read-only mismatch report and reviewed resolution map."
+    },
+    {
+      "id": "LG-26",
+      "severity": "Medium",
+      "title": "Work change notifications use the actor lab instead of the work lab",
+      "evidence": {
+        "file": "server/controllers/workItemController.js",
+        "line": 696,
+        "anchor": "broadcastToLab(user.labId",
+        "sha256": "97d13ee3419c65288c85a26791d772688be30e719ce5961baa60caad8def5727",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Assignment/reassignment/review notifications use user.labId. A global admin with no lab can make a valid change while the broadcaster drops the missing-lab event; a manager’s screen stays stale.",
+      "remedy": "Emit transactional outbox events using the resource receiving lab and affected users, partition bulk actions by lab. Clients refetch authoritative state on reconnect; events must not confer access."
+    },
+    {
+      "id": "LG-27",
+      "severity": "Medium",
+      "title": "Project update attempts to send its response twice",
+      "evidence": {
+        "file": "server/controllers/projectController.js",
+        "line": 496,
+        "anchor": "res.json(updated);",
+        "sha256": "ec644a737fb9fabb41741a3d3dac327c176ca799a6dc7c31698ca6699abceeab",
+        "mode": "source inspection"
+      },
+      "probes": [],
+      "observation": "Two consecutive res.json(updated) calls occur in the update handler. The second write can raise headers-already-sent after a successful save.",
+      "remedy": "Return once after the transaction. Assert one response, one audit and idempotent retry behavior; do not assume an HTTP 500 reaches the client after headers were sent."
+    },
+    {
+      "id": "LG-28",
+      "severity": "High",
+      "title": "SIS key administration and JWT revocation diverge from platform policy",
+      "evidence": {
+        "file": "server/controllers/sisController.js",
+        "line": 836,
+        "anchor": "exports.createApiKey =",
+        "sha256": "c301720f16dd7392f2d82c26adfac49561f5615ffea274e3ba03178b70354b37",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P29"
+      ],
+      "observation": "Key list/create/revoke use MANAGE_BRANDING without an owner/lab check; revoke can target any key. Key creation accepts country/project scopes but omits labs, while the consumer requires explicit lab scope and correctly denies absent labs. SIS JWT middleware checks active user but not tokenVersion or forced-password-change.",
+      "remedy": "Dedicated integration-key policy, explicit validated lab/project scopes and bounded expiry; creation never grants more than the issuer. Preserve hashed keys and one-time creation display. Scope list/revoke and audit them. Reuse HTTP session validation for JWT callers; do not loosen the empty-lab denial to make keys work."
+    },
+    {
+      "id": "LG-29",
+      "severity": "High",
+      "title": "National dashboard lab selector accepts unauthorized labs",
+      "evidence": {
+        "file": "server/services/dashboardScope.js",
+        "line": 95,
+        "anchor": "async function resolveActorScope",
+        "sha256": "7677afc3cfab31259973a238f18e6cd02660a205223ca2aa2536d123ac794e75",
+        "mode": "source + synthetic handler probes"
+      },
+      "probes": [
+        "P30",
+        "P31"
+      ],
+      "observation": "National selectedLabId is accepted without validating the lab country against the actor. Downstream query uses that active lab directly. The local-day helper adds a fixed 24 hours and gives the wrong end boundary on a daylight-saving day.",
+      "remedy": "Validate selectable labs before loading their names or counts; deny out-of-scope selectors. Reuse a timezone-aware next-local-midnight calculation and test 23/25-hour days. Keep the existing queue contract and positive role filters."
+    }
+  ]
+}

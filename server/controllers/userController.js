@@ -15,7 +15,7 @@ const canManage = (actor, target) => {
     if (actor.role === 'LAB_MANAGER') {
         if (!actor.labId) return false;
         if (target.labId !== actor.labId) return false;
-        if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(target.role) && target.id !== actor.id) {
+        if (!ALLOWED_SUB_ROLES.includes(target.role)) {
             return false;
         }
         return true;
@@ -47,10 +47,16 @@ exports.getUsers = async (req, res) => {
                     return res.status(403).json({ error: 'Manager lacks Lab ID' });
                 }
             } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
-                if (actor.countries && actor.countries.length > 0) {
-                    const countryList = typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries;
-                    andConditions.push({ country: { in: countryList } });
+                const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
+                if (!Array.isArray(countryList) || countryList.length === 0) {
+                    return res.json({ users: [], total: 0, page: pageNum, pages: 0 });
                 }
+                const authorizedLabs = await prisma.lab.findMany({
+                    where: { country: { in: countryList } },
+                    select: { id: true }
+                });
+                const labIds = authorizedLabs.map(l => l.id);
+                andConditions.push({ labId: { in: labIds } });
             } else {
                 andConditions.push({ id: actor.id });
             }
@@ -137,11 +143,25 @@ exports.createUser = async (req, res) => {
 
         if (actor.role === 'LAB_MANAGER') {
             if (!actor.labId) return res.status(403).json({ error: 'Manager has no Lab assigned' });
+            if (labId && labId !== actor.labId) {
+                return res.status(403).json({ error: 'Lab Managers cannot assign users to another laboratory' });
+            }
             if (!ALLOWED_SUB_ROLES.includes(role)) {
                 return res.status(403).json({ error: `Lab Managers may only create: ${ALLOWED_SUB_ROLES.join(', ')}` });
             }
         } else if (actor.role !== 'SUPER_ADMIN') {
             return res.status(403).json({ error: 'Only administrators can create users' });
+        }
+
+        const targetLabId = actor.role === 'LAB_MANAGER' ? actor.labId : labId;
+        if (role !== 'SUPER_ADMIN') {
+            if (!targetLabId) {
+                return res.status(400).json({ error: 'Laboratory assignment is required for non-superadmin users' });
+            }
+            const labExists = await prisma.lab.findUnique({ where: { id: String(targetLabId) } });
+            if (!labExists) {
+                return res.status(400).json({ error: `Laboratory '${targetLabId}' does not exist` });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -204,22 +224,35 @@ exports.updateUser = async (req, res) => {
             if (updates.labId && updates.labId !== target.labId) {
                 return res.status(403).json({ error: 'Cannot modify your own lab assignment' });
             }
-            if (updates.countries || updates.projects) {
-                return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+            if (updates.countries !== undefined) {
+                const curC = typeof target.countries === 'string' ? target.countries : JSON.stringify(target.countries || []);
+                const newC = typeof updates.countries === 'string' ? updates.countries : JSON.stringify(updates.countries || []);
+                if (curC !== newC) {
+                    return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+                }
+            }
+            if (updates.projects !== undefined) {
+                const curP = typeof target.projects === 'string' ? target.projects : JSON.stringify(target.projects || []);
+                const newP = typeof updates.projects === 'string' ? updates.projects : JSON.stringify(updates.projects || []);
+                if (curP !== newP) {
+                    return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+                }
             }
         }
 
         // Validate role changes
-        if (updates.role && updates.role !== target.role) {
-            if (!ALL_ROLES.includes(updates.role)) {
-                return res.status(400).json({ error: `Invalid role '${updates.role}'` });
+        if (updates.role !== undefined) {
+            if (!updates.role || typeof updates.role !== 'string' || !ALL_ROLES.includes(updates.role.trim())) {
+                return res.status(400).json({ error: 'VALIDATION_ERROR', message: `Invalid role '${updates.role}'` });
             }
-            if (actor.role === 'LAB_MANAGER') {
-                if (!ALLOWED_SUB_ROLES.includes(updates.role)) {
-                    return res.status(403).json({ error: `Lab Managers may only assign: ${ALLOWED_SUB_ROLES.join(', ')}` });
+            if (updates.role !== target.role) {
+                if (actor.role === 'LAB_MANAGER') {
+                    if (!ALLOWED_SUB_ROLES.includes(updates.role)) {
+                        return res.status(403).json({ error: `Lab Managers may only assign: ${ALLOWED_SUB_ROLES.join(', ')}` });
+                    }
+                } else if (!isSuperAdmin) {
+                    return res.status(403).json({ error: 'Only Super Admins can assign management roles' });
                 }
-            } else if (!isSuperAdmin) {
-                return res.status(403).json({ error: 'Only Super Admins can assign management roles' });
             }
         }
 
@@ -284,6 +317,24 @@ exports.deleteUser = async (req, res) => {
 
         if (!canManage(actor, target)) {
             return res.status(403).json({ error: 'Insufficient permissions' });
+        }
+
+        // Prevent self-deletion
+        if (actor.id === target.id) {
+            return res.status(400).json({ error: 'SELF_DELETION_FORBIDDEN', message: 'Administrators cannot delete their own account' });
+        }
+
+        // Protect last active super administrator (LG-06, P09)
+        if (target.role === 'SUPER_ADMIN') {
+            const adminCount = await prisma.user.count({
+                where: { role: 'SUPER_ADMIN', isActive: true }
+            });
+            if (adminCount <= 1) {
+                return res.status(403).json({
+                    error: 'LAST_ADMIN_PROTECTED',
+                    message: 'Cannot delete the last remaining Super Administrator.'
+                });
+            }
         }
 
         await prisma.user.delete({ where: { id: String(id) } });

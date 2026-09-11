@@ -37,12 +37,43 @@ const verifyToken = async (req, res, next) => {
             return res.status(401).json({ error: 'Account has been deactivated' });
         }
 
+        // Check lab operational status (LG-05, P21, A33)
+        if (user.labId && user.role !== 'SUPER_ADMIN') {
+            const lab = await prisma.lab.findUnique({
+                where: { id: user.labId },
+                select: { isActive: true }
+            });
+            if (lab && lab.isActive === false) {
+                console.warn(`[AUTH] Access denied: lab ${user.labId} is inactive for user ${user.id}`);
+                return res.status(401).json({ error: 'LAB_INACTIVE', message: 'Laboratory is currently inactive or suspended.' });
+            }
+        }
+
         // Check session tokenVersion invalidation
         const dbTokenVersion = user.tokenVersion || 0;
         const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
         if (jwtTokenVersion < dbTokenVersion) {
             console.warn(`[AUTH] Token invalidated by password change for user ID: ${user.id}`);
             return res.status(401).json({ error: 'SESSION_INVALIDATED', message: 'Token has been invalidated. Please log in again.' });
+        }
+
+        // Revalidate original actor if session is impersonated (LG-16, A14)
+        if (decoded.act && decoded.act.id) {
+            const actorUser = await prisma.user.findUnique({
+                where: { id: String(decoded.act.id) }
+            });
+            if (actorUser) {
+                if (actorUser.isActive === false) {
+                    console.warn(`[AUTH] Impersonation rejected: actor deactivated (${decoded.act.id})`);
+                    return res.status(401).json({ error: 'ACTOR_DEACTIVATED', message: 'Impersonating administrator account is no longer active.' });
+                }
+                const actorDbVersion = actorUser.tokenVersion || 0;
+                const actorJwtVersion = decoded.act.tokenVersion !== undefined ? decoded.act.tokenVersion : 0;
+                if (actorJwtVersion < actorDbVersion) {
+                    console.warn(`[AUTH] Impersonation rejected: actor token invalidated (${decoded.act.id})`);
+                    return res.status(401).json({ error: 'ACTOR_SESSION_INVALIDATED', message: 'Impersonating administrator session has been invalidated.' });
+                }
+            }
         }
 
         // Sanitize and Parse JSON fields for SQLite

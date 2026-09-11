@@ -37,7 +37,46 @@ function isValidTimezone(tz) {
 }
 
 /**
+ * Find local midnight UTC Date for a given YYYY-MM-DD date in a timezone
+ */
+function getLocalMidnight(dateStr, tz) {
+    let d = new Date(dateStr + 'T12:00:00Z');
+    const getParts = (dt) => {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz,
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        }).formatToParts(dt);
+        const m = {};
+        for (const p of parts) m[p.type] = p.value;
+        return m;
+    };
+    for (let i = 0; i < 4; i++) {
+        const parts = getParts(d);
+        let hour = parseInt(parts.hour, 10);
+        if (hour === 24) hour = 0;
+        const minute = parseInt(parts.minute, 10);
+        const second = parseInt(parts.second, 10);
+        const curDateStr = `${parts.year}-${parts.month}-${parts.day}`;
+        const diffMs = ((hour * 60 + minute) * 60 + second) * 1000;
+        if (curDateStr === dateStr && diffMs === 0) {
+            return d;
+        }
+        if (curDateStr === dateStr) {
+            d = new Date(d.getTime() - diffMs);
+        } else if (curDateStr < dateStr) {
+            d = new Date(d.getTime() + (24 * 3600 * 1000 - diffMs));
+        } else {
+            d = new Date(d.getTime() - (24 * 3600 * 1000 + diffMs));
+        }
+    }
+    return d;
+}
+
+/**
  * Get half-open local day interval [dayStart, dayEnd) in the given timezone.
+ * Uses exact local midnight calculation to accurately handle 23/25 hour DST transitions (LG-29, A37).
  */
 function getLocalDayInterval(timezone = 'UTC', referenceDate = new Date()) {
     const tz = isValidTimezone(timezone) ? timezone : 'UTC';
@@ -48,17 +87,12 @@ function getLocalDayInterval(timezone = 'UTC', referenceDate = new Date()) {
         day: '2-digit'
     });
     const localDateStr = formatter.format(referenceDate); // YYYY-MM-DD
+    const [y, m, d] = localDateStr.split('-').map(Number);
+    const nextCalDate = new Date(Date.UTC(y, m - 1, d + 1));
+    const nextLocalDateStr = `${nextCalDate.getUTCFullYear()}-${String(nextCalDate.getUTCMonth() + 1).padStart(2, '0')}-${String(nextCalDate.getUTCDate()).padStart(2, '0')}`;
 
-    const getTzOffsetMs = (d, timeZone) => {
-        const utcDate = new Date(d.toLocaleString('en-US', { timeZone: 'UTC' }));
-        const tzDate = new Date(d.toLocaleString('en-US', { timeZone }));
-        return utcDate.getTime() - tzDate.getTime();
-    };
-
-    const midnightUtc = new Date(`${localDateStr}T00:00:00Z`);
-    const offsetMs = getTzOffsetMs(midnightUtc, tz);
-    const dayStart = new Date(midnightUtc.getTime() + offsetMs);
-    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const dayStart = getLocalMidnight(localDateStr, tz);
+    const dayEnd = getLocalMidnight(nextLocalDateStr, tz);
 
     return {
         localDate: localDateStr,
@@ -105,14 +139,41 @@ async function resolveActorScope(user, options = {}) {
     let activeLabId = userLabId;
     let labRecord = null;
 
-    // For Super Admin or Master User, allow selecting an authorized lab
+    // For Super Admin or Master User, allow selecting an authorized lab (LG-29, P30, A04)
     if (selectedLabId) {
         if (user.role === 'SUPER_ADMIN') {
             activeLabId = selectedLabId;
         } else if (user.role === 'MASTER_USER') {
-            activeLabId = selectedLabId;
+            let targetLab = null;
+            try {
+                targetLab = await prisma.lab.findUnique({
+                    where: { id: selectedLabId },
+                    select: { id: true, country: true }
+                });
+            } catch {
+                targetLab = null;
+            }
+            if (targetLab && userCountries.includes(targetLab.country)) {
+                activeLabId = selectedLabId;
+            } else {
+                activeLabId = null;
+                if (options.strict) {
+                    const err = new Error(`Laboratory '${selectedLabId}' is outside your authorized national scope`);
+                    err.statusCode = 403;
+                    err.code = 'TARGET_OUTSIDE_SCOPE';
+                    throw err;
+                }
+            }
         } else if (userLabId === selectedLabId) {
             activeLabId = selectedLabId;
+        } else {
+            activeLabId = userLabId;
+            if (options.strict) {
+                const err = new Error('TARGET_OUTSIDE_SCOPE: Access denied to another laboratory');
+                err.statusCode = 403;
+                err.code = 'TARGET_OUTSIDE_SCOPE';
+                throw err;
+            }
         }
     }
 

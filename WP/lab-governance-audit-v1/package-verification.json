@@ -1,0 +1,10 @@
+{
+  "verifiedAt": "2026-09-11T08:10:41.256Z",
+  "findingCount": 29,
+  "probeChecks": 31,
+  "prototypeChecks": 33,
+  "unchangedSourceFiles": 20,
+  "validLocalMarkdownLinks": 42,
+  "applicationBuildRun": false,
+  "reason": "Only audit/design artifacts changed; implementation and production regression tests remain Antigravity work."
+}

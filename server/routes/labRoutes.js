@@ -83,17 +83,55 @@ router.get('/', async (req, res) => {
             };
         });
 
-        res.json(enriched);
+        const isPrivileged = ['SUPER_ADMIN', 'MASTER_USER'].includes(req.user.role);
+        const userLabId = req.user.labId;
+
+        const sanitized = enriched.map(lab => {
+            const canSeeNotes = isPrivileged || (userLabId && userLabId === lab.id);
+            if (!canSeeNotes) {
+                const { notes, ...safeLab } = lab;
+                return safeLab;
+            }
+            return lab;
+        });
+
+        res.json(sanitized);
     } catch (e) {
         console.error('[GET /api/labs] Error:', e);
         res.status(500).json({ error: 'Failed to fetch labs' });
     }
 });
 
+// ─── GET /api/labs/directory ─── Lightweight public lab directory
+router.get('/directory', async (req, res) => {
+    try {
+        const labs = await prisma.lab.findMany({
+            where: { isActive: true },
+            select: { id: true, code: true, name: true, country: true, location: true, city: true, isActive: true },
+            orderBy: { name: 'asc' }
+        });
+        res.json(labs.map(l => ({ ...l, operationalStatus: l.isActive ? 'ACTIVE' : 'PAUSED' })));
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to fetch directory' });
+    }
+});
+
 // ─── GET /api/labs/:id/staff ─── Staff roster for a specific lab
 router.get('/:id/staff', async (req, res) => {
-    if (!['SUPER_ADMIN', 'MASTER_USER'].includes(req.user.role))
-        return res.status(403).json({ error: 'Unauthorized' });
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwnLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === req.params.id;
+    let isAuthorizedNational = false;
+    if (req.user.role === 'MASTER_USER') {
+        const lab = await prisma.lab.findUnique({ where: { id: req.params.id }, select: { country: true } });
+        const userCountries = Array.isArray(req.user.countries) ? req.user.countries : (typeof req.user.countries === 'string' ? JSON.parse(req.user.countries) : []);
+        if (lab && userCountries.includes(lab.country)) {
+            isAuthorizedNational = true;
+        }
+    }
+
+    if (!isSuperAdmin && !isOwnLabManager && !isAuthorizedNational) {
+        return res.status(403).json({ error: 'Unauthorized: insufficient permissions to view staff for this laboratory' });
+    }
 
     try {
         const users = await prisma.user.findMany({
@@ -122,6 +160,9 @@ router.get('/:id/staff', async (req, res) => {
 
 // ─── PATCH /api/labs/:id/toggle-active ─── Toggle lab active status
 router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can modify laboratory operational status' });
+    }
 
     try {
         const lab = await prisma.lab.findUnique({ where: { id: req.params.id } });
@@ -129,32 +170,27 @@ router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (re
 
         const newActive = !lab.isActive;
 
-        // Toggle lab
-        const updated = await prisma.lab.update({
-            where: { id: req.params.id },
-            data: { isActive: newActive }
-        });
-
-        // If deactivating, also deactivate all staff
-        if (!newActive) {
-            await prisma.user.updateMany({
-                where: { labId: req.params.id },
-                data: { isActive: false }
+        // Wrap update and audit atomically in a transaction (LG-05, P08)
+        const updated = await prisma.$transaction(async (tx) => {
+            const l = await tx.lab.update({
+                where: { id: req.params.id },
+                data: { isActive: newActive }
             });
-        }
 
-        // Audit
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-lab-toggle-${Date.now()}`,
-                entity: 'LAB',
-                entityId: req.params.id,
-                action: 'STATUS_CHANGE',
-                details: `Lab ${newActive ? 'activated' : 'deactivated'}${!newActive ? ' (all staff disabled)' : ''}`,
-                performedBy: req.user.username,
-                labId: req.params.id,
-                timestamp: new Date()
-            }
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-lab-toggle-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    entity: 'LAB',
+                    entityId: req.params.id,
+                    action: 'STATUS_CHANGE',
+                    details: `Lab ${newActive ? 'activated' : 'deactivated'}`,
+                    performedBy: req.user.username,
+                    labId: req.params.id,
+                    timestamp: new Date()
+                }
+            });
+
+            return l;
         });
 
         res.json({ ...updated, isActive: newActive });
@@ -165,29 +201,61 @@ router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (re
 });
 
 // ─── PATCH /api/labs/:id/staff/:userId/toggle ─── Toggle individual staff member active status
-router.patch('/:id/staff/:userId/toggle', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+router.patch('/:id/staff/:userId/toggle', checkPermission('MANAGE_USERS'), async (req, res) => {
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwnLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === req.params.id;
+
+    if (!isSuperAdmin && !isOwnLabManager) {
+        return res.status(403).json({ error: 'Unauthorized to manage staff for this laboratory' });
+    }
 
     try {
         const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.labId !== req.params.id) return res.status(403).json({ error: 'User does not belong to this lab' });
 
-        const updated = await prisma.user.update({
-            where: { id: req.params.userId },
-            data: { isActive: !user.isActive }
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-staff-toggle-${Date.now()}`,
-                entity: 'USER',
-                entityId: req.params.userId,
-                action: 'STATUS_CHANGE',
-                details: `Staff ${updated.isActive ? 'activated' : 'deactivated'}: ${user.username}`,
-                performedBy: req.user.username,
-                labId: req.params.id,
-                timestamp: new Date()
+        // Lab manager role hierarchy restrictions (LG-01, LG-06)
+        if (isOwnLabManager) {
+            const { ALLOWED_SUB_ROLES } = require('../config/roles');
+            if (!ALLOWED_SUB_ROLES.includes(user.role)) {
+                return res.status(403).json({ error: 'Lab Managers may only manage subordinate laboratory staff' });
             }
+        }
+
+        // Protect last active super administrator
+        if (user.role === 'SUPER_ADMIN' && user.isActive) {
+            const adminCount = await prisma.user.count({ where: { role: 'SUPER_ADMIN', isActive: true } });
+            if (adminCount <= 1) {
+                return res.status(403).json({ error: 'LAST_ADMIN_PROTECTED', message: 'Cannot deactivate the last active Super Administrator' });
+            }
+        }
+
+        const newActive = !user.isActive;
+        const newVersion = (user.tokenVersion || 0) + 1;
+
+        const updated = await prisma.$transaction(async (tx) => {
+            const u = await tx.user.update({
+                where: { id: req.params.userId },
+                data: {
+                    isActive: newActive,
+                    tokenVersion: newVersion
+                }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-staff-toggle-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    entity: 'USER',
+                    entityId: req.params.userId,
+                    action: 'STATUS_CHANGE',
+                    details: `Staff ${newActive ? 'activated' : 'deactivated'}: ${user.username}`,
+                    performedBy: req.user.username,
+                    labId: req.params.id,
+                    timestamp: new Date()
+                }
+            });
+
+            return u;
         });
 
         const { password: _, ...safe } = updated;
@@ -199,43 +267,69 @@ router.patch('/:id/staff/:userId/toggle', checkPermission('MANAGE_BRANDING'), as
 });
 
 // ─── PATCH /api/labs/:id/staff/:userId/reset-password ─── Reset staff password
-router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'), async (req, res) => {
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwnLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === req.params.id;
+
+    if (!isSuperAdmin && !isOwnLabManager) {
+        return res.status(403).json({ error: 'Unauthorized to reset credentials for this laboratory' });
+    }
 
     try {
         const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.labId !== req.params.id) return res.status(403).json({ error: 'User does not belong to this lab' });
 
-        const tempPassword = 'password';
-        const hashed = await bcrypt.hash(tempPassword, 10);
-
-        await prisma.user.update({
-            where: { id: req.params.userId },
-            data: { password: hashed, mustChangePassword: true }
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-staff-reset-${Date.now()}`,
-                entity: 'USER',
-                entityId: req.params.userId,
-                action: 'UPDATE',
-                details: `Password reset for ${user.username}`,
-                performedBy: req.user.username,
-                labId: req.params.id,
-                timestamp: new Date()
+        // Lab manager role hierarchy restrictions (LG-01, P02)
+        if (isOwnLabManager) {
+            const { ALLOWED_SUB_ROLES } = require('../config/roles');
+            if (!ALLOWED_SUB_ROLES.includes(user.role)) {
+                return res.status(403).json({ error: 'TARGET_ROLE_NOT_MANAGEABLE', message: 'Lab Managers may only reset credentials for subordinate laboratory staff' });
             }
+        }
+
+        // Generate cryptographically secure random temporary password (LG-03)
+        const crypto = require('crypto');
+        const tempPassword = 'SL-' + crypto.randomBytes(6).toString('hex') + '!' + (Math.floor(Math.random() * 90) + 10);
+        const hashed = await bcrypt.hash(tempPassword, 10);
+        const newVersion = (user.tokenVersion || 0) + 1;
+
+        await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+                where: { id: req.params.userId },
+                data: {
+                    password: hashed,
+                    mustChangePassword: true,
+                    tokenVersion: newVersion
+                }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-staff-reset-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    entity: 'USER',
+                    entityId: req.params.userId,
+                    action: 'PASSWORD_RESET',
+                    details: `Administrative password reset for ${user.username}`,
+                    performedBy: req.user.username,
+                    labId: req.params.id,
+                    timestamp: new Date()
+                }
+            });
         });
 
-        res.json({ username: user.username, tempPassword, message: 'Password reset. User must change on next login.' });
+        res.json({ success: true, username: user.username, tempPassword, temporaryPassword: tempPassword, message: 'Password reset. User must change on next login.' });
     } catch (e) {
         console.error('[PATCH reset-password]', e);
         res.status(500).json({ error: 'Reset failed' });
     }
 });
 
-// ─── POST /api/labs ─── Create a new lab with auto-generated staff + test project
+// ─── POST /api/labs ─── Create a new lab
 router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can create laboratories' });
+    }
 
     const {
         projectId,
@@ -251,91 +345,36 @@ router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
         const codeExists = await prisma.lab.findUnique({ where: { code } });
         if (codeExists) return res.status(400).json({ error: 'Lab Code already exists' });
 
-        const newLab = await prisma.lab.create({
-            data: {
-                id, code, name, country, location, address, city, phone, email, website,
-                capacity: parseInt(capacity) || null,
-                timezone, notes,
-                projectCode: projectId
-            }
-        });
-
-        // 1. GENERATE STAFF ACCOUNTS
-        const roles = [
-            { role: 'LAB_MANAGER', suffix: 'mgr', name: 'Lab Manager' },
-            { role: 'SAMPLE_RECEPTION', suffix: 'intake', name: 'Intake Officer' },
-            { role: 'LAB_TECHNICIAN', suffix: 'tech1', name: 'Technician 1' },
-            { role: 'LAB_TECHNICIAN', suffix: 'tech2', name: 'Technician 2' },
-            { role: 'AUDIT_USER', suffix: 'audit', name: 'Audit Officer' },
-            { role: 'EXTERNAL_VIEWER', suffix: 'farmer', name: 'External Partner' }
-        ];
-
-        const defaultPassword = 'password';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-
-        const createdUsers = [];
-        for (const r of roles) {
-            const username = `${code.toLowerCase()}_${r.suffix}`;
-            const userId = `user-${code}-${r.suffix}-${Date.now()}`;
-
-            try {
-                const user = await prisma.user.create({
-                    data: {
-                        id: userId,
-                        username,
-                        password: hashedPassword,
-                        email: email ? `${r.suffix}@${email.split('@')[1] || 'placeholder.com'}` : `${username}@soilfer.org`,
-                        name: `${name} ${r.name}`,
-                        role: r.role,
-                        labId: id,
-                        mustChangePassword: true,
-                        isActive: true
-                    }
-                });
-                createdUsers.push({ username, role: r.role, name: r.name, password: defaultPassword });
-            } catch (userErr) {
-                console.error(`Failed to create user ${username}:`, userErr);
-            }
-        }
-
-        // 2. GENERATE DEFAULT TEST PROJECT
-        const testProjectCode = `TEST-${code}`;
-        const existingProject = await prisma.project.findUnique({ where: { code: testProjectCode } });
-
-        if (!existingProject) {
-            await prisma.project.create({
+        const newLab = await prisma.$transaction(async (tx) => {
+            const lab = await tx.lab.create({
                 data: {
-                    id: `proj-${testProjectCode}-${Date.now()}`,
-                    code: testProjectCode,
-                    name: `${name} Test Project`,
-                    description: 'Automated test project for laboratory onboarding.',
-                    status: 'ACTIVE',
-                    projectType: 'OPEN_INTAKE',
-                    labId: id,
-                    priority: 'NORMAL'
+                    id, code, name, country, location, address, city, phone, email, website,
+                    capacity: parseInt(capacity) || null,
+                    timezone, notes,
+                    projectCode: projectId
                 }
             });
-        }
 
-        // 3. AUDIT LOG
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-lab-create-${Date.now()}`,
-                entity: 'LAB',
-                entityId: id,
-                action: 'CREATE',
-                details: `Lab "${name}" (${code}) created with ${createdUsers.length} staff accounts`,
-                performedBy: req.user.username,
-                labId: id,
-                timestamp: new Date()
-            }
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-lab-create-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    entity: 'LAB',
+                    entityId: id,
+                    action: 'CREATE',
+                    details: `Lab "${name}" (${code}) created by ${req.user.username}`,
+                    performedBy: req.user.username,
+                    labId: id,
+                    timestamp: new Date()
+                }
+            });
+
+            return lab;
         });
 
         res.json({
             success: true,
             lab: newLab,
-            staff: createdUsers,
-            message: 'Lab created with staff accounts and test project.'
+            message: 'Lab created successfully.'
         });
     } catch (e) {
         console.error(e);
@@ -345,17 +384,64 @@ router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
 // ─── PUT /api/labs/:id ─── Update lab details
 router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwnLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === req.params.id;
 
-    const { projectId, capacity, ...labData } = req.body;
+    if (!isSuperAdmin && !isOwnLabManager) {
+        return res.status(403).json({ error: 'Unauthorized to update this laboratory profile' });
+    }
+
+    // Reject immutable identity and lifecycle fields (LG-02, P05)
+    if (req.body.id && req.body.id !== req.params.id) {
+        return res.status(400).json({ error: 'IMMUTABLE_FIELDS_REJECTED', message: 'Cannot alter immutable laboratory identifier' });
+    }
+    if (req.body.isActive !== undefined) {
+        return res.status(400).json({ error: 'IMMUTABLE_FIELDS_REJECTED', message: 'Laboratory operational status must be changed via dedicated lifecycle endpoint' });
+    }
+    if (req.body.createdAt !== undefined) {
+        return res.status(400).json({ error: 'IMMUTABLE_FIELDS_REJECTED', message: 'Cannot modify createdAt' });
+    }
+
+    const {
+        name, country, location, address, city, phone, email, website,
+        capacity, timezone, notes, projectId
+    } = req.body;
+
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (country !== undefined) data.country = country;
+    if (location !== undefined) data.location = location;
+    if (address !== undefined) data.address = address;
+    if (city !== undefined) data.city = city;
+    if (phone !== undefined) data.phone = phone;
+    if (email !== undefined) data.email = email;
+    if (website !== undefined) data.website = website;
+    if (capacity !== undefined) data.capacity = capacity ? parseInt(capacity) : null;
+    if (timezone !== undefined) data.timezone = timezone;
+    if (notes !== undefined) data.notes = notes;
+    if (projectId !== undefined) data.projectCode = projectId;
 
     try {
-        const updated = await prisma.lab.update({
-            where: { id: req.params.id },
-            data: {
-                ...labData,
-                capacity: capacity ? parseInt(capacity) : null,
-                projectCode: projectId
-            }
+        const updated = await prisma.$transaction(async (tx) => {
+            const lab = await tx.lab.update({
+                where: { id: req.params.id },
+                data
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-lab-update-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    entity: 'LAB',
+                    entityId: req.params.id,
+                    action: 'UPDATE',
+                    details: `Lab profile updated: ${Object.keys(data).join(', ')}`,
+                    performedBy: req.user.username,
+                    labId: req.params.id,
+                    timestamp: new Date()
+                }
+            });
+
+            return lab;
         });
 
         res.json(updated);

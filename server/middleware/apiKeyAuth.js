@@ -77,6 +77,11 @@ const apiKeyAuth = async (req, res, next) => {
                 return res.status(401).json({ error: 'Unauthorized', message: 'User invalid or inactive.' });
             }
 
+            // Session revocation / tokenVersion validation (LG-28, P29)
+            if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== user.tokenVersion) {
+                return res.status(401).json({ error: 'Unauthorized', message: 'Session has been revoked or invalidated. Please log in again.' });
+            }
+
             req.sisAuth = {
                 type: 'JWT_USER',
                 name: user.name || user.username,

@@ -17,5 +17,6 @@ router.post('/:id/manifest', checkPermission('MANAGE_PROJECTS'), projectControll
 router.get('/:id/stats', checkPermission('VIEW_SAMPLES'), projectController.getProjectStats);
 router.get('/:id/samples', checkPermission('VIEW_SAMPLES'), projectController.getProjectSamples);
 router.get('/:id/kobo-config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
+router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 
 module.exports = router;

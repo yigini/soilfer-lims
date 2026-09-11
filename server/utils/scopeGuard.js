@@ -102,7 +102,8 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
                 orClauses.push({ [labField]: labScope });
                 if (altLabField) orClauses.push({ [altLabField]: labScope });
             }
-            if (user.countries) {
+            const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
+            if (isNationalRole && user.countries) {
                 try {
                     const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
                     if (Array.isArray(countries) && countries.length > 0) {
@@ -120,7 +121,8 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
         if (user.role === 'LAB_TECHNICIAN' && user.username) {
             orClauses.push({ workItems: { some: { assignedTo: user.username } } });
         }
-        if (user.countries) {
+        const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
+        if (isNationalRole && user.countries) {
             try {
                 const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
                 if (Array.isArray(countries) && countries.length > 0) {
@@ -207,8 +209,23 @@ function canAccessEntity(user, entity, options = {}) {
         }
     }
 
-    // 4. Country matching (if user has country scope e.g. ["GTM"] and entity is from GTM)
-    if (user.countries) {
+    // 4. Project matching (for project managers / project-scoped roles)
+    const isProjectRole = user.role === 'PROJECT_MANAGER' || user.role === 'EXTERNAL_VIEWER' || user.role === 'VIEWER';
+    if (isProjectRole && user.projects) {
+        try {
+            const projects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
+            if (Array.isArray(projects) && projects.length > 0) {
+                const entityProject = entity.projectCode || entity.projectId || entity.project || null;
+                if (entityProject && projects.includes(entityProject)) return true;
+                if (entity.code && projects.includes(entity.code)) return true;
+                if (entity.id && projects.includes(entity.id)) return true;
+            }
+        } catch (e) {}
+    }
+
+    // 5. Country matching (strictly restricted to national oversight roles: MASTER_USER or COUNTRY_ADMIN)
+    const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
+    if (isNationalRole && user.countries) {
         try {
             const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
             if (Array.isArray(countries)) {
