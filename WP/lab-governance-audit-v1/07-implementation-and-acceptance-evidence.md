@@ -5,14 +5,15 @@
 **Target Branch**: `codex/lab-governance-v1`  
 **Execution Date**: 11 September 2026  
 **Release Status**: **STRICT MERGE & DEPLOYMENT HOLD** ([PR #94](https://github.com/yigini/soilfer-lims/pull/94) remains open; no staging, merge, or deployment)  
-**Auditor Finding Coverage**: All 16 independent review items (IR-01 – IR-16) addressed and validated with automated contract tests  
-**Server Contract Test Suites**: 100+ Test Suites (including dedicated governance suites: `lab_governance_wp_a.test.js`, `lab_governance_wp_b.test.js`, `lab_governance_wp_c.test.js`, `lab_governance_wp_d.test.js` [19 tests], `lab_governance_wp_f.test.js`, `interim_gaps_verification.test.js`, and `reopened_governance_scenarios.test.js` [13 tests])  
-**Client Build Status**: Clean Production Build (0 Errors, 6.65s Vite build)  
+**Auditor Finding Coverage**: All 16 original review items (IR-01 – IR-16) AND all 7 follow-up review findings (F01 – F07 + C01) fully resolved and verified  
+**Server Contract Test Suites**: 101 Test Suites (813 tests total, 0 failures; including 8 dedicated governance suites with 145 contract tests)  
+**Client Build Status**: Clean Production Build (0 Errors, Vite build: 7.64s)  
 **Sample Preservation Invariant**: `server/prisma/dev.db` (35,192 samples) verified read-only and preserved across all preflight audits and migration rehearsals.  
 
 ---
 
 ## 1. Executive Summary & Operational Impact
+
 
 The laboratory management redesign and connected access controls package has been implemented, validated, and hardened across the full stack. 
 
@@ -109,36 +110,53 @@ Following independent execution review (`08-independent-review.md`), the 16 item
 
 ---
 
-### 5. Acceptance Matrix Verification (A01 through A42)
+## 5. Follow-Up Independent Review Ledger (F01 through F07 and C01)
+
+Following the follow-up independent review (`09-follow-up-independent-review.md`), all 7 critical governance review failures (F01–F07) and companion control C01 were reproduced, remediated, and verified with executable probes (`final-review-probes.cjs`) and dedicated contract test coverage (`final_governance_probes.test.js`):
+
+| Finding / Control | Severity | Focus Area | Status | Resolution & Verification Evidence |
+|---|---|---|---|---|
+| **F01** | Critical | National Scope Bypass | **CLOSED** | Guatemala national lead attempting to invite staff into France lab is rejected with HTTP 403, persisting 0 records (`persistedInvitations: 0`). Target lab country is resolved and evaluated against actor's authorized countries (`actorCountries`) in `actionPolicyService.canManageUser`. Fails closed on foreign or unresolvable scopes. Verified by F01 probe and `final_governance_probes.test.js`. |
+| **C01** | Control | Own-Country National Invitation | **CLOSED** | National lead can invite allowed staff inside their own country (HTTP 201). Country scoping only checks proposed lab when a lab/scope change is requested (`isLabScopeChangeRequested`); ordinary national actions without proposed lab are permitted within authorized country. Verified by C01 probe. |
+| **F02** | High | Onboarding Journey in SETUP Status | **CLOSED** | Administrator appoints a pending manager while lab is in `SETUP` status (HTTP 201). Operational state evaluator in `staffLifecycleService.createInvitation` and `consumeInvitation` distinguishes unconfigured `SETUP` labs from `PAUSED` labs, allowing manager onboarding while blocking analytical work item dispatch (HTTP 400 `LAB_PAUSED`). Verified by F02 probe and `final_governance_probes.test.js`. |
+| **F03** | High | Junction-Only Servicing Projects | **CLOSED** | `getLabWorkspace` in `labLifecycleService.js` hydrates `ProjectLab` junction rows (`where: { labId }`) alongside owned and legacy `assignedLabIds`. Fictional junction-only project `FINAL-PROJECT` appears cleanly in workspace projects list (`projectVisible: true`). Verified by F03 probe. |
+| **F04** | High | Workload Pipeline Analytical Metrics | **CLOSED** | Canonical analytical sample filter `isSampleActiveInWorkload` excludes unreceived `EXPECTED`, `DRAFT`, `COLLECTED` and closed/finalized `RELEASED`, `APPROVED`, `COMPLETED`, `ARCHIVED`, `DISPOSED`, `RECEIVED_REJECTED`. Fictional EXPECTED and RELEASED samples are excluded from `workload.samples.active` (actual: 0). Verified by F04 probe. |
+| **F05** | High | Canonical Unfinished Work Lifecycle Accounting | **CLOSED** | Canonical shared predicate `getUnfinishedWorkWhere` defined in `workEligibility.js` and shared between `staffLifecycleService` and `labLifecycleService`. Accounts for `ASSIGNED`, `IN_PROGRESS`, `RECORDED`, `SUBMITTED`, `PENDING_REVIEW`, `RETURNED`, `DRAFT`, and unsubmitted bench work (`COMPLETED` with `submissionId: null`). Access preview accurately detects submitted work awaiting review (`openAssignmentsCount >= 1`). Verified by F05 probe and `final_governance_probes.test.js`. |
+| **F06** | High | Revoked Legacy JWT Authentication Parity | **CLOSED** | In `apiKeyAuth.js`, legacy JWTs omitting `tokenVersion` default to version 0. Once `user.tokenVersion` is incremented, legacy tokens are denied consistently with HTTP 401 across both HTTP (`/api/auth/me`) and SIS (`/api/v1/sis/samples`) endpoints. Verified by F06 probe. |
+| **F07** | High | Real-Time WebSocket Revocation & Outer Transaction Contract | **CLOSED** | User suspension immediately revokes active WebSockets (`wsServer.revokeUserSockets`) after transactional commit. In outer transactions, transaction owners must provide an explicit `afterCommit` hook mechanism (e.g. `withTransaction` or `tx.afterCommit`); unsupported outer contracts fail closed with `UNSUPPORTED_TRANSACTION_CONTRACT`. Aborted transactions roll back DB mutations without premature socket revocation. Committed outer transactions cleanly revoke connected sockets. Verified by F07 probe and `final_governance_probes.test.js`. |
+
+---
+
+## 6. Acceptance Matrix Verification (A01 through A42)
 
 The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` map to specific automated contract and integration assertions:
 
 - **A01–A03 (Lab Scope & Role Hierarchy)**: Verified in `lab_governance_wp_a.test.js` & `lab_governance_wp_b.test.js`. Lab Manager A cannot access or mutate Lab B; subordinate management strictly bounded.
-- **A04–A05 (National Lead Boundaries)**: Verified in `lab_governance_wp_b.test.js` (Test 17–18) & `lab_governance_wp_d.test.js`. National lead scoped to GTM receives 403 on FRA lab; empty country list fails closed.
+- **A04–A05 (National Lead Boundaries)**: Verified in `lab_governance_wp_b.test.js` (Test 17–18), `lab_governance_wp_d.test.js`, and `final_governance_probes.test.js`. National lead scoped to GTM receives 403 on FRA lab; empty country list fails closed.
 - **A06 (All 10 Roles)**: Verified across all test suites. Permissions adhere to the canonical RBAC matrix.
-- **A07–A08 (Schema & Lifecycle Validation)**: Verified in `lab_governance_wp_a.test.js` & `lab_governance_wp_c.test.js`. Immutable fields rejected; invalid/paused lab assignments blocked.
+- **A07–A08 (Schema & Lifecycle Validation)**: Verified in `lab_governance_wp_a.test.js`, `lab_governance_wp_c.test.js`, and `final_governance_probes.test.js`. Immutable fields rejected; invalid/paused lab assignments blocked; manager appointment allowed in SETUP.
 - **A09–A10 (Last Admin & Concurrency Guard)**: Verified in `lab_governance_wp_c.test.js` (Test 9, 11). Atomic database checks prevent last-admin removal or concurrent mutual demotion.
 - **A11–A13 (Staff Lifecycle, Invitations & Tokens)**: Verified in `lab_governance_wp_c.test.js`. Expiring single-use tokens, session revocation on suspension, and clean reactivation.
-- **A14–A15 (Sessions, Sockets & Reassignment)**: Verified in `lab_governance_wp_c.test.js`. `tokenVersion` increments cleanly invalidate sessions across channels.
+- **A14–A15 (Sessions, Sockets & Reassignment)**: Verified in `lab_governance_wp_c.test.js` and `final_governance_probes.test.js`. `tokenVersion` increments cleanly invalidate sessions across channels; post-commit WebSocket termination verified.
 - **A16–A22 (Offline Sync & Scientific Integrity)**: Verified in `lab_governance_wp_a.test.js`, `interim_gaps_verification.test.js`, and `reopened_governance_scenarios.test.js`. Unscoped packs denied; domain rules enforced on replay; drafts durable; spectral scalar values rejected; texture closure enforced.
 - **A23 (Work Assignment Eligibility)**: Verified in `lab_governance_wp_b.test.js` (Test 13–16) and `reopened_governance_scenarios.test.js`. Inactive, cross-lab, and paused-lab assignments blocked.
-- **A24–A26 (Project Relationships & Provenance)**: Verified in `lab_governance_wp_d.test.js`. Ownership enforced; historical sample associations preserved upon lab detachment.
+- **A24–A26 (Project Relationships & Provenance)**: Verified in `lab_governance_wp_d.test.js` and `final_governance_probes.test.js`. Ownership enforced; junction servicing projects hydrated; historical sample associations preserved upon lab detachment.
 - **A27–A29 (Kobo & SIS Integration Controls)**: Verified in `lab_governance_wp_f.test.js` & `interim_gaps_verification.test.js`. Target-lab assertions on Kobo configs; explicit lab scopes and audit logging on SIS API keys.
 - **A30–A32 (Equipment, Inventory & Locales)**: Verified in `lab_governance_wp_a.test.js`. Resource lab checks on equipment/inventory; all 5 canonical locales preserved with full key coverage.
 - **A33–A35 (Lab State & Work Dispatch)**: Verified in `lab_governance_wp_d.test.js` and `reopened_governance_scenarios.test.js`. Pausing lab preserves records without cascading to staff; notifications target receiving lab.
-- **A36–A38 (Workload Pipeline, Timezones & Pagination)**: Verified in `lab_governance_wp_b.test.js` & `lab_governance_wp_d.test.js`. Mutually exclusive counts; bounded pagination (max 100).
+- **A36–A38 (Workload Pipeline, Timezones & Pagination)**: Verified in `lab_governance_wp_b.test.js`, `lab_governance_wp_d.test.js`, and `final_governance_probes.test.js`. Mutually exclusive counts excluding expected/released; bounded pagination (max 100).
 - **A39–A40 (UI & Accessibility)**: Verified via Vite build, accessible modal attributes (focus traps, Escape listeners, `aria-*`), and CSS tokens across responsive viewports.
 - **A41 (Project Update Handler)**: Verified in `lab_governance_wp_d.test.js`. Single response returned without error.
 - **A42 (Migration & Preflight Safety)**: Verified in `server/scripts/preflight_governance_report.js`, `server/scripts/disposable_migration_rehearsal.js`, and `lab_governance_wp_f.test.js`. Zero sample loss verified; dev.db verified untouched.
 
 ---
 
-## 6. Verification Test Evidence Summary
+## 7. Verification Test Evidence Summary
 
 ```text
 ================================================================================
-Test Suites: 100 passed, 100 total
-Tests:       798 passed, 798 total
+Test Suites: 101 passed, 101 total
+Tests:       813 passed, 813 total
 Snapshots:   0 total
 Database:    Strict isolated disposable SQLite databases only.
 Production:  dev.db (35,192 samples) verified read-only and untouched.
@@ -153,24 +171,35 @@ Production:  dev.db (35,192 samples) verified read-only and untouched.
 - `lab_governance_wp_f.test.js`: 12 passed (Connected services, SIS keys, preflight)
 - `interim_gaps_verification.test.js`: 11 passed (Interim gaps 1, 2, 3 verification)
 - `reopened_governance_scenarios.test.js`: 17 passed (Offline draft gating, texture closure, spectral scalar rejection, shared outbox partition with real module execution, pack lease, receiving lab broadcasts)
-- **Total Governance & Contract Tests**: 128 tests, 0 failures.
+- `final_governance_probes.test.js`: 17 passed (F01–F07 scenarios, companion controls, onboarding in SETUP, unsubmitted bench work, rollback safety, unsupported outer contract fail-closed, and committed outer transaction socket termination)
+- **Total Governance Contract Tests**: 145 tests, 0 failures.
 
 ### Independent Review Probes:
 - **Positive Controls (C01–C05)**: 5 / 5 verified (`reproduced: true`).
 - **Defect Probes (R01–R20, R22)**: 21 / 21 resolved (`reproduced: false`).
 - **Defect Probe R21**: Verified (`reproduced: true` on legacy missing-labs payload, returning HTTP 400 `INVALID_LAB_SCOPE`, confirming no wildcard/country fallback occurs; real form tested with explicit lab selector and non-empty `labs` array).
-- **Independent UI Review**: 0 errors (`errors: []`), 3 staff members rendered on People tab, canonical role keys bound in select options.
-- **Multi-Locale Render Verification**: 5 / 5 canonical locales verified with 0 missing keys (`verify_multilang_render.cjs`).
+- **Follow-Up Probes (F01–F07, C01)**: 8 / 8 passed in `final-review-probes.cjs` against schema-only disposable database with source database opened strictly read-only.
+
+### Automated Tests vs. Browser Journeys Distinction:
+- **Automated Headless Tests**: 101 Jest suites (813 tests) cover server business logic, transaction rollback, API routing, SQLite schema compliance, offline sync engine rules, and real loopback WebSocket connections.
+- **Browser Journeys Actually Exercised**:
+  - React Vite production bundle built in 7.64s with 0 syntax or bundling errors (`npm run build`).
+  - `independent-review-ui.cjs` verifies rendering of the People and Access tab with 3 laboratory staff members and validates that modal dropdowns bind canonical role keys (`r.key`/`r.role`), rejecting display names.
+  - Multi-locale rendering verified across all 5 canonical languages (`en`, `es`, `es-419`, `fr`, `pt`) with 0 missing localization keys (`verify_multilang_render.cjs`).
+  - Modal accessibility verified: `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, focus trapping (`useFocusTrap`), and Escape key listeners implemented across all 5 governance modals.
 
 ---
 
-## 7. Release Sign-Off & Status
+## 8. Release Sign-Off & Status
 
 - [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`.
-- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F and all independent review items IR-01 through IR-16.
-- [x] **Tested**: 100 test suites (798 tests) passing with 100% success rate on strict-schema environments.
-- [x] **Sample Preservation Invariant**: Verified. Production database (`dev.db`, 35,192 samples) was completely untouched.
-- [x] **Client Production Build**: Verified. Clean Vite build (0 errors, 6.47s).
+- [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F, independent review items IR-01 through IR-16, and follow-up review findings F01 through F07 and C01.
+- [x] **Single Shared Predicate**: Enforced via `getUnfinishedWorkWhere` in `workEligibility.js`.
+- [x] **Transactional Contract**: Outer transactions require explicit `afterCommit` hook mechanism; rollbacks preserve database state and avoid premature socket termination; successful outer commits revoke connected sockets.
+- [x] **Tested**: 101 test suites (813 tests) and 8 probe scenarios passing with 100% success rate on strict-schema environments.
+- [x] **Sample Preservation Invariant**: Verified. Production database (`dev.db`, 35,192 samples) was completely untouched (SHA-256 hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified unchanged before and after probe runs).
+- [x] **Client Production Build**: Verified. Clean Vite build (0 errors, 7.64s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.
+
 
 

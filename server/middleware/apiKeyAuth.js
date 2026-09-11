@@ -78,8 +78,10 @@ const apiKeyAuth = async (req, res, next) => {
             }
 
             // Session revocation / tokenVersion validation (LG-28, P29)
-            if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== user.tokenVersion) {
-                return res.status(401).json({ error: 'Unauthorized', message: 'Session has been revoked or invalidated. Please log in again.' });
+            const dbTokenVersion = user.tokenVersion || 0;
+            const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
+            if (jwtTokenVersion < dbTokenVersion) {
+                return res.status(401).json({ error: 'Unauthorized', code: 'SESSION_INVALIDATED', message: 'Session has been revoked or invalidated. Please log in again.' });
             }
 
             req.sisAuth = {

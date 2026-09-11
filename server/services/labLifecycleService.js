@@ -3,6 +3,8 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
 const { JWT_SECRET } = require('../config/auth');
+const { getUnfinishedWorkWhere, UNFINISHED_WORK_STATUSES } = require('./workEligibility');
+
 
 let tableInitialized = false;
 
@@ -27,6 +29,24 @@ async function ensureTables(tx = prisma) {
 }
 
 const VALID_STATES = ['SETUP', 'ACTIVE', 'PAUSED', 'RETIRED'];
+
+const INACTIVE_SAMPLE_STATUSES = [
+    'EXPECTED',
+    'DRAFT',
+    'COLLECTED',
+    'RELEASED',
+    'APPROVED',
+    'COMPLETED',
+    'ARCHIVED',
+    'DISPOSED',
+    'RECEIVED_REJECTED',
+    'REJECTED'
+];
+
+function isSampleActiveInWorkload(status) {
+    if (!status) return false;
+    return !INACTIVE_SAMPLE_STATUSES.includes(status);
+}
 
 /**
  * Resolves current operational state and revision for a lab.
@@ -113,15 +133,15 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         totalEquipment
     ] = await Promise.all([
         tx.sample.count({ where: { assignedLab: labId } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { notIn: ['ARCHIVED', 'DISPOSED'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: 'EXPECTED' } }),
-        tx.sample.count({ where: { assignedLab: labId, status: 'RECEIVED' } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['IN_ANALYSIS', 'PROCESSING', 'ANALYZING'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['REVIEW', 'PENDING_APPROVAL'] } } }),
+        tx.sample.count({ where: { assignedLab: labId, status: { notIn: INACTIVE_SAMPLE_STATUSES } } }),
+        tx.sample.count({ where: { assignedLab: labId, status: { in: ['EXPECTED', 'DRAFT', 'COLLECTED'] } } }),
+        tx.sample.count({ where: { assignedLab: labId, status: { in: ['RECEIVED', 'ACCEPTED'] } } }),
+        tx.sample.count({ where: { assignedLab: labId, status: { in: ['IN_ANALYSIS', 'PROCESSING', 'ANALYZING', 'PREPARATION', 'PARTIALLY_COMPLETE'] } } }),
+        tx.sample.count({ where: { assignedLab: labId, status: { in: ['REVIEW', 'PENDING_APPROVAL', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] } } }),
         tx.sample.count({ where: { assignedLab: labId, status: { in: ['RELEASED', 'APPROVED', 'COMPLETED'] } } }),
         tx.workItem.count({ where: { labId } }),
-        tx.workItem.count({ where: { labId, status: { in: ['ASSIGNED', 'IN_PROGRESS'] } } }),
-        tx.workItem.count({ where: { labId, status: { in: ['COMPLETED', 'APPROVED'] } } }),
+        tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
+        tx.workItem.count({ where: { labId, status: { in: ['COMPLETED', 'ACCEPTED', 'APPROVED'] } } }),
         tx.user.count({ where: { labId } }),
         tx.user.count({ where: { labId, isActive: true } }),
         tx.user.findFirst({
@@ -170,8 +190,7 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
     const openWorkCounts = await tx.workItem.groupBy({
         by: ['assignedTo'],
         where: {
-            labId,
-            status: { in: ['ASSIGNED', 'IN_PROGRESS'] },
+            ...getUnfinishedWorkWhere(null, labId),
             assignedTo: { in: staffUsers.map(u => u.username).filter(Boolean) }
         },
         _count: { _all: true }
@@ -185,7 +204,13 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         openWorkCount: countMap[u.username] || 0
     }));
 
-    // Fetch projects served by this laboratory
+    // Fetch projects served by this laboratory (owned, ProjectLab junction, or assignedLabIds)
+    const junctionRecords = await tx.projectLab.findMany({
+        where: { labId },
+        select: { projectCode: true }
+    });
+    const junctionProjectCodes = new Set(junctionRecords.map(j => j.projectCode).filter(Boolean));
+
     const allProjects = await tx.project.findMany({
         where: { status: { not: 'DELETED' } },
         select: {
@@ -200,6 +225,7 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
     });
     const projects = allProjects.filter(p => {
         if (p.labId === labId) return true;
+        if (junctionProjectCodes.has(p.code)) return true;
         try {
             const assigned = JSON.parse(p.assignedLabIds || '[]');
             return Array.isArray(assigned) && assigned.includes(labId);
@@ -392,8 +418,8 @@ async function getLifecyclePreview(actor, labId, targetState, tx = prisma) {
     const currentState = await getLabOperationalState(labId, tx);
 
     const [openAssignmentsCount, pendingSamplesCount, activeStaffCount] = await Promise.all([
-        tx.workItem.count({ where: { labId, status: { in: ['ASSIGNED', 'IN_PROGRESS'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'ANALYZING', 'IN_ANALYSIS'] } } }),
+        tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
+        tx.sample.count({ where: { assignedLab: labId, status: { notIn: INACTIVE_SAMPLE_STATUSES } } }),
         tx.user.count({ where: { labId, isActive: true } })
     ]);
 
@@ -542,7 +568,7 @@ async function _executeTransitionLifecycle(actor, labId, { targetState, reason, 
 
     // Invariant: Retirement safety gate
     if (targetState === 'RETIRED') {
-        const openCount = await tx.workItem.count({ where: { labId, status: { in: ['ASSIGNED', 'IN_PROGRESS'] } } });
+        const openCount = await tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) });
         if (openCount > 0) {
             const err = new Error(`Cannot retire laboratory with ${openCount} unfinished work assignments`);
             err.statusCode = 422;

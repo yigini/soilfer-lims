@@ -5,6 +5,8 @@ const prisma = require('../prisma');
 const { ALL_ROLES, ALLOWED_SUB_ROLES, getPermissionsForRole } = require('../config/roles');
 const { canManageUser, POLICY_CODES } = require('./actionPolicyService');
 const { JWT_SECRET } = require('../config/auth');
+const { getUnfinishedWorkWhere, UNFINISHED_WORK_STATUSES } = require('./workEligibility');
+
 
 let tablesInitialized = false;
 
@@ -48,6 +50,67 @@ async function ensureTables(tx = prisma) {
     }
 }
 
+const txHookRegistry = new WeakMap();
+
+/**
+ * Registers an after-commit hook with the transaction owner.
+ * Returns true if successfully registered, or false if the outer transaction
+ * contract does not support an explicit afterCommit mechanism.
+ */
+function registerAfterCommit(outerTx, options, hook) {
+    if (outerTx && txHookRegistry.has(outerTx)) {
+        txHookRegistry.get(outerTx).push(hook);
+        return true;
+    }
+    if (outerTx && typeof outerTx.afterCommit === 'function') {
+        outerTx.afterCommit(hook);
+        return true;
+    }
+    if (outerTx && Array.isArray(outerTx.afterCommit)) {
+        outerTx.afterCommit.push(hook);
+        return true;
+    }
+    if (options && typeof options.afterCommit === 'function') {
+        options.afterCommit(hook);
+        return true;
+    }
+    if (options && Array.isArray(options.afterCommit)) {
+        options.afterCommit.push(hook);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Executes a transaction and runs registered afterCommit hooks only upon successful commit.
+ * If the transaction rolls back or throws, afterCommit hooks are never executed.
+ */
+async function withTransaction(callback) {
+    const afterCommitHooks = [];
+    const result = await prisma.$transaction(async (tx) => {
+        txHookRegistry.set(tx, afterCommitHooks);
+        tx.afterCommit = (hook) => {
+            if (typeof hook === 'function') {
+                afterCommitHooks.push(hook);
+            }
+        };
+        try {
+            return await callback(tx);
+        } finally {
+            try { delete tx.afterCommit; } catch (_) {}
+            txHookRegistry.delete(tx);
+        }
+    });
+    for (const hook of afterCommitHooks) {
+        try {
+            await hook();
+        } catch (e) {
+            console.error('[staffLifecycleService] Error executing afterCommit hook:', e);
+        }
+    }
+    return result;
+}
+
 /**
  * Creates a pending staff invitation.
  */
@@ -78,16 +141,7 @@ async function createInvitation(actor, { name, email, role, labId, projects }, t
         throw err;
     }
 
-    // Role hierarchy & lab scoping
-    const decision = canManageUser(actor, { role, labId }, { role, labId });
-    if (!decision.allowed) {
-        const err = new Error(decision.message);
-        err.statusCode = 403;
-        err.code = decision.code;
-        throw err;
-    }
-
-    // Check target lab status
+    // Resolve target lab first before authorization
     const targetLab = await tx.lab.findUnique({ where: { id: labId } });
     if (!targetLab) {
         const err = new Error(`Laboratory '${labId}' not found`);
@@ -95,10 +149,33 @@ async function createInvitation(actor, { name, email, role, labId, projects }, t
         err.code = 'LAB_NOT_FOUND';
         throw err;
     }
-    if (targetLab.isActive === false) {
+
+    // Role hierarchy & lab scoping with targetLab country
+    const decision = canManageUser(
+        actor,
+        { role, labId, labCountry: targetLab.country, country: targetLab.country },
+        { role, labId, proposedLabCountry: targetLab.country, labCountry: targetLab.country }
+    );
+    if (!decision.allowed) {
+        const err = new Error(decision.message);
+        err.statusCode = 403;
+        err.code = decision.code;
+        throw err;
+    }
+
+    // Check target lab operational status
+    const { getLabOperationalState } = require('./labLifecycleService');
+    const opState = await getLabOperationalState(labId, tx);
+    if (opState.operationalStatus === 'PAUSED') {
         const err = new Error('Laboratory is currently inactive or paused.');
         err.statusCode = 400;
         err.code = 'LAB_PAUSED';
+        throw err;
+    }
+    if (opState.operationalStatus === 'RETIRED') {
+        const err = new Error('Laboratory is retired.');
+        err.statusCode = 400;
+        err.code = 'LAB_RETIRED';
         throw err;
     }
 
@@ -255,10 +332,7 @@ async function getAccessPreview(actor, targetUserId, changes = {}, tx = prisma) 
 
     // Count open work assignments
     const openAssignmentsCount = await tx.workItem.count({
-        where: {
-            assignedTo: targetUser.username,
-            status: { in: ['ASSIGNED', 'IN_PROGRESS'] }
-        }
+        where: getUnfinishedWorkWhere(targetUser.username)
     });
 
     const proposedRole = changes.role || targetUser.role;
@@ -296,7 +370,8 @@ async function getAccessPreview(actor, targetUserId, changes = {}, tx = prisma) 
 /**
  * Applies access changes with transaction and session revocation.
  */
-async function applyAccessChanges(actor, targetUserId, { changes = {}, reviewToken, reason } = {}, outerTx = null) {
+async function applyAccessChanges(actor, targetUserId, options = {}, outerTx = null) {
+    const { changes = {}, reviewToken, reason } = options;
     const run = async (tx) => {
         const targetUser = await tx.user.findUnique({ where: { id: targetUserId } });
         if (!targetUser) {
@@ -357,10 +432,7 @@ async function applyAccessChanges(actor, targetUserId, { changes = {}, reviewTok
         }
 
         const openCount = await tx.workItem.count({
-            where: {
-                assignedTo: targetUser.username,
-                status: { in: ['ASSIGNED', 'IN_PROGRESS'] }
-            }
+            where: getUnfinishedWorkWhere(targetUser.username)
         });
 
         // Review token verification (IR-03)
@@ -419,15 +491,33 @@ async function applyAccessChanges(actor, targetUserId, { changes = {}, reviewTok
     };
 
     if (outerTx && outerTx !== prisma) {
+        const registered = registerAfterCommit(outerTx, options, () => {
+            try {
+                const wsServer = require('../wsServer');
+                wsServer.revokeUserSockets(targetUserId);
+            } catch (e) {}
+        });
+        if (!registered) {
+            const err = new Error('Unsupported outer transaction contract: transaction owner must provide an explicit afterCommit hook to ensure session revocation after commit');
+            err.statusCode = 500;
+            err.code = 'UNSUPPORTED_TRANSACTION_CONTRACT';
+            throw err;
+        }
         return run(outerTx);
     }
-    return prisma.$transaction(run);
+    const result = await prisma.$transaction(run);
+    try {
+        const wsServer = require('../wsServer');
+        wsServer.revokeUserSockets(targetUserId);
+    } catch (e) {}
+    return result;
 }
 
 /**
  * Suspends a user account.
  */
-async function suspendUser(actor, targetUserId, { reason } = {}, outerTx = null) {
+async function suspendUser(actor, targetUserId, options = {}, outerTx = null) {
+    const { reason } = options;
     const run = async (tx) => {
         const targetUser = await tx.user.findUnique({ where: { id: targetUserId } });
         if (!targetUser) {
@@ -478,10 +568,7 @@ async function suspendUser(actor, targetUserId, { reason } = {}, outerTx = null)
         });
 
         const openCount = await tx.workItem.count({
-            where: {
-                assignedTo: targetUser.username,
-                status: { in: ['ASSIGNED', 'IN_PROGRESS'] }
-            }
+            where: getUnfinishedWorkWhere(targetUser.username)
         });
 
         await tx.auditLog.create({
@@ -507,9 +594,26 @@ async function suspendUser(actor, targetUserId, { reason } = {}, outerTx = null)
     };
 
     if (outerTx && outerTx !== prisma) {
+        const registered = registerAfterCommit(outerTx, options, () => {
+            try {
+                const wsServer = require('../wsServer');
+                wsServer.revokeUserSockets(targetUserId);
+            } catch (e) {}
+        });
+        if (!registered) {
+            const err = new Error('Unsupported outer transaction contract: transaction owner must provide an explicit afterCommit hook to ensure session revocation after commit');
+            err.statusCode = 500;
+            err.code = 'UNSUPPORTED_TRANSACTION_CONTRACT';
+            throw err;
+        }
         return run(outerTx);
     }
-    return prisma.$transaction(run);
+    const result = await prisma.$transaction(run);
+    try {
+        const wsServer = require('../wsServer');
+        wsServer.revokeUserSockets(targetUserId);
+    } catch (e) {}
+    return result;
 }
 
 /**
@@ -587,7 +691,8 @@ async function reactivateUser(actor, targetUserId, outerTx = null) {
 /**
  * Issues an emergency single-use recovery grant.
  */
-async function createRecoveryGrant(actor, targetUserId, { reason } = {}, outerTx = null) {
+async function createRecoveryGrant(actor, targetUserId, options = {}, outerTx = null) {
+    const { reason } = options;
     const run = async (tx) => {
         await ensureTables(tx);
 
@@ -656,9 +761,26 @@ async function createRecoveryGrant(actor, targetUserId, { reason } = {}, outerTx
     };
 
     if (outerTx && outerTx !== prisma) {
+        const registered = registerAfterCommit(outerTx, options, () => {
+            try {
+                const wsServer = require('../wsServer');
+                wsServer.revokeUserSockets(targetUserId);
+            } catch (e) {}
+        });
+        if (!registered) {
+            const err = new Error('Unsupported outer transaction contract: transaction owner must provide an explicit afterCommit hook to ensure session revocation after commit');
+            err.statusCode = 500;
+            err.code = 'UNSUPPORTED_TRANSACTION_CONTRACT';
+            throw err;
+        }
         return run(outerTx);
     }
-    return prisma.$transaction(run);
+    const result = await prisma.$transaction(run);
+    try {
+        const wsServer = require('../wsServer');
+        wsServer.revokeUserSockets(targetUserId);
+    } catch (e) {}
+    return result;
 }
 
 /**
@@ -755,6 +877,21 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
             const err = new Error(existingUser.username === normalizedUsername ? 'Username already taken' : 'An account with this email already exists');
             err.statusCode = 409;
             err.code = 'IDENTITY_CONFLICT';
+            throw err;
+        }
+
+        const { getLabOperationalState } = require('./labLifecycleService');
+        const opState = await getLabOperationalState(metadata.labId, tx);
+        if (opState.operationalStatus === 'RETIRED') {
+            const err = new Error('Cannot activate staff in a retired laboratory');
+            err.statusCode = 400;
+            err.code = 'LAB_RETIRED';
+            throw err;
+        }
+        if (opState.operationalStatus === 'PAUSED') {
+            const err = new Error('Cannot activate staff in a paused laboratory');
+            err.statusCode = 400;
+            err.code = 'LAB_PAUSED';
             throw err;
         }
 
@@ -940,6 +1077,7 @@ async function revokeInvitation(actor, invitationId, tx = prisma) {
 }
 
 module.exports = {
+    withTransaction,
     createInvitation,
     verifyInvitationToken,
     consumeInvitation,
@@ -951,5 +1089,7 @@ module.exports = {
     verifyRecoveryToken,
     consumeRecoveryGrant,
     getPendingInvitations,
-    revokeInvitation
+    revokeInvitation,
+    UNFINISHED_WORK_STATUSES,
+    getUnfinishedWorkWhere
 };

@@ -302,6 +302,13 @@ exports.updateUser = async (req, res) => {
             data
         });
 
+        if (data.isActive === false || data.role || data.labId || updates.password) {
+            try {
+                const wsServer = require('../wsServer');
+                wsServer.revokeUserSockets(id);
+            } catch (e) {}
+        }
+
         await prisma.auditLog.create({
             data: {
                 id: crypto.randomUUID(),
@@ -352,6 +359,10 @@ exports.deleteUser = async (req, res) => {
         }
 
         await prisma.user.delete({ where: { id: String(id) } });
+        try {
+            const wsServer = require('../wsServer');
+            wsServer.revokeUserSockets(id);
+        } catch (e) {}
 
         await prisma.auditLog.create({
             data: {

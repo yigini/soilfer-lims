@@ -92,16 +92,26 @@ function canManageUser(actor, target, requestedChanges = {}) {
             return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'National user has no authorized countries' };
         }
 
-        // Scope check target country
+        // Scope check target country - must resolve and be within authorized scope
         const targetCountry = target.labCountry || target.country;
-        if (targetCountry && !actorCountries.includes(targetCountry)) {
+        if (!targetCountry) {
+            // Unresolved target country fails closed
+            return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Target laboratory or country scope could not be resolved' };
+        }
+        if (!actorCountries.includes(targetCountry)) {
             return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: `Target country '${targetCountry}' outside authorized national scope` };
         }
 
-        // Scope check proposed lab country
-        const proposedCountry = requestedChanges.proposedLabCountry;
-        if (proposedCountry && !actorCountries.includes(proposedCountry)) {
-            return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: `Proposed laboratory country '${proposedCountry}' outside authorized national scope` };
+        // Scope check proposed lab country only when a lab/scope change is requested
+        const isLabScopeChangeRequested = requestedChanges.labId !== undefined || requestedChanges.proposedLabCountry !== undefined || requestedChanges.countries !== undefined;
+        if (isLabScopeChangeRequested) {
+            const proposedCountry = requestedChanges.proposedLabCountry || requestedChanges.labCountry || requestedChanges.country;
+            if (!proposedCountry) {
+                return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: 'Proposed laboratory country scope could not be resolved' };
+            }
+            if (!actorCountries.includes(proposedCountry)) {
+                return { allowed: false, code: POLICY_CODES.TARGET_OUTSIDE_SCOPE, message: `Proposed laboratory country '${proposedCountry}' outside authorized national scope` };
+            }
         }
 
         return { allowed: true, code: POLICY_CODES.ALLOWED, message: 'National user authorized' };

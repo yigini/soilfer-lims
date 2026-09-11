@@ -259,12 +259,46 @@ function canPublish(sample, report, user) {
     return { allowed: true, reason: null };
 }
 
+const UNFINISHED_WORK_STATUSES = [
+    'ASSIGNED',
+    'IN_PROGRESS',
+    'RECORDED',
+    'SUBMITTED',
+    'PENDING_REVIEW',
+    'RETURNED',
+    'DRAFT'
+];
+
+/**
+ * Canonical predicate building Prisma WHERE clause for unfinished work items.
+ * Accounts for analytical work in progress, recorded, submitted for review, or returned,
+ * as well as completed determinations awaiting technician submission.
+ */
+function getUnfinishedWorkWhere(username = null, labId = null) {
+    const conditions = [
+        {
+            status: { in: UNFINISHED_WORK_STATUSES }
+        },
+        {
+            status: 'COMPLETED',
+            submissionId: null
+        }
+    ];
+    const where = { OR: conditions };
+    if (username) where.assignedTo = username;
+    if (labId) where.labId = labId;
+    return where;
+}
+
 module.exports = {
     GATE_ANALYSES,
     NON_ANALYTICAL,
+    UNFINISHED_WORK_STATUSES,
+    getUnfinishedWorkWhere,
     canRecord,
     canSubmit,
     canReview,
     canFinalApprove,
     canPublish
 };
+
