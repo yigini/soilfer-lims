@@ -1,0 +1,138 @@
+{
+  "head": "42c59764d1ae3fc8f01a7aade09acb1beea76b12",
+  "timestamp": "2026-09-11T12:47:42.006Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-final-ce5ddebd-6b31-489c-83d1-b6d1035182eb.db",
+  "schemaSource": "Read-only SQL schema; fictional fixtures only",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "T01",
+      "description": "Outer rollback preserves account, audit and established connection",
+      "expected": {
+        "rollback": "EXPECTED_ROLLBACK",
+        "active": true,
+        "version": 0,
+        "revokeCalls": 0,
+        "audits": 0,
+        "socketOpen": true
+      },
+      "actual": {
+        "rollback": "EXPECTED_ROLLBACK",
+        "active": true,
+        "version": 0,
+        "revokeCalls": 0,
+        "audits": 0,
+        "socketOpen": true
+      },
+      "passed": true
+    },
+    {
+      "id": "T02",
+      "description": "Unsupported outer transaction rejects before mutation",
+      "expected": {
+        "code": "UNSUPPORTED_TRANSACTION_CONTRACT",
+        "active": true,
+        "version": 0
+      },
+      "actual": {
+        "code": "UNSUPPORTED_TRANSACTION_CONTRACT",
+        "active": true,
+        "version": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "T03",
+      "description": "Successful outer commit revokes exactly once after transaction callback",
+      "expected": {
+        "premature": false,
+        "active": false,
+        "version": 1,
+        "revokeCalls": 1,
+        "socketOpen": false
+      },
+      "actual": {
+        "premature": false,
+        "active": false,
+        "version": 1,
+        "revokeCalls": 1,
+        "socketOpen": false
+      },
+      "passed": true
+    },
+    {
+      "id": "S01",
+      "description": "Pending password change blocks operational HTTP, SIS and socket access",
+      "expected": {
+        "http": 403,
+        "sisDenied": true,
+        "socketConnected": false
+      },
+      "actual": {
+        "http": 403,
+        "sis": 403,
+        "socketConnected": false
+      },
+      "passed": true
+    },
+    {
+      "id": "C02",
+      "description": "Authorized impersonation starts before actor suspension",
+      "expected": {
+        "http": 200,
+        "socketConnected": true
+      },
+      "actual": {
+        "http": 200,
+        "socketConnected": true
+      },
+      "passed": true
+    },
+    {
+      "id": "S02",
+      "description": "Suspended impersonating administrator invalidates support token on every channel",
+      "expected": {
+        "suspension": 200,
+        "httpDenied": true,
+        "sisDenied": true,
+        "newSocketConnected": false
+      },
+      "actual": {
+        "suspension": 200,
+        "http": 401,
+        "sis": 401,
+        "newSocketConnected": false
+      },
+      "passed": true
+    },
+    {
+      "id": "S03",
+      "description": "Actor suspension closes already established impersonation socket",
+      "expected": {
+        "socketOpen": false,
+        "receivedAfterActorSuspended": false
+      },
+      "actual": {
+        "socketOpen": false,
+        "receivedAfterActorSuspended": false
+      },
+      "passed": true
+    },
+    {
+      "id": "P01",
+      "description": "Workspace staff collection is bounded for a 200-plus-person roster",
+      "expected": {
+        "http": 200,
+        "returnedAtMost": 100,
+        "paginationMetadata": true
+      },
+      "actual": {
+        "http": 200,
+        "returned": 20,
+        "paginationMetadata": true
+      },
+      "passed": true
+    }
+  ]
+}

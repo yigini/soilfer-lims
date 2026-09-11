@@ -500,6 +500,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(socket.readyState).not.toBe(WS.OPEN);
 
             socket.terminate();
+            await wsServer.close();
             await new Promise(resolve => server.close(resolve));
         });
 
@@ -655,6 +656,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             } finally {
                 wsServer.revokeUserSockets = origRevoke;
                 socket.terminate();
+                await wsServer.close();
                 await new Promise(resolve => server.close(resolve));
             }
         });

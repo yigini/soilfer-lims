@@ -490,7 +490,7 @@ router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 // ─── GET /api/labs/:id/workspace ─── Detailed operational workspace
 router.get('/:id/workspace', async (req, res) => {
     try {
-        const workspace = await labLifecycleService.getLabWorkspace(req.user, req.params.id);
+        const workspace = await labLifecycleService.getLabWorkspace(req.user, req.params.id, req.query);
         res.json(workspace);
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.message, code: err.code });

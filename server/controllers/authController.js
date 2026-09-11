@@ -113,6 +113,11 @@ exports.changePassword = async (req, res) => {
             }
         });
 
+        try {
+            const wsServer = require('../wsServer');
+            wsServer.revokeUserSockets(userId);
+        } catch (e) {}
+
         // Issue freshly signed JWT with new tokenVersion
         const newToken = jwt.sign(
             { id: user.id, username: user.username, role: user.role, tokenVersion: newVersion },

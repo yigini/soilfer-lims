@@ -76,10 +76,20 @@ async function getLabOperationalState(labId, tx = prisma) {
 /**
  * Resolves full workspace details, counts, configuration gaps and capabilities.
  */
-async function getLabWorkspace(actor, labId, tx = prisma) {
-    await ensureTables(tx);
+async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
+    let query = {};
+    let transaction = prisma;
+    if (options && (typeof options.$transaction === 'function' || typeof options.$queryRawUnsafe === 'function')) {
+        transaction = options;
+    } else if (tx && (typeof tx.$transaction === 'function' || typeof tx.$queryRawUnsafe === 'function')) {
+        query = options || {};
+        transaction = tx;
+    } else {
+        query = options || {};
+    }
+    await ensureTables(transaction);
 
-    const lab = await tx.lab.findUnique({
+    const lab = await transaction.lab.findUnique({
         where: { id: labId }
     });
     if (!lab) {
@@ -113,7 +123,7 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         throw err;
     }
 
-    const state = await getLabOperationalState(labId, tx);
+    const state = await getLabOperationalState(labId, transaction);
 
     // Compute parallel workload counts
     const [
@@ -132,23 +142,23 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         responsibleManager,
         totalEquipment
     ] = await Promise.all([
-        tx.sample.count({ where: { assignedLab: labId } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { notIn: INACTIVE_SAMPLE_STATUSES } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['EXPECTED', 'DRAFT', 'COLLECTED'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['RECEIVED', 'ACCEPTED'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['IN_ANALYSIS', 'PROCESSING', 'ANALYZING', 'PREPARATION', 'PARTIALLY_COMPLETE'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['REVIEW', 'PENDING_APPROVAL', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] } } }),
-        tx.sample.count({ where: { assignedLab: labId, status: { in: ['RELEASED', 'APPROVED', 'COMPLETED'] } } }),
-        tx.workItem.count({ where: { labId } }),
-        tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
-        tx.workItem.count({ where: { labId, status: { in: ['COMPLETED', 'ACCEPTED', 'APPROVED'] } } }),
-        tx.user.count({ where: { labId } }),
-        tx.user.count({ where: { labId, isActive: true } }),
-        tx.user.findFirst({
+        transaction.sample.count({ where: { assignedLab: labId } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { notIn: INACTIVE_SAMPLE_STATUSES } } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { in: ['EXPECTED', 'DRAFT', 'COLLECTED'] } } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { in: ['RECEIVED', 'ACCEPTED'] } } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { in: ['IN_ANALYSIS', 'PROCESSING', 'ANALYZING', 'PREPARATION', 'PARTIALLY_COMPLETE'] } } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { in: ['REVIEW', 'PENDING_APPROVAL', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] } } }),
+        transaction.sample.count({ where: { assignedLab: labId, status: { in: ['RELEASED', 'APPROVED', 'COMPLETED'] } } }),
+        transaction.workItem.count({ where: { labId } }),
+        transaction.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
+        transaction.workItem.count({ where: { labId, status: { in: ['COMPLETED', 'ACCEPTED', 'APPROVED'] } } }),
+        transaction.user.count({ where: { labId } }),
+        transaction.user.count({ where: { labId, isActive: true } }),
+        transaction.user.findFirst({
             where: { labId, role: 'LAB_MANAGER', isActive: true },
             select: { id: true, name: true, username: true, email: true }
         }),
-        tx.equipmentAsset ? tx.equipmentAsset.count({ where: { labId } }) : Promise.resolve(0)
+        transaction.equipmentAsset ? transaction.equipmentAsset.count({ where: { labId } }) : Promise.resolve(0)
     ]);
 
     // Configuration attention flags
@@ -169,9 +179,15 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         canManageProjects: isSuperAdmin || isOwnManager
     };
 
-    // Fetch staff roster with open task counts
-    const staffUsers = await tx.user.findMany({
+    // Bounded staff roster query with pagination metadata (P01)
+    const page = Math.max(1, parseInt(query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 50));
+    const skip = (page - 1) * limit;
+
+    const staffUsers = await transaction.user.findMany({
         where: { labId },
+        skip,
+        take: limit,
         select: {
             id: true,
             name: true,
@@ -187,7 +203,7 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         orderBy: { username: 'asc' }
     });
 
-    const openWorkCounts = await tx.workItem.groupBy({
+    const openWorkCounts = await transaction.workItem.groupBy({
         by: ['assignedTo'],
         where: {
             ...getUnfinishedWorkWhere(null, labId),
@@ -204,15 +220,31 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         openWorkCount: countMap[u.username] || 0
     }));
 
-    // Fetch projects served by this laboratory (owned, ProjectLab junction, or assignedLabIds)
-    const junctionRecords = await tx.projectLab.findMany({
+    const pagination = {
+        page,
+        limit,
+        total: totalStaff,
+        totalPages: Math.ceil(totalStaff / limit)
+    };
+
+    // Scoped projects query (owned, ProjectLab junction, or assignedLabIds) without full table in-memory scans
+    const junctionRecords = await transaction.projectLab.findMany({
         where: { labId },
         select: { projectCode: true }
     });
-    const junctionProjectCodes = new Set(junctionRecords.map(j => j.projectCode).filter(Boolean));
+    const junctionProjectCodes = junctionRecords.map(j => j.projectCode).filter(Boolean);
 
-    const allProjects = await tx.project.findMany({
-        where: { status: { not: 'DELETED' } },
+    const projectWhere = {
+        status: { not: 'DELETED' },
+        OR: [
+            { labId },
+            ...(junctionProjectCodes.length > 0 ? [{ code: { in: junctionProjectCodes } }] : []),
+            { assignedLabIds: { contains: labId } }
+        ]
+    };
+
+    const projectsList = await transaction.project.findMany({
+        where: projectWhere,
         select: {
             id: true,
             code: true,
@@ -221,18 +253,10 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
             labId: true,
             assignedLabIds: true,
             createdAt: true
-        }
+        },
+        orderBy: { code: 'asc' }
     });
-    const projects = allProjects.filter(p => {
-        if (p.labId === labId) return true;
-        if (junctionProjectCodes.has(p.code)) return true;
-        try {
-            const assigned = JSON.parse(p.assignedLabIds || '[]');
-            return Array.isArray(assigned) && assigned.includes(labId);
-        } catch {
-            return false;
-        }
-    }).map(p => ({
+    const projects = projectsList.map(p => ({
         ...p,
         isOwned: p.labId === labId
     }));
@@ -285,6 +309,8 @@ async function getLabWorkspace(actor, labId, tx = prisma) {
         pausedBy: state.pausedBy,
         responsibleManager,
         staff,
+        pagination,
+        staffPagination: pagination,
         projects,
         workload,
         counts: workload,
