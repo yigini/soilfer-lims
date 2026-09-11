@@ -31,8 +31,8 @@ exports.getUsers = async (req, res) => {
     const actor = req.user;
     const { page = 1, limit = 20, search, role, labId, country } = req.query;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = Math.max(parseInt(page) || 1, 1);
+    const limitNum = Math.min(Math.max(parseInt(limit) || 25, 1), 100);
     const skip = (pageNum - 1) * limitNum;
 
     try {
@@ -49,7 +49,7 @@ exports.getUsers = async (req, res) => {
             } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
                 const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
                 if (!Array.isArray(countryList) || countryList.length === 0) {
-                    return res.json({ users: [], total: 0, page: pageNum, pages: 0 });
+                    return res.json({ users: [], total: 0, page: pageNum, pages: 0, data: [], pagination: { total: 0, page: pageNum, pageSize: limitNum, totalPages: 0 } });
                 }
                 const authorizedLabs = await prisma.lab.findMany({
                     where: { country: { in: countryList } },
@@ -80,44 +80,57 @@ exports.getUsers = async (req, res) => {
 
         const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
-        const allMatching = await prisma.user.findMany({
-            where
-        });
-
-        const roleOrder = {
-            'SUPER_ADMIN': 1,
-            'MASTER_USER': 2,
-            'PROJECT_MANAGER': 3,
-            'LAB_MANAGER': 4,
-            'SAMPLE_RECEPTION': 5,
-            'LAB_TECHNICIAN': 6,
-            'AUDIT_USER': 7,
-            'VIEWER': 8
-        };
-
-        allMatching.sort((a, b) => {
-            const rA = roleOrder[a.role] || 99;
-            const rB = roleOrder[b.role] || 99;
-            if (rA !== rB) return rA - rB;
-            return (a.username || '').localeCompare(b.username || '');
-        });
-
-        const total = allMatching.length;
-        const paged = allMatching.slice(skip, skip + limitNum);
+        // DB Pagination & explicit safe projection (no password hashes loaded)
+        const [total, matchingUsers] = await prisma.$transaction([
+            prisma.user.count({ where }),
+            prisma.user.findMany({
+                where,
+                skip,
+                take: limitNum,
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    labId: true,
+                    isActive: true,
+                    language: true,
+                    themePreference: true,
+                    countries: true,
+                    projects: true,
+                    createdAt: true,
+                    updatedAt: true
+                },
+                orderBy: [
+                    { name: 'asc' },
+                    { id: 'asc' }
+                ]
+            })
+        ]);
 
         // Parse JSON fields and sanitize
-        const safeUsers = paged.map(u => {
-            const { password, ...rest } = u;
-            return {
-                ...rest,
-                countries: typeof u.countries === 'string' ? JSON.parse(u.countries) : (u.countries || []),
-                projects: typeof u.projects === 'string' ? JSON.parse(u.projects) : (u.projects || [])
-            };
-        });
+        const safeUsers = matchingUsers.map(u => ({
+            ...u,
+            countries: typeof u.countries === 'string' ? JSON.parse(u.countries) : (u.countries || []),
+            projects: typeof u.projects === 'string' ? JSON.parse(u.projects) : (u.projects || [])
+        }));
 
         res.json({
             data: safeUsers,
-            meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }
+            users: safeUsers,
+            pagination: {
+                total,
+                page: pageNum,
+                pageSize: limitNum,
+                totalPages: Math.ceil(total / limitNum)
+            },
+            meta: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                pages: Math.ceil(total / limitNum)
+            }
         });
     } catch (error) {
         console.error('[getUsers] Error:', error);
@@ -362,28 +375,48 @@ exports.getDirectory = async (req, res) => {
 
     try {
         const where = {};
-        if (actor.role === 'SUPER_ADMIN' || actor.role === 'MASTER_USER') {
+        if (actor.role === 'SUPER_ADMIN') {
             // All
-        } else if (actor.role === 'COUNTRY_ADMIN') {
-            // Approximate matching for country-scoped members
+        } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
+            const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
+            if (!Array.isArray(countryList) || countryList.length === 0) {
+                return res.json([]);
+            }
+            const authorizedLabs = await prisma.lab.findMany({
+                where: { country: { in: countryList } },
+                select: { id: true }
+            });
+            const labIds = authorizedLabs.map(l => l.id);
+            where.labId = { in: labIds };
         } else if (actor.labId) {
             where.labId = actor.labId;
         } else {
             where.id = actor.id;
         }
 
-        const users = await prisma.user.findMany({ where });
+        if (req.query.purpose === 'assignment') {
+            where.isActive = true;
+            where.role = { in: ['LAB_TECHNICIAN', 'LAB_MANAGER'] };
+        }
 
-        const directory = users.map(u => ({
-            id: u.id,
-            name: u.name,
-            username: u.username,
-            role: u.role,
-            labId: u.labId
-        }));
+        const users = await prisma.user.findMany({
+            where,
+            take: 200,
+            select: {
+                id: true,
+                name: true,
+                username: true,
+                role: true,
+                labId: true,
+                isActive: true
+            },
+            orderBy: [
+                { name: 'asc' },
+                { id: 'asc' }
+            ]
+        });
 
-        directory.sort((a, b) => (a.name || a.username).localeCompare(b.name || b.username));
-        res.json(directory);
+        res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

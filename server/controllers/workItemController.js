@@ -514,6 +514,9 @@ exports.assignWork = async (req, res) => {
         if (!techUser) {
             return res.status(404).json({ error: `Technician '${assignee}' not found` });
         }
+        if (techUser.isActive === false) {
+            return res.status(400).json({ error: 'ASSIGNEE_INACTIVE', message: `Cannot assign work to deactivated technician '${assignee}'` });
+        }
         if (techUser.role !== 'LAB_TECHNICIAN') {
             return res.status(400).json({ error: `User '${assignee}' is not a LAB_TECHNICIAN` });
         }
@@ -549,6 +552,20 @@ exports.assignWork = async (req, res) => {
                 return res.status(403).json({
                     error: `Work item belongs to different lab scope (Req: ${user.labId}, Has: ${owningLab})`
                 });
+            }
+            if (user.role === 'MASTER_USER') {
+                const countryList = user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : [];
+                const targetLab = await prisma.lab.findUnique({ where: { id: owningLab } });
+                if (!targetLab || !countryList.includes(targetLab.country)) {
+                    return res.status(403).json({
+                        error: 'LAB_OUTSIDE_SCOPE',
+                        message: `Lab '${owningLab}' is outside national scope.`
+                    });
+                }
+            }
+            const owningLabRecord = await prisma.lab.findUnique({ where: { id: owningLab } });
+            if (owningLabRecord && owningLabRecord.isActive === false) {
+                return res.status(400).json({ error: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
             }
         }
 
@@ -747,6 +764,7 @@ exports.reassignWork = async (req, res) => {
 
         const techUser = await prisma.user.findUnique({ where: { username: technicianUserId } });
         if (!techUser) return res.status(404).json({ error: `Technician '${technicianUserId}' not found` });
+        if (techUser.isActive === false) return res.status(400).json({ error: 'ASSIGNEE_INACTIVE', message: `Cannot reassign work to deactivated technician '${technicianUserId}'` });
         if (techUser.role !== 'LAB_TECHNICIAN') return res.status(400).json({ error: `User '${technicianUserId}' is not a LAB_TECHNICIAN` });
 
         // SD-02: Isolation belongs to the sample, not the actor.
@@ -760,6 +778,19 @@ exports.reassignWork = async (req, res) => {
 
         if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
             return res.status(403).json({ error: 'Work item outside your lab scope' });
+        }
+
+        if (user.role === 'MASTER_USER') {
+            const countryList = user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : [];
+            const targetLab = await prisma.lab.findUnique({ where: { id: owningLab } });
+            if (!targetLab || !countryList.includes(targetLab.country)) {
+                return res.status(403).json({ error: 'LAB_OUTSIDE_SCOPE', message: `Laboratory '${owningLab}' is outside national scope.` });
+            }
+        }
+
+        const owningLabRecord = await prisma.lab.findUnique({ where: { id: owningLab } });
+        if (owningLabRecord && owningLabRecord.isActive === false) {
+            return res.status(400).json({ error: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
         }
 
         const previousAssignee = item.assignedTo;
@@ -1796,6 +1827,18 @@ exports.reviewWorkItemsBulk = async (req, res) => {
     } catch (error) {
         console.error('[reviewWorkItemsBulk] Error:', error);
         res.status(500).json({ error: 'Failed to review work items' });
+    }
+};
+
+exports.getEligibleAssignees = async (req, res) => {
+    try {
+        const { labId, analysis } = req.query;
+        const assignmentService = require('../services/assignmentEligibilityService');
+        const result = await assignmentService.getEligibleAssignees(req.user, { labId, analysis });
+        res.json(result);
+    } catch (err) {
+        const status = err.statusCode || err.status || 500;
+        res.status(status).json({ error: err.code || 'FETCH_ASSIGNEES_FAILED', message: err.message });
     }
 };
 

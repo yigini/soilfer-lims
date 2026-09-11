@@ -235,6 +235,7 @@ app.get('/api/audit-final', verifyToken, checkPermission('VIEW_AUDIT'), async (r
 // --- Routes ---
 app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/access', require('./routes/accessRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/config', require('./routes/analysisRoutes'));
 

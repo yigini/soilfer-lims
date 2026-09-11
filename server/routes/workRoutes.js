@@ -7,6 +7,7 @@ router.use(verifyToken);
 
 // Get my work / managerial view
 router.get('/', workItemController.getWorkItems);
+router.get('/eligible-assignees', checkPermission('ASSIGN_WORK'), workItemController.getEligibleAssignees);
 
 // Manager assigns work (batch)
 router.post('/assign', checkPermission('ASSIGN_WORK'), workItemController.assignWork);
