@@ -97,15 +97,15 @@ Following independent execution review (`08-independent-review.md`), the 16 item
 | **IR-05** | High | Role Dropdown Key Parity | **CLOSED** | Modal dropdowns bind canonical role keys (`r.key`/`r.role`), rejecting display names. Verified by R06 probe and `independent-review-ui.cjs`. |
 | **IR-06** | High | Invitation & Recovery Journeys | **CLOSED** | Dedicated activation and recovery routes (`/activate`, `/reset-password`) with single-use hashed tokens, expiry validation, and replay rejection. Verified by R07, R08 probes and `authRoutes.js` tests. |
 | **IR-07** | Critical | Offline Sync Scientific & Access Rules | **CLOSED** | `syncService.js` enforces domain parity with online workbench: evaluates `workEligibility.canRecord`, rejecting prerequisite-incomplete work with `PREREQUISITE_INCOMPLETE` and unassigned technicians with `NOT_ASSIGNED_TECHNICIAN`. Rejects operational gate scalar entry with `OPERATIONAL_GATE_REJECTED` and spectral scalar entry with `SPECTRAL_SCALAR_REJECTED`. Grouped soil texture validation enforces closure sum (rejecting with `TEXTURE_CLOSURE_FAILED`) and atomically writes `SAND`, `SILT`, `CLAY`, and `TEXTURE` results alongside `WorkAttempt` and `CommandReceipt`. First draft advances status from `ASSIGNED` to `IN_PROGRESS`. Verified by `reopened_governance_scenarios.test.js`. |
-| **IR-08** | High | Shared-Device Offline Partitioning & Lease Validation | **CLOSED** | Shared-device IndexedDB outbox queries partition pending operations by authenticated user (`getPendingOutboxOperations(forUserId)` in `offlineDb.js`), preventing foreign operations from executing under a different account without discarding unsynced data. Server lease expiry (410 `PACK_EXPIRED`), strict lab match (403 `PACK_ACCESS_DENIED`), and session revalidation (`tokenVersion` check -> 401 `SESSION_INVALIDATED`) enforced in `offlineController.getPack`. Verified by `reopened_governance_scenarios.test.js`. |
+| **IR-08** | High | Shared-Device Offline Partitioning & Identity Fail-Closed | **CLOSED** | Shared-device IndexedDB outbox queries partition pending operations by authenticated user (`getPendingOutboxOperations(forUserId)` in `offlineDb.js`). Strictly requires a valid non-empty string `forUserId`, failing closed (`[]`) on `null`, `undefined`, empty strings, or foreign records, safely preserving unsynced operations in IndexedDB without cross-account attribution. `triggerSync` in `syncEngine.js` fails closed with `AUTH_REQUIRED` / `MISSING_USER_IDENTITY` when identity is missing/malformed or when an `authToken` is supplied without valid user context. Mid-sync account switch detection aborts safely (`ACCOUNT_SWITCH_DETECTED`) and reverts operations to `PENDING`. Verified by genuine in-memory module execution tests in `reopened_governance_scenarios.test.js`. |
 | **IR-09** | High | Session Revocation Across Channels | **CLOSED** | Unified `tokenVersion` checks across HTTP endpoints, WebSocket handshakes (`wsServer.js`), and SIS API keys. Stale tokens rejected immediately with HTTP 401 and closed sockets. Verified by R22 probe. |
 | **IR-10** | High | Laboratory Operational Lifecycle & Transactional Rollback | **CLOSED** | Operational lifecycle (`SETUP`, `ACTIVE`, `PAUSED`, `RETIRED`) runs inside atomic `prisma.$transaction`. Prevents new work assignments when paused (400 `LAB_PAUSED`) and blocks retiring labs with open items (422 `UNRESOLVED_WORK_ITEMS`). Re-reads and locks revision against reviewToken inside the transaction. Transactional integrity verified: injected audit log failure completely rolls back all lifecycle state and active status changes. Verified by `lab_governance_wp_d.test.js`. |
 | **IR-11** | High | Project Servicing Scope & Queries | **CLOSED** | Servicing lab managers cannot modify foreign project metadata. National project queries resolve country labs correctly without nonexistent column queries. Verified by R13, R19 probes and `lab_governance_wp_d.test.js`. |
 | **IR-12** | High | Lab Directory Management Isolation | **CLOSED** | Split public directory (`GET /api/labs`) from sensitive management summaries (`GET /api/labs/management`). Foreign notes protected from unauthorized national leads. Verified by R14 probe. |
 | **IR-13** | High | Inventory Cross-Lab Transfers | **CLOSED** | Inventory lot transfers require matching destination lab ID. Verified by R20 probe and `inventoryController.js` tests. |
 | **IR-14** | High | SIS Key Scope & UI Selector | **CLOSED** | SIS API keys require explicit non-empty `labs` array; missing/empty lab scope rejected with HTTP 400 `INVALID_LAB_SCOPE` (no wildcard or country fallback). `ApiKeyManager.jsx` form provides explicit authorized lab selector. Verified by R21 probe and `interim_gaps_verification.test.js`. |
-| **IR-15** | Medium/High | Event Dispatch, Accessibility & Sitewide Localization | **CLOSED** | `workItemController.js` validates assignment targets via `assignmentEligibilityService.validateAssignmentTarget` and broadcasts real-time `WORKITEM_UPDATE` to target receiving laboratories (`targetLabIds` / `owningLab`), not the acting user's home lab. Full sitewide translation coverage across all 5 canonical locales (`en.json`, `es.json`, `es-419.json`, `fr.json`, `pt.json`) for `roles` (all 10 roles), `lifecycle`, `labManagement`, and `staffManagement`. Accessible dialog implementation (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`, `useFocusTrap`, and Escape key listener) across all 5 governance modals. Verified by `reopened_governance_scenarios.test.js` and Vite client production build. |
-| **IR-16** | High | Tracked Migrations, Disposable Rehearsal & Read-Only Preflight | **CLOSED** | Tracked Prisma models added to `schema.prisma` (`LabLifecycleState`, `StaffInvitation`, `PasswordRecoveryGrant`) with additive migration `server/prisma/migrations/20260911130000_add_governance_lifecycle_and_grants/migration.sql`. Disposable migration rehearsal script (`server/scripts/disposable_migration_rehearsal.js`) verifies successful application, table existence, and 35,192 sample count integrity without modifying `dev.db`. Genuinely read-only preflight script (`server/scripts/preflight_governance_report.js`) uses Node.js `node:sqlite` `DatabaseSync` with `{ readOnly: true }`, suppressing write PRAGMAs and blocking physical writes at the OS level. Verified by rehearsal and preflight executions. |
+| **IR-15** | Medium/High | Event Dispatch, Accessibility & Sitewide Localization | **CLOSED** | `workItemController.js` validates assignment targets via `assignmentEligibilityService.validateAssignmentTarget` and broadcasts real-time `WORKITEM_UPDATE` to target receiving laboratories (`targetLabIds` / `owningLab`), not the acting user's home lab. Full sitewide translation coverage across all 5 canonical locales (`en.json`, `es.json`, `es-419.json`, `fr.json`, `pt.json`) wired for `roles` (all 10 roles), `lifecycle`, `labManagement` ("People and Access", "Invite a Person", dynamic locale in `getLocalTime`), and `staffManagement` ("Invitation Created", "Laboratory Scope", "Prepare Invitation"). Accessible dialog implementation (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`, `useFocusTrap`, and Escape key listener) across all 5 governance modals. Multi-locale rendering verified across all 5 languages with `verify_multilang_render.cjs`. Verified by `reopened_governance_scenarios.test.js` and Vite client production build. |
+| **IR-16** | High | Tracked Migrations, Disposable Rehearsal & Read-Only Preflight | **CLOSED** | Tracked Prisma models added to `schema.prisma` (`LabLifecycleState`, `StaffInvitation`, `PasswordRecoveryGrant`) with additive migration `server/prisma/migrations/20260911130000_add_governance_lifecycle_and_grants/migration.sql`. Disposable migration rehearsal script (`server/scripts/disposable_migration_rehearsal.js`) verifies successful application, table existence, and 35,192 sample count integrity without modifying `dev.db`. Genuinely read-only preflight script (`server/scripts/preflight_governance_report.js`) uses `better-sqlite3` with `{ readonly: true, fileMustExist: true }` ensuring Node 20 runtime compatibility in CI and production Dockerfile, suppressing write PRAGMAs and blocking physical writes at the OS level. Verified by rehearsal and preflight executions. |
 
 ---
 
@@ -138,7 +138,7 @@ The 42 blocking acceptance scenarios defined in `05-acceptance-and-release.md` m
 ```text
 ================================================================================
 Test Suites: 100 passed, 100 total
-Tests:       794 passed, 794 total
+Tests:       798 passed, 798 total
 Snapshots:   0 total
 Database:    Strict isolated disposable SQLite databases only.
 Production:  dev.db (35,192 samples) verified read-only and untouched.
@@ -152,14 +152,15 @@ Production:  dev.db (35,192 samples) verified read-only and untouched.
 - `lab_governance_wp_d.test.js`: 19 passed (Lab lifecycle, pipeline, project ownership, mandatory reviewToken, rollback)
 - `lab_governance_wp_f.test.js`: 12 passed (Connected services, SIS keys, preflight)
 - `interim_gaps_verification.test.js`: 11 passed (Interim gaps 1, 2, 3 verification)
-- `reopened_governance_scenarios.test.js`: 13 passed (Offline draft gating, texture closure, spectral scalar rejection, shared outbox partition, pack lease, receiving lab broadcasts)
-- **Total Governance & Contract Tests**: 124 tests, 0 failures.
+- `reopened_governance_scenarios.test.js`: 17 passed (Offline draft gating, texture closure, spectral scalar rejection, shared outbox partition with real module execution, pack lease, receiving lab broadcasts)
+- **Total Governance & Contract Tests**: 128 tests, 0 failures.
 
 ### Independent Review Probes:
 - **Positive Controls (C01–C05)**: 5 / 5 verified (`reproduced: true`).
 - **Defect Probes (R01–R20, R22)**: 21 / 21 resolved (`reproduced: false`).
 - **Defect Probe R21**: Verified (`reproduced: true` on legacy missing-labs payload, returning HTTP 400 `INVALID_LAB_SCOPE`, confirming no wildcard/country fallback occurs; real form tested with explicit lab selector and non-empty `labs` array).
 - **Independent UI Review**: 0 errors (`errors: []`), 3 staff members rendered on People tab, canonical role keys bound in select options.
+- **Multi-Locale Render Verification**: 5 / 5 canonical locales verified with 0 missing keys (`verify_multilang_render.cjs`).
 
 ---
 
@@ -167,9 +168,9 @@ Production:  dev.db (35,192 samples) verified read-only and untouched.
 
 - [x] **Audited**: All findings and review items dispositioned against baseline commit `ecb7c91`.
 - [x] **Implemented**: Clean, modular code delivered across WP-A through WP-F and all independent review items IR-01 through IR-16.
-- [x] **Tested**: 100 test suites (794 tests) passing with 100% success rate on strict-schema environments.
+- [x] **Tested**: 100 test suites (798 tests) passing with 100% success rate on strict-schema environments.
 - [x] **Sample Preservation Invariant**: Verified. Production database (`dev.db`, 35,192 samples) was completely untouched.
-- [x] **Client Production Build**: Verified. Clean Vite build (0 errors, 6.65s).
+- [x] **Client Production Build**: Verified. Clean Vite build (0 errors, 6.47s).
 - [ ] **Release Hold**: **STRICT HOLD MAINTAINED**. PR #94 remains open; merge and deployment strictly on hold pending human review.
 
 

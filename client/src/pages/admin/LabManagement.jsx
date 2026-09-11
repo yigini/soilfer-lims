@@ -36,7 +36,7 @@ const getIanaTimezones = () => {
 
 export default function LabManagement() {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { showDialog } = useDialog();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -203,7 +203,7 @@ export default function LabManagement() {
     // Local time formatting helper
     const getLocalTime = (tz) => {
         try {
-            return new Intl.DateTimeFormat('en-GB', {
+            return new Intl.DateTimeFormat(language || 'en', {
                 timeZone: tz || 'UTC',
                 hour: '2-digit',
                 minute: '2-digit',
@@ -217,13 +217,13 @@ export default function LabManagement() {
     // Role display config
     const getRoleBadge = (roleKey) => {
         switch (roleKey) {
-            case 'LAB_MANAGER': return { label: 'Lab Manager', color: 'bg-violet-100 text-violet-800 dark:bg-violet-950/50 dark:text-violet-300' };
-            case 'SAMPLE_RECEPTION': return { label: 'Intake Officer', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300' };
-            case 'LAB_TECHNICIAN': return { label: 'Technician', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' };
-            case 'AUDIT_USER': return { label: 'Quality & Audit', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300' };
-            case 'SUPER_ADMIN': return { label: 'Super Admin', color: 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300' };
-            case 'MASTER_USER': return { label: 'National Lead', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300' };
-            default: return { label: roleKey?.replace(/_/g, ' ') || 'Staff', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' };
+            case 'LAB_MANAGER': return { label: t('roles.labManager', 'Lab Manager'), color: 'bg-violet-100 text-violet-800 dark:bg-violet-950/50 dark:text-violet-300' };
+            case 'SAMPLE_RECEPTION': return { label: t('roles.sampleReception', 'Intake Officer'), color: 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300' };
+            case 'LAB_TECHNICIAN': return { label: t('roles.labTechnician', 'Technician'), color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' };
+            case 'AUDIT_USER': return { label: t('roles.auditUser', 'Quality & Audit'), color: 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300' };
+            case 'SUPER_ADMIN': return { label: t('roles.superAdmin', 'Super Admin'), color: 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300' };
+            case 'MASTER_USER': return { label: t('roles.masterUser', 'National Lead'), color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300' };
+            default: return { label: roleKey?.replace(/_/g, ' ') || t('roles.staff', 'Staff'), color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' };
         }
     };
 
@@ -865,9 +865,9 @@ export default function LabManagement() {
                 <div className="space-y-6 animate-in fade-in duration-150">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h2 className="text-lg font-black text-sf-text">People and Access</h2>
+                            <h2 className="text-lg font-black text-sf-text">{t('labManagement.people.title', 'People and Access')}</h2>
                             <p className="text-xs text-sf-muted mt-0.5">
-                                Single authoritative roster for invitations, capability reviews, and open assignment handovers.
+                                {t('labManagement.people.subtitle', 'Single authoritative roster for invitations, capability reviews, and open assignment handovers.')}
                             </p>
                         </div>
 
@@ -875,7 +875,7 @@ export default function LabManagement() {
                             onClick={() => setShowInviteModal(true)}
                             className="px-4 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 flex items-center gap-2 self-start sm:self-auto"
                         >
-                            <Plus size={15} /> Invite a Person
+                            <Plus size={15} /> {t('labManagement.people.invite', 'Invite a Person')}
                         </button>
                     </div>
 
@@ -887,7 +887,7 @@ export default function LabManagement() {
                                 type="text"
                                 value={staffSearch}
                                 onChange={(e) => setStaffSearch(e.target.value)}
-                                placeholder="Search people by name, username, or role..."
+                                placeholder={t('labManagement.people.searchPlaceholder', 'Search people by name, username, or role...')}
                                 className="w-full pl-10 pr-4 py-2 bg-sf-surface border border-sf-divider rounded-xl text-xs text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                             />
                         </div>
@@ -896,9 +896,9 @@ export default function LabManagement() {
                             onChange={(e) => setStaffStatusFilter(e.target.value)}
                             className="px-3 py-2 bg-sf-surface border border-sf-divider rounded-xl text-xs font-semibold text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         >
-                            <option value="all">All Account States</option>
-                            <option value="Active">Active Only</option>
-                            <option value="Suspended">Suspended Only</option>
+                            <option value="all">{t('labManagement.people.filterAll', 'All Account States')}</option>
+                            <option value="Active">{t('labManagement.people.filterActive', 'Active Only')}</option>
+                            <option value="Suspended">{t('labManagement.people.filterSuspended', 'Suspended Only')}</option>
                         </select>
                     </div>
 
@@ -906,18 +906,18 @@ export default function LabManagement() {
                     <div className="bg-sf-surface border border-sf-divider rounded-2xl overflow-hidden shadow-sm">
                         {filteredStaff.length === 0 ? (
                             <div className="py-16 text-center text-sf-muted text-xs">
-                                No staff accounts matching the selected criteria.
+                                {t('labManagement.people.noStaff', 'No staff accounts matching the selected criteria.')}
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="border-b border-sf-divider bg-sf-canvas/50 text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                                            <th className="py-3 px-4 sm:px-6">Person</th>
-                                            <th className="py-3 px-4">Role & Scope</th>
-                                            <th className="py-3 px-4">Status</th>
-                                            <th className="py-3 px-4">Current Work</th>
-                                            <th className="py-3 px-4 sm:px-6 text-right">Actions</th>
+                                            <th className="py-3 px-4 sm:px-6">{t('labManagement.people.colPerson', 'Person')}</th>
+                                            <th className="py-3 px-4">{t('labManagement.people.colRole', 'Role & Scope')}</th>
+                                            <th className="py-3 px-4">{t('labManagement.people.colStatus', 'Status')}</th>
+                                            <th className="py-3 px-4">{t('labManagement.people.colWork', 'Current Work')}</th>
+                                            <th className="py-3 px-4 sm:px-6 text-right">{t('common.actions', 'Actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-sf-divider text-xs sm:text-sm">
@@ -942,7 +942,7 @@ export default function LabManagement() {
                                                             {roleBadge.label}
                                                         </span>
                                                         <div className="text-[11px] text-sf-muted mt-0.5">
-                                                            {member.labId ? `Lab: ${member.labId}` : 'Global Scope'}
+                                                            {member.labId ? `${t('labManagement.people.labPrefix', 'Lab')}: ${member.labId}` : t('labManagement.people.globalScope', 'Global Scope')}
                                                         </div>
                                                     </td>
                                                     <td className="py-3.5 px-4">
@@ -952,16 +952,16 @@ export default function LabManagement() {
                                                                 : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
                                                         }`}>
                                                             <span className={`w-1.5 h-1.5 rounded-full ${isSuspended ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                                                            {isSuspended ? 'Suspended' : 'Active'}
+                                                            {isSuspended ? t('labManagement.people.statusSuspended', 'Suspended') : t('labManagement.people.statusActive', 'Active')}
                                                         </span>
                                                     </td>
                                                     <td className="py-3.5 px-4 text-xs text-sf-muted">
                                                         {member.openWorkCount ? (
                                                             <span className="font-bold text-amber-600 dark:text-amber-400">
-                                                                {member.openWorkCount} assignments
+                                                                {member.openWorkCount} {t('labManagement.people.assignments', 'assignments')}
                                                             </span>
                                                         ) : (
-                                                            <span>0 open tasks</span>
+                                                            <span>0 {t('labManagement.people.openTasks', 'open tasks')}</span>
                                                         )}
                                                     </td>
                                                     <td className="py-3.5 px-4 sm:px-6 text-right">
@@ -973,7 +973,7 @@ export default function LabManagement() {
                                                                 }}
                                                                 className="px-2.5 py-1 bg-sf-canvas hover:bg-sf-raised border border-sf-divider rounded-lg text-xs font-bold text-sf-text transition"
                                                             >
-                                                                Review Access
+                                                                {t('labManagement.people.reviewAccess', 'Review Access')}
                                                             </button>
 
                                                             <button
@@ -981,7 +981,7 @@ export default function LabManagement() {
                                                                     setTargetUser(member);
                                                                     setShowRecoveryModal(true);
                                                                 }}
-                                                                title="One-Time Recovery Link"
+                                                                title={t('staffManagement.recovery.title', 'One-Time Recovery Link')}
                                                                 className="p-1.5 text-sf-muted hover:text-amber-600 hover:bg-sf-raised rounded-lg transition"
                                                             >
                                                                 <KeyRound size={14} />
@@ -992,7 +992,7 @@ export default function LabManagement() {
                                                                     setTargetUser(member);
                                                                     setShowSuspendModal(true);
                                                                 }}
-                                                                title={isSuspended ? 'Reactivate User' : 'Suspend User'}
+                                                                title={isSuspended ? t('labManagement.people.reactivateUser', 'Reactivate User') : t('labManagement.people.suspendUser', 'Suspend User')}
                                                                 className={`p-1.5 rounded-lg transition ${
                                                                     isSuspended
                                                                         ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'

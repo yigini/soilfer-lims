@@ -110,7 +110,7 @@ export const SyncProvider = ({ children }) => {
 
     const performSync = async () => {
         setSyncStatus('syncing');
-        const res = await triggerSync();
+        const res = await triggerSync(null, user);
         refreshCounts();
         return res;
     };

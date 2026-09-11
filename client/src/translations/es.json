@@ -40,7 +40,11 @@
     "project": "Proyecto",
     "searching": "Buscando...",
     "processing": "Procesando...",
-    "trash": "Papelera"
+    "trash": "Papelera",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "done": "Listo",
+    "generating": "Generando..."
   },
   "login": {
     "title": "Iniciar sesión en SoilFER LIMS",
@@ -362,7 +366,14 @@
     "SURVEYOR": "Topógrafo / Inspector de Campo",
     "VIEWER": "Observador (Solo Lectura)",
     "AUDIT_USER": "Oficial de Calidad y Auditoría",
-    "MASTER_USER": "Líder Nacional / Usuario Maestro"
+    "MASTER_USER": "Líder Nacional / Usuario Maestro",
+    "labManager": "Director de Laboratorio",
+    "sampleReception": "Responsable de Recepción",
+    "labTechnician": "Técnico de Laboratorio",
+    "auditUser": "Calidad y Auditoría",
+    "superAdmin": "Superadministrador",
+    "masterUser": "Responsable Nacional",
+    "staff": "Personal"
   },
   "forms": {
     "required": "Este campo es obligatorio",
@@ -982,6 +993,29 @@
     },
     "attention": {
       "title": "Elementos de Configuración que Requieren Atención"
+    },
+    "people": {
+      "title": "Personal y Acceso",
+      "subtitle": "Registro único y autorizado para invitaciones, revisiones de competencias y traspaso de asignaciones abiertas.",
+      "invite": "Invitar a una Persona",
+      "searchPlaceholder": "Buscar personas por nombre, usuario o rol...",
+      "filterAll": "Todos los Estados",
+      "filterActive": "Solo Activos",
+      "filterSuspended": "Solo Suspendidos",
+      "noStaff": "No hay cuentas de personal que coincidan con los criterios seleccionados.",
+      "colPerson": "Persona",
+      "colRole": "Rol y Ámbito",
+      "colStatus": "Estado",
+      "colWork": "Trabajo Actual",
+      "labPrefix": "Lab",
+      "globalScope": "Ámbito Global",
+      "statusActive": "Activo",
+      "statusSuspended": "Suspendido",
+      "assignments": "asignaciones",
+      "openTasks": "tareas abiertas",
+      "reviewAccess": "Revisar Acceso",
+      "reactivateUser": "Reactivar Usuario",
+      "suspendUser": "Suspender Usuario"
     }
   },
   "staffManagement": {
@@ -994,7 +1028,17 @@
       "role": "Rol en el Sistema",
       "copyLink": "Copiar Enlace de Activación",
       "copied": "¡Copiado!",
-      "expiresNotice": "El enlace caduca en 24 horas. El destinatario crea su propia contraseña al activarlo."
+      "expiresNotice": "El enlace caduca en 24 horas. El destinatario crea su propia contraseña al activarlo.",
+      "namePlaceholder": "ej. María González",
+      "emailPlaceholder": "ej. mgonzalez@soilfer.org",
+      "labScope": "Ámbito de Laboratorio",
+      "globalScope": "Sin laboratorio específico (Global)",
+      "successTitle": "Invitación Creada",
+      "successDetails": "Se ha generado un token de invitación de un solo uso verificado criptográficamente. Nunca se crean contraseñas en texto plano ni compartidas.",
+      "activationLinkLabel": "Enlace de Activación de Un Solo Uso",
+      "prepareButton": "Preparar Invitación",
+      "rbacNotice": "Los permisos del rol están regidos estrictamente por la política RBAC del servidor.",
+      "securityBanner": "Se generará un enlace de activación válido por 24 horas. El invitado configurará sus credenciales personales de forma segura en su primer acceso."
     },
     "review": {
       "title": "Revisión de Acceso Previa al Cambio",

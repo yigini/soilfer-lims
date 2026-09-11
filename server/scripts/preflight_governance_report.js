@@ -19,7 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 
 async function runPreflight(customDbPath = null) {
     console.log('[PREFLIGHT] Starting genuinely read-only laboratory governance audit...');
@@ -31,7 +31,7 @@ async function runPreflight(customDbPath = null) {
     }
 
     // Open strictly in read-only mode at SQLite OS level
-    const db = new DatabaseSync(dbPath, { readOnly: true });
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
 
     try {
         // 1. Users & RBAC Audit

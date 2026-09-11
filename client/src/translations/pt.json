@@ -40,7 +40,11 @@
     "project": "Projeto",
     "searching": "Buscando...",
     "processing": "Processando...",
-    "trash": "Lixeira"
+    "trash": "Lixeira",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "done": "Concluído",
+    "generating": "Gerando..."
   },
   "login": {
     "title": "Entrar no SoilFER LIMS",
@@ -362,7 +366,14 @@
     "SURVEYOR": "Topógrafo de Campo",
     "VIEWER": "Visualizador (Somente Leitura)",
     "AUDIT_USER": "Oficial de Qualidade e Auditoria",
-    "MASTER_USER": "Líder Nacional / Usuário Mestre"
+    "MASTER_USER": "Líder Nacional / Usuário Mestre",
+    "labManager": "Gerente de Laboratório",
+    "sampleReception": "Responsável pela Recepção",
+    "labTechnician": "Técnico de Laboratório",
+    "auditUser": "Qualidade e Auditoria",
+    "superAdmin": "Super Administrador",
+    "masterUser": "Líder Nacional",
+    "staff": "Equipe"
   },
   "forms": {
     "required": "Este campo é obrigatório",
@@ -982,6 +993,29 @@
     },
     "attention": {
       "title": "Itens de Configuração que Exigem Atenção"
+    },
+    "people": {
+      "title": "Pessoas e Acesso",
+      "subtitle": "Quadro oficial único para convites, análises de competências e transferência de atribuições abertas.",
+      "invite": "Convidar uma Pessoa",
+      "searchPlaceholder": "Buscar pessoas por nome, usuário ou função...",
+      "filterAll": "Todos os Estados",
+      "filterActive": "Apenas Ativos",
+      "filterSuspended": "Apenas Suspensos",
+      "noStaff": "Nenhuma conta de colaborador corresponde aos critérios selecionados.",
+      "colPerson": "Pessoa",
+      "colRole": "Função e Escopo",
+      "colStatus": "Status",
+      "colWork": "Trabalho Atual",
+      "labPrefix": "Lab",
+      "globalScope": "Escopo Global",
+      "statusActive": "Ativo",
+      "statusSuspended": "Suspenso",
+      "assignments": "atribuições",
+      "openTasks": "tarefas abertas",
+      "reviewAccess": "Revisar Acesso",
+      "reactivateUser": "Reativar Usuário",
+      "suspendUser": "Suspender Usuário"
     }
   },
   "staffManagement": {
@@ -994,7 +1028,17 @@
       "role": "Função no Sistema",
       "copyLink": "Copiar Link de Ativação",
       "copied": "Copiado!",
-      "expiresNotice": "O link expira em 24 horas. O destinatário define sua própria senha na ativação."
+      "expiresNotice": "O link expira em 24 horas. O destinatário define sua própria senha na ativação.",
+      "namePlaceholder": "ex. Maria Silva",
+      "emailPlaceholder": "ex. msilva@soilfer.org",
+      "labScope": "Escopo do Laboratório",
+      "globalScope": "Nenhum laboratório específico (Global)",
+      "successTitle": "Convite Criado",
+      "successDetails": "Um token de convite de uso único, verificado criptograficamente, foi gerado. Nenhuma senha padrão ou em texto simples é criada.",
+      "activationLinkLabel": "Link de Ativação de Uso Único",
+      "prepareButton": "Preparar Convite",
+      "rbacNotice": "As permissões da função são regidas estritamente pela política RBAC do servidor.",
+      "securityBanner": "Um link de ativação válido por 24 horas será gerado. O convidado configurará suas credenciais com segurança no primeiro acesso."
     },
     "review": {
       "title": "Revisão de Acesso Antes da Alteração",

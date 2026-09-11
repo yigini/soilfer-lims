@@ -341,27 +341,299 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
     });
 
-    describe('3. Offline Shared-Device Outbox User Partitioning', () => {
-        test('Filtered outbox operations strictly isolate User A from User B', async () => {
-            const mockOutbox = [
-                { operationId: 'op-1', userId: userTechA.username, type: 'SAVE_WORK_DRAFT', status: 'PENDING' },
-                { operationId: 'op-2', userId: userTechB.username, type: 'SAVE_WORK_DRAFT', status: 'PENDING' },
-                { operationId: 'op-3', userId: userTechA.username, type: 'COMPLETE_WORK', status: 'PENDING' }
-            ];
+    describe('3. Offline Shared-Device Outbox User Partitioning & Identity Fail-Closed (IR-08)', () => {
+        const { pathToFileURL } = require('url');
+        const path = require('path');
 
-            const getPendingForUser = (user) => mockOutbox.filter(o => o.status === 'PENDING' && o.userId === user);
+        class MemoryIDBStore {
+            constructor(keyPath) {
+                this.keyPath = keyPath;
+                this.items = new Map();
+            }
+            get(key) {
+                const req = { onsuccess: null, onerror: null, result: this.items.get(key) || null };
+                queueMicrotask(() => req.onsuccess && req.onsuccess({ target: req }));
+                return req;
+            }
+            getAll() {
+                const req = { onsuccess: null, onerror: null, result: Array.from(this.items.values()) };
+                queueMicrotask(() => req.onsuccess && req.onsuccess({ target: req }));
+                return req;
+            }
+            put(val) {
+                const key = val[this.keyPath] || ('gen_' + Math.random().toString(36).substring(2));
+                this.items.set(key, JSON.parse(JSON.stringify(val)));
+                const req = { onsuccess: null, onerror: null, result: key };
+                queueMicrotask(() => req.onsuccess && req.onsuccess({ target: req }));
+                return req;
+            }
+            delete(key) {
+                this.items.delete(key);
+                const req = { onsuccess: null, onerror: null, result: undefined };
+                queueMicrotask(() => req.onsuccess && req.onsuccess({ target: req }));
+                return req;
+            }
+            createIndex() {}
+        }
 
-            const userAPending = getPendingForUser(userTechA.username);
-            const userBPending = getPendingForUser(userTechB.username);
+        class MemoryIDBDatabase {
+            constructor() {
+                this.stores = new Map();
+                this.objectStoreNames = {
+                    contains: (name) => this.stores.has(name)
+                };
+            }
+            createObjectStore(name, { keyPath }) {
+                const store = new MemoryIDBStore(keyPath);
+                this.stores.set(name, store);
+                return store;
+            }
+            transaction(storeName) {
+                const store = this.stores.get(storeName);
+                const tx = {
+                    objectStore: () => store,
+                    oncomplete: null,
+                    onerror: null
+                };
+                queueMicrotask(() => tx.oncomplete && tx.oncomplete());
+                return tx;
+            }
+        }
 
-            expect(userAPending).toHaveLength(2);
-            expect(userAPending.map(o => o.operationId)).toEqual(['op-1', 'op-3']);
+        const fs = require('fs');
+        const vm = require('vm');
 
-            expect(userBPending).toHaveLength(1);
-            expect(userBPending[0].operationId).toBe('op-2');
+        function loadModuleInContext(filePath, ctx, moduleMocks = {}) {
+            let code = fs.readFileSync(filePath, 'utf8');
+            code = code.replace(/import\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"];?/g, (match, names) => {
+                const importedNames = names.split(',').map(s => s.trim()).filter(Boolean);
+                return importedNames.map(name => `const ${name} = __mocks__.${name};`).join('\n');
+            });
+            code = code.replace(/export\s+async\s+function\s+([a-zA-Z0-9_$]+)/g, 'exports.$1 = $1; async function $1');
+            code = code.replace(/export\s+function\s+([a-zA-Z0-9_$]+)/g, 'exports.$1 = $1; function $1');
+            code = code.replace(/export\s+const\s+([a-zA-Z0-9_$]+)\s*=/g, 'const $1 = exports.$1 =');
 
-            // Confirm User B never sees User A's un-synced work
-            expect(userBPending.some(o => o.userId === userTechA.username)).toBe(false);
+            const exportsObj = {};
+            const fullContext = {
+                ...ctx,
+                exports: exportsObj,
+                module: { exports: exportsObj },
+                __mocks__: moduleMocks
+            };
+
+            vm.runInNewContext(code, fullContext);
+            return fullContext.exports;
+        }
+
+        let offlineDb;
+        let syncEngine;
+        let memoryDb;
+        let storageMap;
+        let originalFetch;
+        let originalLocalStorage;
+
+        beforeAll(() => {
+            originalFetch = global.fetch;
+            originalLocalStorage = global.localStorage;
+
+            memoryDb = new MemoryIDBDatabase();
+            storageMap = new Map();
+
+            const mockLocalStorage = {
+                getItem: (k) => storageMap.get(k) || null,
+                setItem: (k, v) => storageMap.set(k, String(v)),
+                removeItem: (k) => storageMap.delete(k),
+                clear: () => storageMap.clear()
+            };
+            global.localStorage = mockLocalStorage;
+
+            const context = {
+                window: {
+                    indexedDB: {
+                        open: () => {
+                            const req = { onsuccess: null, onerror: null, onupgradeneeded: null };
+                            queueMicrotask(() => {
+                                if (req.onupgradeneeded) req.onupgradeneeded({ target: { result: memoryDb } });
+                                if (req.onsuccess) req.onsuccess({ target: { result: memoryDb } });
+                            });
+                            return req;
+                        }
+                    }
+                },
+                navigator: { onLine: true, userAgent: 'NodeTest/1.0' },
+                localStorage: mockLocalStorage,
+                fetch: (url, opts) => global.fetch(url, opts),
+                console,
+                Date,
+                JSON,
+                Math,
+                Promise,
+                Array,
+                String,
+                Set,
+                Map,
+                queueMicrotask
+            };
+
+            const offlineDbPath = path.resolve(__dirname, '../../../client/src/services/offline/offlineDb.js');
+            const syncEnginePath = path.resolve(__dirname, '../../../client/src/services/offline/syncEngine.js');
+
+            offlineDb = loadModuleInContext(offlineDbPath, context);
+            syncEngine = loadModuleInContext(syncEnginePath, context, {
+                ...offlineDb,
+                ensureDeviceId: async () => 'test-device-id'
+            });
+        });
+
+        afterAll(() => {
+            global.fetch = originalFetch;
+            global.localStorage = originalLocalStorage;
+        });
+
+        beforeEach(() => {
+            storageMap.clear();
+            if (syncEngine._resetSyncingState) syncEngine._resetSyncingState();
+        });
+
+        test('getPendingOutboxOperations strictly fails closed with [] when identity is null, undefined, empty, or non-string', async () => {
+            expect(await offlineDb.getPendingOutboxOperations(null)).toEqual([]);
+            expect(await offlineDb.getPendingOutboxOperations(undefined)).toEqual([]);
+            expect(await offlineDb.getPendingOutboxOperations('')).toEqual([]);
+            expect(await offlineDb.getPendingOutboxOperations('   ')).toEqual([]);
+            expect(await offlineDb.getPendingOutboxOperations(12345)).toEqual([]);
+            expect(await offlineDb.getPendingOutboxOperations({})).toEqual([]);
+        });
+
+        test('triggerSync fails closed with AUTH_REQUIRED / MISSING_USER_IDENTITY when user identity is absent', async () => {
+            // Storage has no user
+            const result = await syncEngine.triggerSync();
+            expect(result.status).toBe('AUTH_REQUIRED');
+            expect(result.code).toBe('MISSING_USER_IDENTITY');
+            expect(result.count).toBe(0);
+        });
+
+        test('triggerSync fails closed when authToken is passed without valid user context', async () => {
+            const result = await syncEngine.triggerSync('jwt-without-context');
+            expect(result.status).toBe('AUTH_REQUIRED');
+            expect(result.code).toBe('MISSING_USER_IDENTITY');
+            expect(result.count).toBe(0);
+        });
+
+        test('Simulated shared device: User A logout -> User B login dispatches only User B ops and preserves User A & ownerless ops intact', async () => {
+            // 1. User A logs in and records domain work into outbox
+            localStorage.setItem('user', JSON.stringify({ id: userTechA.username, username: userTechA.username }));
+            const opA = await syncEngine.recordSyncOperation({
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemNormal.id,
+                payload: { notes: 'Tech A draft' }
+            });
+            expect(opA.userId).toBe(userTechA.username);
+
+            // 2. Add a legacy ownerless operation (null userId) directly to outbox store
+            await offlineDb.queueOutboxOperation({
+                operationId: 'op-legacy-ownerless-' + Date.now(),
+                userId: null,
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemNormal.id,
+                payload: { notes: 'Legacy operation with null userId' },
+                status: 'PENDING',
+                capturedAtLocal: new Date().toISOString()
+            });
+
+            // 3. User A logs out (localStorage cleared)
+            localStorage.clear();
+
+            // 4. User B logs into shared device
+            localStorage.setItem('user', JSON.stringify({ id: userTechB.username, username: userTechB.username }));
+            localStorage.setItem('token', tokenMgrA); // any valid test token
+
+            // User B pending query returns 0 before User B performs work
+            const initialBPending = await offlineDb.getPendingOutboxOperations(userTechB.username);
+            expect(initialBPending).toHaveLength(0);
+
+            // User B records an operation
+            const opB = await syncEngine.recordSyncOperation({
+                type: 'COMPLETE_WORK',
+                target: workItemNormal.id,
+                payload: { result: 'Tech B work' }
+            });
+            expect(opB.userId).toBe(userTechB.username);
+
+            // Verify User B pending query returns ONLY User B's operation
+            const bPending = await offlineDb.getPendingOutboxOperations(userTechB.username);
+            expect(bPending).toHaveLength(1);
+            expect(bPending[0].operationId).toBe(opB.operationId);
+
+            // 5. User B triggers sync
+            let dispatchedOps = null;
+            global.fetch = jest.fn().mockImplementation(async (url, opts) => {
+                const body = JSON.parse(opts.body);
+                dispatchedOps = body.operations;
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        receipts: dispatchedOps.map(o => ({ operationId: o.operationId, status: 'APPLIED' }))
+                    })
+                };
+            });
+
+            if (syncEngine._resetSyncingState) syncEngine._resetSyncingState();
+            const syncResult = await syncEngine.triggerSync();
+            expect(syncResult.status).toBe('COMPLETED');
+            expect(syncResult.applied).toBe(1);
+
+            // Verify network dispatch ONLY sent User B's operations
+            expect(dispatchedOps).toHaveLength(1);
+            expect(dispatchedOps[0].userId).toBe(userTechB.username);
+
+            // 6. Verify User A's un-synced work and legacy ownerless work remain safely preserved in outbox
+            const allRemaining = await offlineDb.getAllOutboxOperations();
+            const userAInStore = allRemaining.find(o => o.operationId === opA.operationId);
+            const ownerlessInStore = allRemaining.find(o => o.userId === null);
+
+            expect(userAInStore).toBeDefined();
+            expect(userAInStore.userId).toBe(userTechA.username);
+            expect(userAInStore.status).toBe('PENDING');
+
+            expect(ownerlessInStore).toBeDefined();
+            expect(ownerlessInStore.userId).toBeNull();
+            expect(ownerlessInStore.status).toBe('PENDING');
+        });
+
+        test('Mid-sync account switch is detected and safely aborted without cross-account attribution', async () => {
+            // User A queues work
+            localStorage.setItem('user', JSON.stringify({ id: userTechA.username, username: userTechA.username }));
+            localStorage.setItem('token', tokenMgrA);
+
+            const opA = await syncEngine.recordSyncOperation({
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemNormal.id,
+                payload: { notes: 'Tech A in-flight operation' }
+            });
+
+            // Simulate account switch during in-flight network call
+            global.fetch = jest.fn().mockImplementation(async () => {
+                // User switches to User B while fetch is in-flight!
+                localStorage.setItem('user', JSON.stringify({ id: userTechB.username, username: userTechB.username }));
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        receipts: [{ operationId: opA.operationId, status: 'APPLIED' }]
+                    })
+                };
+            });
+
+            const syncResult = await syncEngine.triggerSync(tokenMgrA, { id: userTechA.username });
+            expect(syncResult.status).toBe('ABORTED');
+            expect(syncResult.code).toBe('ACCOUNT_SWITCH_DETECTED');
+
+            // User A's operation must be reverted to PENDING and NOT deleted
+            const userAOps = await offlineDb.getPendingOutboxOperations(userTechA.username);
+            const opInStore = userAOps.find(o => o.operationId === opA.operationId);
+            expect(opInStore).toBeDefined();
+            expect(opInStore.status).toBe('PENDING');
         });
     });
 

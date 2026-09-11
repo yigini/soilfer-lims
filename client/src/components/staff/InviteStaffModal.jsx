@@ -128,17 +128,16 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start gap-3">
                             <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                             <div className="text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
-                                <strong className="font-bold block text-sm">Invitation Created</strong>
+                                <strong className="font-bold block text-sm">{t('staffManagement.invite.successTitle', 'Invitation Created')}</strong>
                                 <p>
-                                    A single-use, cryptographically verified invitation token was generated for <strong>{name}</strong> ({email}).
-                                    No plain-text or shared passwords are ever created.
+                                    {t('staffManagement.invite.successDetails', 'A single-use, cryptographically verified invitation token was generated. No plain-text or shared passwords are ever created.')}
                                 </p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
-                                One-Time Activation Link
+                                {t('staffManagement.invite.activationLinkLabel', 'One-Time Activation Link')}
                             </label>
                             <div className="flex items-center gap-2">
                                 <input
@@ -151,12 +150,12 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                     className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
                                 >
                                     <Copy size={14} />
-                                    {copied ? 'Copied!' : 'Copy'}
+                                    {copied ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
                                 </button>
                             </div>
                             <div className="flex items-center gap-2 text-[11px] text-sf-muted mt-2">
                                 <Clock size={13} />
-                                <span>Expires in 24 hours. The recipient will set their own password upon activation.</span>
+                                <span>{t('staffManagement.invite.expiresNotice', 'Expires in 24 hours. The recipient will set their own password upon activation.')}</span>
                             </div>
                         </div>
 
@@ -165,7 +164,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                 onClick={onClose}
                                 className="px-6 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition"
                             >
-                                Done
+                                {t('common.done', 'Done')}
                             </button>
                         </div>
                     </div>
@@ -180,7 +179,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
 
                         <div>
                             <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                Full Name <span className="text-rose-500">*</span>
+                                {t('staffManagement.invite.fullName', 'Full Name')} <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">
                                 <User size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
@@ -188,7 +187,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="e.g. María González"
+                                    placeholder={t('staffManagement.invite.namePlaceholder', 'e.g. María González')}
                                     required
                                     className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                 />
@@ -197,7 +196,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
 
                         <div>
                             <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                Verified Work Email <span className="text-rose-500">*</span>
+                                {t('staffManagement.invite.email', 'Verified Work Email')} <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">
                                 <Mail size={16} className="absolute left-3.5 top-3.5 text-sf-muted" />
@@ -205,7 +204,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="e.g. mgonzalez@soilfer.org"
+                                    placeholder={t('staffManagement.invite.emailPlaceholder', 'e.g. mgonzalez@soilfer.org')}
                                     required
                                     className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                 />
@@ -215,14 +214,14 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                         {availableLabs.length > 1 && (
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Laboratory Scope
+                                    {t('staffManagement.invite.labScope', 'Laboratory Scope')}
                                 </label>
                                 <select
                                     value={labId}
                                     onChange={(e) => handleLabChange(e.target.value)}
                                     className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                 >
-                                    <option value="">No specific laboratory (Global)</option>
+                                    <option value="">{t('staffManagement.invite.globalScope', 'No specific laboratory (Global)')}</option>
                                     {availableLabs.map(l => (
                                         <option key={l.id} value={l.id}>{l.name} ({l.code})</option>
                                     ))}
@@ -232,7 +231,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
 
                         <div>
                             <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                Assigned System Role <span className="text-rose-500">*</span>
+                                {t('staffManagement.invite.role', 'Assigned System Role')} <span className="text-rose-500">*</span>
                             </label>
                             <select
                                 value={role}
@@ -250,14 +249,14 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                 })}
                             </select>
                             <div className="mt-1.5 text-xs text-sf-muted">
-                                {assignableRoles.find(r => (r.key || r.role) === role)?.description || 'Role permissions are governed strictly by the server RBAC policy.'}
+                                {assignableRoles.find(r => (r.key || r.role) === role)?.description || t('staffManagement.invite.rbacNotice', 'Role permissions are governed strictly by the server RBAC policy.')}
                             </div>
                         </div>
 
                         <div className="p-3 bg-sf-raised/50 rounded-xl border border-sf-divider text-[11px] text-sf-muted flex items-start gap-2">
                             <Shield size={15} className="shrink-0 text-sf-primary mt-0.5" />
                             <span>
-                                An activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access.
+                                {t('staffManagement.invite.securityBanner', 'An activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access.')}
                             </span>
                         </div>
 
@@ -268,14 +267,14 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                 disabled={submitting}
                                 className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                             >
-                                Cancel
+                                {t('common.cancel', 'Cancel')}
                             </button>
                             <button
                                 type="submit"
                                 disabled={submitting || !name.trim() || !email.trim()}
                                 className="px-6 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 disabled:opacity-50"
                             >
-                                {submitting ? 'Generating...' : 'Prepare Invitation'}
+                                {submitting ? t('common.generating', 'Generating...') : t('staffManagement.invite.prepareButton', 'Prepare Invitation')}
                             </button>
                         </div>
                     </form>

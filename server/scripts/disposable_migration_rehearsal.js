@@ -14,7 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 
 async function runRehearsal() {
     console.log('[REHEARSAL] Starting disposable migration rehearsal...');
@@ -31,7 +31,7 @@ async function runRehearsal() {
     }
 
     // Step 1: Record original database stats in strictly read-only mode
-    const origDb = new DatabaseSync(originalDbPath, { readOnly: true });
+    const origDb = new Database(originalDbPath, { readonly: true, fileMustExist: true });
     const originalSampleCount = origDb.prepare('SELECT count(*) as count FROM Sample').get().count;
     origDb.close();
     console.log(`[REHEARSAL] Original dev.db sample count (verified read-only): ${originalSampleCount}`);
@@ -44,7 +44,7 @@ async function runRehearsal() {
         // Step 3: Run migration on disposable copy
         console.log('[REHEARSAL] Executing additive migration on disposable database...');
         const migrationSql = fs.readFileSync(migrationSqlPath, 'utf8');
-        const rehearsalDb = new DatabaseSync(rehearsalDbPath);
+        const rehearsalDb = new Database(rehearsalDbPath, { fileMustExist: true });
         
         rehearsalDb.exec(migrationSql);
         console.log('[REHEARSAL] Migration SQL executed successfully.');
@@ -103,7 +103,7 @@ async function runRehearsal() {
         }
 
         // Step 8: Verify original dev.db remained completely untouched
-        const verifyDb = new DatabaseSync(originalDbPath, { readOnly: true });
+        const verifyDb = new Database(originalDbPath, { readonly: true, fileMustExist: true });
         const postSampleCount = verifyDb.prepare('SELECT count(*) as count FROM Sample').get().count;
         verifyDb.close();
         if (postSampleCount !== originalSampleCount) {

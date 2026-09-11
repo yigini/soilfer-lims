@@ -13,6 +13,10 @@ const DB_VERSION = 3;
 
 let dbPromise = null;
 
+export function resetOfflineDbConnection() {
+    dbPromise = null;
+}
+
 export function getOfflineDb() {
     if (dbPromise) return dbPromise;
 
@@ -147,7 +151,11 @@ export async function queueOutboxOperation(op) {
     return op;
 }
 
-export async function getPendingOutboxOperations(forUserId = null) {
+export async function getPendingOutboxOperations(forUserId) {
+    if (!forUserId || typeof forUserId !== 'string' || !forUserId.trim()) {
+        return [];
+    }
+    const targetUserId = forUserId.trim();
     return withStore('outbox', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const request = store.getAll();
@@ -155,10 +163,10 @@ export async function getPendingOutboxOperations(forUserId = null) {
                 const all = request.result || [];
                 // Sort by capturedAtLocal ascending (causal sequence)
                 all.sort((a, b) => new Date(a.capturedAtLocal) - new Date(b.capturedAtLocal));
-                let pending = all.filter(o => o.status === 'PENDING' || o.status === 'RETRYING');
-                if (forUserId) {
-                    pending = pending.filter(o => o.userId === forUserId);
-                }
+                const pending = all.filter(o => 
+                    (o.status === 'PENDING' || o.status === 'RETRYING') &&
+                    o.userId === targetUserId
+                );
                 resolve(pending);
             };
             request.onerror = () => reject(request.error);

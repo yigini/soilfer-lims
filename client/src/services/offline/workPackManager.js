@@ -14,7 +14,7 @@ import {
     getEnrolledDevice,
     setEnrolledDevice,
     saveOfflineHelpPack
-} from './offlineDb';
+} from './offlineDb.js';
 
 /**
  * Ensures this browser/device has a stable persistent device ID

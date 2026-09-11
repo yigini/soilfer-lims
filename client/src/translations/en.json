@@ -40,7 +40,11 @@
     "project": "Project",
     "searching": "Searching...",
     "processing": "Processing...",
-    "trash": "Trash"
+    "trash": "Trash",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "done": "Done",
+    "generating": "Generating..."
   },
   "login": {
     "title": "Sign in to SoilFER LIMS",
@@ -362,7 +366,14 @@
     "SURVEYOR": "Field Surveyor",
     "VIEWER": "Read-Only Viewer",
     "AUDIT_USER": "Quality & Audit Officer",
-    "MASTER_USER": "National Lead / Master User"
+    "MASTER_USER": "National Lead / Master User",
+    "labManager": "Lab Manager",
+    "sampleReception": "Intake Officer",
+    "labTechnician": "Technician",
+    "auditUser": "Quality & Audit",
+    "superAdmin": "Super Admin",
+    "masterUser": "National Lead",
+    "staff": "Staff"
   },
   "forms": {
     "required": "This field is required",
@@ -982,6 +993,29 @@
     },
     "attention": {
       "title": "Configuration Items Needing Attention"
+    },
+    "people": {
+      "title": "People and Access",
+      "subtitle": "Single authoritative roster for invitations, capability reviews, and open assignment handovers.",
+      "invite": "Invite a Person",
+      "searchPlaceholder": "Search people by name, username, or role...",
+      "filterAll": "All Account States",
+      "filterActive": "Active Only",
+      "filterSuspended": "Suspended Only",
+      "noStaff": "No staff accounts matching the selected criteria.",
+      "colPerson": "Person",
+      "colRole": "Role & Scope",
+      "colStatus": "Status",
+      "colWork": "Current Work",
+      "labPrefix": "Lab",
+      "globalScope": "Global Scope",
+      "statusActive": "Active",
+      "statusSuspended": "Suspended",
+      "assignments": "assignments",
+      "openTasks": "open tasks",
+      "reviewAccess": "Review Access",
+      "reactivateUser": "Reactivate User",
+      "suspendUser": "Suspend User"
     }
   },
   "staffManagement": {
@@ -994,7 +1028,17 @@
       "role": "System Role",
       "copyLink": "Copy Activation Link",
       "copied": "Copied!",
-      "expiresNotice": "Link expires in 24 hours. The recipient creates their own password upon activation."
+      "expiresNotice": "Link expires in 24 hours. The recipient creates their own password upon activation.",
+      "namePlaceholder": "e.g. María González",
+      "emailPlaceholder": "e.g. mgonzalez@soilfer.org",
+      "labScope": "Laboratory Scope",
+      "globalScope": "No specific laboratory (Global)",
+      "successTitle": "Invitation Created",
+      "successDetails": "A single-use, cryptographically verified invitation token was generated. No plain-text or shared passwords are ever created.",
+      "activationLinkLabel": "One-Time Activation Link",
+      "prepareButton": "Prepare Invitation",
+      "rbacNotice": "Role permissions are governed strictly by the server RBAC policy.",
+      "securityBanner": "An activation link with a 24-hour expiry will be generated. The invitee will securely configure their personal credentials upon first access."
     },
     "review": {
       "title": "Pre-Change Access Review",

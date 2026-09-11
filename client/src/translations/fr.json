@@ -40,7 +40,11 @@
     "project": "Projet",
     "searching": "Recherche en cours...",
     "processing": "Traitement en cours...",
-    "trash": "Corbeille"
+    "trash": "Corbeille",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "done": "Terminé",
+    "generating": "Génération en cours..."
   },
   "login": {
     "title": "Se connecter à SoilFER LIMS",
@@ -362,7 +366,14 @@
     "SURVEYOR": "Topographe de Terrain",
     "VIEWER": "Observateur (Lecture Seule)",
     "AUDIT_USER": "Responsable Qualité et Audit",
-    "MASTER_USER": "Responsable National / Utilisateur Principal"
+    "MASTER_USER": "Responsable National / Utilisateur Principal",
+    "labManager": "Responsable de Laboratoire",
+    "sampleReception": "Agent de Réception",
+    "labTechnician": "Technicien de Laboratoire",
+    "auditUser": "Qualité et Audit",
+    "superAdmin": "Super Administrateur",
+    "masterUser": "Responsable National",
+    "staff": "Personnel"
   },
   "forms": {
     "required": "Ce champ est requis",
@@ -982,6 +993,29 @@
     },
     "attention": {
       "title": "Éléments de Configuration Nécessitant une Attention"
+    },
+    "people": {
+      "title": "Personnel et Accès",
+      "subtitle": "Registre unique faisant foi pour les invitations, revues de compétences et réattributions de tâches ouvertes.",
+      "invite": "Inviter une Personne",
+      "searchPlaceholder": "Rechercher par nom, identifiant ou rôle...",
+      "filterAll": "Tous les États de Compte",
+      "filterActive": "Actifs Uniquement",
+      "filterSuspended": "Suspendus Uniquement",
+      "noStaff": "Aucun compte de personnel ne correspond aux critères sélectionnés.",
+      "colPerson": "Personne",
+      "colRole": "Rôle et Périmètre",
+      "colStatus": "Statut",
+      "colWork": "Travaux en Cours",
+      "labPrefix": "Labo",
+      "globalScope": "Périmètre Global",
+      "statusActive": "Actif",
+      "statusSuspended": "Suspendu",
+      "assignments": "affectations",
+      "openTasks": "tâches ouvertes",
+      "reviewAccess": "Revoir les Accès",
+      "reactivateUser": "Réactiver l'Utilisateur",
+      "suspendUser": "Suspendre l'Utilisateur"
     }
   },
   "staffManagement": {
@@ -994,7 +1028,17 @@
       "role": "Rôle Système",
       "copyLink": "Copier le Lien d'Activation",
       "copied": "Copié !",
-      "expiresNotice": "Le lien expire dans 24 heures. Le destinataire crée son propre mot de passe lors de l activation."
+      "expiresNotice": "Le lien expire dans 24 heures. Le destinataire crée son propre mot de passe lors de l activation.",
+      "namePlaceholder": "ex. Marie Dupont",
+      "emailPlaceholder": "ex. mdupont@soilfer.org",
+      "labScope": "Périmètre du Laboratoire",
+      "globalScope": "Aucun laboratoire spécifique (Global)",
+      "successTitle": "Invitation Créée",
+      "successDetails": "Un jeton d'invitation à usage unique et cryptographiquement vérifié a été généré. Aucun mot de passe partagé ou en clair n'est créé.",
+      "activationLinkLabel": "Lien d'Activation à Usage Unique",
+      "prepareButton": "Préparer l'Invitation",
+      "rbacNotice": "Les autorisations de rôle sont strictement régies par la politique RBAC du serveur.",
+      "securityBanner": "Un lien d'activation expirant dans 24 heures va être généré. L'invité configurera ses identifiants personnels en toute sécurité lors de son premier accès."
     },
     "review": {
       "title": "Revue d'Accès Avant Modification",
