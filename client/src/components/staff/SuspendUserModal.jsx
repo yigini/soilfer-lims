@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { X, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
+    const { t } = useLanguage();
+    const modalRef = useFocusTrap(isOpen, onClose);
     const [reason, setReason] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -49,7 +53,13 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md border border-sf-divider overflow-hidden">
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="suspend-user-title"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md border border-sf-divider overflow-hidden"
+            >
                 <div className="p-6 border-b border-sf-divider flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                         <div className={`p-2 rounded-xl ${isSuspending ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-600' : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600'}`}>
@@ -57,9 +67,9 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                         </div>
                         <div>
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                Account State
+                                {t('staffManagement.suspend.title', 'Emergency Staff Suspension')}
                             </div>
-                            <h2 className="text-lg font-black text-sf-text">
+                            <h2 id="suspend-user-title" className="text-lg font-black text-sf-text">
                                 {isSuspending ? 'Suspend Account' : 'Reactivate Account'}
                             </h2>
                         </div>

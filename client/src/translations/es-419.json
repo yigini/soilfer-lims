@@ -353,14 +353,16 @@
     "WAIVED": "Eximido"
   },
   "roles": {
-    "SUPER_ADMIN": "Super administrador",
-    "COUNTRY_ADMIN": "Administrador de país",
-    "LAB_MANAGER": "Gerente de laboratorio",
-    "SAMPLE_RECEPTION": "Recepción de muestras",
-    "LAB_TECHNICIAN": "Técnico de laboratorio",
-    "PROJECT_MANAGER": "Gerente de proyecto",
-    "SURVEYOR": "Encuestador de campo",
-    "VIEWER": "Lector"
+    "SUPER_ADMIN": "Super Administrador",
+    "COUNTRY_ADMIN": "Administrador de País",
+    "LAB_MANAGER": "Gerente de Laboratorio",
+    "SAMPLE_RECEPTION": "Oficial de Recepción de Muestras",
+    "LAB_TECHNICIAN": "Técnico de Laboratorio",
+    "PROJECT_MANAGER": "Gerente de Proyecto",
+    "SURVEYOR": "Agrimensor / Inspector de Campo",
+    "VIEWER": "Observador (Solo Lectura)",
+    "AUDIT_USER": "Oficial de Calidad y Auditoría",
+    "MASTER_USER": "Líder Nacional / Usuario Maestro"
   },
   "forms": {
     "required": "Este campo es obligatorio",
@@ -930,6 +932,87 @@
       "copyDraft": "Copiar borrador al portapapeles",
       "clientOpenedNotice": "Se abrió el borrador en tu cliente de correo. Revisa y envía el correo desde tu aplicación.",
       "failedOpenNotice": "No se pudo abrir automáticamente tu cliente de correo. Puedes copiar el destinatario y el texto arriba para enviarlo manualmente."
+    }
+  },
+  "lifecycle": {
+    "title": "Ciclo de Vida Operativo del Laboratorio",
+    "status": {
+      "SETUP": "Configuración Inicial",
+      "ACTIVE": "Operativo (Activo)",
+      "PAUSED": "Pausado Temporalmente",
+      "RETIRED": "Dado de Baja (Retirado)"
+    },
+    "preview": {
+      "title": "Vista Previa de Transición de Ciclo de Vida",
+      "currentStatus": "Estado Actual",
+      "targetStatus": "Estado Destino",
+      "openAssignments": "Asignaciones de Trabajo Activas",
+      "pendingSamples": "Muestras en Proceso",
+      "activeStaff": "Personal Activo",
+      "warnings": "Advertencias Operativas"
+    },
+    "actions": {
+      "pause": "Pausar Operaciones del Laboratorio",
+      "resume": "Reanudar Operaciones del Laboratorio",
+      "retire": "Dar de Baja el Laboratorio",
+      "confirm": "Confirmar y Ejecutar Transición",
+      "reasonRequired": "Se requiere una justificación operativa documentada"
+    }
+  },
+  "labManagement": {
+    "title": "Espacio de Trabajo del Laboratorio",
+    "subtitle": "Gestione las instalaciones del laboratorio, las autorizaciones del personal y el ciclo de vida operativo.",
+    "tabs": {
+      "overview": "Resumen General",
+      "people": "Personal y Autorizaciones",
+      "equipment": "Equipos e Instrumentación",
+      "inventory": "Inventario y Reactivos",
+      "projects": "Proyectos Asociados",
+      "settings": "Configuración de la Instalación"
+    },
+    "status": {
+      "active": "Activo",
+      "paused": "Pausado",
+      "retired": "Retirado"
+    },
+    "onboard": {
+      "button": "Dar de Alta Laboratorio",
+      "title": "Dar de Alta Nuevo Laboratorio",
+      "success": "Laboratorio registrado en estado de CONFIGURACIÓN. Configure los ajustes y asigne personal para activarlo."
+    },
+    "attention": {
+      "title": "Elementos de Configuración que Requieren Atención"
+    }
+  },
+  "staffManagement": {
+    "invite": {
+      "button": "Invitar Miembro del Equipo",
+      "title": "Incorporación de Personal Nominativo",
+      "description": "Genere un enlace de activación seguro de un solo uso. No se crean contraseñas en texto plano ni por defecto.",
+      "fullName": "Nombre Completo",
+      "email": "Correo Electrónico Laboral Verificado",
+      "role": "Rol en el Sistema",
+      "copyLink": "Copiar Enlace de Activación",
+      "copied": "¡Copiado!",
+      "expiresNotice": "El enlace caduca en 24 horas. El destinatario crea su propia contraseña al activarlo."
+    },
+    "review": {
+      "title": "Revisión de Acceso Previa al Cambio",
+      "currentVsProposed": "Comparación: Actual vs. Propuesto",
+      "unfinishedTasks": "Determinaciones de Muestras No Finalizadas",
+      "activeSessions": "Invalidación de Sesiones Activas",
+      "confirmApply": "Confirmar y Aplicar Cambios"
+    },
+    "suspend": {
+      "title": "Suspensión de Emergencia de Personal",
+      "warning": "Revocación inmediata de sesión en canales HTTP, WebSocket y API. Las asignaciones abiertas se conservan.",
+      "reason": "Motivo de la Suspensión / Referencia del Incidente",
+      "confirm": "Suspender Cuenta Inmediatamente"
+    },
+    "recovery": {
+      "title": "Enlace de Recuperación de Credenciales",
+      "description": "Emite un enlace de recuperación de contraseña de un solo uso válido por 1 hora. La sesión anterior se invalida de inmediato.",
+      "copyLink": "Copiar Enlace de Recuperación"
     }
   }
 }

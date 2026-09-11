@@ -90,12 +90,12 @@ async function getEligibleAssignees(actor, { labId, analysis } = {}, tx = prisma
         throw err;
     }
 
-    // Query active technicians and managers
+    // Query active technicians only (managers cannot be assigned bench work)
     const assignees = await tx.user.findMany({
         where: {
             labId: targetLabId,
             isActive: true,
-            role: { in: ['LAB_TECHNICIAN', 'LAB_MANAGER'] }
+            role: 'LAB_TECHNICIAN'
         },
         select: {
             id: true,
@@ -132,7 +132,7 @@ async function validateAssignmentTarget({ actor, assigneeUsername, owningLab }, 
     }
 
     if (techUser.isActive === false) {
-        return { valid: false, statusCode: 400, code: 'ASSIGNEE_INACTIVE', error: `Cannot assign work to deactivated technician '${assigneeUsername}'` };
+        return { valid: false, statusCode: 400, code: 'ASSIGNEE_INACTIVE', error: 'ASSIGNEE_INACTIVE' };
     }
 
     if (techUser.role !== 'LAB_TECHNICIAN') {

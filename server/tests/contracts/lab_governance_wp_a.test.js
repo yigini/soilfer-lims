@@ -528,6 +528,9 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
                     labId: labA.id,
                     assignedLab: labA.id,
                     status: 'IN_ANALYSIS',
+                    receptionDate: new Date(),
+                    dryingStatus: 'DONE',
+                    preparationStatus: 'DONE',
                     matrix: 'SOIL',
                     country: 'Guatemala'
                 }

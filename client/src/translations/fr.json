@@ -353,14 +353,16 @@
     "WAIVED": "Dispensé"
   },
   "roles": {
-    "SUPER_ADMIN": "Super administrateur",
-    "COUNTRY_ADMIN": "Administrateur pays",
-    "LAB_MANAGER": "Gestionnaire de laboratoire",
-    "SAMPLE_RECEPTION": "Réception d'échantillons",
-    "LAB_TECHNICIAN": "Technicien de laboratoire",
-    "PROJECT_MANAGER": "Chef de projet",
-    "SURVEYOR": "Enquêteur de terrain",
-    "VIEWER": "Lecteur"
+    "SUPER_ADMIN": "Super Administrateur",
+    "COUNTRY_ADMIN": "Administrateur de Pays",
+    "LAB_MANAGER": "Responsable de Laboratoire",
+    "SAMPLE_RECEPTION": "Agent de Réception des Échantillons",
+    "LAB_TECHNICIAN": "Technicien de Laboratoire",
+    "PROJECT_MANAGER": "Chef de Projet",
+    "SURVEYOR": "Topographe de Terrain",
+    "VIEWER": "Observateur (Lecture Seule)",
+    "AUDIT_USER": "Responsable Qualité et Audit",
+    "MASTER_USER": "Responsable National / Utilisateur Principal"
   },
   "forms": {
     "required": "Ce champ est requis",
@@ -930,6 +932,87 @@
       "copyDraft": "Copier le brouillon dans le presse-papier",
       "clientOpenedNotice": "Le brouillon a été ouvert dans votre logiciel de messagerie. Veuillez vérifier et envoyer l'e-mail depuis votre application.",
       "failedOpenNotice": "Impossible de lancer automatiquement votre logiciel de messagerie. Vous pouvez copier le destinataire et le texte ci-dessus pour envoyer manuellement."
+    }
+  },
+  "lifecycle": {
+    "title": "Cycle de Vie Opérationnel du Laboratoire",
+    "status": {
+      "SETUP": "Configuration Initiale",
+      "ACTIVE": "Opérationnel (Actif)",
+      "PAUSED": "Suspendu Temporairement",
+      "RETIRED": "Déclassé (Retiré)"
+    },
+    "preview": {
+      "title": "Aperçu de la Transition du Cycle de Vie du Laboratoire",
+      "currentStatus": "Statut Actuel",
+      "targetStatus": "Statut Cible",
+      "openAssignments": "Assignations de Travail Actives",
+      "pendingSamples": "Échantillons en Cours",
+      "activeStaff": "Personnel Actif",
+      "warnings": "Avertissements Opérationnels"
+    },
+    "actions": {
+      "pause": "Suspendre les Opérations du Laboratoire",
+      "resume": "Reprendre les Opérations du Laboratoire",
+      "retire": "Déclasser le Laboratoire",
+      "confirm": "Confirmer et Exécuter la Transition",
+      "reasonRequired": "Une justification opérationnelle documentée est requise"
+    }
+  },
+  "labManagement": {
+    "title": "Espace de Travail du Laboratoire",
+    "subtitle": "Gérer les installations du laboratoire, les autorisations du personnel et le cycle de vie opérationnel.",
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "people": "Personnel et Autorisations",
+      "equipment": "Équipements et Instruments",
+      "inventory": "Inventaire et Réactifs",
+      "projects": "Projets Associés",
+      "settings": "Paramètres de l'Installation"
+    },
+    "status": {
+      "active": "Actif",
+      "paused": "Suspendu",
+      "retired": "Retiré"
+    },
+    "onboard": {
+      "button": "Enregistrer un Laboratoire",
+      "title": "Enregistrer un Nouveau Laboratoire",
+      "success": "Laboratoire enregistré en mode CONFIGURATION. Configurez les paramètres et affectez du personnel pour l'activer."
+    },
+    "attention": {
+      "title": "Éléments de Configuration Nécessitant une Attention"
+    }
+  },
+  "staffManagement": {
+    "invite": {
+      "button": "Inviter un Membre de l'Équipe",
+      "title": "Intégration Nominative du Personnel",
+      "description": "Générez un lien d'activation sécurisé à usage unique. Aucun mot de passe par défaut ou en texte clair n'est créé.",
+      "fullName": "Nom Complet",
+      "email": "Courriel Professionnel Vérifié",
+      "role": "Rôle Système",
+      "copyLink": "Copier le Lien d'Activation",
+      "copied": "Copié !",
+      "expiresNotice": "Le lien expire dans 24 heures. Le destinataire crée son propre mot de passe lors de l activation."
+    },
+    "review": {
+      "title": "Revue d'Accès Avant Modification",
+      "currentVsProposed": "Comparaison : Actuel vs Proposé",
+      "unfinishedTasks": "Déterminations d'Échantillons Inachevées",
+      "activeSessions": "Révocation des Sessions Actives",
+      "confirmApply": "Confirmer et Appliquer les Modifications"
+    },
+    "suspend": {
+      "title": "Suspension d'Urgence du Personnel",
+      "warning": "Révocation immédiate de session sur HTTP, WebSocket et API. Les assignations en cours restent préservées.",
+      "reason": "Motif de la Suspension / Référence de l'Incident",
+      "confirm": "Suspendre le Compte Immédiatement"
+    },
+    "recovery": {
+      "title": "Lien de Récupération des Identifiants",
+      "description": "Émet un lien de récupération de mot de passe à usage unique valable 1 heure. La session précédente est invalidée immédiatement.",
+      "copyLink": "Copier le Lien de Récupération"
     }
   }
 }

@@ -19,6 +19,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../../config/auth');
+const labLifecycleService = require('../../services/labLifecycleService');
 
 describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
     const SUFFIX = 'WPD-' + Date.now();
@@ -325,13 +326,35 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
     });
 
     describe('4. Lifecycle State Transitions & Anti-Cascade Safety (POST /api/labs/:id/lifecycle)', () => {
-        test('Super Admin pauses laboratory: sets operationalStatus=PAUSED, lab.isActive=false', async () => {
+        test('Omitting review token is blocked with 400 REVIEW_TOKEN_REQUIRED', async () => {
             const res = await request(app)
                 .post(`/api/labs/${labA.id}/lifecycle`)
                 .set('Authorization', `Bearer ${tokenSA}`)
                 .send({
                     targetState: 'PAUSED',
-                    reason: 'Facility decontamination and instrumentation audit'
+                    reason: 'Testing omitted review token'
+                });
+
+            expect(res.status).toBe(400);
+            expect(res.body.code).toBe('REVIEW_TOKEN_REQUIRED');
+        });
+
+        test('Super Admin pauses laboratory with valid reviewToken: sets operationalStatus=PAUSED, lab.isActive=false', async () => {
+            const previewRes = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'PAUSED' });
+            expect(previewRes.status).toBe(200);
+            const reviewToken = previewRes.body.reviewToken;
+            expect(reviewToken).toBeDefined();
+
+            const res = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({
+                    targetState: 'PAUSED',
+                    reason: 'Facility decontamination and instrumentation audit',
+                    reviewToken
                 });
 
             expect(res.status).toBe(200);
@@ -361,30 +384,141 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
         });
 
         test('Attempting to retire a lab with open work items is blocked with 422 UNRESOLVED_WORK_ITEMS', async () => {
+            const previewRes = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'RETIRED' });
+            expect(previewRes.status).toBe(200);
+            const reviewToken = previewRes.body.reviewToken;
+
             const res = await request(app)
                 .post(`/api/labs/${labA.id}/lifecycle`)
                 .set('Authorization', `Bearer ${tokenSA}`)
                 .send({
                     targetState: 'RETIRED',
-                    reason: 'Permanent decommissioning'
+                    reason: 'Permanent decommissioning',
+                    reviewToken
                 });
 
             expect(res.status).toBe(422);
             expect(res.body.code).toBe('UNRESOLVED_WORK_ITEMS');
         });
 
-        test('Super Admin resumes laboratory: sets operationalStatus=ACTIVE, lab.isActive=true', async () => {
+        test('Super Admin resumes laboratory with valid reviewToken: sets operationalStatus=ACTIVE, lab.isActive=true', async () => {
+            const previewRes = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'ACTIVE' });
+            expect(previewRes.status).toBe(200);
+            const reviewToken = previewRes.body.reviewToken;
+
             const res = await request(app)
                 .post(`/api/labs/${labA.id}/lifecycle`)
                 .set('Authorization', `Bearer ${tokenSA}`)
                 .send({
                     targetState: 'ACTIVE',
-                    reason: 'Audit complete, facility resumed'
+                    reason: 'Audit complete, facility resumed',
+                    reviewToken
                 });
 
             expect(res.status).toBe(200);
             expect(res.body.operationalStatus).toBe('ACTIVE');
             expect(res.body.isActive).toBe(true);
+        });
+
+        test('Concurrent lifecycle transition with stale preview token returns 409 STALE_TARGET_REVISION', async () => {
+            // 1. Get preview for PAUSED with current revision
+            const preview1 = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'PAUSED' });
+            expect(preview1.status).toBe(200);
+            const staleToken = preview1.body.reviewToken;
+
+            // 2. An intervening commit transitions the lab and increments revision
+            const preview2 = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'PAUSED' });
+            const commitRes = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({
+                    targetState: 'PAUSED',
+                    reason: 'Intervening transition',
+                    reviewToken: preview2.body.reviewToken
+                });
+            expect(commitRes.status).toBe(200);
+
+            // 3. Now attempt to commit with staleToken
+            const staleRes = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({
+                    targetState: 'PAUSED',
+                    reason: 'Stale commit attempt',
+                    reviewToken: staleToken
+                });
+
+            expect(staleRes.status).toBe(409);
+            expect(staleRes.body.code).toBe('STALE_TARGET_REVISION');
+
+            // Reset lab back to ACTIVE for subsequent tests
+            const resetPreview = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'ACTIVE' });
+            await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({
+                    targetState: 'ACTIVE',
+                    reason: 'Reset after concurrent test',
+                    reviewToken: resetPreview.body.reviewToken
+                });
+        });
+
+        test('Injected audit failure rolls back lifecycle transaction atomically', async () => {
+            const preview = await request(app)
+                .post(`/api/labs/${labA.id}/lifecycle-preview`)
+                .set('Authorization', `Bearer ${tokenSA}`)
+                .send({ targetState: 'PAUSED' });
+            const reviewToken = preview.body.reviewToken;
+
+            const labBefore = await prisma.lab.findUnique({ where: { id: labA.id } });
+            const stateBefore = await labLifecycleService.getLabOperationalState(labA.id, prisma);
+
+            // Spy on prisma.$transaction to inject an audit log failure inside the real transaction
+            const originalTx = prisma.$transaction;
+            jest.spyOn(prisma, '$transaction').mockImplementation(async (fn) => {
+                return originalTx.call(prisma, async (innerTx) => {
+                    innerTx.auditLog.create = jest.fn().mockRejectedValue(new Error('Injected audit log database failure inside transaction'));
+                    return fn(innerTx);
+                });
+            });
+
+            try {
+                const res = await request(app)
+                    .post(`/api/labs/${labA.id}/lifecycle`)
+                    .set('Authorization', `Bearer ${tokenSA}`)
+                    .send({
+                        targetState: 'PAUSED',
+                        reason: 'Testing atomic rollback on audit failure',
+                        reviewToken
+                    });
+
+                expect(res.status).toBe(500);
+
+                // Verify rollback: lab.isActive and LabLifecycleState must be completely unmodified!
+                const labAfter = await prisma.lab.findUnique({ where: { id: labA.id } });
+                const stateAfter = await labLifecycleService.getLabOperationalState(labA.id, prisma);
+
+                expect(labAfter.isActive).toBe(labBefore.isActive);
+                expect(stateAfter.operationalStatus).toBe(stateBefore.operationalStatus);
+                expect(stateAfter.revision).toBe(stateBefore.revision);
+            } finally {
+                prisma.$transaction.mockRestore();
+            }
         });
     });
 

@@ -89,6 +89,7 @@ class WorkPackService {
             deviceId,
             userId: user.id || user.username,
             labId: effectiveLabId,
+            tokenVersion: user.tokenVersion !== undefined ? user.tokenVersion : 0,
             issuedAt: now.toISOString(),
             expiresAt: expiresAt.toISOString(),
             leaseDurationHours: 12,

@@ -41,7 +41,7 @@ const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const { createNotification } = require('./notificationController');
 const { getAnalysisName, getAnalysisCategory } = require('../services/analysisService');
-const { broadcastToLab, broadcastToUser } = require('../wsServer');
+const wsServer = require('../wsServer');
 
 // Helper to get effective analysis list for a sample
 const getEffectiveAnalyses = (sample) => {
@@ -507,19 +507,7 @@ exports.assignWork = async (req, res) => {
             return res.status(400).json({ error: 'assignee username is required' });
         }
 
-        const techUser = await prisma.user.findUnique({
-            where: { username: assignee }
-        });
-
-        if (!techUser) {
-            return res.status(404).json({ error: `Technician '${assignee}' not found` });
-        }
-        if (techUser.isActive === false) {
-            return res.status(400).json({ error: 'ASSIGNEE_INACTIVE', message: `Cannot assign work to deactivated technician '${assignee}'` });
-        }
-        if (techUser.role !== 'LAB_TECHNICIAN') {
-            return res.status(400).json({ error: `User '${assignee}' is not a LAB_TECHNICIAN` });
-        }
+        const assignmentEligibilityService = require('../services/assignmentEligibilityService');
 
         const dbItems = await prisma.workItem.findMany({
             where: { id: { in: workItemIds } }
@@ -537,37 +525,40 @@ exports.assignWork = async (req, res) => {
         const sampleMap = {};
         samples.forEach(s => sampleMap[s.id] = s);
 
+        let validatedTechUser = null;
+
         // SD-02: Isolation belongs to the sample, not the actor.
-        // One unconditional rule for every role:
         // A super admin may act across laboratories; they must not be able to create a cross-laboratory assignment.
         for (const item of dbItems) {
             const sample = sampleMap[item.sampleId];
             const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
-            if (!owningLab || techUser.labId !== owningLab) {
-                return res.status(403).json({
-                    error: `Cannot assign to technician in different lab. Technician ${techUser.username} (${techUser.labId}) is not in ${owningLab}`
+
+            const validation = await assignmentEligibilityService.validateAssignmentTarget({
+                actor: user,
+                assigneeUsername: assignee,
+                owningLab
+            });
+
+            if (!validation.valid) {
+                const status = validation.statusCode || 400;
+                const errorStr = validation.code === 'CROSS_LAB_ASSIGNMENT_DENIED' ? validation.error : (validation.code || validation.error);
+                return res.status(status).json({
+                    error: errorStr,
+                    code: validation.code,
+                    message: validation.error
                 });
             }
+
+            validatedTechUser = validation.assignee;
+
             if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
                 return res.status(403).json({
                     error: `Work item belongs to different lab scope (Req: ${user.labId}, Has: ${owningLab})`
                 });
             }
-            if (user.role === 'MASTER_USER') {
-                const countryList = user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : [];
-                const targetLab = await prisma.lab.findUnique({ where: { id: owningLab } });
-                if (!targetLab || !countryList.includes(targetLab.country)) {
-                    return res.status(403).json({
-                        error: 'LAB_OUTSIDE_SCOPE',
-                        message: `Lab '${owningLab}' is outside national scope.`
-                    });
-                }
-            }
-            const owningLabRecord = await prisma.lab.findUnique({ where: { id: owningLab } });
-            if (owningLabRecord && owningLabRecord.isActive === false) {
-                return res.status(400).json({ error: 'LAB_PAUSED', code: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
-            }
         }
+
+        const techUser = validatedTechUser;
 
         let assignedCount = 0;
         let errors = [];
@@ -706,18 +697,25 @@ exports.assignWork = async (req, res) => {
             });
         }
 
-        // Real-time push: broadcast WORKITEM_UPDATE to all connected users
+        // Real-time push: broadcast WORKITEM_UPDATE to target receiving lab(s)
         if (assignedCount > 0) {
             const affectedSampleIds = [...new Set(dbItems.map(i => i.sampleId).filter(Boolean))];
-            try {
-                broadcastToLab(user.labId,'WORKITEM_UPDATE', {
-                    sampleIds: affectedSampleIds,
-                    updatedBy: user.username,
-                    action: 'ASSIGNED',
-                    count: assignedCount
-                });
-            } catch (wsErr) {
-                console.error('[WS] Failed to broadcast WORKITEM_UPDATE (assign):', wsErr);
+            const targetLabIds = [...new Set(dbItems.map(i => {
+                const s = sampleMap[i.sampleId];
+                return (s ? (s.assignedLab || s.labId) : (i.assignedLab || i.labId)) || user.labId;
+            }).filter(Boolean))];
+
+            for (const targetLabId of targetLabIds) {
+                try {
+                    wsServer.broadcastToLab(targetLabId, 'WORKITEM_UPDATE', {
+                        sampleIds: affectedSampleIds,
+                        updatedBy: user.username,
+                        action: 'ASSIGNED',
+                        count: assignedCount
+                    });
+                } catch (wsErr) {
+                    console.error('[WS] Failed to broadcast WORKITEM_UPDATE (assign):', wsErr);
+                }
             }
         }
 
@@ -762,35 +760,30 @@ exports.reassignWork = async (req, res) => {
         const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return res.status(404).json({ error: 'Work item not found' });
 
-        const techUser = await prisma.user.findUnique({ where: { username: technicianUserId } });
-        if (!techUser) return res.status(404).json({ error: `Technician '${technicianUserId}' not found` });
-        if (techUser.isActive === false) return res.status(400).json({ error: 'ASSIGNEE_INACTIVE', message: `Cannot reassign work to deactivated technician '${technicianUserId}'` });
-        if (techUser.role !== 'LAB_TECHNICIAN') return res.status(400).json({ error: `User '${technicianUserId}' is not a LAB_TECHNICIAN` });
-
-        // SD-02: Isolation belongs to the sample, not the actor.
         const sample = item.sampleId ? await prisma.sample.findUnique({ where: { id: item.sampleId } }) : null;
         const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
-        if (!owningLab || techUser.labId !== owningLab) {
-            return res.status(403).json({
-                error: `Cannot reassign to technician in different lab. Technician ${techUser.username} (${techUser.labId}) is not in ${owningLab}`
+
+        const assignmentEligibilityService = require('../services/assignmentEligibilityService');
+        const validation = await assignmentEligibilityService.validateAssignmentTarget({
+            actor: user,
+            assigneeUsername: technicianUserId,
+            owningLab
+        });
+
+        if (!validation.valid) {
+            const status = validation.statusCode || 400;
+            const errorStr = validation.code === 'CROSS_LAB_ASSIGNMENT_DENIED' ? validation.error : (validation.code || validation.error);
+            return res.status(status).json({
+                error: errorStr,
+                code: validation.code,
+                message: validation.error
             });
         }
 
+        const techUser = validation.assignee;
+
         if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
             return res.status(403).json({ error: 'Work item outside your lab scope' });
-        }
-
-        if (user.role === 'MASTER_USER') {
-            const countryList = user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : [];
-            const targetLab = await prisma.lab.findUnique({ where: { id: owningLab } });
-            if (!targetLab || !countryList.includes(targetLab.country)) {
-                return res.status(403).json({ error: 'LAB_OUTSIDE_SCOPE', message: `Laboratory '${owningLab}' is outside national scope.` });
-            }
-        }
-
-        const owningLabRecord = await prisma.lab.findUnique({ where: { id: owningLab } });
-        if (owningLabRecord && owningLabRecord.isActive === false) {
-            return res.status(400).json({ error: 'LAB_PAUSED', message: 'Laboratory is currently inactive or paused.' });
         }
 
         const previousAssignee = item.assignedTo;
@@ -859,9 +852,9 @@ exports.reassignWork = async (req, res) => {
             }
         });
 
-        // Real-time push: broadcast WORKITEM_UPDATE
+        // Real-time push: broadcast WORKITEM_UPDATE to receiving laboratory
         try {
-            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
+            wsServer.broadcastToLab(owningLab, 'WORKITEM_UPDATE', {
                 sampleIds: [item.sampleId],
                 updatedBy: user.username,
                 action: 'REASSIGNED',
@@ -1124,7 +1117,8 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
-            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
+            const targetLab = item.assignedLab || item.labId || user.labId;
+            wsServer.broadcastToLab(targetLab, 'WORKITEM_UPDATE', {
                 sampleIds: [String(item.sampleId)],
                 updatedBy: user.username,
                 action: status === 'COMPLETED' ? 'COMPLETED' : 'STATUS_CHANGE',
@@ -1476,11 +1470,11 @@ exports.reviewWorkItem = async (req, res) => {
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
-            broadcastToLab(user.labId,'WORKITEM_UPDATE', {
+            const targetLab = item.assignedLab || item.labId || user.labId;
+            wsServer.broadcastToLab(targetLab, 'WORKITEM_UPDATE', {
                 sampleIds: [String(item.sampleId)],
                 updatedBy: user.username,
                 action: 'REVIEWED',
-                reviewStatus: status,
                 count: 1
             });
         } catch (wsErr) {
@@ -1811,7 +1805,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         if (items.length > 0) {
             const affectedSampleIds = [...new Set(items.map(i => i.sampleId).filter(Boolean))];
             try {
-                broadcastToLab(user.labId,'WORKITEM_UPDATE', {
+                wsServer.broadcastToLab(user.labId, 'WORKITEM_UPDATE', {
                     sampleIds: affectedSampleIds,
                     updatedBy: user.username,
                     action: 'BULK_REVIEWED',

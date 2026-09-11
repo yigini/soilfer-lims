@@ -437,34 +437,58 @@ async function getLifecyclePreview(actor, labId, targetState, tx = prisma) {
 }
 
 function verifyLabReviewToken(token, actorId, labId, targetState, currentRevision) {
-    if (!token || typeof token !== 'string') return false;
+    if (!token || typeof token !== 'string') {
+        return { valid: false, code: 'REVIEW_TOKEN_REQUIRED', error: 'Review token is required' };
+    }
     const parts = token.split('.');
-    if (parts.length !== 2) return false;
+    if (parts.length !== 2) {
+        return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Malformed review token' };
+    }
     const [signature, payloadBase64] = parts;
     try {
         const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
         const expectedSig = crypto.createHmac('sha256', JWT_SECRET || 'secret').update(payloadJson).digest('hex');
         if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-            return false;
+            return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Invalid review token signature' };
         }
         const payload = JSON.parse(payloadJson);
-        if (!payload.ts || (Date.now() - payload.ts) > 15 * 60 * 1000) return false;
-        if (payload.actorId !== actorId) return false;
-        if (payload.labId !== labId) return false;
-        if (targetState && payload.targetState !== targetState) return false;
-        if (currentRevision !== undefined && payload.revision !== undefined) {
-            if (Number(currentRevision) !== Number(payload.revision)) return false;
+        if (!payload.ts || (Date.now() - payload.ts) > 15 * 60 * 1000) {
+            return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Review token has expired' };
         }
-        return true;
+        if (payload.actorId !== actorId) {
+            return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Review token actor mismatch' };
+        }
+        if (payload.labId !== labId) {
+            return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Review token laboratory mismatch' };
+        }
+        if (targetState && payload.targetState !== targetState) {
+            return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Review token target state mismatch' };
+        }
+        if (currentRevision !== undefined && payload.revision !== undefined) {
+            if (Number(currentRevision) !== Number(payload.revision)) {
+                return { valid: false, code: 'STALE_TARGET_REVISION', error: 'Target laboratory revision has changed since preview was generated' };
+            }
+        }
+        return { valid: true, payload };
     } catch {
-        return false;
+        return { valid: false, code: 'INVALID_REVIEW_TOKEN', error: 'Failed to verify review token' };
     }
 }
 
 /**
  * Commits a laboratory operational lifecycle state transition.
+ * Executes atomically inside a real database transaction.
  */
-async function transitionLifecycle(actor, labId, { targetState, reason, reviewToken }, tx = prisma) {
+async function transitionLifecycle(actor, labId, { targetState, reason, reviewToken }, tx = null) {
+    if (!tx || tx === prisma) {
+        return prisma.$transaction(async (innerTx) => {
+            return _executeTransitionLifecycle(actor, labId, { targetState, reason, reviewToken }, innerTx);
+        });
+    }
+    return _executeTransitionLifecycle(actor, labId, { targetState, reason, reviewToken }, tx);
+}
+
+async function _executeTransitionLifecycle(actor, labId, { targetState, reason, reviewToken }, tx) {
     await ensureTables(tx);
 
     if (actor.role !== 'SUPER_ADMIN') {
@@ -474,16 +498,21 @@ async function transitionLifecycle(actor, labId, { targetState, reason, reviewTo
         throw err;
     }
 
+    if (!reviewToken || typeof reviewToken !== 'string' || !reviewToken.trim()) {
+        const err = new Error('Review token is required to transition laboratory lifecycle. Request a preview first.');
+        err.statusCode = 400;
+        err.code = 'REVIEW_TOKEN_REQUIRED';
+        throw err;
+    }
+
     const currentState = await getLabOperationalState(labId, tx);
 
-    if (reviewToken) {
-        const isValid = verifyLabReviewToken(reviewToken, actor.id, labId, targetState, currentState?.revision);
-        if (!isValid) {
-            const err = new Error('Invalid, altered, or expired review token');
-            err.statusCode = 400;
-            err.code = 'INVALID_REVIEW_TOKEN';
-            throw err;
-        }
+    const tokenVerification = verifyLabReviewToken(reviewToken, actor.id, labId, targetState, currentState?.revision);
+    if (!tokenVerification.valid) {
+        const err = new Error(tokenVerification.error || 'Invalid, altered, or expired review token');
+        err.statusCode = tokenVerification.code === 'STALE_TARGET_REVISION' ? 409 : 400;
+        err.code = tokenVerification.code || 'INVALID_REVIEW_TOKEN';
+        throw err;
     }
 
     if (!VALID_STATES.includes(targetState)) {
@@ -528,7 +557,7 @@ async function transitionLifecycle(actor, labId, { targetState, reason, reviewTo
         data: { isActive: isLabActive }
     });
 
-    // 2. Upsert LabLifecycleState
+    // 2. Upsert LabLifecycleState with new revision
     await tx.$executeRawUnsafe(`
         INSERT INTO "LabLifecycleState" ("labId", "operationalStatus", "revision", "pauseReason", "pausedAt", "pausedBy", "updatedAt")
         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -548,11 +577,12 @@ async function transitionLifecycle(actor, labId, { targetState, reason, reviewTo
         targetState === 'PAUSED' ? actor.username : null
     );
 
-    // 3. Audit log
-    const commandId = 'cmd-lab-lc-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+    // 3. Audit log (collision-safe unique ID)
+    const commandId = 'cmd-lab-lc-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+    const auditId = 'audit-lc-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
     await tx.auditLog.create({
         data: {
-            id: 'audit-lc-' + Date.now(),
+            id: auditId,
             entity: 'LAB',
             entityId: labId,
             action: 'LIFECYCLE_TRANSITION',
@@ -581,5 +611,6 @@ module.exports = {
     getLabWorkspace,
     updateLabProfile,
     getLifecyclePreview,
-    transitionLifecycle
+    transitionLifecycle,
+    verifyLabReviewToken
 };

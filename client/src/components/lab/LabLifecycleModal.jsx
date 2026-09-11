@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, PauseCircle, PlayCircle, Archive, AlertTriangle, CheckCircle2, Shield } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, onSuccess }) {
+    const { t } = useLanguage();
+    const modalRef = useFocusTrap(isOpen, onClose);
     const [preview, setPreview] = useState(null);
     const [loadingPreview, setLoadingPreview] = useState(false);
     const [reason, setReason] = useState('');
@@ -67,13 +71,19 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden">
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="lab-lifecycle-title"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden"
+            >
                 <div className="p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                            Laboratory Status Change
+                            {t('lifecycle.title', 'Laboratory Operational Lifecycle')}
                         </div>
-                        <h2 className="text-xl font-black text-sf-text">{title}</h2>
+                        <h2 id="lab-lifecycle-title" className="text-xl font-black text-sf-text">{title}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />

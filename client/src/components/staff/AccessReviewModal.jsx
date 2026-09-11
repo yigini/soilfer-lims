@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, Shield, AlertTriangle, CheckCircle2, ArrowRight, RefreshCw, Clock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, currentLabId }) {
     const { t } = useLanguage();
+    const modalRef = useFocusTrap(isOpen, onClose);
     const [proposedRole, setProposedRole] = useState(user?.role || 'LAB_TECHNICIAN');
     const [reason, setReason] = useState('');
     const [confirmImpact, setConfirmImpact] = useState(false);
@@ -104,14 +106,20 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden">
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="access-review-title"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-2xl border border-sf-divider max-h-[92vh] flex flex-col overflow-hidden"
+            >
                 {/* Modal Head */}
                 <div className="p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                            Review Before Changing
+                            {t('staffManagement.review.title', 'Pre-Change Access Review')}
                         </div>
-                        <h2 className="text-xl font-black text-sf-text">
+                        <h2 id="access-review-title" className="text-xl font-black text-sf-text">
                             Review Access: {user.name || user.username}
                         </h2>
                     </div>

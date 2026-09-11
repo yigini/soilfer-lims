@@ -3,8 +3,11 @@ import axios from 'axios';
 import { X, Mail, User, Shield, CheckCircle2, Copy, AlertTriangle, Clock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+
 export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLabId, availableLabs = [] }) {
     const { t } = useLanguage();
+    const modalRef = useFocusTrap(isOpen, onClose);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('LAB_TECHNICIAN');
@@ -99,13 +102,21 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden">
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="invite-staff-title"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden"
+            >
                 <div className="p-6 border-b border-sf-divider flex items-center justify-between">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                            Named Staff Onboarding
+                            {t('staffManagement.invite.title', 'Named Staff Onboarding')}
                         </div>
-                        <h2 className="text-xl font-black text-sf-text">Invite a Team Member</h2>
+                        <h2 id="invite-staff-title" className="text-xl font-black text-sf-text">
+                            {t('staffManagement.invite.button', 'Invite a Team Member')}
+                        </h2>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />

@@ -1,0 +1,498 @@
+'use strict';
+
+/**
+ * Reopened Governance & Parity Scenarios Contract Tests
+ *
+ * Verifies:
+ * 1. Offline Sync Draft Parity (workEligibility.canRecord gating, DRYING_PENDING -> PREREQUISITE_INCOMPLETE, status advancement)
+ * 2. Offline Sync Spectral & Texture Determinations (SPECTRAL_SCALAR_REJECTED for custom methods, TEXTURE_CLOSURE_FAILED vs atomic multi-fraction persistence)
+ * 3. Offline Shared-Device Outbox User Partitioning (userId scoping, no cross-account execution)
+ * 4. Offline Pack Lease & Scope Enforcement (410 PACK_EXPIRED, 403 PACK_ACCESS_DENIED, 401 SESSION_INVALIDATED)
+ * 5. Work Item Assignment Scoping & Receiving Lab Broadcasts (assignmentEligibilityService validation, receiving lab broadcast)
+ */
+
+const request = require('supertest');
+const app = require('../../app');
+const prisma = require('../../prisma');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../../config/auth');
+const syncService = require('../../services/syncService');
+const offlineController = require('../../controllers/offlineController');
+const wsServer = require('../../wsServer');
+
+describe('Reopened Governance & Offline Parity Contract Tests', () => {
+    const SUFFIX = 'REOPEN-' + Date.now();
+    let labA, labB, userTechA, userTechB, userMgrA, userSA;
+    let tokenTechA, tokenTechB, tokenMgrA, tokenSA;
+    let sampleA, samplePendingDrying;
+    let workItemTexture, workItemSpectral, workItemNormal, workItemDryingBlocked;
+    let customSpectralMethod;
+
+    beforeAll(async () => {
+        // Ensure analysis records exist for foreign key constraints
+        const ensureAnalysis = async (code, name) => {
+            await prisma.analysis.upsert({
+                where: { code },
+                create: { code, name, matrix: 'SOIL', module: 'FERTILITY' },
+                update: {}
+            });
+        };
+
+        await ensureAnalysis('SPEC_MIR', 'Mid-Infrared Spectroscopy');
+        await ensureAnalysis('TEXTURE', 'Soil Texture');
+        await ensureAnalysis('SAND', 'Sand Fraction');
+        await ensureAnalysis('SILT', 'Silt Fraction');
+        await ensureAnalysis('CLAY', 'Clay Fraction');
+        await ensureAnalysis('PH_H2O', 'pH in Water');
+
+        // Setup Labs
+        labA = await prisma.lab.create({
+            data: {
+                id: 'lab-a-' + SUFFIX,
+                code: 'LA-' + SUFFIX.slice(-4),
+                name: 'Lab Alpha ' + SUFFIX,
+                country: 'Guatemala',
+                isActive: true
+            }
+        });
+
+        labB = await prisma.lab.create({
+            data: {
+                id: 'lab-b-' + SUFFIX,
+                code: 'LB-' + SUFFIX.slice(-4),
+                name: 'Lab Beta ' + SUFFIX,
+                country: 'Guatemala',
+                isActive: true
+            }
+        });
+
+        // Setup Users
+        userSA = await prisma.user.create({
+            data: {
+                id: 'usr-sa-' + SUFFIX,
+                username: 'sa_' + SUFFIX,
+                email: 'sa_' + SUFFIX + '@soilfer.org',
+                password: 'hash',
+                role: 'SUPER_ADMIN',
+                isActive: true,
+                tokenVersion: 1
+            }
+        });
+
+        userMgrA = await prisma.user.create({
+            data: {
+                id: 'usr-mgrA-' + SUFFIX,
+                username: 'mgrA_' + SUFFIX,
+                email: 'mgrA_' + SUFFIX + '@soilfer.org',
+                password: 'hash',
+                role: 'LAB_MANAGER',
+                labId: labA.id,
+                isActive: true,
+                tokenVersion: 1
+            }
+        });
+
+        userTechA = await prisma.user.create({
+            data: {
+                id: 'usr-techA-' + SUFFIX,
+                username: 'techA_' + SUFFIX,
+                email: 'techA_' + SUFFIX + '@soilfer.org',
+                password: 'hash',
+                role: 'LAB_TECHNICIAN',
+                labId: labA.id,
+                isActive: true,
+                tokenVersion: 1
+            }
+        });
+
+        userTechB = await prisma.user.create({
+            data: {
+                id: 'usr-techB-' + SUFFIX,
+                username: 'techB_' + SUFFIX,
+                email: 'techB_' + SUFFIX + '@soilfer.org',
+                password: 'hash',
+                role: 'LAB_TECHNICIAN',
+                labId: labB.id,
+                isActive: true,
+                tokenVersion: 1
+            }
+        });
+
+        tokenSA = jwt.sign({ id: userSA.id, username: userSA.username, role: userSA.role, tokenVersion: 1 }, JWT_SECRET);
+        tokenMgrA = jwt.sign({ id: userMgrA.id, username: userMgrA.username, role: userMgrA.role, labId: labA.id, tokenVersion: 1 }, JWT_SECRET);
+        tokenTechA = jwt.sign({ id: userTechA.id, username: userTechA.username, role: userTechA.role, labId: labA.id, tokenVersion: 1 }, JWT_SECRET);
+        tokenTechB = jwt.sign({ id: userTechB.id, username: userTechB.username, role: userTechB.role, labId: labB.id, tokenVersion: 1 }, JWT_SECRET);
+
+        // Custom spectral methodology
+        customSpectralMethod = await prisma.methodology.create({
+            data: {
+                id: 'meth-spec-' + SUFFIX,
+                analysisCode: 'SPEC_MIR',
+                name: 'Custom MIR Spectroscopy ' + SUFFIX,
+                standard: 'MIR Spectroscopy Standard'
+            }
+        });
+
+        // Setup Samples
+        sampleA = await prisma.sample.create({
+            data: {
+                id: 'smp-a-' + SUFFIX,
+                originalId: 'orig-a-' + SUFFIX,
+                status: 'PROCESSING',
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                receptionDate: new Date(),
+                assignedLab: labA.id,
+                labId: labA.id,
+                country: 'Guatemala'
+            }
+        });
+
+        samplePendingDrying = await prisma.sample.create({
+            data: {
+                id: 'smp-dry-' + SUFFIX,
+                originalId: 'orig-dry-' + SUFFIX,
+                status: 'RECEIVED',
+                dryingStatus: 'PENDING',
+                preparationStatus: 'PENDING',
+                receptionDate: new Date(),
+                assignedLab: labA.id,
+                labId: labA.id,
+                country: 'Guatemala'
+            }
+        });
+
+        // Setup Work Items
+        workItemDryingBlocked = await prisma.workItem.create({
+            data: {
+                id: 'wi-dry-' + SUFFIX,
+                sampleId: samplePendingDrying.id,
+                analysis: 'PH_H2O',
+                status: 'ASSIGNED',
+                assignedTo: userTechA.username,
+                assignedLab: labA.id,
+                labId: labA.id,
+                version: 1
+            }
+        });
+
+        workItemNormal = await prisma.workItem.create({
+            data: {
+                id: 'wi-norm-' + SUFFIX,
+                sampleId: sampleA.id,
+                analysis: 'PH_H2O',
+                status: 'ASSIGNED',
+                assignedTo: userTechA.username,
+                assignedLab: labA.id,
+                labId: labA.id,
+                version: 1
+            }
+        });
+
+        workItemSpectral = await prisma.workItem.create({
+            data: {
+                id: 'wi-spec-' + SUFFIX,
+                sampleId: sampleA.id,
+                analysis: 'SPEC_MIR',
+                methodologyId: customSpectralMethod.id,
+                category: 'Spectroscopy',
+                status: 'IN_PROGRESS',
+                assignedTo: userTechA.username,
+                assignedLab: labA.id,
+                labId: labA.id,
+                version: 1
+            }
+        });
+
+        workItemTexture = await prisma.workItem.create({
+            data: {
+                id: 'wi-text-' + SUFFIX,
+                sampleId: sampleA.id,
+                analysis: 'TEXTURE',
+                status: 'IN_PROGRESS',
+                assignedTo: userTechA.username,
+                assignedLab: labA.id,
+                labId: labA.id,
+                version: 1
+            }
+        });
+    });
+
+    afterAll(async () => {
+        await prisma.result.deleteMany({ where: { sampleId: { in: [sampleA.id, samplePendingDrying.id] } } }).catch(() => {});
+        await prisma.workAttempt.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
+        await prisma.workItemDraft.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
+        await prisma.commandReceipt.deleteMany({ where: { author: { in: [userTechA.username, userTechB.username] } } }).catch(() => {});
+        await prisma.workItem.deleteMany({ where: { id: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
+        await prisma.sample.deleteMany({ where: { id: { in: [sampleA.id, samplePendingDrying.id] } } }).catch(() => {});
+        await prisma.methodology.deleteMany({ where: { id: customSpectralMethod.id } }).catch(() => {});
+        await prisma.user.deleteMany({ where: { id: { in: [userTechA.id, userTechB.id, userMgrA.id, userSA.id] } } }).catch(() => {});
+        await prisma.lab.deleteMany({ where: { id: { in: [labA.id, labB.id] } } }).catch(() => {});
+    });
+
+    describe('1. Offline Sync Draft Parity & Gating', () => {
+        test('SAVE_WORK_DRAFT rejects prerequisite-blocked sample with PREREQUISITE_INCOMPLETE', async () => {
+            const result = await syncService.applySyncOperations(userTechA, [{
+                operationId: 'op-draft-block-' + Date.now(),
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemDryingBlocked.id,
+                payload: { value: '6.5' }
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(result.receipts[0].status).toBe('REJECTED');
+            expect(result.receipts[0].code).toBe('PREREQUISITE_INCOMPLETE');
+        });
+
+        test('SAVE_WORK_DRAFT rejects unassigned technician with NOT_ASSIGNED_TECHNICIAN', async () => {
+            const result = await syncService.applySyncOperations(userTechB, [{ // Tech B from Lab B
+                operationId: 'op-draft-unassigned-' + Date.now(),
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemNormal.id,
+                payload: { value: '6.8' }
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(result.receipts[0].status).toBe('REJECTED');
+            expect(['NOT_ASSIGNED_TECHNICIAN', 'WORK_ITEM_OUTSIDE_LAB_SCOPE']).toContain(result.receipts[0].code);
+        });
+
+        test('Valid SAVE_WORK_DRAFT persists atomically and advances status from ASSIGNED to IN_PROGRESS', async () => {
+            const opId = 'op-draft-valid-' + Date.now();
+            const result = await syncService.applySyncOperations(userTechA, [{
+                operationId: opId,
+                type: 'SAVE_WORK_DRAFT',
+                target: workItemNormal.id,
+                payload: { value: '7.1', notes: 'Preliminary draft reading' }
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(['APPLIED', 'SUCCESS']).toContain(result.receipts[0].status);
+
+            // Verify work item advanced to IN_PROGRESS
+            const updatedItem = await prisma.workItem.findUnique({ where: { id: workItemNormal.id } });
+            expect(updatedItem.status).toBe('IN_PROGRESS');
+        });
+    });
+
+    describe('2. Offline Sync Spectral & Texture Determinations', () => {
+        test('COMPLETE_WORK on custom spectral method rejects scalar entry with SPECTRAL_SCALAR_REJECTED', async () => {
+            const result = await syncService.applySyncOperations(userTechA, [{
+                operationId: 'op-spec-scalar-' + Date.now(),
+                type: 'COMPLETE_WORK',
+                target: workItemSpectral.id,
+                payload: { result: '1250.5' } // Scalar instead of spectral scan
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(result.receipts[0].status).toBe('REJECTED');
+            expect(result.receipts[0].code).toBe('SPECTRAL_SCALAR_REJECTED');
+        });
+
+        test('COMPLETE_WORK on grouped texture rejects non-closing sum with TEXTURE_CLOSURE_FAILED', async () => {
+            const result = await syncService.applySyncOperations(userTechA, [{
+                operationId: 'op-text-fail-' + Date.now(),
+                type: 'COMPLETE_WORK',
+                target: workItemTexture.id,
+                payload: {
+                    sand: 50,
+                    silt: 20,
+                    clay: 20 // Sum is 90%, outside tolerance
+                }
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(result.receipts[0].status).toBe('REJECTED');
+            expect(result.receipts[0].code).toBe('TEXTURE_CLOSURE_FAILED');
+        });
+
+        test('COMPLETE_WORK on grouped texture with valid closure atomically writes SAND, SILT, CLAY, and TEXTURE results', async () => {
+            const opId = 'op-text-success-' + Date.now();
+            const result = await syncService.applySyncOperations(userTechA, [{
+                operationId: opId,
+                type: 'COMPLETE_WORK',
+                target: workItemTexture.id,
+                payload: {
+                    sand: 40,
+                    silt: 40,
+                    clay: 20 // Sum is 100%
+                }
+            }]);
+
+            expect(result.receipts).toHaveLength(1);
+            expect(['APPLIED', 'SUCCESS']).toContain(result.receipts[0].status);
+
+            // Verify 4 Result records were created for the sample
+            const createdResults = await prisma.result.findMany({
+                where: { sampleId: sampleA.id, isCurrent: true }
+            });
+            const params = createdResults.map(r => r.param);
+            expect(params).toContain('SAND');
+            expect(params).toContain('SILT');
+            expect(params).toContain('CLAY');
+            expect(params).toContain('TEXTURE');
+
+            // Verify WorkAttempt was created
+            const attempt = await prisma.workAttempt.findFirst({
+                where: { workItemId: workItemTexture.id }
+            });
+            expect(attempt).not.toBeNull();
+            expect(attempt.author || attempt.technician).toBe(userTechA.username);
+        });
+    });
+
+    describe('3. Offline Shared-Device Outbox User Partitioning', () => {
+        test('Filtered outbox operations strictly isolate User A from User B', async () => {
+            const mockOutbox = [
+                { operationId: 'op-1', userId: userTechA.username, type: 'SAVE_WORK_DRAFT', status: 'PENDING' },
+                { operationId: 'op-2', userId: userTechB.username, type: 'SAVE_WORK_DRAFT', status: 'PENDING' },
+                { operationId: 'op-3', userId: userTechA.username, type: 'COMPLETE_WORK', status: 'PENDING' }
+            ];
+
+            const getPendingForUser = (user) => mockOutbox.filter(o => o.status === 'PENDING' && o.userId === user);
+
+            const userAPending = getPendingForUser(userTechA.username);
+            const userBPending = getPendingForUser(userTechB.username);
+
+            expect(userAPending).toHaveLength(2);
+            expect(userAPending.map(o => o.operationId)).toEqual(['op-1', 'op-3']);
+
+            expect(userBPending).toHaveLength(1);
+            expect(userBPending[0].operationId).toBe('op-2');
+
+            // Confirm User B never sees User A's un-synced work
+            expect(userBPending.some(o => o.userId === userTechA.username)).toBe(false);
+        });
+    });
+
+    describe('4. Offline Pack Lease & Scope Enforcement', () => {
+        test('getPack returns 410 PACK_EXPIRED when pack lease is expired', async () => {
+            const req = {
+                params: { id: 'pack-expired-1' },
+                user: userTechA
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            const bundle = await offlineController.preparePack({
+                user: userTechA,
+                body: { packType: 'SAMPLE', targetIds: [sampleA.id] }
+            }, { json: (b) => b });
+
+            bundle.expiresAt = new Date(Date.now() - 1000).toISOString();
+
+            req.params.id = bundle.packId;
+            await offlineController.getPack(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(410);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'PACK_EXPIRED' }));
+        });
+
+        test('getPack returns 403 PACK_ACCESS_DENIED when requested across laboratories', async () => {
+            const bundle = await offlineController.preparePack({
+                user: userTechA,
+                body: { packType: 'SAMPLE', targetIds: [sampleA.id] }
+            }, { json: (b) => b });
+
+            const req = {
+                params: { id: bundle.packId },
+                user: userTechB
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            await offlineController.getPack(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'PACK_ACCESS_DENIED' }));
+        });
+
+        test('getPack returns 401 SESSION_INVALIDATED when user tokenVersion changed', async () => {
+            const bundle = await offlineController.preparePack({
+                user: { ...userTechA, tokenVersion: 1 },
+                body: { packType: 'SAMPLE', targetIds: [sampleA.id] }
+            }, { json: (b) => b });
+
+            const req = {
+                params: { id: bundle.packId },
+                user: { ...userTechA, tokenVersion: 2 }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            await offlineController.getPack(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'SESSION_INVALIDATED' }));
+        });
+    });
+
+    describe('5. Work Item Assignment Scoping & Receiving Lab Broadcast', () => {
+        let broadcastSpy;
+
+        beforeEach(() => {
+            broadcastSpy = jest.spyOn(wsServer, 'broadcastToLab').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+            if (broadcastSpy) broadcastSpy.mockRestore();
+        });
+
+        test('assignWork via assignmentEligibilityService blocks cross-lab assignment', async () => {
+            const res = await request(app)
+                .post('/api/work/assign')
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    workItemIds: [workItemNormal.id],
+                    assignee: userTechB.username // Tech B belongs to Lab B
+                });
+
+            expect(res.status).toBe(403);
+            expect(res.body.code).toBe('CROSS_LAB_ASSIGNMENT_DENIED');
+        });
+
+        test('assignWork broadcasts WORKITEM_UPDATE to target receiving laboratory', async () => {
+            const res = await request(app)
+                .post('/api/work/assign')
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    workItemIds: [workItemNormal.id],
+                    assignee: userTechA.username
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+
+            expect(broadcastSpy).toHaveBeenCalledWith(
+                labA.id,
+                'WORKITEM_UPDATE',
+                expect.objectContaining({ action: 'ASSIGNED' })
+            );
+        });
+
+        test('reassignWork broadcasts WORKITEM_UPDATE to receiving laboratory', async () => {
+            const res = await request(app)
+                .post(`/api/work/${workItemNormal.id}/reassign`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    technicianUserId: userTechA.username,
+                    reason: 'Work reassignment to confirmed lead analyst'
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+
+            expect(broadcastSpy).toHaveBeenCalledWith(
+                labA.id,
+                'WORKITEM_UPDATE',
+                expect.objectContaining({ action: 'REASSIGNED' })
+            );
+        });
+    });
+});

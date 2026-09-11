@@ -3,7 +3,7 @@
 const prisma = require('../prisma');
 const CommandReceiptService = require('./commandReceiptService');
 const OperationalConfirmationService = require('./operationalConfirmationService');
-const { parseDeterminationValue, validateValue, validateTexture } = require('./workbenchValidationService');
+const { parseDeterminationValue, validateValue, validateTexture, validateTextureFractions, validateNumericMethod } = require('./workbenchValidationService');
 const { canRecord } = require('./workEligibility');
 const { hasPermission } = require('../config/roles');
 const { randomUUID } = require('crypto');
@@ -32,8 +32,8 @@ class SyncService {
 
         for (const op of operations) {
             const opId = op.operationId || op.id;
-            const workItemId = op.target?.workItemId || op.workItemId;
-            const targetResource = workItemId || op.target?.sampleId || opId;
+            const workItemId = (typeof op.target === 'string' ? op.target : op.target?.workItemId) || op.workItemId;
+            const targetResource = workItemId || (typeof op.target === 'object' ? op.target?.sampleId : null) || opId;
 
             try {
                 // 1. Idempotency & Deduplication Check
@@ -122,13 +122,25 @@ class SyncService {
                         continue;
                     }
 
-                    // Technician assignment check
-                    if (user.role === 'LAB_TECHNICIAN' && item.assignedTo && item.assignedTo !== user.username) {
+                    // Check eligibility using canonical workEligibility.canRecord
+                    const eligibility = canRecord(item, item.sample, user);
+                    if (!eligibility.allowed) {
+                        let code = 'WORK_NOT_ELIGIBLE';
+                        const firstBlocker = eligibility.reason || (eligibility.blockers && eligibility.blockers[0]) || '';
+                        if (firstBlocker.includes('NOT_ASSIGNED_TO_ACTOR')) {
+                            code = 'NOT_ASSIGNED_TECHNICIAN';
+                        } else if (firstBlocker.includes('DRYING_PENDING') || firstBlocker.includes('PREPARATION_PENDING') || firstBlocker.includes('NOT_RECEIVED')) {
+                            code = 'PREREQUISITE_INCOMPLETE';
+                        } else if (firstBlocker.includes('ALREADY_RECORDED') || firstBlocker.includes('SUBMITTED') || firstBlocker.includes('ACCEPTED') || firstBlocker.includes('OMITTED')) {
+                            code = 'TERMINAL_STATE_REJECTED';
+                        } else if (firstBlocker.includes('SAMPLE_REJECTED') || firstBlocker.includes('SAMPLE_CLOSED')) {
+                            code = 'SAMPLE_STATE_INVALID';
+                        }
                         receipts.push({
                             operationId: opId,
                             status: 'REJECTED',
-                            code: 'NOT_ASSIGNED_TECHNICIAN',
-                            reason: 'Cannot save draft on work assigned to another technician'
+                            code,
+                            reason: firstBlocker
                         });
                         continue;
                     }
@@ -167,6 +179,14 @@ class SyncService {
                             draftRecord = await tx.workItem.update({
                                 where: { id: workItemId },
                                 data: { updatedAt: new Date() }
+                            });
+                        }
+
+                        // Advance work item status from ASSIGNED to IN_PROGRESS on first draft save
+                        if (item.status === 'ASSIGNED') {
+                            await tx.workItem.update({
+                                where: { id: workItemId },
+                                data: { status: 'IN_PROGRESS', updatedAt: new Date() }
                             });
                         }
 
@@ -228,11 +248,23 @@ class SyncService {
                         continue;
                     }
 
-                    // 2. Reject scalar values for spectral analyses
+                    // 2. Reject scalar values for spectral analyses (standard and custom methods)
                     const isSpectral = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis) ||
                         (item.analysis && item.analysis.startsWith('SPEC_')) ||
                         item.category === 'Spectroscopy';
-                    if (isSpectral) {
+                    let isCustomSpectral = false;
+                    if (item.methodologyId) {
+                        const method = await prisma.methodology.findUnique({ where: { id: item.methodologyId } });
+                        if (method && (
+                            method.analysisCode?.startsWith('SPEC_') ||
+                            method.name?.toLowerCase().includes('spectr') ||
+                            method.standard?.toLowerCase().includes('spectr') ||
+                            method.standard?.toLowerCase().includes('mir')
+                        )) {
+                            isCustomSpectral = true;
+                        }
+                    }
+                    if (isSpectral || isCustomSpectral) {
                         receipts.push({
                             operationId: opId,
                             status: 'REJECTED',
@@ -240,6 +272,34 @@ class SyncService {
                             reason: 'Mid-Infrared and NIR spectroscopy require spectrum upload or scan linkage; scalar value entry is not permitted'
                         });
                         continue;
+                    }
+
+                    // 3. Grouped soil texture validation
+                    const isTextureTask = item.analysis === 'TEXTURE' || ['SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum'].includes(item.analysis);
+                    const textureFractions = op.payload?.values || (op.payload?.sand !== undefined ? { sand: op.payload.sand, silt: op.payload.silt, clay: op.payload.clay } : null);
+                    let textVal = null;
+                    if (isTextureTask && textureFractions) {
+                        textVal = validateTextureFractions(textureFractions);
+                        if (!textVal.isValid) {
+                            if (textVal.flags?.includes('INVALID_FORMAT') || textVal.flags?.includes('INCOMPLETE_FRACTIONS')) {
+                                receipts.push({
+                                    operationId: opId,
+                                    status: 'REJECTED',
+                                    code: textVal.flags?.includes('INVALID_FORMAT') ? 'INVALID_FORMAT' : 'INCOMPLETE_FRACTIONS',
+                                    reason: textVal.error || 'All three fractions (Sand, Silt, Clay) are required as valid percentages.'
+                                });
+                                continue;
+                            }
+                            if (!op.payload?.overrideReason || user.role === 'LAB_TECHNICIAN') {
+                                receipts.push({
+                                    operationId: opId,
+                                    status: 'REJECTED',
+                                    code: 'TEXTURE_CLOSURE_FAILED',
+                                    reason: textVal.error || 'Texture closure check failed. All three fractions required and must sum to 100% within tolerance.'
+                                });
+                                continue;
+                            }
+                        }
                     }
 
                     // Parity with canonical workEligibility.canRecord service
@@ -289,7 +349,7 @@ class SyncService {
                     }
 
                     // Validate result value
-                    const rawVal = op.payload?.value !== undefined ? op.payload.value : op.payload?.result;
+                    const rawVal = isTextureTask && textVal ? (textVal.className || 'Loam') : (op.payload?.value !== undefined ? op.payload.value : op.payload?.result);
                     if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
                         receipts.push({
                             operationId: opId,
@@ -301,8 +361,14 @@ class SyncService {
                     }
 
                     const parsed = parseDeterminationValue(rawVal);
-                    if (!parsed.isValid && !parsed.isCensored) {
-                        throw new Error(`Invalid determination value: ${rawVal}`);
+                    if (!isTextureTask && !parsed.isValid && !parsed.isCensored) {
+                        receipts.push({
+                            operationId: opId,
+                            status: 'REJECTED',
+                            code: 'INVALID_FORMAT',
+                            reason: `Invalid determination value: ${rawVal}`
+                        });
+                        continue;
                     }
 
                     let savedReceipt = null;
@@ -313,45 +379,103 @@ class SyncService {
 
                     // Execute atomic record transaction
                     await prisma.$transaction(async (tx) => {
-                        // Supersede prior active result for this sample & parameter for this replicateNo
-                        await tx.result.updateMany({
-                            where: {
-                                sampleId: item.sampleId,
-                                param: item.analysis,
-                                replicateNo: repNo,
-                                isCurrent: true
-                            },
-                            data: {
-                                isCurrent: false,
-                                supersededBy: newResultId
-                            }
-                        });
+                        if (isTextureTask && textVal && textVal.isValid && textureFractions) {
+                            const sandNum = Number(String(textureFractions.sand).replace(',', '.'));
+                            const siltNum = Number(String(textureFractions.silt).replace(',', '.'));
+                            const clayNum = Number(String(textureFractions.clay).replace(',', '.'));
+                            const textClassName = textVal.className || 'Loam';
 
-                        // Create canonical Result record
-                        await tx.result.create({
-                            data: {
-                                id: newResultId,
-                                sampleId: item.sampleId,
-                                param: item.analysis,
-                                value: String(rawVal),
-                                numericValue: parsed.normalizedValue !== undefined ? parsed.normalizedValue : null,
-                                unit: op.payload?.unit || null,
-                                flags: JSON.stringify(op.payload?.flags || []),
-                                isValid: parsed.isValid,
-                                censoring: parsed.censoring || 'NONE',
-                                basis: validBasis,
-                                provenance: op.payload?.provenance || 'MEASURED',
-                                methodologyId: item.methodologyId || null,
-                                replicateNo: repNo,
-                                isCurrent: true,
-                                enteredBy: user.username,
-                                analysedAt: now,
-                                equipmentId: op.payload?.equipmentId || item.equipmentId || null,
-                                batchId: item.batchId || null,
-                                createdAt: now,
-                                updatedAt: now
+                            const textResId = `res-${Date.now()}-text-${Math.random().toString(36).substr(2, 5)}`;
+                            const sandResId = `res-${Date.now()}-sand-${Math.random().toString(36).substr(2, 5)}`;
+                            const siltResId = `res-${Date.now()}-silt-${Math.random().toString(36).substr(2, 5)}`;
+                            const clayResId = `res-${Date.now()}-clay-${Math.random().toString(36).substr(2, 5)}`;
+
+                            await tx.result.updateMany({
+                                where: {
+                                    sampleId: item.sampleId,
+                                    param: { in: ['SAND', 'SILT', 'CLAY', 'TEXTURE', item.analysis] },
+                                    replicateNo: repNo,
+                                    isCurrent: true
+                                },
+                                data: {
+                                    isCurrent: false,
+                                    supersededBy: textResId
+                                }
+                            });
+
+                            const fractions = [
+                                { id: sandResId, param: 'SAND', valStr: String(sandNum), num: sandNum, unit: '%' },
+                                { id: siltResId, param: 'SILT', valStr: String(siltNum), num: siltNum, unit: '%' },
+                                { id: clayResId, param: 'CLAY', valStr: String(clayNum), num: clayNum, unit: '%' },
+                                { id: textResId, param: item.analysis, valStr: textClassName, num: null, unit: null }
+                            ];
+
+                            for (const f of fractions) {
+                                await tx.result.create({
+                                    data: {
+                                        id: f.id,
+                                        sampleId: item.sampleId,
+                                        param: f.param,
+                                        value: f.valStr,
+                                        numericValue: f.num,
+                                        unit: f.unit,
+                                        flags: JSON.stringify(op.payload?.flags || []),
+                                        isValid: true,
+                                        censoring: 'NONE',
+                                        basis: validBasis,
+                                        provenance: op.payload?.provenance || 'MEASURED',
+                                        methodologyId: item.methodologyId || null,
+                                        replicateNo: repNo,
+                                        isCurrent: true,
+                                        enteredBy: user.username,
+                                        analysedAt: now,
+                                        equipmentId: op.payload?.equipmentId || item.equipmentId || null,
+                                        batchId: item.batchId || null,
+                                        createdAt: now,
+                                        updatedAt: now
+                                    }
+                                });
                             }
-                        });
+                        } else {
+                            // Single parameter determination
+                            await tx.result.updateMany({
+                                where: {
+                                    sampleId: item.sampleId,
+                                    param: item.analysis,
+                                    replicateNo: repNo,
+                                    isCurrent: true
+                                },
+                                data: {
+                                    isCurrent: false,
+                                    supersededBy: newResultId
+                                }
+                            });
+
+                            await tx.result.create({
+                                data: {
+                                    id: newResultId,
+                                    sampleId: item.sampleId,
+                                    param: item.analysis,
+                                    value: String(rawVal),
+                                    numericValue: parsed.normalizedValue !== undefined ? parsed.normalizedValue : null,
+                                    unit: op.payload?.unit || null,
+                                    flags: JSON.stringify(op.payload?.flags || []),
+                                    isValid: parsed.isValid,
+                                    censoring: parsed.censoring || 'NONE',
+                                    basis: validBasis,
+                                    provenance: op.payload?.provenance || 'MEASURED',
+                                    methodologyId: item.methodologyId || null,
+                                    replicateNo: repNo,
+                                    isCurrent: true,
+                                    enteredBy: user.username,
+                                    analysedAt: now,
+                                    equipmentId: op.payload?.equipmentId || item.equipmentId || null,
+                                    batchId: item.batchId || null,
+                                    createdAt: now,
+                                    updatedAt: now
+                                }
+                            });
+                        }
 
                         // Create WorkAttempt record
                         const attemptId = `att-${item.id}-${Date.now()}`;
@@ -519,6 +643,13 @@ class SyncService {
             serverTimestamp,
             receipts
         };
+    }
+
+    /**
+     * Helper to process an array of operations directly
+     */
+    static async applySyncOperations(user, operations, deviceId = 'test-device') {
+        return this.processSyncBatch(user, { protocolVersion: 1, deviceId, operations });
     }
 }
 

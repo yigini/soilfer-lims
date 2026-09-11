@@ -353,14 +353,16 @@
     "WAIVED": "Waived"
   },
   "roles": {
-    "SUPER_ADMIN": "Super Admin",
-    "COUNTRY_ADMIN": "Country Admin",
-    "LAB_MANAGER": "Lab Manager",
-    "SAMPLE_RECEPTION": "Sample Reception",
-    "LAB_TECHNICIAN": "Lab Technician",
+    "SUPER_ADMIN": "Super Administrator",
+    "COUNTRY_ADMIN": "Country Administrator",
+    "LAB_MANAGER": "Laboratory Manager",
+    "SAMPLE_RECEPTION": "Sample Reception Officer",
+    "LAB_TECHNICIAN": "Laboratory Technician",
     "PROJECT_MANAGER": "Project Manager",
-    "SURVEYOR": "Surveyor",
-    "VIEWER": "Viewer"
+    "SURVEYOR": "Field Surveyor",
+    "VIEWER": "Read-Only Viewer",
+    "AUDIT_USER": "Quality & Audit Officer",
+    "MASTER_USER": "National Lead / Master User"
   },
   "forms": {
     "required": "This field is required",
@@ -930,6 +932,87 @@
       "copyDraft": "Copy draft to clipboard",
       "clientOpenedNotice": "Email client draft opened. Please verify and send the email from your application.",
       "failedOpenNotice": "Could not automatically launch your email client. You can copy the recipient and body above to send manually."
+    }
+  },
+  "lifecycle": {
+    "title": "Laboratory Operational Lifecycle",
+    "status": {
+      "SETUP": "Setup & Configuration",
+      "ACTIVE": "Operational (Active)",
+      "PAUSED": "Temporarily Paused",
+      "RETIRED": "Decommissioned (Retired)"
+    },
+    "preview": {
+      "title": "Laboratory Lifecycle Transition Preview",
+      "currentStatus": "Current Status",
+      "targetStatus": "Target Status",
+      "openAssignments": "Active Work Assignments",
+      "pendingSamples": "In-Flight Samples",
+      "activeStaff": "Active Staff Roster",
+      "warnings": "Operational Warnings"
+    },
+    "actions": {
+      "pause": "Pause Laboratory Operations",
+      "resume": "Resume Laboratory Operations",
+      "retire": "Decommission Laboratory",
+      "confirm": "Confirm & Execute Transition",
+      "reasonRequired": "A documented operational justification is required"
+    }
+  },
+  "labManagement": {
+    "title": "Laboratory Workspace",
+    "subtitle": "Manage laboratory facilities, staff authorizations, and operational lifecycle.",
+    "tabs": {
+      "overview": "Overview",
+      "people": "Staff & Authorizations",
+      "equipment": "Equipment & Instruments",
+      "inventory": "Inventory & Reagents",
+      "projects": "Associated Projects",
+      "settings": "Facility Settings"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "retired": "Retired"
+    },
+    "onboard": {
+      "button": "Onboard Laboratory",
+      "title": "Onboard New Laboratory",
+      "success": "Laboratory onboarded in SETUP state. Configure settings and assign staff to activate."
+    },
+    "attention": {
+      "title": "Configuration Items Needing Attention"
+    }
+  },
+  "staffManagement": {
+    "invite": {
+      "button": "Invite Team Member",
+      "title": "Named Staff Onboarding",
+      "description": "Generate a secure, single-use activation link. No plaintext or default passwords are created.",
+      "fullName": "Full Name",
+      "email": "Verified Work Email",
+      "role": "System Role",
+      "copyLink": "Copy Activation Link",
+      "copied": "Copied!",
+      "expiresNotice": "Link expires in 24 hours. The recipient creates their own password upon activation."
+    },
+    "review": {
+      "title": "Pre-Change Access Review",
+      "currentVsProposed": "Current vs. Proposed Comparison",
+      "unfinishedTasks": "Unfinished Sample Determinations",
+      "activeSessions": "Active Sessions Invalidation",
+      "confirmApply": "Confirm and Apply Changes"
+    },
+    "suspend": {
+      "title": "Emergency Staff Suspension",
+      "warning": "Immediate Session Revocation across HTTP, WebSocket, and API channels. Open assignments remain preserved.",
+      "reason": "Suspension Reason / Incident Reference",
+      "confirm": "Suspend Account Immediately"
+    },
+    "recovery": {
+      "title": "Credential Recovery Link",
+      "description": "Issues a single-use 1-hour password recovery link. The previous session is invalidated immediately.",
+      "copyLink": "Copy Recovery Link"
     }
   }
 }

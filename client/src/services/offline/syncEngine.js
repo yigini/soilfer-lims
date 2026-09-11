@@ -64,16 +64,31 @@ export async function recordSyncOperation({
     schemaRevision = '1.0.0',
     payload = {},
     attachmentIds = [],
-    packId = null
+    packId = null,
+    userId = null,
+    labId = null
 }) {
     const deviceId = await ensureDeviceId();
     const operationId = 'op_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
     const payloadHash = await computePayloadHash(payload);
 
+    // Resolve user and lab context from session if not explicitly provided
+    let opUser = userId;
+    let opLab = labId;
+    if (!opUser && typeof localStorage !== 'undefined') {
+        try {
+            const stored = JSON.parse(localStorage.getItem('user') || '{}');
+            opUser = stored.username || stored.id || null;
+            opLab = opLab || stored.labId || null;
+        } catch {}
+    }
+
     const operation = {
         operationId,
         deviceId,
         packId,
+        userId: opUser,
+        labId: opLab,
         type,
         target,
         baseVersion,
@@ -111,7 +126,16 @@ export async function triggerSync(authToken = null) {
         return { status: 'OFFLINE' };
     }
 
-    const pending = await getPendingOutboxOperations();
+    // Resolve current authenticated user to prevent cross-account outbox replay (IR-08)
+    let currentUserId = null;
+    if (typeof localStorage !== 'undefined') {
+        try {
+            const stored = JSON.parse(localStorage.getItem('user') || '{}');
+            currentUserId = stored.username || stored.id || null;
+        } catch {}
+    }
+
+    const pending = await getPendingOutboxOperations(currentUserId);
     if (!pending || pending.length === 0) {
         return { status: 'UP_TO_DATE', count: 0 };
     }

@@ -147,7 +147,7 @@ export async function queueOutboxOperation(op) {
     return op;
 }
 
-export async function getPendingOutboxOperations() {
+export async function getPendingOutboxOperations(forUserId = null) {
     return withStore('outbox', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const request = store.getAll();
@@ -155,7 +155,11 @@ export async function getPendingOutboxOperations() {
                 const all = request.result || [];
                 // Sort by capturedAtLocal ascending (causal sequence)
                 all.sort((a, b) => new Date(a.capturedAtLocal) - new Date(b.capturedAtLocal));
-                resolve(all.filter(o => o.status === 'PENDING' || o.status === 'RETRYING'));
+                let pending = all.filter(o => o.status === 'PENDING' || o.status === 'RETRYING');
+                if (forUserId) {
+                    pending = pending.filter(o => o.userId === forUserId);
+                }
+                resolve(pending);
             };
             request.onerror = () => reject(request.error);
         });

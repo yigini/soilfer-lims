@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { X, KeyRound, Copy, CheckCircle2, AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) {
+    const { t } = useLanguage();
+    const modalRef = useFocusTrap(isOpen, onClose);
     const [reason, setReason] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -45,13 +49,21 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden">
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="recovery-link-title"
+                className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden"
+            >
                 <div className="p-6 border-b border-sf-divider flex items-center justify-between">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                            Emergency Account Access
+                            {t('staffManagement.recovery.title', 'Emergency Account Access')}
                         </div>
-                        <h2 className="text-xl font-black text-sf-text">One-Time Recovery Link</h2>
+                        <h2 id="recovery-link-title" className="text-xl font-black text-sf-text">
+                            {t('staffManagement.recovery.title', 'One-Time Recovery Link')}
+                        </h2>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                         <X size={18} />
