@@ -25,7 +25,7 @@ async function runPreflight(customDbPath = null) {
     console.log('[PREFLIGHT] Starting genuinely read-only laboratory governance audit...');
     const startTime = Date.now();
 
-    const dbPath = customDbPath || path.resolve(__dirname, '../prisma/dev.db');
+    const dbPath = customDbPath || process.env.DATABASE_PATH || path.resolve(__dirname, '../prisma/dev.db');
     if (!fs.existsSync(dbPath)) {
         throw new Error(`Database file not found at: ${dbPath}`);
     }

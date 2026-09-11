@@ -16,9 +16,9 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
-async function runRehearsal() {
+async function runRehearsal(customDbPath = null) {
     console.log('[REHEARSAL] Starting disposable migration rehearsal...');
-    const originalDbPath = path.join(__dirname, '../prisma/dev.db');
+    const originalDbPath = customDbPath || process.env.DATABASE_PATH || path.join(__dirname, '../prisma/dev.db');
     const rehearsalDbPath = path.join(__dirname, `../prisma/disposable_rehearsal_${Date.now()}.db`);
     const migrationSqlPath = path.join(__dirname, '../prisma/migrations/20260911130000_add_governance_lifecycle_and_grants/migration.sql');
 

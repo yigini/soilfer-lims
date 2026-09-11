@@ -10,48 +10,54 @@ describe('Help Publication & Governance Security Contract Tests', () => {
     let technicianToken;
     let testArticleId = 'test-gov-article';
 
+    let testUsers = [];
+    const SUFFIX = 'HELPGOV-' + Date.now();
+
     beforeAll(async () => {
-        // Find or create test users
-        let superAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });
-        if (!superAdmin) {
-            superAdmin = await prisma.user.create({
-                data: {
-                    username: 'test_super_admin',
-                    role: 'SUPER_ADMIN',
-                    password: 'hash',
-                    email: 'admin@example.com'
-                }
-            });
-        }
-        superAdminToken = jwt.sign({ id: superAdmin.id, role: 'SUPER_ADMIN' }, JWT_SECRET);
+        // Create dedicated isolated test users with tokenVersion: 1
+        const superAdmin = await prisma.user.create({
+            data: {
+                id: 'usr-sa-' + SUFFIX,
+                username: 'sa_' + SUFFIX,
+                role: 'SUPER_ADMIN',
+                password: 'hash',
+                email: 'sa_' + SUFFIX + '@example.com',
+                tokenVersion: 1,
+                isActive: true
+            }
+        });
+        testUsers.push(superAdmin.id);
+        superAdminToken = jwt.sign({ id: superAdmin.id, role: 'SUPER_ADMIN', tokenVersion: 1 }, JWT_SECRET);
 
-        let labManager = await prisma.user.findFirst({ where: { role: 'LAB_MANAGER' } });
-        if (!labManager) {
-            labManager = await prisma.user.create({
-                data: {
-                    username: 'test_lab_mgr',
-                    role: 'LAB_MANAGER',
-                    labId: 'lab-1',
-                    password: 'hash',
-                    email: 'mgr@example.com'
-                }
-            });
-        }
-        labManagerToken = jwt.sign({ id: labManager.id, role: 'LAB_MANAGER' }, JWT_SECRET);
+        const labManager = await prisma.user.create({
+            data: {
+                id: 'usr-mgr-' + SUFFIX,
+                username: 'mgr_' + SUFFIX,
+                role: 'LAB_MANAGER',
+                labId: 'lab-1',
+                password: 'hash',
+                email: 'mgr_' + SUFFIX + '@example.com',
+                tokenVersion: 1,
+                isActive: true
+            }
+        });
+        testUsers.push(labManager.id);
+        labManagerToken = jwt.sign({ id: labManager.id, role: 'LAB_MANAGER', tokenVersion: 1 }, JWT_SECRET);
 
-        let tech = await prisma.user.findFirst({ where: { role: 'LAB_TECHNICIAN' } });
-        if (!tech) {
-            tech = await prisma.user.create({
-                data: {
-                    username: 'test_tech',
-                    role: 'LAB_TECHNICIAN',
-                    labId: 'lab-1',
-                    password: 'hash',
-                    email: 'tech@example.com'
-                }
-            });
-        }
-        technicianToken = jwt.sign({ id: tech.id, role: 'LAB_TECHNICIAN' }, JWT_SECRET);
+        const tech = await prisma.user.create({
+            data: {
+                id: 'usr-tech-' + SUFFIX,
+                username: 'tech_' + SUFFIX,
+                role: 'LAB_TECHNICIAN',
+                labId: 'lab-1',
+                password: 'hash',
+                email: 'tech_' + SUFFIX + '@example.com',
+                tokenVersion: 1,
+                isActive: true
+            }
+        });
+        testUsers.push(tech.id);
+        technicianToken = jwt.sign({ id: tech.id, role: 'LAB_TECHNICIAN', tokenVersion: 1 }, JWT_SECRET);
 
         // Clean up any test article
         await prisma.helpPublication.deleteMany({ where: { articleId: testArticleId } });
@@ -79,7 +85,7 @@ describe('Help Publication & Governance Security Contract Tests', () => {
                         sourceLocale: 'en',
                         sourceHash: 'test-hash-1',
                         changeReason: 'Initial test draft',
-                        authorId: 'test_super_admin',
+                        authorId: superAdmin.username,
                         locales: {
                             create: [
                                 { locale: 'en', title: 'Test EN', summary: 'Summary EN', steps: '["Step 1"]', success: 'S', caution: 'C', reviewStatus: 'EDITORIAL_DRAFT' },
@@ -96,6 +102,9 @@ describe('Help Publication & Governance Security Contract Tests', () => {
         await prisma.helpPublication.deleteMany({ where: { articleId: testArticleId } });
         await prisma.helpRevision.deleteMany({ where: { articleId: testArticleId } });
         await prisma.helpArticle.deleteMany({ where: { id: testArticleId } });
+        if (testUsers.length > 0) {
+            await prisma.user.deleteMany({ where: { id: { in: testUsers } } }).catch(() => {});
+        }
     });
 
     test('1. Negative Gate: Publishing unreviewed revision is rejected with 422', async () => {

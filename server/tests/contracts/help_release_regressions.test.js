@@ -1,4 +1,4 @@
-﻿const request = require('supertest');
+const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
@@ -28,7 +28,7 @@ describe('Help Centre Release Regressions & Governance Gates (Finding 1, 3, 4)',
                 }
             });
         }
-        superAdminToken = jwt.sign({ id: superAdmin.id, role: 'SUPER_ADMIN', username: superAdmin.username }, JWT_SECRET);
+        superAdminToken = jwt.sign({ id: superAdmin.id, role: 'SUPER_ADMIN', username: superAdmin.username, tokenVersion: superAdmin.tokenVersion !== undefined ? superAdmin.tokenVersion : 0 }, JWT_SECRET);
 
         let labManager = await prisma.user.findFirst({ where: { role: 'LAB_MANAGER', labId: labA } });
         if (!labManager) {
@@ -43,7 +43,7 @@ describe('Help Centre Release Regressions & Governance Gates (Finding 1, 3, 4)',
                 }
             });
         }
-        labManagerToken = jwt.sign({ id: labManager.id, role: 'LAB_MANAGER', labId: labA, username: labManager.username }, JWT_SECRET);
+        labManagerToken = jwt.sign({ id: labManager.id, role: 'LAB_MANAGER', labId: labA, username: labManager.username, tokenVersion: labManager.tokenVersion !== undefined ? labManager.tokenVersion : 0 }, JWT_SECRET);
 
         let tech = await prisma.user.findFirst({ where: { role: 'LAB_TECHNICIAN', labId: labA } });
         if (!tech) {
@@ -58,7 +58,7 @@ describe('Help Centre Release Regressions & Governance Gates (Finding 1, 3, 4)',
                 }
             });
         }
-        technicianToken = jwt.sign({ id: tech.id, role: 'LAB_TECHNICIAN', labId: labA, username: tech.username }, JWT_SECRET);
+        technicianToken = jwt.sign({ id: tech.id, role: 'LAB_TECHNICIAN', labId: labA, username: tech.username, tokenVersion: tech.tokenVersion !== undefined ? tech.tokenVersion : 0 }, JWT_SECRET);
 
         let viewer = await prisma.user.findFirst({ where: { role: 'VIEWER' } });
         if (!viewer) {
@@ -73,7 +73,7 @@ describe('Help Centre Release Regressions & Governance Gates (Finding 1, 3, 4)',
                 }
             });
         }
-        viewerToken = jwt.sign({ id: viewer.id, role: 'VIEWER', labId: labA, username: viewer.username }, JWT_SECRET);
+        viewerToken = jwt.sign({ id: viewer.id, role: 'VIEWER', labId: labA, username: viewer.username, tokenVersion: viewer.tokenVersion !== undefined ? viewer.tokenVersion : 0 }, JWT_SECRET);
 
         await prisma.helpPublication.deleteMany({ where: { articleId: testArticleId } });
         await prisma.helpLabNote.deleteMany({ where: { articleId: testArticleId } });
