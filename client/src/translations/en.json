@@ -711,7 +711,9 @@
       "viewReport": "Report →",
       "viewWork": "Workbench →",
       "showingFirst100": "Showing first 100 matching samples. Use search or the full sample list for more.",
-      "canonicalNotice": "Drying and preparation completion, analytical measurements, spectral file uploads and approval take place in the workbench. This page displays their authoritative coordinated state."
+      "canonicalNotice": "Drying and preparation completion, analytical measurements, spectral file uploads and approval take place in the workbench. This page displays their authoritative coordinated state.",
+      "showingRange": "Showing {{start}} to {{end}} of {{total}} samples",
+      "perPage": "Rows:"
     },
     "plan": {
       "effectivePlan": "Effective plan",
@@ -741,7 +743,18 @@
       "gatesDesc": "Operational preparation gates are managed through task checklists, not as synthetic analytical values. Requirements are driven by the master catalogue.",
       "availabilityTitle": "Method availability by laboratory",
       "availabilityDesc": "Participating servicing laboratories must have validated instrumentation and reagent stock for selected methods before receiving shipments.",
-      "viewCatalogueLink": "View catalogue definitions →"
+      "viewCatalogueLink": "View catalogue definitions →",
+      "noBundleTitle": "No analysis bundle assigned",
+      "lastSynchronized": "Last updated: ",
+      "catalogueLoadErrorTitle": "Failed to load analysis catalogue definitions",
+      "catalogueLoadErrorDesc": "The system could not retrieve master methods or packages from the server: {{error}}",
+      "emptyHeading": "No default analysis bundle configured",
+      "emptyDesc": "This project does not define an automatic analysis package. Incoming samples will receive tests assigned individually or specified upon physical receipt.",
+      "openCatalogue": "Configure packages in catalogue →",
+      "bundleUnresolvedTitle": "Bundle assigned but not defined in catalogue",
+      "bundleUnresolvedDesc": "Project specifies bundle \"{{bundleName}}\", but no active parameter list was found in the laboratory analysis catalogue.",
+      "createPackageInCatalogue": "Define this package in catalogue →",
+      "manageCatalogue": "Manage catalogue definitions"
     },
     "team": {
       "scopedNotice": "You are viewing your laboratory’s participation. Other laboratories’ staff and internal sample details are isolated.",
@@ -798,7 +811,10 @@
       "title": "Project activity & audit history",
       "subtitle": "Traceable, permanent domain log of all governance, admission, and lifecycle actions.",
       "immutableBadge": "Immutable log",
-      "openFullAudit": "Open full authorized audit log →"
+      "openFullAudit": "Open full authorized audit log →",
+      "accessDenied": "Access denied: You do not have permission to view activity logs for this project.",
+      "empty": "No activity or governance events recorded for this project yet.",
+      "fetchError": "Failed to load activity logs"
     },
     "import": {
       "modalTitle": "Preview expected sample manifest",
@@ -854,6 +870,30 @@
     },
     "modals": {
       "reasonRequired": "A reason is required to modify admissions status."
+    },
+    "samples": {
+      "title": "Samples & arrivals",
+      "scopedCount": "Only samples in your authorized lab scope · {{count}} matching samples",
+      "wholeCount": "Authorized project samples · {{count}} matching samples",
+      "openSampleList": "Open full sample list →",
+      "stageLabel": "Stage:",
+      "allStages": "All stages ({{count}})",
+      "searchPlaceholder": "Find a field or laboratory ID…",
+      "sampleIdHeader": "Sample Identifier",
+      "labHeader": "Assigned Lab",
+      "statusHeader": "Current Stage",
+      "arrivalHeader": "Arrival / Date",
+      "actionHeader": "Action",
+      "noSamplesFound": "No samples matching the selected filters.",
+      "notAssignedYet": "Lab accession pending",
+      "notReceived": "Not received yet",
+      "viewInReception": "Reception →",
+      "viewReport": "Report →",
+      "viewWork": "Workbench →",
+      "showingFirst100": "Showing first 100 matching samples. Use search or the full sample list for more.",
+      "canonicalNotice": "Drying and preparation completion, analytical measurements, spectral file uploads and approval take place in the workbench. This page displays their authoritative coordinated state.",
+      "showingRange": "Showing {{start}} to {{end}} of {{total}} samples",
+      "perPage": "Rows:"
     }
   },
   "users": {

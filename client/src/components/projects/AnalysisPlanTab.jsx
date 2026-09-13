@@ -21,27 +21,38 @@ export default function AnalysisPlanTab({
     const bundleName = project?.defaultAnalysisBundle;
     const isManager = ['SUPER_ADMIN', 'ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'PROJECT_MANAGER'].includes(userRole);
 
-    useEffect(() => {
-        let isMounted = true;
+    const loadPlanData = React.useCallback(async () => {
         setLoading(true);
         setFetchError(null);
 
-        Promise.allSettled([
-            axios.get('/api/config/groups'),
-            axios.get('/api/config/analyses'),
-            axios.get('/api/config/gates')
-        ]).then(([groupsRes, analysesRes, gatesRes]) => {
-            if (!isMounted) return;
+        try {
+            const [groupsRes, analysesRes, gatesRes] = await Promise.allSettled([
+                axios.get('/api/config/groups'),
+                axios.get('/api/config/analyses'),
+                axios.get('/api/config/gates')
+            ]);
 
-            const allGroups = groupsRes.status === 'fulfilled' && Array.isArray(groupsRes.value.data)
-                ? groupsRes.value.data
-                : [];
-            const allAnalyses = analysesRes.status === 'fulfilled' && Array.isArray(analysesRes.value.data)
-                ? analysesRes.value.data
-                : [];
-            const allGates = gatesRes.status === 'fulfilled' && Array.isArray(gatesRes.value.data)
-                ? gatesRes.value.data
-                : [];
+            const failedEndpoints = [];
+            if (groupsRes.status === 'rejected') {
+                failedEndpoints.push(`Analysis packages (${groupsRes.reason?.response?.status || groupsRes.reason?.message || 'Network error'})`);
+            }
+            if (analysesRes.status === 'rejected') {
+                failedEndpoints.push(`Methods catalogue (${analysesRes.reason?.response?.status || analysesRes.reason?.message || 'Network error'})`);
+            }
+
+            if (failedEndpoints.length > 0) {
+                setFetchError(failedEndpoints.join('; '));
+                setBundleGroup(null);
+                setResolvedAnalyses([]);
+                if (gatesRes.status === 'fulfilled' && Array.isArray(gatesRes.value?.data)) {
+                    setGates(gatesRes.value.data);
+                }
+                return;
+            }
+
+            const allGroups = Array.isArray(groupsRes.value?.data) ? groupsRes.value.data : [];
+            const allAnalyses = Array.isArray(analysesRes.value?.data) ? analysesRes.value.data : [];
+            const allGates = gatesRes.status === 'fulfilled' && Array.isArray(gatesRes.value?.data) ? gatesRes.value.data : [];
 
             setGates(allGates);
 
@@ -74,20 +85,16 @@ export default function AnalysisPlanTab({
                 setBundleGroup(null);
                 setResolvedAnalyses([]);
             }
-        }).catch(err => {
-            if (isMounted) {
-                setFetchError(err.message || 'Failed to load catalogue');
-            }
-        }).finally(() => {
-            if (isMounted) {
-                setLoading(false);
-            }
-        });
-
-        return () => {
-            isMounted = false;
-        };
+        } catch (err) {
+            setFetchError(err.message || 'Failed to load catalogue');
+        } finally {
+            setLoading(false);
+        }
     }, [bundleName]);
+
+    useEffect(() => {
+        loadPlanData();
+    }, [loadPlanData]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -118,6 +125,29 @@ export default function AnalysisPlanTab({
                     {loading ? (
                         <div className="py-12 text-center text-xs text-sf-muted">
                             {t('common.loading', 'Loading analytical plan definitions…')}
+                        </div>
+                    ) : fetchError ? (
+                        /* Explicit Error State: Catalogue endpoints failed */
+                        <div className="p-6 rounded-xl border border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 space-y-3">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+                                <div className="space-y-1">
+                                    <h3 className="text-sm font-bold text-red-900 dark:text-red-200">
+                                        {t('projects.plan.catalogueLoadErrorTitle', 'Failed to load analysis catalogue definitions')}
+                                    </h3>
+                                    <p className="text-xs text-red-700 dark:text-red-300">
+                                        {t('projects.plan.catalogueLoadErrorDesc', 'The system could not retrieve master methods or packages from the server: {{error}}', { error: fetchError })}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="pt-1">
+                                <button
+                                    onClick={loadPlanData}
+                                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-sf-surface hover:bg-red-100 dark:hover:bg-red-950/50 text-red-800 dark:text-red-200 transition-colors"
+                                >
+                                    {t('common.retry', 'Retry')}
+                                </button>
+                            </div>
                         </div>
                     ) : !bundleName ? (
                         /* Honest Empty State: No Bundle Configured */

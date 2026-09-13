@@ -711,7 +711,9 @@
       "viewReport": "Informe →",
       "viewWork": "Mesa de trabajo →",
       "showingFirst100": "Mostrando las primeras 100 muestras coincidentes.",
-      "canonicalNotice": "La preparación, mediciones analíticas y aprobación se realizan en la mesa de trabajo. Esta página muestra su estado coordinado fidedigno."
+      "canonicalNotice": "La preparación, mediciones analíticas y aprobación se realizan en la mesa de trabajo. Esta página muestra su estado coordinado fidedigno.",
+      "showingRange": "Mostrando {{start}} a {{end}} de {{total}} muestras",
+      "perPage": "Filas:"
     },
     "plan": {
       "effectivePlan": "Plan vigente",
@@ -741,7 +743,18 @@
       "gatesDesc": "Las etapas preparatorias se gestionan mediante listas de control operativas, no como valores analíticos numéricos sintéticos.",
       "availabilityTitle": "Disponibilidad de métodos por laboratorio",
       "availabilityDesc": "Los laboratorios de servicio participantes deben contar con instrumental y reactivos validados antes de recibir lotes.",
-      "viewCatalogueLink": "Ver definiciones del catálogo →"
+      "viewCatalogueLink": "Ver definiciones del catálogo →",
+      "noBundleTitle": "Sin paquete de análisis asignado",
+      "lastSynchronized": "Última actualización: ",
+      "catalogueLoadErrorTitle": "Error al cargar definiciones del catálogo de análisis",
+      "catalogueLoadErrorDesc": "El sistema no pudo obtener los métodos o paquetes maestros del servidor: {{error}}",
+      "emptyHeading": "No hay un paquete de análisis predeterminado configurado",
+      "emptyDesc": "Este proyecto no define un paquete automático. Las muestras entrantes recibirán determinaciones asignadas individualmente o al recibo físico.",
+      "openCatalogue": "Configurar paquetes en el catálogo →",
+      "bundleUnresolvedTitle": "Paquete asignado pero no definido en el catálogo",
+      "bundleUnresolvedDesc": "El proyecto especifica el paquete \"{{bundleName}}\", pero no se encontró una lista activa en el catálogo.",
+      "createPackageInCatalogue": "Definir este paquete en el catálogo →",
+      "manageCatalogue": "Gestionar definiciones del catálogo"
     },
     "team": {
       "scopedNotice": "Visualiza la participación de su laboratorio. El personal e información de otros laboratorios permanecen aislados.",
@@ -798,7 +811,10 @@
       "title": "Actividad del proyecto e historial de auditoría",
       "subtitle": "Registro permanente y trazable de todas las acciones de gobernanza, admisión y ciclo de vida.",
       "immutableBadge": "Registro inmutable",
-      "openFullAudit": "Abrir registro de auditoría completo →"
+      "openFullAudit": "Abrir registro de auditoría completo →",
+      "accessDenied": "Acceso denegado: No tiene permisos para ver el historial de actividad de este proyecto.",
+      "empty": "No se han registrado eventos de actividad o gobernanza para este proyecto aún.",
+      "fetchError": "Error al cargar el registro de actividad"
     },
     "import": {
       "modalTitle": "Previsualizar manifiesto de muestras previstas",
@@ -854,6 +870,30 @@
     },
     "modals": {
       "reasonRequired": "Es obligatorio indicar un motivo para cambiar el estado de admisiones."
+    },
+    "samples": {
+      "title": "Muestras y arribos",
+      "scopedCount": "Solo muestras de su laboratorio autorizado · {{count}} muestras coincidentes",
+      "wholeCount": "Muestras autorizadas del proyecto · {{count}} muestras coincidentes",
+      "openSampleList": "Abrir lista completa de muestras →",
+      "stageLabel": "Etapa:",
+      "allStages": "Todas las etapas ({{count}})",
+      "searchPlaceholder": "Buscar ID de campo o laboratorio…",
+      "sampleIdHeader": "Identificador de muestra",
+      "labHeader": "Laboratorio asignado",
+      "statusHeader": "Etapa actual",
+      "arrivalHeader": "Recepción / Fecha",
+      "actionHeader": "Acción",
+      "noSamplesFound": "No se encontraron muestras que coincidan con los filtros.",
+      "notAssignedYet": "Número de laboratorio pendiente",
+      "notReceived": "Aún no recibida",
+      "viewInReception": "Recepción →",
+      "viewReport": "Informe →",
+      "viewWork": "Mesa de trabajo →",
+      "showingFirst100": "Mostrando las primeras 100 muestras coincidentes.",
+      "canonicalNotice": "La preparación, mediciones analíticas y aprobación se realizan en la mesa de trabajo. Esta página muestra su estado coordinado fidedigno.",
+      "showingRange": "Mostrando {{start}} a {{end}} de {{total}} muestras",
+      "perPage": "Filas:"
     }
   },
   "users": {

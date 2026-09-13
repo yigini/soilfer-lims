@@ -296,6 +296,36 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
     const removedLabs = currentRelations.servicingLabIds.filter(id => !servicingLabIds.includes(id));
     const addedLabs = servicingLabIds.filter(id => !currentRelations.servicingLabIds.includes(id));
 
+    // Blocker: Cannot remove a servicing laboratory with active or unfinished samples / work
+    if (removedLabs.length > 0) {
+        const terminalStatuses = ['COMPLETED', 'RELEASED', 'ARCHIVED', 'CANCELLED', 'REJECTED', 'DISPOSED', 'FAILED'];
+        const activeCount = await tx.sample.count({
+            where: {
+                AND: [
+                    {
+                        OR: [{ projectId: project.id }, { projectCode: project.code }]
+                    },
+                    {
+                        OR: [
+                            { assignedLab: { in: removedLabs } },
+                            { labId: { in: removedLabs } }
+                        ]
+                    },
+                    {
+                        status: { notIn: terminalStatuses }
+                    }
+                ]
+            }
+        });
+
+        if (activeCount > 0) {
+            const err = new Error(`Cannot remove servicing laboratory with ${activeCount} active or unfinished sample(s). Complete or transfer samples before removing laboratory access.`);
+            err.statusCode = 400;
+            err.code = 'CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK';
+            throw err;
+        }
+    }
+
     // Synchronize ProjectLab junction table
     if (removedLabs.length > 0) {
         await tx.projectLab.deleteMany({
