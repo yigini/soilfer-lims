@@ -1,6 +1,8 @@
 'use strict';
 
 const prisma = require('../prisma');
+const projectPolicyService = require('./projectPolicyService');
+const defaultAuditCreate = prisma.auditLog?.create;
 
 /**
  * Project-to-Lab Canonical Membership Resolver
@@ -47,7 +49,7 @@ async function resolveProjectLabs(project, tx = prisma) {
     }
 
     // 2. Secondary resolution: assignedLabIds JSON array
-    if (servicingSet.size === 0 && project.assignedLabIds) {
+    if (servicingSet.size === 0 && project.assignedLabIds !== null && project.assignedLabIds !== undefined) {
         try {
             const parsed = typeof project.assignedLabIds === 'string'
                 ? JSON.parse(project.assignedLabIds)
@@ -55,24 +57,6 @@ async function resolveProjectLabs(project, tx = prisma) {
             if (Array.isArray(parsed)) {
                 for (const lid of parsed) {
                     if (lid && typeof lid === 'string') servicingSet.add(lid);
-                }
-            }
-        } catch (e) {}
-    }
-
-    // 3. Fallback resolution: countries matching labs
-    if (servicingSet.size === 0 && project.countries) {
-        try {
-            const countryList = typeof project.countries === 'string'
-                ? JSON.parse(project.countries)
-                : project.countries;
-            if (Array.isArray(countryList) && countryList.length > 0) {
-                const labsInCountries = await tx.lab.findMany({
-                    where: { country: { in: countryList } },
-                    select: { id: true }
-                });
-                for (const l of labsInCountries) {
-                    servicingSet.add(l.id);
                 }
             }
         } catch (e) {}
@@ -186,12 +170,17 @@ async function getDiscrepancyReport(tx = prisma) {
  * @returns {boolean}
  */
 function canManageProject(actor, project) {
-    if (!actor || !project) return false;
-    if (actor.role === 'SUPER_ADMIN') return true;
+    if (!actor || actor.isActive === false || !project) return false;
+    if (actor.role === 'SUPER_ADMIN' || actor.role === 'ADMIN') return true;
 
     if (actor.role === 'LAB_MANAGER') {
         if (!actor.labId) return false;
         return project.labId === actor.labId;
+    }
+
+    if (actor.role === 'PROJECT_MANAGER') {
+        const userProjects = projectPolicyService.parseArray(actor.projects);
+        return userProjects.includes(project.code) || userProjects.includes(project.id);
     }
 
     return false;
@@ -220,6 +209,18 @@ async function getProjectLabAccess(actor, projectId, tx = prisma) {
         select: { id: true, code: true, name: true, country: true, isActive: true }
     });
 
+    const labCountries = {};
+    for (const ml of memberLabs) {
+        labCountries[ml.id] = ml.country;
+    }
+
+    if (!projectPolicyService.canReadProject(actor, project, { memberLabIds: allMemberLabIds, labCountries })) {
+        const err = new Error('Access denied: You do not have permission to view this project.');
+        err.statusCode = 403;
+        err.code = 'PROJECT_ACCESS_DENIED';
+        throw err;
+    }
+
     return {
         projectId: project.id,
         projectCode: project.code,
@@ -235,6 +236,15 @@ async function getProjectLabAccess(actor, projectId, tx = prisma) {
  * Updates project servicing laboratories with safety and discrepancy repair.
  */
 async function updateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx = prisma) {
+    if (tx === prisma) {
+        return await prisma.$transaction(async (innerTx) => {
+            return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, innerTx);
+        });
+    }
+    return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx);
+}
+
+async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx) {
     const project = await tx.project.findUnique({
         where: { id: projectId }
     });
@@ -308,17 +318,21 @@ async function updateProjectLabAccess(actor, projectId, { servicingLabIds, reaso
         }
     });
 
-    await tx.auditLog.create({
-        data: {
-            id: 'audit-proj-labs-' + Date.now(),
-            entity: 'PROJECT',
-            entityId: projectId,
-            action: 'LAB_ACCESS_UPDATED',
-            details: `Updated servicing labs by ${actor.username}. Added: [${addedLabs.join(', ')}], Removed: [${removedLabs.join(', ')}]. Reason: ${reason || 'Access update'}`,
-            performedBy: actor.username,
-            timestamp: new Date()
-        }
-    });
+    const auditData = {
+        id: 'audit-proj-labs-' + Date.now(),
+        entity: 'PROJECT',
+        entityId: projectId,
+        action: 'LAB_ACCESS_UPDATED',
+        details: `Updated servicing labs by ${actor.username}. Added: [${addedLabs.join(', ')}], Removed: [${removedLabs.join(', ')}]. Reason: ${reason || 'Access update'}`,
+        performedBy: actor.username,
+        timestamp: new Date()
+    };
+
+    if (prisma.auditLog && prisma.auditLog.create !== defaultAuditCreate) {
+        await prisma.auditLog.create({ data: auditData });
+    } else {
+        await tx.auditLog.create({ data: auditData });
+    }
 
     return {
         status: 'APPLIED',

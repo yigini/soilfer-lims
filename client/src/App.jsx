@@ -31,6 +31,7 @@ import SampleDetail from './pages/SampleDetail';
 
 // Lazy-loaded secondary pages
 const Projects = React.lazy(() => import('./pages/Projects'));
+const ProjectWorkspace = React.lazy(() => import('./pages/ProjectWorkspace'));
 const Inventory = React.lazy(() => import('./pages/Inventory'));
 const Equipment = React.lazy(() => import('./pages/Equipment'));
 const Reception = React.lazy(() => import('./pages/Reception'));
@@ -161,10 +162,12 @@ const Layout = ({ children }) => {
         navItems.push({ icon: Package, label: t('nav.inventory'), path: '/inventory' });
     }
 
-    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
+    if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'AUDIT_USER'].includes(user?.role)) {
         navItems.push({ icon: FileSpreadsheet, label: t('nav.projects'), path: '/projects' });
-        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
+    }
 
+    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
     }
 
     if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role)) {
@@ -359,7 +362,8 @@ function App() {
             <Route path="/inventory" element={<RequireAuth permission="VIEW_INVENTORY"><Inventory /></RequireAuth>} />
             <Route path="/equipment" element={<RequireAuth permission="VIEW_EQUIPMENT"><Equipment /></RequireAuth>} />
             <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
-            <Route path="/projects" element={<RequireAuth permission="MANAGE_PROJECTS"><Projects /></RequireAuth>} />
+            <Route path="/projects" element={<RequireAuth permission="VIEW_PROJECTS"><Projects /></RequireAuth>} />
+            <Route path="/projects/:projectId" element={<RequireAuth permission="VIEW_PROJECTS"><ProjectWorkspace /></RequireAuth>} />
 
             <Route path="/admin" element={<RequireAuth permission="MANAGE_ANALYSES"><AdminPanel /></RequireAuth>} />
             <Route path="/admin/methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />

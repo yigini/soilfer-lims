@@ -1,0 +1,297 @@
+{
+  "auditedAt": "2026-09-13T22:07:00.173Z",
+  "baseline": "aeb62f7fac91412ea23a7c6871f0f7370d656a23",
+  "fixtureDatabase": "C:\\Users\\yigin\\AppData\\Local\\Temp\\codex-project-audit-GngEWl\\fixture.db",
+  "sourceDatabaseHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceDatabaseHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "P01",
+      "case": "Unrelated manager reads foreign project lab-access",
+      "status": 200,
+      "body": {
+        "projectId": "P",
+        "projectCode": "P",
+        "name": "Fixture P",
+        "ownerLabId": "A",
+        "servicingLabIds": [
+          "B"
+        ],
+        "memberLabs": [
+          {
+            "id": "A",
+            "code": "A",
+            "name": "Fixture lab A",
+            "country": "GTM",
+            "isActive": true
+          },
+          {
+            "id": "B",
+            "code": "B",
+            "name": "Fixture lab B",
+            "country": "GTM",
+            "isActive": true
+          }
+        ],
+        "canManage": false
+      }
+    },
+    {
+      "id": "P02",
+      "case": "Servicing manager reads samples from both labs",
+      "status": 200,
+      "body": [
+        {
+          "id": "SA",
+          "originalId": "SA",
+          "status": "EXPECTED",
+          "labId": "ACCESSION-SA",
+          "createdAt": "2026-09-13T22:06:59.582Z"
+        },
+        {
+          "id": "SB",
+          "originalId": "SB",
+          "status": "RELEASED",
+          "labId": "ACCESSION-SB",
+          "createdAt": "2026-09-13T22:06:59.583Z"
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "case": "Same servicing manager stats only count their own lab",
+      "status": 200,
+      "body": {
+        "total": 1,
+        "target": 120,
+        "expected": 0,
+        "received": 0,
+        "processing": 0,
+        "completed": 0,
+        "rejected": 0
+      }
+    },
+    {
+      "id": "P04",
+      "case": "Administrator statistics omit RELEASED from buckets",
+      "status": 200,
+      "body": {
+        "total": 2,
+        "target": 120,
+        "expected": 1,
+        "received": 0,
+        "processing": 0,
+        "completed": 0,
+        "rejected": 0
+      }
+    },
+    {
+      "id": "P05",
+      "case": "Unrelated manager reads foreign project target",
+      "status": 200,
+      "body": {
+        "total": 0,
+        "target": 120,
+        "expected": 0,
+        "received": 0,
+        "processing": 0,
+        "completed": 0,
+        "rejected": 0
+      }
+    },
+    {
+      "id": "P06",
+      "case": "Servicing manager archive returns 500 after persisting COMPLETED despite expected sample",
+      "response": {
+        "status": 500,
+        "body": {
+          "errorCode": "PROJECT_ARCHIVE_ERROR",
+          "errorParams": "Invalid status code: {\"project\":{\"id\":\"P\",\"code\":\"P\",\"name\":\"Fixture P\",\"description\":null,\"notes\":null,\"client\":null,\"startDate\":null,\"deliveryDeadline\":null,\"status\":\"COMPLETED\",\"projectType\":\"OPEN_INTAKE\",\"expectedSampleCount\":120,\"priority\":\"NORMAL\",\"defaultAnalysisBundle\":null,\"labId\":\"A\",\"countries\":null,\"assignedLabIds\":\"[\\\"B\\\"]\",\"createdAt\":\"2026-09-13T22:06:59.573Z\",\"updatedAt\":\"2026-09-13T22:07:00.059Z\"}}. Status code must be an integer.",
+          "error": null,
+          "data": null
+        }
+      },
+      "persistedStatus": "COMPLETED"
+    },
+    {
+      "id": "P07",
+      "case": "Project manager create then cannot update own new project",
+      "create": {
+        "status": 200,
+        "body": {
+          "id": "PM-NEW",
+          "code": "PM-NEW",
+          "name": "PM new",
+          "description": null,
+          "notes": null,
+          "client": null,
+          "startDate": null,
+          "deliveryDeadline": null,
+          "status": "ACTIVE",
+          "projectType": "OPEN_INTAKE",
+          "expectedSampleCount": 0,
+          "priority": "NORMAL",
+          "defaultAnalysisBundle": null,
+          "labId": null,
+          "countries": null,
+          "assignedLabIds": null,
+          "createdAt": "2026-09-13T22:07:00.073Z",
+          "updatedAt": "2026-09-13T22:07:00.073Z"
+        }
+      },
+      "update": {
+        "status": 403,
+        "body": {
+          "error": "PROJECT_UPDATE_FORBIDDEN",
+          "message": "Only the project owner laboratory manager or Super Administrator can modify project metadata."
+        }
+      }
+    },
+    {
+      "id": "P08",
+      "case": "National role creates project owned by foreign-country lab",
+      "status": 200,
+      "body": {
+        "id": "CROSS",
+        "code": "CROSS",
+        "name": "Cross",
+        "description": null,
+        "notes": null,
+        "client": null,
+        "startDate": null,
+        "deliveryDeadline": null,
+        "status": "ACTIVE",
+        "projectType": "OPEN_INTAKE",
+        "expectedSampleCount": 0,
+        "priority": "NORMAL",
+        "defaultAnalysisBundle": null,
+        "labId": "C",
+        "countries": null,
+        "assignedLabIds": null,
+        "createdAt": "2026-09-13T22:07:00.085Z",
+        "updatedAt": "2026-09-13T22:07:00.085Z"
+      }
+    },
+    {
+      "id": "P09",
+      "case": "Duplicate existing sample during creation swallowed",
+      "status": 200,
+      "body": {
+        "id": "DUP",
+        "code": "DUP",
+        "name": "Duplicate",
+        "description": null,
+        "notes": null,
+        "client": null,
+        "startDate": null,
+        "deliveryDeadline": null,
+        "status": "ACTIVE",
+        "projectType": "TEMPLATE_PREDEFINED_IDS",
+        "expectedSampleCount": 0,
+        "priority": "NORMAL",
+        "defaultAnalysisBundle": null,
+        "labId": null,
+        "countries": null,
+        "assignedLabIds": null,
+        "createdAt": "2026-09-13T22:07:00.090Z",
+        "updatedAt": "2026-09-13T22:07:00.090Z"
+      },
+      "actualNewSamples": 0
+    },
+    {
+      "id": "P10",
+      "case": "Removing every lab revives same-country labs via fallback",
+      "write": {
+        "status": 200,
+        "body": {
+          "status": "APPLIED",
+          "projectId": "FALLBACK",
+          "projectCode": "FALLBACK",
+          "ownerLabId": null,
+          "servicingLabIds": [],
+          "addedLabs": [],
+          "removedLabs": [
+            "B"
+          ]
+        }
+      },
+      "resolved": {
+        "ownerLabId": null,
+        "servicingLabIds": [
+          "A",
+          "B"
+        ],
+        "allMemberLabIds": [
+          "A",
+          "B"
+        ]
+      }
+    },
+    {
+      "id": "P11",
+      "case": "Failed audit leaves changed project despite 500",
+      "response": {
+        "status": 500,
+        "body": {
+          "errorCode": "PROJECT_UPDATE_ERROR",
+          "errorParams": "Fixture injected audit failure",
+          "error": null,
+          "data": null
+        }
+      },
+      "persistedName": "Persisted despite 500"
+    },
+    {
+      "id": "P12",
+      "case": "Trash detaches even released sample from project",
+      "sample": {
+        "id": "SB",
+        "status": "RELEASED",
+        "projectId": null,
+        "projectCode": "RESTORE:P"
+      }
+    },
+    {
+      "id": "P13",
+      "case": "Manifest API response puts counts in message instead of data",
+      "status": 200,
+      "body": {
+        "messageCode": "MANIFEST_PROCESSED",
+        "messageParams": "Successfully processed 1 IDs.",
+        "message": {
+          "count": 1,
+          "skipped": 0
+        },
+        "data": null
+      }
+    },
+    {
+      "id": "P14",
+      "case": "Generic update accepts unknown lifecycle state and foreign lab assignment without junction sync",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "BYPASS",
+          "code": "BYPASS",
+          "name": "Fixture BYPASS",
+          "description": null,
+          "notes": null,
+          "client": null,
+          "startDate": null,
+          "deliveryDeadline": null,
+          "status": "MADE_UP_STATUS",
+          "projectType": "OPEN_INTAKE",
+          "expectedSampleCount": 0,
+          "priority": "NORMAL",
+          "defaultAnalysisBundle": null,
+          "labId": "A",
+          "countries": null,
+          "assignedLabIds": "[\"C\"]",
+          "createdAt": "2026-09-13T22:07:00.164Z",
+          "updatedAt": "2026-09-13T22:07:00.168Z"
+        }
+      },
+      "junctions": []
+    }
+  ]
+}
