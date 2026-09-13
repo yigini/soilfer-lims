@@ -218,7 +218,7 @@ function buildProjectSampleScope(actor, project, { authorizedLabIds = null } = {
                 ]
             };
         }
-        return baseQuery;
+        return { id: '__DENIED__' };
     }
 
     if (['LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'SURVEYOR', 'AUDIT_USER', 'EXTERNAL_VIEWER', 'VIEWER'].includes(role)) {

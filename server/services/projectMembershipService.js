@@ -255,7 +255,7 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         throw err;
     }
 
-    if (!canManageProject(actor, project)) {
+    if (!projectPolicyService.canManageProjectAccess(actor, project)) {
         const err = new Error('Only the project owner laboratory manager or Super Administrator may manage servicing laboratories');
         err.statusCode = 403;
         err.code = 'PROJECT_OWNER_REQUIRED';
@@ -269,11 +269,11 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         throw err;
     }
 
-    // Verify all target labs exist
+    // Verify all target labs exist and are active
     if (servicingLabIds.length > 0) {
         const existingLabs = await tx.lab.findMany({
             where: { id: { in: servicingLabIds } },
-            select: { id: true }
+            select: { id: true, isActive: true }
         });
         const existingIds = existingLabs.map(l => l.id);
         const missing = servicingLabIds.filter(id => !existingIds.includes(id));
@@ -281,6 +281,13 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
             const err = new Error(`Laboratories not found: ${missing.join(', ')}`);
             err.statusCode = 404;
             err.code = 'LAB_NOT_FOUND';
+            throw err;
+        }
+        const inactiveLabs = existingLabs.filter(l => !l.isActive).map(l => l.id);
+        if (inactiveLabs.length > 0) {
+            const err = new Error(`Cannot assign inactive laboratories to servicing membership: ${inactiveLabs.join(', ')}`);
+            err.statusCode = 400;
+            err.code = 'INACTIVE_LAB_NOT_ALLOWED';
             throw err;
         }
     }

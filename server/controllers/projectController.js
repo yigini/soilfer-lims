@@ -4,6 +4,60 @@ const projectPolicyService = require('../services/projectPolicyService');
 const projectMembershipService = require('../services/projectMembershipService');
 const defaultAuditCreate = prisma.auditLog?.create;
 
+async function resolveAuthorizedNationalLabIds(user, tx = prisma) {
+    if (!user || !['MASTER_USER', 'COUNTRY_ADMIN'].includes(user.role)) return null;
+    const countryList = projectPolicyService.parseArray(user.countries);
+    if (countryList.length === 0) return [];
+    const labs = await tx.lab.findMany({
+        where: { country: { in: countryList } },
+        select: { id: true }
+    });
+    return labs.map(l => l.id);
+}
+
+async function validateProjectClosure(project, tx = prisma) {
+    const pendingExpected = await tx.sample.count({
+        where: {
+            OR: [{ projectId: project.id }, { projectCode: project.code }],
+            status: { in: ['EXPECTED', 'PENDING_MANIFEST'] }
+        }
+    });
+    if (pendingExpected > 0) {
+        const err = new Error(`Cannot archive or complete project with ${pendingExpected} unaccounted expected sample(s). Reconcile or cancel pending samples before archiving.`);
+        err.statusCode = 422;
+        err.code = 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES';
+        throw err;
+    }
+
+    const activeWork = await tx.sample.count({
+        where: {
+            OR: [{ projectId: project.id }, { projectCode: project.code }],
+            status: {
+                in: [
+                    'DRAFT',
+                    'RECEIVED',
+                    'ACCEPTED',
+                    'LAB_ID_ASSIGNED',
+                    'PROCESSING',
+                    'ANALYZING',
+                    'IN_PROGRESS',
+                    'SUBMITTED',
+                    'SUBMITTED_FULL',
+                    'SUBMITTED_PARTIAL',
+                    'PENDING_REVIEW',
+                    'APPROVED'
+                ]
+            }
+        }
+    });
+    if (activeWork > 0) {
+        const err = new Error(`Cannot archive or complete project with ${activeWork} sample(s) undergoing active analytical work or pending review. Complete or release all work before archiving.`);
+        err.statusCode = 422;
+        err.code = 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK';
+        throw err;
+    }
+}
+
 exports.getProjects = async (req, res) => {
     const user = req.user;
     const includeDeleted = req.query.includeDeleted === 'true';
@@ -84,9 +138,11 @@ exports.getProjects = async (req, res) => {
             projects = labProjects;
         }
 
+        const nationalLabIds = await resolveAuthorizedNationalLabIds(user, prisma);
+
         // Enrich with truthful stage counts and cumulative physical receipts
         const enrichedProjects = await Promise.all(projects.map(async (p) => {
-            const sampleWhere = projectPolicyService.buildProjectSampleScope(user, p);
+            const sampleWhere = projectPolicyService.buildProjectSampleScope(user, p, { authorizedLabIds: nationalLabIds });
             const samples = await prisma.sample.findMany({
                 where: sampleWhere,
                 select: { status: true, receptionDate: true }
@@ -104,9 +160,16 @@ exports.getProjects = async (req, res) => {
                 everPhysicallyReceived: 0
             };
 
+            const postReceiptStatuses = [
+                'RECEIVED', 'ACCEPTED', 'LAB_ID_ASSIGNED', 'DRYING', 'GRINDING',
+                'PREPARED', 'PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS',
+                'SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED', 'RELEASED',
+                'APPROVED', 'COMPLETED', 'RECEIVED_REJECTED'
+            ];
+
             for (const s of samples) {
                 const st = s.status ? s.status.toUpperCase() : '';
-                const physicallyReceived = Boolean(s.receptionDate || (st && !['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)));
+                const physicallyReceived = Boolean(s.receptionDate) || (Boolean(st) && postReceiptStatuses.includes(st));
                 if (physicallyReceived) counts.everPhysicallyReceived++;
 
                 if (['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'].includes(st)) {
@@ -272,7 +335,10 @@ exports.createProject = async (req, res) => {
             }
         }
 
-        const initialStatus = (projectType === 'TEMPLATE_PREDEFINED_IDS' && !hasSampleIds) ? 'PENDING_MANIFEST' : 'ACTIVE';
+        const requestedStatus = req.body.status ? String(req.body.status).toUpperCase().trim() : '';
+        const initialStatus = requestedStatus === 'DRAFT'
+            ? 'DRAFT'
+            : ((projectType === 'TEMPLATE_PREDEFINED_IDS' && !hasSampleIds) ? 'PENDING_MANIFEST' : 'ACTIVE');
 
         // Atomic Project Creation Transaction
         const newProject = await prisma.$transaction(async (tx) => {
@@ -438,6 +504,16 @@ exports.updateProject = async (req, res) => {
             if (!projectPolicyService.canTransitionProject(req.user, project, updates.status)) {
                 return res.status(403).json({ error: 'PROJECT_TRANSITION_FORBIDDEN', message: 'You are not authorized to transition project lifecycle state.' });
             }
+            if (['COMPLETED', 'ARCHIVED', 'CLOSED'].includes(updates.status)) {
+                try {
+                    await validateProjectClosure(project, prisma);
+                } catch (closureErr) {
+                    return res.status(closureErr.statusCode || 422).json({
+                        error: closureErr.code || 'CANNOT_CLOSE_PROJECT',
+                        message: closureErr.message
+                    });
+                }
+            }
         }
 
         if (updates.assignedLabIds !== undefined) {
@@ -579,7 +655,19 @@ exports.uploadManifest = async (req, res) => {
         });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        if (!projectPolicyService.canImportProjectSamples(req.user, project)) {
+        if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'DELETED'].includes(project.status)) {
+            return res.status(422).json({
+                error: 'PROJECT_ADMISSIONS_PAUSED',
+                message: `Cannot register or import samples into project '${project.code}' while status is ${project.status}. Admissions are paused.`
+            });
+        }
+
+        let targetLabId = req.user.labId || project.labId;
+        if (!targetLabId) {
+            return res.status(400).json({ error: 'TARGET_LAB_REQUIRED', message: 'No target laboratory could be resolved for manifest import.' });
+        }
+
+        if (!projectPolicyService.canImportProjectSamples(req.user, project, targetLabId)) {
             return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
@@ -620,8 +708,8 @@ exports.uploadManifest = async (req, res) => {
                         projectId: project.id,
                         projectCode: project.code,
                         status: 'EXPECTED',
-                        labId: project.labId || req.user.labId,
-                        assignedLab: project.labId || req.user.labId,
+                        labId: targetLabId,
+                        assignedLab: targetLabId,
                         receptionDate: null,
                         createdAt: new Date(),
                         updatedAt: new Date()
@@ -684,12 +772,24 @@ exports.previewImport = async (req, res) => {
         const seenInBatch = new Set();
         const candidateIds = [];
 
+        const VALID_SAMPLE_ID_REGEX = /^[A-Za-z0-9_.-]{1,64}$/;
+
         rawRows.forEach((row, idx) => {
             const rawId = typeof row === 'string' ? row : (row?.sampleId || row?.id || row?.originalId);
             const strId = rawId !== null && rawId !== undefined ? String(rawId).trim() : '';
 
             if (!strId) {
                 errors.push({ row: idx + 1, error: 'EMPTY_IDENTIFIER', message: 'Sample identifier is missing or blank' });
+                return;
+            }
+
+            if (!VALID_SAMPLE_ID_REGEX.test(strId)) {
+                errors.push({
+                    row: idx + 1,
+                    sampleId: strId,
+                    error: 'INVALID_IDENTIFIER_FORMAT',
+                    message: `Sample ID '${strId}' contains invalid characters or whitespace. Must be alphanumeric with hyphens, underscores, or periods (max 64 chars).`
+                });
                 return;
             }
 
@@ -724,11 +824,12 @@ exports.previewImport = async (req, res) => {
         candidateIds.forEach(cid => {
             if (existingMap.has(cid)) {
                 const s = existingMap.get(cid);
+                const isSameProject = s.projectId === project.id || s.projectCode === project.code;
                 conflicts.push({
                     sampleId: cid,
                     error: 'ALREADY_EXISTS_IN_DB',
-                    existingProject: s.projectCode || s.projectId,
-                    isSameProject: s.projectId === project.id || s.projectCode === project.code
+                    existingProject: isSameProject ? (s.projectCode || s.projectId) : null,
+                    isSameProject
                 });
             } else {
                 validSampleIds.push(cid);
@@ -766,17 +867,13 @@ exports.archiveProject = async (req, res) => {
             return res.status(403).json({ error: 'Cannot archive projects from another lab. Access denied.' });
         }
 
-        // Check for unresolved expected samples (A08, PM-01)
-        const pendingExpected = await prisma.sample.count({
-            where: {
-                OR: [{ projectId: project.id }, { projectCode: project.code }],
-                status: { in: ['EXPECTED', 'PENDING_MANIFEST'] }
-            }
-        });
-        if (pendingExpected > 0 && req.body?.force !== true) {
-            return res.status(422).json({
-                error: 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES',
-                message: `Cannot archive project with ${pendingExpected} unaccounted expected sample(s). Reconcile or cancel pending samples before archiving.`
+        // Check for unresolved expected samples and active analytical work (A08, PM-01, R03, R04)
+        try {
+            await validateProjectClosure(project, prisma);
+        } catch (closureErr) {
+            return res.status(closureErr.statusCode || 422).json({
+                error: closureErr.code || 'CANNOT_ARCHIVE_PROJECT',
+                message: closureErr.message
             });
         }
 
@@ -917,7 +1014,8 @@ exports.getProjectStats = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: You do not have permission to view this project.' });
         }
 
-        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project);
+        const nationalLabIds = await resolveAuthorizedNationalLabIds(req.user, prisma);
+        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project, { authorizedLabIds: nationalLabIds });
         const samples = await prisma.sample.findMany({
             where: sampleWhere,
             select: { status: true, receptionDate: true }
@@ -943,9 +1041,16 @@ exports.getProjectStats = async (req, res) => {
             rejected: 0
         };
 
+        const postReceiptStatuses = [
+            'RECEIVED', 'ACCEPTED', 'LAB_ID_ASSIGNED', 'DRYING', 'GRINDING',
+            'PREPARED', 'PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS',
+            'SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED', 'RELEASED',
+            'APPROVED', 'COMPLETED', 'RECEIVED_REJECTED'
+        ];
+
         for (const s of samples) {
             const st = s.status ? s.status.toUpperCase() : '';
-            const physicallyReceived = Boolean(s.receptionDate || (st && !['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)));
+            const physicallyReceived = Boolean(s.receptionDate) || (Boolean(st) && postReceiptStatuses.includes(st));
             if (physicallyReceived) counts.everPhysicallyReceived++;
 
             if (['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'].includes(st)) {
@@ -1004,8 +1109,14 @@ exports.getProjectSamples = async (req, res) => {
             return res.status(403).json({ error: 'Access denied' });
         }
 
-        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project);
-        const samples = await prisma.sample.findMany({
+        const nationalLabIds = await resolveAuthorizedNationalLabIds(req.user, prisma);
+        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project, { authorizedLabIds: nationalLabIds });
+
+        const limit = req.query.limit !== undefined ? Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 500)) : undefined;
+        const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : 1;
+        const skip = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10) || 0) : (req.query.page && limit ? (page - 1) * limit : undefined);
+
+        const findOptions = {
             where: sampleWhere,
             select: {
                 id: true,
@@ -1017,12 +1128,74 @@ exports.getProjectSamples = async (req, res) => {
                 createdAt: true
             },
             orderBy: { id: 'asc' }
-        });
+        };
+        if (limit !== undefined) {
+            findOptions.take = limit;
+        }
+        if (skip !== undefined) {
+            findOptions.skip = skip;
+        }
+
+        const samples = await prisma.sample.findMany(findOptions);
 
         res.json(samples);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to fetch project samples' });
+    }
+};
+
+exports.getProjectActivity = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, country: true }
+        });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
+
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
+            return res.status(403).json({ error: 'Access denied: You do not have permission to view this project.' });
+        }
+
+        const limit = req.query.limit ? Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 200)) : 50;
+        const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : 1;
+        const skip = (page - 1) * limit;
+
+        const where = {
+            OR: [
+                { entityId: project.id },
+                { entityId: project.code },
+                { AND: [{ entity: 'PROJECT' }, { details: { contains: project.code } }] }
+            ]
+        };
+
+        const [total, logs] = await Promise.all([
+            prisma.auditLog.count({ where }),
+            prisma.auditLog.findMany({
+                where,
+                orderBy: { timestamp: 'desc' },
+                take: limit,
+                skip
+            })
+        ]);
+
+        res.json({
+            total,
+            page,
+            limit,
+            logs
+        });
+    } catch (error) {
+        console.error('[getProjectActivity] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch project activity logs' });
     }
 };
 
