@@ -764,6 +764,24 @@ exports.receiveSample = async (req, res) => {
             });
         }
 
+        // Validate project admission policy
+        if (sample.projectId || sample.projectCode) {
+            const project = await prisma.project.findFirst({
+                where: {
+                    OR: [
+                        { id: sample.projectId || '' },
+                        { code: sample.projectCode || '' }
+                    ]
+                }
+            });
+            if (project && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot receive sample: Admissions for project ${project.code} are ${project.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                });
+            }
+        }
+
         const beforeState = sample.status;
         const now = new Date();
 
@@ -1702,6 +1720,27 @@ exports.updateSampleProject = async (req, res) => {
         const scopeGuard = require('../utils/scopeGuard');
         if (!scopeGuard.canAccessEntity(user, sample, { labField: 'assignedLab', altLabField: 'labId' })) {
             return res.status(403).json({ error: 'Sample is outside your scope' });
+        }
+
+        // Validate target project admission policy
+        if (projectId || projectCode) {
+            const targetProject = await prisma.project.findFirst({
+                where: {
+                    OR: [
+                        { id: projectId || '' },
+                        { code: projectCode || '' }
+                    ]
+                }
+            });
+            if (!targetProject) {
+                return res.status(404).json({ error: 'TARGET_PROJECT_NOT_FOUND', message: 'Target project not found' });
+            }
+            if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot move sample into project ${targetProject.code}: Admissions are ${targetProject.status.toLowerCase()}.`
+                });
+            }
         }
 
         const now = new Date();

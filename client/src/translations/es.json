@@ -754,7 +754,10 @@
       "bundleUnresolvedTitle": "Paquete asignado pero no definido en el catálogo",
       "bundleUnresolvedDesc": "El proyecto especifica el paquete \"{{bundleName}}\", pero no se encontró una lista activa en el catálogo.",
       "createPackageInCatalogue": "Definir este paquete en el catálogo →",
-      "manageCatalogue": "Gestionar definiciones del catálogo"
+      "manageCatalogue": "Gestionar definiciones del catálogo",
+      "selectPackage": "Seleccionar paquete de análisis",
+      "changePackage": "Cambiar paquete",
+      "configurePlan": "Configurar plan de proyecto"
     },
     "team": {
       "scopedNotice": "Visualiza la participación de su laboratorio. El personal e información de otros laboratorios permanecen aislados.",
@@ -893,7 +896,16 @@
       "showingFirst100": "Mostrando las primeras 100 muestras coincidentes.",
       "canonicalNotice": "La preparación, mediciones analíticas y aprobación se realizan en la mesa de trabajo. Esta página muestra su estado coordinado fidedigno.",
       "showingRange": "Mostrando {{start}} a {{end}} de {{total}} muestras",
-      "perPage": "Filas:"
+      "perPage": "Filas:",
+      "loadingSamples": "Cargando muestras del proyecto…",
+      "noMatchingSamples": "No hay muestras que coincidan con los filtros seleccionados",
+      "noSearchMatchDesc": "Ninguna muestra coincide con la búsqueda o el filtro de etapa. Intente ajustar el término de búsqueda o la etapa.",
+      "noStageMatchDesc": "No hay muestras en este proyecto en la etapa seleccionada.",
+      "clearFilters": "Borrar todos los filtros",
+      "noSamplesYet": "Aún no hay muestras registradas en este proyecto",
+      "noSamplesDesc": "Importe un manifiesto pre-registrado o sincronice desde KoboToolbox para iniciar la recepción.",
+      "filteredNotice": "(filtrado)",
+      "fetchError": "Error al cargar muestras: {{error}}"
     }
   },
   "users": {

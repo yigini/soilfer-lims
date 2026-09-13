@@ -754,7 +754,10 @@
       "bundleUnresolvedTitle": "Bundle assigned but not defined in catalogue",
       "bundleUnresolvedDesc": "Project specifies bundle \"{{bundleName}}\", but no active parameter list was found in the laboratory analysis catalogue.",
       "createPackageInCatalogue": "Define this package in catalogue →",
-      "manageCatalogue": "Manage catalogue definitions"
+      "manageCatalogue": "Manage catalogue definitions",
+      "selectPackage": "Select analysis package",
+      "changePackage": "Change package",
+      "configurePlan": "Configure project plan"
     },
     "team": {
       "scopedNotice": "You are viewing your laboratory’s participation. Other laboratories’ staff and internal sample details are isolated.",
@@ -893,7 +896,16 @@
       "showingFirst100": "Showing first 100 matching samples. Use search or the full sample list for more.",
       "canonicalNotice": "Drying and preparation completion, analytical measurements, spectral file uploads and approval take place in the workbench. This page displays their authoritative coordinated state.",
       "showingRange": "Showing {{start}} to {{end}} of {{total}} samples",
-      "perPage": "Rows:"
+      "perPage": "Rows:",
+      "loadingSamples": "Loading project samples…",
+      "noMatchingSamples": "No samples match the selected filters",
+      "noSearchMatchDesc": "No samples matched your search query or stage filter. Try adjusting your search term or stage.",
+      "noStageMatchDesc": "No samples in this project are currently in the selected stage.",
+      "clearFilters": "Clear all filters",
+      "noSamplesYet": "No samples registered in this project yet",
+      "noSamplesDesc": "Import a pre-registered manifest or sync from KoboToolbox to begin intake.",
+      "filteredNotice": "(filtered)",
+      "fetchError": "Failed to load samples: {{error}}"
     }
   },
   "users": {

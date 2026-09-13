@@ -754,7 +754,10 @@
       "bundleUnresolvedTitle": "Forfait assigné mais non défini dans le catalogue",
       "bundleUnresolvedDesc": "Le projet spécifie le forfait « {{bundleName}} », mais aucun paramètre actif n'a été trouvé dans le catalogue.",
       "createPackageInCatalogue": "Définir ce forfait dans le catalogue →",
-      "manageCatalogue": "Gérer les définitions du catalogue"
+      "manageCatalogue": "Gérer les définitions du catalogue",
+      "selectPackage": "Sélectionner le forfait d'analyse",
+      "changePackage": "Changer de forfait",
+      "configurePlan": "Configurer le plan analytique"
     },
     "team": {
       "scopedNotice": "You are viewing your laboratory’s participation. Other laboratories’ staff and internal sample details are isolated.",
@@ -893,7 +896,16 @@
       "showingFirst100": "Affichage des 100 premiers échantillons correspondants.",
       "canonicalNotice": "La préparation, les mesures analytiques et l'approbation se déroulent sur la paillasse. Cette page affiche leur état coordonné authentique.",
       "showingRange": "Affichage de {{start}} à {{end}} sur {{total}} échantillons",
-      "perPage": "Lignes :"
+      "perPage": "Lignes :",
+      "loadingSamples": "Chargement des échantillons du projet…",
+      "noMatchingSamples": "Aucun échantillon ne correspond aux filtres sélectionnés",
+      "noSearchMatchDesc": "Aucun échantillon ne correspond à votre recherche ou filtre d'étape. Modifiez vos critères.",
+      "noStageMatchDesc": "Aucun échantillon de ce projet n'est actuellement à cette étape.",
+      "clearFilters": "Effacer tous les filtres",
+      "noSamplesYet": "Aucun échantillon enregistré pour ce projet",
+      "noSamplesDesc": "Importez un manifeste ou synchronisez KoboToolbox pour commencer la réception.",
+      "filteredNotice": "(filtré)",
+      "fetchError": "Échec du chargement des échantillons: {{error}}"
     }
   },
   "users": {

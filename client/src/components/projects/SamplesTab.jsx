@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, ExternalLink, Calendar, Beaker, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, ExternalLink, Calendar, Beaker, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function SamplesTab({
@@ -8,6 +8,9 @@ export default function SamplesTab({
     samples = [],
     selectedStage = 'all',
     onSelectStage,
+    searchQuery = '',
+    onSearchChange,
+    onClearFilters,
     counts,
     capabilities = {},
     page = 1,
@@ -15,11 +18,26 @@ export default function SamplesTab({
     totalCount = 0,
     onPageChange,
     onLimitChange,
-    loading = false
+    loading = false,
+    error = null,
+    onRetry
 }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
-    const [searchQuery, setSearchQuery] = useState('');
+    const [inputValue, setInputValue] = useState(searchQuery || '');
+
+    useEffect(() => {
+        setInputValue(searchQuery || '');
+    }, [searchQuery]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (inputValue !== (searchQuery || '')) {
+                onSearchChange?.(inputValue);
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [inputValue, searchQuery, onSearchChange]);
 
     const stageLabels = [
         t('projects.stages.awaitingArrival', 'Awaiting arrival'),
@@ -41,23 +59,6 @@ export default function SamplesTab({
         return 0;
     };
 
-    const filteredSamples = useMemo(() => {
-        return samples.filter((s) => {
-            const stageIdx = getSampleStageIndex(s);
-            if (selectedStage !== 'all' && String(stageIdx) !== String(selectedStage)) {
-                return false;
-            }
-            if (searchQuery.trim()) {
-                const q = searchQuery.toLowerCase();
-                const idMatch = (s.id || '').toLowerCase().includes(q);
-                const origMatch = (s.originalId || '').toLowerCase().includes(q);
-                const labMatch = (s.labId || '').toLowerCase().includes(q);
-                if (!idMatch && !origMatch && !labMatch) return false;
-            }
-            return true;
-        });
-    }, [samples, selectedStage, searchQuery]);
-
     const stageBadges = [
         'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border-amber-300',
         'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300 border-yellow-300',
@@ -67,7 +68,8 @@ export default function SamplesTab({
         'bg-gray-100 text-gray-800 dark:bg-gray-950/40 dark:text-gray-300 border-gray-300'
     ];
 
-    const totalPages = Math.max(1, Math.ceil((totalCount || samples.length) / limit));
+    const isFiltered = Boolean((searchQuery || '').trim()) || (selectedStage && selectedStage !== 'all');
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
     return (
         <div className="space-y-4">
@@ -79,8 +81,8 @@ export default function SamplesTab({
                     </h2>
                     <p className="text-xs text-sf-muted mt-0.5">
                         {capabilities.isScopedOnly
-                            ? t('projects.samples.scopedCount', 'Only samples in your authorized lab scope · {{count}} matching samples', { count: totalCount || filteredSamples.length })
-                            : t('projects.samples.wholeCount', 'Authorized project samples · {{count}} matching samples', { count: totalCount || filteredSamples.length })}
+                            ? t('projects.samples.scopedCount', 'Only samples in your authorized lab scope · {{count}} matching samples', { count: totalCount })
+                            : t('projects.samples.wholeCount', 'Authorized project samples · {{count}} matching samples', { count: totalCount })}
                     </p>
                 </div>
 
@@ -94,6 +96,24 @@ export default function SamplesTab({
                 </div>
             </div>
 
+            {/* Error Banner */}
+            {error && (
+                <div className="p-3.5 rounded-xl border border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
+                        <span>{t('projects.samples.fetchError', 'Failed to load samples: {{error}}', { error })}</span>
+                    </div>
+                    {onRetry && (
+                        <button
+                            onClick={onRetry}
+                            className="text-xs font-semibold px-3 py-1 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-sf-surface hover:bg-red-100 dark:hover:bg-red-950/50 text-red-800 dark:text-red-200 transition-colors shrink-0"
+                        >
+                            {t('common.retry', 'Retry')}
+                        </button>
+                    )}
+                </div>
+            )}
+
             {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 rounded-xl bg-sf-surface border border-sf-divider">
                 <div className="flex items-center gap-2">
@@ -106,7 +126,9 @@ export default function SamplesTab({
                         onChange={(e) => onSelectStage(e.target.value)}
                         className="text-xs rounded-lg border border-sf-border bg-sf-inset px-2.5 py-1.5 font-medium text-sf-text"
                     >
-                        <option value="all">{t('projects.samples.allStages', 'All stages ({{count}})', { count: totalCount || samples.length })}</option>
+                        <option value="all">
+                            {t('projects.samples.allStages', 'All stages ({{count}})', { count: counts?.registered ?? totalCount })}
+                        </option>
                         {stageLabels.map((lbl, idx) => (
                             <option key={idx} value={String(idx)}>
                                 {lbl} ({
@@ -127,11 +149,28 @@ export default function SamplesTab({
                     <input
                         type="text"
                         placeholder={t('projects.samples.searchPlaceholder', 'Find a field or laboratory ID…')}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
                         className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-border bg-sf-inset text-sf-text placeholder:text-sf-muted"
                     />
                 </div>
+
+                {isFiltered && (
+                    <button
+                        onClick={() => {
+                            setInputValue('');
+                            if (onClearFilters) {
+                                onClearFilters();
+                            } else {
+                                onSearchChange?.('');
+                                onSelectStage?.('all');
+                            }
+                        }}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-sf-border bg-sf-inset hover:bg-sf-hover text-sf-text transition-colors whitespace-nowrap"
+                    >
+                        {t('projects.samples.clearFilters', 'Clear all filters')}
+                    </button>
+                )}
             </div>
 
             {/* Scrollable Sample Table Container */}
@@ -148,14 +187,63 @@ export default function SamplesTab({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-sf-divider/70">
-                            {filteredSamples.length === 0 ? (
+                            {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="py-8 text-center text-sf-muted">
-                                        {t('projects.samples.noSamplesFound', 'No samples matching the selected filters.')}
+                                    <td colSpan={5} className="py-12 text-center text-sf-muted">
+                                        <div className="inline-flex items-center gap-2 text-xs">
+                                            <RefreshCw className="w-4 h-4 animate-spin text-sf-primary" />
+                                            <span>{t('projects.samples.loadingSamples', 'Loading project samples…')}</span>
+                                        </div>
                                     </td>
                                 </tr>
+                            ) : samples.length === 0 ? (
+                                isFiltered ? (
+                                    <tr>
+                                        <td colSpan={5} className="py-12 text-center space-y-3">
+                                            <Filter className="w-8 h-8 text-sf-muted mx-auto opacity-40" />
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-semibold text-sf-text">
+                                                    {t('projects.samples.noMatchingSamples', 'No samples match the selected filters')}
+                                                </p>
+                                                <p className="text-xs text-sf-muted max-w-sm mx-auto">
+                                                    {searchQuery
+                                                        ? t('projects.samples.noSearchMatchDesc', 'No samples matched your search query or stage filter. Try adjusting your search term or stage.')
+                                                        : t('projects.samples.noStageMatchDesc', 'No samples in this project are currently in the selected stage.')}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <button
+                                                    onClick={() => {
+                                                        setInputValue('');
+                                                        if (onClearFilters) {
+                                                            onClearFilters();
+                                                        } else {
+                                                            onSearchChange?.('');
+                                                            onSelectStage?.('all');
+                                                        }
+                                                    }}
+                                                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-sf-border bg-sf-inset hover:bg-sf-hover text-sf-text transition-colors"
+                                                >
+                                                    {t('projects.samples.clearFilters', 'Clear all filters')}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    <tr>
+                                        <td colSpan={5} className="py-12 text-center space-y-2 text-sf-muted">
+                                            <Beaker className="w-8 h-8 mx-auto opacity-40" />
+                                            <p className="text-sm font-semibold text-sf-text">
+                                                {t('projects.samples.noSamplesYet', 'No samples registered in this project yet')}
+                                            </p>
+                                            <p className="text-xs text-sf-muted max-w-sm mx-auto">
+                                                {t('projects.samples.noSamplesDesc', 'Import a pre-registered manifest or sync from KoboToolbox to begin intake.')}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                )
                             ) : (
-                                filteredSamples.map((sample) => {
+                                samples.map((sample) => {
                                     const stageIdx = getSampleStageIndex(sample);
                                     const badgeClass = stageBadges[stageIdx] || stageBadges[0];
                                     const stageName = stageLabels[stageIdx] || sample.status;
@@ -221,13 +309,13 @@ export default function SamplesTab({
                         <span>
                             {t('projects.samples.showingRange', 'Showing {{start}} to {{end}} of {{total}} samples', {
                                 start: totalCount === 0 ? 0 : (page - 1) * limit + 1,
-                                end: Math.min(page * limit, totalCount || samples.length),
-                                total: totalCount || samples.length
+                                end: Math.min(page * limit, totalCount),
+                                total: totalCount
                             })}
                         </span>
-                        {searchQuery && (
+                        {isFiltered && totalCount > 0 && (
                             <span className="text-[11px] font-medium text-sf-primary bg-sf-surface px-2 py-0.5 rounded border border-sf-divider">
-                                ({filteredSamples.length} matching search)
+                                {t('projects.samples.filteredNotice', '(filtered)')}
                             </span>
                         )}
                     </div>

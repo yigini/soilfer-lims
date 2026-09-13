@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Beaker, Layers, Activity, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Beaker, Layers, Activity, AlertCircle, CheckCircle2, ArrowRight, Settings } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function AnalysisPlanTab({
     project,
     capabilities = {},
-    userRole = ''
+    userRole = '',
+    onOpenConfigurePlan
 }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -115,11 +116,22 @@ export default function AnalysisPlanTab({
                                 </p>
                             )}
                         </div>
-                        {bundleName && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300">
-                                {t('projects.plan.currentBadge', 'Active bundle')}
-                            </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {bundleName && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300">
+                                    {t('projects.plan.currentBadge', 'Active bundle')}
+                                </span>
+                            )}
+                            {capabilities.canManage && onOpenConfigurePlan && (
+                                <button
+                                    onClick={onOpenConfigurePlan}
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border border-sf-border bg-sf-inset hover:bg-sf-hover text-sf-primary transition-colors"
+                                >
+                                    <Settings className="w-3.5 h-3.5" />
+                                    <span>{bundleName ? t('projects.plan.changePackage', 'Change package') : t('projects.plan.selectPackage', 'Select package')}</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {loading ? (
@@ -161,7 +173,23 @@ export default function AnalysisPlanTab({
                                     {t('projects.plan.emptyDesc', 'This project does not define an automatic analysis package. Incoming samples will receive tests assigned individually or specified upon physical receipt.')}
                                 </p>
                             </div>
-                            {isManager && (
+                            {capabilities.canManage && onOpenConfigurePlan ? (
+                                <div className="flex items-center justify-center gap-2 pt-2">
+                                    <button
+                                        onClick={onOpenConfigurePlan}
+                                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sf-primary text-white hover:bg-sf-primary-hover shadow-sm transition-colors"
+                                    >
+                                        <Settings className="w-3.5 h-3.5" />
+                                        <span>{t('projects.plan.selectPackage', 'Select analysis package')}</span>
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/admin/methods')}
+                                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-muted transition-colors"
+                                    >
+                                        <span>{t('projects.plan.openCatalogue', 'Configure packages in catalogue →')}</span>
+                                    </button>
+                                </div>
+                            ) : isManager && (
                                 <button
                                     onClick={() => navigate('/admin/methods')}
                                     className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-primary transition-colors"
@@ -228,12 +256,23 @@ export default function AnalysisPlanTab({
                     </div>
 
                     {isManager ? (
-                        <button
-                            onClick={() => navigate('/admin/methods')}
-                            className="text-xs font-semibold px-4 py-2 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-text transition-colors"
-                        >
-                            {t('projects.plan.manageCatalogue', 'Manage catalogue definitions')}
-                        </button>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {capabilities.canManage && onOpenConfigurePlan && (
+                                <button
+                                    onClick={onOpenConfigurePlan}
+                                    className="text-xs font-semibold px-4 py-2 rounded-lg border border-sf-primary bg-sf-primary/10 hover:bg-sf-primary/20 text-sf-primary transition-colors inline-flex items-center gap-1.5"
+                                >
+                                    <Settings className="w-3.5 h-3.5" />
+                                    <span>{t('projects.plan.configurePlan', 'Configure project plan')}</span>
+                                </button>
+                            )}
+                            <button
+                                onClick={() => navigate('/admin/methods')}
+                                className="text-xs font-semibold px-4 py-2 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-text transition-colors"
+                            >
+                                {t('projects.plan.manageCatalogue', 'Manage catalogue definitions')}
+                            </button>
+                        </div>
                     ) : (
                         <p className="text-xs text-sf-muted">
                             {t('projects.plan.readOnlyNotice', 'Your role has view-only access to this analysis plan. Contact the project manager to request modifications.')}

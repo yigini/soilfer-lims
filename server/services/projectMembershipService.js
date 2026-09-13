@@ -318,8 +318,26 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
             }
         });
 
-        if (activeCount > 0) {
-            const err = new Error(`Cannot remove servicing laboratory with ${activeCount} active or unfinished sample(s). Complete or transfer samples before removing laboratory access.`);
+        let activeWorkItems = 0;
+        if (tx.workItem) {
+            activeWorkItems = await tx.workItem.count({
+                where: {
+                    sample: {
+                        OR: [{ projectId: project.id }, { projectCode: project.code }]
+                    },
+                    OR: [
+                        { assignedLab: { in: removedLabs } },
+                        { labId: { in: removedLabs } },
+                        { sample: { assignedLab: { in: removedLabs } } },
+                        { sample: { labId: { in: removedLabs } } }
+                    ],
+                    status: { notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'ACCEPTED', 'CANCELLED', 'REJECTED'] }
+                }
+            });
+        }
+
+        if (activeCount > 0 || activeWorkItems > 0) {
+            const err = new Error(`Cannot remove servicing laboratory with outstanding work (${activeCount} active sample(s), ${activeWorkItems} active work item(s)). Complete or transfer samples before removing laboratory access.`);
             err.statusCode = 400;
             err.code = 'CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK';
             throw err;
