@@ -13,40 +13,32 @@ export default function ActivityTab({
     const { t } = useLanguage();
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isDenied, setIsDenied] = useState(false);
 
     useEffect(() => {
-        if (!project?.id) return;
+        const identifier = project?.id || project?.code;
+        if (!identifier) return;
+
         setLoading(true);
-        axios.get(`/api/audit?entity=PROJECT&entityId=${encodeURIComponent(project.id)}`)
+        setError(null);
+        setIsDenied(false);
+
+        axios.get(`/api/projects/${encodeURIComponent(identifier)}/activity`)
             .then(res => {
                 const data = Array.isArray(res.data) ? res.data : (res.data?.logs || []);
                 setLogs(data);
             })
-            .catch(() => {
-                // If specific entity query fails or requires extra permissions, provide empty state
+            .catch(err => {
+                if (err.response?.status === 403) {
+                    setIsDenied(true);
+                } else {
+                    setError(err.response?.data?.error || t('projects.activity.fetchError', 'Failed to load activity logs'));
+                }
                 setLogs([]);
             })
             .finally(() => setLoading(false));
-    }, [project?.id]);
-
-    const fallbackLogs = [
-        {
-            id: 'log-1',
-            action: 'PROJECT_UPDATED',
-            details: 'Coordinated metadata and servicing membership synchronized',
-            performedBy: project?.creator || 'System',
-            timestamp: project?.updatedAt || new Date()
-        },
-        {
-            id: 'log-2',
-            action: 'PROJECT_CREATED',
-            details: `Created ${project?.projectType || 'OPEN_INTAKE'} project ${project?.code}`,
-            performedBy: project?.creator || 'System',
-            timestamp: project?.createdAt || new Date()
-        }
-    ];
-
-    const displayLogs = logs.length > 0 ? logs : fallbackLogs;
+    }, [project?.id, project?.code, t]);
 
     return (
         <div className="space-y-6">
@@ -69,9 +61,21 @@ export default function ActivityTab({
                     <div className="py-8 text-center text-xs text-sf-muted">
                         {t('common.loading', 'Loading activity trail…')}
                     </div>
+                ) : isDenied ? (
+                    <div className="py-8 text-center text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800/40">
+                        {t('projects.activity.accessDenied', 'Access denied: You do not have permission to view activity logs for this project.')}
+                    </div>
+                ) : error ? (
+                    <div className="py-8 text-center text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 rounded-xl p-4 border border-rose-200 dark:border-rose-800/40">
+                        {error}
+                    </div>
+                ) : logs.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-sf-muted bg-sf-inset/50 rounded-xl p-6 border border-sf-divider">
+                        {t('projects.activity.empty', 'No activity or governance events recorded for this project yet.')}
+                    </div>
                 ) : (
                     <div className="space-y-4 pt-2">
-                        {displayLogs.map((item, idx) => (
+                        {logs.map((item, idx) => (
                             <div key={item.id || idx} className="relative pl-6 pb-4 border-l border-sf-divider last:border-0 last:pb-0">
                                 <span className="absolute -left-1.5 top-0.5 w-3 h-3 rounded-full bg-sf-primary border-2 border-sf-surface" />
                                 <div className="space-y-0.5">

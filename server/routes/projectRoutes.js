@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const projectController = require('../controllers/projectController');
@@ -17,6 +16,7 @@ router.post('/:id/manifest', checkPermission('MANAGE_PROJECTS'), projectControll
 router.post('/:id/imports/preview', checkPermission('MANAGE_PROJECTS'), projectController.previewImport);
 router.get('/:id/stats', checkPermission('VIEW_SAMPLES'), projectController.getProjectStats);
 router.get('/:id/samples', checkPermission('VIEW_SAMPLES'), projectController.getProjectSamples);
+router.get('/:id/activity', projectController.getProjectActivity);
 router.get('/:id/kobo-config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 
