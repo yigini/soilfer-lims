@@ -26,6 +26,10 @@ export default function ProjectWorkspace() {
     const [project, setProject] = useState(null);
     const [stats, setStats] = useState(null);
     const [samples, setSamples] = useState([]);
+    const [samplesPage, setSamplesPage] = useState(1);
+    const [samplesLimit, setSamplesLimit] = useState(50);
+    const [samplesTotal, setSamplesTotal] = useState(0);
+    const [samplesLoading, setSamplesLoading] = useState(false);
     const [labAccess, setLabAccess] = useState(null);
     const [koboConfig, setKoboConfig] = useState(null);
 
@@ -38,6 +42,25 @@ export default function ProjectWorkspace() {
     const [actionsModalOpen, setActionsModalOpen] = useState(false);
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [guideModalOpen, setGuideModalOpen] = useState(false);
+
+    const fetchSamples = useCallback(async (page = 1, limit = 50) => {
+        if (!projectId) return;
+        setSamplesLoading(true);
+        try {
+            const samplesRes = await axios.get(`/api/projects/${projectId}/samples`, {
+                params: { page, limit }
+            });
+            setSamples(Array.isArray(samplesRes.data) ? samplesRes.data : []);
+            const headerTotal = parseInt(samplesRes.headers['x-total-count'], 10);
+            if (!isNaN(headerTotal)) {
+                setSamplesTotal(headerTotal);
+            }
+        } catch (err) {
+            console.warn('[Workspace] Samples fetch failed:', err.message);
+        } finally {
+            setSamplesLoading(false);
+        }
+    }, [projectId]);
 
     const fetchWorkspaceData = useCallback(async () => {
         if (!projectId) return;
@@ -59,12 +82,7 @@ export default function ProjectWorkspace() {
             }
 
             // 3. Scoped samples
-            try {
-                const samplesRes = await axios.get(`/api/projects/${projectId}/samples`);
-                setSamples(Array.isArray(samplesRes.data) ? samplesRes.data : []);
-            } catch (err) {
-                console.warn('[Workspace] Samples fetch failed:', err.message);
-            }
+            await fetchSamples(samplesPage, samplesLimit);
 
             // 4. Lab Access & Membership
             try {
@@ -108,6 +126,15 @@ export default function ProjectWorkspace() {
     useEffect(() => {
         fetchWorkspaceData();
     }, [fetchWorkspaceData]);
+
+    const isInitialMount = React.useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        fetchSamples(samplesPage, samplesLimit);
+    }, [fetchSamples, samplesPage, samplesLimit]);
 
     const handleSelectStage = (stageIdx) => {
         setSelectedStage(stageIdx);
@@ -203,6 +230,15 @@ export default function ProjectWorkspace() {
                         onSelectStage={setSelectedStage}
                         counts={counts}
                         capabilities={capabilities}
+                        page={samplesPage}
+                        limit={samplesLimit}
+                        totalCount={samplesTotal || counts?.registered || samples.length}
+                        onPageChange={setSamplesPage}
+                        onLimitChange={(newLimit) => {
+                            setSamplesLimit(newLimit);
+                            setSamplesPage(1);
+                        }}
+                        loading={samplesLoading}
                     />
                 )}
 

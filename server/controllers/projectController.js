@@ -35,11 +35,17 @@ async function validateProjectClosure(project, tx = prisma) {
             status: {
                 in: [
                     'DRAFT',
+                    'COLLECTED',
                     'RECEIVED',
                     'ACCEPTED',
                     'LAB_ID_ASSIGNED',
+                    'DRYING',
+                    'GRINDING',
+                    'PREPARED',
                     'PROCESSING',
-                    'ANALYZING',
+                    'IN_LAB',
+                    'ANALYSIS_IN_PROGRESS',
+                    'ANALYSIS',
                     'IN_PROGRESS',
                     'SUBMITTED',
                     'SUBMITTED_FULL',
@@ -55,6 +61,25 @@ async function validateProjectClosure(project, tx = prisma) {
         err.statusCode = 422;
         err.code = 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK';
         throw err;
+    }
+
+    if (tx.workItem) {
+        const activeWorkItems = await tx.workItem.count({
+            where: {
+                sample: {
+                    OR: [{ projectId: project.id }, { projectCode: project.code }]
+                },
+                status: {
+                    notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'CANCELLED', 'REJECTED']
+                }
+            }
+        });
+        if (activeWorkItems > 0) {
+            const err = new Error(`Cannot archive or complete project with ${activeWorkItems} active analytical work item(s). Complete or release all work before archiving.`);
+            err.statusCode = 422;
+            err.code = 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK';
+            throw err;
+        }
     }
 }
 
@@ -671,6 +696,17 @@ exports.uploadManifest = async (req, res) => {
             return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
+        // Validate identifier format
+        const idRegex = /^[A-Za-z0-9_.-]{1,64}$/;
+        const invalidIds = sampleIds.filter(s => typeof s !== 'string' || !idRegex.test(String(s).trim()));
+        if (invalidIds.length > 0) {
+            return res.status(400).json({
+                error: 'INVALID_IDENTIFIER_FORMAT',
+                message: `Sample identifier format is invalid for: ${invalidIds.slice(0, 5).join(', ')}. IDs must contain 1-64 alphanumeric characters, underscores, hyphens, or periods without whitespace.`,
+                invalidIds
+            });
+        }
+
         // Check for duplicates within this batch and against existing db
         const uniqueSampleIds = [...new Set(sampleIds.map(s => String(s).trim()))];
         const existing = await prisma.sample.findMany({
@@ -683,13 +719,20 @@ exports.uploadManifest = async (req, res) => {
             select: { id: true, originalId: true, projectId: true, projectCode: true }
         });
 
-        // CROSS-PROJECT VALIDATION:
-        const crossProjectConflicts = existing.filter(e => e.projectId && e.projectId !== project.id);
+        // CROSS-PROJECT VALIDATION (Neutral message without disclosing confidential foreign project codes):
+        const crossProjectConflicts = existing.filter(e =>
+            (e.projectId && e.projectId !== project.id) ||
+            (e.projectCode && e.projectCode !== project.code)
+        );
         if (crossProjectConflicts.length > 0) {
-            const conflictDetails = crossProjectConflicts.map(c => `${c.id} (Project: ${c.projectCode || c.projectId})`).join(', ');
+            const conflictIds = crossProjectConflicts.map(c => c.originalId || c.id).join(', ');
             return res.status(400).json({
-                error: 'Cross-project Sample ID conflict detected.',
-                details: `The following IDs are already registered to other projects: ${conflictDetails}. Samples cannot be shared across projects.`
+                error: 'CROSS_PROJECT_CONFLICT',
+                details: `The following IDs are already registered to another project: ${conflictIds}. Samples cannot be shared across projects.`,
+                conflicts: crossProjectConflicts.map(c => ({
+                    sampleId: c.originalId || c.id,
+                    error: 'ALREADY_EXISTS_IN_DB'
+                }))
             });
         }
 
@@ -1112,9 +1155,10 @@ exports.getProjectSamples = async (req, res) => {
         const nationalLabIds = await resolveAuthorizedNationalLabIds(req.user, prisma);
         const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project, { authorizedLabIds: nationalLabIds });
 
-        const limit = req.query.limit !== undefined ? Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 500)) : undefined;
+        const parsedLimit = req.query.limit !== undefined ? parseInt(req.query.limit, 10) : 50;
+        const limit = Math.max(1, Math.min(isNaN(parsedLimit) ? 50 : parsedLimit, 500));
         const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : 1;
-        const skip = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10) || 0) : (req.query.page && limit ? (page - 1) * limit : undefined);
+        const skip = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10) || 0) : (page - 1) * limit;
 
         const findOptions = {
             where: sampleWhere,
@@ -1127,14 +1171,14 @@ exports.getProjectSamples = async (req, res) => {
                 receptionDate: true,
                 createdAt: true
             },
-            orderBy: { id: 'asc' }
+            orderBy: { id: 'asc' },
+            take: limit,
+            skip: skip
         };
-        if (limit !== undefined) {
-            findOptions.take = limit;
-        }
-        if (skip !== undefined) {
-            findOptions.skip = skip;
-        }
+
+        const total = await prisma.sample.count({ where: sampleWhere });
+        res.setHeader('X-Total-Count', String(total));
+        res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
 
         const samples = await prisma.sample.findMany(findOptions);
 
@@ -1169,18 +1213,25 @@ exports.getProjectActivity = async (req, res) => {
         const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : 1;
         const skip = (page - 1) * limit;
 
+        // Require exact project entity and identity on query branches without substring matching
         const where = {
-            OR: [
-                { entityId: project.id },
-                { entityId: project.code },
-                { AND: [{ entity: 'PROJECT' }, { details: { contains: project.code } }] }
-            ]
+            entity: 'PROJECT',
+            entityId: { in: [String(project.id), String(project.code)] }
         };
 
         const [total, logs] = await Promise.all([
             prisma.auditLog.count({ where }),
             prisma.auditLog.findMany({
                 where,
+                select: {
+                    id: true,
+                    entity: true,
+                    entityId: true,
+                    action: true,
+                    details: true,
+                    performedBy: true,
+                    timestamp: true
+                },
                 orderBy: { timestamp: 'desc' },
                 take: limit,
                 skip
