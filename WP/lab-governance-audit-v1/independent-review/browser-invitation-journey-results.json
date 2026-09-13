@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-09-11T15:28:26.639Z",
+  "totalTests": 14,
+  "passed": 14,
+  "failed": 0,
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "B_INV_01",
+      "description": "Pending invitations roster renders on People Tab",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_02",
+      "description": "Both active and same-day expired invitations are listed in table",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_03",
+      "description": "Same-day expired invitation displays dynamic Expired badge",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_04",
+      "description": "Clicking Reissue opens Reissued Invitation Modal",
+      "expected": "Invitation Reissued",
+      "actual": "Invitation Reissued",
+      "passed": true
+    },
+    {
+      "id": "B_INV_05",
+      "description": "Reissued modal displays fresh activation link with token",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_06",
+      "description": "Copy button gives immediate visual feedback (Copied!)",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_07",
+      "description": "Dismissing modal closes dialog cleanly",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_08",
+      "description": "Activation with reissued token creates active staff account (HTTP 201)",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_09",
+      "description": "Activated user persisted with correct role, labId, and active status",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_10",
+      "description": "Invitation record is flagged as consumed",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_11",
+      "description": "Prior revoked invitation token is rejected on activation attempt (410/400)",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_12",
+      "description": "National Lead can view pending invitations roster for authorized country lab",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_13",
+      "description": "National Lead successfully reissues own-country staff invitation from UI",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "B_INV_14",
+      "description": "Baseline database dev.db hash strictly preserved untouched",
+      "expected": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "actual": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "passed": true
+    }
+  ]
+}

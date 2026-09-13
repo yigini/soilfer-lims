@@ -1,0 +1,227 @@
+{
+  "head": "c41d60da73788c9fcd9c1babe29867056e26dc01",
+  "timestamp": "2026-09-11T14:32:20.961Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-modal-all-26af34e0-7e59-4b21-8a1d-4131e4f05dc9.db",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "dbUntouched": true,
+  "allPassed": true,
+  "results": [
+    {
+      "id": "MODAL-INVITE-320",
+      "description": "InviteStaffModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 539.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-INVITE-320",
+      "description": "InviteStaffModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-REVIEW-320",
+      "description": "AccessReviewModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-access-review-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-REVIEW-320",
+      "description": "AccessReviewModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-RECOVERY-320",
+      "description": "RecoveryLinkModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 395.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-recovery-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-RECOVERY-320",
+      "description": "RecoveryLinkModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-SUSPEND-320",
+      "description": "SuspendUserModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 367.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-suspend-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-SUSPEND-320",
+      "description": "SuspendUserModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-LIFECYCLE-320",
+      "description": "LabLifecycleModal stays within 320x568 viewport with visible buttons",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-lifecycle-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-LIFECYCLE-320",
+      "description": "LabLifecycleModal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-LONG-LABEL-ES",
+      "description": "Modal layout in Spanish with longer translated strings fits 320x568 viewport",
+      "expected": {
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 552,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-es-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "MODAL-THEME-DARK-320",
+      "description": "Modal renders correctly in authentic Dark Theme with dark surface tokens and WCAG AAA contrast >= 7:1 at 320x568",
+      "expected": {
+        "isDark": true,
+        "bgIsDark": true,
+        "contrastMeetsAAA": true,
+        "insideViewport": true,
+        "allButtonsContained": true
+      },
+      "actual": {
+        "isDark": true,
+        "bgIsDark": true,
+        "backgroundColor": "rgb(46, 50, 54)",
+        "headingColor": "rgb(241, 244, 243)",
+        "contrastRatio": 11.67,
+        "contrastMeetsAAA": true,
+        "insideViewport": true,
+        "allButtonsContained": true,
+        "height": 539.5,
+        "screenshot": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\modal-all-invite-dark-320.png"
+      },
+      "passed": true
+    },
+    {
+      "id": "TRAP-THEME-DARK-320",
+      "description": "Dark Theme modal wraps Shift+Tab (first->last) and Tab (last->first) and restores trigger focus on Escape",
+      "expected": {
+        "focusTrapped": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "actual": {
+        "focusTrapped": true,
+        "wrappedFirstToLast": true,
+        "wrappedLastToFirst": true,
+        "dialogClosed": true,
+        "focusReturned": true
+      },
+      "passed": true
+    }
+  ]
+}

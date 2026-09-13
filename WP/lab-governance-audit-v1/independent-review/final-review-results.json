@@ -1,0 +1,111 @@
+{
+  "head": "5b07d3d3aa634b04dcf85b440417874f5bf76e4c",
+  "timestamp": "2026-09-11T13:44:11.384Z",
+  "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\WP\\lab-governance-audit-v1\\independent-review\\disposable-final-e67eb6eb-3bbf-4ebf-abba-9b15d52b9b3e.db",
+  "schemaSource": "Read-only SQL schema; no existing data rows copied",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "F01",
+      "description": "Guatemala national lead invites staff into France laboratory",
+      "expected": {
+        "http": 403,
+        "persistedInvitations": 0
+      },
+      "actual": {
+        "http": 403,
+        "persistedInvitations": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "C01",
+      "description": "National lead can invite allowed staff inside their own country",
+      "expected": {
+        "http": 201
+      },
+      "actual": {
+        "http": 201
+      },
+      "passed": true
+    },
+    {
+      "id": "F02",
+      "description": "Administrator appoints a pending manager while lab is in SETUP, as specified by onboarding scenario",
+      "expected": {
+        "http": 201
+      },
+      "actual": {
+        "http": 201
+      },
+      "passed": true
+    },
+    {
+      "id": "F03",
+      "description": "Junction-only servicing project appears in laboratory workspace",
+      "expected": {
+        "http": 200,
+        "projectVisible": true
+      },
+      "actual": {
+        "http": 200,
+        "projectVisible": true
+      },
+      "passed": true
+    },
+    {
+      "id": "F04",
+      "description": "Expected and released samples are excluded from active laboratory workload",
+      "expected": {
+        "activeSamples": 0
+      },
+      "actual": {
+        "activeSamples": 0,
+        "expected": 1,
+        "released": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "F05",
+      "description": "Access review accounts for submitted work awaiting review before role removal",
+      "expected": {
+        "openAssignmentsAtLeast": 1
+      },
+      "actual": {
+        "http": 200,
+        "openAssignmentsCount": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "F06",
+      "description": "Revoked legacy JWT without tokenVersion is rejected consistently by HTTP and SIS",
+      "expected": {
+        "http": 401,
+        "sis": 401
+      },
+      "actual": {
+        "http": 401,
+        "sis": 401
+      },
+      "passed": true
+    },
+    {
+      "id": "F07",
+      "description": "Suspension revokes an already connected socket before further lab events",
+      "expected": {
+        "suspendHttp": 200,
+        "receivedAfterSuspend": false,
+        "socketOpen": false
+      },
+      "actual": {
+        "suspendHttp": 200,
+        "receivedAfterSuspend": false,
+        "socketOpen": false
+      },
+      "passed": true
+    }
+  ]
+}

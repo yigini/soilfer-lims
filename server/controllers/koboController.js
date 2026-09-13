@@ -7,17 +7,50 @@ const koboService = require('../services/koboService');
 const workflow = require('../workflowContract');
 const crypto = require('crypto');
 
+async function assertLabAccess(actor, targetLabId) {
+    if (!actor) return false;
+    if (actor.role === 'SUPER_ADMIN') return true;
+    if (actor.role === 'MASTER_USER') {
+        const countries = Array.isArray(actor.countries)
+            ? actor.countries
+            : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+        const lab = await prisma.lab.findUnique({ where: { id: targetLabId } });
+        return !!(lab && countries.includes(lab.country));
+    }
+    return actor.labId === targetLabId;
+}
+
+
 /**
  * GET /api/kobo/configs
  * Get all Kobo configurations (admin only)
  */
 exports.getAllConfigs = async (req, res) => {
     try {
+        const actor = req.user;
+        let where = {};
+        if (actor.role === 'SUPER_ADMIN') {
+            where = {};
+        } else if (actor.role === 'MASTER_USER') {
+            const countries = Array.isArray(actor.countries)
+                ? actor.countries
+                : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+            const labs = await prisma.lab.findMany({
+                where: { country: { in: countries } },
+                select: { id: true }
+            });
+            where = { labId: { in: labs.map(l => l.id) } };
+        } else if (actor.labId) {
+            where = { labId: actor.labId };
+        } else {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'Unauthorized to list Kobo configurations' });
+        }
+
         const configs = await prisma.koboConfig.findMany({
+            where,
             orderBy: { labId: 'asc' }
         });
 
-        // Mask API tokens for security
         const maskedConfigs = configs.map(c => ({
             ...c,
             apiToken: c.apiToken ? '••••••••' + c.apiToken.slice(-4) : null
@@ -37,6 +70,10 @@ exports.getAllConfigs = async (req, res) => {
 exports.getConfig = async (req, res) => {
     try {
         const { labId } = req.params;
+        const allowed = await assertLabAccess(req.user, labId);
+        if (!allowed) {
+            return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
+        }
 
         const config = await prisma.koboConfig.findFirst({
             where: { labId, isActive: true }
@@ -46,7 +83,6 @@ exports.getConfig = async (req, res) => {
             return res.json({ configured: false, labId });
         }
 
-        // Mask API token
         res.json({
             ...config,
             apiToken: config.apiToken ? '••••••••' + config.apiToken.slice(-4) : null,
@@ -65,6 +101,10 @@ exports.getConfig = async (req, res) => {
 exports.upsertConfig = async (req, res) => {
     try {
         const { labId } = req.params;
+        const allowed = await assertLabAccess(req.user, labId);
+        if (!allowed) {
+            return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
+        }
         const { koboServerUrl, formId, apiToken, labName, fieldMapping, syncIntervalMins, isActive } = req.body;
 
         if (!formId || !apiToken) {
@@ -147,6 +187,10 @@ exports.testConnection = async (req, res) => {
 exports.getFormFields = async (req, res) => {
     try {
         const { labId } = req.params;
+        const allowed = await assertLabAccess(req.user, labId);
+        if (!allowed) {
+            return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
+        }
 
         const config = await prisma.koboConfig.findFirst({
             where: { labId, isActive: true }
@@ -176,6 +220,10 @@ exports.getFormFields = async (req, res) => {
 exports.syncLab = async (req, res) => {
     try {
         const { labId } = req.params;
+        const allowed = await assertLabAccess(req.user, labId);
+        if (!allowed) {
+            return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
+        }
 
         const config = await prisma.koboConfig.findFirst({
             where: { labId, isActive: true }
@@ -200,6 +248,9 @@ exports.syncLab = async (req, res) => {
  */
 exports.syncAll = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'Global sync-all is restricted to Super Administrators' });
+        }
         const configs = await prisma.koboConfig.findMany({
             where: { isActive: true }
         });

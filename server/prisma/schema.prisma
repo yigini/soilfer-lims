@@ -1310,3 +1310,46 @@ model HelpSupportConfig {
 
   @@index([labId])
 }
+
+// --- LABORATORY GOVERNANCE & ACCESS CONTROL MODELS ---
+
+model LabLifecycleState {
+  labId             String    @id
+  operationalStatus String    @default("ACTIVE")
+  revision          Int       @default(1)
+  pauseReason       String?
+  pausedAt          DateTime?
+  pausedBy          String?
+  updatedAt         DateTime  @default(now()) @updatedAt
+}
+
+model StaffInvitation {
+  id         String    @id
+  email      String
+  name       String
+  role       String
+  labId      String
+  projects   String?
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  isConsumed Boolean   @default(false)
+  isRevoked  Boolean   @default(false)
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  consumedAt DateTime?
+}
+
+model PasswordRecoveryGrant {
+  id         String    @id
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  isConsumed Boolean   @default(false)
+  isRevoked  Boolean   @default(false)
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  consumedAt DateTime?
+
+  @@map("StaffRecoveryGrant")
+}
+

@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
 const { ALL_ROLES, ALLOWED_SUB_ROLES } = require('../config/roles');
+const staffLifecycleService = require('../services/staffLifecycleService');
 
 const canManage = (actor, target) => {
     if (!actor || !target) return false;
@@ -15,7 +16,7 @@ const canManage = (actor, target) => {
     if (actor.role === 'LAB_MANAGER') {
         if (!actor.labId) return false;
         if (target.labId !== actor.labId) return false;
-        if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(target.role) && target.id !== actor.id) {
+        if (!ALLOWED_SUB_ROLES.includes(target.role)) {
             return false;
         }
         return true;
@@ -31,8 +32,8 @@ exports.getUsers = async (req, res) => {
     const actor = req.user;
     const { page = 1, limit = 20, search, role, labId, country } = req.query;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = Math.max(parseInt(page) || 1, 1);
+    const limitNum = Math.min(Math.max(parseInt(limit) || 25, 1), 100);
     const skip = (pageNum - 1) * limitNum;
 
     try {
@@ -47,10 +48,16 @@ exports.getUsers = async (req, res) => {
                     return res.status(403).json({ error: 'Manager lacks Lab ID' });
                 }
             } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
-                if (actor.countries && actor.countries.length > 0) {
-                    const countryList = typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries;
-                    andConditions.push({ country: { in: countryList } });
+                const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
+                if (!Array.isArray(countryList) || countryList.length === 0) {
+                    return res.json({ users: [], total: 0, page: pageNum, pages: 0, data: [], pagination: { total: 0, page: pageNum, pageSize: limitNum, totalPages: 0 } });
                 }
+                const authorizedLabs = await prisma.lab.findMany({
+                    where: { country: { in: countryList } },
+                    select: { id: true }
+                });
+                const labIds = authorizedLabs.map(l => l.id);
+                andConditions.push({ labId: { in: labIds } });
             } else {
                 andConditions.push({ id: actor.id });
             }
@@ -74,44 +81,57 @@ exports.getUsers = async (req, res) => {
 
         const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
-        const allMatching = await prisma.user.findMany({
-            where
-        });
-
-        const roleOrder = {
-            'SUPER_ADMIN': 1,
-            'MASTER_USER': 2,
-            'PROJECT_MANAGER': 3,
-            'LAB_MANAGER': 4,
-            'SAMPLE_RECEPTION': 5,
-            'LAB_TECHNICIAN': 6,
-            'AUDIT_USER': 7,
-            'VIEWER': 8
-        };
-
-        allMatching.sort((a, b) => {
-            const rA = roleOrder[a.role] || 99;
-            const rB = roleOrder[b.role] || 99;
-            if (rA !== rB) return rA - rB;
-            return (a.username || '').localeCompare(b.username || '');
-        });
-
-        const total = allMatching.length;
-        const paged = allMatching.slice(skip, skip + limitNum);
+        // DB Pagination & explicit safe projection (no password hashes loaded)
+        const [total, matchingUsers] = await prisma.$transaction([
+            prisma.user.count({ where }),
+            prisma.user.findMany({
+                where,
+                skip,
+                take: limitNum,
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    labId: true,
+                    isActive: true,
+                    language: true,
+                    themePreference: true,
+                    countries: true,
+                    projects: true,
+                    createdAt: true,
+                    updatedAt: true
+                },
+                orderBy: [
+                    { name: 'asc' },
+                    { id: 'asc' }
+                ]
+            })
+        ]);
 
         // Parse JSON fields and sanitize
-        const safeUsers = paged.map(u => {
-            const { password, ...rest } = u;
-            return {
-                ...rest,
-                countries: typeof u.countries === 'string' ? JSON.parse(u.countries) : (u.countries || []),
-                projects: typeof u.projects === 'string' ? JSON.parse(u.projects) : (u.projects || [])
-            };
-        });
+        const safeUsers = matchingUsers.map(u => ({
+            ...u,
+            countries: typeof u.countries === 'string' ? JSON.parse(u.countries) : (u.countries || []),
+            projects: typeof u.projects === 'string' ? JSON.parse(u.projects) : (u.projects || [])
+        }));
 
         res.json({
             data: safeUsers,
-            meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }
+            users: safeUsers,
+            pagination: {
+                total,
+                page: pageNum,
+                pageSize: limitNum,
+                totalPages: Math.ceil(total / limitNum)
+            },
+            meta: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                pages: Math.ceil(total / limitNum)
+            }
         });
     } catch (error) {
         console.error('[getUsers] Error:', error);
@@ -137,11 +157,25 @@ exports.createUser = async (req, res) => {
 
         if (actor.role === 'LAB_MANAGER') {
             if (!actor.labId) return res.status(403).json({ error: 'Manager has no Lab assigned' });
+            if (labId && labId !== actor.labId) {
+                return res.status(403).json({ error: 'Lab Managers cannot assign users to another laboratory' });
+            }
             if (!ALLOWED_SUB_ROLES.includes(role)) {
                 return res.status(403).json({ error: `Lab Managers may only create: ${ALLOWED_SUB_ROLES.join(', ')}` });
             }
         } else if (actor.role !== 'SUPER_ADMIN') {
             return res.status(403).json({ error: 'Only administrators can create users' });
+        }
+
+        const targetLabId = actor.role === 'LAB_MANAGER' ? actor.labId : labId;
+        if (role !== 'SUPER_ADMIN') {
+            if (!targetLabId) {
+                return res.status(400).json({ error: 'Laboratory assignment is required for non-superadmin users' });
+            }
+            const labExists = await prisma.lab.findUnique({ where: { id: String(targetLabId) } });
+            if (!labExists) {
+                return res.status(400).json({ error: `Laboratory '${targetLabId}' does not exist` });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -204,22 +238,35 @@ exports.updateUser = async (req, res) => {
             if (updates.labId && updates.labId !== target.labId) {
                 return res.status(403).json({ error: 'Cannot modify your own lab assignment' });
             }
-            if (updates.countries || updates.projects) {
-                return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+            if (updates.countries !== undefined) {
+                const curC = typeof target.countries === 'string' ? target.countries : JSON.stringify(target.countries || []);
+                const newC = typeof updates.countries === 'string' ? updates.countries : JSON.stringify(updates.countries || []);
+                if (curC !== newC) {
+                    return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+                }
+            }
+            if (updates.projects !== undefined) {
+                const curP = typeof target.projects === 'string' ? target.projects : JSON.stringify(target.projects || []);
+                const newP = typeof updates.projects === 'string' ? updates.projects : JSON.stringify(updates.projects || []);
+                if (curP !== newP) {
+                    return res.status(403).json({ error: 'Cannot modify your own country or project scopes' });
+                }
             }
         }
 
         // Validate role changes
-        if (updates.role && updates.role !== target.role) {
-            if (!ALL_ROLES.includes(updates.role)) {
-                return res.status(400).json({ error: `Invalid role '${updates.role}'` });
+        if (updates.role !== undefined) {
+            if (!updates.role || typeof updates.role !== 'string' || !ALL_ROLES.includes(updates.role.trim())) {
+                return res.status(400).json({ error: 'VALIDATION_ERROR', message: `Invalid role '${updates.role}'` });
             }
-            if (actor.role === 'LAB_MANAGER') {
-                if (!ALLOWED_SUB_ROLES.includes(updates.role)) {
-                    return res.status(403).json({ error: `Lab Managers may only assign: ${ALLOWED_SUB_ROLES.join(', ')}` });
+            if (updates.role !== target.role) {
+                if (actor.role === 'LAB_MANAGER') {
+                    if (!ALLOWED_SUB_ROLES.includes(updates.role)) {
+                        return res.status(403).json({ error: `Lab Managers may only assign: ${ALLOWED_SUB_ROLES.join(', ')}` });
+                    }
+                } else if (!isSuperAdmin) {
+                    return res.status(403).json({ error: 'Only Super Admins can assign management roles' });
                 }
-            } else if (!isSuperAdmin) {
-                return res.status(403).json({ error: 'Only Super Admins can assign management roles' });
             }
         }
 
@@ -255,6 +302,13 @@ exports.updateUser = async (req, res) => {
             data
         });
 
+        if (data.isActive === false || data.role || data.labId || updates.password) {
+            try {
+                const wsServer = require('../wsServer');
+                wsServer.revokeUserSockets(id);
+            } catch (e) {}
+        }
+
         await prisma.auditLog.create({
             data: {
                 id: crypto.randomUUID(),
@@ -286,7 +340,29 @@ exports.deleteUser = async (req, res) => {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
 
+        // Prevent self-deletion
+        if (actor.id === target.id) {
+            return res.status(400).json({ error: 'SELF_DELETION_FORBIDDEN', message: 'Administrators cannot delete their own account' });
+        }
+
+        // Protect last active super administrator (LG-06, P09)
+        if (target.role === 'SUPER_ADMIN') {
+            const adminCount = await prisma.user.count({
+                where: { role: 'SUPER_ADMIN', isActive: true }
+            });
+            if (adminCount <= 1) {
+                return res.status(403).json({
+                    error: 'LAST_ADMIN_PROTECTED',
+                    message: 'Cannot delete the last remaining Super Administrator.'
+                });
+            }
+        }
+
         await prisma.user.delete({ where: { id: String(id) } });
+        try {
+            const wsServer = require('../wsServer');
+            wsServer.revokeUserSockets(id);
+        } catch (e) {}
 
         await prisma.auditLog.create({
             data: {
@@ -311,29 +387,152 @@ exports.getDirectory = async (req, res) => {
 
     try {
         const where = {};
-        if (actor.role === 'SUPER_ADMIN' || actor.role === 'MASTER_USER') {
+        if (actor.role === 'SUPER_ADMIN') {
             // All
-        } else if (actor.role === 'COUNTRY_ADMIN') {
-            // Approximate matching for country-scoped members
+        } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(actor.role)) {
+            const countryList = actor.countries ? (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : actor.countries) : [];
+            if (!Array.isArray(countryList) || countryList.length === 0) {
+                return res.json([]);
+            }
+            const authorizedLabs = await prisma.lab.findMany({
+                where: { country: { in: countryList } },
+                select: { id: true }
+            });
+            const labIds = authorizedLabs.map(l => l.id);
+            where.labId = { in: labIds };
         } else if (actor.labId) {
             where.labId = actor.labId;
         } else {
             where.id = actor.id;
         }
 
-        const users = await prisma.user.findMany({ where });
+        if (req.query.purpose === 'assignment') {
+            where.isActive = true;
+            where.role = { in: ['LAB_TECHNICIAN', 'LAB_MANAGER'] };
+        }
 
-        const directory = users.map(u => ({
-            id: u.id,
-            name: u.name,
-            username: u.username,
-            role: u.role,
-            labId: u.labId
-        }));
+        const users = await prisma.user.findMany({
+            where,
+            take: 200,
+            select: {
+                id: true,
+                name: true,
+                username: true,
+                role: true,
+                labId: true,
+                isActive: true
+            },
+            orderBy: [
+                { name: 'asc' },
+                { id: 'asc' }
+            ]
+        });
 
-        directory.sort((a, b) => (a.name || a.username).localeCompare(b.name || b.username));
-        res.json(directory);
+        res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+
+exports.createInvitation = async (req, res) => {
+    try {
+        const { name, email, role, labId, projects, reissue } = req.body;
+        const result = await staffLifecycleService.createInvitation(req.user, { name, email, role, labId, projects, reissue });
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code, existingInvitationId: err.existingInvitationId });
+    }
+};
+
+exports.getPendingInvitations = async (req, res) => {
+    try {
+        const labId = req.query.labId || req.user.labId;
+        const options = {
+            page: req.query.page,
+            limit: req.query.limit
+        };
+        const result = await staffLifecycleService.getPendingInvitations(req.user, labId, options);
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.reissueInvitation = async (req, res) => {
+    try {
+        const result = await staffLifecycleService.reissueInvitation(req.user, req.params.id, req.body);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.revokeInvitation = async (req, res) => {
+    try {
+        const result = await staffLifecycleService.revokeInvitation(req.user, req.params.id, req.body);
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.getAccessPreview = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const changes = req.body || {};
+        const preview = await staffLifecycleService.getAccessPreview(req.user, targetUserId, changes);
+        res.json(preview);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.applyAccess = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { changes, reviewToken, reason } = req.body || {};
+        const result = await staffLifecycleService.applyAccessChanges(req.user, targetUserId, { changes, reviewToken, reason });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.suspendUser = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { reason } = req.body || {};
+        if (!reason || typeof reason !== 'string' || !reason.trim()) {
+            return res.status(400).json({
+                error: 'A justification reason is required to suspend an account',
+                code: 'REASON_REQUIRED'
+            });
+        }
+        const result = await staffLifecycleService.suspendUser(req.user, targetUserId, { reason: reason.trim() });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.reactivateUser = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const result = await staffLifecycleService.reactivateUser(req.user, targetUserId);
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.createRecovery = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { reason } = req.body || {};
+        const result = await staffLifecycleService.createRecoveryGrant(req.user, targetUserId, { reason });
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
     }
 };

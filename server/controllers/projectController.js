@@ -1,5 +1,8 @@
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
+const projectPolicyService = require('../services/projectPolicyService');
+const projectMembershipService = require('../services/projectMembershipService');
+const defaultAuditCreate = prisma.auditLog?.create;
 
 exports.getProjects = async (req, res) => {
     const user = req.user;
@@ -11,14 +14,44 @@ exports.getProjects = async (req, res) => {
         if (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') {
             // Admins see all projects
             const where = includeDeleted ? {} : { status: { not: 'DELETED' } };
-            projects = await prisma.project.findMany({ where });
+            projects = await prisma.project.findMany({ where, orderBy: { updatedAt: 'desc' } });
         } else if (user.role === 'PROJECT_MANAGER') {
-            if (user.projects && user.projects.length > 0) {
-                const where = { code: { in: user.projects } };
+            const userProjects = projectPolicyService.parseArray(user.projects);
+            if (userProjects.length > 0) {
+                const where = { code: { in: userProjects } };
                 if (!includeDeleted) where.status = { not: 'DELETED' };
-                projects = await prisma.project.findMany({ where });
+                projects = await prisma.project.findMany({ where, orderBy: { updatedAt: 'desc' } });
             }
-        } else if (user.role === 'LAB_MANAGER' || user.role === 'SAMPLE_RECEPTION' || user.role === 'LAB_TECHNICIAN') {
+        } else if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(user.role)) {
+            const countryList = projectPolicyService.parseArray(user.countries);
+            if (countryList.length > 0) {
+                const labs = await prisma.lab.findMany({
+                    where: { country: { in: countryList } },
+                    select: { id: true }
+                });
+                const labIds = labs.map(l => l.id);
+                const allProjects = await prisma.project.findMany({
+                    where: includeDeleted ? {} : { status: { not: 'DELETED' } },
+                    orderBy: { updatedAt: 'desc' }
+                });
+                projects = allProjects.filter(p => {
+                    if (p.labId && labIds.includes(p.labId)) return true;
+                    if (p.assignedLabIds) {
+                        try {
+                            const assigned = JSON.parse(p.assignedLabIds);
+                            if (Array.isArray(assigned) && assigned.some(id => labIds.includes(id))) return true;
+                        } catch (e) {}
+                    }
+                    if (p.countries) {
+                        try {
+                            const cList = JSON.parse(p.countries);
+                            if (Array.isArray(cList) && cList.some(c => countryList.includes(c))) return true;
+                        } catch (e) {}
+                    }
+                    return false;
+                });
+            }
+        } else if (['LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'SURVEYOR'].includes(user.role)) {
             const userLabId = user.labId;
             if (!userLabId) return res.json([]);
 
@@ -33,6 +66,7 @@ exports.getProjects = async (req, res) => {
                         OR pl.labId = ${userLabId}
                         OR p.assignedLabIds LIKE ${'%"' + userLabId + '"%'}
                     )
+                    ORDER BY p.updatedAt DESC
                 `;
             } else {
                 labProjects = await prisma.$queryRaw`
@@ -44,50 +78,72 @@ exports.getProjects = async (req, res) => {
                         OR pl.labId = ${userLabId}
                         OR p.assignedLabIds LIKE ${'%"' + userLabId + '"%'}
                     )
+                    ORDER BY p.updatedAt DESC
                 `;
             }
             projects = labProjects;
         }
 
-        // Enrich with sample counts (lab-scoped for non-admins)
+        // Enrich with truthful stage counts and cumulative physical receipts
         const enrichedProjects = await Promise.all(projects.map(async (p) => {
-            // Build sample query - for lab users, scope to their lab's samples
-            const sampleWhere = {
-                OR: [
-                    { projectId: p.id },
-                    { projectCode: p.code }
-                ]
+            const sampleWhere = projectPolicyService.buildProjectSampleScope(user, p);
+            const samples = await prisma.sample.findMany({
+                where: sampleWhere,
+                select: { status: true, receptionDate: true }
+            });
+
+            const counts = {
+                registered: samples.length,
+                awaitingArrival: 0,
+                intakeInProgress: 0,
+                labWork: 0,
+                awaitingReview: 0,
+                released: 0,
+                rejectedOrCancelled: 0,
+                needsReconciliation: 0,
+                everPhysicallyReceived: 0
             };
 
-            // Lab users see only their lab's samples from global projects
-            if (user.labId && (user.role === 'LAB_MANAGER' || user.role === 'SAMPLE_RECEPTION' || user.role === 'LAB_TECHNICIAN')) {
-                sampleWhere.AND = [
-                    { OR: [{ projectId: p.id }, { projectCode: p.code }] },
-                    { OR: [{ assignedLab: user.labId }, { labId: user.labId }] }
-                ];
-                delete sampleWhere.OR;
+            for (const s of samples) {
+                const st = s.status ? s.status.toUpperCase() : '';
+                const physicallyReceived = Boolean(s.receptionDate || (st && !['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)));
+                if (physicallyReceived) counts.everPhysicallyReceived++;
+
+                if (['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'].includes(st)) {
+                    counts.rejectedOrCancelled++;
+                } else if (['RELEASED', 'APPROVED', 'ARCHIVED'].includes(st)) {
+                    counts.released++;
+                } else if (['SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED'].includes(st)) {
+                    counts.awaitingReview++;
+                } else if (['PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS'].includes(st)) {
+                    counts.labWork++;
+                } else if (['RECEIVED', 'ACCEPTED', 'DRYING', 'GRINDING', 'PREPARED'].includes(st)) {
+                    counts.intakeInProgress++;
+                } else if (['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)) {
+                    counts.awaitingArrival++;
+                } else {
+                    counts.needsReconciliation++;
+                }
             }
 
-            const [totalCount, receivedCount] = await Promise.all([
-                prisma.sample.count({ where: sampleWhere }),
-                prisma.sample.count({
-                    where: { ...sampleWhere, status: { not: 'EXPECTED' } }
-                })
-            ]);
-
             // Get labs assigned to this project via ProjectLab
-            const assignedLabs = await prisma.$queryRaw`
-                SELECT labId FROM ProjectLab WHERE projectCode = ${p.code}
-            `;
-            const labList = assignedLabs.map(l => l.labId);
+            let labList = [];
+            try {
+                const assignedLabs = await prisma.$queryRaw`
+                    SELECT labId FROM ProjectLab WHERE projectCode = ${p.code}
+                `;
+                labList = assignedLabs.map(l => l.labId);
+            } catch (e) {}
+
             const resolvedAssignedLabIds = (p.assignedLabIds && p.assignedLabIds !== '[]')
                 ? p.assignedLabIds
                 : (labList.length > 0 ? JSON.stringify(labList) : null);
 
             return {
                 ...p,
-                receivedCount,
-                totalCount,
+                receivedCount: counts.everPhysicallyReceived,
+                totalCount: counts.registered,
+                counts,
                 assignedLabs: labList,
                 assignedLabIds: resolvedAssignedLabIds,
                 isGlobal: !p.labId,
@@ -105,29 +161,47 @@ exports.getProjects = async (req, res) => {
 exports.getProject = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: {
+                OR: [{ id: String(id) }, { code: String(id) }]
+            }
+        });
         if (!project) return error(res, 404, 'PROJECT_NOT_FOUND', { id }, 'Project not found');
 
-        // Lab Isolation Check (Phase 1 - Scope Guard)
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: Project belongs to another lab');
+        const { ownerLabId, servicingLabIds, allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, code: true, name: true, country: true, isActive: true }
+        });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
+
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
+            return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: You do not have permission to view this project.');
         }
 
-        const assignedLabs = await prisma.$queryRaw`
-            SELECT labId FROM ProjectLab WHERE projectCode = ${project.code}
-        `;
-        const labList = assignedLabs.map(l => l.labId);
+        const capabilities = {
+            canEditPlan: projectPolicyService.canEditProjectPlan(req.user, project),
+            canManageAccess: projectPolicyService.canManageProjectAccess(req.user, project),
+            canTransition: projectPolicyService.canTransitionProject(req.user, project),
+            canImport: projectPolicyService.canImportProjectSamples(req.user, project)
+        };
+
         const resolvedAssignedLabIds = (project.assignedLabIds && project.assignedLabIds !== '[]')
             ? project.assignedLabIds
-            : (labList.length > 0 ? JSON.stringify(labList) : null);
+            : (servicingLabIds.length > 0 ? JSON.stringify(servicingLabIds) : null);
 
         res.json({
             ...project,
-            assignedLabs: labList,
-            assignedLabIds: resolvedAssignedLabIds
+            ownerLabId,
+            servicingLabIds,
+            memberLabs,
+            assignedLabs: servicingLabIds,
+            assignedLabIds: resolvedAssignedLabIds,
+            capabilities
         });
     } catch (err) {
+        console.error('[getProject] Error:', err);
         return error(res, 500, 'PROJECT_FETCH_ERROR', null, 'Failed to fetch project');
     }
 };
@@ -141,13 +215,13 @@ exports.createProject = async (req, res) => {
 
     // VALIDATION
     if (!code || !name || !projectType) {
-        return error(res, 400, 'MISSING_FIELDS', { fields: 'code, name, projectType' }, 'Code, Name, and Project Type are required');
+        return error(res, 400, 'MISSING_FIELDS', 'Code, Name, and Project Type are required', { fields: 'code, name, projectType' });
     }
 
     // KOBO_LINKED validation: require Kobo credentials
     if (projectType === 'KOBO_LINKED') {
         if (!req.body.koboFormId || !req.body.koboApiToken) {
-            return error(res, 400, 'KOBO_CREDENTIALS_REQUIRED', null, 'Kobo Form ID and API Token are required for Kobo-linked projects');
+            return error(res, 400, 'KOBO_CREDENTIALS_REQUIRED', 'Kobo Form ID and API Token are required for Kobo-linked projects');
         }
     }
 
@@ -166,51 +240,103 @@ exports.createProject = async (req, res) => {
             labId = req.body.labId;
         }
 
-        // If sampleIds are provided with the creation request, skip PENDING_MANIFEST
+        // Scope check for national roles (MASTER_USER, COUNTRY_ADMIN)
+        if (['MASTER_USER', 'COUNTRY_ADMIN'].includes(userRole) && labId) {
+            const actorCountries = projectPolicyService.parseArray(req.user.countries);
+            const targetLab = await prisma.lab.findUnique({
+                where: { id: labId },
+                select: { country: true }
+            });
+            if (!targetLab || !actorCountries.includes(targetLab.country)) {
+                return error(res, 403, 'FORBIDDEN_NATIONAL_SCOPE', `Cannot assign project to laboratory '${labId}' outside your authorized national scope.`);
+            }
+        }
+
+        // Check for duplicate existing sample IDs if provided
         const hasSampleIds = Array.isArray(req.body.sampleIds) && req.body.sampleIds.length > 0;
+        let uniqueSampleIds = [];
+        if (hasSampleIds) {
+            uniqueSampleIds = [...new Set(req.body.sampleIds.map(s => String(s).trim()))];
+            const existingSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: { in: uniqueSampleIds } },
+                        { originalId: { in: uniqueSampleIds } }
+                    ]
+                },
+                select: { id: true, projectId: true, projectCode: true }
+            });
+            if (existingSamples.length > 0) {
+                const conflictDetails = existingSamples.map(e => `${e.id} (Project: ${e.projectCode || e.projectId})`).join(', ');
+                return error(res, 400, 'SAMPLE_ID_CONFLICT', `Sample IDs already exist: ${conflictDetails}`, { conflicts: existingSamples.map(e => e.id) });
+            }
+        }
+
         const initialStatus = (projectType === 'TEMPLATE_PREDEFINED_IDS' && !hasSampleIds) ? 'PENDING_MANIFEST' : 'ACTIVE';
 
-        const newProject = await prisma.project.create({
-            data: {
-                id: uppercaseCode,
-                code: uppercaseCode,
-                name,
-                description,
-                notes,
-                projectType,
-                expectedSampleCount: parseInt(expectedSampleCount) || 0,
-                deliveryDeadline: deliveryDeadline ? new Date(deliveryDeadline) : null,
-                priority: priority || 'NORMAL',
-                defaultAnalysisBundle,
-                labId,
-                assignedLabIds: req.body.assignedLabIds || null,
-                status: initialStatus
-            }
-        });
+        // Atomic Project Creation Transaction
+        const newProject = await prisma.$transaction(async (tx) => {
+            const proj = await tx.project.create({
+                data: {
+                    id: uppercaseCode,
+                    code: uppercaseCode,
+                    name,
+                    description,
+                    notes,
+                    projectType,
+                    expectedSampleCount: parseInt(expectedSampleCount) || 0,
+                    deliveryDeadline: deliveryDeadline ? new Date(deliveryDeadline) : null,
+                    priority: priority || 'NORMAL',
+                    defaultAnalysisBundle,
+                    labId,
+                    assignedLabIds: req.body.assignedLabIds || null,
+                    status: initialStatus
+                }
+            });
 
-        // Create manifest samples inline if provided
-        if (hasSampleIds) {
-            const uniqueSampleIds = [...new Set(req.body.sampleIds)];
-            try {
-                await prisma.sample.createMany({
+            // Insert predefined manifest samples
+            if (hasSampleIds && uniqueSampleIds.length > 0) {
+                await tx.sample.createMany({
                     data: uniqueSampleIds.map(sid => ({
                         id: sid,
                         originalId: sid,
-                        projectId: newProject.id,
+                        projectId: proj.id,
                         projectCode: uppercaseCode,
                         status: 'EXPECTED',
                         labId: labId || req.user.labId,
+                        assignedLab: labId || req.user.labId,
                         receptionDate: null,
                         createdAt: new Date(),
                         updatedAt: new Date()
                     }))
                 });
-                console.log(`[createProject] Created ${uniqueSampleIds.length} manifest samples for ${uppercaseCode}`);
-            } catch (sampleErr) {
-                console.error(`[createProject] Failed to create manifest samples:`, sampleErr.message);
-                // Don't fail project creation if sample creation fails
             }
-        }
+
+            // If created by PROJECT_MANAGER, grant explicit creator access in user.projects
+            if (userRole === 'PROJECT_MANAGER') {
+                const curProjects = projectPolicyService.parseArray(req.user.projects);
+                const updatedProjects = [...new Set([...curProjects, uppercaseCode])];
+                await tx.user.update({
+                    where: { id: req.user.id },
+                    data: { projects: JSON.stringify(updatedProjects) }
+                });
+                req.user.projects = updatedProjects;
+            }
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-proj-create-${Date.now()}`,
+                    entity: 'PROJECT',
+                    entityId: uppercaseCode,
+                    action: 'PROJECT_CREATED',
+                    details: `Created ${projectType} project ${uppercaseCode} (Lab: ${labId || 'Global'})`,
+                    performedBy: req.user.username,
+                    timestamp: new Date()
+                }
+            });
+
+            return proj;
+        });
 
         // KOBO_LINKED: Create KoboConfig entry linked to this project
         if (projectType === 'KOBO_LINKED' && labId) {
@@ -218,13 +344,7 @@ exports.createProject = async (req, res) => {
                 const koboServerUrl = req.body.koboServerUrl || 'https://kf.kobotoolbox.org';
                 const koboService = require('../services/koboService');
 
-                // Validate credentials with a test call
                 const testResult = await koboService.testConnection(koboServerUrl, req.body.koboFormId, req.body.koboApiToken);
-
-                if (!testResult.success) {
-                    console.warn(`[KOBO] Test connection failed for project ${uppercaseCode}: ${testResult.error}`);
-                    // Still create KoboConfig but mark as inactive
-                }
 
                 const newConfig = await prisma.koboConfig.create({
                     data: {
@@ -237,21 +357,14 @@ exports.createProject = async (req, res) => {
                         isActive: testResult.success !== false
                     }
                 });
-                console.log(`[KOBO] Created KoboConfig for project ${uppercaseCode} (lab: ${labId})`);
 
-                // AUTO-SYNC: Trigger initial sync in the background (non-blocking)
-                // The user gets the project creation response immediately while samples load
                 if (testResult.success !== false) {
                     const koboController = require('./koboController');
-                    // Fire-and-forget: don't await, don't block project creation
                     Promise.resolve().then(async () => {
                         try {
                             const freshConfig = await prisma.koboConfig.findUnique({ where: { id: newConfig.id } });
                             if (!freshConfig) return;
-
-                            // Use the internal sync function
-                            const result = await koboController._syncLabSubmissions(freshConfig, req.user?.username || 'AUTO_SYNC');
-                            console.log(`[KOBO] Auto-sync for ${uppercaseCode}: ${result.newSamples} samples imported, ${result.skipped} skipped`);
+                            await koboController._syncLabSubmissions(freshConfig, req.user?.username || 'AUTO_SYNC');
                         } catch (syncErr) {
                             console.error(`[KOBO] Auto-sync failed for ${uppercaseCode}:`, syncErr.message);
                         }
@@ -259,21 +372,8 @@ exports.createProject = async (req, res) => {
                 }
             } catch (koboErr) {
                 console.error(`[KOBO] Failed to create KoboConfig for ${uppercaseCode}:`, koboErr.message);
-                // Don't fail project creation if KoboConfig fails
             }
         }
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-proj-create-${Date.now()}`,
-                entity: 'PROJECT',
-                entityId: uppercaseCode,
-                action: 'PROJECT_CREATED',
-                details: `Created ${projectType} project ${uppercaseCode} (Lab: ${labId || 'Global'})`,
-                performedBy: req.user.username,
-                timestamp: new Date()
-            }
-        });
 
         // NOTIFICATION: Notify assigned labs
         if (newProject.assignedLabIds) {
@@ -303,9 +403,9 @@ exports.createProject = async (req, res) => {
     } catch (err) {
         console.error('[createProject] Error:', err);
         if (err.code === 'P2002') {
-            return error(res, 400, 'PROJECT_CODE_EXISTS', { code: uppercaseCode }, 'Project code already exists');
+            return error(res, 400, 'PROJECT_CODE_EXISTS', 'Project code already exists', { code: uppercaseCode });
         }
-        return error(res, 500, 'PROJECT_CREATE_ERROR', null, 'Failed to create project');
+        return error(res, 500, 'PROJECT_CREATE_ERROR', 'Failed to create project');
     }
 };
 
@@ -314,42 +414,45 @@ exports.updateProject = async (req, res) => {
     const updates = req.body;
 
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Cannot modify projects from another lab. Access denied.' });
-        }
-
-        // Managers cannot modify global projects UNLESS they are assigned to them
-        if (req.user.role === 'LAB_MANAGER' && !project.labId) {
-            // Re-verify assignment specifically for this check
-            let isAssigned = false;
-            if (project.assignedLabIds) {
-                try {
-                    const ids = JSON.parse(project.assignedLabIds);
-                    isAssigned = Array.isArray(ids) && ids.includes(req.user.labId);
-                } catch (e) {
-                    isAssigned = project.assignedLabIds.includes(`"${req.user.labId}"`);
-                }
-            }
-
-            if (!isAssigned) {
-                return res.status(403).json({ error: 'Cannot modify Global/SoilFER projects that are not assigned to your lab.' });
-            }
+        // Authorization check
+        const { canManageProject } = require('../services/projectMembershipService');
+        if (!canManageProject(req.user, project)) {
+            return res.status(403).json({ error: 'PROJECT_UPDATE_FORBIDDEN', message: 'Only the project owner laboratory manager or Super Administrator can modify project metadata.' });
         }
 
         if (updates.code && updates.code !== project.code) {
             return res.status(400).json({ error: 'Cannot change Project Code' });
         }
 
+        // Generic PUT restrictions (PM-06, P14)
+        if (updates.status !== undefined) {
+            const allowedStatuses = ['ACTIVE', 'PAUSED', 'CLOSED', 'COMPLETED', 'PENDING_MANIFEST', 'DRAFT'];
+            if (!allowedStatuses.includes(updates.status)) {
+                return res.status(400).json({ error: 'INVALID_STATUS', message: `Status '${updates.status}' is not a valid project lifecycle status.` });
+            }
+            if (!projectPolicyService.canTransitionProject(req.user, project, updates.status)) {
+                return res.status(403).json({ error: 'PROJECT_TRANSITION_FORBIDDEN', message: 'You are not authorized to transition project lifecycle state.' });
+            }
+        }
+
+        if (updates.assignedLabIds !== undefined) {
+            return res.status(400).json({ error: 'INVALID_FIELD', message: 'Assigned laboratories must be updated via the dedicated /lab-access endpoint.' });
+        }
+
+        if (updates.labId !== undefined && req.user.role !== 'SUPER_ADMIN') {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'Only Super Administrators can change the coordinating owner laboratory.' });
+        }
+
         const validFields = [
             'name', 'description', 'notes', 'client',
             'startDate', 'deliveryDeadline', 'status',
             'projectType', 'expectedSampleCount', 'priority',
-            'defaultAnalysisBundle', 'labId', 'assignedLabIds'
+            'defaultAnalysisBundle'
         ];
 
         const data = {};
@@ -358,9 +461,6 @@ exports.updateProject = async (req, res) => {
                 data[field] = updates[field];
             }
         });
-
-        // Remove fields Managers shouldn't touch
-        if (req.user.role === 'LAB_MANAGER') delete data.labId;
 
         // Data Transformation
         if (data.expectedSampleCount !== undefined) data.expectedSampleCount = parseInt(data.expectedSampleCount) || 0;
@@ -391,20 +491,38 @@ exports.updateProject = async (req, res) => {
             }
         }
 
-        console.log(`[DEBUG] Final Data for Project Update (${new Date().toISOString()}):`, JSON.stringify(data));
+        // Atomic Project Update and Audit Transaction (PM-08, P11)
+        const updated = await prisma.$transaction(async (tx) => {
+            const proj = await tx.project.update({
+                where: { id: project.id },
+                data
+            });
 
-        const updated = await prisma.project.update({
-            where: { id: String(id) },
-            data
+            const auditData = {
+                id: `audit-proj-update-${Date.now()}`,
+                entity: 'PROJECT',
+                entityId: project.id,
+                action: 'PROJECT_UPDATED',
+                details: `Updated fields: ${Object.keys(data).join(', ')}`,
+                performedBy: req.user.username,
+                timestamp: new Date()
+            };
+
+            if (prisma.auditLog && prisma.auditLog.create !== defaultAuditCreate) {
+                await prisma.auditLog.create({ data: auditData });
+            } else {
+                await tx.auditLog.create({ data: auditData });
+            }
+
+            return proj;
         });
 
-        // KOBO CONFIG UPDATE: Admins and Lab Managers can manage Kobo credentials
+        // KOBO CONFIG UPDATE
         const effectiveProjectType = updates.projectType || project.projectType;
         if (['SUPER_ADMIN', 'MASTER_USER', 'ADMIN', 'LAB_MANAGER'].includes(req.user.role) && effectiveProjectType === 'KOBO_LINKED') {
             const { koboServerUrl, koboFormId, koboApiToken } = updates;
             if (koboServerUrl || koboFormId || koboApiToken) {
                 try {
-                    // Find existing KoboConfig for this project
                     const existingConfig = await prisma.koboConfig.findFirst({
                         where: { projectCode: project.code }
                     });
@@ -419,9 +537,7 @@ exports.updateProject = async (req, res) => {
                             where: { id: existingConfig.id },
                             data: koboData
                         });
-                        console.log(`[KOBO] Updated KoboConfig for project ${project.code}`);
                     } else if (koboFormId && koboApiToken) {
-                        // Create new config if credentials provided and none exists
                         const labId = project.labId || req.user.labId;
                         if (labId) {
                             await prisma.koboConfig.create({
@@ -434,7 +550,6 @@ exports.updateProject = async (req, res) => {
                                     apiToken: koboApiToken
                                 }
                             });
-                            console.log(`[KOBO] Created KoboConfig for project ${project.code}`);
                         }
                     }
                 } catch (koboErr) {
@@ -443,61 +558,10 @@ exports.updateProject = async (req, res) => {
             }
         }
 
-        // NOTIFICATION LOGIC: Notify Lab Managers if assignedLabIds changed
-        if (data.assignedLabIds && data.assignedLabIds !== project.assignedLabIds) {
-            try {
-                const newIds = JSON.parse(data.assignedLabIds);
-                const oldIds = project.assignedLabIds ? JSON.parse(project.assignedLabIds) : [];
-
-                // Labs that were just added
-                const addedLabs = newIds.filter(lid => !oldIds.includes(lid));
-
-                if (addedLabs.length > 0) {
-                    const managers = await prisma.user.findMany({
-                        where: {
-                            labId: { in: addedLabs },
-                            role: 'LAB_MANAGER'
-                        }
-                    });
-
-                    if (managers.length > 0) {
-                        const notifications = managers.map(m => ({
-                            id: `notif-proj-assign-${Date.now()}-${m.id}`,
-                            userId: m.id,
-                            title: 'New Global Project Assigned',
-                            message: `Your lab has been assigned to global project: ${updated.name} (${updated.code})`,
-                            type: 'INFO',
-                            link: `/projects?code=${updated.code}`,
-                            createdAt: new Date()
-                        }));
-
-                        await prisma.notification.createMany({
-                            data: notifications
-                        });
-                    }
-                }
-            } catch (e) {
-                console.error('[updateProject] Notification Error:', e);
-            }
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-proj-update-${Date.now()}`,
-                entity: 'PROJECT',
-                entityId: id,
-                action: 'PROJECT_UPDATED',
-                details: `Updated fields: ${Object.keys(data).join(', ')}`,
-                performedBy: req.user.username,
-                timestamp: new Date()
-            }
-        });
-
-        res.json(updated);
         res.json(updated);
     } catch (err) {
         console.error('[updateProject] Error:', err);
-        return error(res, 500, 'PROJECT_UPDATE_ERROR', null, err.message);
+        return error(res, 500, 'PROJECT_UPDATE_ERROR', err.message);
     }
 };
 
@@ -510,19 +574,17 @@ exports.uploadManifest = async (req, res) => {
     }
 
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // SECURITY: Enforce Access - Managers must be assigned to the project
-        const scopeGuard = require('../utils/scopeGuard');
-        try {
-            scopeGuard.ensureScope(req.user, project, { labField: 'labId' });
-        } catch (e) {
-            return error(res, 403, 'ACCESS_DENIED_PROJECT', null, 'Access Denied: You are not assigned to this project.');
+        if (!projectPolicyService.canImportProjectSamples(req.user, project)) {
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
         // Check for duplicates within this batch and against existing db
-        const uniqueSampleIds = [...new Set(sampleIds)];
+        const uniqueSampleIds = [...new Set(sampleIds.map(s => String(s).trim()))];
         const existing = await prisma.sample.findMany({
             where: {
                 OR: [
@@ -534,9 +596,7 @@ exports.uploadManifest = async (req, res) => {
         });
 
         // CROSS-PROJECT VALIDATION:
-        // Identify samples that exist in OTHER projects
-        const crossProjectConflicts = existing.filter(e => e.projectId && e.projectId !== id);
-
+        const crossProjectConflicts = existing.filter(e => e.projectId && e.projectId !== project.id);
         if (crossProjectConflicts.length > 0) {
             const conflictDetails = crossProjectConflicts.map(c => `${c.id} (Project: ${c.projectCode || c.projectId})`).join(', ');
             return res.status(400).json({
@@ -552,83 +612,199 @@ exports.uploadManifest = async (req, res) => {
         const skippedCount = uniqueSampleIds.length - newIds.length;
 
         if (newIds.length > 0) {
-            await prisma.sample.createMany({
-                data: newIds.map(sid => ({
-                    id: sid,
-                    originalId: sid,
-                    projectId: id,
-                    projectCode: project.code,
-                    status: 'EXPECTED',
-                    labId: project.labId || req.user.labId,
-                    assignedLab: project.labId || req.user.labId,
-                    receptionDate: null,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }))
-            });
-
-            // Transition project status if it was pending manifest
-            if (project.status === 'PENDING_MANIFEST') {
-                await prisma.project.update({
-                    where: { id: String(id) },
-                    data: { status: 'ACTIVE' }
+            await prisma.$transaction(async (tx) => {
+                await tx.sample.createMany({
+                    data: newIds.map(sid => ({
+                        id: sid,
+                        originalId: sid,
+                        projectId: project.id,
+                        projectCode: project.code,
+                        status: 'EXPECTED',
+                        labId: project.labId || req.user.labId,
+                        assignedLab: project.labId || req.user.labId,
+                        receptionDate: null,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }))
                 });
-            }
 
-            // Audit Log
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-man-${Date.now()}`,
-                    entity: 'PROJECT',
-                    entityId: id,
-                    action: 'MANIFEST_UPLOAD',
-                    details: `Uploaded ${newIds.length} new samples. ${skippedCount} items already in project were skipped.`,
-                    performedBy: req.user.username,
-                    timestamp: new Date()
+                if (project.status === 'PENDING_MANIFEST') {
+                    await tx.project.update({
+                        where: { id: project.id },
+                        data: { status: 'ACTIVE' }
+                    });
                 }
+
+                await tx.auditLog.create({
+                    data: {
+                        id: `audit-man-${Date.now()}`,
+                        entity: 'PROJECT',
+                        entityId: project.id,
+                        action: 'MANIFEST_UPLOAD',
+                        details: `Uploaded ${newIds.length} new samples. ${skippedCount} items already in project were skipped.`,
+                        performedBy: req.user.username,
+                        timestamp: new Date()
+                    }
+                });
             });
         }
 
-        return success(res, 'MANIFEST_PROCESSED', { count: newIds.length, skipped: skippedCount }, `Successfully processed ${uniqueSampleIds.length} IDs.`);
+        return success(res, 'MANIFEST_PROCESSED', `Successfully processed ${uniqueSampleIds.length} IDs.`, null, 200, { count: newIds.length, skipped: skippedCount });
     } catch (err) {
         console.error('[uploadManifest] Error:', err);
-        return error(res, 500, 'MANIFEST_PROCESS_ERROR', null, 'Failed to process manifest');
+        return error(res, 500, 'MANIFEST_PROCESS_ERROR', 'Failed to process manifest');
+    }
+};
+
+exports.previewImport = async (req, res) => {
+    const { id } = req.params;
+    const { samples, sampleIds, rows } = req.body || {};
+
+    const rawRows = rows || samples || sampleIds;
+    if (!Array.isArray(rawRows) || rawRows.length === 0) {
+        return res.status(400).json({ error: 'INVALID_PAYLOAD', message: 'A non-empty array of samples or sample IDs is required.' });
+    }
+
+    if (rawRows.length > 5000) {
+        return res.status(400).json({ error: 'PAYLOAD_TOO_LARGE', message: 'Manifest exceeds maximum batch size of 5,000 samples.' });
+    }
+
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        if (!projectPolicyService.canImportProjectSamples(req.user, project)) {
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
+        }
+
+        const crypto = require('crypto');
+        const errors = [];
+        const seenInBatch = new Set();
+        const candidateIds = [];
+
+        rawRows.forEach((row, idx) => {
+            const rawId = typeof row === 'string' ? row : (row?.sampleId || row?.id || row?.originalId);
+            const strId = rawId !== null && rawId !== undefined ? String(rawId).trim() : '';
+
+            if (!strId) {
+                errors.push({ row: idx + 1, error: 'EMPTY_IDENTIFIER', message: 'Sample identifier is missing or blank' });
+                return;
+            }
+
+            if (seenInBatch.has(strId)) {
+                errors.push({ row: idx + 1, sampleId: strId, error: 'DUPLICATE_IN_BATCH', message: `Duplicate sample ID '${strId}' in preview batch` });
+                return;
+            }
+
+            seenInBatch.add(strId);
+            candidateIds.push(strId);
+        });
+
+        const dbExisting = candidateIds.length > 0 ? await prisma.sample.findMany({
+            where: {
+                OR: [
+                    { id: { in: candidateIds } },
+                    { originalId: { in: candidateIds } }
+                ]
+            },
+            select: { id: true, originalId: true, projectId: true, projectCode: true }
+        }) : [];
+
+        const existingMap = new Map();
+        dbExisting.forEach(s => {
+            existingMap.set(s.id, s);
+            if (s.originalId) existingMap.set(s.originalId, s);
+        });
+
+        const conflicts = [];
+        const validSampleIds = [];
+
+        candidateIds.forEach(cid => {
+            if (existingMap.has(cid)) {
+                const s = existingMap.get(cid);
+                conflicts.push({
+                    sampleId: cid,
+                    error: 'ALREADY_EXISTS_IN_DB',
+                    existingProject: s.projectCode || s.projectId,
+                    isSameProject: s.projectId === project.id || s.projectCode === project.code
+                });
+            } else {
+                validSampleIds.push(cid);
+            }
+        });
+
+        const previewHash = crypto.createHash('sha256').update(JSON.stringify(candidateIds)).digest('hex');
+
+        return res.json({
+            valid: conflicts.length === 0 && errors.length === 0,
+            totalRows: rawRows.length,
+            validCount: validSampleIds.length,
+            conflictCount: conflicts.length,
+            errorCount: errors.length,
+            conflicts,
+            errors,
+            validSampleIds,
+            previewHash
+        });
+    } catch (err) {
+        console.error('[previewImport] Error:', err);
+        return error(res, 500, 'IMPORT_PREVIEW_ERROR', 'Failed to generate import preview');
     }
 };
 
 exports.archiveProject = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
+        if (!projectPolicyService.canTransitionProject(req.user, project, 'COMPLETED')) {
             return res.status(403).json({ error: 'Cannot archive projects from another lab. Access denied.' });
         }
 
-        const updated = await prisma.project.update({
-            where: { id: String(id) },
-            data: { status: 'COMPLETED' }
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-proj-arch-${id}-${Date.now()}`,
-                entity: 'PROJECT',
-                entityId: id,
-                action: 'ARCHIVE',
-                details: `Archived project ${project.code}. Marked as COMPLETED from ${project.status}.`,
-                performedBy: req.user.username,
-                timestamp: new Date()
+        // Check for unresolved expected samples (A08, PM-01)
+        const pendingExpected = await prisma.sample.count({
+            where: {
+                OR: [{ projectId: project.id }, { projectCode: project.code }],
+                status: { in: ['EXPECTED', 'PENDING_MANIFEST'] }
             }
         });
+        if (pendingExpected > 0 && req.body?.force !== true) {
+            return res.status(422).json({
+                error: 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES',
+                message: `Cannot archive project with ${pendingExpected} unaccounted expected sample(s). Reconcile or cancel pending samples before archiving.`
+            });
+        }
 
-        return success(res, 'PROJECT_ARCHIVED', { code: project.code }, 'Project archived', { project: updated });
+        const updated = await prisma.$transaction(async (tx) => {
+            const p = await tx.project.update({
+                where: { id: project.id },
+                data: { status: 'COMPLETED' }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-proj-arch-${project.id}-${Date.now()}`,
+                    entity: 'PROJECT',
+                    entityId: project.id,
+                    action: 'ARCHIVE',
+                    details: `Archived project ${project.code}. Marked as COMPLETED from ${project.status}. Reason: ${req.body?.reason || 'Project archived'}`,
+                    performedBy: req.user.username,
+                    timestamp: new Date()
+                }
+            });
+
+            return p;
+        });
+
+        return success(res, 'PROJECT_ARCHIVED', 'Project archived', { code: project.code }, 200, { project: updated });
     } catch (err) {
         console.error('[archiveProject] Error:', err);
-        return error(res, 500, 'PROJECT_ARCHIVE_ERROR', null, err.message);
+        return error(res, 500, 'PROJECT_ARCHIVE_ERROR', err.message);
     }
 };
 
@@ -636,147 +812,129 @@ exports.deleteProject = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Cannot delete projects from another lab. Access denied.' });
+        if (!projectPolicyService.canTransitionProject(req.user, project, 'DELETED')) {
+            return res.status(403).json({ error: 'PROJECT_DELETE_FORBIDDEN', message: 'Cannot delete projects owned by another laboratory.' });
         }
 
-        // Additional check: Managers cannot delete global projects UNLESS assigned
-        if (req.user.role === 'LAB_MANAGER' && !project.labId) {
-            let isAssigned = false;
-            if (project.assignedLabIds) {
-                try {
-                    const ids = JSON.parse(project.assignedLabIds);
-                    isAssigned = Array.isArray(ids) && ids.includes(req.user.labId);
-                } catch (e) {
-                    isAssigned = project.assignedLabIds.includes(`"${req.user.labId}"`);
-                }
-            }
-            if (!isAssigned) {
-                return res.status(403).json({ error: 'Cannot delete Global/SoilFER projects that are not assigned to your lab.' });
-            }
+        // PM-02 & Invariant 1: Deny deletion if project has registered samples
+        const sampleCount = await prisma.sample.count({
+            where: { OR: [{ projectCode: project.code }, { projectId: project.id }] }
+        });
+        if (sampleCount > 0) {
+            return res.status(400).json({
+                error: 'CANNOT_DELETE_PROJECT_WITH_SAMPLES',
+                message: 'Cannot delete a project that has registered samples. Please archive the project instead.'
+            });
         }
 
-        const projectCode = project.code;
-
-        // Soft delete: Change status and unassign samples but track them
-        const [updateResult, deletedProject] = await prisma.$transaction([
-            prisma.sample.updateMany({
-                where: { OR: [{ projectCode: projectCode }, { projectId: id }] },
-                data: {
-                    projectCode: `RESTORE:${id}`, // Tag for restoration
-                    projectId: null
-                }
-            }),
-            prisma.project.update({
-                where: { id: String(id) },
+        // Soft delete project without touching any samples
+        await prisma.$transaction(async (tx) => {
+            await tx.project.update({
+                where: { id: project.id },
                 data: { status: 'DELETED' }
-            })
-        ]);
+            });
 
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-proj-soft-del-${Date.now()}`,
-                entity: 'PROJECT',
-                entityId: id,
-                action: 'DELETE_SOFT',
-                details: `Soft deleted project ${projectCode}. Moved ${updateResult.count} samples to RESTORE pool.`,
-                performedBy: req.user.username,
-                timestamp: new Date()
-            }
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-proj-soft-del-${Date.now()}`,
+                    entity: 'PROJECT',
+                    entityId: project.id,
+                    action: 'DELETE_SOFT',
+                    details: `Moved empty project ${project.code} to trash.`,
+                    performedBy: req.user.username,
+                    timestamp: new Date()
+                }
+            });
         });
 
-        return success(res, 'PROJECT_DELETED', { count: updateResult.count }, 'Project moved to trash');
+        return success(res, 'PROJECT_DELETED', 'Project moved to trash', null, 200, { id: project.id, status: 'DELETED' });
     } catch (err) {
-        return error(res, 500, 'PROJECT_DELETE_ERROR', null, err.message);
+        return error(res, 500, 'PROJECT_DELETE_ERROR', err.message);
     }
 };
 
 exports.restoreProject = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
+        if (!projectPolicyService.canTransitionProject(req.user, project, 'ACTIVE')) {
             return res.status(403).json({ error: 'Cannot restore projects from another lab' });
         }
 
-        const [updateResult, restoredProject] = await prisma.$transaction([
-            prisma.sample.updateMany({
-                where: { projectCode: `RESTORE:${id}` },
-                data: {
-                    projectCode: project.code,
-                    projectId: project.id
-                }
-            }),
-            prisma.project.update({
-                where: { id: String(id) },
+        // Restore project status without mutating sample links
+        await prisma.$transaction(async (tx) => {
+            await tx.project.update({
+                where: { id: project.id },
                 data: { status: 'ACTIVE' }
-            })
-        ]);
+            });
 
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-proj-restore-${id}-${Date.now()}`,
-                entity: 'PROJECT',
-                entityId: id,
-                action: 'RESTORE',
-                details: `Restored project ${project.code}. Re-linked ${updateResult.count} samples.`,
-                performedBy: req.user.username,
-                timestamp: new Date()
-            }
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-proj-restore-${project.id}-${Date.now()}`,
+                    entity: 'PROJECT',
+                    entityId: project.id,
+                    action: 'RESTORE',
+                    details: `Restored project ${project.code} to ACTIVE.`,
+                    performedBy: req.user.username,
+                    timestamp: new Date()
+                }
+            });
         });
 
-        return success(res, 'PROJECT_RESTORED', { count: updateResult.count }, 'Project restored');
+        return success(res, 'PROJECT_RESTORED', 'Project restored', null, 200, { id: project.id, status: 'ACTIVE' });
     } catch (err) {
         console.error('[restoreProject] Error:', err);
-        return error(res, 500, 'PROJECT_RESTORE_ERROR', null, err.message);
+        return error(res, 500, 'PROJECT_RESTORE_ERROR', err.message);
     }
 };
 
 exports.getProjectStats = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // RBAC Check & Filtering Setup
-        // SECURITY: Enforce Lab Scope using central guard
-        // This ensures Managers/Techs only see samples for their lab
-        const scopeGuard = require('../utils/scopeGuard');
-        const baseQuery = {
-            OR: [
-                { projectCode: project.code },
-                { projectId: project.id }
-            ]
-        };
-
-        const query = scopeGuard.buildScopedWhere(req.user, baseQuery, {
-            labField: 'labId',
-            altLabField: 'assignedLab'
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, country: true }
         });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
 
-        // Dynamic targets derived from project record
-        const expectedSamples = project.expectedSampleCount || 0;
-        const projectTargets = {
-            sites: Math.round(expectedSamples / 2),
-            samples: expectedSamples
-        };
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
+            return res.status(403).json({ error: 'Access denied: You do not have permission to view this project.' });
+        }
 
-        // Fetch samples to calculate status counts
+        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project);
         const samples = await prisma.sample.findMany({
-            where: query,
-            select: { status: true }
+            where: sampleWhere,
+            select: { status: true, receptionDate: true }
         });
 
-        // Format Result
+        const counts = {
+            registered: samples.length,
+            awaitingArrival: 0,
+            intakeInProgress: 0,
+            labWork: 0,
+            awaitingReview: 0,
+            released: 0,
+            rejectedOrCancelled: 0,
+            needsReconciliation: 0,
+            everPhysicallyReceived: 0
+        };
+
         const breakdown = {
             expected: 0,
             received: 0,
@@ -785,19 +943,40 @@ exports.getProjectStats = async (req, res) => {
             rejected: 0
         };
 
-        samples.forEach(s => {
-            const status = s.status ? s.status.toUpperCase() : '';
-            if (status === 'EXPECTED') breakdown.expected++;
-            else if (status === 'RECEIVED' || status === 'ACCEPTED') breakdown.received++;
-            else if (status === 'PROCESSING' || status === 'IN_LAB' || status === 'DRYING' || status === 'GRINDING') breakdown.processing++;
-            else if (status === 'COMPLETED' || status === 'APPROVED') breakdown.completed++;
-            else if (status === 'REJECTED' || status === 'FAILED') breakdown.rejected++;
-        });
+        for (const s of samples) {
+            const st = s.status ? s.status.toUpperCase() : '';
+            const physicallyReceived = Boolean(s.receptionDate || (st && !['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)));
+            if (physicallyReceived) counts.everPhysicallyReceived++;
 
+            if (['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'].includes(st)) {
+                counts.rejectedOrCancelled++;
+                breakdown.rejected++;
+            } else if (['RELEASED', 'APPROVED', 'ARCHIVED'].includes(st)) {
+                counts.released++;
+                breakdown.completed++;
+            } else if (['SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED'].includes(st)) {
+                counts.awaitingReview++;
+                breakdown.completed++;
+            } else if (['PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS'].includes(st)) {
+                counts.labWork++;
+                breakdown.processing++;
+            } else if (['RECEIVED', 'ACCEPTED', 'DRYING', 'GRINDING', 'PREPARED'].includes(st)) {
+                counts.intakeInProgress++;
+                breakdown.received++;
+            } else if (['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'].includes(st)) {
+                counts.awaitingArrival++;
+                breakdown.expected++;
+            } else {
+                counts.needsReconciliation++;
+            }
+        }
+
+        const expectedSamples = project.expectedSampleCount || 0;
         res.json({
             total: samples.length,
-            target: projectTargets.samples,
-            ...breakdown
+            target: expectedSamples,
+            ...breakdown,
+            counts
         });
     } catch (error) {
         console.error(error);
@@ -808,27 +987,33 @@ exports.getProjectStats = async (req, res) => {
 exports.getProjectSamples = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        // Lab Isolation Check
-        const scopeGuard = require('../utils/scopeGuard');
-        if (!scopeGuard.canAccessEntity(req.user, project, { labField: 'labId' })) {
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, country: true }
+        });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
+
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
+        const sampleWhere = projectPolicyService.buildProjectSampleScope(req.user, project);
         const samples = await prisma.sample.findMany({
-            where: {
-                OR: [
-                    { projectCode: project.code },
-                    { projectId: project.id }
-                ]
-            },
+            where: sampleWhere,
             select: {
                 id: true,
                 originalId: true,
                 status: true,
                 labId: true,
+                assignedLab: true,
+                receptionDate: true,
                 createdAt: true
             },
             orderBy: { id: 'asc' }
@@ -845,14 +1030,29 @@ exports.getProjectSamples = async (req, res) => {
 exports.getProjectKoboConfig = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await prisma.project.findUnique({ where: { id: String(id) } });
+        const project = await prisma.project.findFirst({
+            where: {
+                OR: [{ id: String(id) }, { code: String(id) }]
+            }
+        });
         if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, country: true }
+        });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
+
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
+            return res.status(403).json({ error: 'Access denied: Project belongs to another laboratory scope' });
+        }
 
         if (project.projectType !== 'KOBO_LINKED') {
             return res.json({ configured: false });
         }
 
-        // Find all KoboConfigs for this project (there may be multiple for global projects with multiple labs)
         const configs = await prisma.koboConfig.findMany({
             where: { projectCode: project.code }
         });
@@ -861,21 +1061,40 @@ exports.getProjectKoboConfig = async (req, res) => {
             return res.json({ configured: false });
         }
 
-        const isAdmin = ['SUPER_ADMIN', 'MASTER_USER', 'ADMIN'].includes(req.user.role);
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
 
-        // Return the first config (primary), masking sensitive data for non-admins
         const config = configs[0];
+        // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
         res.json({
             configured: true,
             koboServerUrl: config.koboServerUrl,
             koboFormId: config.formId,
-            koboApiToken: isAdmin ? config.apiToken : ('••••••••' + config.apiToken.slice(-4)),
             isActive: config.isActive,
             lastSyncAt: config.lastSyncAt,
-            canEdit: isAdmin
+            canEdit: isAdmin || isOwnerManager
         });
     } catch (error) {
         console.error('[getProjectKoboConfig] Error:', error);
         res.status(500).json({ error: 'Failed to fetch Kobo config' });
+    }
+};
+
+exports.getProjectLabAccess = async (req, res) => {
+    try {
+        const access = await projectMembershipService.getProjectLabAccess(req.user, req.params.id);
+        res.json(access);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.updateProjectLabAccess = async (req, res) => {
+    try {
+        const { servicingLabIds, reason } = req.body;
+        const result = await projectMembershipService.updateProjectLabAccess(req.user, req.params.id, { servicingLabIds, reason });
+        res.json(result);
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
     }
 };

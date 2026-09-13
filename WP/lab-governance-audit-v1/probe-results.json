@@ -1,0 +1,192 @@
+{
+  "executedAt": "2026-09-11T08:27:25.761Z",
+  "environment": "VM + synthetic adapters; no HTTP, production writes or DB access",
+  "semantics": "reproduced=true confirms described behavior, including explicitly labelled positive controls",
+  "results": [
+    {
+      "id": "P01",
+      "description": "Manager A can disable lab B",
+      "reproduced": false,
+      "observedStatus": 403
+    },
+    {
+      "id": "P02",
+      "description": "Lab reset route accepts another lab and privileged target",
+      "reproduced": false,
+      "observedStatus": 403,
+      "resetInvalidatesTokenVersion": false
+    },
+    {
+      "id": "P03",
+      "description": "Main Users API denies same cross-lab edit (positive control)",
+      "reproduced": true,
+      "observedStatus": 403
+    },
+    {
+      "id": "P04",
+      "description": "Lab reactivation leaves staff disabled",
+      "reproduced": false
+    },
+    {
+      "id": "P05",
+      "description": "Lab PUT forwards immutable and lifecycle fields",
+      "reproduced": false,
+      "auditRecorded": false,
+      "staffCascade": false
+    },
+    {
+      "id": "P06",
+      "description": "Lab manager can create an unrelated laboratory",
+      "reproduced": false,
+      "automaticAccounts": 0
+    },
+    {
+      "id": "P07",
+      "description": "Authenticated viewer receives management notes for all labs",
+      "reproduced": false
+    },
+    {
+      "id": "P08",
+      "description": "Audit failure occurs after lab and staff changes",
+      "reproduced": false
+    },
+    {
+      "id": "P09",
+      "description": "Self-deletion has no last-administrator guard at handler boundary",
+      "reproduced": false,
+      "limit": "Synthetic adapter has no foreign-key constraints; database may reject users with references."
+    },
+    {
+      "id": "P10",
+      "description": "Empty role value is forwarded to update",
+      "reproduced": false
+    },
+    {
+      "id": "P11",
+      "description": "New user accepts a nonexistent laboratory",
+      "reproduced": false
+    },
+    {
+      "id": "P12",
+      "description": "National Users query refers to nonexistent User.country",
+      "reproduced": false,
+      "limit": "Query construction and schema checked; Prisma validation failure not executed against a database."
+    },
+    {
+      "id": "P13",
+      "description": "Empty national country scope produces an unfiltered Users query",
+      "reproduced": false,
+      "harnessError": "Cannot read properties of undefined (reading '1')"
+    },
+    {
+      "id": "P14",
+      "description": "Manager own profile save rejects unchanged scope arrays",
+      "reproduced": true
+    },
+    {
+      "id": "P15",
+      "description": "Ordinary lab manager can manage a same-lab project manager",
+      "reproduced": false
+    },
+    {
+      "id": "P16",
+      "description": "Country metadata grants manager A access to another lab sample",
+      "reproduced": false
+    },
+    {
+      "id": "P17",
+      "description": "National role falls through Projects list to empty",
+      "reproduced": true
+    },
+    {
+      "id": "P18",
+      "description": "Junction-only project membership rejected before junction lookup",
+      "reproduced": false
+    },
+    {
+      "id": "P19",
+      "description": "Project Manager project membership ignored by detail scope guard",
+      "reproduced": false
+    },
+    {
+      "id": "P20",
+      "description": "Impersonation JWT misses current target token version",
+      "reproduced": false,
+      "observedStatus": 200
+    },
+    {
+      "id": "P21",
+      "description": "Active user of inactive lab passes HTTP authentication",
+      "reproduced": false
+    },
+    {
+      "id": "P22",
+      "description": "Disabled user is denied by HTTP authentication (positive control)",
+      "reproduced": true
+    },
+    {
+      "id": "P23",
+      "description": "Cached offline pack returned to a different user/lab",
+      "reproduced": false
+    },
+    {
+      "id": "P24",
+      "description": "Offline pack with no lab scope builds a global sample query",
+      "reproduced": false,
+      "harnessError": "Laboratory scope is required to prepare offline work pack"
+    },
+    {
+      "id": "P25",
+      "description": "Offline result command reaches write path as a viewer on another lab approved item",
+      "reproduced": false,
+      "limit": "Persistence, receipts and scientific parser are synthetic; demonstrates absent authorization/state gates in actual sync handler."
+    },
+    {
+      "id": "P26",
+      "description": "Offline draft reports applied without persisting a draft",
+      "reproduced": false
+    },
+    {
+      "id": "P27",
+      "description": "Manager can change equipment status in another laboratory",
+      "reproduced": false
+    },
+    {
+      "id": "P28",
+      "description": "National user can retrieve raw Kobo credential from unrelated project",
+      "reproduced": false
+    },
+    {
+      "id": "P29",
+      "description": "SIS JWT path accepts a token version revoked by HTTP auth",
+      "reproduced": false
+    },
+    {
+      "id": "P30",
+      "description": "National dashboard selection can switch to an out-of-country lab",
+      "reproduced": false
+    },
+    {
+      "id": "P31",
+      "description": "Dashboard local-day interval is always 24 hours across DST transition",
+      "reproduced": false,
+      "actualEnd": "2026-03-29T23:00:00.000Z",
+      "expectedEnd": "2026-03-29T23:00:00.000Z"
+    }
+  ],
+  "sourceHashes": {
+    "server/config/roles.js": "599e3863953acb664dc1514298e6a7b6d9810ab61d773a8447e83ef5bc4d0b6b",
+    "server/utils/scopeGuard.js": "064aac174de6c57b60fb5db0d54070dacc19bc64ed8dd1b75121610c99dd8d32",
+    "server/middleware/authMiddleware.js": "54c516763470d13f4369529db82b8882f5253ea86cde65fdd7d1344e3466ce5b",
+    "server/routes/labRoutes.js": "837bb250e14d62e4729fee8c68bee408a0800a852974432d96d9c5cf282dfeb8",
+    "server/controllers/userController.js": "5ad9ba56959b241126c485bb8407f60e5737568b7df6fef03f1dd28d0f711d55",
+    "server/controllers/projectController.js": "13a81ac9be4c26a73d99ae43b1040ab9336f8fd2a80421e5b7512e2ab192f87a",
+    "server/controllers/equipmentController.js": "1c0ad09607c102711ebf0685f1a15ee4403716d36f45d8e50070a1a38249dbfa",
+    "server/controllers/authController.js": "433d5642730fa97905e342df40bf129729cde3532671a1f548d59080624ca277",
+    "server/controllers/offlineController.js": "9ceecfc804945a3874a1cf1e89161fcb9e80fb3707859a737c6f9f50a9e4eba5",
+    "server/services/workPackService.js": "734c141756e7b09764bbfb6de56c7a98d29011c2e086f59759330326f15c634a",
+    "server/services/syncService.js": "90ee01be3881c72f6f15656ceae80a50b7b619160ece4c1fab226b14d7c3525b",
+    "server/middleware/apiKeyAuth.js": "9a806509e0d0e23dbb1bd2e46b25784970a1a0873006294c799a51dfba15c0db",
+    "server/services/dashboardScope.js": "02e0fe3abd9f7e108784711aac211f7833be48610c1034ad7fe2cf57b54b3129"
+  }
+}

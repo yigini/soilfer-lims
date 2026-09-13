@@ -69,14 +69,17 @@ const apiKeyAuth = async (req, res, next) => {
         // 2. Otherwise verify as User JWT Token
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
-            const user = await prisma.user.findUnique({
-                where: { id: String(decoded.id) }
-            });
-
-            if (!user || !user.isActive) {
-                return res.status(401).json({ error: 'Unauthorized', message: 'User invalid or inactive.' });
+            const { validateUserPrincipal } = require('../services/sessionValidationService');
+            const decision = await validateUserPrincipal(decoded, { currentPath: req.originalUrl || req.url });
+            if (!decision.valid) {
+                return res.status(decision.statusCode || 401).json({
+                    error: decision.error,
+                    code: decision.code || decision.error,
+                    message: decision.message
+                });
             }
 
+            const user = decision.user;
             req.sisAuth = {
                 type: 'JWT_USER',
                 name: user.name || user.username,

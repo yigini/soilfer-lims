@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-09-11T16:19:34.268Z",
+  "totalTests": 8,
+  "passed": 8,
+  "failed": 0,
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "A40_01",
+      "description": "Scoped lab deep link loads target laboratory view",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A40_02",
+      "description": "Help Centre route connects and renders knowledge base guide content",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A40_03",
+      "description": "Reports route /reports safely navigates to result reports interface",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A40_04",
+      "description": "Sample Workflow Map deep link renders sample graph with stages, rejecting missing-sample error",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A40_05",
+      "description": "Technician Workbench renders assigned method and numeric determination editor",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "id": "A40_06",
+      "description": "Technician enters draft determination through the actual editor input",
+      "expected": "7.15",
+      "actual": "7.15",
+      "passed": true
+    },
+    {
+      "id": "A40_07",
+      "description": "Offline draft survives client reload and is restored in the actual editor input",
+      "expected": "7.15",
+      "actual": "7.15",
+      "passed": true
+    },
+    {
+      "id": "A40_08",
+      "description": "Baseline database dev.db hash strictly preserved untouched",
+      "expected": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "actual": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+      "passed": true
+    }
+  ]
+}

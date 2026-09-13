@@ -14,8 +14,13 @@ router.delete('/:id', checkPermission('ARCHIVE_PROJECTS'), projectController.del
 router.post('/:id/archive', checkPermission('ARCHIVE_PROJECTS'), projectController.archiveProject);
 router.post('/:id/restore', checkPermission('ARCHIVE_PROJECTS'), projectController.restoreProject);
 router.post('/:id/manifest', checkPermission('MANAGE_PROJECTS'), projectController.uploadManifest);
+router.post('/:id/imports/preview', checkPermission('MANAGE_PROJECTS'), projectController.previewImport);
 router.get('/:id/stats', checkPermission('VIEW_SAMPLES'), projectController.getProjectStats);
 router.get('/:id/samples', checkPermission('VIEW_SAMPLES'), projectController.getProjectSamples);
 router.get('/:id/kobo-config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
+router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
+
+router.get('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.getProjectLabAccess);
+router.patch('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.updateProjectLabAccess);
 
 module.exports = router;

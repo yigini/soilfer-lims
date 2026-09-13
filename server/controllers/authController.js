@@ -113,6 +113,11 @@ exports.changePassword = async (req, res) => {
             }
         });
 
+        try {
+            const wsServer = require('../wsServer');
+            wsServer.revokeUserSockets(userId);
+        } catch (e) {}
+
         // Issue freshly signed JWT with new tokenVersion
         const newToken = jwt.sign(
             { id: user.id, username: user.username, role: user.role, tokenVersion: newVersion },
@@ -148,13 +153,14 @@ exports.impersonate = async (req, res) => {
             return error(res, 403, 'AUTH.FORBIDDEN', 'Cannot impersonate another Super Admin');
         }
 
-        // Mint short-lived token (30m) with actor claim
+        // Mint short-lived token (30m) with actor claim and tokenVersions
         const token = jwt.sign(
             {
                 id: targetUser.id,
                 username: targetUser.username,
                 role: targetUser.role,
-                act: { id: adminUser.id, username: adminUser.username }
+                tokenVersion: targetUser.tokenVersion || 0,
+                act: { id: adminUser.id, username: adminUser.username, tokenVersion: adminUser.tokenVersion || 0 }
             },
             SECRET_KEY,
             { expiresIn: '30m' }
@@ -259,5 +265,76 @@ exports.updatePreferences = async (req, res) => {
     } catch (err) {
         console.error('[AUTH] Update Preferences Error:', err);
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');
+    }
+};
+
+
+exports.updateProfile = async (req, res) => {
+    const actor = req.user;
+    if (!actor) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Allowlist only safe self-service fields
+    const allowedKeys = ['name', 'language', 'themePreference'];
+    const forbiddenKeys = ['role', 'labId', 'countries', 'projects', 'isActive', 'email', 'username', 'tokenVersion', 'password'];
+    
+    const bodyKeys = Object.keys(req.body || {});
+    const attemptedForbidden = bodyKeys.filter(k => forbiddenKeys.includes(k) || !allowedKeys.includes(k));
+    if (attemptedForbidden.length > 0) {
+        return res.status(400).json({ 
+            error: `Forbidden or invalid fields in profile update: ${attemptedForbidden.join(', ')}`,
+            code: 'FORBIDDEN_PROFILE_FIELD' 
+        });
+    }
+
+    if (bodyKeys.length === 0) {
+        return res.status(400).json({ error: 'At least one field must be provided for update', code: 'EMPTY_PAYLOAD' });
+    }
+
+    const { name, language, themePreference } = req.body;
+    const updateData = {};
+
+    if (name !== undefined) {
+        if (!name || typeof name !== 'string' || !name.trim()) {
+            return res.status(400).json({ error: 'Name must be a non-empty string', code: 'INVALID_NAME' });
+        }
+        updateData.name = name.trim();
+    }
+
+    if (themePreference !== undefined) {
+        if (!['light', 'dark'].includes(themePreference)) {
+            return res.status(400).json({ error: 'Theme preference must be "light" or "dark"', code: 'INVALID_THEME' });
+        }
+        updateData.themePreference = themePreference;
+    }
+
+    if (language !== undefined) {
+        const { matchSupportedLocale } = require('../utils/localeResolver');
+        const matched = matchSupportedLocale(language);
+        if (!matched) {
+            return res.status(400).json({ error: `Unsupported language: ${language}`, code: 'INVALID_LANGUAGE' });
+        }
+        updateData.language = matched;
+    }
+
+    try {
+        const updated = await prisma.user.update({
+            where: { id: String(actor.id) },
+            data: updateData,
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                email: true,
+                role: true,
+                labId: true,
+                language: true,
+                themePreference: true
+            }
+        });
+
+        res.json({ message: 'Profile updated successfully', user: updated });
+    } catch (err) {
+        console.error('[AUTH] updateProfile error:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };

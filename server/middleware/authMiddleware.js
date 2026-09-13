@@ -23,26 +23,34 @@ const verifyToken = async (req, res, next) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         console.log(`[AUTH] Verifying token for ID: ${decoded.id} (Type: ${typeof decoded.id})`);
 
-        const user = await prisma.user.findUnique({
-            where: { id: String(decoded.id) }
-        });
+        const { validateUserPrincipal } = require('../services/sessionValidationService');
+        const currentPath = (req.baseUrl || '') + (req.path || '');
+        const decision = await validateUserPrincipal(decoded, { currentPath });
 
-        if (!user) {
-            console.error(`[AUTH] User NOT FOUND for ID: ${decoded.id}`);
-            return res.status(401).json({ error: 'User invalid' });
+        if (!decision.valid) {
+            if (decision.isPasswordChangeRequired) {
+                return res.status(403).json({
+                    error: 'PASSWORD_CHANGE_REQUIRED',
+                    code: 'PASSWORD_CHANGE_REQUIRED',
+                    message: decision.message
+                });
+            }
+            return res.status(decision.statusCode || 401).json({
+                error: decision.error,
+                code: decision.code || decision.error,
+                message: decision.message
+            });
         }
 
-        if (user.isActive === false) {
-            console.warn(`[AUTH] Access denied for deactivated user ID: ${user.id} (${user.username})`);
-            return res.status(401).json({ error: 'Account has been deactivated' });
-        }
+        const user = decision.user;
 
-        // Check session tokenVersion invalidation
-        const dbTokenVersion = user.tokenVersion || 0;
-        const jwtTokenVersion = decoded.tokenVersion !== undefined ? decoded.tokenVersion : 0;
-        if (jwtTokenVersion < dbTokenVersion) {
-            console.warn(`[AUTH] Token invalidated by password change for user ID: ${user.id}`);
-            return res.status(401).json({ error: 'SESSION_INVALIDATED', message: 'Token has been invalidated. Please log in again.' });
+        // Resolve lab operational status without blocking basic authentication (IR-10)
+        if (user.labId && user.role !== 'SUPER_ADMIN') {
+            const lab = await prisma.lab.findUnique({
+                where: { id: user.labId },
+                select: { isActive: true }
+            });
+            user.labIsActive = lab ? lab.isActive : true;
         }
 
         // Sanitize and Parse JSON fields for SQLite
@@ -57,18 +65,6 @@ const verifyToken = async (req, res, next) => {
             projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
             permissions: getPermissionsForRole(user.role)
         };
-
-        // Enforce mustChangePassword gate on all non-whitelisted endpoints
-        if (user.mustChangePassword) {
-            const allowedPaths = ['/api/auth/me', '/api/auth/change-password', '/api/auth/logout'];
-            const currentPath = (req.baseUrl || '') + (req.path || '');
-            if (!allowedPaths.some(p => currentPath.includes(p))) {
-                return res.status(403).json({
-                    error: 'PASSWORD_CHANGE_REQUIRED',
-                    message: 'You must change your password before proceeding to other features.'
-                });
-            }
-        }
 
         // Sync locale with user preference
         if (req.user.language) {

@@ -31,8 +31,18 @@ export const SyncProvider = ({ children }) => {
     const refreshCounts = useCallback(async () => {
         try {
             const allOps = await getAllOutboxOperations();
-            const pending = allOps.filter(o => o.status === 'PENDING' || o.status === 'SYNCING');
-            const conflicts = allOps.filter(o => o.status === 'CONFLICT' || o.status === 'REJECTED');
+            const activeId = user?.id || user?.userId || null;
+            const activeUsername = user?.username || null;
+            const allowed = new Set([activeId, activeUsername].filter(Boolean));
+
+            const pending = allOps.filter(o => 
+                (o.status === 'PENDING' || o.status === 'SYNCING') &&
+                (allowed.size === 0 ? false : (typeof o.userId === 'string' && allowed.has(o.userId.trim())))
+            );
+            const conflicts = allOps.filter(o => 
+                (o.status === 'CONFLICT' || o.status === 'REJECTED') &&
+                (allowed.size === 0 ? false : (typeof o.userId === 'string' && allowed.has(o.userId.trim())))
+            );
             setPendingCount(pending.length);
             setConflictCount(conflicts.length);
 
@@ -46,7 +56,7 @@ export const SyncProvider = ({ children }) => {
         } catch (e) {
             console.error('[SYNC_CONTEXT] Error refreshing counts:', e);
         }
-    }, [syncStatus]);
+    }, [syncStatus, user]);
 
     // Check active work pack
     const refreshPack = useCallback(async () => {
@@ -64,8 +74,8 @@ export const SyncProvider = ({ children }) => {
         const handleOnline = () => {
             setIsOnline(true);
             setSyncStatus('idle');
-            // Auto sync when coming back online
-            triggerSync().catch(() => {});
+            // Auto sync when coming back online using active user context
+            triggerSync(null, user).catch(() => {});
         };
 
         const handleOffline = () => {
@@ -108,12 +118,27 @@ export const SyncProvider = ({ children }) => {
         };
     }, [refreshCounts, refreshPack]);
 
-    const performSync = async () => {
+    const performSync = useCallback(async () => {
         setSyncStatus('syncing');
-        const res = await triggerSync();
+        const res = await triggerSync(null, user);
         refreshCounts();
         return res;
-    };
+    }, [user, refreshCounts]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.soilferSync = {
+                recordSyncOperation,
+                triggerSync: performSync,
+                refreshCounts
+            };
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                delete window.soilferSync;
+            }
+        };
+    }, [performSync, refreshCounts]);
 
     const downloadPack = async (options) => {
         const bundle = await downloadAndActivateWorkPack(options);

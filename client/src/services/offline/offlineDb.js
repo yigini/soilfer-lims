@@ -13,6 +13,10 @@ const DB_VERSION = 3;
 
 let dbPromise = null;
 
+export function resetOfflineDbConnection() {
+    dbPromise = null;
+}
+
 export function getOfflineDb() {
     if (dbPromise) return dbPromise;
 
@@ -141,13 +145,80 @@ export async function queueOutboxOperation(op) {
     op.retries = op.retries || 0;
 
     await withStore('outbox', 'readwrite', (store) => {
-        store.put(op);
+        return new Promise((resolve, reject) => {
+            if (op.type === 'SAVE_WORK_DRAFT') {
+                const targetId = op.target || op.payload?.workItemId;
+                const req = store.getAll();
+                req.onsuccess = () => {
+                    const existingOps = req.result || [];
+                    let maxSeq = op.draftSeq || op.payload?.draftVersion || 0;
+                    for (const prev of existingOps) {
+                        if (
+                            prev.type === 'SAVE_WORK_DRAFT' &&
+                            (prev.target === targetId || prev.payload?.workItemId === targetId) &&
+                            (prev.userId === op.userId || (typeof prev.userId === 'string' && prev.userId.trim() === String(op.userId).trim())) &&
+                            prev.status === 'PENDING'
+                        ) {
+                            const prevSeq = prev.draftSeq || prev.payload?.draftVersion || prev.payload?.clientDraftVersion || 0;
+                            if (prevSeq > maxSeq) maxSeq = prevSeq;
+                            // Coalesce: remove superseded pending draft operation on this device
+                            store.delete(prev.operationId);
+                        }
+                    }
+                    if (!op.payload) op.payload = {};
+                    const newSeq = Math.max(maxSeq + 1, op.payload.draftVersion || 1);
+                    op.draftSeq = newSeq;
+                    op.payload.draftVersion = newSeq;
+                    op.payload.clientDraftVersion = newSeq;
+                    store.put(op);
+                    resolve(op);
+                };
+                req.onerror = () => reject(req.error);
+            } else {
+                store.put(op);
+                resolve(op);
+            }
+        });
     });
 
     return op;
 }
 
-export async function getPendingOutboxOperations() {
+export async function getPendingOutboxOperations(userOrId, legacyUsername = null) {
+    let canonicalId = null;
+    let legacyUser = null;
+
+    if (typeof userOrId === 'string' && userOrId.trim()) {
+        canonicalId = userOrId.trim();
+        if (typeof legacyUsername === 'string' && legacyUsername.trim()) {
+            legacyUser = legacyUsername.trim();
+        }
+    } else if (userOrId && typeof userOrId === 'object') {
+        const candidateId = userOrId.id || userOrId.userId;
+        if (typeof candidateId === 'string' && candidateId.trim()) {
+            canonicalId = candidateId.trim();
+        }
+        const candidateUser = userOrId.username || legacyUsername;
+        if (typeof candidateUser === 'string' && candidateUser.trim()) {
+            legacyUser = candidateUser.trim();
+        }
+        // If object only has username, use as canonical
+        if (!canonicalId && legacyUser) {
+            canonicalId = legacyUser;
+            legacyUser = null;
+        }
+    }
+
+    // Fail closed if no verified canonical identity
+    if (!canonicalId) {
+        return [];
+    }
+
+    const allowedIdentities = new Set([canonicalId]);
+    if (legacyUser && legacyUser !== canonicalId) {
+        allowedIdentities.add(legacyUser);
+    }
+
     return withStore('outbox', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
             const request = store.getAll();
@@ -155,7 +226,13 @@ export async function getPendingOutboxOperations() {
                 const all = request.result || [];
                 // Sort by capturedAtLocal ascending (causal sequence)
                 all.sort((a, b) => new Date(a.capturedAtLocal) - new Date(b.capturedAtLocal));
-                resolve(all.filter(o => o.status === 'PENDING' || o.status === 'RETRYING'));
+                const pending = all.filter(o => 
+                    (o.status === 'PENDING' || o.status === 'RETRYING') &&
+                    typeof o.userId === 'string' &&
+                    o.userId.trim() !== '' &&
+                    allowedIdentities.has(o.userId.trim())
+                );
+                resolve(pending);
             };
             request.onerror = () => reject(request.error);
         });
@@ -194,6 +271,26 @@ export async function updateOutboxOperation(operationId, updates) {
 export async function removeOutboxOperation(operationId) {
     return withStore('outbox', 'readwrite', (store) => {
         store.delete(operationId);
+    });
+}
+
+export async function removePendingDraftOperations(workItemId, userId = null) {
+    return withStore('outbox', 'readwrite', (store) => {
+        return new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const ops = request.result || [];
+                for (const op of ops) {
+                    if (op.type === 'SAVE_WORK_DRAFT' && (op.target === workItemId || op.payload?.workItemId === workItemId)) {
+                        if (!userId || op.userId === userId || (typeof op.userId === 'string' && op.userId.trim() === String(userId).trim())) {
+                            store.delete(op.operationId);
+                        }
+                    }
+                }
+                resolve();
+            };
+            request.onerror = () => reject(request.error);
+        });
     });
 }
 

@@ -2,20 +2,127 @@ const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
 const { JWT_SECRET } = require('./config/auth');
+const prisma = require('./prisma');
 
 // Map: userId -> Set<WebSocket>
 const clients = new Map();
 const DEBUG = process.env.NODE_ENV !== 'production';
 
 let wss = null;
+let heartbeatTimer = null;
+
+/**
+ * Explicitly close the WebSocket server, dispose its clients, and clear any heartbeat timers.
+ */
+function close(callback) {
+    return new Promise((resolve) => {
+        const done = () => {
+            if (callback) callback();
+            resolve();
+        };
+        if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+        if (wss) {
+            const currentWss = wss;
+            wss = null;
+            if (currentWss.clients) {
+                currentWss.clients.forEach(ws => {
+                    try { ws.terminate(); } catch (e) {}
+                });
+            }
+            clients.clear();
+            try {
+                currentWss.close(done);
+            } catch (e) {
+                done();
+            }
+        } else {
+            clients.clear();
+            done();
+        }
+    });
+}
 
 /**
  * Initialise the WebSocket server by attaching it to the existing HTTP server.
  */
 function init(server) {
-    wss = new WebSocketServer({ server, path: '/ws' });
+    // If an existing instance or heartbeat exists, dispose it cleanly first
+    if (wss || heartbeatTimer) {
+        if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+        if (wss) {
+            try {
+                if (wss.clients) {
+                    wss.clients.forEach(ws => {
+                        try { ws.terminate(); } catch (e) {}
+                    });
+                }
+                wss.close();
+            } catch (e) {}
+            wss = null;
+        }
+    }
 
-    wss.on('connection', (ws, req) => {
+    const instanceWss = new WebSocketServer({ server, path: '/ws' });
+    wss = instanceWss;
+
+    // Instance-bound heartbeat interval — drop stale connections every 30s
+    let instanceHeartbeat = setInterval(() => {
+        if (!instanceWss || instanceWss !== wss) return;
+        instanceWss.clients.forEach((ws) => {
+            if (!ws.isAlive) return ws.terminate();
+            ws.isAlive = false;
+            ws.ping();
+        });
+    }, 30000);
+    heartbeatTimer = instanceHeartbeat;
+
+    const cleanupInstance = () => {
+        if (instanceHeartbeat) {
+            clearInterval(instanceHeartbeat);
+            instanceHeartbeat = null;
+        }
+        if (heartbeatTimer === instanceHeartbeat) {
+            heartbeatTimer = null;
+        }
+        if (instanceWss.clients) {
+            instanceWss.clients.forEach(ws => {
+                try { ws.terminate(); } catch (e) {}
+            });
+        }
+        if (wss === instanceWss) {
+            wss = null;
+        }
+    };
+
+    instanceWss.on('close', cleanupInstance);
+
+    if (server && typeof server.once === 'function') {
+        server.once('close', () => {
+            cleanupInstance();
+            try {
+                instanceWss.close();
+            } catch (e) {}
+        });
+    }
+
+    instanceWss.dispose = () => {
+        cleanupInstance();
+        return new Promise(resolve => {
+            try {
+                instanceWss.close(resolve);
+            } catch (e) {
+                resolve();
+            }
+        });
+    };
+
+    instanceWss.on('connection', (ws, req) => {
         // Authenticate via Sec-WebSocket-Protocol or query param
         let token = null;
         if (req.headers['sec-websocket-protocol']) {
@@ -41,21 +148,27 @@ function init(server) {
             return;
         }
 
-        // Verify active status in DB
+        // Verify principal using consolidated sessionValidationService
         (async () => {
             try {
-                const prisma = require('./prisma');
-                const user = await prisma.user.findUnique({
-                    where: { id: userId },
-                    select: { id: true, username: true, role: true, isActive: true, labId: true }
-                });
-
-                if (!user || user.isActive === false) {
-                    ws.close(4003, 'Account deactivated or invalid');
+                const { validateUserPrincipal } = require('./services/sessionValidationService');
+                const decision = await validateUserPrincipal(decoded, { currentPath: '/ws' });
+                if (!decision.valid) {
+                    if (decision.isPasswordChangeRequired) {
+                        ws.close(4005, 'Password change required');
+                    } else if (decision.error === 'ACTOR_DEACTIVATED' || decision.error === 'ACTOR_SESSION_INVALIDATED' || decision.error === 'ACTOR_NOT_FOUND' || decision.error === 'ACTOR_UNAUTHORIZED') {
+                        ws.close(4003, decision.message || 'Actor invalid or deactivated');
+                    } else if (decision.error === 'ACCOUNT_DEACTIVATED') {
+                        ws.close(4003, 'Account deactivated or invalid');
+                    } else {
+                        ws.close(4004, decision.message || 'Session token invalidated');
+                    }
                     return;
                 }
 
-                ws.userId = userId;
+                const user = decision.user;
+                ws.userId = String(user.id);
+                ws.actorId = decoded.act?.id ? String(decoded.act.id) : null;
                 ws.username = user.username;
                 ws.role = user.role;
                 ws.labId = user.labId || null;
@@ -135,19 +248,8 @@ function init(server) {
         });
     });
 
-    // Heartbeat interval — drop stale connections every 30s
-    const heartbeat = setInterval(() => {
-        if (!wss) return;
-        wss.clients.forEach((ws) => {
-            if (!ws.isAlive) return ws.terminate();
-            ws.isAlive = false;
-            ws.ping();
-        });
-    }, 30000);
-
-    wss.on('close', () => clearInterval(heartbeat));
-
     console.log('[WS] WebSocket server initialised on /ws');
+    return instanceWss;
 }
 
 /**
@@ -226,4 +328,33 @@ function broadcastToAll(eventType, payload) {
     return count;
 }
 
-module.exports = { init, broadcastToUser, broadcastToUsers, broadcastToLab, broadcastToAll };
+function revokeUserSockets(principalId) {
+    if (!principalId) return;
+    const pid = String(principalId);
+    // 1. Close direct sockets
+    const userSockets = clients.get(pid);
+    if (userSockets) {
+        userSockets.forEach(sock => {
+            try {
+                sock.close(4004, 'Session revoked');
+            } catch (e) {}
+        });
+        clients.delete(pid);
+    }
+    // 2. Also close any sockets where actorId === pid (impersonation sessions)
+    clients.forEach((sockets, uid) => {
+        sockets.forEach(sock => {
+            if (sock.actorId === pid) {
+                try {
+                    sock.close(4004, 'Actor session revoked');
+                } catch (e) {}
+                sockets.delete(sock);
+            }
+        });
+        if (sockets.size === 0) {
+            clients.delete(uid);
+        }
+    });
+}
+
+module.exports = { init, close, broadcastToUser, broadcastToUsers, broadcastToLab, broadcastToAll, revokeUserSockets };

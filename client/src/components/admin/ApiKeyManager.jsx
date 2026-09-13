@@ -23,6 +23,8 @@ const ApiKeyManager = () => {
     const [name, setName] = useState('');
     const [role, setRole] = useState('NSIS_CONSUMER');
     const [selectedCountries, setSelectedCountries] = useState(['*']);
+    const [availableLabs, setAvailableLabs] = useState([]);
+    const [selectedLabs, setSelectedLabs] = useState([]);
     const [expiresDays, setExpiresDays] = useState(365);
     const [creating, setCreating] = useState(false);
 
@@ -101,10 +103,19 @@ const ApiKeyManager = () => {
     const fetchKeys = async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/api/v1/data-exchange/keys');
-            setKeys(res.data.data || []);
+            const [keysRes, labsRes] = await Promise.allSettled([
+                axios.get('/api/v1/data-exchange/keys'),
+                axios.get('/api/labs')
+            ]);
+            if (keysRes.status === 'fulfilled') {
+                setKeys(keysRes.value.data.data || []);
+            }
+            if (labsRes.status === 'fulfilled') {
+                const fetched = Array.isArray(labsRes.value.data) ? labsRes.value.data : (labsRes.value.data?.labs || []);
+                setAvailableLabs(fetched);
+            }
         } catch (err) {
-            console.error('Failed to fetch API keys:', err);
+            console.error('Failed to fetch API keys or laboratories:', err);
         } finally {
             setLoading(false);
         }
@@ -113,23 +124,33 @@ const ApiKeyManager = () => {
     const handleCreateKey = async (e) => {
         e.preventDefault();
         if (!name.trim()) return;
+        if (!selectedLabs.length) {
+            showDialog({
+                title: 'Laboratory Scope Required',
+                message: 'You must select at least one authorized laboratory for this integration key (IR-14).',
+                type: 'error'
+            });
+            return;
+        }
         setCreating(true);
         try {
             const res = await axios.post('/api/v1/data-exchange/keys', {
                 name,
                 role,
                 countries: selectedCountries.includes('*') ? null : selectedCountries,
+                labs: selectedLabs,
                 expiresDays: parseInt(expiresDays) || 365
             });
 
             setGeneratedKey(res.data.apiKey);
             setIsCreateModalOpen(false);
             setName('');
+            setSelectedLabs([]);
             fetchKeys();
         } catch (err) {
             showDialog({
                 title: 'Creation Failed',
-                message: err.response?.data?.error || err.message,
+                message: err.response?.data?.message || err.response?.data?.error || err.message,
                 type: 'error'
             });
         } finally {
@@ -372,6 +393,9 @@ const ApiKeyManager = () => {
                                                 </span>
                                                 <div className="text-xs text-gray-500">
                                                     Territory: {k.countries?.join(', ') || 'Global (*)'}
+                                                </div>
+                                                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                                                    Labs: {Array.isArray(k.labs) ? (k.labs.includes('*') ? 'All Laboratories (*)' : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? 'All Laboratories (*)' : JSON.parse(k.labs).join(', ')) : 'None')}
                                                 </div>
                                             </td>
                                             <td className="p-4 text-xs text-gray-500 space-y-0.5">
@@ -842,6 +866,51 @@ const ApiKeyManager = () => {
                                             <span className="font-semibold">{c.label}</span>
                                         </label>
                                     ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    Authorized Laboratory Scope *
+                                </label>
+                                <div className="space-y-1.5 max-h-40 overflow-y-auto p-2.5 rounded-xl border border-sf-divider bg-sf-canvas/50">
+                                    <label className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-sf-canvas cursor-pointer text-xs font-bold border-b border-sf-divider pb-2 mb-1">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedLabs.includes('*')}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedLabs(['*']);
+                                                } else {
+                                                    setSelectedLabs([]);
+                                                }
+                                            }}
+                                            className="rounded text-blue-600"
+                                        />
+                                        <span>All Laboratories (Global Wildcard *)</span>
+                                    </label>
+                                    {availableLabs.map((l) => (
+                                        <label key={l.id} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-sf-canvas cursor-pointer text-xs">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedLabs.includes(l.id)}
+                                                onChange={(e) => {
+                                                    const filtered = selectedLabs.filter(x => x !== '*');
+                                                    if (e.target.checked) {
+                                                        setSelectedLabs([...filtered, l.id]);
+                                                    } else {
+                                                        setSelectedLabs(filtered.filter(x => x !== l.id));
+                                                    }
+                                                }}
+                                                className="rounded text-blue-600"
+                                            />
+                                            <span className="font-semibold">{l.name || l.id} ({l.code || l.id})</span>
+                                            {l.country && <span className="text-[10px] text-gray-400">· {l.country}</span>}
+                                        </label>
+                                    ))}
+                                    {availableLabs.length === 0 && (
+                                        <p className="text-xs text-gray-400 italic p-2">Loading laboratories...</p>
+                                    )}
                                 </div>
                             </div>
 

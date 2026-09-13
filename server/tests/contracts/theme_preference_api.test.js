@@ -98,12 +98,13 @@ describe('User Theme Preference Contract & Security', () => {
 
     test('7. Impersonated token cannot modify profile preference (403 Forbidden)', async () => {
         // Mint an impersonated token for techUser with admin as actor
+        const adminId = jwt.decode(adminToken).id;
         const impersonatedToken = jwt.sign(
             {
                 id: techUserId,
                 username: 'tech-user',
                 role: 'LAB_TECHNICIAN',
-                act: { id: 'admin-id', username: 'admin' }
+                act: { id: adminId, username: 'admin' }
             },
             JWT_SECRET,
             { expiresIn: '30m' }

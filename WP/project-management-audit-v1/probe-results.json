@@ -1,0 +1,253 @@
+{
+  "auditedAt": "2026-09-13T22:25:20.153Z",
+  "baseline": "aeb62f7fac91412ea23a7c6871f0f7370d656a23",
+  "fixtureDatabase": "C:\\Users\\yigin\\AppData\\Local\\Temp\\codex-project-audit-I9SayG\\fixture.db",
+  "sourceDatabaseHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceDatabaseHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "results": [
+    {
+      "id": "P01",
+      "case": "Unrelated manager reads foreign project lab-access",
+      "status": 403,
+      "body": {
+        "error": "Access denied: You do not have permission to view this project.",
+        "code": "PROJECT_ACCESS_DENIED"
+      }
+    },
+    {
+      "id": "P02",
+      "case": "Servicing manager reads samples from both labs",
+      "status": 200,
+      "body": [
+        {
+          "id": "SB",
+          "originalId": "SB",
+          "status": "RELEASED",
+          "labId": "ACCESSION-SB",
+          "assignedLab": "B",
+          "receptionDate": null,
+          "createdAt": "2026-09-13T22:25:19.962Z"
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "case": "Same servicing manager stats only count their own lab",
+      "status": 200,
+      "body": {
+        "total": 1,
+        "target": 120,
+        "expected": 0,
+        "received": 0,
+        "processing": 0,
+        "completed": 1,
+        "rejected": 0,
+        "counts": {
+          "registered": 1,
+          "awaitingArrival": 0,
+          "intakeInProgress": 0,
+          "labWork": 0,
+          "awaitingReview": 0,
+          "released": 1,
+          "rejectedOrCancelled": 0,
+          "needsReconciliation": 0,
+          "everPhysicallyReceived": 1
+        }
+      }
+    },
+    {
+      "id": "P04",
+      "case": "Administrator statistics omit RELEASED from buckets",
+      "status": 200,
+      "body": {
+        "total": 2,
+        "target": 120,
+        "expected": 1,
+        "received": 0,
+        "processing": 0,
+        "completed": 1,
+        "rejected": 0,
+        "counts": {
+          "registered": 2,
+          "awaitingArrival": 1,
+          "intakeInProgress": 0,
+          "labWork": 0,
+          "awaitingReview": 0,
+          "released": 1,
+          "rejectedOrCancelled": 0,
+          "needsReconciliation": 0,
+          "everPhysicallyReceived": 1
+        }
+      }
+    },
+    {
+      "id": "P05",
+      "case": "Unrelated manager reads foreign project target",
+      "status": 403,
+      "body": {
+        "error": "Access denied: You do not have permission to view this project."
+      }
+    },
+    {
+      "id": "P06",
+      "case": "Servicing manager archive returns 500 after persisting COMPLETED despite expected sample",
+      "response": {
+        "status": 403,
+        "body": {
+          "error": "Cannot archive projects from another lab. Access denied."
+        }
+      },
+      "persistedStatus": "ACTIVE"
+    },
+    {
+      "id": "P07",
+      "case": "Project manager create then cannot update own new project",
+      "create": {
+        "status": 200,
+        "body": {
+          "id": "PM-NEW",
+          "code": "PM-NEW",
+          "name": "PM new",
+          "description": null,
+          "notes": null,
+          "client": null,
+          "startDate": null,
+          "deliveryDeadline": null,
+          "status": "ACTIVE",
+          "projectType": "OPEN_INTAKE",
+          "expectedSampleCount": 0,
+          "priority": "NORMAL",
+          "defaultAnalysisBundle": null,
+          "labId": null,
+          "countries": null,
+          "assignedLabIds": null,
+          "createdAt": "2026-09-13T22:25:20.092Z",
+          "updatedAt": "2026-09-13T22:25:20.092Z"
+        }
+      },
+      "update": {
+        "status": 200,
+        "body": {
+          "id": "PM-NEW",
+          "code": "PM-NEW",
+          "name": "changed",
+          "description": null,
+          "notes": null,
+          "client": null,
+          "startDate": null,
+          "deliveryDeadline": null,
+          "status": "ACTIVE",
+          "projectType": "OPEN_INTAKE",
+          "expectedSampleCount": 0,
+          "priority": "NORMAL",
+          "defaultAnalysisBundle": null,
+          "labId": null,
+          "countries": null,
+          "assignedLabIds": null,
+          "createdAt": "2026-09-13T22:25:20.092Z",
+          "updatedAt": "2026-09-13T22:25:20.101Z"
+        }
+      }
+    },
+    {
+      "id": "P08",
+      "case": "National role creates project owned by foreign-country lab",
+      "status": 403,
+      "body": {
+        "errorCode": "FORBIDDEN_NATIONAL_SCOPE",
+        "errorParams": null,
+        "error": "Cannot assign project to laboratory 'C' outside your authorized national scope.",
+        "data": null
+      }
+    },
+    {
+      "id": "P09",
+      "case": "Duplicate existing sample during creation swallowed",
+      "status": 400,
+      "body": {
+        "errorCode": "SAMPLE_ID_CONFLICT",
+        "errorParams": {
+          "conflicts": [
+            "SA"
+          ]
+        },
+        "error": "Sample IDs already exist: SA (Project: P)",
+        "data": null
+      },
+      "actualNewSamples": 0
+    },
+    {
+      "id": "P10",
+      "case": "Removing every lab revives same-country labs via fallback",
+      "write": {
+        "status": 200,
+        "body": {
+          "status": "APPLIED",
+          "projectId": "FALLBACK",
+          "projectCode": "FALLBACK",
+          "ownerLabId": null,
+          "servicingLabIds": [],
+          "addedLabs": [],
+          "removedLabs": [
+            "B"
+          ]
+        }
+      },
+      "resolved": {
+        "ownerLabId": null,
+        "servicingLabIds": [],
+        "allMemberLabIds": []
+      }
+    },
+    {
+      "id": "P11",
+      "case": "Failed audit leaves changed project despite 500",
+      "response": {
+        "status": 500,
+        "body": {
+          "errorCode": "PROJECT_UPDATE_ERROR",
+          "errorParams": null,
+          "error": "Fixture injected audit failure",
+          "data": null
+        }
+      },
+      "persistedName": "Fixture PARTIAL"
+    },
+    {
+      "id": "P12",
+      "case": "Trash detaches even released sample from project",
+      "sample": {
+        "id": "SB",
+        "status": "RELEASED",
+        "projectId": "P",
+        "projectCode": "P"
+      }
+    },
+    {
+      "id": "P13",
+      "case": "Manifest API response puts counts in message instead of data",
+      "status": 200,
+      "body": {
+        "messageCode": "MANIFEST_PROCESSED",
+        "messageParams": null,
+        "message": "Successfully processed 1 IDs.",
+        "data": {
+          "count": 1,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "id": "P14",
+      "case": "Generic update accepts unknown lifecycle state and foreign lab assignment without junction sync",
+      "response": {
+        "status": 400,
+        "body": {
+          "error": "INVALID_STATUS",
+          "message": "Status 'MADE_UP_STATUS' is not a valid project lifecycle status."
+        }
+      },
+      "junctions": []
+    }
+  ]
+}

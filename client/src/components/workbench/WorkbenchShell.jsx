@@ -15,6 +15,8 @@ import ReviewCompletionView from './ReviewCompletionView';
 import ReviewSubmissionView from './ReviewSubmissionView';
 import ActivityReceiptsView from './ActivityReceiptsView';
 import SpectralIntakeModal from './SpectralIntakeModal';
+import { saveLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations } from '../../services/offline/offlineDb';
+import { recordSyncOperation } from '../../services/offline/syncEngine';
 
 /**
  * WorkbenchShell
@@ -91,6 +93,36 @@ export default function WorkbenchShell({
                 params: { view: viewToFetch }
             });
             const fetchedGroups = res.data.groups || [];
+
+            // Rehydrate with durable offline local drafts if present
+            if (user?.id) {
+                for (const g of fetchedGroups) {
+                    if (Array.isArray(g.items)) {
+                        for (const item of g.items) {
+                            try {
+                                const localDraft = await getLocalDraft(`draft:${user.id}:${item.workItemId}`);
+                                if (localDraft && localDraft.value !== undefined && localDraft.value !== null) {
+                                    if (!item.draft || item.draft.value === undefined || item.draft.value === null ||
+                                        (localDraft.updatedAt && new Date(localDraft.updatedAt) > new Date(item.draft.updatedAt || 0))) {
+                                        item.draft = {
+                                            ...(item.draft || {}),
+                                            workItemId: item.workItemId,
+                                            value: localDraft.value,
+                                            values: localDraft.extra?.values || item.draft?.values,
+                                            checks: localDraft.extra?.checks || item.draft?.checks,
+                                            basis: localDraft.extra?.basis || item.draft?.basis || 'AIR_DRY',
+                                            replicateNo: localDraft.extra?.replicateNo || item.draft?.replicateNo || 1,
+                                            draftVersion: localDraft.draftVersion || item.draft?.draftVersion || 1,
+                                            updatedAt: localDraft.updatedAt
+                                        };
+                                    }
+                                }
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+
             setGroups(fetchedGroups);
             setStats(res.data.stats || {});
 
@@ -212,6 +244,17 @@ export default function WorkbenchShell({
     // Debounced Draft Persistence
     // ─────────────────────────────────────────────────────────────────────────
     const handleDraftChange = useCallback((workItemId, value, extra = {}) => {
+        // Look up current draft version
+        let currentItemSnapshot = null;
+        for (const g of groups) {
+            const match = g.items?.find(i => i.workItemId === workItemId);
+            if (match) {
+                currentItemSnapshot = match;
+                break;
+            }
+        }
+        const nextDraftVersion = (Number(currentItemSnapshot?.draft?.draftVersion) || 0) + 1;
+
         // Immediately patch in local UI state
         setGroups(prevGroups => {
             return prevGroups.map(group => ({
@@ -230,12 +273,24 @@ export default function WorkbenchShell({
                             basis: extra.basis || existingDraft.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || existingDraft.replicateNo || 1,
                             instrumentId: extra.instrumentId || existingDraft.instrumentId || item.equipmentId,
+                            draftVersion: nextDraftVersion,
                             updatedAt: new Date().toISOString()
                         }
                     };
                 })
             }));
         });
+
+        // Persist local offline draft immediately to IndexedDB
+        if (user?.id) {
+            saveLocalDraft(`draft:${user.id}:${workItemId}`, {
+                workItemId,
+                value,
+                extra,
+                draftVersion: nextDraftVersion,
+                updatedAt: new Date().toISOString()
+            }).catch(e => console.warn('[workbench] Failed to persist local draft:', e));
+        }
 
         setSyncStatus('saving');
 
@@ -245,29 +300,61 @@ export default function WorkbenchShell({
         }
 
         debounceTimers.current[workItemId] = setTimeout(async () => {
-            try {
-                // Find current item snapshot
-                let currentItem = null;
-                for (const g of groups) {
-                    const match = g.items?.find(i => i.workItemId === workItemId);
-                    if (match) {
-                        currentItem = match;
-                        break;
+            // Find current item snapshot
+            let currentItem = null;
+            for (const g of groups) {
+                const match = g.items?.find(i => i.workItemId === workItemId);
+                if (match) {
+                    currentItem = match;
+                    break;
+                }
+            }
+
+            const draftVal = value !== null && value !== undefined ? value : currentItem?.draft?.value;
+
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                setSyncStatus('offline');
+                if (user?.id) {
+                    try {
+                        await recordSyncOperation({
+                            type: 'SAVE_WORK_DRAFT',
+                            target: workItemId,
+                            baseVersion: currentItem?.version || 1,
+                            payload: {
+                                workItemId,
+                                value: draftVal,
+                                values: extra.values || currentItem?.draft?.values,
+                                checks: extra.checks || currentItem?.draft?.checks,
+                                basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
+                                replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
+                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                draftVersion: nextDraftVersion,
+                                clientDraftVersion: nextDraftVersion
+                            },
+                            userId: user.id,
+                            labId: user.labId
+                        });
+                    } catch (syncErr) {
+                        console.warn('[workbench] Failed to queue outbox sync operation:', syncErr);
                     }
                 }
+                return;
+            }
 
+            try {
                 await axios.post('/api/workbench/batch-save', {
                     draft: true,
                     entries: [
                         {
                             workItemId,
-                            value: value !== null && value !== undefined ? value : currentItem?.draft?.value,
+                            value: draftVal,
                             values: extra.values || currentItem?.draft?.values,
                             checks: extra.checks || currentItem?.draft?.checks,
                             basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
                             equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
-                            version: currentItem?.version || 0
+                            version: currentItem?.version || 0,
+                            draftVersion: nextDraftVersion
                         }
                     ]
                 });
@@ -276,9 +363,33 @@ export default function WorkbenchShell({
             } catch (err) {
                 console.error('[workbench] Draft save error:', err);
                 setSyncStatus('offline');
+                if (user?.id) {
+                    try {
+                        await recordSyncOperation({
+                            type: 'SAVE_WORK_DRAFT',
+                            target: workItemId,
+                            baseVersion: currentItem?.version || 1,
+                            payload: {
+                                workItemId,
+                                value: draftVal,
+                                values: extra.values || currentItem?.draft?.values,
+                                checks: extra.checks || currentItem?.draft?.checks,
+                                basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
+                                replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
+                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                draftVersion: nextDraftVersion,
+                                clientDraftVersion: nextDraftVersion
+                            },
+                            userId: user.id,
+                            labId: user.labId
+                        });
+                    } catch (syncErr) {
+                        console.warn('[workbench] Failed to queue outbox sync operation:', syncErr);
+                    }
+                }
             }
         }, 800);
-    }, [groups]);
+    }, [groups, user]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Update Item Metadata (Basis, Replicate, Instrument)
@@ -296,6 +407,10 @@ export default function WorkbenchShell({
             delete debounceTimers.current[workItemId];
         }
         try {
+            if (user?.id) {
+                deleteLocalDraft(`draft:${user.id}:${workItemId}`).catch(() => {});
+                removePendingDraftOperations(workItemId, user.id).catch(() => {});
+            }
             await axios.delete(`/api/workbench/drafts/item/${workItemId}`);
             addToast('Draft discarded successfully', 'info');
             fetchQueue(queueView);

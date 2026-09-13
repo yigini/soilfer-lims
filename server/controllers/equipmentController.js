@@ -109,7 +109,15 @@ exports.addEquipment = async (req, res) => {
             return res.status(403).json({ error: 'Administrative role required to add equipment across labs' });
         }
 
-        const targetLabId = req.body.labId || labId;
+        let targetLabId = labId;
+        if (req.user.role === 'SUPER_ADMIN') {
+            targetLabId = req.body.labId || labId;
+        } else {
+            targetLabId = req.user.labId;
+            if (req.body.labId && req.body.labId !== req.user.labId) {
+                return res.status(403).json({ error: 'Cannot register equipment for another laboratory' });
+            }
+        }
 
         const asset = await prisma.equipmentAsset.create({
             data: {
@@ -167,6 +175,13 @@ exports.updateStatus = async (req, res) => {
         const asset = await prisma.equipmentAsset.findUnique({ where: { id } });
         if (!asset) return res.status(404).json({ error: 'Equipment not found' });
 
+        // Lab scope check (LG-18, P27)
+        if (req.user.role !== 'SUPER_ADMIN') {
+            if (req.user.labId !== asset.labId) {
+                return res.status(403).json({ error: 'EQUIPMENT_OUTSIDE_SCOPE', message: 'Cannot modify equipment belonging to another laboratory' });
+            }
+        }
+
         const updated = await prisma.equipmentAsset.update({
             where: { id },
             data: {
@@ -203,7 +218,17 @@ exports.updateEquipment = async (req, res) => {
             return res.status(403).json({ error: 'Manager permissions required to edit equipment' });
         }
 
-        const asset = await prisma.equipmentAsset.update({
+        const asset = await prisma.equipmentAsset.findUnique({ where: { id } });
+        if (!asset) return res.status(404).json({ error: 'Equipment not found' });
+
+        // Lab scope check (LG-18, P27)
+        if (req.user.role !== 'SUPER_ADMIN') {
+            if (req.user.labId !== asset.labId) {
+                return res.status(403).json({ error: 'EQUIPMENT_OUTSIDE_SCOPE', message: 'Cannot modify equipment belonging to another laboratory' });
+            }
+        }
+
+        const updated = await prisma.equipmentAsset.update({
             where: { id },
             data: {
                 name,
@@ -217,7 +242,7 @@ exports.updateEquipment = async (req, res) => {
                 events: {
                     create: {
                         id: uuidv4(),
-                        labId: req.user.labId,
+                        labId: asset.labId,
                         userId: req.user.username,
                         eventType: 'METADATA_UPDATE',
                         summary: `Equipment details updated: ${name}`,

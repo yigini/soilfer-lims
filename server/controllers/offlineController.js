@@ -20,16 +20,30 @@ exports.preparePack = async (req, res) => {
 
 exports.getPack = async (req, res) => {
     const { id } = req.params;
-    let pack = packCache.get(id);
+    const pack = packCache.get(id);
 
     if (!pack) {
-        // Try regenerating or return 404
-        try {
-            pack = await WorkPackService.preparePack(req.user, { labId: req.user.labId });
-            packCache.set(pack.packId, pack);
-        } catch (e) {
-            return res.status(404).json({ error: `Offline pack '${id}' not found or expired` });
-        }
+        return res.status(404).json({ error: `Offline pack '${id}' not found`, code: 'PACK_NOT_FOUND' });
+    }
+
+    // 1. Lease Expiry Check (IR-08)
+    if (pack.expiresAt && new Date(pack.expiresAt) <= new Date()) {
+        packCache.delete(id);
+        return res.status(410).json({ error: `Offline pack '${id}' has expired`, code: 'PACK_EXPIRED' });
+    }
+
+    // 2. Strict ownership & laboratory scope matching (IR-08)
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const isOwner = pack.userId === req.user.id || pack.userId === req.user.username;
+    const isSameLab = Boolean(req.user.labId && pack.labId && req.user.labId === pack.labId);
+
+    if (!isSuperAdmin && (!isOwner || !isSameLab)) {
+        return res.status(403).json({ error: 'Access denied to this offline work pack', code: 'PACK_ACCESS_DENIED' });
+    }
+
+    // 3. Current Session & Token Version Revalidation (IR-08, IR-09)
+    if (req.user.tokenVersion !== undefined && pack.tokenVersion !== undefined && req.user.tokenVersion !== pack.tokenVersion) {
+        return res.status(401).json({ error: 'Session invalidated since pack issuance. Re-authentication required.', code: 'SESSION_INVALIDATED' });
     }
 
     return res.json(pack);

@@ -31,6 +31,7 @@ import SampleDetail from './pages/SampleDetail';
 
 // Lazy-loaded secondary pages
 const Projects = React.lazy(() => import('./pages/Projects'));
+const ProjectWorkspace = React.lazy(() => import('./pages/ProjectWorkspace'));
 const Inventory = React.lazy(() => import('./pages/Inventory'));
 const Equipment = React.lazy(() => import('./pages/Equipment'));
 const Reception = React.lazy(() => import('./pages/Reception'));
@@ -61,6 +62,8 @@ const FAQPage = React.lazy(() => import('./pages/help/FAQPage'));
 const ArticleReader = React.lazy(() => import('./pages/help/ArticleReader'));
 const TopicExplorer = React.lazy(() => import('./pages/help/TopicExplorer'));
 const AdminHelpEditor = React.lazy(() => import('./pages/help/AdminHelpEditor'));
+const ActivateAccount = React.lazy(() => import('./pages/auth/ActivateAccount'));
+const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -159,16 +162,23 @@ const Layout = ({ children }) => {
         navItems.push({ icon: Package, label: t('nav.inventory'), path: '/inventory' });
     }
 
-    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
+    if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'AUDIT_USER'].includes(user?.role)) {
         navItems.push({ icon: FileSpreadsheet, label: t('nav.projects'), path: '/projects' });
-        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
+    }
 
+    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
+    }
+
+    if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({
+            icon: Beaker,
+            label: user?.role === 'LAB_MANAGER' ? t('nav.myLab', 'My Laboratory') : t('nav.labs', 'Laboratories'),
+            path: user?.role === 'LAB_MANAGER' && user?.labId ? `/admin/labs?labId=${user.labId}` : '/admin/labs'
+        });
     }
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        if (user?.role === 'SUPER_ADMIN') {
-            navItems.push({ icon: Beaker, label: t('nav.labs'), path: '/admin/labs' });
-        }
         navItems.push({ icon: Settings, label: t('nav.admin'), path: '/admin' });
     }
 
@@ -334,6 +344,8 @@ function App() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />
+            <Route path="/reset-password" element={<React.Suspense fallback={<LazyFallback />}><ResetPassword /></React.Suspense>} />
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
             <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
@@ -350,13 +362,14 @@ function App() {
             <Route path="/inventory" element={<RequireAuth permission="VIEW_INVENTORY"><Inventory /></RequireAuth>} />
             <Route path="/equipment" element={<RequireAuth permission="VIEW_EQUIPMENT"><Equipment /></RequireAuth>} />
             <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
-            <Route path="/projects" element={<RequireAuth permission="MANAGE_PROJECTS"><Projects /></RequireAuth>} />
+            <Route path="/projects" element={<RequireAuth permission="VIEW_PROJECTS"><Projects /></RequireAuth>} />
+            <Route path="/projects/:projectId" element={<RequireAuth permission="VIEW_PROJECTS"><ProjectWorkspace /></RequireAuth>} />
 
             <Route path="/admin" element={<RequireAuth permission="MANAGE_ANALYSES"><AdminPanel /></RequireAuth>} />
             <Route path="/admin/methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
             <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
             <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
-            <Route path="/admin/labs" element={<RequireAuth requiredRole="SUPER_ADMIN"><LabManagement /></RequireAuth>} />
+            <Route path="/admin/labs" element={<RequireAuth permission="MANAGE_USERS"><LabManagement /></RequireAuth>} />
             <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
 
             {/* General Access */}

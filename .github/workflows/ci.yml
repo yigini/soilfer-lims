@@ -35,6 +35,7 @@ jobs:
           node seeds/units.js
           node seeds/references.js
           node seeds/catalogue.js --confirm
+          node seed_languages.js
         working-directory: server
         env:
           NODE_ENV: test

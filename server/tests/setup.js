@@ -31,7 +31,8 @@ function generateToken(user) {
         labId: user.labId || null,
         countries: Array.isArray(user.countries) ? user.countries : [],
         projects: Array.isArray(user.projects) ? user.projects : [],
-        permissions: Array.isArray(user.permissions) ? user.permissions : []
+        permissions: Array.isArray(user.permissions) ? user.permissions : [],
+        tokenVersion: user.tokenVersion !== undefined ? user.tokenVersion : 0
     };
 
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
