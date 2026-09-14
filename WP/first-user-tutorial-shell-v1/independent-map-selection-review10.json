@@ -1,0 +1,59 @@
+{
+  "time": "2026-09-14T13:36:18.104Z",
+  "scope": "Frozen current local client/dist; all API requests mocked; no backend, database or production access. Synthetic technician authentication verifies client behavior only.",
+  "sourceHead": "b421a9a502fc77a96a20b2317e761baa8bc5002d",
+  "sourceShellSha256": "09e6ef649582d4dcd8e98f3457e559f825e38136300458d49d97bcaecfd45077",
+  "indexSha256": "63caa88f312186ed3d5a60455bb5e4463c280042b58200228b5492a19931c28d",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-Bb5_VIl7.js",
+      "sha256": "a40a0fbe134896fb700351ba73795969f24a957ee76d9b5aebb6b82c2c65d4b4"
+    },
+    {
+      "path": "/assets/TutorialShell-DBnTsSTn.css",
+      "sha256": "ddfa2508a6d18fc92852cdf676ba1f20ea7bf3e5457a1a3eba659985c12b2d7d"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2"
+  ],
+  "apiReads": [
+    "/api/public/i18n/bootstrap",
+    "/api/admin/settings",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/config/analyses",
+    "/api/auth/me",
+    "/api/workbench/queue",
+    "/api/workbench/v2/receipts",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/auth/me",
+    "/api/samples/TEST-SAMPLE/detail"
+  ],
+  "checks": {
+    "before": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "title": "A result with a history.",
+      "authIdentity": "map-exit-synthetic-tech"
+    },
+    "pending": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "detailHeld": true
+    },
+    "afterInputChangeBeforeResponse": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "guideCount": 1,
+      "session": "{\"active\":true,\"step\":13,\"introStage\":3,\"path\":\"full\",\"roleChoice\":\"technician\",\"sampleTube\":1,\"viewed\":[],\"practiced\":[],\"done\":[],\"skipped\":[],\"paused\":false,\"language\":\"en\",\"practiceByTube\":{\"1\":{\"intakeMass\":\"485.2\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"6.85\",\"benchStatusCode\":\"initial\",\"texture\":[35,35,30],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"2\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"3\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"4\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"5\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false}},\"f03Search\":\"\",\"f03Filter\":\"all\",\"f03SelectedId\":null,\"equipmentStatus\":\"ready\",\"inventoryLot\":\"LOT-2026-08\",\"timestamp\":1789392978451,\"lastActivityAt\":1789392979570}"
+    },
+    "afterLateResponse": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "guideCount": 1,
+      "session": true
+    }
+  },
+  "reproduced": false,
+  "expected": "After changing the sample input, the previous lookup is canceled or ignored; route stays /workbench until the new selection is requested."
+}

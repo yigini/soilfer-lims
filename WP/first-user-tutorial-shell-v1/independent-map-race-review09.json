@@ -1,13 +1,13 @@
 {
-  "time": "2026-09-14T12:51:53.584Z",
+  "time": "2026-09-14T13:12:04.400Z",
   "scope": "Frozen current local client/dist; all API requests mocked; no backend, database or production access. Synthetic technician authentication verifies client behavior only.",
-  "sourceHead": "2a07e37bc48b10ff393af2a00a38e10b579d86ad",
-  "sourceShellSha256": "9655b5da5771ba0e5a6f3d6e2d677a30e5b8302a4698e15e3d74851f7987df6b",
-  "indexSha256": "39de659c99561b56d44118c273d6582989173d7c539014633b5f4b08500bfefb",
+  "sourceHead": "b421a9a502fc77a96a20b2317e761baa8bc5002d",
+  "sourceShellSha256": "90460b3b34e5719623a80835338ad4243a8d198928a34e3eac175747b523eeaf",
+  "indexSha256": "4280b65873974d0fa6748b078d09f8af1db37d204fe0e23bba4eb807a4b196e7",
   "assets": [
     {
-      "path": "/assets/TutorialShell-BpEgDth_.js",
-      "sha256": "114dda5f8632bcf942e3af3bc5508582ee4650680335ec9d272760ff6a069c39"
+      "path": "/assets/TutorialShell-BUnyJsyA.js",
+      "sha256": "e7189ec18ac92f7e7eda62702c04a984059f34240be0202db7d4a34bf93d3f52"
     },
     {
       "path": "/assets/TutorialShell-DBnTsSTn.css",

@@ -81,6 +81,27 @@ export default function TutorialShell({ onExit, onPause }) {
     const verifiedSampleRef = useRef(null); // { sampleId, humanInput, actorKey }
     const sampleCheckSeqRef = useRef(0);
 
+    // Context refs to guard against stale closure variables across async lookup awaits
+    const verifiedUserRef = useRef(verifiedUser);
+    useEffect(() => {
+        verifiedUserRef.current = verifiedUser;
+    }, [verifiedUser]);
+
+    const tokenRef = useRef(token);
+    useEffect(() => {
+        tokenRef.current = token;
+    }, [token]);
+
+    const locationPathRef = useRef(location.pathname);
+    useEffect(() => {
+        locationPathRef.current = location.pathname;
+    }, [location.pathname]);
+
+    const selectedSampleIdRef = useRef(state?.selectedSampleId);
+    useEffect(() => {
+        selectedSampleIdRef.current = state?.selectedSampleId;
+    }, [state?.selectedSampleId]);
+
     // Cancel in-flight sample check and invalidate on unmount
     useEffect(() => {
         isMountedRef.current = true;
@@ -94,14 +115,8 @@ export default function TutorialShell({ onExit, onPause }) {
         };
     }, []);
 
-    // Invalidate and cancel pending lookup on actor/lab/token, chapter, or sample changes
+    // A. Reset selection and acknowledge identity changes when actor/lab changes
     useEffect(() => {
-        if (sampleLookupAbortRef.current) {
-            try { sampleLookupAbortRef.current.abort(); } catch {}
-            sampleLookupAbortRef.current = null;
-        }
-        sampleCheckSeqRef.current++;
-
         if (identityChanged) {
             acknowledgeIdentityChange();
         }
@@ -109,8 +124,18 @@ export default function TutorialShell({ onExit, onPause }) {
             setSelectedSampleId(null);
         }
         verifiedSampleRef.current = null;
+    }, [identityChanged, acknowledgeIdentityChange, verifiedUser?.id, verifiedUser?.labId]);
+
+    // B. Invalidate and cancel in-flight sample lookup whenever sample input, chapter, URL, or actor changes
+    // (Separated from selection-clearing so typing in the input field does not erase keystrokes)
+    useEffect(() => {
+        if (sampleLookupAbortRef.current) {
+            try { sampleLookupAbortRef.current.abort(); } catch {}
+            sampleLookupAbortRef.current = null;
+        }
+        sampleCheckSeqRef.current++;
         setNavNotice(null);
-    }, [identityChanged, acknowledgeIdentityChange, verifiedUser?.id, verifiedUser?.labId, token, state?.step]);
+    }, [state?.selectedSampleId, state?.step, location.pathname, location.search, token, verifiedUser?.id, verifiedUser?.labId]);
 
     // Save previous active focus when entering tutorial
     useEffect(() => {
@@ -509,7 +534,7 @@ export default function TutorialShell({ onExit, onPause }) {
         return false;
     };
 
-    const performNavigation = async (customUrl = null) => {
+    const performNavigation = async (customUrl = null, force = false) => {
         hasDirtyInputRef.current = false;
         if (customUrl) {
             navigate(customUrl);
@@ -519,7 +544,10 @@ export default function TutorialShell({ onExit, onPause }) {
         // Ignore navigation if guide is unmounting or exited
         if (!isMountedRef.current) return;
 
-        const actorKey = verifiedUser ? `${verifiedUser.id}:${verifiedUser.labId || ''}` : 'anonymous';
+        const startingPathname = location.pathname;
+        const currentActor = verifiedUserRef.current;
+        const actorKey = currentActor ? `${currentActor.id}:${currentActor.labId || ''}` : 'anonymous';
+        const startingToken = tokenRef.current;
 
         if (currentChapter.resolveRoute) {
             if (currentChapter.id === 'trace') {
@@ -548,10 +576,15 @@ export default function TutorialShell({ onExit, onPause }) {
                 // Check if already verified for this exact actor
                 if (verifiedSampleRef.current && (verifiedSampleRef.current.sampleId === candidateId || verifiedSampleRef.current.humanInput === candidateId) && verifiedSampleRef.current.actorKey === actorKey) {
                     const canonicalId = verifiedSampleRef.current.sampleId;
-                    const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: canonicalId });
+                    const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: currentActor, authStatus, selectedSampleId: canonicalId });
                     if (targetPath && isMountedRef.current) {
                         const sep = targetPath.includes('?') ? '&' : '?';
                         const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+                        if (!force && hasDirtyDraft()) {
+                            setPendingNavigateUrl(finalUrl);
+                            setShowDraftDialog(true);
+                            return;
+                        }
                         navigate(finalUrl);
                     }
                     return;
@@ -566,11 +599,12 @@ export default function TutorialShell({ onExit, onPause }) {
                 const abortController = new AbortController();
                 sampleLookupAbortRef.current = abortController;
                 const currentSeq = ++sampleCheckSeqRef.current;
+                const startingCandidateId = candidateId;
 
                 setNavNotice(t('sampleVerifying', 'Verifying sample access...'));
 
                 try {
-                    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                    const headers = startingToken ? { Authorization: `Bearer ${startingToken}` } : {};
                     const res = await axios.get(`/api/samples/${encodeURIComponent(candidateId)}/detail`, {
                         headers,
                         signal: abortController.signal,
@@ -582,9 +616,21 @@ export default function TutorialShell({ onExit, onPause }) {
                         return;
                     }
 
+                    // Check that sample input has not changed while waiting for response
+                    const currentSampleInput = (selectedSampleIdRef.current && selectedSampleIdRef.current.trim()) || null;
+                    if (currentSampleInput !== null && currentSampleInput !== startingCandidateId) {
+                        return;
+                    }
+
+                    // Check that route pathname has not changed while waiting for response
+                    if (locationPathRef.current !== startingPathname) {
+                        return;
+                    }
+
                     // Check that verified actor has not changed while waiting for response
-                    const freshActorKey = verifiedUser ? `${verifiedUser.id}:${verifiedUser.labId || ''}` : 'anonymous';
-                    if (freshActorKey !== actorKey) {
+                    const freshActor = verifiedUserRef.current;
+                    const freshActorKey = freshActor ? `${freshActor.id}:${freshActor.labId || ''}` : 'anonymous';
+                    if (freshActorKey !== actorKey || tokenRef.current !== startingToken) {
                         return;
                     }
 
@@ -601,7 +647,7 @@ export default function TutorialShell({ onExit, onPause }) {
 
                         const targetPath = currentChapter.resolveRoute({
                             isAuthenticated,
-                            user: verifiedUser,
+                            user: freshActor,
                             authStatus,
                             selectedSampleId: canonicalId
                         });
@@ -609,11 +655,18 @@ export default function TutorialShell({ onExit, onPause }) {
                         if (targetPath && isMountedRef.current) {
                             const sep = targetPath.includes('?') ? '&' : '?';
                             const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+
+                            // Re-check live form dirty draft protection before navigating
+                            if (!force && hasDirtyDraft()) {
+                                setPendingNavigateUrl(finalUrl);
+                                setShowDraftDialog(true);
+                                return;
+                            }
+
                             navigate(finalUrl);
                         }
                     } else {
                         verifiedSampleRef.current = null;
-                        if (setSelectedSampleId) setSelectedSampleId(null);
                         setNavNotice(t('sampleCheckError', 'Unable to verify sample access. Select an authorized sample from your laboratory list.'));
                     }
                 } catch (err) {
@@ -625,7 +678,6 @@ export default function TutorialShell({ onExit, onPause }) {
                         return;
                     }
                     verifiedSampleRef.current = null;
-                    if (setSelectedSampleId) setSelectedSampleId(null);
                     const status = err.response?.status;
                     if (status === 403) {
                         setNavNotice(t('sampleForbiddenNotice', 'Access denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.'));
@@ -642,10 +694,15 @@ export default function TutorialShell({ onExit, onPause }) {
                 return;
             }
 
-            const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: state.selectedSampleId });
+            const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: currentActor, authStatus, selectedSampleId: state.selectedSampleId });
             if (targetPath && isMountedRef.current) {
                 const sep = targetPath.includes('?') ? '&' : '?';
                 const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+                if (!force && hasDirtyDraft()) {
+                    setPendingNavigateUrl(finalUrl);
+                    setShowDraftDialog(true);
+                    return;
+                }
                 navigate(finalUrl);
             }
             return;
@@ -655,6 +712,11 @@ export default function TutorialShell({ onExit, onPause }) {
         if (targetPath && isMountedRef.current) {
             const sep = targetPath.includes('?') ? '&' : '?';
             const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+            if (!force && hasDirtyDraft()) {
+                setPendingNavigateUrl(finalUrl);
+                setShowDraftDialog(true);
+                return;
+            }
             navigate(finalUrl);
         }
     };
@@ -1602,6 +1664,12 @@ export default function TutorialShell({ onExit, onPause }) {
                                     value={state.selectedSampleId || ''}
                                     onChange={(e) => {
                                         const val = e.target.value;
+                                        if (sampleLookupAbortRef.current) {
+                                            try { sampleLookupAbortRef.current.abort(); } catch {}
+                                            sampleLookupAbortRef.current = null;
+                                        }
+                                        sampleCheckSeqRef.current++;
+                                        setNavNotice(null);
                                         if (setSelectedSampleId) setSelectedSampleId(val);
                                         else updateF03('selectedSampleId', val);
                                     }}
@@ -1945,7 +2013,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                     setShowDraftDialog(false);
                                     const url = pendingNavigateUrl;
                                     setPendingNavigateUrl(null);
-                                    performNavigation(url);
+                                    performNavigation(url, true);
                                 }}
                                 style={{ padding: '6px 14px', fontSize: '13px' }}
                             >

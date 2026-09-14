@@ -1,0 +1,25 @@
+{
+  "time": "2026-09-14T13:13:46.163Z",
+  "expectedImage": "soilfer-lims:v3.5.8-b421a9a",
+  "scope": "Anonymous production login/tutorial/exit only. No account login or laboratory form input; all non-read requests blocked.",
+  "attemptedMutations": [],
+  "errors": [],
+  "ordinary": {
+    "loginVisible": true,
+    "guideCount": 0,
+    "tutorialRequests": []
+  },
+  "optIn": {
+    "title": "A shared record for the laboratory.",
+    "guideVisible": true,
+    "assets": [
+      "/assets/TutorialShell-BUnyJsyA.js",
+      "/assets/TutorialShell-DBnTsSTn.css"
+    ]
+  },
+  "exit": {
+    "url": "https://lims.yigini.net/login?lang=en",
+    "guideCount": 0,
+    "loginVisible": true
+  }
+}

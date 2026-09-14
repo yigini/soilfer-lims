@@ -1,0 +1,141 @@
+{
+  "time": "2026-09-14T13:36:29.290Z",
+  "scope": "Frozen current local client/dist, all APIs intercepted; synthetic authentication tests UI state only. No database or production. Only initial navigation uses page.goto; later account changes use real UI.",
+  "sourceHead": "b421a9a502fc77a96a20b2317e761baa8bc5002d",
+  "sourceShellSha256": "09e6ef649582d4dcd8e98f3457e559f825e38136300458d49d97bcaecfd45077",
+  "indexSha256": "63caa88f312186ed3d5a60455bb5e4463c280042b58200228b5492a19931c28d",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-Bb5_VIl7.js",
+      "sha256": "a40a0fbe134896fb700351ba73795969f24a957ee76d9b5aebb6b82c2c65d4b4"
+    },
+    {
+      "path": "/assets/TutorialShell-DBnTsSTn.css",
+      "sha256": "ddfa2508a6d18fc92852cdf676ba1f20ea7bf3e5457a1a3eba659985c12b2d7d"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "mockedAuthPosts": [
+    {
+      "path": "/api/auth/login",
+      "username": "synthetic-tech-b"
+    }
+  ],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2"
+  ],
+  "apiReads": [
+    {
+      "path": "/api/public/i18n/bootstrap",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/admin/settings",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/config/analyses",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/workbench/queue",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/workbench/v2/receipts",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/dashboard/home",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/config/analyses",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/workbench/queue",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/workbench/v2/receipts",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/samples/OLD-LAB-SAMPLE/detail",
+      "actor": "synthetic-tech-b"
+    }
+  ],
+  "documentRequests": [
+    "/workbench?tutorialmode=true&tour=first-visit"
+  ],
+  "checks": {
+    "initial": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "guideHasA": true,
+      "sampleInput": ""
+    },
+    "signedOut": {
+      "url": "/login",
+      "guideHasA": false,
+      "sampleInput": "",
+      "marker": "spa-handover-review11"
+    },
+    "signedInB": {
+      "url": "/",
+      "guideHasB": true,
+      "guideHasA": false,
+      "sampleInput": "",
+      "marker": "spa-handover-review11",
+      "authMeB": true
+    },
+    "forbiddenOldLab": {
+      "url": "/workbench",
+      "guideHasB": true,
+      "guideHasA": false,
+      "guideText": "Map & report\n14 / 16\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nS\nSynthetic Technician B · LAB_TECHNICIAN\nA result with a history.\n\nThe map explains dependencies and handovers. The report connects the final result to its method, version and review history.\n\nWhy this matters\n/samples/:id/map\nGo to page →\nAccess denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.\n✕\nSample ID:\nOLD-LAB-SAMPLE\nView Map →\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 0 viewed)\nWords used here\nExplore the lab around it →\n← Back\nSkip lesson",
+      "requestedAsB": true,
+      "marker": "spa-handover-review11",
+      "documentRequests": 1
+    }
+  },
+  "interactionLimit": "The dock overlaps the user-menu Sign Out pointer target at 1440x1000; this auth-state check uses keyboard activation of the real button and login form, not a forced click or application auth hook.",
+  "pass": true
+}

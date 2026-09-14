@@ -758,7 +758,7 @@ async function main() {
             await page.waitForSelector('#roleSelect', { timeout: 5000 });
         }
 
-        results['T11'] = 'PASS: Full curriculum, 9-stop quick path (01/09 to 09/09, texture included), viewed vs practiced separation, and actual UI selection and traversal across all 5 role tracks verified with unavailable states';
+        results['T11'] = 'PASS: Full curriculum, 9-stop quick path (01/09 to 09/09, texture included), viewed vs practiced separation, and actual UI role selection with stop counters and unavailable states verified across all 5 role tracks';
         console.log('✓ T11 PASSED');
 
         // =========================================================================
@@ -1128,7 +1128,7 @@ async function main() {
         const tutorialCssAsset = assetFiles.find(f => f.startsWith('TutorialShell-') && f.endsWith('.css'));
 
         if (liveHealthStatus === 200) {
-            results['T21'] = `PASS: Candidate ${gitCommit} (${tutorialJsAsset}, ${tutorialCssAsset}) verified; /api/health HTTP 200 on live VPS 46.19.33.37; live DB invariant verified (36,870 samples); unflagged zero-chunk isolation confirmed`;
+            results['T21'] = `PASS (Live VPS health & candidate build assets): Public /api/health HTTP 200 on live VPS 46.19.33.37; candidate chunk separation verified locally (${tutorialJsAsset}, ${tutorialCssAsset}) with unflagged zero-chunk isolation`;
             console.log(`✓ T21 PASSED (LIVE VPS VERIFIED: ${gitCommit})`);
         } else {
             results['T21'] = `PARTIAL (Pre-Deployment Candidate Verified): Candidate ${gitCommit} compiled with assets ${tutorialJsAsset}, ${tutorialCssAsset}; local readiness verified; live deployment to VPS pending after push`;
@@ -1461,21 +1461,24 @@ async function main() {
         assert(forbiddenNoticeText.includes('Access denied') || forbiddenNoticeText.includes('another laboratory'), `T23: Forbidden sample must show laboratory access denied notice, got: ${forbiddenNoticeText}`);
         assert(!page.url().includes('SAMPLE-FORBIDDEN-001'), 'T23: Forbidden sample must NOT navigate');
 
-        // 5g. Same-document account/lab change while old URL remains -> new access verification blocks unauthorized lab
-        // Switch session in same document from usr-tech (LAB-COORD) to usr-other-tech (LAB-OTHER)
-        await page.evaluate(({ token }) => {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify({
-                id: 'usr-other-tech',
-                username: 'other_tech',
-                name: 'Oscar Other',
-                role: 'LAB_TECHNICIAN',
-                labId: 'LAB-OTHER'
-            }));
-        }, { token: otherTechToken });
-        // Attempt to access LAB-COORD sample from LAB-OTHER technician
-        await page.goto(`${UI_BASE_URL}/workbench?tutorialmode=true`);
+        // 5g. Same-document account/lab change without page.goto via normal AuthContext/SPA sign-in
+        // Click User Menu and Sign Out to trigger AuthContext.logout() in the current document
+        await page.click('button[title="User Menu"]', { force: true });
+        await page.waitForSelector('button:has-text("Sign Out")', { timeout: 4000 });
+        await page.$eval('button:has-text("Sign Out")', el => el.click());
+        await page.waitForSelector('#username', { timeout: 6000 });
+
+        // Normal SPA sign-in as other_tech (LAB-OTHER)
+        await page.fill('#username', 'other_tech');
+        await page.fill('#password', 'Password123!');
+        await page.$eval('button[type="submit"]', el => el.click());
+
+        // Client-side SPA navigation to /workbench
+        await page.waitForSelector('[data-tour="nav-workbench"]', { timeout: 8000 });
+        await page.click('[data-tour="nav-workbench"]');
         await page.waitForSelector('#sampleIdInput', { timeout: 8000 });
+
+        // Attempt to access LAB-COORD sample from LAB-OTHER technician
         await page.fill('#sampleIdInput', 'SAMPLE-ACCESSIBLE-001');
         await page.waitForTimeout(100);
         await page.click('#viewSampleMapBtn');
@@ -1484,21 +1487,19 @@ async function main() {
         assert(labMismatchNotice.includes('Access denied') || labMismatchNotice.includes('another laboratory'), `T23: Other lab technician must be denied access to LAB-COORD sample, got: ${labMismatchNotice}`);
         assert(!page.url().includes('SAMPLE-ACCESSIBLE-001'), 'T23: Stale lab record must NOT be navigated to by other lab');
 
-        // Restore techToken session for remaining checks
-        await page.evaluate(({ token }) => {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify({
-                id: 'usr-tech',
-                username: 'lab_technician',
-                name: 'Tomas Tech',
-                role: 'LAB_TECHNICIAN',
-                labId: 'LAB-COORD'
-            }));
-        }, { token: techToken });
+        // Restore tech session via same-document SPA sign-in
+        await page.click('button[title="User Menu"]', { force: true });
+        await page.waitForSelector('button:has-text("Sign Out")', { timeout: 4000 });
+        await page.$eval('button:has-text("Sign Out")', el => el.click());
+        await page.waitForSelector('#username', { timeout: 6000 });
+        await page.fill('#username', 'lab_technician');
+        await page.fill('#password', 'Password123!');
+        await page.$eval('button[type="submit"]', el => el.click());
+        await page.waitForSelector('[data-tour="nav-workbench"]', { timeout: 8000 });
+        await page.click('[data-tour="nav-workbench"]');
+        await page.waitForSelector('#sampleIdInput', { timeout: 8000 });
 
         // 5h. URL Single Encoding check: sample with spaces ('SOIL 001')
-        await page.goto(`${UI_BASE_URL}/workbench?tutorialmode=true`);
-        await page.waitForSelector('#sampleIdInput', { timeout: 8000 });
         await page.fill('#sampleIdInput', 'SOIL 001');
         await page.waitForTimeout(100);
         await page.click('#viewSampleMapBtn');
@@ -1523,7 +1524,7 @@ async function main() {
         const raceData = JSON.parse(fs.readFileSync(raceReportPath, 'utf8'));
         assert(raceData.reproduced === false, 'T23: Independent map race reproducer must confirm reproduced: false');
 
-        results['T23'] = 'PASS: Visitor journey (F01-F03 interactive search/filter/selection), path choices, and Chapter 13 map resolution verified: human alias ORIG-001 -> canonical SAMPLE-ACCESSIBLE-001 map, wrong-lab 403 blocking, same-document actor change isolation, single URL encoding, and verified race-free Exit teardown';
+        results['T23'] = 'PASS: Visitor journey (F01-F03 interactive search/filter/selection), path choices, and Chapter 13 map resolution verified: human alias ORIG-001 -> canonical SAMPLE-ACCESSIBLE-001 map, wrong-lab 403 blocking, same-document actor switch via in-document SPA sign-in, single URL encoding, and verified race-free Exit teardown';
         console.log('✓ T23 PASSED');
 
         // =========================================================================
