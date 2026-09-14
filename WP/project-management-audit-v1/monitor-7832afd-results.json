@@ -1,0 +1,286 @@
+{
+  "checkedAt": "2026-09-14T00:01:21.038Z",
+  "baseline": "7832afd1ac0ceea88655cfb5bfd00271927e82b8",
+  "fixtureDatabase": "C:\\Users\\yigin\\AppData\\Local\\Temp\\codex-project-audit-V5ktfm\\fixture.db",
+  "sourceHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceUnchanged": true,
+  "cases": 17,
+  "passed": 17,
+  "results": [
+    {
+      "id": "R01",
+      "case": "National GTM actor must not read ZZZ lab sample",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "id": "A-EXPECTED",
+            "originalId": "A-EXPECTED",
+            "status": "EXPECTED",
+            "labId": "ACC-A-EXPECTED",
+            "assignedLab": "A",
+            "receptionDate": null,
+            "createdAt": "2026-09-14T00:01:20.769Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "R02",
+      "case": "Generic PUT must not bypass archive readiness with expected sample",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES",
+          "message": "Cannot archive or complete project with 1 unaccounted expected sample(s). Reconcile or cancel pending samples before archiving."
+        }
+      },
+      "persisted": "ACTIVE"
+    },
+    {
+      "id": "R03",
+      "case": "Force flag must not bypass expected-sample archival blocker",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES",
+          "message": "Cannot archive or complete project with 1 unaccounted expected sample(s). Reconcile or cancel pending samples before archiving."
+        }
+      }
+    },
+    {
+      "id": "R04",
+      "case": "Archive must reject unresolved analytical work",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "CANNOT_ARCHIVE_WITH_ACTIVE_WORK",
+          "message": "Cannot archive or complete project with 1 sample(s) undergoing active analytical work or pending review. Complete or release all work before archiving."
+        }
+      }
+    },
+    {
+      "id": "R05",
+      "case": "Paused admissions must block manifest and not route servicing lab import to owner",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "PROJECT_ADMISSIONS_PAUSED",
+          "message": "Cannot register or import samples into project 'PAUSED' while status is PAUSED. Admissions are paused."
+        }
+      },
+      "created": null
+    },
+    {
+      "id": "R06",
+      "case": "Import conflict must not disclose unauthorized foreign project code",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "valid": false,
+          "totalRows": 1,
+          "validCount": 0,
+          "conflictCount": 1,
+          "errorCount": 0,
+          "conflicts": [
+            {
+              "sampleId": "KNOWN-FOREIGN",
+              "error": "ALREADY_EXISTS_IN_DB",
+              "existingProject": null,
+              "isSameProject": false
+            }
+          ],
+          "errors": [],
+          "validSampleIds": [],
+          "previewHash": "bba291adff898d0552fe2fc80df1b43020343cd4fc86727b86bef8f98d99009a"
+        }
+      }
+    },
+    {
+      "id": "R07",
+      "case": "Coordinator must not grant project lab access including inactive lab without governance authority",
+      "passed": true,
+      "response": {
+        "status": 403,
+        "body": {
+          "error": "Only the project owner laboratory manager or Super Administrator may manage servicing laboratories",
+          "code": "PROJECT_OWNER_REQUIRED"
+        }
+      }
+    },
+    {
+      "id": "R08",
+      "case": "Unreceived draft/cancelled/unknown records must not count as physical receipts",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "total": 3,
+          "target": 0,
+          "expected": 0,
+          "received": 0,
+          "processing": 0,
+          "completed": 0,
+          "rejected": 1,
+          "counts": {
+            "registered": 3,
+            "awaitingArrival": 0,
+            "intakeInProgress": 0,
+            "labWork": 0,
+            "awaitingReview": 0,
+            "released": 0,
+            "rejectedOrCancelled": 1,
+            "needsReconciliation": 2,
+            "everPhysicallyReceived": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "R09",
+      "case": "Sample endpoint must honor bounded pagination",
+      "passed": true,
+      "status": 200,
+      "returnedRows": 1
+    },
+    {
+      "id": "R10",
+      "case": "Invalid field identifiers must not be approved by import preview",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "valid": false,
+          "totalRows": 1,
+          "validCount": 0,
+          "conflictCount": 0,
+          "errorCount": 1,
+          "conflicts": [],
+          "errors": [
+            {
+              "row": 1,
+              "sampleId": "bad id!",
+              "error": "INVALID_IDENTIFIER_FORMAT",
+              "message": "Sample ID 'bad id!' contains invalid characters or whitespace. Must be alphanumeric with hyphens, underscores, or periods (max 64 chars)."
+            }
+          ],
+          "validSampleIds": [],
+          "previewHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "id": "R11",
+      "case": "Incomplete project explicitly requested as draft must not activate",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "DRAFT-REQUEST",
+          "code": "DRAFT-REQUEST",
+          "name": "New incomplete project",
+          "description": null,
+          "notes": null,
+          "client": null,
+          "startDate": null,
+          "deliveryDeadline": null,
+          "status": "DRAFT",
+          "projectType": "OPEN_INTAKE",
+          "expectedSampleCount": 0,
+          "priority": "NORMAL",
+          "defaultAnalysisBundle": null,
+          "labId": null,
+          "countries": null,
+          "assignedLabIds": null,
+          "createdAt": "2026-09-14T00:01:20.927Z",
+          "updatedAt": "2026-09-14T00:01:20.927Z"
+        }
+      }
+    },
+    {
+      "id": "H01",
+      "case": "Prepared sample still needs analysis and must block closure",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "CANNOT_ARCHIVE_WITH_ACTIVE_WORK",
+          "message": "Cannot archive or complete project with 1 sample(s) undergoing active analytical work or pending review. Complete or release all work before archiving."
+        }
+      }
+    },
+    {
+      "id": "H02",
+      "case": "Commit must validate IDs even without preview",
+      "passed": true,
+      "response": {
+        "status": 400,
+        "body": {
+          "error": "INVALID_IDENTIFIER_FORMAT",
+          "message": "Sample identifier format is invalid for: bad id!. IDs must contain 1-64 alphanumeric characters, underscores, hyphens, or periods without whitespace.",
+          "invalidIds": [
+            "bad id!"
+          ]
+        }
+      }
+    },
+    {
+      "id": "H03",
+      "case": "Commit conflict must not disclose foreign project",
+      "passed": true,
+      "response": {
+        "status": 400,
+        "body": {
+          "error": "CROSS_PROJECT_CONFLICT",
+          "details": "The following IDs are already registered to another project: KNOWN-FOREIGN. Samples cannot be shared across projects.",
+          "conflicts": [
+            {
+              "sampleId": "KNOWN-FOREIGN",
+              "error": "ALREADY_EXISTS_IN_DB"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "H04",
+      "case": "Lab removal must block outstanding prepared sample",
+      "passed": true,
+      "response": {
+        "status": 400,
+        "body": {
+          "error": "Cannot remove servicing laboratory with outstanding work (1 active sample(s), 0 active work item(s)). Complete or transfer samples before removing laboratory access.",
+          "code": "CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK"
+        }
+      }
+    },
+    {
+      "id": "H05",
+      "case": "Project activity must exclude foreign event whose details mention current code",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "total": 0,
+          "page": 1,
+          "limit": 50,
+          "logs": []
+        }
+      }
+    },
+    {
+      "id": "H06",
+      "case": "Default sample request must be bounded to at most 500 rows",
+      "passed": true,
+      "status": 200,
+      "rows": 50
+    }
+  ]
+}

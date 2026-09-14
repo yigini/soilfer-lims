@@ -131,6 +131,26 @@ exports.processIntake = async (req, res) => {
             where: { originalId: String(originalId) }
         });
 
+        // Validate project admission policy (PM-14 / Admissions invariant)
+        const candidateProjectId = projectId || (sample ? (sample.projectId || sample.projectCode) : (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null)));
+
+        if (candidateProjectId) {
+            const project = await prisma.project.findFirst({
+                where: {
+                    OR: [
+                        { id: String(candidateProjectId) },
+                        { code: String(candidateProjectId) }
+                    ]
+                }
+            });
+            if (project && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot receive sample: Admissions for project ${project.code || project.id} are ${project.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                });
+            }
+        }
+
         if (!sample) {
             let finalProjectId = null;
             let idPrefix = 'W';
@@ -806,9 +826,48 @@ exports.discardDraft = async (req, res) => {
             return res.status(403).json({ error: 'You can only discard samples from your own lab.' });
         }
 
-        // Determine if this is a pre-registered project sample
+        // Determine if this is a pre-registered sample vs an ad-hoc walk-in draft created at reception desk
         let isPreRegistered = false;
-        if (sample.projectId || sample.projectCode) {
+
+        // 1. Inspect sample-level fieldMetadata / metadata for external intake provenance
+        let hasExternalProvenance = false;
+        if (sample.fieldMetadata) {
+            try {
+                const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
+                if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
+                    hasExternalProvenance = true;
+                }
+            } catch (e) {}
+        }
+        if (sample.metadata) {
+            try {
+                const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
+                if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
+                    hasExternalProvenance = true;
+                }
+            } catch (e) {}
+        }
+
+        // 2. Inspect receptionData to check if sample was created as an ad-hoc walk-in
+        let isWalkIn = false;
+        if (sample.receptionData) {
+            try {
+                const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
+                if (rd?.isWalkIn === true) {
+                    isWalkIn = true;
+                }
+            } catch (e) {}
+        }
+
+        // 3. Evaluate provenance:
+        // - External provenance (Kobo, manifest, etc.) is always pre-registered
+        // - Any sample linked to a project that was not born as an ad-hoc walk-in is pre-registered
+        // - Any sample linked to a KOBO_LINKED or TEMPLATE_PREDEFINED_IDS project is pre-registered
+        if (hasExternalProvenance) {
+            isPreRegistered = true;
+        } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+            isPreRegistered = true;
+        } else if (sample.projectId || sample.projectCode) {
             const project = await prisma.project.findFirst({
                 where: sample.projectId
                     ? { id: sample.projectId }
@@ -1255,6 +1314,51 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         const userLab = user?.labId || 'GEN';
         const receivedBy = user?.username || 'reception_staff';
         const now = new Date();
+
+        // Validate project admission policy for consignment and batch samples (PM-14)
+        const projectRefs = new Set();
+        if (csgInput.projectCode) projectRefs.add(String(csgInput.projectCode));
+        if (csgInput.projectId) projectRefs.add(String(csgInput.projectId));
+        for (const s of samples) {
+            if (s.projectCode) projectRefs.add(String(s.projectCode));
+            if (s.projectId) projectRefs.add(String(s.projectId));
+        }
+
+        const sampleOriginalIds = samples.map(s => String(s.originalId || s.id || '')).filter(Boolean);
+        if (sampleOriginalIds.length > 0) {
+            const existingSamplesWithProj = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { originalId: { in: sampleOriginalIds } },
+                        { id: { in: sampleOriginalIds } }
+                    ]
+                },
+                select: { projectId: true, projectCode: true }
+            });
+            for (const es of existingSamplesWithProj) {
+                if (es.projectId) projectRefs.add(String(es.projectId));
+                if (es.projectCode) projectRefs.add(String(es.projectCode));
+            }
+        }
+
+        if (projectRefs.size > 0) {
+            const blockedProjects = await prisma.project.findMany({
+                where: {
+                    OR: [
+                        { id: { in: Array.from(projectRefs) } },
+                        { code: { in: Array.from(projectRefs) } }
+                    ],
+                    status: { in: ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'] }
+                }
+            });
+            if (blockedProjects.length > 0) {
+                const bp = blockedProjects[0];
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot receive consignment: Admissions for project ${bp.code || bp.id} are ${bp.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                });
+            }
+        }
 
         // 1. Generate unique sequential consignment code CSG-YYYYMMDD-XXX
         const todayStr = now.toISOString().slice(0, 10).replace(/-/g, '');

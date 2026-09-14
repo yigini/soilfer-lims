@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2 } from 'lucide-react';
+import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function ProjectActionsModal({
@@ -8,23 +8,93 @@ export default function ProjectActionsModal({
     onClose,
     project,
     counts,
-    onSuccess
+    onSuccess,
+    initialActionType = 'menu'
 }) {
     const { t } = useLanguage();
     const [submitting, setSubmitting] = useState(false);
-    const [actionType, setActionType] = useState('menu'); // 'menu' | 'pause' | 'archive' | 'delete'
+    const [actionType, setActionType] = useState(initialActionType); // 'menu' | 'edit' | 'pause' | 'archive' | 'delete'
     const [reason, setReason] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+
+    // Edit project settings state
+    const [editName, setEditName] = useState(project?.name || '');
+    const [editClient, setEditClient] = useState(project?.client || '');
+    const [editDescription, setEditDescription] = useState(project?.description || '');
+    const [editExpectedCount, setEditExpectedCount] = useState(project?.expectedSampleCount || '');
+    const [editDeadline, setEditDeadline] = useState(project?.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
+    const [editBundle, setEditBundle] = useState(project?.defaultAnalysisBundle || '');
+    const [editStatus, setEditStatus] = useState(project?.status || 'ACTIVE');
+    const [catalogueGroups, setCatalogueGroups] = useState([]);
+
+    React.useEffect(() => {
+        if (isOpen) {
+            setActionType(initialActionType);
+            setEditName(project?.name || '');
+            setEditClient(project?.client || '');
+            setEditDescription(project?.description || '');
+            setEditExpectedCount(project?.expectedSampleCount || '');
+            setEditDeadline(project?.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
+            setEditBundle(project?.defaultAnalysisBundle || '');
+            setEditStatus(project?.status || 'ACTIVE');
+            setErrorMessage('');
+            setReason('');
+        }
+    }, [isOpen, initialActionType, project]);
+
+    React.useEffect(() => {
+        if (isOpen && actionType === 'edit') {
+            axios.get('/api/config/groups')
+                .then(res => {
+                    if (Array.isArray(res.data)) {
+                        setCatalogueGroups(res.data);
+                    }
+                })
+                .catch(err => {
+                    console.warn('[ProjectActionsModal] Failed to load analysis groups:', err.message);
+                });
+        }
+    }, [isOpen, actionType]);
 
     if (!isOpen || !project) return null;
 
     const isPaused = project.status === 'PAUSED';
+    const isDraft = project.status === 'DRAFT' || project.status === 'PENDING_MANIFEST';
     const pendingExpected = counts?.awaitingArrival ?? 0;
     const pendingLabWork = (counts?.intakeInProgress ?? 0) + (counts?.labWork ?? 0) + (counts?.awaitingReview ?? 0);
     const totalRegistered = counts?.registered ?? 0;
 
     const canArchive = pendingExpected === 0 && pendingLabWork === 0;
     const canDelete = totalRegistered === 0;
+
+    const handleSaveSettings = async (e) => {
+        e.preventDefault();
+        if (!editName.trim()) {
+            setErrorMessage(t('projects.create.nameRequired', 'Project name is required.'));
+            return;
+        }
+
+        setSubmitting(true);
+        setErrorMessage('');
+        try {
+            const payload = {
+                name: editName.trim(),
+                client: editClient.trim(),
+                description: editDescription.trim(),
+                expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
+                deliveryDeadline: editDeadline || null,
+                defaultAnalysisBundle: editBundle || null,
+                status: editStatus
+            };
+            await axios.put(`/api/projects/${project.id}`, payload);
+            onSuccess?.('PROJECT_UPDATED');
+            onClose();
+        } catch (err) {
+            setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update project settings');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const handleTogglePause = async () => {
         if (!reason.trim()) {
@@ -83,6 +153,7 @@ export default function ProjectActionsModal({
                 <div className="flex items-center justify-between pb-3 border-b border-sf-divider">
                     <h2 className="text-lg font-bold text-sf-text">
                         {actionType === 'menu' && t('projects.actions.modalTitle', 'Project governance actions')}
+                        {actionType === 'edit' && t('projects.actions.editSettingsTitle', 'Edit project settings & plan')}
                         {actionType === 'pause' && (isPaused ? t('projects.actions.resumeTitle', 'Resume new admissions') : t('projects.actions.pauseTitle', 'Pause new admissions'))}
                         {actionType === 'archive' && t('projects.actions.archiveTitle', 'Review archival readiness')}
                         {actionType === 'delete' && t('projects.actions.deleteTitle', 'Delete empty project')}
@@ -110,6 +181,32 @@ export default function ProjectActionsModal({
                         </p>
 
                         <div className="space-y-2">
+                            {/* Option 0: Edit Settings & Plan */}
+                            <button
+                                onClick={() => {
+                                    setActionType('edit');
+                                    setEditName(project.name || '');
+                                    setEditClient(project.client || '');
+                                    setEditDescription(project.description || '');
+                                    setEditExpectedCount(project.expectedSampleCount || '');
+                                    setEditDeadline(project.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
+                                    setEditBundle(project.defaultAnalysisBundle || '');
+                                    setEditStatus(project.status || 'ACTIVE');
+                                    setErrorMessage('');
+                                }}
+                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                            >
+                                <Settings className="w-5 h-5 text-sf-primary mt-0.5" />
+                                <div>
+                                    <div className="font-bold text-xs text-sf-text">
+                                        {t('projects.actions.editSettingsBtn', 'Edit project settings & analysis plan')}
+                                    </div>
+                                    <div className="text-[11px] text-sf-muted mt-0.5">
+                                        {t('projects.actions.editSettingsSub', 'Update metadata, client organization, deadlines, and default analysis package from the catalogue.')}
+                                    </div>
+                                </div>
+                            </button>
+
                             {/* Option 1: Pause / Resume */}
                             <button
                                 onClick={() => { setActionType('pause'); setReason(''); }}
@@ -161,6 +258,129 @@ export default function ProjectActionsModal({
                             )}
                         </div>
                     </div>
+                )}
+
+                {/* Subview: Edit Settings & Plan */}
+                {actionType === 'edit' && (
+                    <form onSubmit={handleSaveSettings} className="space-y-3.5 pt-1">
+                        <div>
+                            <label className="block text-xs font-semibold text-sf-text mb-1">
+                                {t('projects.create.nameLabel', 'Project name *')}
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text placeholder:text-sf-muted focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-sf-text mb-1">
+                                    {t('projects.create.clientLabel', 'Client / Partner organization')}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editClient}
+                                    onChange={(e) => setEditClient(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text placeholder:text-sf-muted focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-sf-text mb-1">
+                                    {t('projects.overview.nextDelivery', 'Delivery deadline')}
+                                </label>
+                                <input
+                                    type="date"
+                                    value={editDeadline}
+                                    onChange={(e) => setEditDeadline(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-sf-text mb-1">
+                                    {t('projects.create.targetCountLabel', 'Expected sample count')}
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={editExpectedCount}
+                                    onChange={(e) => setEditExpectedCount(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-sf-text mb-1">
+                                    {t('projects.overview.defaultPlan', 'Default analysis package')}
+                                </label>
+                                <select
+                                    value={editBundle}
+                                    onChange={(e) => setEditBundle(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                                >
+                                    <option value="">{t('projects.plan.noBundleTitle', 'No analysis bundle assigned')}</option>
+                                    {catalogueGroups.map(g => (
+                                        <option key={g.id || g.name} value={g.id || g.name}>
+                                            {g.name} ({Array.isArray(g.analyses) ? g.analyses.length : 0} methods)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-sf-text mb-1">
+                                {t('projects.create.descriptionLabel', 'Description / Notes')}
+                            </label>
+                            <textarea
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                rows={2}
+                                className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset px-3 py-2 text-sf-text placeholder:text-sf-muted focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                            />
+                        </div>
+
+                        {isDraft && (
+                            <div className="p-3 rounded-xl border border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 text-xs space-y-2">
+                                <label className="flex items-center gap-2 font-semibold text-sf-text cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={editStatus === 'ACTIVE'}
+                                        onChange={(e) => setEditStatus(e.target.checked ? 'ACTIVE' : 'DRAFT')}
+                                        className="rounded border-sf-border text-sf-primary focus:ring-sf-primary"
+                                    />
+                                    <span>{t('projects.actions.activateProjectLabel', 'Activate project for admissions')}</span>
+                                </label>
+                                <p className="text-[11px] text-sf-muted">
+                                    {t('projects.actions.activateProjectDesc', 'Check this box when initial setup is complete and the project is ready to receive sample manifests and intake.')}
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setActionType('menu')}
+                                className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-sf-border text-sf-muted hover:bg-sf-hover"
+                            >
+                                {t('common.back', 'Back')}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="btn-primary text-xs"
+                            >
+                                {submitting ? t('common.loading', 'Saving…') : t('common.save', 'Save changes')}
+                            </button>
+                        </div>
+                    </form>
                 )}
 
                 {/* Subview: Pause / Resume Admissions */}

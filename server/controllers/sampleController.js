@@ -764,6 +764,24 @@ exports.receiveSample = async (req, res) => {
             });
         }
 
+        // Validate project admission policy
+        if (sample.projectId || sample.projectCode) {
+            const project = await prisma.project.findFirst({
+                where: {
+                    OR: [
+                        { id: sample.projectId || '' },
+                        { code: sample.projectCode || '' }
+                    ]
+                }
+            });
+            if (project && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot receive sample: Admissions for project ${project.code} are ${project.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                });
+            }
+        }
+
         const beforeState = sample.status;
         const now = new Date();
 
@@ -1396,9 +1414,42 @@ exports.deleteSample = async (req, res) => {
             return res.status(403).json({ error: 'Cannot delete SoilFER (Google Sheet) samples.' });
         }
 
-        // CHECK PROJECT TYPE: Kobo/Template samples should be REVERTED, not deleted
+        // Determine if sample has pre-registered provenance vs ad-hoc walk-in draft
         let isPreRegistered = false;
-        if (sample.projectId || sample.projectCode) {
+
+        let hasExternalProvenance = false;
+        if (sample.fieldMetadata) {
+            try {
+                const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
+                if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
+                    hasExternalProvenance = true;
+                }
+            } catch (e) {}
+        }
+        if (sample.metadata) {
+            try {
+                const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
+                if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
+                    hasExternalProvenance = true;
+                }
+            } catch (e) {}
+        }
+
+        let isWalkIn = false;
+        if (sample.receptionData) {
+            try {
+                const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
+                if (rd?.isWalkIn === true) {
+                    isWalkIn = true;
+                }
+            } catch (e) {}
+        }
+
+        if (hasExternalProvenance) {
+            isPreRegistered = true;
+        } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+            isPreRegistered = true;
+        } else if (sample.projectId || sample.projectCode) {
             const project = await prisma.project.findFirst({
                 where: sample.projectId
                     ? { id: sample.projectId }
@@ -1537,7 +1588,40 @@ exports.batchDeleteSamples = async (req, res) => {
 
         for (const sample of samples) {
             let isPreRegistered = false;
-            if (sample.projectId || sample.projectCode) {
+
+            let hasExternalProvenance = false;
+            if (sample.fieldMetadata) {
+                try {
+                    const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
+                    if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
+                        hasExternalProvenance = true;
+                    }
+                } catch (e) {}
+            }
+            if (sample.metadata) {
+                try {
+                    const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
+                    if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
+                        hasExternalProvenance = true;
+                    }
+                } catch (e) {}
+            }
+
+            let isWalkIn = false;
+            if (sample.receptionData) {
+                try {
+                    const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
+                    if (rd?.isWalkIn === true) {
+                        isWalkIn = true;
+                    }
+                } catch (e) {}
+            }
+
+            if (hasExternalProvenance) {
+                isPreRegistered = true;
+            } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+                isPreRegistered = true;
+            } else if (sample.projectId || sample.projectCode) {
                 const project = await prisma.project.findFirst({
                     where: sample.projectId
                         ? { id: sample.projectId }
@@ -1563,10 +1647,10 @@ exports.batchDeleteSamples = async (req, res) => {
             await transitionSample(sample.id, 'EXPECTED', user, 'Draft/intake discarded. Sample reverted to EXPECTED status.', {
                 labId: null,
                 receptionData: null,
-                fieldMetadata: null,
+                receptionDate: null,
+                receivedBy: null,
                 requiredAnalyses: null,
                 analysisGroupIds: null,
-                metadata: null,
                 assignedLab: sample.assignedLab,
                 history: JSON.stringify([{
                     status: 'EXPECTED',
@@ -1702,6 +1786,27 @@ exports.updateSampleProject = async (req, res) => {
         const scopeGuard = require('../utils/scopeGuard');
         if (!scopeGuard.canAccessEntity(user, sample, { labField: 'assignedLab', altLabField: 'labId' })) {
             return res.status(403).json({ error: 'Sample is outside your scope' });
+        }
+
+        // Validate target project admission policy
+        if (projectId || projectCode) {
+            const targetProject = await prisma.project.findFirst({
+                where: {
+                    OR: [
+                        { id: projectId || '' },
+                        { code: projectCode || '' }
+                    ]
+                }
+            });
+            if (!targetProject) {
+                return res.status(404).json({ error: 'TARGET_PROJECT_NOT_FOUND', message: 'Target project not found' });
+            }
+            if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot move sample into project ${targetProject.code}: Admissions are ${targetProject.status.toLowerCase()}.`
+                });
+            }
         }
 
         const now = new Date();

@@ -29,30 +29,12 @@ async function validateProjectClosure(project, tx = prisma) {
         throw err;
     }
 
+    const terminalStatuses = ['RELEASED', 'ARCHIVED', 'RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'];
     const activeWork = await tx.sample.count({
         where: {
             OR: [{ projectId: project.id }, { projectCode: project.code }],
             status: {
-                in: [
-                    'DRAFT',
-                    'COLLECTED',
-                    'RECEIVED',
-                    'ACCEPTED',
-                    'LAB_ID_ASSIGNED',
-                    'DRYING',
-                    'GRINDING',
-                    'PREPARED',
-                    'PROCESSING',
-                    'IN_LAB',
-                    'ANALYSIS_IN_PROGRESS',
-                    'ANALYSIS',
-                    'IN_PROGRESS',
-                    'SUBMITTED',
-                    'SUBMITTED_FULL',
-                    'SUBMITTED_PARTIAL',
-                    'PENDING_REVIEW',
-                    'APPROVED'
-                ]
+                notIn: [...terminalStatuses, 'EXPECTED', 'PENDING_MANIFEST']
             }
         }
     });
@@ -70,7 +52,7 @@ async function validateProjectClosure(project, tx = prisma) {
                     OR: [{ projectId: project.id }, { projectCode: project.code }]
                 },
                 status: {
-                    notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'CANCELLED', 'REJECTED']
+                    notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'ACCEPTED', 'CANCELLED', 'REJECTED']
                 }
             }
         });
@@ -594,6 +576,10 @@ exports.updateProject = async (req, res) => {
 
         // Atomic Project Update and Audit Transaction (PM-08, P11)
         const updated = await prisma.$transaction(async (tx) => {
+            if (updates.status !== undefined && ['COMPLETED', 'ARCHIVED', 'CLOSED'].includes(updates.status)) {
+                await validateProjectClosure(project, tx);
+            }
+
             const proj = await tx.project.update({
                 where: { id: project.id },
                 data
@@ -639,12 +625,12 @@ exports.updateProject = async (req, res) => {
                             data: koboData
                         });
                     } else if (koboFormId && koboApiToken) {
-                        const labId = project.labId || req.user.labId;
-                        if (labId) {
+                        const targetLabId = project.labId || req.user.labId;
+                        if (targetLabId) {
                             await prisma.koboConfig.create({
                                 data: {
-                                    labId,
-                                    labName: project.name,
+                                    id: `kobo-cfg-${Date.now()}`,
+                                    labId: targetLabId,
                                     projectCode: project.code,
                                     koboServerUrl: koboServerUrl || 'https://kf.kobotoolbox.org',
                                     formId: koboFormId,
@@ -661,6 +647,12 @@ exports.updateProject = async (req, res) => {
 
         res.json(updated);
     } catch (err) {
+        if (err.statusCode === 422 || err.code === 'CANNOT_CLOSE_PROJECT' || err.code === 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES' || err.code === 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK') {
+            return res.status(err.statusCode || 422).json({
+                error: err.code || 'CANNOT_CLOSE_PROJECT',
+                message: err.message
+            });
+        }
         console.error('[updateProject] Error:', err);
         return error(res, 500, 'PROJECT_UPDATE_ERROR', err.message);
     }
@@ -910,17 +902,10 @@ exports.archiveProject = async (req, res) => {
             return res.status(403).json({ error: 'Cannot archive projects from another lab. Access denied.' });
         }
 
-        // Check for unresolved expected samples and active analytical work (A08, PM-01, R03, R04)
-        try {
-            await validateProjectClosure(project, prisma);
-        } catch (closureErr) {
-            return res.status(closureErr.statusCode || 422).json({
-                error: closureErr.code || 'CANNOT_ARCHIVE_PROJECT',
-                message: closureErr.message
-            });
-        }
-
         const updated = await prisma.$transaction(async (tx) => {
+            // Check for unresolved expected samples and active analytical work atomically within transaction
+            await validateProjectClosure(project, tx);
+
             const p = await tx.project.update({
                 where: { id: project.id },
                 data: { status: 'COMPLETED' }
@@ -943,6 +928,12 @@ exports.archiveProject = async (req, res) => {
 
         return success(res, 'PROJECT_ARCHIVED', 'Project archived', { code: project.code }, 200, { project: updated });
     } catch (err) {
+        if (err.statusCode === 422 || err.code === 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES' || err.code === 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK') {
+            return res.status(err.statusCode || 422).json({
+                error: err.code || 'CANNOT_ARCHIVE_PROJECT',
+                message: err.message
+            });
+        }
         console.error('[archiveProject] Error:', err);
         return error(res, 500, 'PROJECT_ARCHIVE_ERROR', err.message);
     }
@@ -1160,8 +1151,47 @@ exports.getProjectSamples = async (req, res) => {
         const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : 1;
         const skip = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10) || 0) : (page - 1) * limit;
 
+        const stageStatusMap = {
+            '0': ['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'],
+            '1': ['RECEIVED', 'ACCEPTED', 'DRYING', 'GRINDING', 'PREPARED'],
+            '2': ['PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS'],
+            '3': ['SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED'],
+            '4': ['RELEASED', 'APPROVED', 'ARCHIVED'],
+            '5': ['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED']
+        };
+
+        const extraConditions = [];
+
+        // Search filter across sample ID, originalId, or labId
+        if (req.query.q) {
+            const q = String(req.query.q).trim();
+            if (q) {
+                extraConditions.push({
+                    OR: [
+                        { id: { contains: q } },
+                        { originalId: { contains: q } },
+                        { labId: { contains: q } }
+                    ]
+                });
+            }
+        }
+
+        // Stage filter
+        if (req.query.stage !== undefined && req.query.stage !== '' && req.query.stage !== 'all') {
+            const stageKey = String(req.query.stage);
+            if (stageStatusMap[stageKey]) {
+                extraConditions.push({
+                    status: { in: stageStatusMap[stageKey] }
+                });
+            }
+        }
+
+        const effectiveWhere = extraConditions.length > 0
+            ? { AND: [sampleWhere, ...extraConditions] }
+            : sampleWhere;
+
         const findOptions = {
-            where: sampleWhere,
+            where: effectiveWhere,
             select: {
                 id: true,
                 originalId: true,
@@ -1176,7 +1206,7 @@ exports.getProjectSamples = async (req, res) => {
             skip: skip
         };
 
-        const total = await prisma.sample.count({ where: sampleWhere });
+        const total = await prisma.sample.count({ where: effectiveWhere });
         res.setHeader('X-Total-Count', String(total));
         res.setHeader('Access-Control-Expose-Headers', 'X-Total-Count');
 
@@ -1288,7 +1318,9 @@ exports.getProjectKoboConfig = async (req, res) => {
         const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
         const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
 
-        const config = configs[0];
+        const userLabConfig = req.user.labId ? configs.find(c => c.labId === req.user.labId) : null;
+        const ownerLabConfig = configs.find(c => c.labId === project.labId);
+        const config = userLabConfig || ownerLabConfig || configs[0];
         // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
         res.json({
             configured: true,

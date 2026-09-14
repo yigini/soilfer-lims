@@ -325,6 +325,24 @@ async function syncLabSubmissions(config, performedBy) {
         throw new Error(`[KOBO] Configured project '${projectCode}' does not exist in the database.`);
     }
 
+    // Verify servicing laboratory is authorized for this project
+    const projectMembershipService = require('../services/projectMembershipService');
+    const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+    if (!allMemberLabIds.includes(config.labId)) {
+        throw new Error(`[KOBO] Laboratory '${config.labId}' is not an authorized servicing laboratory for project '${projectCode}'.`);
+    }
+
+    // Admissions policy check: skip intake if admissions are paused or closed
+    if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
+        console.warn(`[KOBO] Admissions ${project.status.toLowerCase()} for project '${projectCode}'. Skipping new sample intake.`);
+        return {
+            newSamples: 0,
+            skipped: submissions.length,
+            message: `Project admissions ${project.status.toLowerCase()}`,
+            lastSubmissionId: config.lastSubmissionId
+        };
+    }
+
     let newCount = 0;
     let skippedCount = 0;
     let lastSubmissionId = config.lastSubmissionId;

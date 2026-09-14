@@ -754,7 +754,10 @@
       "bundleUnresolvedTitle": "Pacote atribuído mas não definido no catálogo",
       "bundleUnresolvedDesc": "O projeto especifica o pacote \"{{bundleName}}\", mas nenhuma lista ativa foi encontrada no catálogo.",
       "createPackageInCatalogue": "Definir este pacote no catálogo →",
-      "manageCatalogue": "Gerenciar definições do catálogo"
+      "manageCatalogue": "Gerenciar definições do catálogo",
+      "selectPackage": "Selecionar pacote de análises",
+      "changePackage": "Alterar pacote",
+      "configurePlan": "Configurar plano do projeto"
     },
     "team": {
       "scopedNotice": "You are viewing your laboratory’s participation. Other laboratories’ staff and internal sample details are isolated.",
@@ -893,7 +896,16 @@
       "showingFirst100": "Exibindo as primeiras 100 amostras correspondentes.",
       "canonicalNotice": "A preparação, medições analíticas e aprovação ocorrem na bancada. Esta página exibe o estado coordenado autêntico.",
       "showingRange": "Exibindo {{start}} a {{end}} de {{total}} amostras",
-      "perPage": "Linhas:"
+      "perPage": "Linhas:",
+      "loadingSamples": "Carregando amostras do projeto…",
+      "noMatchingSamples": "Nenhuma amostra corresponde aos filtros selecionados",
+      "noSearchMatchDesc": "Nenhuma amostra correspondeu à sua busca ou filtro de etapa. Tente ajustar os termos.",
+      "noStageMatchDesc": "Nenhuma amostra neste projeto está no estágio selecionado.",
+      "clearFilters": "Limpar todos os filtros",
+      "noSamplesYet": "Nenhuma amostra registrada neste projeto ainda",
+      "noSamplesDesc": "Importe um manifesto pré-registrado ou sincronize do KoboToolbox para iniciar o recebimento.",
+      "filteredNotice": "(filtrado)",
+      "fetchError": "Falha ao carregar amostras: {{error}}"
     }
   },
   "users": {

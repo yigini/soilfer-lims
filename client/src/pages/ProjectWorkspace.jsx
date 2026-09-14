@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -20,35 +20,120 @@ import PageGuideModal from '../components/projects/PageGuideModal';
 export default function ProjectWorkspace() {
     const { projectId } = useParams();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useAuth();
     const { t } = useLanguage();
 
     const [project, setProject] = useState(null);
     const [stats, setStats] = useState(null);
     const [samples, setSamples] = useState([]);
-    const [samplesPage, setSamplesPage] = useState(1);
-    const [samplesLimit, setSamplesLimit] = useState(50);
     const [samplesTotal, setSamplesTotal] = useState(0);
     const [samplesLoading, setSamplesLoading] = useState(false);
+    const [samplesError, setSamplesError] = useState(null);
     const [labAccess, setLabAccess] = useState(null);
     const [koboConfig, setKoboConfig] = useState(null);
 
-    const [activeTab, setActiveTab] = useState('overview');
-    const [selectedStage, setSelectedStage] = useState('all');
+    const activeTab = searchParams.get('tab') || 'overview';
+    const selectedStage = searchParams.get('stage') || 'all';
+    const searchQuery = searchParams.get('q') || '';
+    const samplesPage = parseInt(searchParams.get('page'), 10) || 1;
+    const samplesLimit = parseInt(searchParams.get('limit'), 10) || 50;
+
     const [loading, setLoading] = useState(true);
     const [errorState, setErrorState] = useState(null);
 
     // Modals
     const [actionsModalOpen, setActionsModalOpen] = useState(false);
+    const [actionsModalInitialAction, setActionsModalInitialAction] = useState('menu');
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [guideModalOpen, setGuideModalOpen] = useState(false);
 
-    const fetchSamples = useCallback(async (page = 1, limit = 50) => {
+    const abortControllerRef = React.useRef(null);
+
+    const setActiveTab = (tab) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('tab', tab);
+            return next;
+        });
+    };
+
+    const setSelectedStage = (stage) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (stage && stage !== 'all') {
+                next.set('stage', stage);
+            } else {
+                next.delete('stage');
+            }
+            next.set('page', '1');
+            return next;
+        });
+    };
+
+    const setSearchQuery = (q) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (q && q.trim()) {
+                next.set('q', q.trim());
+            } else {
+                next.delete('q');
+            }
+            next.set('page', '1');
+            return next;
+        });
+    };
+
+    const handleClearFilters = () => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('q');
+            next.delete('stage');
+            next.set('page', '1');
+            return next;
+        });
+    };
+
+    const handleOpenActionsModal = (action = 'menu') => {
+        setActionsModalInitialAction(action);
+        setActionsModalOpen(true);
+    };
+
+    const setSamplesPage = (page) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('page', String(page));
+            return next;
+        });
+    };
+
+    const setSamplesLimit = (limit) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('limit', String(limit));
+            next.set('page', '1');
+            return next;
+        });
+    };
+
+    const fetchSamples = useCallback(async (page = 1, limit = 50, q = '', stage = 'all') => {
         if (!projectId) return;
+
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
+
         setSamplesLoading(true);
+        setSamplesError(null);
         try {
+            const params = { page, limit };
+            if (q && q.trim()) params.q = q.trim();
+            if (stage && stage !== 'all') params.stage = stage;
+
             const samplesRes = await axios.get(`/api/projects/${projectId}/samples`, {
-                params: { page, limit }
+                params,
+                signal: abortControllerRef.current.signal
             });
             setSamples(Array.isArray(samplesRes.data) ? samplesRes.data : []);
             const headerTotal = parseInt(samplesRes.headers['x-total-count'], 10);
@@ -56,7 +141,11 @@ export default function ProjectWorkspace() {
                 setSamplesTotal(headerTotal);
             }
         } catch (err) {
+            if (axios.isCancel(err) || err.name === 'CanceledError' || err.name === 'AbortError') {
+                return;
+            }
             console.warn('[Workspace] Samples fetch failed:', err.message);
+            setSamplesError(err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to load samples');
         } finally {
             setSamplesLoading(false);
         }
@@ -82,7 +171,7 @@ export default function ProjectWorkspace() {
             }
 
             // 3. Scoped samples
-            await fetchSamples(samplesPage, samplesLimit);
+            await fetchSamples(samplesPage, samplesLimit, searchQuery, selectedStage);
 
             // 4. Lab Access & Membership
             try {
@@ -133,8 +222,8 @@ export default function ProjectWorkspace() {
             isInitialMount.current = false;
             return;
         }
-        fetchSamples(samplesPage, samplesLimit);
-    }, [fetchSamples, samplesPage, samplesLimit]);
+        fetchSamples(samplesPage, samplesLimit, searchQuery, selectedStage);
+    }, [fetchSamples, samplesPage, samplesLimit, searchQuery, selectedStage]);
 
     const handleSelectStage = (stageIdx) => {
         setSelectedStage(stageIdx);
@@ -203,7 +292,7 @@ export default function ProjectWorkspace() {
                 activeTab={activeTab}
                 onSelectTab={setActiveTab}
                 onOpenGuide={() => setGuideModalOpen(true)}
-                onOpenActions={() => setActionsModalOpen(true)}
+                onOpenActions={() => handleOpenActionsModal('menu')}
                 capabilities={capabilities}
                 userRole={user?.role}
             />
@@ -228,17 +317,22 @@ export default function ProjectWorkspace() {
                         samples={samples}
                         selectedStage={selectedStage}
                         onSelectStage={setSelectedStage}
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        onClearFilters={handleClearFilters}
                         counts={counts}
                         capabilities={capabilities}
                         page={samplesPage}
                         limit={samplesLimit}
-                        totalCount={samplesTotal || counts?.registered || samples.length}
+                        totalCount={samplesTotal}
                         onPageChange={setSamplesPage}
                         onLimitChange={(newLimit) => {
                             setSamplesLimit(newLimit);
                             setSamplesPage(1);
                         }}
                         loading={samplesLoading}
+                        error={samplesError}
+                        onRetry={() => fetchSamples(samplesPage, samplesLimit, searchQuery, selectedStage)}
                     />
                 )}
 
@@ -247,6 +341,7 @@ export default function ProjectWorkspace() {
                         project={project}
                         capabilities={capabilities}
                         userRole={user?.role}
+                        onOpenConfigurePlan={() => handleOpenActionsModal('edit')}
                     />
                 )}
 
@@ -285,6 +380,7 @@ export default function ProjectWorkspace() {
                 onClose={() => setActionsModalOpen(false)}
                 project={project}
                 counts={counts}
+                initialActionType={actionsModalInitialAction}
                 onSuccess={() => fetchWorkspaceData()}
             />
 
