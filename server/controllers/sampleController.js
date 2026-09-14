@@ -7,6 +7,8 @@ const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const sampleWorkspaceService = require('../services/sampleWorkspaceService');
 const commandReceiptService = require('../services/commandReceiptService');
+const sampleOriginService = require('../services/sampleOriginService');
+const sampleStateService = require('../services/sampleStateService');
 
 
 /**
@@ -1395,14 +1397,18 @@ exports.deleteSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // ROLE-BASED STATUS & ISOLATION CHECK
-        if (!hasPermission(user, 'DELETE_SAMPLE')) {
-            // Only allow deleting DRAFT, EXPECTED or RECEIVED (not yet approved)
-            const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED'];
-            if (!deletableStatuses.includes(sample.status)) {
-                return res.status(403).json({ error: `Cannot discard sample in ${sample.status} status. Only drafts or received samples can be discarded.` });
-            }
+        // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
+        // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
+        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
+        if (!deletableStatuses.includes(sample.status)) {
+            return res.status(409).json({
+                error: 'ILLEGAL_STATUS_TRANSITION',
+                message: `Cannot delete or discard sample in status '${sample.status}'. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment.`
+            });
+        }
 
+        // ROLE-BASED LAB ISOLATION CHECK
+        if (!hasPermission(user, 'DELETE_SAMPLE')) {
             // Lab isolation: Managers/Reception can only delete their own lab's samples
             if (user.labId && sample.labId && user.labId !== sample.labId) {
                 return res.status(403).json({ error: 'Access denied: Sample belongs to another lab.' });
@@ -1414,64 +1420,45 @@ exports.deleteSample = async (req, res) => {
             return res.status(403).json({ error: 'Cannot delete SoilFER (Google Sheet) samples.' });
         }
 
-        // Determine if sample has pre-registered provenance vs ad-hoc walk-in draft
-        let isPreRegistered = false;
-
-        let hasExternalProvenance = false;
-        if (sample.fieldMetadata) {
-            try {
-                const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
-                if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
-                    hasExternalProvenance = true;
-                }
-            } catch (e) {}
-        }
-        if (sample.metadata) {
-            try {
-                const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
-                if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
-                    hasExternalProvenance = true;
-                }
-            } catch (e) {}
-        }
-
-        let isWalkIn = false;
-        if (sample.receptionData) {
-            try {
-                const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
-                if (rd?.isWalkIn === true) {
-                    isWalkIn = true;
-                }
-            } catch (e) {}
-        }
-
-        // Conservative provenance evaluation:
-        // A sample is pre-registered / project-persisted (and must REVERT, never hard-delete) if:
-        // - It is linked to any project (projectId or projectCode)
-        // - OR it has external intake provenance (Kobo, manifest, etc.)
-        // - Only an unattached sample with NO project and NO external provenance that is a walk-in may be deleted.
-        // - Ambiguous origin without project is conservatively reverted to EXPECTED.
-        if (sample.projectId || sample.projectCode) {
-            isPreRegistered = true;
-        } else if (hasExternalProvenance) {
-            isPreRegistered = true;
-        } else if (isWalkIn) {
-            isPreRegistered = false;
-        } else {
-            isPreRegistered = true; // Conservative fallback
-        }
+        // Canonical provenance evaluation: only genuine unattached desk walk-ins may be hard deleted
+        const isPreRegistered = !sampleOriginService.isDisposableDeskDraft(sample);
 
         if (isPreRegistered) {
-            // REVERT to EXPECTED — fully atomic transaction
+            // REVERT to EXPECTED — fully atomic transaction with domain workflow validation (I04)
             await prisma.$transaction(async (tx) => {
+                const current = await tx.sample.findUnique({ where: { id: String(id) } });
+                if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+                if (!deletableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot discard sample in status '${current.status}'. Samples in progress or completed cannot be reset.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+
+                const resultCount = await tx.result.count({ where: { sampleId: String(id) } });
+                if (resultCount > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+                }
+                const activeWork = await tx.workItem.findMany({
+                    where: {
+                        sampleId: String(id),
+                        status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
+                    }
+                });
+                if (activeWork.length > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+                }
+
                 await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
                 await tx.submission.deleteMany({ where: { sampleId: String(id) } });
                 await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
                 await tx.result.deleteMany({ where: { sampleId: String(id) } });
 
-                const sampleHistory = typeof sample.history === 'string'
-                    ? JSON.parse(sample.history)
-                    : (sample.history || []);
+                const sampleHistory = typeof current.history === 'string'
+                    ? JSON.parse(current.history)
+                    : (current.history || []);
                 sampleHistory.push({
                     status: 'EXPECTED',
                     action: 'REVERT_TO_EXPECTED',
@@ -1480,10 +1467,13 @@ exports.deleteSample = async (req, res) => {
                     note: 'Sample reset/reverted to EXPECTED by manager'
                 });
 
-                await tx.sample.update({
-                    where: { id: String(id) },
-                    data: {
-                        status: 'EXPECTED',
+                // Canonical transition inside transaction (enforces workflowContract graph and logs transition audit)
+                await sampleStateService.transitionSample(
+                    id,
+                    'EXPECTED',
+                    user,
+                    'Sample reset/reverted to EXPECTED by manager',
+                    {
                         labId: null,
                         receptionData: null,
                         receptionDate: null,
@@ -1499,10 +1489,11 @@ exports.deleteSample = async (req, res) => {
                         lastSubmissionId: null,
                         lastSubmissionType: null,
                         lastSubmissionAt: null,
-                        assignedLab: sample.assignedLab,
+                        assignedLab: current.assignedLab,
                         history: JSON.stringify(sampleHistory)
-                    }
-                });
+                    },
+                    tx
+                );
 
                 await tx.auditLog.create({
                     data: {
@@ -1521,8 +1512,24 @@ exports.deleteSample = async (req, res) => {
             return res.json({ message: 'Sample intake discarded. Sample reverted to EXPECTED status.', reverted: true });
         }
 
-        // HARD DELETE for walk-in samples — fully atomic transaction
+        // HARD DELETE for walk-in samples — fully atomic transaction with safety validation
         await prisma.$transaction(async (tx) => {
+            const current = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+            if (!deletableStatuses.includes(current.status)) {
+                throw new sampleStateService.TransitionError(
+                    `Cannot delete sample in status '${current.status}'.`,
+                    409,
+                    'ILLEGAL_STATUS_TRANSITION'
+                );
+            }
+
+            const resultCount = await tx.result.count({ where: { sampleId: String(id) } });
+            if (resultCount > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+            }
+
             await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
             await tx.submission.deleteMany({ where: { sampleId: String(id) } });
             await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
@@ -1545,6 +1552,12 @@ exports.deleteSample = async (req, res) => {
 
         res.json({ message: 'Sample deleted successfully' });
     } catch (error) {
+        if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
+            return res.status(error.statusCode || 409).json({
+                error: error.code || 'ILLEGAL_STATUS_TRANSITION',
+                message: error.message
+            });
+        }
         console.error('[deleteSample] Error:', error);
         res.status(500).json({ error: 'Failed to delete sample' });
     }
@@ -1570,6 +1583,18 @@ exports.batchDeleteSamples = async (req, res) => {
             return res.status(404).json({ error: 'No valid samples found for the provided IDs.' });
         }
 
+        // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
+        // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
+        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
+        const nonDeletable = samples.filter(s => !deletableStatuses.includes(s.status));
+        if (nonDeletable.length > 0) {
+            const blocked = nonDeletable.map(s => `${s.originalId || s.id} (${s.status})`).join(', ');
+            return res.status(409).json({
+                error: 'ILLEGAL_STATUS_TRANSITION',
+                message: `Cannot delete or discard samples outside initial intake stages. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment. Blocked: ${blocked}`
+            });
+        }
+
         // Lab staff can only discard DRAFT or RECEIVED samples from their own lab
         if (!isSuperAdmin) {
             if (!isLabStaff) {
@@ -1577,110 +1602,110 @@ exports.batchDeleteSamples = async (req, res) => {
             }
 
             const invalidSamples = samples.filter(s => {
-                const isDiscardable = ['DRAFT', 'RECEIVED', 'COLLECTED'].includes(s.status);
-                const isOwnLab = s.assignedLab === user.labId;
-                return !isDiscardable || !isOwnLab;
+                const isOwnLab = !s.assignedLab || s.assignedLab === user.labId;
+                return !isOwnLab;
             });
 
             if (invalidSamples.length > 0) {
                 const lockedIds = invalidSamples.map(s => s.id || s.originalId).join(', ');
                 return res.status(403).json({
-                    error: `Permission Denied: You can only discard Draft/Received samples from your own lab. Blocked: ${lockedIds}`
+                    error: `Permission Denied: You can only discard samples from your own lab. Blocked: ${lockedIds}`
                 });
             }
         }
 
         // Check if any sample is protected (SoilFER)
-        if (isSuperAdmin) {
-            const protectedSamples = samples.filter(s => {
-                const metadata = typeof s.metadata === 'string' ? JSON.parse(s.metadata) : (s.metadata || {});
-                return metadata._uuid || metadata['Country'];
-            });
+        const protectedSamples = samples.filter(s => {
+            const metadata = typeof s.metadata === 'string' ? JSON.parse(s.metadata) : (s.metadata || {});
+            return metadata._uuid || metadata['Country'];
+        });
 
-            if (protectedSamples.length > 0) {
-                return res.status(403).json({
-                    error: `Action blocked: ${protectedSamples.length} samples in your selection are protected (SoilFER/Google Sheet). Please deselect them.`
-                });
-            }
+        if (protectedSamples.length > 0) {
+            return res.status(403).json({
+                error: `Action blocked: ${protectedSamples.length} samples in your selection are protected (SoilFER/Google Sheet). Please deselect them.`
+            });
         }
 
         // Separate samples: project-linked (revert to EXPECTED) vs walk-in/open (hard delete)
+        // using canonical sampleOriginService (I02, I03)
         const toRevert = [];
         const toDelete = [];
 
         for (const sample of samples) {
-            let isPreRegistered = false;
-
-            let hasExternalProvenance = false;
-            if (sample.fieldMetadata) {
-                try {
-                    const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
-                    if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
-                        hasExternalProvenance = true;
-                    }
-                } catch (e) {}
-            }
-            if (sample.metadata) {
-                try {
-                    const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
-                    if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
-                        hasExternalProvenance = true;
-                    }
-                } catch (e) {}
-            }
-
-            let isWalkIn = false;
-            if (sample.receptionData) {
-                try {
-                    const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
-                    if (rd?.isWalkIn === true) {
-                        isWalkIn = true;
-                    }
-                } catch (e) {}
-            }
-
-            if (sample.projectId || sample.projectCode) {
-                isPreRegistered = true;
-            } else if (hasExternalProvenance) {
-                isPreRegistered = true;
-            } else if (isWalkIn) {
-                isPreRegistered = false;
-            } else {
-                isPreRegistered = true; // Conservative fallback
-            }
-
-            if (isPreRegistered) {
-                toRevert.push(sample);
-            } else {
+            if (sampleOriginService.isDisposableDeskDraft(sample)) {
                 toDelete.push(sample);
+            } else {
+                toRevert.push(sample);
             }
         }
 
         // Execute batch revert and delete in a single atomic transaction
         await prisma.$transaction(async (tx) => {
-            if (toRevert.length > 0) {
-                const revertIds = toRevert.map(s => String(s.id));
-                await tx.workItem.deleteMany({ where: { sampleId: { in: revertIds } } });
-                await tx.submission.deleteMany({ where: { sampleId: { in: revertIds } } });
-                await tx.spectralData.deleteMany({ where: { sampleId: { in: revertIds } } });
-                await tx.result.deleteMany({ where: { sampleId: { in: revertIds } } });
+            const allIds = samples.map(s => String(s.id));
+            const currentSamples = await tx.sample.findMany({
+                where: { id: { in: allIds } }
+            });
 
+            if (currentSamples.length !== samples.length) {
+                throw new sampleStateService.TransitionError('One or more samples were concurrently modified or deleted.', 404, 'SAMPLE_NOT_FOUND');
+            }
+
+            for (const current of currentSamples) {
+                if (!deletableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot discard sample ${current.originalId || current.id} in status '${current.status}'. Samples in progress or completed cannot be reset.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+            }
+
+            // Verify no analytical results exist
+            const resultCount = await tx.result.count({
+                where: { sampleId: { in: allIds } }
+            });
+            if (resultCount > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete or discard samples with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+            }
+
+            // Verify no completed or submitted work items exist
+            const activeWork = await tx.workItem.findMany({
+                where: {
+                    sampleId: { in: allIds },
+                    status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
+                }
+            });
+            if (activeWork.length > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete or discard samples with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+            }
+
+            // Clean up related records
+            await tx.workItem.deleteMany({ where: { sampleId: { in: allIds } } });
+            await tx.submission.deleteMany({ where: { sampleId: { in: allIds } } });
+            await tx.spectralData.deleteMany({ where: { sampleId: { in: allIds } } });
+            await tx.result.deleteMany({ where: { sampleId: { in: allIds } } });
+
+            if (toRevert.length > 0) {
                 for (const sample of toRevert) {
-                    const sampleHistory = typeof sample.history === 'string'
-                        ? JSON.parse(sample.history)
-                        : (sample.history || []);
+                    const current = currentSamples.find(c => String(c.id) === String(sample.id)) || sample;
+                    const sampleHistory = typeof current.history === 'string'
+                        ? JSON.parse(current.history)
+                        : (current.history || []);
                     sampleHistory.push({
                         status: 'EXPECTED',
                         action: 'REVERT_TO_EXPECTED',
                         changedBy: user.username,
                         timestamp: new Date(),
-                        note: 'Draft/intake discarded. Sample reverted to EXPECTED status.'
+                        note: 'Draft/intake discarded in batch. Sample reverted to EXPECTED status.'
                     });
 
-                    await tx.sample.update({
-                        where: { id: String(sample.id) },
-                        data: {
-                            status: 'EXPECTED',
+                    // Canonical transition inside transaction (enforces workflowContract graph and logs transition audit)
+                    await sampleStateService.transitionSample(
+                        current.id,
+                        'EXPECTED',
+                        user,
+                        'Draft/intake discarded in batch. Sample reverted to EXPECTED status.',
+                        {
                             labId: null,
                             receptionData: null,
                             receptionDate: null,
@@ -1696,19 +1721,16 @@ exports.batchDeleteSamples = async (req, res) => {
                             lastSubmissionId: null,
                             lastSubmissionType: null,
                             lastSubmissionAt: null,
-                            assignedLab: sample.assignedLab,
+                            assignedLab: current.assignedLab,
                             history: JSON.stringify(sampleHistory)
-                        }
-                    });
+                        },
+                        tx
+                    );
                 }
             }
 
             if (toDelete.length > 0) {
                 const deleteIds = toDelete.map(s => String(s.id));
-                await tx.workItem.deleteMany({ where: { sampleId: { in: deleteIds } } });
-                await tx.submission.deleteMany({ where: { sampleId: { in: deleteIds } } });
-                await tx.spectralData.deleteMany({ where: { sampleId: { in: deleteIds } } });
-                await tx.result.deleteMany({ where: { sampleId: { in: deleteIds } } });
                 await tx.sample.deleteMany({ where: { id: { in: deleteIds } } });
             }
 
@@ -1732,8 +1754,14 @@ exports.batchDeleteSamples = async (req, res) => {
 
         res.json({ message: msg, reverted: toRevert.length, deleted: toDelete.length });
     } catch (error) {
+        if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
+            return res.status(error.statusCode || 409).json({
+                error: error.code || 'ILLEGAL_STATUS_TRANSITION',
+                message: error.message
+            });
+        }
         console.error('[batchDeleteSamples] Error:', error);
-        res.status(500).json({ error: 'Failed to batch delete samples' });
+        res.status(500).json({ error: 'Failed to batch delete samples: ' + error.message });
     }
 };
 

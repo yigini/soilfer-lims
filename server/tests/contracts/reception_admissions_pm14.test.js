@@ -493,4 +493,156 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
         const walkInDb = await prisma.sample.findUnique({ where: { id: walkInSampleId } });
         expect(walkInDb).toBeNull();
     });
+
+    it('retains desk walk-in origin after reopening and saving twice, and hard deletes on discard (I03)', async () => {
+        const originalId = 'WALK-2SAVE-' + SUFFIX;
+
+        // 1. Initial desk intake draft save
+        const firstRes = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', authReception)
+            .send({
+                originalId,
+                isWalkIn: true,
+                isDraft: true,
+                decision: 'DRAFT'
+            });
+
+        expect(firstRes.status).toBe(200);
+        expect(firstRes.body.success).toBe(true);
+        const sampleId = firstRes.body.id;
+        trackedSampleIds.add(sampleId);
+
+        // 2. Reopen and save draft a second time
+        const secondRes = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', authReception)
+            .send({
+                originalId,
+                isWalkIn: true,
+                isDraft: true,
+                decision: 'DRAFT'
+            });
+
+        expect(secondRes.status).toBe(200);
+        expect(secondRes.body.success).toBe(true);
+
+        // 3. Discard draft
+        const discardRes = await request(app)
+            .post('/api/reception/discard')
+            .set('Authorization', authReception)
+            .send({ id: sampleId });
+
+        expect(discardRes.status).toBe(200);
+        expect(discardRes.body.success).toBe(true);
+
+        // 4. Sample must be completely deleted, leaving no phantom EXPECTED record
+        const sampleInDb = await prisma.sample.findUnique({ where: { id: sampleId } });
+        expect(sampleInDb).toBeNull();
+    });
+
+    it('denies generic DELETE /api/samples/:id on a RELEASED sample even for SUPER_ADMIN (I04)', async () => {
+        const prjId = 'PRJ-REL-I04-' + SUFFIX;
+        trackedProjectIds.add(prjId);
+        await prisma.project.create({
+            data: { id: prjId, code: prjId, name: 'Released Project', status: 'ACTIVE', projectType: 'OPEN_INTAKE', labId: testLab }
+        });
+
+        const sampleId = 'SMP-REL-PROT-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+        const approvalDate = new Date();
+        await prisma.sample.create({
+            data: {
+                id: sampleId,
+                originalId: sampleId,
+                projectId: prjId,
+                projectCode: prjId,
+                status: 'RELEASED',
+                assignedLab: testLab,
+                approvedAt: approvalDate,
+                approvedBy: 'admin'
+            }
+        });
+
+        const res = await request(app)
+            .delete(`/api/samples/${sampleId}`)
+            .set('Authorization', authAdmin);
+
+        expect(res.status).toBe(409);
+        expect(res.body.error).toBe('ILLEGAL_STATUS_TRANSITION');
+
+        // Verify sample status and approvals remain completely untouched
+        const sampleInDb = await prisma.sample.findUnique({ where: { id: sampleId } });
+        expect(sampleInDb).not.toBeNull();
+        expect(sampleInDb.status).toBe('RELEASED');
+        expect(sampleInDb.approvedAt).not.toBeNull();
+        expect(sampleInDb.approvedBy).toBe('admin');
+    });
+
+    it('denies batch delete on RELEASED samples even for SUPER_ADMIN (I04-batch)', async () => {
+        const prjId = 'PRJ-REL-BATCH-' + SUFFIX;
+        trackedProjectIds.add(prjId);
+        await prisma.project.create({
+            data: { id: prjId, code: prjId, name: 'Released Batch Project', status: 'ACTIVE', projectType: 'OPEN_INTAKE', labId: testLab }
+        });
+
+        const sampleId = 'SMP-REL-BATCH-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+        await prisma.sample.create({
+            data: {
+                id: sampleId,
+                originalId: sampleId,
+                projectId: prjId,
+                projectCode: prjId,
+                status: 'RELEASED',
+                assignedLab: testLab,
+                approvedAt: new Date(),
+                approvedBy: 'admin'
+            }
+        });
+
+        const res = await request(app)
+            .post('/api/samples/batch-delete')
+            .set('Authorization', authAdmin)
+            .send({ ids: [sampleId] });
+
+        expect(res.status).toBe(409);
+        expect(res.body.error).toBe('ILLEGAL_STATUS_TRANSITION');
+
+        const sampleInDb = await prisma.sample.findUnique({ where: { id: sampleId } });
+        expect(sampleInDb).not.toBeNull();
+        expect(sampleInDb.status).toBe('RELEASED');
+    });
+
+    it('denies reception discard on sample with existing analytical results', async () => {
+        const sampleId = 'SMP-WITH-RES-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+        await prisma.sample.create({
+            data: {
+                id: sampleId,
+                originalId: sampleId,
+                status: 'DRAFT',
+                assignedLab: testLab
+            }
+        });
+
+        await prisma.result.create({
+            data: {
+                id: 'RES-' + SUFFIX,
+                sampleId,
+                param: 'pH',
+                value: '6.5',
+                unit: 'pH'
+            }
+        });
+
+        const res = await request(app)
+            .post('/api/reception/discard')
+            .set('Authorization', authReception)
+            .send({ id: sampleId });
+
+        expect(res.status).toBe(409);
+        expect(res.body.error).toBe('CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+    });
 });
+

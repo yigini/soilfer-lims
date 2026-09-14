@@ -1,0 +1,88 @@
+{
+  "checkedAt": "2026-09-14T00:27:41.711Z",
+  "baseline": "18836f1b58b126f4dc0183478fe81dcc1c984fcd",
+  "sourceUnchanged": true,
+  "results": [
+    {
+      "id": "I01",
+      "case": "Request project override must not bypass paused existing sample project",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "PROJECT_ADMISSIONS_PAUSED",
+          "message": "Cannot receive sample: Admissions for project PAUSED-P are paused. New sample intake is currently paused or closed."
+        }
+      },
+      "persisted": {
+        "status": "EXPECTED",
+        "projectId": "PAUSED-P",
+        "projectCode": "PAUSED-P"
+      }
+    },
+    {
+      "id": "I02",
+      "case": "Mutable walk-in flag must not cause hard deletion of an existing pre-registered sample",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Sample PRE-ACTIVE reverted to EXPECTED."
+        }
+      },
+      "draftStatus": 200,
+      "persisted": {
+        "status": "EXPECTED",
+        "projectId": "ACTIVE-P"
+      }
+    },
+    {
+      "id": "I03",
+      "case": "Legitimate new desk draft remains discardable after reopening and saving twice",
+      "passed": true,
+      "first": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "id": "WALKIN-NEW",
+          "originalId": "WALKIN-NEW",
+          "status": "DRAFT",
+          "message": "Draft saved."
+        }
+      },
+      "second": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "id": "WALKIN-NEW",
+          "originalId": "WALKIN-NEW",
+          "status": "DRAFT",
+          "message": "Draft saved."
+        }
+      },
+      "discard": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Sample WALKIN-NEW deleted."
+        }
+      },
+      "persisted": null
+    },
+    {
+      "id": "I04",
+      "case": "Generic delete must not silently revert released project sample into expected",
+      "passed": true,
+      "status": 409,
+      "body": {
+        "error": "ILLEGAL_STATUS_TRANSITION",
+        "message": "Cannot delete or discard sample in status 'RELEASED'. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment."
+      },
+      "persisted": {
+        "status": "RELEASED",
+        "approvedAt": "2026-09-14T00:27:41.705Z"
+      }
+    }
+  ]
+}
