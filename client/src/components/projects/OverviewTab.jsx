@@ -277,7 +277,9 @@ export default function OverviewTab({
                             </div>
                             <div className="flex justify-between py-2 border-b border-sf-divider">
                                 <span className="text-sf-muted">{t('projects.overview.defaultPlan', 'Default analysis plan')}</span>
-                                <strong className="font-semibold text-sf-text">{project?.defaultAnalysisBundle || t('projects.overview.routineSoil', 'Routine soil characterization')}</strong>
+                                <strong className={`font-semibold ${project?.defaultAnalysisBundle ? 'text-sf-text' : 'text-sf-muted'}`}>
+                                    {project?.defaultAnalysisBundle || t('projects.plan.noBundleTitle', 'No analysis bundle assigned')}
+                                </strong>
                             </div>
                             <div className="flex justify-between py-2 border-b border-sf-divider">
                                 <span className="text-sf-muted">{t('projects.overview.nextDelivery', 'Delivery deadline')}</span>

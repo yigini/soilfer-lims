@@ -619,7 +619,6 @@ exports.updateProject = async (req, res) => {
                         if (koboServerUrl) koboData.koboServerUrl = koboServerUrl;
                         if (koboFormId) koboData.formId = koboFormId;
                         if (koboApiToken) koboData.apiToken = koboApiToken;
-                        koboData.lastSyncAt = new Date();
 
                         await prisma.koboConfig.update({
                             where: { id: existingConfig.id },
