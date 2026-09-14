@@ -1,0 +1,100 @@
+{
+  "timestamp": "2026-09-14T05:31:54.714Z",
+  "dataset": {
+    "totalSamples": 36870,
+    "totalProjects": 100,
+    "targetProjectSamples": 5000,
+    "comparisonProjectSamples": 322
+  },
+  "environment": {
+    "nodeVersion": "v24.13.0",
+    "platform": "win32",
+    "arch": "arm64",
+    "cpus": 12,
+    "memoryTotalGB": "15.6",
+    "sqliteJournalMode": "WAL"
+  },
+  "benchmarks": {
+    "GET /api/projects/:id (Project Overview & Capabilities)": {
+      "path": "/api/projects/PERF-TARGET",
+      "iterations": 100,
+      "avgPayloadBytes": 888,
+      "measuredQueryCount": 7,
+      "measuredQueriesAtScaleA_5000": 7,
+      "measuredQueriesAtScaleB_322": 7,
+      "queryGrowthModel": "O(1) Scale-Invariant",
+      "instrumentationMethod": "Prisma query event emission listener",
+      "executedSqlQueries": [
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Project`.`id`, `main`.`Project`.`code`, `main`.`Project`.`name`, `main`.`Project`.`description`, `main`.`Project`.`notes`, `main`.`Project`.`client`, `main`.`Project`.`startDate`, `main`.`Project`.`deliveryDeadline`, `main`.`Project`.`status`, `main`.`Project`.`projectType`, `main`.`Project`.`expectedSampleCount`, `main`.`Project`.`priority`, `main`.`Project`.`defaultAnalysisBundle`, `main`.`Project`.`labId`, `main`.`Project`.`countries`, `main`.`Project`.`assignedLabIds`, `main`.`Project`.`createdAt`, `main`.`Project`.`updatedAt` FROM `main`.`Project` WHERE (`main`.`Project`.`id` = ? OR `main`.`Project`.`code` = ?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`ProjectLab`.`id`, `main`.`ProjectLab`.`labId`, `main`.`ProjectLab`.`role` FROM `main`.`ProjectLab` WHERE `main`.`ProjectLab`.`projectCode` = ? LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`code`, `main`.`Lab`.`name`, `main`.`Lab`.`country`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE `main`.`Lab`.`id` IN (?,?) LIMIT ? OFFSET ?"
+      ],
+      "latenciesMs": {
+        "min": 1.09,
+        "p50": 1.32,
+        "p95": 2.18,
+        "p99": 4.35,
+        "max": 4.35
+      }
+    },
+    "GET /api/projects/:id/samples?page=1&limit=50 (First-Page Sample List)": {
+      "path": "/api/projects/PERF-TARGET/samples?page=1&limit=50",
+      "iterations": 100,
+      "avgPayloadBytes": 9372,
+      "measuredQueryCount": 9,
+      "measuredQueriesAtScaleA_5000": 9,
+      "measuredQueriesAtScaleB_322": 9,
+      "queryGrowthModel": "O(1) Scale-Invariant",
+      "instrumentationMethod": "Prisma query event emission listener",
+      "executedSqlQueries": [
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Project`.`id`, `main`.`Project`.`code`, `main`.`Project`.`name`, `main`.`Project`.`description`, `main`.`Project`.`notes`, `main`.`Project`.`client`, `main`.`Project`.`startDate`, `main`.`Project`.`deliveryDeadline`, `main`.`Project`.`status`, `main`.`Project`.`projectType`, `main`.`Project`.`expectedSampleCount`, `main`.`Project`.`priority`, `main`.`Project`.`defaultAnalysisBundle`, `main`.`Project`.`labId`, `main`.`Project`.`countries`, `main`.`Project`.`assignedLabIds`, `main`.`Project`.`createdAt`, `main`.`Project`.`updatedAt` FROM `main`.`Project` WHERE (`main`.`Project`.`id` = ? OR `main`.`Project`.`code` = ?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`ProjectLab`.`id`, `main`.`ProjectLab`.`labId`, `main`.`ProjectLab`.`role` FROM `main`.`ProjectLab` WHERE `main`.`ProjectLab`.`projectCode` = ? LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`country` FROM `main`.`Lab` WHERE `main`.`Lab`.`id` IN (?,?) LIMIT ? OFFSET ?",
+        "SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`Sample`.`id` FROM `main`.`Sample` WHERE ((`main`.`Sample`.`projectId` = ? OR `main`.`Sample`.`projectCode` = ?) AND (`main`.`Sample`.`assignedLab` = ? OR `main`.`Sample`.`labId` = ?)) LIMIT ? OFFSET ?) AS `sub`",
+        "SELECT `main`.`Sample`.`id`, `main`.`Sample`.`originalId`, `main`.`Sample`.`status`, `main`.`Sample`.`labId`, `main`.`Sample`.`assignedLab`, `main`.`Sample`.`receptionDate`, `main`.`Sample`.`createdAt` FROM `main`.`Sample` WHERE ((`main`.`Sample`.`projectId` = ? OR `main`.`Sample`.`projectCode` = ?) AND (`main`.`Sample`.`assignedLab` = ? OR `main`.`Sample`.`labId` = ?)) ORDER BY `main`.`Sample`.`id` ASC LIMIT ? OFFSET ?"
+      ],
+      "latenciesMs": {
+        "min": 3.26,
+        "p50": 4.15,
+        "p95": 5.43,
+        "p99": 6.6,
+        "max": 6.6
+      }
+    },
+    "GET /api/projects/:id/stats (Aggregated Statistics)": {
+      "path": "/api/projects/PERF-TARGET/stats",
+      "iterations": 100,
+      "avgPayloadBytes": 312,
+      "measuredQueryCount": 8,
+      "measuredQueriesAtScaleA_5000": 8,
+      "measuredQueriesAtScaleB_322": 8,
+      "queryGrowthModel": "O(1) Scale-Invariant",
+      "instrumentationMethod": "Prisma query event emission listener",
+      "executedSqlQueries": [
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`User`.`id`, `main`.`User`.`username`, `main`.`User`.`password`, `main`.`User`.`email`, `main`.`User`.`role`, `main`.`User`.`name`, `main`.`User`.`labId`, `main`.`User`.`language`, `main`.`User`.`themePreference`, `main`.`User`.`countries`, `main`.`User`.`projects`, `main`.`User`.`isActive`, `main`.`User`.`mustChangePassword`, `main`.`User`.`tokenVersion`, `main`.`User`.`createdAt`, `main`.`User`.`updatedAt` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`isActive` FROM `main`.`Lab` WHERE (`main`.`Lab`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Project`.`id`, `main`.`Project`.`code`, `main`.`Project`.`name`, `main`.`Project`.`description`, `main`.`Project`.`notes`, `main`.`Project`.`client`, `main`.`Project`.`startDate`, `main`.`Project`.`deliveryDeadline`, `main`.`Project`.`status`, `main`.`Project`.`projectType`, `main`.`Project`.`expectedSampleCount`, `main`.`Project`.`priority`, `main`.`Project`.`defaultAnalysisBundle`, `main`.`Project`.`labId`, `main`.`Project`.`countries`, `main`.`Project`.`assignedLabIds`, `main`.`Project`.`createdAt`, `main`.`Project`.`updatedAt` FROM `main`.`Project` WHERE (`main`.`Project`.`id` = ? OR `main`.`Project`.`code` = ?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`ProjectLab`.`id`, `main`.`ProjectLab`.`labId`, `main`.`ProjectLab`.`role` FROM `main`.`ProjectLab` WHERE `main`.`ProjectLab`.`projectCode` = ? LIMIT ? OFFSET ?",
+        "SELECT `main`.`Lab`.`id`, `main`.`Lab`.`country` FROM `main`.`Lab` WHERE `main`.`Lab`.`id` IN (?,?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Sample`.`id`, `main`.`Sample`.`status`, `main`.`Sample`.`receptionDate` FROM `main`.`Sample` WHERE ((`main`.`Sample`.`projectId` = ? OR `main`.`Sample`.`projectCode` = ?) AND (`main`.`Sample`.`assignedLab` = ? OR `main`.`Sample`.`labId` = ?)) LIMIT ? OFFSET ?"
+      ],
+      "latenciesMs": {
+        "min": 7.63,
+        "p50": 9.85,
+        "p95": 13.94,
+        "p99": 14.62,
+        "max": 14.62
+      }
+    }
+  }
+}
