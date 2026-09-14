@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings } from 'lucide-react';
+import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+
+// Persistent registry of unresolved/in-flight project operations across modal lifecycle and prop updates
+const pendingOperationsStore = new Map();
 
 export default function ProjectActionsModal({
     isOpen,
@@ -27,6 +30,16 @@ export default function ProjectActionsModal({
     const [editStatus, setEditStatus] = useState(project?.status || 'ACTIVE');
     const [catalogueGroups, setCatalogueGroups] = useState([]);
 
+    const opKey = project ? `${project.id}:${actionType}` : null;
+    const findActiveOp = () => {
+        if (!project) return null;
+        if (opKey && pendingOperationsStore.has(opKey)) {
+            return pendingOperationsStore.get(opKey);
+        }
+        return Array.from(pendingOperationsStore.values()).find(op => op.projectId === project.id) || null;
+    };
+    const [unresolvedOp, setUnresolvedOp] = useState(findActiveOp);
+
     React.useEffect(() => {
         if (isOpen) {
             setActionType(initialActionType);
@@ -39,16 +52,19 @@ export default function ProjectActionsModal({
             setEditStatus(project?.status || 'ACTIVE');
             setErrorMessage('');
             setReason('');
-            commandRef.current = null;
         }
-    }, [isOpen, initialActionType, project]);
+    }, [isOpen, initialActionType]);
 
-    const commandRef = React.useRef(null);
-
-    // Invalidate retained command key whenever form inputs are modified
+    // Retain unresolved operation across background prop refreshes and modal reopens
     React.useEffect(() => {
-        commandRef.current = null;
-    }, [editName, editClient, editDescription, editExpectedCount, editDeadline, editBundle, editStatus, reason]);
+        if (isOpen && project) {
+            const active = findActiveOp();
+            setUnresolvedOp(active);
+            if (active && active.action === 'archive' && active.snapshot?.reason && !reason) {
+                setReason(active.snapshot.reason);
+            }
+        }
+    }, [isOpen, opKey, project?.id, actionType]);
 
     React.useEffect(() => {
         if (isOpen && actionType === 'edit') {
@@ -75,6 +91,47 @@ export default function ProjectActionsModal({
     const canArchive = pendingExpected === 0 && pendingLabWork === 0;
     const canDelete = totalRegistered === 0;
 
+    // Explicit recovery of an unresolved command receipt
+    const handleRecoverUnresolved = async () => {
+        if (!unresolvedOp || !project) return;
+        setSubmitting(true);
+        setErrorMessage('');
+        try {
+            const res = await axios.get(`/api/projects/${project.id}/operations/${unresolvedOp.idempotencyKey}`);
+            if (res.data?.receipt?.outcome) {
+                if (unresolvedOp?.action) {
+                    pendingOperationsStore.delete(`${project.id}:${unresolvedOp.action}`);
+                }
+                if (opKey) pendingOperationsStore.delete(opKey);
+                setUnresolvedOp(null);
+                onSuccess?.(unresolvedOp.action === 'archive' ? 'PROJECT_ARCHIVED' : (unresolvedOp.action === 'pause' ? 'PROJECT_PAUSED' : 'PROJECT_UPDATED'));
+                onClose();
+                return;
+            }
+            setErrorMessage(t('projects.actions.receiptNotFoundYet', 'No completed receipt recorded on server for this attempt. You may safely retry or discard.'));
+        } catch (err) {
+            if (err.response?.status === 404) {
+                setErrorMessage(t('projects.actions.receiptNotFoundYet', 'No completed receipt recorded on server for this attempt. You may safely retry or discard.'));
+            } else {
+                setErrorMessage(err.response?.data?.message || err.message || 'Failed to check operation receipt status');
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Discard unresolved command identity to intentionally start a fresh operation
+    const handleDiscardUnresolved = () => {
+        if (unresolvedOp?.action) {
+            pendingOperationsStore.delete(`${project.id}:${unresolvedOp.action}`);
+        }
+        if (opKey) {
+            pendingOperationsStore.delete(opKey);
+        }
+        setUnresolvedOp(null);
+        setErrorMessage('');
+    };
+
     const handleSaveSettings = async (e) => {
         e?.preventDefault?.();
         if (!editName.trim()) {
@@ -82,47 +139,56 @@ export default function ProjectActionsModal({
             return;
         }
 
+        const payload = {
+            name: editName.trim(),
+            client: editClient.trim(),
+            description: editDescription.trim(),
+            expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
+            deliveryDeadline: editDeadline || null,
+            defaultAnalysisBundle: editBundle || null,
+            status: editStatus
+        };
+
+        // If an unresolved command exists with different parameters, require explicit choice
+        if (unresolvedOp && JSON.stringify(unresolvedOp.snapshot) !== JSON.stringify(payload)) {
+            setErrorMessage(t('projects.actions.unresolvedConflictNotice', 'A previous settings update is still unconfirmed. Recover the previous outcome or click "Discard previous attempt" before submitting new values.'));
+            return;
+        }
+
         setSubmitting(true);
         setErrorMessage('');
+
+        const idempotencyKey = unresolvedOp
+            ? unresolvedOp.idempotencyKey
+            : (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
+
+        // Mark in-flight/uncertain
+        const commandRecord = {
+            idempotencyKey,
+            action: 'edit',
+            projectId: project.id,
+            snapshot: JSON.parse(JSON.stringify(payload)),
+            status: 'uncertain'
+        };
+        pendingOperationsStore.set(opKey, commandRecord);
+        setUnresolvedOp(commandRecord);
+
         try {
-            const payload = {
-                name: editName.trim(),
-                client: editClient.trim(),
-                description: editDescription.trim(),
-                expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
-                deliveryDeadline: editDeadline || null,
-                defaultAnalysisBundle: editBundle || null,
-                status: editStatus
-            };
-
-            let idempotencyKey;
-            let isRetry = false;
-            if (commandRef.current && commandRef.current.action === 'edit' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
-                idempotencyKey = commandRef.current.key;
-                isRetry = true;
-            } else {
-                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                    ? crypto.randomUUID()
-                    : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
-                commandRef.current = {
-                    key: idempotencyKey,
-                    action: 'edit',
-                    snapshot: JSON.parse(JSON.stringify(payload))
-                };
-            }
-
-            // If retrying an uncertain command, resolve existing receipt first
-            if (isRetry) {
+            // If retrying, resolve existing receipt first
+            if (unresolvedOp) {
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        commandRef.current = null;
+                        pendingOperationsStore.delete(opKey);
+                        setUnresolvedOp(null);
                         onSuccess?.('PROJECT_UPDATED');
                         onClose();
                         return;
                     }
                 } catch (receiptErr) {
-                    // No receipt recorded yet, proceed to execute mutation
+                    // No receipt on server yet, proceed with mutation
                 }
             }
 
@@ -134,14 +200,16 @@ export default function ProjectActionsModal({
             }
 
             await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
-            commandRef.current = null;
+            pendingOperationsStore.delete(opKey);
+            setUnresolvedOp(null);
             onSuccess?.('PROJECT_UPDATED');
             onClose();
         } catch (err) {
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                commandRef.current = null;
+                pendingOperationsStore.delete(opKey);
+                setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update project settings');
         } finally {
@@ -155,39 +223,46 @@ export default function ProjectActionsModal({
             return;
         }
 
+        const nextStatus = isPaused ? 'ACTIVE' : 'PAUSED';
+        const payload = { status: nextStatus, reason: reason.trim() };
+
+        if (unresolvedOp && JSON.stringify(unresolvedOp.snapshot) !== JSON.stringify(payload)) {
+            setErrorMessage(t('projects.actions.unresolvedConflictNotice', 'A previous status transition is still unconfirmed. Recover the previous outcome or click "Discard previous attempt" before submitting new values.'));
+            return;
+        }
+
         setSubmitting(true);
         setErrorMessage('');
+
+        const idempotencyKey = unresolvedOp
+            ? unresolvedOp.idempotencyKey
+            : (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`proj-pause-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
+
+        const commandRecord = {
+            idempotencyKey,
+            action: 'pause',
+            projectId: project.id,
+            snapshot: JSON.parse(JSON.stringify(payload)),
+            status: 'uncertain'
+        };
+        pendingOperationsStore.set(opKey, commandRecord);
+        setUnresolvedOp(commandRecord);
+
         try {
-            const nextStatus = isPaused ? 'ACTIVE' : 'PAUSED';
-            const payload = { status: nextStatus, reason: reason.trim() };
-
-            let idempotencyKey;
-            let isRetry = false;
-            if (commandRef.current && commandRef.current.action === 'pause' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
-                idempotencyKey = commandRef.current.key;
-                isRetry = true;
-            } else {
-                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                    ? crypto.randomUUID()
-                    : (`proj-pause-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
-                commandRef.current = {
-                    key: idempotencyKey,
-                    action: 'pause',
-                    snapshot: JSON.parse(JSON.stringify(payload))
-                };
-            }
-
-            if (isRetry) {
+            if (unresolvedOp) {
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        commandRef.current = null;
+                        pendingOperationsStore.delete(opKey);
+                        setUnresolvedOp(null);
                         onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
                         onClose();
                         return;
                     }
                 } catch (receiptErr) {
-                    // No receipt yet, execute mutation
+                    // Proceed with PUT
                 }
             }
 
@@ -199,14 +274,16 @@ export default function ProjectActionsModal({
             }
 
             await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
-            commandRef.current = null;
+            pendingOperationsStore.delete(opKey);
+            setUnresolvedOp(null);
             onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
             onClose();
         } catch (err) {
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                commandRef.current = null;
+                pendingOperationsStore.delete(opKey);
+                setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update status');
         } finally {
@@ -216,38 +293,46 @@ export default function ProjectActionsModal({
 
     const handleArchive = async () => {
         if (!canArchive) return;
+
+        const payload = { reason: reason.trim() };
+
+        if (unresolvedOp && JSON.stringify(unresolvedOp.snapshot) !== JSON.stringify(payload)) {
+            setErrorMessage(t('projects.actions.unresolvedConflictNotice', 'A previous archival request is still unconfirmed. Recover the previous outcome or click "Discard previous attempt" before submitting new values.'));
+            return;
+        }
+
         setSubmitting(true);
         setErrorMessage('');
+
+        const idempotencyKey = unresolvedOp
+            ? unresolvedOp.idempotencyKey
+            : (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`proj-arch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
+
+        const commandRecord = {
+            idempotencyKey,
+            action: 'archive',
+            projectId: project.id,
+            snapshot: JSON.parse(JSON.stringify(payload)),
+            status: 'uncertain'
+        };
+        pendingOperationsStore.set(opKey, commandRecord);
+        setUnresolvedOp(commandRecord);
+
         try {
-            const payload = { reason: reason.trim() };
-
-            let idempotencyKey;
-            let isRetry = false;
-            if (commandRef.current && commandRef.current.action === 'archive' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
-                idempotencyKey = commandRef.current.key;
-                isRetry = true;
-            } else {
-                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                    ? crypto.randomUUID()
-                    : (`proj-arch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
-                commandRef.current = {
-                    key: idempotencyKey,
-                    action: 'archive',
-                    snapshot: JSON.parse(JSON.stringify(payload))
-                };
-            }
-
-            if (isRetry) {
+            if (unresolvedOp) {
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        commandRef.current = null;
+                        pendingOperationsStore.delete(opKey);
+                        setUnresolvedOp(null);
                         onSuccess?.('PROJECT_ARCHIVED');
                         onClose();
                         return;
                     }
                 } catch (receiptErr) {
-                    // No receipt yet, execute mutation
+                    // Proceed with POST
                 }
             }
 
@@ -259,14 +344,16 @@ export default function ProjectActionsModal({
             }
 
             await axios.post(`/api/projects/${project.id}/archive`, { ...payload, idempotencyKey }, { headers });
-            commandRef.current = null;
+            pendingOperationsStore.delete(opKey);
+            setUnresolvedOp(null);
             onSuccess?.('PROJECT_ARCHIVED');
             onClose();
         } catch (err) {
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                commandRef.current = null;
+                pendingOperationsStore.delete(opKey);
+                setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to archive project');
         } finally {
@@ -313,6 +400,39 @@ export default function ProjectActionsModal({
                 {errorMessage && (
                     <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-300 text-red-800 dark:text-red-200 text-xs">
                         {errorMessage}
+                    </div>
+                )}
+
+                {unresolvedOp && (
+                    <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                                <span className="font-semibold">{t('projects.actions.unresolvedTitle', 'Unconfirmed previous attempt')}</span>
+                                <p className="mt-0.5 text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                                    {t('projects.actions.unresolvedDesc', 'A previous attempt for this operation may have been processed by the server before the connection was interrupted.')}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                            <button
+                                type="button"
+                                onClick={handleRecoverUnresolved}
+                                disabled={submitting}
+                                className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                            >
+                                <RefreshCw className={`w-3 h-3 ${submitting ? 'animate-spin' : ''}`} />
+                                {t('projects.actions.recoverAttempt', 'Recover previous attempt')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDiscardUnresolved}
+                                disabled={submitting}
+                                className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-amber-400/60 dark:border-amber-600/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 disabled:opacity-50 transition-colors"
+                            >
+                                {t('projects.actions.discardAttempt', 'Discard attempt')}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -520,7 +640,7 @@ export default function ProjectActionsModal({
                                 disabled={submitting}
                                 className="btn-primary text-xs"
                             >
-                                {submitting ? t('common.loading', 'Saving…') : (commandRef.current?.action === 'edit' ? t('common.retry', 'Retry saving') : t('common.save', 'Save changes'))}
+                                {submitting ? t('common.loading', 'Saving…') : (unresolvedOp?.action === 'edit' ? t('projects.actions.retrySaving', 'Retry saving') : t('common.save', 'Save changes'))}
                             </button>
                         </div>
                     </form>
@@ -565,7 +685,7 @@ export default function ProjectActionsModal({
                                 disabled={submitting || !reason.trim()}
                                 className="btn-primary text-xs"
                             >
-                                {submitting ? t('common.loading', 'Updating…') : (commandRef.current?.action === 'pause' ? t('common.retry', 'Retry transition') : t('common.confirm', 'Confirm transition'))}
+                                {submitting ? t('common.loading', 'Updating…') : (unresolvedOp?.action === 'pause' ? t('projects.actions.retryTransition', 'Retry transition') : t('common.confirm', 'Confirm transition'))}
                             </button>
                         </div>
                     </div>
@@ -651,7 +771,7 @@ export default function ProjectActionsModal({
                                         disabled={submitting || !reason.trim()}
                                         className="btn-primary text-xs"
                                     >
-                                        {submitting ? t('common.loading', 'Archiving…') : (commandRef.current?.action === 'archive' ? t('common.retry', 'Retry archive') : t('projects.actions.confirmArchive', 'Archive project'))}
+                                        {submitting ? t('common.loading', 'Archiving…') : (unresolvedOp?.action === 'archive' ? t('projects.actions.retryArchive', 'Retry archive') : t('projects.actions.confirmArchive', 'Archive project'))}
                                     </button>
                                 </div>
                             </div>

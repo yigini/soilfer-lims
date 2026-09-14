@@ -86,10 +86,22 @@ class CommandReceiptService {
      * @param {string} params.actor
      * @param {string} params.status - SUCCESS | FAILED
      * @param {object} [params.outcome]
+     * @param {string} [params.payloadHash]
      */
-    static async recordReceipt(tx, { idempotencyKey, commandType, targetResource, actor, status = 'SUCCESS', outcome = null }) {
+    static async recordReceipt(tx, { idempotencyKey, commandType, targetResource, actor, status = 'SUCCESS', outcome = null, payloadHash = null }) {
         if (!idempotencyKey) {
             return null;
+        }
+
+        let storedOutcome = outcome;
+        if (payloadHash) {
+            if (storedOutcome && typeof storedOutcome === 'object' && !Array.isArray(storedOutcome)) {
+                if (!storedOutcome.payloadHash) {
+                    storedOutcome = { ...storedOutcome, payloadHash };
+                }
+            } else if (!storedOutcome) {
+                storedOutcome = { payloadHash };
+            }
         }
 
         const client = tx || prisma;
@@ -100,7 +112,7 @@ class CommandReceiptService {
                 targetResource,
                 actor,
                 status,
-                outcome: outcome ? JSON.stringify(outcome) : null
+                outcome: storedOutcome ? JSON.stringify(storedOutcome) : null
             }
         });
     }

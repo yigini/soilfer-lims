@@ -254,6 +254,16 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
             });
             expect(archAudits2).toBe(1); // Exactly 1 audit log!
 
+            // 5. Differing reason with same key rejected with 409 collision
+            const archCollisionRes = await request(app)
+                .post(`/api/projects/${cleanProject.id}/archive`)
+                .set('Authorization', `Bearer ${tokenOwner}`)
+                .set('x-idempotency-key', archKey)
+                .send({ reason: 'Completely different reason replaying old key' });
+
+            expect(archCollisionRes.status).toBe(409);
+            expect(archCollisionRes.body.error).toContain('differing command parameters');
+
             // Clean up
             await prisma.commandReceipt.deleteMany({ where: { idempotencyKey: archKey } }).catch(() => {});
             await prisma.auditLog.deleteMany({ where: { entityId: cleanProject.id } }).catch(() => {});

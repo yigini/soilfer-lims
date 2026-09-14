@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, Upload, CheckCircle2, AlertTriangle, AlertCircle, FileText, ArrowRight } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertTriangle, AlertCircle, FileText, ArrowRight, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '../../context/LanguageContext';
+
+// Persistent registry of unresolved/in-flight manifest imports across modal lifecycle and prop updates
+const pendingManifestStore = new Map();
 
 export default function ImportPreviewModal({
     isOpen,
@@ -16,12 +19,27 @@ export default function ImportPreviewModal({
     const [previewResult, setPreviewResult] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [committing, setCommitting] = useState(false);
-    const commitCommandRef = React.useRef(null);
 
-    // Invalidate retained commit key when input, preview, or modal state changes
+    const opKey = project?.id;
+    const [unresolvedOp, setUnresolvedOp] = useState(() => (opKey ? pendingManifestStore.get(opKey) || null : null));
+
+    // Retain unresolved operation across background prop refreshes and modal reopens
     React.useEffect(() => {
-        commitCommandRef.current = null;
-    }, [rawInput, previewResult, isOpen]);
+        if (isOpen && opKey) {
+            const existing = pendingManifestStore.get(opKey);
+            if (existing) {
+                setUnresolvedOp(existing);
+                if (!previewResult && existing.previewResult) {
+                    setPreviewResult(existing.previewResult);
+                }
+                if (!rawInput && existing.rawInput) {
+                    setRawInput(existing.rawInput);
+                }
+            } else {
+                setUnresolvedOp(null);
+            }
+        }
+    }, [isOpen, opKey]);
 
     if (!isOpen || !project) return null;
 
@@ -45,7 +63,6 @@ export default function ImportPreviewModal({
                 setRawInput(ids.join('\n'));
                 setPreviewResult(null);
                 setErrorMessage('');
-                commitCommandRef.current = null;
             } catch (err) {
                 setErrorMessage('Failed to read spreadsheet file');
             }
@@ -67,7 +84,6 @@ export default function ImportPreviewModal({
         setLoading(true);
         setErrorMessage('');
         setPreviewResult(null);
-        commitCommandRef.current = null;
 
         try {
             const res = await axios.post(`/api/projects/${project.id}/imports/preview`, {
@@ -82,43 +98,84 @@ export default function ImportPreviewModal({
         }
     };
 
+    const handleRecoverUnresolved = async () => {
+        if (!unresolvedOp || !project) return;
+        setCommitting(true);
+        setErrorMessage('');
+        try {
+            const res = await axios.get(`/api/projects/${project.id}/operations/${unresolvedOp.idempotencyKey}`);
+            if (res.data?.receipt?.outcome) {
+                pendingManifestStore.delete(project.id);
+                setUnresolvedOp(null);
+                onSuccess?.(res.data.receipt.outcome);
+                onClose();
+                return;
+            }
+            setErrorMessage(t('projects.import.receiptNotFoundYet', 'No completed receipt recorded on server for this attempt. You may safely retry or discard.'));
+        } catch (err) {
+            if (err.response?.status === 404) {
+                setErrorMessage(t('projects.import.receiptNotFoundYet', 'No completed receipt recorded on server for this attempt. You may safely retry or discard.'));
+            } else {
+                setErrorMessage(err.response?.data?.message || err.message || 'Failed to check operation receipt status');
+            }
+        } finally {
+            setCommitting(false);
+        }
+    };
+
+    const handleDiscardUnresolved = () => {
+        if (project) {
+            pendingManifestStore.delete(project.id);
+        }
+        setUnresolvedOp(null);
+        setErrorMessage('');
+    };
+
     const handleCommit = async () => {
         if (!previewResult || !previewResult.validSampleIds || previewResult.validSampleIds.length === 0) {
+            return;
+        }
+
+        const snapshot = {
+            sampleIds: previewResult.validSampleIds,
+            previewHash: previewResult.previewHash,
+            previewToken: previewResult.previewToken,
+            targetLabId: previewResult.destinationLabId || project.labId || undefined
+        };
+
+        if (unresolvedOp && JSON.stringify(unresolvedOp.snapshot.sampleIds) !== JSON.stringify(snapshot.sampleIds)) {
+            setErrorMessage(t('projects.import.unresolvedConflictNotice', 'A previous manifest registration attempt is still unconfirmed. Recover the previous outcome or click "Discard attempt" before submitting new values.'));
             return;
         }
 
         setCommitting(true);
         setErrorMessage('');
 
+        const idempotencyKey = unresolvedOp
+            ? unresolvedOp.idempotencyKey
+            : (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
+
+        const commandRecord = {
+            idempotencyKey,
+            projectId: project.id,
+            snapshot: JSON.parse(JSON.stringify(snapshot)),
+            rawInput,
+            previewResult,
+            status: 'uncertain'
+        };
+        pendingManifestStore.set(project.id, commandRecord);
+        setUnresolvedOp(commandRecord);
+
         try {
-            const snapshot = {
-                sampleIds: previewResult.validSampleIds,
-                previewHash: previewResult.previewHash,
-                previewToken: previewResult.previewToken,
-                targetLabId: previewResult.destinationLabId || project.labId || undefined
-            };
-
-            let idempotencyKey;
-            let isRetry = false;
-            if (commitCommandRef.current && JSON.stringify(commitCommandRef.current.snapshot) === JSON.stringify(snapshot)) {
-                idempotencyKey = commitCommandRef.current.key;
-                isRetry = true;
-            } else {
-                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                    ? crypto.randomUUID()
-                    : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
-                commitCommandRef.current = {
-                    key: idempotencyKey,
-                    snapshot: JSON.parse(JSON.stringify(snapshot))
-                };
-            }
-
             // If retrying an uncertain commit, attempt receipt lookup first
-            if (isRetry) {
+            if (unresolvedOp) {
                 try {
                     const checkRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (checkRes.data?.receipt?.outcome) {
-                        commitCommandRef.current = null;
+                        pendingManifestStore.delete(project.id);
+                        setUnresolvedOp(null);
                         onSuccess?.(checkRes.data.receipt.outcome);
                         onClose();
                         return;
@@ -143,14 +200,16 @@ export default function ImportPreviewModal({
                 idempotencyKey
             }, { headers });
 
-            commitCommandRef.current = null;
+            pendingManifestStore.delete(project.id);
+            setUnresolvedOp(null);
             onSuccess?.(res.data);
             onClose();
         } catch (err) {
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                commitCommandRef.current = null;
+                pendingManifestStore.delete(project.id);
+                setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to register manifest samples');
         } finally {
@@ -171,7 +230,7 @@ export default function ImportPreviewModal({
                             {t('projects.import.modalSubtitle', 'Validate identifiers, detect duplicates, and preview outcome before registration.')}
                         </p>
                     </div>
-                    <button onClick={onClose} className="text-sf-muted hover:text-sf-text p-1 rounded-lg">
+                    <button onClick={onClose} className="text-sf-muted hover:text-sf-text p-1 rounded-lg" aria-label="Close">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -179,6 +238,39 @@ export default function ImportPreviewModal({
                 {errorMessage && (
                     <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-300 text-red-800 dark:text-red-200 text-xs">
                         {errorMessage}
+                    </div>
+                )}
+
+                {unresolvedOp && (
+                    <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                                <span className="font-semibold">{t('projects.import.unresolvedTitle', 'Unconfirmed previous registration attempt')}</span>
+                                <p className="mt-0.5 text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                                    {t('projects.import.unresolvedDesc', 'A previous manifest registration attempt may have been processed by the server before the connection was interrupted.')}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                            <button
+                                type="button"
+                                onClick={handleRecoverUnresolved}
+                                disabled={committing || loading}
+                                className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                            >
+                                <RefreshCw className={`w-3 h-3 ${committing ? 'animate-spin' : ''}`} />
+                                {t('projects.actions.recoverAttempt', 'Recover previous attempt')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDiscardUnresolved}
+                                disabled={committing || loading}
+                                className="px-2.5 py-1 text-[11px] font-semibold rounded-lg border border-amber-400/60 dark:border-amber-600/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 disabled:opacity-50 transition-colors"
+                            >
+                                {t('projects.actions.discardAttempt', 'Discard attempt')}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -299,8 +391,8 @@ export default function ImportPreviewModal({
                             >
                                 {committing
                                     ? t('common.loading', 'Registering…')
-                                    : (commitCommandRef.current
-                                        ? t('common.retry', 'Retry registration')
+                                    : (unresolvedOp
+                                        ? t('projects.import.retryRegistration', 'Retry registration')
                                         : t('projects.import.registerEligible', { count: previewResult.validCount }, 'Register {{count}} expected samples'))}
                             </button>
                         </div>

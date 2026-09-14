@@ -1164,7 +1164,8 @@ exports.archiveProject = async (req, res) => {
                 status: 'success',
                 messageCode: 'PROJECT_ARCHIVED',
                 message: 'Project archived',
-                data: { code: project.code, project: p }
+                data: { code: project.code, project: p },
+                payloadHash
             };
 
             if (idempotencyKey) {
