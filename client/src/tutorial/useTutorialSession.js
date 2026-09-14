@@ -15,17 +15,17 @@ export const PATH_STOPS = {
 };
 
 const DEFAULT_PRACTICE_BY_TUBE = {
-    1: { intakeMass: '485.2', condition: 'intact', intakeStatusCode: 'initial', checks: [false, false, false], prepVerified: false, benchValue: '6.85', benchStatusCode: 'initial', texture: [35, 35, 30], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
-    2: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
-    3: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
-    4: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
-    5: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false }
+    1: { intakeMass: '485.2', condition: 'intact', intakeStatusCode: 'initial', receiptStatusCode: 'initial', assignmentStatusCode: 'initial', assignmentAssignee: 'techA', checks: [false, false, false], prepVerified: false, benchValue: '6.85', benchStatusCode: 'initial', texture: [35, 35, 30], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
+    2: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', receiptStatusCode: 'initial', assignmentStatusCode: 'initial', assignmentAssignee: 'techA', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
+    3: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', receiptStatusCode: 'initial', assignmentStatusCode: 'initial', assignmentAssignee: 'techA', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
+    4: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', receiptStatusCode: 'initial', assignmentStatusCode: 'initial', assignmentAssignee: 'techA', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false },
+    5: { intakeMass: '', condition: 'intact', intakeStatusCode: 'initial', receiptStatusCode: 'initial', assignmentStatusCode: 'initial', assignmentAssignee: 'techA', checks: [false, false, false], prepVerified: false, benchValue: '', benchStatusCode: 'initial', texture: ['', '', ''], spectrumLoaded: false, reviewReason: '', reviewSubmitted: false }
 };
 
 export function isSessionExpired(session) {
     if (!session) return true;
-    const activity = session.lastActivityAt || session.timestamp || 0;
-    return Date.now() - activity > SESSION_TTL_MS;
+    const createdAt = session.timestamp || session.lastActivityAt || 0;
+    return Date.now() - createdAt > SESSION_TTL_MS;
 }
 
 export function getStoredSession() {
@@ -84,6 +84,7 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
                 f03Search: '',
                 f03Filter: 'all',
                 f03SelectedId: null,
+                selectedSampleId: null,
                 equipmentStatus: 'ready',
                 inventoryLot: 'LOT-2026-08',
                 timestamp: Date.now(),
@@ -108,6 +109,7 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
             f03Search: saved?.f03Search ?? '',
             f03Filter: saved?.f03Filter ?? 'all',
             f03SelectedId: saved?.f03SelectedId ?? null,
+            selectedSampleId: saved?.selectedSampleId ?? null,
             equipmentStatus: saved?.equipmentStatus ?? 'ready',
             inventoryLot: saved?.inventoryLot ?? 'LOT-2026-08',
             timestamp: saved?.timestamp ?? Date.now(),
@@ -122,8 +124,9 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
             return;
         }
         try {
+            const { selectedSampleId, ...persistedState } = state;
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-                ...state,
+                ...persistedState,
                 lastActivityAt: Date.now()
             }));
         } catch {}
@@ -419,14 +422,19 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
         exitTutorial: exit,
         updatePractice: updatePracticeForCurrentTube,
         updatePracticeForCurrentTube,
-        updateF03: (updater) => {
-            if (typeof updater === 'function') {
-                setState(prev => ({ ...prev, ...updater(prev), lastActivityAt: Date.now() }));
+        updateF03: (fieldOrUpdater, value) => {
+            if (typeof fieldOrUpdater === 'function') {
+                setState(prev => ({ ...prev, ...fieldOrUpdater(prev), lastActivityAt: Date.now() }));
+            } else if (typeof fieldOrUpdater === 'string') {
+                setState(prev => ({ ...prev, [fieldOrUpdater]: value, lastActivityAt: Date.now() }));
             }
         },
         setF03Search,
         setF03Filter,
         setF03SelectedId,
+        setSelectedSampleId: (sampleId) => {
+            setState(prev => ({ ...prev, selectedSampleId: sampleId, lastActivityAt: Date.now() }));
+        },
         setEquipmentStatus,
         setInventoryLot
     };

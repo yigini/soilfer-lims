@@ -7,6 +7,8 @@ import { foundations, f03PracticeSamples, glossaryEntriesByChapter } from './con
 import { useTutorialAuth } from './useTutorialAuth';
 
 import PracticeIntake from './practice/PracticeIntake';
+import PracticeReceipt from './practice/PracticeReceipt';
+import PracticeAssignment from './practice/PracticeAssignment';
 import PracticePreparation from './practice/PracticePreparation';
 import PracticeWorksheetPH from './practice/PracticeWorksheetPH';
 import PracticeTexture from './practice/PracticeTexture';
@@ -34,6 +36,7 @@ export default function TutorialShell({ onExit, onPause }) {
 
     const {
         state,
+        activeStops,
         setStep,
         setIntroStage,
         setPath,
@@ -46,6 +49,7 @@ export default function TutorialShell({ onExit, onPause }) {
         skipLesson,
         updatePractice,
         updateF03,
+        setSelectedSampleId,
         pause,
         resume,
         exitTutorial
@@ -65,17 +69,21 @@ export default function TutorialShell({ onExit, onPause }) {
     const [basicAnswer, setBasicAnswer] = useState(null);
     const [targetAnchorStatus, setTargetAnchorStatus] = useState('searching'); // 'searching' | 'found' | 'duplicate' | 'missing'
     const [showDraftDialog, setShowDraftDialog] = useState(false);
+    const [pendingNavigateUrl, setPendingNavigateUrl] = useState(null);
     const [navNotice, setNavNotice] = useState(null);
     const coachTitleRef = useRef(null);
     const containerRef = useRef(null);
     const priorFocusRef = useRef(null);
 
-    // Reset/clear any live refs if identity changed
+    // Reset/clear any live refs if identity changed or actor/lab changed
     useEffect(() => {
         if (identityChanged) {
             acknowledgeIdentityChange();
         }
-    }, [identityChanged, acknowledgeIdentityChange]);
+        if (setSelectedSampleId) {
+            setSelectedSampleId(null);
+        }
+    }, [identityChanged, acknowledgeIdentityChange, verifiedUser?.id, verifiedUser?.labId]);
 
     // Save previous active focus when entering tutorial
     useEffect(() => {
@@ -87,6 +95,34 @@ export default function TutorialShell({ onExit, onPause }) {
         };
     }, []);
 
+    // Track live page inputs for controlled form draft protection
+    const hasDirtyInputRef = useRef(false);
+    useEffect(() => {
+        const handleInput = (e) => {
+            if (e.target && !e.target.closest('[data-sf-tutorial]')) {
+                hasDirtyInputRef.current = true;
+            }
+        };
+        const handleReset = (e) => {
+            if (e.target && !e.target.closest('[data-sf-tutorial]')) {
+                hasDirtyInputRef.current = false;
+            }
+        };
+        window.addEventListener('input', handleInput, true);
+        window.addEventListener('change', handleInput, true);
+        window.addEventListener('submit', handleReset, true);
+        window.addEventListener('reset', handleReset, true);
+        return () => {
+            window.removeEventListener('input', handleInput, true);
+            window.removeEventListener('change', handleInput, true);
+            window.removeEventListener('submit', handleReset, true);
+            window.removeEventListener('reset', handleReset, true);
+        };
+    }, []);
+
+    useEffect(() => {
+        hasDirtyInputRef.current = false;
+    }, [location.pathname]);
 
     // Active translation dictionary
     const dict = LOCALES[state?.language] || LOCALES.en;
@@ -187,7 +223,7 @@ export default function TutorialShell({ onExit, onPause }) {
 
     // Highlight target anchor on real page in docked mode (exact-one matching with 2.5s bounded retry)
     useEffect(() => {
-        if (isModalMode || state.paused || mustChangePassword) {
+        if (isModalMode || state.paused || mustChangePassword || chosenPath === 'quick') {
             setTargetAnchorStatus('missing');
             return;
         }
@@ -268,7 +304,7 @@ export default function TutorialShell({ onExit, onPause }) {
                 activeHighlightEl.classList.remove('sf-tutorial-target-highlight');
             }
         };
-    }, [isModalMode, state.paused, currentChapter, location.pathname, location.search, mustChangePassword]);
+    }, [isModalMode, state.paused, currentChapter, location.pathname, location.search, mustChangePassword, chosenPath]);
 
     if (!state.active || mustChangePassword) return null;
 
@@ -331,6 +367,7 @@ export default function TutorialShell({ onExit, onPause }) {
     });
 
     const hasDirtyDraft = () => {
+        if (hasDirtyInputRef.current) return true;
         try {
             const inputs = document.querySelectorAll('input:not([type="hidden"]):not([readonly]):not([disabled]), textarea:not([readonly]):not([disabled]), select:not([disabled])');
             for (const input of inputs) {
@@ -338,7 +375,7 @@ export default function TutorialShell({ onExit, onPause }) {
                 if (input.closest('[data-sf-tutorial]')) continue;
                 if (input.type === 'checkbox' || input.type === 'radio') {
                     if (input.checked !== input.defaultChecked) return true;
-                } else if (input.value !== input.defaultValue && input.value.trim() !== '') {
+                } else if (input.value && input.value.trim() !== '') {
                     return true;
                 }
             }
@@ -346,12 +383,24 @@ export default function TutorialShell({ onExit, onPause }) {
         return false;
     };
 
-    const performNavigation = () => {
+    const performNavigation = (customUrl = null) => {
+        hasDirtyInputRef.current = false;
+        if (customUrl) {
+            navigate(customUrl);
+            return;
+        }
+        const pathMatch = location.pathname.match(/\/samples\/([^\/]+)/);
+        const querySampleId = new URLSearchParams(location.search).get('sampleId');
+        const rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim())
+            || (pathMatch ? decodeURIComponent(pathMatch[1]) : null)
+            || querySampleId;
+        const currentSelectedSampleId = rawSampleId ? encodeURIComponent(rawSampleId) : null;
+
         const targetPath = currentChapter.resolveRoute
-            ? currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus })
+            ? currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: currentSelectedSampleId })
             : currentChapter.route;
         if (!targetPath) {
-            setNavNotice(t('sampleRequiredNotice', 'Select a sample from the laboratory list to view its workflow map. Docked guidance remains active.'));
+            setNavNotice(t('sampleRequiredNotice', 'Select an authorized sample from the laboratory list to view its workflow map. Docked guidance remains active.'));
             return;
         }
 
@@ -370,11 +419,113 @@ export default function TutorialShell({ onExit, onPause }) {
         setNavNotice(null);
 
         if (hasDirtyDraft()) {
+            setPendingNavigateUrl(null);
             setShowDraftDialog(true);
             return;
         }
 
         performNavigation();
+    };
+
+    const renderQuickOverviewDiagram = (chapterId) => {
+        switch (chapterId) {
+            case 'identity':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🔐</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.identityTitle', 'Roles and access')}:</b>
+                                {t('quickOverview.identityDesc', 'Each laboratory role has clear responsibilities, from receiving samples to recording tests and reviewing final results.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'field':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🌾</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.fieldTitle', 'Field collection')}:</b>
+                                {t('quickOverview.fieldDesc', 'Samples arrive with field identifiers and location notes, linking laboratory work back to where the soil was collected.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'intake':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>⚖️</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.intakeTitle', 'Sample intake')}:</b>
+                                {t('quickOverview.intakeDesc', 'The laboratory checks the container, records an illustrative sample mass (such as 485.2 g), and confirms physical arrival.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'bench':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🧪</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.benchTitle', 'Bench testing')}:</b>
+                                {t('quickOverview.benchDesc', 'Technicians perform tests following the laboratory’s configured analytical methods and quality checks, recording measurements like pH.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'texture':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🔬</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.textureTitle', 'Soil texture')}:</b>
+                                {t('quickOverview.textureDesc', 'Measurements of sand, silt, and clay fractions are checked to ensure their sum closes to 100% for proper soil texture classification.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'review':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>📋</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.reviewTitle', 'Quality review')}:</b>
+                                {t('quickOverview.reviewDesc', 'A supervisor or manager reviews the submitted measurements against quality thresholds before authorizing the report.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'finish':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>✨</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.finishTitle', 'Connected workflow')}:</b>
+                                {t('quickOverview.finishDesc', 'From initial field collection to physical reception, bench analysis, and authorized reports, the platform keeps records connected.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            default:
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🏢</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.defaultTitle', 'Laboratory overview')}:</b>
+                                {t('quickOverview.defaultDesc', 'A connected record connecting sample arrivals, analytical tasks, and verified reports.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+        }
     };
 
     // =========================================================================
@@ -460,19 +611,22 @@ export default function TutorialShell({ onExit, onPause }) {
                         {chapters.map((ch, i) => {
                             const isActive = i === step;
                             const isDone = doneSet.has(i);
+                            const isSkipped = state.skipped && state.skipped.includes(i);
+                            const isUnavailable = !activeStops.includes(i);
                             return (
                                 <button
                                     key={ch.id}
                                     type="button"
-                                    className={`chapter ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}`}
+                                    className={`chapter ${isActive ? 'active' : ''} ${isDone ? 'done' : ''} ${isSkipped ? 'skipped' : ''} ${isUnavailable ? 'unavailable' : ''}`}
                                     data-step={i}
+                                    data-status={isDone ? 'practiced' : isSkipped ? 'skipped' : isUnavailable ? 'unavailable' : 'pending'}
                                     aria-current={isActive ? 'step' : undefined}
                                     onClick={() => {
                                         setIntroStage(3);
                                         setStep(i);
                                     }}
                                 >
-                                    <i>{isDone ? '✓' : String(i + 1).padStart(2, '0')}</i>
+                                    <i>{isDone ? '✓' : isSkipped ? '↷' : isUnavailable ? '⊘' : String(i + 1).padStart(2, '0')}</i>
                                     <span>{t(ch.nameKey)}</span>
                                 </button>
                             );
@@ -633,6 +787,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                             />
                                                             <button
                                                                 type="button"
+                                                                id="f03FilterAll"
                                                                 className={`quiet ${state.f03Filter === 'all' ? 'focus' : ''}`}
                                                                 style={{ border: '1px solid #dce3da' }}
                                                                 onClick={() => updateF03('f03Filter', 'all')}
@@ -641,6 +796,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                             </button>
                                                             <button
                                                                 type="button"
+                                                                id="f03FilterExpected"
                                                                 className={`quiet ${state.f03Filter === 'expected' ? 'focus' : ''}`}
                                                                 style={{ border: '1px solid #dce3da' }}
                                                                 onClick={() => updateF03('f03Filter', 'expected')}
@@ -649,6 +805,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                             </button>
                                                             <button
                                                                 type="button"
+                                                                id="f03FilterReceived"
                                                                 className={`quiet ${state.f03Filter === 'received' ? 'focus' : ''}`}
                                                                 style={{ border: '1px solid #dce3da' }}
                                                                 onClick={() => updateF03('f03Filter', 'received')}
@@ -658,7 +815,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                         </div>
 
                                                         <div className="table-wrap" style={{ marginTop: '12px' }}>
-                                                            <table>
+                                                            <table id="f03Table">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>{t('common.tableSampleId', 'Sample ID')}</th>
@@ -670,6 +827,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                                     {filteredF03Samples.map(sample => (
                                                                         <tr
                                                                             key={sample.id}
+                                                                            data-f03-sample-id={sample.id}
                                                                             style={{ cursor: 'pointer', background: state.f03SelectedId === sample.id ? '#edf4eb' : 'transparent' }}
                                                                             onClick={() => updateF03('f03SelectedId', sample.id)}
                                                                         >
@@ -683,7 +841,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                         </div>
 
                                                         {state.f03SelectedId && (
-                                                            <div className="status" style={{ marginTop: '10px' }}>
+                                                            <div id="f03SelectionDetails" className="status" style={{ marginTop: '10px' }}>
                                                                 {t('foundation.f03.sampleSelected')
                                                                     .replace('{id}', state.f03SelectedId)
                                                                     .replace('{state}', 'Verified')}
@@ -1052,59 +1210,78 @@ export default function TutorialShell({ onExit, onPause }) {
                         <p id="why" style={{ fontSize: '12px', marginTop: '6px' }}>{whyText}</p>
                     </details>
 
-                    {/* Real Page Orientation Block */}
-                    <div
-                        style={{
-                            margin: '14px 0',
-                            padding: '12px',
-                            background: '#f4f7f2',
-                            border: '1px solid #dce3da',
-                            borderRadius: '8px',
-                            fontSize: '12px'
-                        }}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                            <span className="route" id="route" style={{ fontWeight: 600 }}>{currentChapter.routeDisplay || currentChapter.route}</span>
-                            {(currentChapter.resolveRoute || currentChapter.route) && (
-                                <button
-                                    type="button"
-                                    className="quiet small"
-                                    id="goToPage"
-                                    onClick={handleNavigateRealPage}
-                                    style={{ padding: '2px 8px', minHeight: '26px', color: '#245942', fontWeight: 700 }}
-                                >
-                                    {t('goToPage', 'Go to page →')}
-                                </button>
+                    {/* Stage Orientation: Illustrated Overview for Quick Path vs Real Page Orientation for Full/Role Paths */}
+                    {chosenPath === 'quick' ? (
+                        <div
+                            style={{
+                                margin: '14px 0',
+                                padding: '12px',
+                                background: '#f4f7f2',
+                                border: '1px solid #dce3da',
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <span className="badge clay">{t('common.illustrativePage', 'Illustrative overview · no account needed')}</span>
+                                <span className="small muted">{t(currentChapter.nameKey)}</span>
+                            </div>
+                            {renderQuickOverviewDiagram(currentChapter.id)}
+                        </div>
+                    ) : (
+                        <div
+                            style={{
+                                margin: '14px 0',
+                                padding: '12px',
+                                background: '#f4f7f2',
+                                border: '1px solid #dce3da',
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <span className="route" id="route" style={{ fontWeight: 600 }}>{currentChapter.routeDisplay || currentChapter.route}</span>
+                                {(currentChapter.resolveRoute || currentChapter.route) && (
+                                    <button
+                                        type="button"
+                                        className="quiet small"
+                                        id="goToPage"
+                                        onClick={handleNavigateRealPage}
+                                        style={{ padding: '2px 8px', minHeight: '26px', color: '#245942', fontWeight: 700 }}
+                                    >
+                                        {t('goToPage', 'Go to page →')}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Anchor Check Indicator */}
+                            {targetAnchorStatus === 'found' && (
+                                <div style={{ color: '#245942', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>✓</span> {t('targetHighlighted', 'Target element highlighted on this page')}
+                                </div>
+                            )}
+                            {targetAnchorStatus === 'duplicate' && (
+                                <div style={{ color: '#b45309', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>⚠</span> {t('duplicateAnchor', 'Multiple matching elements found. Target highlight disabled to prevent ambiguity.')}
+                                </div>
+                            )}
+                            {targetAnchorStatus === 'missing' && (
+                                <div className="muted" style={{ fontSize: '11px' }}>
+                                    {t('missingAnchor', 'Target element not present on this page view. Docked guidance remains active.')}
+                                </div>
+                            )}
+
+                            {navNotice && (
+                                <div id="navNotice" style={{ marginTop: '8px', padding: '6px 8px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '4px', color: '#991b1b', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>{navNotice}</span>
+                                    <button type="button" onClick={() => setNavNotice(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#991b1b' }}>✕</button>
+                                </div>
                             )}
                         </div>
-
-                        {/* Anchor Check Indicator */}
-                        {targetAnchorStatus === 'found' && (
-                            <div style={{ color: '#245942', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span>✓</span> {t('targetHighlighted', 'Target element highlighted on this page')}
-                            </div>
-                        )}
-                        {targetAnchorStatus === 'duplicate' && (
-                            <div style={{ color: '#b45309', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span>⚠</span> {t('duplicateAnchor', 'Multiple matching elements found. Target highlight disabled to prevent ambiguity.')}
-                            </div>
-                        )}
-                        {targetAnchorStatus === 'missing' && (
-                            <div className="muted" style={{ fontSize: '11px' }}>
-                                {t('missingAnchor', 'Target element not present on this page view. Docked guidance remains active.')}
-                            </div>
-                        )}
-
-                        {navNotice && (
-                            <div style={{ marginTop: '8px', padding: '6px 8px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '4px', color: '#991b1b', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>{navNotice}</span>
-                                <button type="button" onClick={() => setNavNotice(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#991b1b' }}>✕</button>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
                     {/* Step 1 Identity: Role Track Selector */}
-                    {step === 1 && (
+                    {step === 1 && chosenPath !== 'quick' && (
                         <div className="panel" style={{ padding: '12px', marginTop: '10px' }}>
                             <div className="row">
                                 <h3 style={{ fontSize: '13px' }}>{t('common.exploreRole', 'Explore a specific role')}</h3>
@@ -1141,6 +1318,40 @@ export default function TutorialShell({ onExit, onPause }) {
                         </div>
                     )}
 
+                    {/* Step 13 Trace: Sample Map Selection */}
+                    {currentChapter.id === 'trace' && (
+                        <div className="panel" style={{ marginTop: '10px', padding: '12px' }}>
+                            <div className="row">
+                                <label htmlFor="sampleIdInput" className="label" style={{ margin: 0, fontWeight: 600 }}>
+                                    {t('common.tableSampleId', 'Sample ID')}:
+                                </label>
+                                <span className="badge">{state.selectedSampleId || t('chapters.trace.noSampleSelected', 'None selected')}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                <input
+                                    id="sampleIdInput"
+                                    value={state.selectedSampleId || ''}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (setSelectedSampleId) setSelectedSampleId(val);
+                                        else updateF03('selectedSampleId', val);
+                                    }}
+                                    placeholder={t('chapters.trace.inputPlaceholder', 'Enter authorized sample ID...')}
+                                    style={{ flex: 1, minHeight: '30px', fontSize: '12px' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="primary"
+                                    id="viewSampleMapBtn"
+                                    onClick={handleNavigateRealPage}
+                                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                                >
+                                    {t('chapters.trace.viewMap', 'View Map →')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Guide-Owned Synthetic Practice Drawer */}
                     {currentChapter.practiceType && (
                         <div style={{ marginTop: '14px' }}>
@@ -1154,6 +1365,27 @@ export default function TutorialShell({ onExit, onPause }) {
                                     mass={currentTubePractice.intakeMass}
                                     condition={currentTubePractice.condition}
                                     intakeStatusCode={currentTubePractice.intakeStatusCode}
+                                    onUpdate={updatePractice}
+                                    onMarkDone={() => markDone(step)}
+                                    t={t}
+                                />
+                            )}
+
+                            {currentChapter.practiceType === 'receipt' && (
+                                <PracticeReceipt
+                                    sample={{ id: `TRAIN-US-00${sampleTube}`, tube: sampleTube }}
+                                    receiptStatusCode={currentTubePractice.receiptStatusCode}
+                                    onUpdate={updatePractice}
+                                    onMarkDone={() => markDone(step)}
+                                    t={t}
+                                />
+                            )}
+
+                            {currentChapter.practiceType === 'assignment' && (
+                                <PracticeAssignment
+                                    sample={{ id: `TRAIN-US-00${sampleTube}`, tube: sampleTube }}
+                                    assignmentStatusCode={currentTubePractice.assignmentStatusCode}
+                                    assignee={currentTubePractice.assignmentAssignee}
                                     onUpdate={updatePractice}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
@@ -1213,6 +1445,8 @@ export default function TutorialShell({ onExit, onPause }) {
 
                             {currentChapter.practiceType === 'resources' && (
                                 <PracticeResources
+                                    key={`practice-resources-${currentChapter.id}`}
+                                    initialResource={currentChapter.id === 'inventory' ? 'inventory' : 'equipment'}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
                                 />
@@ -1273,6 +1507,60 @@ export default function TutorialShell({ onExit, onPause }) {
                             ))}
                         </div>
                     </div>
+
+                    {/* Curriculum Progress Index */}
+                    <details id="curriculumIndex" style={{ marginTop: '12px' }}>
+                        <summary style={{ fontSize: '12px', fontWeight: 600, color: '#245942', cursor: 'pointer' }}>
+                            {t('common.allChapters', 'Curriculum chapters')} ({done.length} {t('common.completed', 'completed')})
+                        </summary>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+                            {chapters.map((ch, i) => {
+                                const isActive = i === step;
+                                const isDone = doneSet.has(i);
+                                const isSkipped = state.skipped && state.skipped.includes(i);
+                                const isUnavailable = !activeStops.includes(i);
+                                return (
+                                    <button
+                                        key={ch.id}
+                                        type="button"
+                                        className={`chapter ${isActive ? 'active' : ''} ${isDone ? 'done' : ''} ${isSkipped ? 'skipped' : ''} ${isUnavailable ? 'unavailable' : ''}`}
+                                        data-step={i}
+                                        data-status={isDone ? 'practiced' : isSkipped ? 'skipped' : isUnavailable ? 'unavailable' : 'pending'}
+                                        onClick={() => setStep(i)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            padding: '6px 10px',
+                                            fontSize: '11px',
+                                            borderRadius: '6px',
+                                            border: isActive ? '1px solid #245942' : '1px solid #e5e7eb',
+                                            background: isActive ? '#eaf2e7' : '#fff',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ fontWeight: 700, width: '18px' }}>
+                                                {isDone ? '✓' : isSkipped ? '↷' : isUnavailable ? '⊘' : String(i + 1).padStart(2, '0')}
+                                            </span>
+                                            <span>{t(ch.nameKey)}</span>
+                                        </div>
+                                        <span className="small muted">
+                                            {isDone
+                                                ? t('common.statusDone', 'Practiced & completed')
+                                                : isSkipped
+                                                    ? t('common.statusSkipped', 'Skipped')
+                                                    : isUnavailable
+                                                        ? t('common.statusUnavailable', 'Not in current track')
+                                                        : isActive
+                                                            ? t('common.statusCurrent', 'Current step')
+                                                            : t('common.statusPending', 'Upcoming')}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </details>
 
                     {/* Glossary */}
                     <details id="glossary" style={{ marginTop: '12px' }}>
@@ -1377,7 +1665,10 @@ export default function TutorialShell({ onExit, onPause }) {
                                 type="button"
                                 className="quiet"
                                 id="draftCancelBtn"
-                                onClick={() => setShowDraftDialog(false)}
+                                onClick={() => {
+                                    setShowDraftDialog(false);
+                                    setPendingNavigateUrl(null);
+                                }}
                                 style={{ padding: '6px 14px', fontSize: '13px' }}
                             >
                                 {t('common.cancel', 'Cancel')}
@@ -1388,7 +1679,9 @@ export default function TutorialShell({ onExit, onPause }) {
                                 id="draftDiscardBtn"
                                 onClick={() => {
                                     setShowDraftDialog(false);
-                                    performNavigation();
+                                    const url = pendingNavigateUrl;
+                                    setPendingNavigateUrl(null);
+                                    performNavigation(url);
                                 }}
                                 style={{ padding: '6px 14px', fontSize: '13px' }}
                             >

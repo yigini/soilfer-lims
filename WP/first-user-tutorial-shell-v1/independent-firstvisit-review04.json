@@ -1,0 +1,40 @@
+{
+  "time": "2026-09-14T11:26:08.675Z",
+  "sourceCandidate": "10c33316c88d9374db40c4753d1d1f27a7a0a9a5",
+  "scope": "Existing built snapshot, isolated headless Chrome, synthetic input, API mocks, external requests blocked. No production/database access.",
+  "assets": [
+    "/assets/TutorialShell-chiItfdV.js",
+    "/assets/TutorialShell-D1vt1_Ss.css"
+  ],
+  "indexSha256": "f57e18bdd3c834a8c464f2f18f3f05128f81c9eeea4da030a7a7a090f5674bed",
+  "checks": {
+    "F03": {
+      "beforeRows": 3,
+      "search": {
+        "typed": "TRAIN-US-002",
+        "actualValue": "TRAIN-US-002",
+        "rowCount": 1,
+        "stored": "TRAIN-US-002"
+      },
+      "filter": {
+        "rowCount": 1,
+        "stored": "expected"
+      },
+      "selection": {
+        "stored": "TRAIN-US-002",
+        "selectedFeedback": true
+      },
+      "confirmedNoOp": false
+    },
+    "controlledLoginDraft": {
+      "input": {
+        "value": "synthetic-unsent-username",
+        "defaultValue": "synthetic-unsent-username"
+      },
+      "heuristic": false,
+      "dialogPresent": 1,
+      "note": "Actual React Login input, never submitted. This demonstrates the detector misses controlled text; it does not independently prove a laboratory worksheet loses drafts."
+    }
+  },
+  "mutationCount": 0
+}

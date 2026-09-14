@@ -21,7 +21,7 @@
     "previewBarDate": "14 septembre 2026",
     "stageSubtitle": "Un échantillon à suivre. Cinq sous les yeux.",
     "previewPersona": "Profil de démonstration · aucun compte connecté",
-    "illustrativePage": "Page illustrative",
+    "illustrativePage": "Aperçu illustré · aucun compte requis",
     "yourLabVisit": "VOTRE VISITE DU LABORATOIRE",
     "readStepUp": "Lire cette étape ↑",
     "collapseGuide": "Replier le guide ↓",
@@ -71,7 +71,15 @@
     "unsavedDraftWarning": "Vous avez peut-être des données non enregistrées sur cette page. Continuer vers la destination suivante du guide ?",
     "sampleRequiredNotice": "Sélectionnez un échantillon dans la liste du laboratoire pour afficher sa carte des flux. Le guide ancré reste actif.",
     "cancel": "Annuler",
-    "discardAndProceed": "Ignorer et continuer"
+    "discardAndProceed": "Ignorer et continuer",
+    "reset": "Réinitialiser",
+    "statusDone": "Pratiqué et terminé",
+    "statusSkipped": "Ignoré",
+    "statusUnavailable": "Pas dans le parcours actuel",
+    "statusCurrent": "Étape actuelle",
+    "statusPending": "À venir",
+    "allChapters": "Chapitres du programme",
+    "completed": "terminés"
   },
   "roles": {
     "visitor": "Visiteur",
@@ -230,7 +238,10 @@
       "title": "Un résultat avec un historique.",
       "copy": "La carte détaille les dépendances et transmissions. Le rapport relie le résultat final à sa méthode, sa révision et son historique de contrôle.",
       "why": "La carte doit refléter les événements enregistrés. Un tutoriel ne doit jamais simuler un état achevé sur un échantillon réel incomplet.",
-      "next": "Explorer l'environnement du labo →"
+      "next": "Explorer l'environnement du labo →",
+      "viewMap": "Voir la carte →",
+      "noSampleSelected": "Aucun sélectionné",
+      "inputPlaceholder": "Entrez l'identifiant d'échantillon autorisé..."
     },
     "resources": {
       "name": "Labo & données",
@@ -405,6 +416,25 @@
       "helpLink": "Ouvrir le Centre d'Aide ↗",
       "reportLink": "Signaler un problème sur GitHub ↗",
       "summaryText": "{doneCount} leçons explorées · {skippedCount} ignorées"
+    },
+    "receipt": {
+      "title": "Confirmer l'arrivée physique",
+      "custodyLabel": "Chaîne de traçabilité",
+      "custodyOk": "Sceau du contenant vérifié et bordereau d'expédition intact",
+      "confirmBtn": "Confirmer l'arrivée et générer le reçu",
+      "confirmed": "Arrivée confirmée : Reçu synthétique enregistré. Contenant physique vérifié pour préparation et essais.",
+      "pending": "Inspectez le sceau de traçabilité du contenant et confirmez l'arrivée physique au laboratoire."
+    },
+    "assignment": {
+      "title": "Assigner les tâches d'analyse",
+      "methodsLabel": "Essais requis",
+      "assigneeLabel": "Technicien / poste assigné",
+      "techA": "Tomas Tech · Poste 1 (pH / CE)",
+      "techB": "Sarah Specialist · Poste 2 (Texture / Hydromètre)",
+      "assignBtn": "Assigner les essais au banc de travail",
+      "assigned": "Ordres de travail assignés : Tâches en attente pour préparation et banc de travail.",
+      "pending": "Sélectionnez le poste de travail et assignez les méthodes pour démarrer les analyses.",
+      "methodsList": "pH · Texture du sol"
     }
   },
   "glossary": {
@@ -428,5 +458,23 @@
     "progress": "Progression du tutoriel",
     "sampleTube": "Cibler l'échantillon de pratique {num}",
     "mobileToggle": "Basculer la vue du guide"
+  },
+  "quickOverview": {
+    "identityTitle": "Rôles et accès",
+    "identityDesc": "Chaque rôle de laboratoire a des responsabilités claires, de la réception des échantillons à la saisie des analyses et à la révision des résultats.",
+    "fieldTitle": "Collecte sur le terrain",
+    "fieldDesc": "Les échantillons arrivent avec des identifiants de terrain et des notes de localisation, reliant le travail du laboratoire au lieu de prélèvement.",
+    "intakeTitle": "Réception d'échantillons",
+    "intakeDesc": "Le laboratoire vérifie le contenant, enregistre une masse d'échantillon illustrative (comme 485,2 g) et confirme l'arrivée physique.",
+    "benchTitle": "Analyses à la paillasse",
+    "benchDesc": "Les techniciens effectuent des tests selon les méthodes analytiques et contrôles qualité configurés, en enregistrant des mesures comme le pH.",
+    "textureTitle": "Texture du sol",
+    "textureDesc": "Les fractions de sable, limon et argile sont vérifiées pour s'assurer que leur somme fait 100% pour classifier la texture du sol.",
+    "reviewTitle": "Contrôle qualité",
+    "reviewDesc": "Un superviseur ou responsable examine les mesures soumises selon les critères de qualité avant d'autoriser le rapport.",
+    "finishTitle": "Flux connecté",
+    "finishDesc": "De la collecte sur le terrain à la réception physique, l'analyse et les rapports autorisés, la plateforme garde les registres connectés.",
+    "defaultTitle": "Aperçu du laboratoire",
+    "defaultDesc": "Un registre connecté reliant l'arrivée des échantillons, les tâches analytiques et les rapports vérifiés."
   }
 }

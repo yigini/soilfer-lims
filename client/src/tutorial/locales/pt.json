@@ -21,7 +21,7 @@
     "previewBarDate": "14 de setembro de 2026",
     "stageSubtitle": "Uma amostra a acompanhar. Cinco em vista.",
     "previewPersona": "Perfil de demonstração · sem conta conectada",
-    "illustrativePage": "Página ilustrativa",
+    "illustrativePage": "Visão ilustrada · nenhuma conta necessária",
     "yourLabVisit": "SUA VISITA AO LABORATÓRIO",
     "readStepUp": "Ler esta etapa ↑",
     "collapseGuide": "Recolher guia ↓",
@@ -71,7 +71,15 @@
     "unsavedDraftWarning": "Você pode ter trabalho não salvo nesta página. Continuar para o próximo destino do guia?",
     "sampleRequiredNotice": "Selecione uma amostra da lista do laboratório para visualizar seu mapa de fluxo de trabalho. O guia fixado permanece ativo.",
     "cancel": "Cancelar",
-    "discardAndProceed": "Descartar e continuar"
+    "discardAndProceed": "Descartar e continuar",
+    "reset": "Redefinir",
+    "statusDone": "Praticado e concluído",
+    "statusSkipped": "Ignorado",
+    "statusUnavailable": "Não na trilha atual",
+    "statusCurrent": "Etapa atual",
+    "statusPending": "Próximo",
+    "allChapters": "Capítulos do currículo",
+    "completed": "concluídos"
   },
   "roles": {
     "visitor": "Visitante",
@@ -230,7 +238,10 @@
       "title": "Um resultado com histórico.",
       "copy": "O mapa explica dependências e entregas. O relatório conecta o resultado final ao método, versão e histórico de revisão.",
       "why": "O mapa deve refletir eventos registrados. Um tutorial nunca deve indicar conclusão sobre uma amostra real em andamento.",
-      "next": "Explorar o laboratório integrado →"
+      "next": "Explorar o laboratório integrado →",
+      "viewMap": "Ver mapa →",
+      "noSampleSelected": "Nenhuma selecionada",
+      "inputPlaceholder": "Insira o ID da amostra autorizada..."
     },
     "resources": {
       "name": "Laboratório e dados",
@@ -405,6 +416,25 @@
       "helpLink": "Abrir Central de Ajuda ↗",
       "reportLink": "Relatar um problema no GitHub ↗",
       "summaryText": "{doneCount} lições exploradas · {skippedCount} ignoradas"
+    },
+    "receipt": {
+      "title": "Confirmar chegada física",
+      "custodyLabel": "Cadeia de custódia",
+      "custodyOk": "Lacre do recipiente verificado e guia de remessa intacta",
+      "confirmBtn": "Confirmar chegada e gerar recibo",
+      "confirmed": "Chegada confirmada: Recibo sintético registrado. Recipiente físico verificado para preparação e ensaios.",
+      "pending": "Inspecione o lacre de custódia do recipiente e confirme a chegada física ao laboratório."
+    },
+    "assignment": {
+      "title": "Atribuir tarefas de análise",
+      "methodsLabel": "Ensaios necessários",
+      "assigneeLabel": "Técnico / bancada atribuída",
+      "techA": "Tomas Tech · Estação 1 (pH / CE)",
+      "techB": "Sarah Specialist · Estação 2 (Textura / Hidrômetro)",
+      "assignBtn": "Atribuir ensaios à bancada de trabalho",
+      "assigned": "Ordens de trabalho atribuídas: Tarefas na fila para preparação e bancada de trabalho.",
+      "pending": "Selecione a bancada de trabalho e atribua os métodos para iniciar as análises.",
+      "methodsList": "pH · Textura do solo"
     }
   },
   "glossary": {
@@ -428,5 +458,23 @@
     "progress": "Progresso do tutorial",
     "sampleTube": "Focar amostra de prática {num}",
     "mobileToggle": "Alternar visualização do guia"
+  },
+  "quickOverview": {
+    "identityTitle": "Funções e acesso",
+    "identityDesc": "Cada função do laboratório tem responsabilidades claras, desde o recebimento de amostras até o registro de testes e revisão dos resultados finais.",
+    "fieldTitle": "Coleta em campo",
+    "fieldDesc": "As amostras chegam com identificadores de campo e notas de localização, conectando o trabalho do laboratório ao local de coleta.",
+    "intakeTitle": "Entrada de amostras",
+    "intakeDesc": "O laboratório verifica o recipiente, registra uma massa ilustrativa da amostra (como 485,2 g) e confirma o recebimento físico.",
+    "benchTitle": "Testes na bancada",
+    "benchDesc": "Os técnicos realizam testes seguindo os métodos analíticos e controles de qualidade configurados, registrando medições como o pH.",
+    "textureTitle": "Textura do solo",
+    "textureDesc": "As frações de areia, silte e argila são verificadas para garantir que a soma feche em 100% para a classificação correta da textura do solo.",
+    "reviewTitle": "Revisão de qualidade",
+    "reviewDesc": "Um supervisor ou gerente revisa as medições enviadas com base em critérios de qualidade antes de autorizar o relatório.",
+    "finishTitle": "Fluxo conectado",
+    "finishDesc": "Da coleta inicial em campo à recepção física, análise de bancada e relatórios autorizados, a plataforma mantém os registros conectados.",
+    "defaultTitle": "Visão geral do laboratório",
+    "defaultDesc": "Um registro conectado que vincula a chegada de amostras, tarefas analíticas e relatórios verificados."
   }
 }

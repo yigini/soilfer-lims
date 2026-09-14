@@ -1,11 +1,11 @@
 {
-  "time": "2026-09-14T10:48:44.011Z",
+  "time": "2026-09-14T11:26:13.559Z",
   "scope": "Existing built client snapshot; isolated browser; mocked APIs; blocked external network; no database or production writes",
   "assets": [
-    "/assets/TutorialShell-BYrzxXl2.css",
-    "/assets/TutorialShell-Cg5UzekW.js"
+    "/assets/TutorialShell-chiItfdV.js",
+    "/assets/TutorialShell-D1vt1_Ss.css"
   ],
-  "indexSha256": "15f94a22bbac3e7c29403f5e81eab01b32b676fb9d428807dc5c290614d581dd",
+  "indexSha256": "f57e18bdd3c834a8c464f2f18f3f05128f81c9eeea4da030a7a7a090f5674bed",
   "checks": {
     "server500CachedVerification": {
       "meRequests": 2,

@@ -21,7 +21,7 @@
     "previewBarDate": "14 September 2026",
     "stageSubtitle": "One sample to follow. Five to keep in view.",
     "previewPersona": "Preview persona · not a signed-in account",
-    "illustrativePage": "Illustrative page",
+    "illustrativePage": "Illustrative overview · no account needed",
     "yourLabVisit": "YOUR LAB VISIT",
     "readStepUp": "Read this step ↑",
     "collapseGuide": "Collapse guide ↓",
@@ -71,7 +71,15 @@
     "unsavedDraftWarning": "You may have unsaved work on this page. Continue to next guide destination?",
     "sampleRequiredNotice": "Select a sample from the laboratory list to view its workflow map. Docked guidance remains active.",
     "cancel": "Cancel",
-    "discardAndProceed": "Discard & Proceed"
+    "discardAndProceed": "Discard & Proceed",
+    "reset": "Reset",
+    "statusDone": "Practiced & completed",
+    "statusSkipped": "Skipped",
+    "statusUnavailable": "Not in current track",
+    "statusCurrent": "Current step",
+    "statusPending": "Upcoming",
+    "allChapters": "Curriculum chapters",
+    "completed": "completed"
   },
   "roles": {
     "visitor": "Visitor",
@@ -230,7 +238,10 @@
       "title": "A result with a history.",
       "copy": "The map explains dependencies and handovers. The report connects the final result to its method, version and review history.",
       "why": "A workflow map must reflect recorded events. A tutorial must never draw a completed state over an incomplete real sample.",
-      "next": "Explore the lab around it →"
+      "next": "Explore the lab around it →",
+      "viewMap": "View Map →",
+      "noSampleSelected": "None selected",
+      "inputPlaceholder": "Enter authorized sample ID..."
     },
     "resources": {
       "name": "Lab & data",
@@ -405,6 +416,25 @@
       "helpLink": "Open Help Centre ↗",
       "reportLink": "Report an issue on GitHub ↗",
       "summaryText": "{doneCount} lessons explored · {skippedCount} skipped"
+    },
+    "receipt": {
+      "title": "Confirm physical arrival",
+      "custodyLabel": "Chain of custody",
+      "custodyOk": "Verified container seal & dispatch voucher intact",
+      "confirmBtn": "Confirm arrival & generate receipt",
+      "confirmed": "Arrival confirmed: Synthetic receipt logged. Physical container verified for preparation and testing.",
+      "pending": "Inspect container custody seal and confirm physical arrival in the laboratory."
+    },
+    "assignment": {
+      "title": "Assign analysis tasks",
+      "methodsLabel": "Required tests",
+      "assigneeLabel": "Assigned technician / bench",
+      "techA": "Tomas Tech · Station 1 (pH / EC)",
+      "techB": "Sarah Specialist · Station 2 (Texture / Hydrometer)",
+      "assignBtn": "Assign tests to workbench",
+      "assigned": "Work orders assigned: Tasks queued for preparation and technician workbench.",
+      "pending": "Select technician workstation and assign methods to initiate analytical testing.",
+      "methodsList": "pH · Soil texture"
     }
   },
   "glossary": {
@@ -428,5 +458,23 @@
     "progress": "Tutorial progress",
     "sampleTube": "Focus practice sample {num}",
     "mobileToggle": "Toggle tutorial coach view"
+  },
+  "quickOverview": {
+    "identityTitle": "Roles and access",
+    "identityDesc": "Each laboratory role has clear responsibilities, from receiving samples to recording tests and reviewing final results.",
+    "fieldTitle": "Field collection",
+    "fieldDesc": "Samples arrive with field identifiers and location notes, linking laboratory work back to where the soil was collected.",
+    "intakeTitle": "Sample intake",
+    "intakeDesc": "The laboratory checks the container, records an illustrative sample mass (such as 485.2 g), and confirms physical arrival.",
+    "benchTitle": "Bench testing",
+    "benchDesc": "Technicians perform tests following the laboratory's configured analytical methods and quality checks, recording measurements like pH.",
+    "textureTitle": "Soil texture",
+    "textureDesc": "Measurements of sand, silt, and clay fractions are checked to ensure their sum closes to 100% for proper soil texture classification.",
+    "reviewTitle": "Quality review",
+    "reviewDesc": "A supervisor or manager reviews the submitted measurements against quality thresholds before authorizing the report.",
+    "finishTitle": "Connected workflow",
+    "finishDesc": "From initial field collection to physical reception, bench analysis, and authorized reports, the platform keeps records connected.",
+    "defaultTitle": "Laboratory overview",
+    "defaultDesc": "A connected record connecting sample arrivals, analytical tasks, and verified reports."
   }
 }

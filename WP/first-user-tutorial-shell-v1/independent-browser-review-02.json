@@ -1,9 +1,9 @@
 {
-  "time": "2026-09-14T10:48:47.912Z",
+  "time": "2026-09-14T11:26:20.914Z",
   "candidate": "7ddf79b",
   "assets": [
-    "/assets/TutorialShell-BYrzxXl2.css",
-    "/assets/TutorialShell-Cg5UzekW.js"
+    "/assets/TutorialShell-chiItfdV.js",
+    "/assets/TutorialShell-D1vt1_Ss.css"
   ],
   "scope": "Built client snapshot, mocked API, blocked external network; no database or production writes",
   "identity": {

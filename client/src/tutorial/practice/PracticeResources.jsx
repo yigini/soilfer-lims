@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function PracticeResources({ onMarkDone, t }) {
-    const [activeResource, setActiveResource] = useState('equipment');
+export default function PracticeResources({ initialResource = 'equipment', onMarkDone, t }) {
+    const [activeResource, setActiveResource] = useState(initialResource);
+
+    useEffect(() => {
+        setActiveResource(initialResource);
+    }, [initialResource]);
 
     const resourceDetails = {
         equipment: {

@@ -68,6 +68,7 @@ export const chapters = [
         copyKey: 'chapters.receipt.copy',
         whyKey: 'chapters.receipt.why',
         nextKey: 'chapters.receipt.next',
+        practiceType: 'receipt',
         resolveRoute: () => '/reception'
     },
     {
@@ -82,6 +83,7 @@ export const chapters = [
         copyKey: 'chapters.assignment.copy',
         whyKey: 'chapters.assignment.why',
         nextKey: 'chapters.assignment.next',
+        practiceType: 'assignment',
         resolveRoute: () => '/manager-queue?lane=assign'
     },
     {
@@ -96,6 +98,7 @@ export const chapters = [
         copyKey: 'chapters.equipment.copy',
         whyKey: 'chapters.equipment.why',
         nextKey: 'chapters.equipment.next',
+        practiceType: 'resources',
         resolveRoute: () => '/equipment'
     },
     {
@@ -110,6 +113,7 @@ export const chapters = [
         copyKey: 'chapters.inventory.copy',
         whyKey: 'chapters.inventory.why',
         nextKey: 'chapters.inventory.next',
+        practiceType: 'resources',
         resolveRoute: () => '/inventory'
     },
     {
@@ -201,7 +205,7 @@ export const chapters = [
         nextKey: 'chapters.trace.next',
         resolveRoute: (ctx) => {
             if (ctx && ctx.selectedSampleId) {
-                return `/samples/${ctx.selectedSampleId}/map`;
+                return `/samples/${encodeURIComponent(ctx.selectedSampleId)}/map`;
             }
             return null;
         }

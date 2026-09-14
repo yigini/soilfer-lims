@@ -108,3 +108,20 @@
     box-shadow: 0 0 0 4px rgba(36, 89, 66, 0.35);
   }
 }
+
+#soilfer-tutorial-overlay .chapter.done i {
+  background: #d1fae5;
+  color: #065f46;
+}
+#soilfer-tutorial-overlay .chapter.skipped i {
+  background: #fef3c7;
+  color: #92400e;
+}
+#soilfer-tutorial-overlay .chapter.unavailable {
+  opacity: 0.55;
+}
+#soilfer-tutorial-overlay .chapter.unavailable i {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
