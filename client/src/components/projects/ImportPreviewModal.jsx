@@ -67,39 +67,72 @@ export default function ImportPreviewModal({
     const MAX_BATCH_ROWS = 2000;
 
     const LOCALIZED_SAMPLE_HEADERS = [
-        'sample id', 'sample_id', 'sampleid', 'sample code', 'sample_code', 'sample', 'id', 'identifier', 'code',
-        'identificador', 'identificador de muestra', 'id_muestra', 'id muestra', 'codigo', 'código', 'muestra', 'código de muestra',
-        'identifiant', 'id_echantillon', 'id echantillon', 'échantillon', 'echantillon', 'code echantillon', 'numéro d’échantillon',
+        'sample id', 'sample_id', 'sampleid', 'sample-id',
+        'sample code', 'sample_code', 'samplecode', 'sample-code',
+        'sample', 'identifier', 'id', 'code',
+        'identificador', 'identificador de muestra', 'identificador_muestra', 'id_muestra', 'id muestra',
+        'codigo', 'código', 'codigo de muestra', 'código de muestra', 'muestra',
+        'identifiant', 'identifiant de l\'échantillon', 'identifiant echantillon', 'id_echantillon', 'id echantillon',
+        'échantillon', 'echantillon', 'code echantillon', 'code échantillon', 'numéro d\'échantillon', 'numero d\'echantillon',
         'amostra', 'id_amostra', 'id amostra', 'código da amostra', 'codigo da amostra', 'identificador da amostra'
     ];
 
     const extractIdsFromColumn = (rows, colIdx, hasHeader) => {
+        if (!rows || rows.length === 0) {
+            return {
+                success: false,
+                error: t('projects.import.emptyFile', 'The selected spreadsheet file is empty.'),
+                ids: []
+            };
+        }
+
         const startRow = hasHeader ? 1 : 0;
         const dataRows = rows.slice(startRow);
 
         if (dataRows.length > MAX_BATCH_ROWS) {
-            setErrorMessage(t('projects.import.tooManyRows', `File contains ${dataRows.length} rows, which exceeds the maximum allowed batch size of ${MAX_BATCH_ROWS} samples.`));
-            return;
+            return {
+                success: false,
+                error: t('projects.import.tooManyRows', `File contains ${dataRows.length} data rows, which exceeds the maximum allowed batch size of ${MAX_BATCH_ROWS} samples.`),
+                ids: []
+            };
         }
 
-        const ids = dataRows
-            .map(r => String(r[colIdx] ?? '').trim())
-            .filter(id => {
-                if (!id) return false;
-                if (hasHeader && LOCALIZED_SAMPLE_HEADERS.includes(id.toLowerCase())) return false;
-                return true;
-            });
+        const ids = [];
+        for (let r = 0; r < dataRows.length; r++) {
+            const val = String(dataRows[r]?.[colIdx] ?? '').trim();
+            if (val) {
+                ids.push(val);
+            }
+        }
 
-        setRawInput(ids.join('\n'));
+        if (ids.length === 0) {
+            return {
+                success: false,
+                error: t('projects.import.noIdsFoundInCol', 'No non-empty sample identifiers found in the selected column.'),
+                ids: []
+            };
+        }
+
+        return {
+            success: true,
+            error: null,
+            ids
+        };
     };
 
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Reset file input element so selecting the same file again triggers change
+        e.target.value = '';
+
         if (file.size > MAX_FILE_SIZE) {
             setErrorMessage(t('projects.import.fileTooLarge', `File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds maximum allowed limit of 5 MB.`));
-            e.target.value = '';
+            setRawInput('');
+            setParsedSheetData(null);
+            setUploadedFileInfo(null);
+            setPreviewResult(null);
             return;
         }
 
@@ -110,39 +143,41 @@ export default function ImportPreviewModal({
                 // raw: false ensures cellText is preserved, maintaining leading zeros in identifiers (e.g. '000124')
                 const wb = XLSX.read(data, { type: 'array', raw: false, cellText: true });
                 const wsname = wb.SheetNames[0];
+                if (!wsname) {
+                    setErrorMessage(t('projects.import.emptyFile', 'The selected spreadsheet file has no sheets.'));
+                    setRawInput('');
+                    setParsedSheetData(null);
+                    setUploadedFileInfo(null);
+                    setPreviewResult(null);
+                    return;
+                }
+
                 const ws = wb.Sheets[wsname];
                 const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
 
                 if (!rows || rows.length === 0) {
                     setErrorMessage(t('projects.import.emptyFile', 'The selected spreadsheet file is empty.'));
+                    setRawInput('');
+                    setParsedSheetData(null);
+                    setUploadedFileInfo(null);
+                    setPreviewResult(null);
                     return;
                 }
 
                 const headerRow = rows[0] || [];
-                let detectedColIdx = 0;
-                let headerDetected = false;
+                const matchingCols = [];
 
-                // Check all columns for exact localized header match
+                // Check all columns for exact canonical localized header match (no destructive fuzzy guessing)
                 for (let c = 0; c < headerRow.length; c++) {
                     const headerText = String(headerRow[c] || '').trim().toLowerCase();
                     if (LOCALIZED_SAMPLE_HEADERS.includes(headerText)) {
-                        detectedColIdx = c;
-                        headerDetected = true;
-                        break;
+                        matchingCols.push(c);
                     }
                 }
 
-                // If not exact match, check fuzzy contains
-                if (!headerDetected && headerRow.length > 0) {
-                    for (let c = 0; c < headerRow.length; c++) {
-                        const headerText = String(headerRow[c] || '').trim().toLowerCase();
-                        if (LOCALIZED_SAMPLE_HEADERS.some(h => headerText.includes(h))) {
-                            detectedColIdx = c;
-                            headerDetected = true;
-                            break;
-                        }
-                    }
-                }
+                const isAmbiguous = matchingCols.length > 1;
+                const headerDetected = matchingCols.length > 0;
+                const detectedColIdx = matchingCols.length > 0 ? matchingCols[0] : 0;
 
                 // Compute column descriptors for dropdown
                 const columns = headerRow.map((colName, idx) => {
@@ -155,19 +190,37 @@ export default function ImportPreviewModal({
                     };
                 });
 
+                // Extract IDs
+                const extractRes = extractIdsFromColumn(rows, detectedColIdx, headerDetected);
+
+                if (!extractRes.success) {
+                    // Explicit failure: invalidate prior file & raw IDs, retain error
+                    setErrorMessage(extractRes.error);
+                    setRawInput('');
+                    setParsedSheetData(null);
+                    setUploadedFileInfo(null);
+                    setPreviewResult(null);
+                    return;
+                }
+
                 setParsedSheetData(rows);
                 setUploadedFileInfo({
                     fileName: file.name,
                     columns,
                     selectedColIdx: detectedColIdx,
-                    hasHeader: headerDetected
+                    hasHeader: headerDetected,
+                    isAmbiguous,
+                    confirmed: !isAmbiguous
                 });
-
-                extractIdsFromColumn(rows, detectedColIdx, headerDetected);
+                setRawInput(extractRes.ids.join('\n'));
                 setPreviewResult(null);
                 setErrorMessage('');
             } catch (err) {
                 setErrorMessage(t('projects.import.readError', 'Failed to read spreadsheet file: ' + err.message));
+                setRawInput('');
+                setParsedSheetData(null);
+                setUploadedFileInfo(null);
+                setPreviewResult(null);
             }
         };
         reader.readAsArrayBuffer(file);
@@ -176,13 +229,42 @@ export default function ImportPreviewModal({
     const handleColumnChange = (newColIdx) => {
         if (!parsedSheetData || !uploadedFileInfo) return;
         const colIdx = parseInt(newColIdx, 10);
-        setUploadedFileInfo(prev => ({ ...prev, selectedColIdx: colIdx }));
-        extractIdsFromColumn(parsedSheetData, colIdx, uploadedFileInfo.hasHeader);
+        const extractRes = extractIdsFromColumn(parsedSheetData, colIdx, uploadedFileInfo.hasHeader);
+        if (!extractRes.success) {
+            setErrorMessage(extractRes.error);
+            setRawInput('');
+            setPreviewResult(null);
+            setUploadedFileInfo(prev => ({ ...prev, selectedColIdx: colIdx, isAmbiguous: false, confirmed: true }));
+            return;
+        }
+        setUploadedFileInfo(prev => ({ ...prev, selectedColIdx: colIdx, isAmbiguous: false, confirmed: true }));
+        setRawInput(extractRes.ids.join('\n'));
+        setPreviewResult(null);
+        setErrorMessage('');
+    };
+
+    const handleHeaderToggle = (newHasHeader) => {
+        if (!parsedSheetData || !uploadedFileInfo) return;
+        const extractRes = extractIdsFromColumn(parsedSheetData, uploadedFileInfo.selectedColIdx, newHasHeader);
+        if (!extractRes.success) {
+            setErrorMessage(extractRes.error);
+            setRawInput('');
+            setPreviewResult(null);
+            setUploadedFileInfo(prev => ({ ...prev, hasHeader: newHasHeader }));
+            return;
+        }
+        setUploadedFileInfo(prev => ({ ...prev, hasHeader: newHasHeader }));
+        setRawInput(extractRes.ids.join('\n'));
         setPreviewResult(null);
         setErrorMessage('');
     };
 
     const handleRunPreview = async () => {
+        if (uploadedFileInfo?.isAmbiguous && !uploadedFileInfo?.confirmed) {
+            setErrorMessage(t('projects.import.confirmColumnRequired', 'Multiple potential identifier columns detected. Please confirm the correct column before running preview.'));
+            return;
+        }
+
         const lines = rawInput
             .split(/\r?\n/)
             .map(l => l.trim())
@@ -417,7 +499,7 @@ export default function ImportPreviewModal({
                         </div>
 
                         {uploadedFileInfo && (
-                            <div className="p-3 rounded-xl border border-sf-border bg-sf-inset space-y-2">
+                            <div className="p-3 rounded-xl border border-sf-border bg-sf-inset space-y-2.5">
                                 <div className="flex items-center justify-between text-xs">
                                     <div className="flex items-center gap-2 font-medium text-sf-text">
                                         <FileSpreadsheet className="w-4 h-4 text-sf-primary shrink-0" />
@@ -435,24 +517,55 @@ export default function ImportPreviewModal({
                                         {t('common.clear', 'Clear file')}
                                     </button>
                                 </div>
-                                {uploadedFileInfo.columns.length > 1 && (
-                                    <div className="flex items-center gap-2 text-xs pt-1 border-t border-sf-divider">
-                                        <label className="text-sf-muted whitespace-nowrap text-[11px]">
-                                            {t('projects.import.columnSelect', 'Sample ID column:')}
-                                        </label>
-                                        <select
-                                            value={uploadedFileInfo.selectedColIdx}
-                                            onChange={(e) => handleColumnChange(e.target.value)}
-                                            className="w-full text-xs rounded-lg border border-sf-border bg-sf-surface p-1 text-sf-text focus:ring-1 focus:ring-sf-primary focus:outline-none"
-                                        >
-                                            {uploadedFileInfo.columns.map(col => (
-                                                <option key={col.index} value={col.index}>
-                                                    {col.label}
-                                                </option>
-                                            ))}
-                                        </select>
+
+                                {uploadedFileInfo.isAmbiguous && !uploadedFileInfo.confirmed && (
+                                    <div className="p-2.5 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                            <span className="font-semibold">{t('projects.import.ambiguousColsWarning', 'Multiple potential identifier columns detected. Please confirm the correct column.')}</span>
+                                        </div>
+                                        <div className="flex justify-end pt-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setUploadedFileInfo(prev => ({ ...prev, isAmbiguous: false, confirmed: true }))}
+                                                className="px-2.5 py-1 text-xs font-semibold rounded bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                                            >
+                                                {t('projects.import.confirmColumnBtn', 'Confirm selected column')}
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
+
+                                <div className="space-y-2 pt-1 border-t border-sf-divider">
+                                    {uploadedFileInfo.columns.length > 1 && (
+                                        <div className="flex items-center gap-2 text-xs">
+                                            <label className="text-sf-muted whitespace-nowrap text-[11px]">
+                                                {t('projects.import.columnSelect', 'Sample ID column:')}
+                                            </label>
+                                            <select
+                                                value={uploadedFileInfo.selectedColIdx}
+                                                onChange={(e) => handleColumnChange(e.target.value)}
+                                                className="w-full text-xs rounded-lg border border-sf-border bg-sf-surface p-1 text-sf-text focus:ring-1 focus:ring-sf-primary focus:outline-none"
+                                            >
+                                                {uploadedFileInfo.columns.map(col => (
+                                                    <option key={col.index} value={col.index}>
+                                                        {col.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <label className="flex items-center gap-2 text-xs font-semibold text-sf-text cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={uploadedFileInfo.hasHeader}
+                                            onChange={(e) => handleHeaderToggle(e.target.checked)}
+                                            className="rounded border-sf-border text-sf-primary focus:ring-sf-primary"
+                                        />
+                                        <span>{t('projects.import.fileHasHeader', 'File includes header row (skip row 1)')}</span>
+                                    </label>
+                                </div>
                             </div>
                         )}
 
@@ -477,7 +590,7 @@ export default function ImportPreviewModal({
                             </button>
                             <button
                                 onClick={handleRunPreview}
-                                disabled={loading || !rawInput.trim()}
+                                disabled={loading || !rawInput.trim() || (uploadedFileInfo?.isAmbiguous && !uploadedFileInfo?.confirmed)}
                                 className="btn-primary text-xs"
                             >
                                 {loading ? t('common.loading', 'Validating…') : t('projects.import.runValidation', 'Run preview validation →')}

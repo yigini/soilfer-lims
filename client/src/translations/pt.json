@@ -600,7 +600,11 @@
       "reasonForChange": "Motivo da alteração de membros (obrigatório)",
       "labAccessPlaceholder": "ex.: Atribuição de atendimento regional autorizada para a Fase 2…",
       "retrySave": "Tentar salvar novamente",
-      "saveLabAccessBtn": "Salvar acesso ao laboratório"
+      "saveLabAccessBtn": "Salvar acesso ao laboratório",
+      "loadingLabAccess": "Carregando diretório de acesso aos laboratórios…",
+      "loadFailedTitle": "Falha ao carregar o acesso aos laboratórios",
+      "goToWorkbench": "Abrir Bancada Técnica para concluir ou transferir trabalho",
+      "notReadyToSaveAccess": "O diretório de acesso aos laboratórios deve ser carregado e autorizado antes de salvar as alterações."
     },
     "viewDetails": "Ver Detalhes",
     "viewSamples": "Ver Amostras",
@@ -875,7 +879,12 @@
       "unresolvedTitle": "Tentativa de registro anterior não confirmada",
       "unresolvedDesc": "Uma tentativa anterior de registro de manifesto pode ter sido processada pelo servidor antes da interrupção da conexão.",
       "columnSelect": "Coluna de ID da amostra:",
-      "retryRegistration": "Tentando registro novamente…"
+      "retryRegistration": "Tentando registro novamente…",
+      "noIdsFoundInCol": "Nenhum identificador de amostra não vazio encontrado na coluna selecionada.",
+      "ambiguousColsWarning": "Várias colunas de identificadores potenciais detectadas. Confirme a coluna correta.",
+      "fileHasHeader": "O arquivo inclui linha de cabeçalho (ignorar linha 1)",
+      "confirmColumnBtn": "Confirmar coluna selecionada",
+      "confirmColumnRequired": "Várias colunas de identificadores potenciais detectadas. Confirme a coluna correta antes de executar a pré-visualização."
     },
     "create": {
       "modalTitle": "Create new project",

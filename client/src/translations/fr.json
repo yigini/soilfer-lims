@@ -600,7 +600,11 @@
       "reasonForChange": "Motif du changement d'accès (obligatoire)",
       "labAccessPlaceholder": "ex. Affectation régionale autorisée pour l'admission Phase 2…",
       "retrySave": "Réessayer d'enregistrer",
-      "saveLabAccessBtn": "Enregistrer l'accès au laboratoire"
+      "saveLabAccessBtn": "Enregistrer l'accès au laboratoire",
+      "loadingLabAccess": "Chargement du répertoire d'accès au laboratoire…",
+      "loadFailedTitle": "Échec du chargement de l'accès au laboratoire",
+      "goToWorkbench": "Ouvrir l'établi technique pour terminer ou transférer les travaux",
+      "notReadyToSaveAccess": "Le répertoire d'accès au laboratoire doit être chargé et autorisé avant d'enregistrer les modifications."
     },
     "viewDetails": "Voir les Détails",
     "viewSamples": "Voir les Échantillons",
@@ -875,7 +879,12 @@
       "unresolvedTitle": "Tentative d'enregistrement précédente non confirmée",
       "unresolvedDesc": "Une tentative d'enregistrement de manifeste précédente a peut-être été traitée par le serveur avant l'interruption de la connexion.",
       "columnSelect": "Colonne des identifiants d'échantillons :",
-      "retryRegistration": "Nouvelle tentative d'enregistrement…"
+      "retryRegistration": "Nouvelle tentative d'enregistrement…",
+      "noIdsFoundInCol": "Aucun identifiant d'échantillon non vide trouvé dans la colonne sélectionnée.",
+      "ambiguousColsWarning": "Plusieurs colonnes d'identifiants potentielles détectées. Veuillez confirmer la colonne appropriée.",
+      "fileHasHeader": "Le fichier inclut une ligne d'en-tête (ignorer la ligne 1)",
+      "confirmColumnBtn": "Confirmer la colonne sélectionnée",
+      "confirmColumnRequired": "Plusieurs colonnes d'identifiants potentielles détectées. Veuillez confirmer la colonne appropriée avant d'exécuter l'aperçu."
     },
     "create": {
       "modalTitle": "Create new project",

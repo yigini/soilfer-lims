@@ -313,6 +313,10 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         throw err;
     }
 
+    const currentRelations = await resolveProjectLabs(project, tx);
+    const removedLabs = currentRelations.servicingLabIds.filter(id => !servicingLabIds.includes(id));
+    const addedLabs = servicingLabIds.filter(id => !currentRelations.servicingLabIds.includes(id));
+
     // Verify all target labs exist and are active
     if (servicingLabIds.length > 0) {
         const existingLabs = await tx.lab.findMany({
@@ -327,18 +331,15 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
             err.code = 'LAB_NOT_FOUND';
             throw err;
         }
-        const inactiveLabs = existingLabs.filter(l => !l.isActive).map(l => l.id);
-        if (inactiveLabs.length > 0) {
-            const err = new Error(`Cannot assign inactive laboratories to servicing membership: ${inactiveLabs.join(', ')}`);
+        // Only added labs cannot be inactive (existing inactive memberships are preserved historically until removed)
+        const newlyAddedInactive = existingLabs.filter(l => !l.isActive && addedLabs.includes(l.id)).map(l => l.id);
+        if (newlyAddedInactive.length > 0) {
+            const err = new Error(`Cannot assign inactive laboratories to servicing membership: ${newlyAddedInactive.join(', ')}`);
             err.statusCode = 400;
             err.code = 'INACTIVE_LAB_NOT_ALLOWED';
             throw err;
         }
     }
-
-    const currentRelations = await resolveProjectLabs(project, tx);
-    const removedLabs = currentRelations.servicingLabIds.filter(id => !servicingLabIds.includes(id));
-    const addedLabs = servicingLabIds.filter(id => !currentRelations.servicingLabIds.includes(id));
 
     // Blocker: Cannot remove a servicing laboratory with active or unfinished samples / work
     if (removedLabs.length > 0) {
@@ -384,6 +385,11 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
             const err = new Error(`Cannot remove servicing laboratory with outstanding work (${activeCount} active sample(s), ${activeWorkItems} active work item(s)). Complete or transfer samples before removing laboratory access.`);
             err.statusCode = 400;
             err.code = 'CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK';
+            err.details = {
+                activeSamples: activeCount,
+                activeWorkItems: activeWorkItems,
+                removedLabs: removedLabs
+            };
             throw err;
         }
     }

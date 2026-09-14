@@ -600,7 +600,11 @@
       "reasonForChange": "Motivo del cambio de membresía (obligatorio)",
       "labAccessPlaceholder": "p. ej., Asignación de servicio regional autorizada para la entrada de Fase 2…",
       "retrySave": "Reintentar guardar",
-      "saveLabAccessBtn": "Guardar acceso de laboratorios"
+      "saveLabAccessBtn": "Guardar acceso de laboratorios",
+      "loadingLabAccess": "Cargando directorio de acceso a laboratorios…",
+      "loadFailedTitle": "Error al cargar el acceso a laboratorios",
+      "goToWorkbench": "Abrir Banco de Trabajo Técnico para completar o transferir trabajo",
+      "notReadyToSaveAccess": "El directorio de acceso a laboratorios debe estar cargado y autorizado antes de guardar cambios."
     },
     "viewDetails": "Ver Detalles",
     "viewSamples": "Ver Muestras",
@@ -875,7 +879,12 @@
       "unresolvedTitle": "Intento de registro anterior no confirmado",
       "unresolvedDesc": "Es posible que el servidor haya procesado un intento de registro de manifiesto anterior antes de que se interrumpiera la conexión.",
       "columnSelect": "Columna de ID de muestra:",
-      "retryRegistration": "Reintentando registro…"
+      "retryRegistration": "Reintentando registro…",
+      "noIdsFoundInCol": "No se encontraron identificadores de muestra no vacíos en la columna seleccionada.",
+      "ambiguousColsWarning": "Se detectaron múltiples columnas potenciales de identificadores. Por favor confirme la columna correcta.",
+      "fileHasHeader": "El archivo incluye fila de encabezado (omitir fila 1)",
+      "confirmColumnBtn": "Confirmar columna seleccionada",
+      "confirmColumnRequired": "Se detectaron múltiples columnas potenciales de identificadores. Por favor confirme la columna correcta antes de ejecutar la vista previa."
     },
     "create": {
       "modalTitle": "Crear nuevo proyecto",

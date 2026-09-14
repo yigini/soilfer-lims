@@ -600,7 +600,11 @@
       "reasonForChange": "Reason for membership change (required)",
       "labAccessPlaceholder": "e.g. Authorized regional servicing assignment for Phase 2 intake…",
       "retrySave": "Retry save",
-      "saveLabAccessBtn": "Save laboratory access"
+      "saveLabAccessBtn": "Save laboratory access",
+      "loadingLabAccess": "Loading laboratory access directory…",
+      "loadFailedTitle": "Failed to load laboratory access",
+      "goToWorkbench": "Open Tech Workbench to complete or transfer work",
+      "notReadyToSaveAccess": "Laboratory access directory must be loaded and authorized before saving changes."
     },
     "viewDetails": "View Details",
     "viewSamples": "View Samples",
@@ -875,7 +879,12 @@
       "unresolvedTitle": "Unconfirmed previous registration attempt",
       "unresolvedDesc": "A previous manifest registration attempt may have been processed by the server before the connection was interrupted.",
       "columnSelect": "Sample ID column:",
-      "retryRegistration": "Retrying registration…"
+      "retryRegistration": "Retrying registration…",
+      "noIdsFoundInCol": "No non-empty sample identifiers found in the selected column.",
+      "ambiguousColsWarning": "Multiple potential identifier columns detected. Please confirm the correct column.",
+      "fileHasHeader": "File includes header row (skip row 1)",
+      "confirmColumnBtn": "Confirm selected column",
+      "confirmColumnRequired": "Multiple potential identifier columns detected. Please confirm the correct column before running preview."
     },
     "create": {
       "modalTitle": "Create new project",

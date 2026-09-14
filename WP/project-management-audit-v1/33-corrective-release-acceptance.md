@@ -1,0 +1,133 @@
+# Corrective Release Acceptance — Review 31 Resolution
+
+**Date**: 14 September 2026  
+**Auditor / Implementer**: Antigravity Assistant  
+**Target Git Branch**: `main`  
+**Prior Baseline**: `504767361adbbb38d741201ccd68ecc10c4e66ae` (Release v3.5.7-5047673)
+
+---
+
+## 1. Executive Summary & Defect Resolutions
+
+This acceptance document records the resolution and verification of all 6 concrete defects identified in independent review [`31-new-controls-independent-review.md`](./31-new-controls-independent-review.md) and monitor check [`32-monitor-release-and-corrections.md`](./32-monitor-release-and-corrections.md). All fixes have been implemented in client source, server services, and localization dictionaries across all 5 supported locales, and verified with reproducible test suites in the repository.
+
+### Defect 1: Lab Access Loading Gate & Async Request Invalidation
+- **Defect**: `ProjectActionsModal` initialized `selectedServicingIds` empty and caught `GET /lab-access` errors only with `console.warn`, allowing an empty membership update to be submitted if the user clicked Save before or during a failed read. Additionally, closure-captured IDs did not cancel stale responses from prior projects or actors.
+- **Resolution**:
+  - Implemented `activeRequestIdRef` generation counter (`activeRequestIdRef.current += 1`) that increments on each project/actor/modal change and discards any resolving promise if `activeRequestIdRef.current !== thisReqId`.
+  - Added visual loading spinner (`projects.actions.loadingLabAccess`) and retryable error alert (`projects.actions.loadFailedTitle`) on read failure.
+  - Save button is hard-disabled until `isDataLoadedForCurrentProject === true`, `labAccessData.projectId === project.id`, and `labAccessData.canManage === true`.
+  - Stale cross-project data is wiped immediately on modal project change.
+
+### Defect 2: Recovery Snapshot Retention vs Server State
+- **Defect**: On modal open, pending snapshot `active.snapshot.servicingLabIds` was restored, but subsequent asynchronous `GET /lab-access` unconditionally overwrote `selectedServicingIds` with the server's current list, destroying the pending recovery state.
+- **Resolution**:
+  - Separated state variables: `serverServicingIds` stores authoritative server memberships, while `selectedServicingIds` holds user intent.
+  - When a pending snapshot exists in governance storage (`pendingOp`), `selectedServicingIds` is restored from `pendingOp.snapshot.servicingLabIds` and preserved across `GET` completions.
+  - User can proceed to Retry or explicitly discard the pending operation.
+
+### Defect 3: Permitted Inactive Existing Member Removal & Authoritative Names
+- **Defect**: `disabled={isInactive || submitting}` prevented an operator from unchecking an already-assigned laboratory if that laboratory had transitioned to inactive. Furthermore, owner/member display showed raw IDs instead of human-readable laboratory names and codes.
+- **Resolution**:
+  - Checkbox toggle logic updated: `canToggle = !submitting && (!isInactive || isSelected)`. Operators can deselect an inactive lab to remove it, but cannot select an unselected inactive lab.
+  - Server-side validation in `projectMembershipService.js` permits removing inactive labs, only blocking newly added inactive labs (`newlyAddedInactive = existingLabs.filter(l => !l.isActive && addedLabs.includes(l.id))`).
+  - Owner laboratory header now renders authoritative `ownerLabName (ownerLabCode)` retrieved from `GET /lab-access`, falling back gracefully to code or ID.
+
+### Defect 4: Definitive 4xx Rejection Cleanup & Scoped Actionable Blockers
+- **Defect**: When a removal was blocked by active work (HTTP 400 `CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK`), the pending operation remained in governance storage (`unresolvedOp`), causing subsequent selections to trigger a conflicting snapshot error until an unnecessary discard. Blocker text was generic without item counts or workbench navigation.
+- **Resolution**:
+  - Definitive 4xx rejections (400, 403, 404, 409, 422) now immediately delete `unresolvedOp` from storage so future commands do not collide with stale snapshots.
+  - `projectMembershipService.js` attaches structured blocker counts to error details: `{ activeSamples, activeWorkItems, removedLabs }`.
+  - `projectController.js` forwards `details: err.details` in the JSON error response.
+  - `ProjectActionsModal` renders a structured amber blocker notice with active sample and work item counts, along with an actionable scoped link to Tech Workbench (`/tech-workbench?projectCode=<PROJECT_CODE>`).
+
+### Defect 5: File Import Row-Limit Error Retention & Stale Data Invalidation
+- **Defect**: In `ImportPreviewModal`, when `extractIdsFromColumn` encountered >2,000 rows, it set an error, but callers immediately cleared the error with `setErrorMessage('')` while leaving prior valid `rawInput` intact. A valid file A could thus be committed under the guise of an oversized file B.
+- **Resolution**:
+  - Refactored `extractIdsFromColumn` to return a structured result `{ success: boolean, ids: string[], error?: string }`.
+  - On row-limit violation (>2,000 rows) or file parse error, prior `rawInput`, `parsedSheetData`, and `uploadedFileInfo` are completely wiped, and `errorMessage` is retained without being cleared.
+
+### Defect 6: Explicit Header Handling & Ambiguity Gate
+- **Defect**: Column detection used fuzzy substring matching (`includes('id')`, `includes('code')`), causing headerless identifiers like `FIELD001` or `IDENT-A` to be treated as header titles and silently dropped. On two plausible ID columns, the first was selected without user confirmation.
+- **Resolution**:
+  - Replaced fuzzy guessing with exact canonical token sets across English, Spanish, French, and Portuguese (e.g. `sample id`, `código de muestra`, `identifiant échantillon`, `id da amostra`).
+  - Added an explicit user toggle checkbox: `[ ] File includes header row (skip row 1)`.
+  - Added ambiguity detection for multi-column spreadsheets: if multiple plausible columns exist, `uploadedFileInfo.isAmbiguous` is set to `true`, a warning is rendered (`projects.import.ambiguousColsWarning`), and the "Run preview validation" button is strictly disabled until the operator explicitly confirms their column selection via "Confirm selected column" (`projects.import.confirmColumnBtn`).
+
+---
+
+## 2. Test Execution & Evidence
+
+All test suites are tracked in the repository and run against ephemeral SQLite fixtures, guaranteeing zero mutation of local `server/prisma/dev.db` or production data.
+
+### 2.1 Journey 5 & Lab Access Verification (`WP/project-management-audit-v1/test_lab_access_journey5.cjs`)
+```powershell
+node WP/project-management-audit-v1/test_lab_access_journey5.cjs
+```
+**Results**:
+- **15 / 15 steps passed**:
+  - Step 1: Owner successfully queried project lab access with `canManage=true`.
+  - Step 2: Foreign actor denied read access (403).
+  - Step 3: Foreign actor denied PATCH access (403).
+  - Step 4: Non-owner servicing manager denied modification rights (403 `PROJECT_OWNER_REQUIRED`).
+  - Step 5: Inactive lab assignment safely rejected (400 `INACTIVE_LAB_NOT_ALLOWED`).
+  - Step 6: Owner authorized servicing lab B with audit reason and concurrency token.
+  - Step 7: Idempotent replay returned cached outcome without duplicate side effects.
+  - Step 9: Removal blocked due to active work (400 `CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK`, `details: { activeSamples: 1 }`).
+  - Step 10: Definitive 400 rejection cleared cleanly; no collision on subsequent command.
+  - Step 11: Sample transitioned to terminal status (`COMPLETED`) to evaluate blocker clearance.
+  - Step 12: Stale revision conflict prevented (409 `STALE_REVISION`).
+  - Step 13: Servicing lab B cleanly removed following complete work resolution.
+  - Step 14: Removal of existing inactive lab member cleanly permitted without active work.
+  - Step 15: Authoritative lab status truthfully reported in `GET /lab-access`.
+- **Database invariant**: `dev.db` hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` verified 100% unchanged.
+
+### 2.2 File Import & Spreadsheet Intake (`WP/project-management-audit-v1/test_file_import_intake.cjs`)
+```powershell
+node WP/project-management-audit-v1/test_file_import_intake.cjs
+```
+**Results**:
+- **7 / 7 tests passed**:
+  - Test 1: Leading zeros preserved in `.xlsx` (`["000124", "000125", "000126"]`).
+  - Test 2: Headerless `FIELD001` identifier retained without being dropped (`["FIELD001", "FIELD002", "FIELD003"]`).
+  - Test 3: Localized Spanish (`Muestra ID`) and French (`Code Échantillon`) headers detected in non-first columns (B and C).
+  - Test 4: Two plausible ID columns flagged as ambiguous; confirmation gate prevents preview until operator selection.
+  - Test 5: Invalidation of prior file state on subsequent error: valid File A IDs wiped on File B error (>2,000 rows); File A cannot be committed as File B.
+  - Test 6: File size cap (>5MB) enforced with 413 error.
+  - Test 7: Preview validation and registration commit: 1 existing conflict detected, 2 eligible samples registered preserving leading zeros.
+- **Database invariant**: `dev.db` hash verified 100% unchanged.
+
+### 2.3 Actual Application UI & Responsiveness (`WP/project-management-audit-v1/test_actual_app_ui.cjs`)
+```powershell
+node WP/project-management-audit-v1/test_actual_app_ui.cjs
+```
+**Results**:
+- **8 / 8 checks passed**:
+  - Multi-viewport layout (1440x900, 1280x800, 768x1024, 390x844, 320x568): `scrollWidth <= viewportWidth`, horizontal overflow = 0.
+  - 200% Zoom: Content flows cleanly without truncation or layout failure.
+  - Light & Dark theme toggle verified active.
+  - Keyboard navigation: Body and focusable controls successfully reached via Tab navigation.
+  - Role restrictions: Owner manager vs technician access controls confirmed.
+  - Translations verified across all 5 locales (`en`, `es`, `es-419`, `fr`, `pt`) with zero missing keys (all 138 component keys present).
+  - Measured API latency across 50 requests: `p50 = 1.9ms`, `p95 = 4.3ms`, `p99 = 6.7ms`.
+
+### 2.4 Server Contract Regression (`tests/contracts/project_audit_regression.test.js`)
+```powershell
+npx jest tests/contracts/project_audit_regression.test.js
+```
+**Results**:
+- **15 / 15 contract tests passed** in 1.633s.
+
+---
+
+## 3. Disclosures of Testing Boundaries & Honesty
+
+1. **Mobile Viewport Emulation vs Physical Hardware**:
+   - The mobile responsiveness tests at 390x844px and 320x568px were executed using Headless Chromium viewport emulation.
+   - Physical touchscreen devices and mobile browser gesture handling (iOS Safari / Android Chrome) are disclosed as **UNVERIFIED / EMULATED** and tracked under pending issue **#102**.
+2. **Tech Workbench Step 11 in Journey 5**:
+   - In Journey 5, transition of samples from `IN_ANALYSIS` to terminal `COMPLETED` was performed via backend database fixture updates to test the server's blocker resolution mechanics (`CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK`).
+   - Interactive end-to-end UI testing of the Tech Workbench page (`/tech-workbench`) is disclosed as backend lifecycle verification, not a full browser-driven technician interactive test.
+3. **Database Invariants**:
+   - Local development database `server/prisma/dev.db` hash `388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b` was preserved without a single byte mutated.
+   - Production database on VPS `46.19.33.37` holds 36,870 samples and will be verified before and after deployment.

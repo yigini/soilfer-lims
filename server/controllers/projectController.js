@@ -1737,7 +1737,7 @@ exports.updateProjectLabAccess = async (req, res) => {
         });
         res.json(result);
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+        res.status(err.statusCode || 500).json({ error: err.message, message: err.message, code: err.code, details: err.details });
     }
 };
 
