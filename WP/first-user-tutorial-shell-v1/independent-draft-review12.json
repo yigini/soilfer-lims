@@ -1,17 +1,17 @@
 {
-  "time": "2026-09-14T14:07:41.022Z",
+  "time": "2026-09-14T14:25:03.421Z",
   "scope": "Frozen current local client/dist; all API requests mocked; no backend, database or production access. Synthetic technician authentication verifies client behavior only.",
-  "sourceHead": "be9309384050f9f6b940c8e41f6a89258fceb050",
-  "sourceShellSha256": "16a47a7449bec361cb3a92a6d459179143ab2adb0bcf8b8baaadd50caba8a0a1",
-  "indexSha256": "9eda24d610304927821ebe530fdeb2b8096b9e3311b8112225f451189b267a83",
+  "sourceHead": "76a63b5af7cff0f202150a1037278de4e95027e5",
+  "sourceShellSha256": "9c5564913eefeaadcea5baef3a8c327b739b1a5e5ef89317e5ca0ab4af02bea5",
+  "indexSha256": "b65439e30e00f2bbd385edddb86f451d378769440d51746cc48b9cad89753344",
   "assets": [
     {
-      "path": "/assets/TutorialShell-BXQUMQ6w.css",
-      "sha256": "641d60ad90ef27a4cebce1e563209601f6aeae949d853e9ff0dce0255e53af36"
+      "path": "/assets/TutorialShell-BSpGr4x-.css",
+      "sha256": "d1a6cc7519e7a6cca274e74655bb7e82b6587d52b883d350f8bfb01c56bfa8ee"
     },
     {
-      "path": "/assets/TutorialShell-ZKJdI3SM.js",
-      "sha256": "8c9df3c5db2562581aa374fa86facbc463045284629cf62087f73fe3da966eff"
+      "path": "/assets/TutorialShell-Dw7KOo2o.js",
+      "sha256": "99ba58ee761a7da5d549d96272f8f63a2d6f838d3dd50d2fea31fb9796f32c49"
     }
   ],
   "errors": [],
@@ -58,7 +58,7 @@
     "afterInputChangeBeforeResponse": {
       "url": "/workbench?tutorialmode=true&tour=first-visit",
       "guideCount": 1,
-      "session": "{\"active\":true,\"step\":13,\"introStage\":3,\"path\":\"full\",\"roleChoice\":\"technician\",\"sampleTube\":1,\"viewed\":[],\"practiced\":[],\"done\":[],\"skipped\":[],\"paused\":false,\"language\":\"en\",\"practiceByTube\":{\"1\":{\"intakeMass\":\"485.2\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"6.85\",\"benchStatusCode\":\"initial\",\"texture\":[35,35,30],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"2\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"3\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"4\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"5\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false}},\"f03Search\":\"\",\"f03Filter\":\"all\",\"f03SelectedId\":null,\"equipmentStatus\":\"ready\",\"inventoryLot\":\"LOT-2026-08\",\"timestamp\":1789394861579,\"lastActivityAt\":1789394862995}"
+      "session": "{\"active\":true,\"step\":13,\"introStage\":3,\"path\":\"full\",\"roleChoice\":\"technician\",\"sampleTube\":1,\"viewed\":[],\"practiced\":[],\"done\":[],\"skipped\":[],\"paused\":false,\"language\":\"en\",\"practiceByTube\":{\"1\":{\"intakeMass\":\"485.2\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"6.85\",\"benchStatusCode\":\"initial\",\"texture\":[35,35,30],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"2\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"3\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"4\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"5\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false}},\"f03Search\":\"\",\"f03Filter\":\"all\",\"f03SelectedId\":null,\"equipmentStatus\":\"ready\",\"inventoryLot\":\"LOT-2026-08\",\"timestamp\":1789395903997,\"lastActivityAt\":1789395905351}"
     },
     "afterLateResponse": {
       "url": "/workbench?tutorialmode=true&tour=first-visit",

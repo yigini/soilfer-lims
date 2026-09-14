@@ -1,0 +1,76 @@
+{
+  "time": "2026-09-14T14:25:20.668Z",
+  "scope": "Frozen current local client/dist; all API requests mocked; no backend, database or production access. Synthetic technician authentication verifies client behavior only.",
+  "sourceHead": "76a63b5af7cff0f202150a1037278de4e95027e5",
+  "sourceShellSha256": "9c5564913eefeaadcea5baef3a8c327b739b1a5e5ef89317e5ca0ab4af02bea5",
+  "indexSha256": "b65439e30e00f2bbd385edddb86f451d378769440d51746cc48b9cad89753344",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-BSpGr4x-.css",
+      "sha256": "d1a6cc7519e7a6cca274e74655bb7e82b6587d52b883d350f8bfb01c56bfa8ee"
+    },
+    {
+      "path": "/assets/TutorialShell-Dw7KOo2o.js",
+      "sha256": "99ba58ee761a7da5d549d96272f8f63a2d6f838d3dd50d2fea31fb9796f32c49"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2"
+  ],
+  "apiReads": [
+    "/api/public/i18n/bootstrap",
+    "/api/admin/settings",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/config/analyses",
+    "/api/auth/me",
+    "/api/workbench/queue",
+    "/api/workbench/v2/receipts",
+    "/api/auth/me",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/samples/TEST-SAMPLE/detail",
+    "/api/samples/TEST-SAMPLE/detail",
+    "/api/samples/TEST-SAMPLE/map-state"
+  ],
+  "checks": {
+    "before": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "title": "A result with a history.",
+      "authIdentity": "map-exit-synthetic-tech"
+    },
+    "initialControlledInput": {
+      "value": "initial acknowledged input",
+      "outsideTutorial": true
+    },
+    "initialConfirmation": {
+      "dialog": 1,
+      "lookupStarted": false
+    },
+    "pending": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "detailHeld": true
+    },
+    "unchangedControlledInput": {
+      "value": "initial acknowledged input",
+      "dialog": 0
+    },
+    "beforeResponse": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "guideCount": 1,
+      "session": "{\"active\":true,\"step\":13,\"introStage\":3,\"path\":\"full\",\"roleChoice\":\"technician\",\"sampleTube\":1,\"viewed\":[],\"practiced\":[],\"done\":[],\"skipped\":[],\"paused\":false,\"language\":\"en\",\"practiceByTube\":{\"1\":{\"intakeMass\":\"485.2\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"6.85\",\"benchStatusCode\":\"initial\",\"texture\":[35,35,30],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"2\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"3\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"4\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false},\"5\":{\"intakeMass\":\"\",\"condition\":\"intact\",\"intakeStatusCode\":\"initial\",\"receiptStatusCode\":\"initial\",\"assignmentStatusCode\":\"initial\",\"assignmentAssignee\":\"techA\",\"checks\":[false,false,false],\"prepVerified\":false,\"benchValue\":\"\",\"benchStatusCode\":\"initial\",\"texture\":[\"\",\"\",\"\"],\"spectrumLoaded\":false,\"reviewReason\":\"\",\"reviewSubmitted\":false}},\"f03Search\":\"\",\"f03Filter\":\"all\",\"f03SelectedId\":null,\"equipmentStatus\":\"ready\",\"inventoryLot\":\"LOT-2026-08\",\"timestamp\":1789395921173,\"lastActivityAt\":1789395922521}"
+    },
+    "afterLateResponse": {
+      "url": "/samples/TEST-SAMPLE/map?tutorialmode=true",
+      "guideCount": 0,
+      "session": true,
+      "dialog": 0,
+      "liveInputRemaining": 0
+    }
+  },
+  "passed": true,
+  "expected": "An unchanged confirmed input must navigate once after the lookup without another confirmation.",
+  "limitation": "Real Activity Receipts search control demonstrates the global draft guard behavior. It is not a numeric result editor; no clinical/laboratory draft loss or server persistence was tested."
+}

@@ -69,12 +69,20 @@
 }
 
 @media (max-width: 600px) {
-  #soilfer-tutorial-overlay.docked {
+  #soilfer-tutorial-overlay.docked,
+  #soilfer-tutorial-overlay.docked.on-login {
     left: 10px !important;
     right: 10px !important;
     bottom: 10px !important;
+    top: auto !important;
+    inset: auto 10px 10px 10px !important;
     width: auto !important;
     max-width: calc(100vw - 20px) !important;
+    max-height: 85vh !important;
+  }
+
+  #soilfer-tutorial-overlay.docked .coach {
+    width: 100% !important;
     max-height: 85vh !important;
   }
 
@@ -97,6 +105,17 @@
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
+  }
+}
+
+@media (max-height: 600px) {
+  #soilfer-tutorial-overlay.docked,
+  #soilfer-tutorial-overlay.docked.on-login {
+    max-height: calc(100vh - 30px) !important;
+    bottom: 10px !important;
+  }
+  #soilfer-tutorial-overlay.docked .coach {
+    max-height: calc(100vh - 35px) !important;
   }
 }
 

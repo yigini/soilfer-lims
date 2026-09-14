@@ -1,0 +1,620 @@
+{
+  "time": "2026-09-14T14:24:36.648Z",
+  "scope": "Frozen current local client/dist, all APIs intercepted; synthetic authentication tests UI state only. No database or production. Only initial navigation uses page.goto; later account changes use real UI.",
+  "sourceHead": "76a63b5af7cff0f202150a1037278de4e95027e5",
+  "sourceShellSha256": "9c5564913eefeaadcea5baef3a8c327b739b1a5e5ef89317e5ca0ab4af02bea5",
+  "indexSha256": "b65439e30e00f2bbd385edddb86f451d378769440d51746cc48b9cad89753344",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-BSpGr4x-.css",
+      "sha256": "d1a6cc7519e7a6cca274e74655bb7e82b6587d52b883d350f8bfb01c56bfa8ee"
+    },
+    {
+      "path": "/assets/TutorialShell-Dw7KOo2o.js",
+      "sha256": "99ba58ee761a7da5d549d96272f8f63a2d6f838d3dd50d2fea31fb9796f32c49"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "mockedAuthPosts": [
+    {
+      "path": "/api/auth/login",
+      "username": "synthetic-tech-b"
+    }
+  ],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2"
+  ],
+  "apiReads": [
+    {
+      "path": "/api/public/i18n/bootstrap",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/admin/settings",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/config/analyses",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/workbench/queue",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/workbench/v2/receipts",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-a"
+    },
+    {
+      "path": "/api/auth/me",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/dashboard/home",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/notifications",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/messages/conversations",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/config/analyses",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/workbench/queue",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/workbench/v2/receipts",
+      "actor": "synthetic-tech-b"
+    },
+    {
+      "path": "/api/samples/OLD-LAB-SAMPLE/detail",
+      "actor": "synthetic-tech-b"
+    }
+  ],
+  "documentRequests": [
+    "/workbench?tutorialmode=true&tour=first-visit"
+  ],
+  "checks": {
+    "initial": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "guideHasA": true,
+      "sampleInput": ""
+    },
+    "signedOut": {
+      "url": "/login",
+      "guideHasA": false,
+      "sampleInput": "",
+      "marker": "pointer-review13"
+    },
+    "signedInB": {
+      "url": "/",
+      "guideHasB": true,
+      "guideHasA": false,
+      "sampleInput": "",
+      "marker": "pointer-review13",
+      "authMeB": true
+    },
+    "forbiddenOldLab": {
+      "url": "/workbench",
+      "guideHasB": true,
+      "guideHasA": false,
+      "guideText": "Map & report\n14 / 16\nEN\nES\nES-419\nFR\nPT\nMinimize —\nPause\nExit guide ↗\nS\nSynthetic Technician B · LAB_TECHNICIAN\nA result with a history.\n\nThe map explains dependencies and handovers. The report connects the final result to its method, version and review history.\n\nWhy this matters\n/samples/:id/map\nGo to page →\nAccess denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.\n✕\nSample ID:\nOLD-LAB-SAMPLE\nView Map →\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 0 viewed)\nWords used here\nExplore the lab around it →\n← Back\nSkip lesson",
+      "requestedAsB": true,
+      "marker": "pointer-review13",
+      "documentRequests": 1
+    }
+  },
+  "pass": true,
+  "layouts": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "states": [
+        {
+          "label": "expanded",
+          "guide": {
+            "x": 24,
+            "y": 341,
+            "width": 440,
+            "height": 635,
+            "right": 464,
+            "bottom": 976,
+            "scrollWidth": 440,
+            "clientWidth": 440
+          },
+          "coach": {
+            "x": 24,
+            "y": 341,
+            "width": 440,
+            "height": 635,
+            "right": 464,
+            "bottom": 976,
+            "scrollWidth": 438,
+            "clientWidth": 438
+          },
+          "pageWidth": 1440,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "box": {
+                "x": 229.65625,
+                "y": 386,
+                "width": 77.9375,
+                "height": 28,
+                "right": 307.59375,
+                "bottom": 414,
+                "scrollWidth": 76,
+                "clientWidth": 76
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "collapseCoachBtn"
+            },
+            {
+              "id": "pause",
+              "box": {
+                "x": 313.59375,
+                "y": 386,
+                "width": 46.859375,
+                "height": 28,
+                "right": 360.453125,
+                "bottom": 414,
+                "scrollWidth": 45,
+                "clientWidth": 45
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pause"
+            },
+            {
+              "id": "exit",
+              "box": {
+                "x": 366.453125,
+                "y": 386,
+                "width": 82.546875,
+                "height": 28,
+                "right": 449,
+                "bottom": 414,
+                "scrollWidth": 81,
+                "clientWidth": 81
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exit"
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 24,
+            "y": 934,
+            "width": 440,
+            "height": 42,
+            "right": 464,
+            "bottom": 976,
+            "scrollWidth": 440,
+            "clientWidth": 440
+          },
+          "coach": {
+            "x": 24,
+            "y": 934,
+            "width": 440,
+            "height": 42,
+            "right": 464,
+            "bottom": 976,
+            "scrollWidth": 438,
+            "clientWidth": 438
+          },
+          "pageWidth": 1440,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "box": {
+                "x": 257.078125,
+                "y": 941,
+                "width": 96.984375,
+                "height": 28,
+                "right": 354.0625,
+                "bottom": 969,
+                "scrollWidth": 95,
+                "clientWidth": 95
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "expandCoachBtn"
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "box": {
+                "x": 358.0625,
+                "y": 941,
+                "width": 42.859375,
+                "height": 28,
+                "right": 400.921875,
+                "bottom": 969,
+                "scrollWidth": 41,
+                "clientWidth": 41
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pauseCollapsedBtn"
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "box": {
+                "x": 404.921875,
+                "y": 941,
+                "width": 48.078125,
+                "height": 28,
+                "right": 453,
+                "bottom": 969,
+                "scrollWidth": 46,
+                "clientWidth": 46
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exitCollapsedBtn"
+            }
+          ]
+        }
+      ],
+      "expandedExitClicked": true,
+      "guideExited": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "states": [
+        {
+          "label": "expanded",
+          "guide": {
+            "x": 10,
+            "y": 564,
+            "width": 370,
+            "height": 270,
+            "right": 380,
+            "bottom": 834,
+            "scrollWidth": 370,
+            "clientWidth": 370
+          },
+          "coach": {
+            "x": 10,
+            "y": 564,
+            "width": 370,
+            "height": 270,
+            "right": 380,
+            "bottom": 834,
+            "scrollWidth": 368,
+            "clientWidth": 368
+          },
+          "pageWidth": 390,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "box": {
+                "x": 145.65625,
+                "y": 609,
+                "width": 77.9375,
+                "height": 28,
+                "right": 223.59375,
+                "bottom": 637,
+                "scrollWidth": 76,
+                "clientWidth": 76
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "collapseCoachBtn"
+            },
+            {
+              "id": "pause",
+              "box": {
+                "x": 229.59375,
+                "y": 609,
+                "width": 46.859375,
+                "height": 28,
+                "right": 276.453125,
+                "bottom": 637,
+                "scrollWidth": 45,
+                "clientWidth": 45
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pause"
+            },
+            {
+              "id": "exit",
+              "box": {
+                "x": 282.453125,
+                "y": 609,
+                "width": 82.546875,
+                "height": 28,
+                "right": 365,
+                "bottom": 637,
+                "scrollWidth": 81,
+                "clientWidth": 81
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exit"
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 792,
+            "width": 370,
+            "height": 42,
+            "right": 380,
+            "bottom": 834,
+            "scrollWidth": 370,
+            "clientWidth": 370
+          },
+          "coach": {
+            "x": 10,
+            "y": 792,
+            "width": 370,
+            "height": 42,
+            "right": 380,
+            "bottom": 834,
+            "scrollWidth": 368,
+            "clientWidth": 368
+          },
+          "pageWidth": 390,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "box": {
+                "x": 173.078125,
+                "y": 799,
+                "width": 96.984375,
+                "height": 28,
+                "right": 270.0625,
+                "bottom": 827,
+                "scrollWidth": 95,
+                "clientWidth": 95
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "expandCoachBtn"
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "box": {
+                "x": 274.0625,
+                "y": 799,
+                "width": 42.859375,
+                "height": 28,
+                "right": 316.921875,
+                "bottom": 827,
+                "scrollWidth": 41,
+                "clientWidth": 41
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pauseCollapsedBtn"
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "box": {
+                "x": 320.921875,
+                "y": 799,
+                "width": 48.078125,
+                "height": 28,
+                "right": 369,
+                "bottom": 827,
+                "scrollWidth": 46,
+                "clientWidth": 46
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exitCollapsedBtn"
+            }
+          ]
+        }
+      ],
+      "expandedExitClicked": true,
+      "guideExited": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "states": [
+        {
+          "label": "expanded",
+          "guide": {
+            "x": 10,
+            "y": 406,
+            "width": 300,
+            "height": 284,
+            "right": 310,
+            "bottom": 690,
+            "scrollWidth": 300,
+            "clientWidth": 300
+          },
+          "coach": {
+            "x": 10,
+            "y": 406,
+            "width": 300,
+            "height": 284,
+            "right": 310,
+            "bottom": 690,
+            "scrollWidth": 298,
+            "clientWidth": 298
+          },
+          "pageWidth": 320,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "box": {
+                "x": 75.65625,
+                "y": 451,
+                "width": 77.9375,
+                "height": 28,
+                "right": 153.59375,
+                "bottom": 479,
+                "scrollWidth": 76,
+                "clientWidth": 76
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "collapseCoachBtn"
+            },
+            {
+              "id": "pause",
+              "box": {
+                "x": 159.59375,
+                "y": 451,
+                "width": 46.859375,
+                "height": 28,
+                "right": 206.453125,
+                "bottom": 479,
+                "scrollWidth": 45,
+                "clientWidth": 45
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pause"
+            },
+            {
+              "id": "exit",
+              "box": {
+                "x": 212.453125,
+                "y": 451,
+                "width": 82.546875,
+                "height": 28,
+                "right": 295,
+                "bottom": 479,
+                "scrollWidth": 81,
+                "clientWidth": 81
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exit"
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690,
+            "scrollWidth": 300,
+            "clientWidth": 300
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690,
+            "scrollWidth": 298,
+            "clientWidth": 298
+          },
+          "pageWidth": 320,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "box": {
+                "x": 103.078125,
+                "y": 655,
+                "width": 96.984375,
+                "height": 28,
+                "right": 200.0625,
+                "bottom": 683,
+                "scrollWidth": 95,
+                "clientWidth": 95
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "expandCoachBtn"
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "box": {
+                "x": 204.0625,
+                "y": 655,
+                "width": 42.859375,
+                "height": 28,
+                "right": 246.921875,
+                "bottom": 683,
+                "scrollWidth": 41,
+                "clientWidth": 41
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "pauseCollapsedBtn"
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "box": {
+                "x": 250.921875,
+                "y": 655,
+                "width": 48.078125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683,
+                "scrollWidth": 46,
+                "clientWidth": 46
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "hit": "exitCollapsedBtn"
+            }
+          ]
+        }
+      ],
+      "expandedExitClicked": true,
+      "guideExited": true,
+      "pass": true
+    }
+  ],
+  "authPass": true
+}

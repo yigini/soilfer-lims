@@ -1433,16 +1433,6 @@ export default function TutorialShell({ onExit, onPause }) {
             data-sf-tutorial="root"
             aria-label={t('aria.coach', 'First-visit guide')}
             style={{
-                position: 'fixed',
-                left: location.pathname === '/login' ? '24px' : 'auto',
-                right: location.pathname === '/login' ? 'auto' : '24px',
-                bottom: '24px',
-                width: isCollapsed ? 'auto' : '440px',
-                minWidth: isCollapsed ? '320px' : undefined,
-                maxWidth: 'calc(100vw - 48px)',
-                maxHeight: isCollapsed ? 'none' : 'calc(100vh - 360px)',
-                zIndex: 8500,
-                pointerEvents: 'none',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
                 fontSize: '15px',
                 lineHeight: 1.5,
@@ -1452,14 +1442,9 @@ export default function TutorialShell({ onExit, onPause }) {
             <aside
                 className={`coach ${isCollapsed ? 'coach-collapsed' : ''} ${mobileExpanded ? 'mobile-expanded' : ''}`}
                 style={{
-                    pointerEvents: 'auto',
-                    width: '100%',
-                    maxHeight: isCollapsed ? 'none' : 'calc(100vh - 365px)',
-                    overflowY: isCollapsed ? 'visible' : 'auto',
                     background: '#fff',
                     border: '1px solid #cbd8c7',
                     borderRadius: isCollapsed ? '12px' : '16px',
-                    boxShadow: isCollapsed ? '0 8px 24px rgba(34, 55, 42, 0.18)' : '0 16px 36px rgba(34, 55, 42, 0.18)',
                     display: 'flex',
                     flexDirection: 'column'
                 }}
@@ -1473,19 +1458,21 @@ export default function TutorialShell({ onExit, onPause }) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            padding: '8px 12px',
+                            padding: '6px 10px',
                             background: '#ffffff',
                             borderRadius: '12px',
-                            gap: '10px'
+                            gap: '6px',
+                            maxWidth: '100%',
+                            boxSizing: 'border-box'
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                            <span style={{ fontSize: '15px' }}>🧭</span>
-                            <span id="collapsedPosition" style={{ fontSize: '12px', fontWeight: 650, color: '#213b32', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {displayStepNum} / {totalStops} · {currentChapter.nameKey ? t(currentChapter.nameKey) : titleText}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
+                            <span style={{ fontSize: '14px', flexShrink: 0 }}>🧭</span>
+                            <span id="collapsedPosition" style={{ fontSize: '11px', fontWeight: 650, color: '#213b32', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {String(displayStepNum).padStart(2, '0')}/{String(totalStops).padStart(2, '0')} · {currentChapter.nameKey ? t(currentChapter.nameKey) : titleText}
                             </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
                             <button
                                 type="button"
                                 id="expandCoachBtn"
@@ -1493,7 +1480,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                 onClick={() => setIsCollapsed(false)}
                                 title={t('expandGuide', 'Expand guide ↗')}
                                 aria-expanded="false"
-                                style={{ minHeight: '30px', padding: '3px 9px', fontSize: '12px' }}
+                                style={{ minHeight: '28px', padding: '3px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
                             >
                                 {t('expandGuide', 'Expand ↗')}
                             </button>
@@ -1503,7 +1490,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                 className="quiet small"
                                 onClick={handlePause}
                                 title={t('common.pause', 'Pause')}
-                                style={{ minHeight: '30px', padding: '3px 8px', fontSize: '12px' }}
+                                style={{ minHeight: '28px', padding: '3px 6px', fontSize: '11px', whiteSpace: 'nowrap' }}
                             >
                                 {t('common.pause', 'Pause')}
                             </button>
@@ -1513,7 +1500,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                 className="small"
                                 onClick={handleExit}
                                 title={t('common.exitGuide', 'Exit guide ↗')}
-                                style={{ minHeight: '30px', padding: '3px 8px', fontSize: '12px' }}
+                                style={{ minHeight: '28px', padding: '3px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
                             >
                                 {t('common.exit', 'Exit')} ✕
                             </button>
@@ -1525,18 +1512,24 @@ export default function TutorialShell({ onExit, onPause }) {
                         <div
                             className="coach-top"
                             style={{
-                                padding: '14px 18px',
+                                padding: '10px 14px',
                                 borderBottom: '1px solid #dce3da',
-                                background: '#fbfaf6'
+                                background: '#fbfaf6',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '6px'
                             }}
                         >
-                            <div className="row" style={{ alignItems: 'center', marginBottom: '8px' }}>
-                                <span className="badge">{badgeText}</span>
-                                <span id="position" style={{ fontSize: '11px', fontWeight: 700, color: '#66756e' }}>
-                                    {isOffTrack
-                                        ? `${t('common.statusUnavailable', 'Outside current track')} (${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')})`
-                                        : `${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')}`}
-                                </span>
+                            {/* Row 1: Context (Badge, Position, Language Selector) */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+                                    <span className="badge" style={{ flexShrink: 0 }}>{badgeText}</span>
+                                    <span id="position" style={{ fontSize: '11px', fontWeight: 700, color: '#66756e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {isOffTrack
+                                            ? `${t('common.statusUnavailable', 'Outside current track')} (${String(displayStepNum).padStart(2, '0')}/${String(totalStops).padStart(2, '0')})`
+                                            : `${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')}`}
+                                    </span>
+                                </div>
 
                                 {/* In-Guide Language Selector */}
                                 <select
@@ -1545,11 +1538,10 @@ export default function TutorialShell({ onExit, onPause }) {
                                     aria-label={t('common.language', 'Language')}
                                     style={{
                                         width: 'auto',
-                                        padding: '4px 8px',
-                                        minHeight: '30px',
+                                        padding: '2px 6px',
+                                        minHeight: '28px',
                                         fontSize: '11px',
-                                        marginLeft: 'auto',
-                                        marginRight: '6px'
+                                        flexShrink: 0
                                     }}
                                 >
                                     <option value="en">EN</option>
@@ -1558,7 +1550,19 @@ export default function TutorialShell({ onExit, onPause }) {
                                     <option value="fr">FR</option>
                                     <option value="pt">PT</option>
                                 </select>
+                            </div>
 
+                            {/* Row 2: Action Controls (Minimize, Pause, Exit) */}
+                            <div
+                                id="coachHeaderActions"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-end',
+                                    gap: '6px',
+                                    flexWrap: 'wrap'
+                                }}
+                            >
                                 <button
                                     type="button"
                                     className="quiet small"
@@ -1566,7 +1570,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                     onClick={() => setIsCollapsed(true)}
                                     title={t('collapseGuide', 'Collapse guide ↓')}
                                     aria-expanded="true"
-                                    style={{ padding: '4px 8px', minHeight: '30px', marginRight: '4px' }}
+                                    style={{ padding: '3px 8px', minHeight: '28px', fontSize: '11px', whiteSpace: 'nowrap' }}
                                 >
                                     {t('collapse', 'Minimize')} —
                                 </button>
@@ -1575,7 +1579,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                     className="quiet small"
                                     id="pause"
                                     onClick={handlePause}
-                                    style={{ padding: '4px 8px', minHeight: '30px' }}
+                                    style={{ padding: '3px 8px', minHeight: '28px', fontSize: '11px', whiteSpace: 'nowrap' }}
                                 >
                                     {t('common.pause', 'Pause')}
                                 </button>
@@ -1584,14 +1588,14 @@ export default function TutorialShell({ onExit, onPause }) {
                                     className="small"
                                     id="exit"
                                     onClick={handleExit}
-                                    style={{ padding: '4px 10px', minHeight: '30px' }}
+                                    style={{ padding: '3px 10px', minHeight: '28px', fontSize: '11px', whiteSpace: 'nowrap' }}
                                 >
                                     {t('common.exitGuide', 'Exit guide ↗')}
                                 </button>
                             </div>
 
                             {/* Verified User / Persona Strip */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#66756e', marginTop: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#66756e', marginTop: '2px' }}>
                                 <div
                                     className="avatar"
                                     style={{ width: '22px', height: '22px', fontSize: '10px' }}

@@ -1,5 +1,5 @@
 {
-  "time": "2026-09-14T14:08:06.753Z",
+  "time": "2026-09-14T14:21:11.734Z",
   "expectedImage": "soilfer-lims:v3.5.8-be93093",
   "scope": "Anonymous production login/tutorial/exit only. No account login or laboratory form input; all non-read requests blocked.",
   "attemptedMutations": [],
@@ -13,8 +13,8 @@
     "title": "A shared record for the laboratory.",
     "guideVisible": true,
     "assets": [
-      "/assets/TutorialShell-Bb5_VIl7.js",
-      "/assets/TutorialShell-DBnTsSTn.css"
+      "/assets/TutorialShell-ZKJdI3SM.js",
+      "/assets/TutorialShell-BXQUMQ6w.css"
     ]
   },
   "exit": {
