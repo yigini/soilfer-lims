@@ -64,6 +64,7 @@ const TopicExplorer = React.lazy(() => import('./pages/help/TopicExplorer'));
 const AdminHelpEditor = React.lazy(() => import('./pages/help/AdminHelpEditor'));
 const ActivateAccount = React.lazy(() => import('./pages/auth/ActivateAccount'));
 const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
+const TutorialEntry = React.lazy(() => import('./tutorial/TutorialEntry'));
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -342,66 +343,71 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
 
 function App() {
     return (
-        <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />
-            <Route path="/reset-password" element={<React.Suspense fallback={<LazyFallback />}><ResetPassword /></React.Suspense>} />
-            <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
-            <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
-            <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
-            <Route path="/scan" element={<RequireAuth><React.Suspense fallback={<LazyFallback />}><ScanPage /></React.Suspense></RequireAuth>} />
-            <Route path="/samples/:id/map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
-            <Route path="/workflow-map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
+        <>
+            <React.Suspense fallback={null}>
+                <TutorialEntry />
+            </React.Suspense>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />
+                <Route path="/reset-password" element={<React.Suspense fallback={<LazyFallback />}><ResetPassword /></React.Suspense>} />
+                <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
+                <Route path="/samples" element={<RequireAuth><Samples /></RequireAuth>} />
+                <Route path="/samples/:id" element={<RequireAuth><SampleDetail /></RequireAuth>} />
+                <Route path="/scan" element={<RequireAuth><React.Suspense fallback={<LazyFallback />}><ScanPage /></React.Suspense></RequireAuth>} />
+                <Route path="/samples/:id/map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
+                <Route path="/workflow-map" element={<RequireAuth><React.Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><SampleWorkflowMap /></React.Suspense></RequireAuth>} />
 
-            {/* Restricted Routes */}
-            <Route path="/my-work" element={<RequireAuth permission="ENTER_RESULTS"><MyWork /></RequireAuth>} />
-            <Route path="/workbench" element={<RequireAuth permission="ENTER_RESULTS"><TechWorkbench /></RequireAuth>} />
-            <Route path="/manager-queue" element={<RequireAuth permission="APPROVE_RESULTS"><ManagerQueue /></RequireAuth>} />
-            <Route path="/reception" element={<RequireAuth permission="RECEIVE_SAMPLE"><Reception /></RequireAuth>} />
+                {/* Restricted Routes */}
+                <Route path="/my-work" element={<RequireAuth permission="ENTER_RESULTS"><MyWork /></RequireAuth>} />
+                <Route path="/workbench" element={<RequireAuth permission="ENTER_RESULTS"><TechWorkbench /></RequireAuth>} />
+                <Route path="/manager-queue" element={<RequireAuth permission="APPROVE_RESULTS"><ManagerQueue /></RequireAuth>} />
+                <Route path="/reception" element={<RequireAuth permission="RECEIVE_SAMPLE"><Reception /></RequireAuth>} />
 
-            <Route path="/inventory" element={<RequireAuth permission="VIEW_INVENTORY"><Inventory /></RequireAuth>} />
-            <Route path="/equipment" element={<RequireAuth permission="VIEW_EQUIPMENT"><Equipment /></RequireAuth>} />
-            <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
-            <Route path="/projects" element={<RequireAuth permission="VIEW_PROJECTS"><Projects /></RequireAuth>} />
-            <Route path="/projects/:projectId" element={<RequireAuth permission="VIEW_PROJECTS"><ProjectWorkspace /></RequireAuth>} />
+                <Route path="/inventory" element={<RequireAuth permission="VIEW_INVENTORY"><Inventory /></RequireAuth>} />
+                <Route path="/equipment" element={<RequireAuth permission="VIEW_EQUIPMENT"><Equipment /></RequireAuth>} />
+                <Route path="/users" element={<RequireAuth permission="MANAGE_USERS"><Users /></RequireAuth>} />
+                <Route path="/projects" element={<RequireAuth permission="VIEW_PROJECTS"><Projects /></RequireAuth>} />
+                <Route path="/projects/:projectId" element={<RequireAuth permission="VIEW_PROJECTS"><ProjectWorkspace /></RequireAuth>} />
 
-            <Route path="/admin" element={<RequireAuth permission="MANAGE_ANALYSES"><AdminPanel /></RequireAuth>} />
-            <Route path="/admin/methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
-            <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
-            <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
-            <Route path="/admin/labs" element={<RequireAuth permission="MANAGE_USERS"><LabManagement /></RequireAuth>} />
-            <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
+                <Route path="/admin" element={<RequireAuth permission="MANAGE_ANALYSES"><AdminPanel /></RequireAuth>} />
+                <Route path="/admin/methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
+                <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
+                <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
+                <Route path="/admin/labs" element={<RequireAuth permission="MANAGE_USERS"><LabManagement /></RequireAuth>} />
+                <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
 
-            {/* General Access */}
-            <Route path="/datasheet" element={<RequireAuth><DataSheet /></RequireAuth>} />
-            <Route path="/maps" element={<RequireAuth><CountryData /></RequireAuth>} />
-            <Route path="/qa" element={<RequireAuth permission="VIEW_AUDIT"><QADashboard /></RequireAuth>} />
-            <Route path="/spectral-library" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
-            <Route path="/spectral" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
-            <Route path="/data-results" element={<RequireAuth><DataResults /></RequireAuth>} />
+                {/* General Access */}
+                <Route path="/datasheet" element={<RequireAuth><DataSheet /></RequireAuth>} />
+                <Route path="/maps" element={<RequireAuth><CountryData /></RequireAuth>} />
+                <Route path="/qa" element={<RequireAuth permission="VIEW_AUDIT"><QADashboard /></RequireAuth>} />
+                <Route path="/spectral-library" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
+                <Route path="/spectral" element={<RequireAuth><SpectralLibrary /></RequireAuth>} />
+                <Route path="/data-results" element={<RequireAuth><DataResults /></RequireAuth>} />
 
-            <Route path="/result-reports" element={<RequireAuth><ResultReports /></RequireAuth>} />
-            <Route path="/reports" element={<Navigate to="/result-reports" replace />} />
-            <Route path="/report/:token" element={<React.Suspense fallback={<LazyFallback />}><PublicReport /></React.Suspense>} />
-            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+                <Route path="/result-reports" element={<RequireAuth><ResultReports /></RequireAuth>} />
+                <Route path="/reports" element={<Navigate to="/result-reports" replace />} />
+                <Route path="/report/:token" element={<React.Suspense fallback={<LazyFallback />}><PublicReport /></React.Suspense>} />
+                <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
-            {/* Public Institutional & Technical Architecture Routes */}
-            <Route path="/about" element={<React.Suspense fallback={<LazyFallback />}><About /></React.Suspense>} />
-            <Route path="/techstack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
-            <Route path="/tech-stack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
-            <Route path="/credits" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+                {/* Public Institutional & Technical Architecture Routes */}
+                <Route path="/about" element={<React.Suspense fallback={<LazyFallback />}><About /></React.Suspense>} />
+                <Route path="/techstack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+                <Route path="/tech-stack" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
+                <Route path="/credits" element={<React.Suspense fallback={<LazyFallback />}><TechStack /></React.Suspense>} />
 
-            {/* Help Centre & Knowledge Base Routes (Publicly accessible with server-side visibility filtering) */}
-            <Route path="/help" element={<React.Suspense fallback={<LazyFallback />}><HelpCentre /></React.Suspense>} />
-            <Route path="/help/faq" element={<React.Suspense fallback={<LazyFallback />}><FAQPage /></React.Suspense>} />
-            <Route path="/faq" element={<Navigate to="/help/faq" replace />} />
-            <Route path="/help/articles/:articleId" element={<React.Suspense fallback={<LazyFallback />}><ArticleReader /></React.Suspense>} />
-            <Route path="/help/topics/:topicId" element={<React.Suspense fallback={<LazyFallback />}><TopicExplorer /></React.Suspense>} />
-            <Route path="/admin/help" element={<RequireAuth permission="HELP_EDIT_LAB"><React.Suspense fallback={<LazyFallback />}><AdminHelpEditor /></React.Suspense></RequireAuth>} />
+                {/* Help Centre & Knowledge Base Routes (Publicly accessible with server-side visibility filtering) */}
+                <Route path="/help" element={<React.Suspense fallback={<LazyFallback />}><HelpCentre /></React.Suspense>} />
+                <Route path="/help/faq" element={<React.Suspense fallback={<LazyFallback />}><FAQPage /></React.Suspense>} />
+                <Route path="/faq" element={<Navigate to="/help/faq" replace />} />
+                <Route path="/help/articles/:articleId" element={<React.Suspense fallback={<LazyFallback />}><ArticleReader /></React.Suspense>} />
+                <Route path="/help/topics/:topicId" element={<React.Suspense fallback={<LazyFallback />}><TopicExplorer /></React.Suspense>} />
+                <Route path="/admin/help" element={<RequireAuth permission="HELP_EDIT_LAB"><React.Suspense fallback={<LazyFallback />}><AdminHelpEditor /></React.Suspense></RequireAuth>} />
 
-            {/* Catch-All 404 Route */}
-            <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />
-        </Routes>
+                {/* Catch-All 404 Route */}
+                <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />
+            </Routes>
+        </>
     );
 }
 

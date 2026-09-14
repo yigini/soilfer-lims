@@ -1,0 +1,284 @@
+{
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "back": "← Retour",
+    "skipLesson": "Ignorer la leçon",
+    "skipBasics": "Ignorer les bases",
+    "pause": "Pause",
+    "exitGuide": "Quitter le guide ↗",
+    "resume": "Reprendre ma visite →",
+    "reopenPreview": "Rouvrir ce guide",
+    "whyThisMatters": "Pourquoi c'est important",
+    "wordsUsedHere": "Mots utilisés ici",
+    "lessonExplored": "Leçon explorée. Vous pouvez la revoir à tout moment.",
+    "notRealRecord": "Pas un enregistrement réel",
+    "practiceContext": "Contexte d'exercice uniquement",
+    "practicePassport": "Passeport d'échantillon d'exercice",
+    "exampleProject": "Exemple SOILFER-US",
+    "previewBarTitle": "GUIDE DE PREMIÈRE VISITE · PARCOURS GUIDÉ DE LA PLATEFORME",
+    "previewBarSubtitle": "Les exercices utilisent des données synthétiques d'exemple · aucun enregistrement LIMS n'est modifié",
+    "previewBarDate": "14 septembre 2026",
+    "stageSubtitle": "Un échantillon à suivre. Cinq sous les yeux.",
+    "previewPersona": "Profil de démonstration · aucun compte connecté",
+    "illustrativePage": "Page illustrative",
+    "yourLabVisit": "VOTRE VISITE DU LABORATOIRE",
+    "readStepUp": "Lire cette étape ↑",
+    "collapseGuide": "Replier le guide ↓",
+    "footerNote": "Guide de première visite disponible en anglais, espagnol, espagnol d'Amérique latine, français et portugais.",
+    "pausedTitle": "Votre progression est conservée.",
+    "pausedDesc": "Le guide est en pause. Aucune action automatique ou de laboratoire n'est exécutée. Vos pages, brouillons et autorisations restent intacts.",
+    "exitTitle": "Retour à l'utilisation normale du LIMS.",
+    "exitDesc": "Le guide a été fermé. Toutes les pages, formulaires et brouillons habituels restent inchangés."
+  },
+  "roles": {
+    "visitor": "Visiteur",
+    "reception": "Réception",
+    "technician": "Technicien",
+    "manager": "Responsable de laboratoire",
+    "coordinator": "Coordinateur de projet",
+    "viewer": "Lecteur / auditeur",
+    "assigned": "Votre rôle assigné"
+  },
+  "foundation": {
+    "f01": {
+      "title": "Un registre partagé pour le laboratoire.",
+      "copy": "LIMS signifie Système de Gestion des Informations de Laboratoire. Il aide l'équipe à savoir quel échantillon elle possède, quel travail est requis, qui le réalise et quels résultats ont été validés.",
+      "why": "Le personnel et les équipements effectuent le travail physique. Le LIMS relie les registres, les responsabilités et l'historique.",
+      "next": "Voir comment s'articulent les registres →",
+      "subtitle": "Commencez ici · aucun compte requis",
+      "lead": "LIMS signifie Système de Gestion des Informations de Laboratoire. Il relie l'échantillon, le travail effectué et les résultats publiés.",
+      "panelTitle": "Imaginez qu'un sachet de sol étiqueté arrive.",
+      "question": "Un échantillon est indiqué comme «attendu». Son contenant est-il arrivé?",
+      "optNotNecessarily": "Pas nécessairement",
+      "feedbackCorrect": "Correct. «Attendu» signifie planifié ou enregistré; l'arrivée physique fait l'objet d'une confirmation distincte.",
+      "feedbackIncorrect": "Pas tout à fait. «Attendu» signifie planifié ou enregistré; l'arrivée physique fait l'objet d'une confirmation distincte."
+    },
+    "f02": {
+      "title": "Un échantillon. Des travaux reliés.",
+      "copy": "Un échantillon peut nécessiter plusieurs analyses. Sa fiche d'échantillon, ses tâches et son rapport sont des vues connectées d'un même travail, pas des copies à ressaisir.",
+      "why": "Un projet peut impliquer plusieurs laboratoires. Votre compte détermine les données visibles; l'identité de l'échantillon suit le travail.",
+      "next": "Découvrir la navigation →",
+      "subtitle": "Le même échantillon d'un bout à l'autre",
+      "lead": "Un échantillon peut nécessiter des analyses de pH, de texture et d'autres paramètres.",
+      "panelTitle": "Un sachet de sol. Plusieurs analyses.",
+      "question": "Un échantillon nécessite des tests de pH et de texture. Combien de fiches d'échantillon cela représente-t-il?",
+      "optOneSample": "Un seul échantillon",
+      "optTwoSamples": "Deux échantillons",
+      "feedbackCorrect": "Correct. Une seule fiche d'échantillon regroupe plusieurs analyses, tâches assignées et résultats.",
+      "feedbackIncorrect": "Pas tout à fait. Une seule fiche d'échantillon regroupe plusieurs analyses, tâches assignées et résultats."
+    },
+    "f03": {
+      "title": "Où dois-je aller ensuite?",
+      "copy": "L'Accueil montre ce qui requiert votre attention. Échantillons retrace l'historique d'un échantillon. La paillasse est l'endroit où le technicien saisit le travail assigné.",
+      "why": "Un brouillon enregistré reste un travail en cours. Le soumettre constitue une transmission officielle à la personne chargée de le vérifier.",
+      "next": "Choisir mon parcours d'apprentissage →",
+      "subtitle": "Votre plan de la plateforme",
+      "lead": "Ces destinations présentent différents aspects du travail connecté.",
+      "panelTitle": "Commencez par la tâche devant vous.",
+      "question": "Vous avez enregistré un résultat en brouillon. Qui intervient ensuite?",
+      "optCompleteSubmit": "Je dois encore le finaliser et le soumettre",
+      "optReviewerApprove": "Le réviseur peut déjà l'approuver",
+      "feedbackCorrect": "Correct. Le brouillon reste sous votre responsabilité; la soumission est la transmission pour vérification.",
+      "feedbackIncorrect": "Pas tout à fait. Le brouillon reste sous votre responsabilité; la soumission est la transmission pour vérification."
+    }
+  },
+  "chapters": {
+    "welcome": {
+      "name": "Bienvenue",
+      "title": "Votre premier jour, en toute clarté.",
+      "copy": "Suivez un échantillon de son arrivée à son rapport final. Choisissez un aperçu rapide, l'histoire complète ou le parcours dédié à votre rôle.",
+      "why": "Une introduction efficace relie chaque action à son objectif. Vous pouvez mettre en pause, ignorer et revenir à tout moment.",
+      "next": "Commencer ma visite →"
+    },
+    "identity": {
+      "name": "Votre rôle",
+      "title": "Commencez avec le bon rôle.",
+      "copy": "Votre compte détermine le laboratoire et les tâches auxquels vous avez accès. Le récit change de rôle; votre compte réel ne change que lors de la connexion.",
+      "why": "Réception, techniciens et réviseurs ont des responsabilités distinctes. Un tutoriel ne doit jamais contourner ces autorisations.",
+      "next": "Voir la liaison terrain →"
+    },
+    "field": {
+      "name": "Du terrain au labo",
+      "title": "Attendu ne veut pas dire reçu.",
+      "copy": "Les enregistrements de terrain apportent l'identité et la localisation au projet. Cinq échantillons peuvent être attendus, mais l'arrivée doit être constatée au laboratoire.",
+      "why": "La provenance Kobo permet de relier un sachet physique à sa fiche de terrain. Une importation réussie ne vaut pas prise en charge physique.",
+      "next": "Aller à la réception des échantillons →"
+    },
+    "intake": {
+      "name": "Réception",
+      "title": "Vérifiez d'abord le contenant.",
+      "copy": "Contrôlez l'identifiant de terrain, le projet et le site. Enregistrez la masse et l'état seulement lorsque le contenant est physiquement présent.",
+      "why": "L'identifiant de laboratoire sert d'étiquette de travail. Préserver l'identité de terrain garantit la traçabilité des résultats.",
+      "next": "Continuer vers la préparation →"
+    },
+    "prepare": {
+      "name": "Préparation",
+      "title": "La préparation est une preuve.",
+      "copy": "Pratiquez la liste de contrôle ci-dessous. Au laboratoire, confirmez une étape uniquement lorsque vous l'avez réalisée avec l'enregistrement requis.",
+      "why": "Le séchage et la préparation sont des protocoles stricts. Une valeur numérique fictive ne peut attester que l'échantillon est prêt.",
+      "next": "Voir la paillasse d'analyse →"
+    },
+    "bench": {
+      "name": "Paillasse d'analyse",
+      "title": "Une méthode. Une série claire.",
+      "copy": "Utilisez une feuille de méthode pour traiter les échantillons de manière cohérente. Vérifiez l'identité, la méthode et l'unité avant de saisir un résultat.",
+      "why": "Un brouillon, une mesure enregistrée et un résultat soumis sont des états distincts. La soumission est la transmission au réviseur.",
+      "next": "Essayer un résultat groupé →"
+    },
+    "texture": {
+      "name": "Texture",
+      "title": "Trois fractions. Un seul résultat.",
+      "copy": "Sable, limon et argile sont indissociables. Essayez un total différent de 100%, puis corrigez-le avant de valider l'exercice.",
+      "why": "La méthode réelle régit la précision et la tolérance. La classe texturale est un résultat dérivé et validé; ce guide n'invente pas de classification.",
+      "next": "Explorer les données spectrales →"
+    },
+    "spectra": {
+      "name": "Spectroscopie",
+      "title": "La preuve réside dans le spectre.",
+      "copy": "Inspectez une courbe, ses axes et son rattachement à l'échantillon. Le MIR et le NIR exigent des preuves spectrales, pas un simple chiffre de réflectance.",
+      "why": "L'importation, le contrôle qualité spectral, les prédictions et les spectres validés en bibliothèque sont des étapes distinctes.",
+      "next": "Transmettre pour révision →"
+    },
+    "review": {
+      "name": "Révision",
+      "title": "Examiner les preuves.",
+      "copy": "Un responsable examine le travail soumis. Entraînez-vous à renvoyer un résultat avec un motif clair afin que le technicien sache quoi corriger.",
+      "why": "Un travail non soumis n'est pas prêt pour révision. L'acceptation d'un paramètre et la libération finale d'un échantillon ou rapport sont distinctes.",
+      "next": "Suivre la carte de déroulement →"
+    },
+    "trace": {
+      "name": "Carte & rapport",
+      "title": "Un résultat avec un historique.",
+      "copy": "La carte détaille les dépendances et transmissions. Le rapport relie le résultat final à sa méthode, sa révision et son historique de contrôle.",
+      "why": "La carte doit refléter les événements enregistrés. Un tutoriel ne doit jamais simuler un état achevé sur un échantillon réel incomplet.",
+      "next": "Explorer l'environnement du labo →"
+    },
+    "resources": {
+      "name": "Labo & données",
+      "title": "Le laboratoire est connecté.",
+      "copy": "Vérifiez l'état des équipements et les lots de réactifs. Suivez la provenance Kobo et apprenez comment les résultats autorisés s'échangent avec le SIS.",
+      "why": "Consulter un stock ne le consomme pas, et prévisualiser une exportation ne prouve pas sa livraison. Chaque action génère son propre enregistrement.",
+      "next": "Terminer ma visite →"
+    },
+    "finish": {
+      "name": "Votre prochaine étape",
+      "title": "Prêt à explorer votre rôle.",
+      "copy": "Vous avez découvert comment le travail s'articule. Utilisez maintenant votre compte et les échantillons d'essai désignés par votre formateur.",
+      "why": "Un tutoriel est une découverte, pas un certificat de qualification ni la preuve que chaque flux a satisfait à ses critères d'acceptation.",
+      "next": "Revenir au début ↺"
+    }
+  },
+  "practice": {
+    "tag": "Exercice uniquement · aucune écriture LIMS",
+    "intake": {
+      "title": "Arrivée physique",
+      "massLabel": "Masse reçue (g)",
+      "conditionLabel": "État du contenant",
+      "condIntact": "Contenant intact",
+      "condMismatch": "L'étiquette ne correspond pas",
+      "button": "Vérifier cette réception d'exercice",
+      "initialStatus": "Vérifiez l'étiquette et saisissez une masse positive.",
+      "success": "Exercice validé: le contenant correspond et une masse positive est enregistrée pour cet exercice.",
+      "error": "Vérifiez l'identité du contenant et saisissez une masse positive. Toute anomalie doit être résolue."
+    },
+    "prep": {
+      "title": "Exercice de préparation",
+      "check0": "Vérifier que l'étiquette correspond à la fiche de réception.",
+      "check1": "Contrôler les fiches applicables de séchage et de préparation.",
+      "check2": "Confirmer que les fractions préparées sont étiquetées pour leurs analyses.",
+      "button": "Vérifier la liste de contrôle",
+      "verifiedStatus": "Liste de contrôle d'exercice validée. Aucun enregistrement réel n'a été modifié."
+    },
+    "bench": {
+      "colSample": "Échantillon",
+      "colMethod": "Méthode",
+      "colReading": "Lecture",
+      "colState": "État",
+      "ariaPh": "Mesure de pH d'exercice",
+      "stateEntry": "Saisie d'exercice",
+      "stateNotEntered": "Non renseigné",
+      "step1": "Brouillon",
+      "step1Desc": "Travail en cours",
+      "step2": "Enregistrer la mesure",
+      "step2Desc": "Saisie vérifiée",
+      "step3": "Soumettre pour révision",
+      "step3Desc": "Transmission au réviseur",
+      "button": "Vérifier la mesure d'exercice",
+      "initialStatus": "Ce champ appartient à la démonstration, pas à la paillasse réelle.",
+      "previewPrefix": "Aperçu d'exercice:",
+      "previewSuffix": "Dans le LIMS, confirmez la méthode et les limites configurées avant enregistrement.",
+      "error": "Saisissez une valeur numérique valide."
+    },
+    "texture": {
+      "sand": "Sable",
+      "silt": "Limon",
+      "clay": "Argile",
+      "practiceTotal": "Total d'exercice",
+      "badgeCloses": "Total égal à 100%",
+      "badgeCheck": "Vérifiez les fractions",
+      "statusOk": "Les fractions sont équilibrées à 100%. La méthode réelle définit la précision et la tolérance.",
+      "statusError": "Utilisez des valeurs de 0 à 100% pour chaque fraction afin d'obtenir exactement 100%.",
+      "classTitle": "Et la classe texturale?",
+      "classDesc": "Le rapport officiel utilise la règle de classification validée et la révision du résultat. Ce guide ne calcule pas de classe de substitution."
+    },
+    "spectra": {
+      "title": "Exercice sur fichier spectral",
+      "tag": "Courbe synthétique",
+      "ariaSvg": "Courbe MIR illustrative, nombre d'onde décroissant de 4000 à 400 cm⁻¹",
+      "svgLabel": "Signal relatif illustratif · synthétique, pas une exportation d'instrument",
+      "note": "Un spectre brut comporte une série continue de mesures le long d'un axe spectral.",
+      "btnLoad": "Charger la courbe illustrative",
+      "btnLoaded": "Courbe illustrative chargée",
+      "infoSample": "Échantillon",
+      "infoFile": "Fichier",
+      "infoQuality": "Qualité",
+      "ribbon": "Un spectre brut, un spectre contrôlé et une prédiction validée sont des enregistrements distincts."
+    },
+    "review": {
+      "badgeExample": "Exemple de révision",
+      "qcNote": "Contrôle qualité: nécessite une inspection, ne pas supposer CONFORME sans vérification.",
+      "title": "Renvoyer pour correction",
+      "label": "Indiquez au technicien l'élément à vérifier",
+      "placeholder": "Par exemple: vérifier l'écart sur le duplicat",
+      "button": "Pratiquer le renvoi du résultat",
+      "initialStatus": "Un motif précis est obligatoire avant de renvoyer un résultat.",
+      "handoverPrefix": "Consigne d'exercice transmise au technicien:"
+    },
+    "res": {
+      "btnEquipment": "Équipements",
+      "btnEquipmentSub": "Disponibilité & étalonnage",
+      "btnInventory": "Inventaire",
+      "btnInventorySub": "Lots, péremption & stockage",
+      "btnKobo": "Kobo",
+      "btnKoboSub": "Provenance terrain",
+      "btnSis": "SIS",
+      "btnSisSub": "Échange autorisé",
+      "equipmentTitle": "Disponibilité des équipements",
+      "equipmentDesc": "Vérifiez le statut opérationnel et l'étalonnage avant usage. Consulter un équipement ne le réserve ni ne l'étalonne.",
+      "inventoryTitle": "Choisir le bon lot",
+      "inventoryDesc": "Vérifiez la quantité, la date limite, le statut et l'emplacement. Consulter l'inventaire ne déstocke aucun produit.",
+      "koboTitle": "Conserver la liaison terrain",
+      "koboDesc": "Identifiez le formulaire d'origine, l'identifiant terrain et le site. Une connexion configurée ne garantit pas la réception physique.",
+      "sisTitle": "Échanger avec un statut clair",
+      "sisDesc": "Examinez les données autorisées et leurs métadonnées. L'aperçu ne vaut pas accusé de réception par le SIS national.",
+      "langTitle": "Travaillez dans votre langue.",
+      "langDesc": "La plateforme propose cinq langues officielles."
+    }
+  },
+  "glossary": {
+    "lims": "Système de Gestion des Informations de Laboratoire: suivi intégré des opérations analytiques.",
+    "sample": "Le matériau physique et sa fiche numérique correspondante.",
+    "project": "Ensemble d'échantillons et d'analyses associés; peut concerner plusieurs laboratoires.",
+    "spectrum": "Signal mesuré sur une plage de longueurs d'onde, enregistré sous forme de données continues.",
+    "mir_nir": "Analyses par spectroscopie moyen infrarouge / proche infrarouge.",
+    "qc": "Contrôle qualité: vérifications de conformité et de fiabilité des mesures.",
+    "kobo": "Passerelle de collecte des données agronomiques de terrain.",
+    "sis": "Système d'Information sur les Sols: plateforme d'échange de données pédologiques autorisées.",
+    "lot": "Lot spécifique de réactif ou de consommable de laboratoire.",
+    "workbench": "Espace de travail du technicien pour saisir les analyses qui lui sont assignées.",
+    "draft": "Travail enregistré temporairement, pas encore transmis pour vérification.",
+    "submit": "Transmettre officiellement les mesures achevées au responsable de validation.",
+    "auditHistory": "Historique chronologique et horodaté de toutes les interventions effectuées."
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "common": {
+    "yes": "Sí",
+    "no": "No",
+    "back": "← Atrás",
+    "skipLesson": "Omitir lección",
+    "skipBasics": "Omitir conceptos básicos",
+    "pause": "Pausa",
+    "exitGuide": "Salir de la guía ↗",
+    "resume": "Reanudar mi visita →",
+    "reopenPreview": "Reabrir esta guía",
+    "whyThisMatters": "Por qué es importante",
+    "wordsUsedHere": "Términos usados aquí",
+    "lessonExplored": "Lección explorada. Puede volver a consultarla.",
+    "notRealRecord": "No es un registro real",
+    "practiceContext": "Solo contexto de práctica",
+    "practicePassport": "Pasaporte de muestra de práctica",
+    "exampleProject": "Ejemplo SOILFER-US",
+    "previewBarTitle": "GUÍA DE PRIMERA VISITA · RECORRIDO GUIADO POR LA PLATAFORMA",
+    "previewBarSubtitle": "Los ejercicios prácticos usan datos sintéticos de ejemplo · no se modifican registros de LIMS",
+    "previewBarDate": "14 de septiembre de 2026",
+    "stageSubtitle": "Una muestra a seguir. Cinco a la vista.",
+    "previewPersona": "Perfil de demostración · no es una cuenta conectada",
+    "illustrativePage": "Página ilustrativa",
+    "yourLabVisit": "SU VISITA AL LABORATORIO",
+    "readStepUp": "Leer este paso ↑",
+    "collapseGuide": "Plegar guía ↓",
+    "footerNote": "Guía de primera visita disponible en inglés, español, español (Latinoamérica), francés y portugués.",
+    "pausedTitle": "Su progreso se ha guardado.",
+    "pausedDesc": "La guía está en pausa. No se realizan avances automáticos ni acciones de laboratorio. Las páginas, borradores y permisos existentes permanecen intactos.",
+    "exitTitle": "Vuelta al uso ordinario de LIMS.",
+    "exitDesc": "La superposición del tutorial se ha cerrado. Todas las páginas, formularios y borradores normales de la aplicación permanecen intactos."
+  },
+  "roles": {
+    "visitor": "Visitante",
+    "reception": "Recepción",
+    "technician": "Técnico",
+    "manager": "Responsable de laboratorio",
+    "coordinator": "Coordinador de proyecto",
+    "viewer": "Visualizador / auditor",
+    "assigned": "Su rol asignado"
+  },
+  "foundation": {
+    "f01": {
+      "title": "Un registro compartido para el laboratorio.",
+      "copy": "LIMS significa Sistema de Gestión de Información de Laboratorio. Ayuda al equipo a saber qué muestra tiene, qué trabajo se necesita, quién lo realiza y qué resultados han sido verificados.",
+      "why": "El personal y los equipos realizan el trabajo físico de laboratorio. LIMS conecta sus registros, responsabilidades e historial.",
+      "next": "Ver cómo encajan los registros →",
+      "subtitle": "Comience aquí · no se necesita cuenta",
+      "lead": "LIMS significa Sistema de Gestión de Información de Laboratorio. Conecta la muestra, el trabajo del personal y los resultados que se emiten.",
+      "panelTitle": "Imagine que llega una bolsa de suelo etiquetada.",
+      "question": "Una muestra figura como «esperada». ¿Ha llegado ya su contenedor?",
+      "optNotNecessarily": "No necesariamente",
+      "feedbackCorrect": "Correcto. «Esperada» significa planificada o registrada; la llegada física se confirma por separado.",
+      "feedbackIncorrect": "No exactamente. «Esperada» significa planificada o registrada; la llegada física se confirma por separado."
+    },
+    "f02": {
+      "title": "Una muestra. Trabajo conectado.",
+      "copy": "Una muestra puede requerir varios análisis. Su página de muestra, tareas asignadas e informe son vistas conectadas del mismo trabajo, no copias que deban duplicarse.",
+      "why": "Un proyecto puede involucrar a varios laboratorios. Su cuenta determina qué registros puede ver; la identidad de la muestra acompaña al trabajo.",
+      "next": "Conozca la navegación →",
+      "subtitle": "La misma muestra en todo momento",
+      "lead": "Una misma muestra puede requerir pH, textura y otros análisis.",
+      "panelTitle": "Una bolsa de suelo. Múltiples ensayos.",
+      "question": "Una muestra requiere ensayos de pH y textura. ¿Cuántos registros de muestra son?",
+      "optOneSample": "Una muestra",
+      "optTwoSamples": "Dos muestras",
+      "feedbackCorrect": "Correcto. Un solo registro de muestra puede tener varios análisis, tareas asignadas y resultados.",
+      "feedbackIncorrect": "No exactamente. Un solo registro de muestra puede tener varios análisis, tareas asignadas y resultados."
+    },
+    "f03": {
+      "title": "¿A dónde debo ir a continuación?",
+      "copy": "Inicio muestra lo que requiere atención. Muestras le cuenta la historia de una muestra. El banco de trabajo es donde un técnico registra el trabajo asignado.",
+      "why": "Un borrador guardado sigue siendo trabajo en curso. Enviarlo es una entrega formal a quien debe revisarlo.",
+      "next": "Elegir mi itinerario de aprendizaje →",
+      "subtitle": "Su mapa de la plataforma",
+      "lead": "Estos destinos muestran distintas partes del trabajo conectado.",
+      "panelTitle": "Comience con la tarea que tiene delante.",
+      "question": "Ha guardado un resultado como borrador. ¿Quién actúa ahora?",
+      "optCompleteSubmit": "Aún debo completarlo y enviarlo",
+      "optReviewerApprove": "El revisor ya puede aprobarlo",
+      "feedbackCorrect": "Correcto. El borrador sigue estando bajo su responsabilidad; el envío es la entrega para su revisión.",
+      "feedbackIncorrect": "No exactamente. El borrador sigue estando bajo su responsabilidad; el envío es la entrega para su revisión."
+    }
+  },
+  "chapters": {
+    "welcome": {
+      "name": "Bienvenida",
+      "title": "Su primer día, con total claridad.",
+      "copy": "Siga una muestra desde su llegada hasta su informe final. Elija un resumen rápido, la historia completa del laboratorio o el trabajo que corresponde a su rol.",
+      "why": "Una introducción útil conecta cada acción con su propósito. Puede pausar, omitir y regresar en cualquier momento.",
+      "next": "Comenzar mi visita →"
+    },
+    "identity": {
+      "name": "Su rol",
+      "title": "Comience con el rol adecuado.",
+      "copy": "Su cuenta determina a qué laboratorio y tareas tiene acceso. La historia cambia de rol; su cuenta real solo cambia cuando inicia sesión.",
+      "why": "Recepción, técnicos y revisores tienen distintas responsabilidades. Un tutorial nunca debe eludir esos permisos.",
+      "next": "Ver la conexión de campo →"
+    },
+    "field": {
+      "name": "Campo al laboratorio",
+      "title": "Lo esperado no es lo recibido.",
+      "copy": "Los registros de campo aportan identidad y ubicación al proyecto. Pueden esperarse cinco muestras, pero la llegada debe comprobarse en el laboratorio.",
+      "why": "La procedencia Kobo ayuda a conectar un contenedor físico con su registro de campo. Una importación con éxito no confirma la custodia física.",
+      "next": "Ir a recepción de muestras →"
+    },
+    "intake": {
+      "name": "Recepción",
+      "title": "Compruebe primero el contenedor.",
+      "copy": "Verifique el ID de campo, proyecto y ubicación. Registre la masa y condición solo cuando el contenedor esté físicamente presente.",
+      "why": "El identificador de laboratorio es la etiqueta de trabajo. Conservar la identidad de campo hace que los resultados sean trazables.",
+      "next": "Continuar a preparación →"
+    },
+    "prepare": {
+      "name": "Preparación",
+      "title": "La preparación es evidencia.",
+      "copy": "Practique la lista de verificación a continuación. En el laboratorio real, confirme un paso solo cuando lo haya ejecutado y cuente con el registro requerido.",
+      "why": "El secado y la preparación son pasos procedimentales. Un valor numérico ficticio no puede acreditar que el material esté listo.",
+      "next": "Ver el banco de análisis →"
+    },
+    "bench": {
+      "name": "Banco de análisis",
+      "title": "Un método. Un lote claro.",
+      "copy": "Use una hoja de trabajo de método para procesar muestras de forma homogénea. Compruebe identidad, método y unidad antes de registrar un resultado.",
+      "why": "Un borrador, una determinación registrada y un resultado enviado son estados distintos. El envío es la entrega al revisor.",
+      "next": "Probar un resultado agrupado →"
+    },
+    "texture": {
+      "name": "Textura",
+      "title": "Tres fracciones. Un resultado.",
+      "copy": "Arena, limo y arcilla van unidos. Pruebe un total que no sume el 100%, y corríjalo antes de marcar la práctica como completada.",
+      "why": "El método real define precisión y tolerancia. La clase textural es un resultado derivado y validado; esta guía no inventa clasificaciones.",
+      "next": "Explorar evidencia espectral →"
+    },
+    "spectra": {
+      "name": "Espectroscopía",
+      "title": "La evidencia es el espectro.",
+      "copy": "Inspeccione una curva, sus ejes y el vínculo con la muestra. MIR y NIR requieren evidencia espectral, no solo un número de reflectancia.",
+      "why": "La importación, el control de calidad espectral, las predicciones y los registros aprobados de biblioteca son fases distintas.",
+      "next": "Entregar para revisión →"
+    },
+    "review": {
+      "name": "Revisión",
+      "title": "Revisar la evidencia.",
+      "copy": "Un responsable revisa el trabajo enviado. Practique la devolución de un resultado aportando un motivo claro para que el técnico sepa qué corregir.",
+      "why": "El trabajo no enviado no está listo para revisión. La aceptación de un ítem y la liberación final de muestra o informe son decisiones distintas.",
+      "next": "Seguir el mapa de flujo de trabajo →"
+    },
+    "trace": {
+      "name": "Mapa e informe",
+      "title": "Un resultado con historia.",
+      "copy": "El mapa explica dependencias y entregas. El informe vincula el resultado final con su método, versión e historial de revisión.",
+      "why": "El mapa debe reflejar eventos registrados. Un tutorial nunca debe mostrar un estado completado sobre una muestra real incompleta.",
+      "next": "Explorar el laboratorio conectado →"
+    },
+    "resources": {
+      "name": "Laboratorio y datos",
+      "title": "El laboratorio está conectado.",
+      "copy": "Compruebe la disponibilidad de equipos y lotes de inventario. Siga la procedencia desde Kobo y conozca cómo se intercambian resultados con SIS.",
+      "why": "Consultar inventario no consume existencias, y previsualizar una exportación no demuestra su entrega. Cada acción tiene su registro.",
+      "next": "Terminar mi visita →"
+    },
+    "finish": {
+      "name": "Su siguiente paso",
+      "title": "Listo para explorar su rol.",
+      "copy": "Ha visto cómo se articula todo el trabajo. A continuación, use la cuenta y las muestras de prueba asignadas por su facilitador.",
+      "why": "Un tutorial es una introducción, no un certificado de competencia ni prueba de que cada flujo haya pasado su aceptación.",
+      "next": "Volver al inicio ↺"
+    }
+  },
+  "practice": {
+    "tag": "Solo práctica · sin escritura en LIMS",
+    "intake": {
+      "title": "Llegada física",
+      "massLabel": "Masa recibida (g)",
+      "conditionLabel": "Estado del contenedor",
+      "condIntact": "Contenedor intacto",
+      "condMismatch": "La etiqueta no coincide",
+      "button": "Verificar esta recepción de práctica",
+      "initialStatus": "Compruebe la etiqueta e introduzca una masa positiva.",
+      "success": "Práctica verificada: el contenedor coincide y se ha registrado una masa positiva en este ejercicio.",
+      "error": "Compruebe la identidad del contenedor e introduzca una masa positiva. Cualquier discrepancia debe resolverse."
+    },
+    "prep": {
+      "title": "Práctica de preparación",
+      "check0": "Verificar que la etiqueta coincida con su registro de entrada.",
+      "check1": "Comprobar los registros aplicables de secado y preparación.",
+      "check2": "Confirmar que las fracciones preparadas están etiquetadas para sus análisis.",
+      "button": "Verificar lista de práctica",
+      "verifiedStatus": "Lista de verificación de práctica confirmada. No se ha modificado ningún registro real."
+    },
+    "bench": {
+      "colSample": "Muestra",
+      "colMethod": "Método",
+      "colReading": "Lectura",
+      "colState": "Estado",
+      "ariaPh": "Lectura de pH de práctica",
+      "stateEntry": "Entrada de práctica",
+      "stateNotEntered": "No introducido",
+      "step1": "Borrador",
+      "step1Desc": "Trabajo en curso",
+      "step2": "Registrar determinación",
+      "step2Desc": "Entrada verificada",
+      "step3": "Enviar a revisión",
+      "step3Desc": "Entrega al revisor",
+      "button": "Comprobar lectura de práctica",
+      "initialStatus": "Este campo pertenece a la demostración, no al banco de trabajo real.",
+      "previewPrefix": "Vista previa de práctica:",
+      "previewSuffix": "En LIMS, confirme el método configurado y los límites antes de registrar.",
+      "error": "Introduzca una lectura numérica válida."
+    },
+    "texture": {
+      "sand": "Arena",
+      "silt": "Limo",
+      "clay": "Arcilla",
+      "practiceTotal": "Total de práctica",
+      "badgeCloses": "Cierra al 100%",
+      "badgeCheck": "Compruebe las fracciones",
+      "statusOk": "Los valores de práctica cierran correctamente. El método real define precisión y tolerancia.",
+      "statusError": "Use valores de 0 a 100% para cada fracción de modo que sumen exactamente 100%.",
+      "classTitle": "¿Y la clase textural?",
+      "classDesc": "El informe de producción debe emplear la regla de clasificación validada y la revisión del resultado. Esta guía no calcula clases sustitutas."
+    },
+    "spectra": {
+      "title": "Práctica de archivo espectral",
+      "tag": "Curva sintética",
+      "ariaSvg": "Curva MIR ilustrativa, número de onda descendente de 4000 a 400 cm⁻¹",
+      "svgLabel": "Señal relativa ilustrativa · sintética, no es una exportación de instrumento",
+      "note": "Un espectro original contiene una serie de mediciones continuas a lo largo de un eje espectral.",
+      "btnLoad": "Cargar curva ilustrativa",
+      "btnLoaded": "Curva ilustrativa cargada",
+      "infoSample": "Muestra",
+      "infoFile": "Archivo",
+      "infoQuality": "Calidad",
+      "ribbon": "Un escaneo en bruto, un espectro con control de calidad y una predicción aprobada son registros independientes."
+    },
+    "review": {
+      "badgeExample": "Ejemplo de revisión",
+      "qcNote": "Evidencia de CC: requiere inspección, no asumir APTO por defecto.",
+      "title": "Devolver para corrección",
+      "label": "Indique al técnico qué debe verificar",
+      "placeholder": "Por ejemplo: verificar discrepancia en el duplicado",
+      "button": "Practicar devolución del resultado",
+      "initialStatus": "Se requiere un motivo fundamentado antes de devolver un resultado.",
+      "handoverPrefix": "Entrega de práctica al técnico:"
+    },
+    "res": {
+      "btnEquipment": "Equipos",
+      "btnEquipmentSub": "Disponibilidad y calibración",
+      "btnInventory": "Inventario",
+      "btnInventorySub": "Lotes, caducidad y almacén",
+      "btnKobo": "Kobo",
+      "btnKoboSub": "Procedencia de campo",
+      "btnSis": "SIS",
+      "btnSisSub": "Intercambio autorizado",
+      "equipmentTitle": "Disponibilidad de equipos",
+      "equipmentDesc": "Compruebe el estado operativo y la calibración antes del uso. Consultar un activo no lo reserva ni lo calibra.",
+      "inventoryTitle": "Elegir el lote adecuado",
+      "inventoryDesc": "Compruebe cantidad, caducidad, estado y ubicación. Consultar inventario no consume existencias.",
+      "koboTitle": "Mantener la conexión de campo",
+      "koboDesc": "Localice formulario de origen, identificador de campo y ubicación. La conectividad no demuestra una recepción física.",
+      "sisTitle": "Intercambio con estado claro",
+      "sisDesc": "Revise el conjunto de datos permitido y sus metadatos. La vista previa de carga útil no demuestra la entrega o acuse por el SIS nacional.",
+      "langTitle": "Use su propio idioma.",
+      "langDesc": "La plataforma admite cinco opciones de idioma oficial."
+    }
+  },
+  "glossary": {
+    "lims": "Sistema de Gestión de Información de Laboratorio: registros conectados para el trabajo analítico.",
+    "sample": "El material físico y su correspondiente registro digital.",
+    "project": "Conjunto de muestras y trabajos relacionados; puede abarcar varios laboratorios.",
+    "spectrum": "Señal medida a lo largo de un rango espectral, guardada como datos numéricos continuos.",
+    "mir_nir": "Análisis por infrarrojo medio / infrarrojo cercano.",
+    "qc": "Control de calidad: comprobaciones sobre la evidencia analítica y su conformidad.",
+    "kobo": "Conexión para la recopilación de datos de campo.",
+    "sis": "Sistema de Información de Suelos: interfaz para el intercambio autorizado de datos edafológicos.",
+    "lot": "Lote específico de material o reactivo de laboratorio.",
+    "workbench": "Espacio de trabajo del técnico para registrar las tareas asignadas.",
+    "draft": "Trabajo guardado que aún no se ha enviado para su revisión formal.",
+    "submit": "Entregar el trabajo completado a la persona responsable de revisarlo.",
+    "auditHistory": "Registro cronológico de quién realizó cada acción y en qué momento."
+  }
+}
