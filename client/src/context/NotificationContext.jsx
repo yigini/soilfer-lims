@@ -47,8 +47,9 @@ export const NotificationProvider = ({ children }) => {
         if (!user) return;
         try {
             const res = await axios.get('/api/notifications');
-            setNotifications(res.data);
-            setUnreadCount(res.data.filter(n => !n.read && !n.isRead).length);
+            const list = Array.isArray(res.data) ? res.data : [];
+            setNotifications(list);
+            setUnreadCount(list.filter(n => !n.read && !n.isRead).length);
         } catch (err) {
             console.error('Failed to fetch notifications', err);
         }
@@ -140,7 +141,7 @@ export const NotificationProvider = ({ children }) => {
         if (!user) return;
         try {
             const res = await axios.get('/api/messages/conversations');
-            setConversations(res.data);
+            setConversations(Array.isArray(res.data) ? res.data : []);
         } catch (err) { console.error('Failed to fetch conversations', err); }
     }, [user]);
 
@@ -397,10 +398,12 @@ export const NotificationProvider = ({ children }) => {
     }, []);
 
     // Unread counts calculation
-    const unreadNotificationCount = notifications.filter(n => (!n.read && !n.isRead) && n.type !== 'MESSAGE').length;
-    const unreadChatCount = (conversations || []).reduce((sum, c) => sum + (c.unreadCount || 0), 0);
-    const unreadFormalMessageCount = notifications.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && n.link).length;
-    const unreadChatNotifs = notifications.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && !n.link).length;
+    const notifsList = Array.isArray(notifications) ? notifications : [];
+    const convsList = Array.isArray(conversations) ? conversations : [];
+    const unreadNotificationCount = notifsList.filter(n => (!n.read && !n.isRead) && n.type !== 'MESSAGE').length;
+    const unreadChatCount = convsList.reduce((sum, c) => sum + (c?.unreadCount || 0), 0);
+    const unreadFormalMessageCount = notifsList.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && n.link).length;
+    const unreadChatNotifs = notifsList.filter(n => (!n.read && !n.isRead) && n.type === 'MESSAGE' && !n.link).length;
     const effectiveChatCount = Math.max(unreadChatCount, unreadChatNotifs);
     const unreadMessageCount = effectiveChatCount + unreadFormalMessageCount;
     const hasUnreadMessages = unreadMessageCount > 0;

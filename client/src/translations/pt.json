@@ -603,8 +603,9 @@
       "saveLabAccessBtn": "Salvar acesso ao laboratório",
       "loadingLabAccess": "Carregando diretório de acesso aos laboratórios…",
       "loadFailedTitle": "Falha ao carregar o acesso aos laboratórios",
-      "goToWorkbench": "Abrir Bancada Técnica para concluir ou transferir trabalho",
-      "notReadyToSaveAccess": "O diretório de acesso aos laboratórios deve ser carregado e autorizado antes de salvar as alterações."
+      "goToWorkbench": "Abrir bancada",
+      "notReadyToSaveAccess": "O diretório de acesso aos laboratórios deve ser carregado e autorizado antes de salvar as alterações.",
+      "viewProjectSamples": "Ver amostras do projeto no espaço de trabalho"
     },
     "viewDetails": "Ver Detalhes",
     "viewSamples": "Ver Amostras",

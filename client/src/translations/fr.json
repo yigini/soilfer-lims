@@ -603,8 +603,9 @@
       "saveLabAccessBtn": "Enregistrer l'accès au laboratoire",
       "loadingLabAccess": "Chargement du répertoire d'accès au laboratoire…",
       "loadFailedTitle": "Échec du chargement de l'accès au laboratoire",
-      "goToWorkbench": "Ouvrir l'établi technique pour terminer ou transférer les travaux",
-      "notReadyToSaveAccess": "Le répertoire d'accès au laboratoire doit être chargé et autorisé avant d'enregistrer les modifications."
+      "goToWorkbench": "Ouvrir l'établi",
+      "notReadyToSaveAccess": "Le répertoire d'accès au laboratoire doit être chargé et autorisé avant d'enregistrer les modifications.",
+      "viewProjectSamples": "Voir les échantillons du projet dans l'espace projet"
     },
     "viewDetails": "Voir les Détails",
     "viewSamples": "Voir les Échantillons",

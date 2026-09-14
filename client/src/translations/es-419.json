@@ -603,8 +603,9 @@
       "saveLabAccessBtn": "Guardar acceso de laboratorios",
       "loadingLabAccess": "Cargando directorio de acceso a laboratorios…",
       "loadFailedTitle": "Error al cargar el acceso a laboratorios",
-      "goToWorkbench": "Abrir Banco de Trabajo Técnico para completar o transferir trabajo",
-      "notReadyToSaveAccess": "El directorio de acceso a laboratorios debe estar cargado y autorizado antes de guardar cambios."
+      "goToWorkbench": "Abrir banco de trabajo",
+      "notReadyToSaveAccess": "El directorio de acceso a laboratorios debe estar cargado y autorizado antes de guardar cambios.",
+      "viewProjectSamples": "Ver muestras del proyecto en el espacio de trabajo"
     },
     "viewDetails": "Ver Detalles",
     "viewSamples": "Ver Muestras",

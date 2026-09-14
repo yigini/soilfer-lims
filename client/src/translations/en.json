@@ -603,8 +603,9 @@
       "saveLabAccessBtn": "Save laboratory access",
       "loadingLabAccess": "Loading laboratory access directory…",
       "loadFailedTitle": "Failed to load laboratory access",
-      "goToWorkbench": "Open Tech Workbench to complete or transfer work",
-      "notReadyToSaveAccess": "Laboratory access directory must be loaded and authorized before saving changes."
+      "goToWorkbench": "Open Workbench",
+      "notReadyToSaveAccess": "Laboratory access directory must be loaded and authorized before saving changes.",
+      "viewProjectSamples": "View project samples in Project Workspace"
     },
     "viewDetails": "View Details",
     "viewSamples": "View Samples",

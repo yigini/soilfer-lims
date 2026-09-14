@@ -10,6 +10,22 @@ import {
     deletePendingManifest
 } from '../../services/pendingGovernanceStore';
 
+import {
+    MAX_FILE_SIZE,
+    MAX_BATCH_ROWS,
+    LOCALIZED_SAMPLE_HEADERS,
+    detectIdColumns,
+    extractIdsFromColumn
+} from '../../utils/spreadsheetImport';
+
+export {
+    MAX_FILE_SIZE,
+    MAX_BATCH_ROWS,
+    LOCALIZED_SAMPLE_HEADERS,
+    detectIdColumns,
+    extractIdsFromColumn
+};
+
 export default function ImportPreviewModal({
     isOpen,
     onClose,
@@ -61,64 +77,18 @@ export default function ImportPreviewModal({
         setParsedSheetData(null);
     }, [actorId]);
 
-    if (!isOpen || !project) return null;
-
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB limit
-    const MAX_BATCH_ROWS = 2000;
-
-    const LOCALIZED_SAMPLE_HEADERS = [
-        'sample id', 'sample_id', 'sampleid', 'sample-id',
-        'sample code', 'sample_code', 'samplecode', 'sample-code',
-        'sample', 'identifier', 'id', 'code',
-        'identificador', 'identificador de muestra', 'identificador_muestra', 'id_muestra', 'id muestra',
-        'codigo', 'código', 'codigo de muestra', 'código de muestra', 'muestra',
-        'identifiant', 'identifiant de l\'échantillon', 'identifiant echantillon', 'id_echantillon', 'id echantillon',
-        'échantillon', 'echantillon', 'code echantillon', 'code échantillon', 'numéro d\'échantillon', 'numero d\'echantillon',
-        'amostra', 'id_amostra', 'id amostra', 'código da amostra', 'codigo da amostra', 'identificador da amostra'
-    ];
-
-    const extractIdsFromColumn = (rows, colIdx, hasHeader) => {
-        if (!rows || rows.length === 0) {
-            return {
-                success: false,
-                error: t('projects.import.emptyFile', 'The selected spreadsheet file is empty.'),
-                ids: []
-            };
-        }
-
-        const startRow = hasHeader ? 1 : 0;
-        const dataRows = rows.slice(startRow);
-
-        if (dataRows.length > MAX_BATCH_ROWS) {
-            return {
-                success: false,
-                error: t('projects.import.tooManyRows', `File contains ${dataRows.length} data rows, which exceeds the maximum allowed batch size of ${MAX_BATCH_ROWS} samples.`),
-                ids: []
-            };
-        }
-
-        const ids = [];
-        for (let r = 0; r < dataRows.length; r++) {
-            const val = String(dataRows[r]?.[colIdx] ?? '').trim();
-            if (val) {
-                ids.push(val);
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                onClose();
             }
-        }
-
-        if (ids.length === 0) {
-            return {
-                success: false,
-                error: t('projects.import.noIdsFoundInCol', 'No non-empty sample identifiers found in the selected column.'),
-                ids: []
-            };
-        }
-
-        return {
-            success: true,
-            error: null,
-            ids
         };
-    };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
+    if (!isOpen || !project) return null;
 
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
@@ -165,15 +135,7 @@ export default function ImportPreviewModal({
                 }
 
                 const headerRow = rows[0] || [];
-                const matchingCols = [];
-
-                // Check all columns for exact canonical localized header match (no destructive fuzzy guessing)
-                for (let c = 0; c < headerRow.length; c++) {
-                    const headerText = String(headerRow[c] || '').trim().toLowerCase();
-                    if (LOCALIZED_SAMPLE_HEADERS.includes(headerText)) {
-                        matchingCols.push(c);
-                    }
-                }
+                const matchingCols = detectIdColumns(headerRow);
 
                 const isAmbiguous = matchingCols.length > 1;
                 const headerDetected = matchingCols.length > 0;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings, RefreshCw, Building2, Shield, Users, Lock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
@@ -18,8 +19,9 @@ export default function ProjectActionsModal({
     onSuccess,
     initialActionType = 'menu'
 }) {
+    const navigate = useNavigate();
     const { t } = useLanguage();
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
     const actorId = user?.id || 'anonymous';
 
     const [submitting, setSubmitting] = useState(false);
@@ -56,6 +58,17 @@ export default function ProjectActionsModal({
         return findPendingOperationForProject(actorId, project.id);
     };
     const [unresolvedOp, setUnresolvedOp] = useState(findActiveOp);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
 
     React.useEffect(() => {
         if (isOpen) {
@@ -1146,15 +1159,29 @@ export default function ProjectActionsModal({
                                             </div>
                                         </div>
                                         <p className="text-[11px] opacity-90 pl-7">{blockerNotice.detail}</p>
-                                        <div className="pl-7 pt-1">
-                                            <a
-                                                href={`/tech-workbench?projectCode=${encodeURIComponent(project.code || project.id)}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="font-semibold text-sf-primary hover:underline inline-flex items-center gap-1"
+                                        <div className="pl-7 pt-1 flex flex-wrap items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    onClose();
+                                                    navigate(`/projects/${encodeURIComponent(project.code || project.id)}?tab=samples`);
+                                                }}
+                                                className="font-semibold text-sf-primary hover:underline inline-flex items-center gap-1 text-[11px]"
                                             >
-                                                {t('projects.actions.goToWorkbench', 'Open Tech Workbench to complete or transfer work')} &rarr;
-                                            </a>
+                                                {t('projects.actions.viewProjectSamples', 'View project samples in Project Workspace')} &rarr;
+                                            </button>
+                                            {hasPermission?.('ENTER_RESULTS') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        onClose();
+                                                        navigate('/workbench');
+                                                    }}
+                                                    className="font-medium text-sf-muted hover:text-sf-primary hover:underline inline-flex items-center gap-1 text-[11px]"
+                                                >
+                                                    {t('projects.actions.goToWorkbench', 'Open Workbench')} &rarr;
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 )}

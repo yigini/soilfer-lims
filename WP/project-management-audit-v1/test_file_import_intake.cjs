@@ -68,21 +68,19 @@ function assert(condition, message) {
     }
 }
 
-const LOCALIZED_SAMPLE_HEADERS = [
-    'sample id', 'sample_id', 'sampleid', 'sample-id',
-    'sample code', 'sample_code', 'samplecode', 'sample-code',
-    'sample', 'identifier', 'id', 'code',
-    'identificador', 'identificador de muestra', 'identificador_muestra', 'id_muestra', 'id muestra',
-    'codigo', 'código', 'codigo de muestra', 'código de muestra', 'muestra',
-    'identifiant', 'identifiant de l\'échantillon', 'identifiant echantillon', 'id_echantillon', 'id echantillon',
-    'échantillon', 'echantillon', 'code echantillon', 'code échantillon', 'numéro d\'échantillon', 'numero d\'echantillon',
-    'amostra', 'id_amostra', 'id amostra', 'código da amostra', 'codigo da amostra', 'identificador da amostra'
-];
+let prodSpreadsheetImport;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-const MAX_BATCH_ROWS = 2000;
+async function initProdModule() {
+    if (!prodSpreadsheetImport) {
+        const fileUrl = new URL('../../client/src/utils/spreadsheetImport.js', 'file://' + __filename.replace(/\\/g, '/')).href;
+        prodSpreadsheetImport = await import(fileUrl);
+    }
+    return prodSpreadsheetImport;
+}
 
 function parseSpreadsheet(buffer, fileName, fileSize, forceHasHeader = null) {
+    const { MAX_FILE_SIZE, detectIdColumns, extractIdsFromColumn } = prodSpreadsheetImport;
+
     if (fileSize > MAX_FILE_SIZE) {
         return {
             success: false,
@@ -114,15 +112,7 @@ function parseSpreadsheet(buffer, fileName, fileSize, forceHasHeader = null) {
     }
 
     const headerRow = rows[0] || [];
-    const matchingCols = [];
-
-    // Exact canonical matching without substring guessing
-    for (let c = 0; c < headerRow.length; c++) {
-        const headerText = String(headerRow[c] || '').trim().toLowerCase();
-        if (LOCALIZED_SAMPLE_HEADERS.includes(headerText)) {
-            matchingCols.push(c);
-        }
-    }
+    const matchingCols = detectIdColumns(headerRow);
 
     const isAmbiguous = matchingCols.length > 1;
     const headerDetected = forceHasHeader !== null ? forceHasHeader : (matchingCols.length > 0);
@@ -138,37 +128,7 @@ function parseSpreadsheet(buffer, fileName, fileSize, forceHasHeader = null) {
         };
     });
 
-    function extract(colIdx, hasHdr) {
-        const startRow = hasHdr ? 1 : 0;
-        const dataRows = rows.slice(startRow);
-        if (dataRows.length > MAX_BATCH_ROWS) {
-            return {
-                success: false,
-                error: `File contains ${dataRows.length} data rows, which exceeds the maximum allowed batch size of ${MAX_BATCH_ROWS} samples.`,
-                ids: []
-            };
-        }
-
-        const ids = [];
-        for (let r = 0; r < dataRows.length; r++) {
-            const val = String(dataRows[r]?.[colIdx] ?? '').trim();
-            if (val) {
-                ids.push(val);
-            }
-        }
-
-        if (ids.length === 0) {
-            return {
-                success: false,
-                error: 'No non-empty sample identifiers found in the selected column.',
-                ids: []
-            };
-        }
-
-        return { success: true, error: null, ids };
-    }
-
-    const extractRes = extract(detectedColIdx, headerDetected);
+    const extractRes = extractIdsFromColumn(rows, detectedColIdx, headerDetected);
 
     return {
         success: extractRes.success,
@@ -180,7 +140,7 @@ function parseSpreadsheet(buffer, fileName, fileSize, forceHasHeader = null) {
         detectedColIdx,
         headerDetected,
         extractedIds: extractRes.ids,
-        extract
+        extract: (cIdx, hFlag) => extractIdsFromColumn(rows, cIdx, hFlag)
     };
 }
 
@@ -210,6 +170,7 @@ async function request(method, url, { token, body, headers = {} } = {}) {
 }
 
 async function run() {
+    await initProdModule();
     console.log('='.repeat(75));
     console.log('  STARTING REAL FILE IMPORT & SPREADSHEET INTAKE VERIFICATION (A14)');
     console.log('  Fixture:', fixture);
