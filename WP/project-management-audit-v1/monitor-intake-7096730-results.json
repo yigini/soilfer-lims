@@ -1,0 +1,41 @@
+{
+  "checkedAt": "2026-09-14T00:16:10.310Z",
+  "baseline": "7096730b253156e3e9c9bb695f641be1e85f7b93",
+  "sourceUnchanged": true,
+  "results": [
+    {
+      "id": "I01",
+      "case": "Request project override must not bypass paused existing sample project",
+      "passed": true,
+      "response": {
+        "status": 422,
+        "body": {
+          "error": "PROJECT_ADMISSIONS_PAUSED",
+          "message": "Cannot receive sample: Admissions for project PAUSED-P are paused. New sample intake is currently paused or closed."
+        }
+      },
+      "persisted": {
+        "status": "EXPECTED",
+        "projectId": "PAUSED-P",
+        "projectCode": "PAUSED-P"
+      }
+    },
+    {
+      "id": "I02",
+      "case": "Mutable walk-in flag must not cause hard deletion of an existing pre-registered sample",
+      "passed": true,
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Sample PRE-ACTIVE reverted to EXPECTED."
+        }
+      },
+      "draftStatus": 200,
+      "persisted": {
+        "status": "EXPECTED",
+        "projectId": "ACTIVE-P"
+      }
+    }
+  ]
+}
