@@ -1,0 +1,208 @@
+{
+  "checkedAt": "2026-09-14T01:54:47.702Z",
+  "totalContracts": 20,
+  "passedContracts": 20,
+  "allPassed": true,
+  "sourceDatabaseHashBefore": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceDatabaseHashAfter": "388e85fbc6573509f0c56e0f1db6989fa682c2931af5a90b0b82eeb1a0e6a90b",
+  "sourceDatabaseIntact": true,
+  "contracts": [
+    {
+      "id": "A01",
+      "title": "Foreign project scope isolation",
+      "passed": true,
+      "details": {
+        "detail": 403,
+        "stats": 403,
+        "labAccess": 403,
+        "samples": 403,
+        "kobo": 403
+      }
+    },
+    {
+      "id": "A02",
+      "title": "Servicing manager scope and boundary",
+      "passed": true,
+      "details": {
+        "sampleCount": 1,
+        "archiveStatus": 403,
+        "patchStatus": 403
+      }
+    },
+    {
+      "id": "A03",
+      "title": "Generic PUT status and junction protection",
+      "passed": true,
+      "details": {
+        "badStatus": 400,
+        "junctionBypass": 400
+      }
+    },
+    {
+      "id": "A04",
+      "title": "National manager country scope boundary",
+      "passed": true,
+      "details": {
+        "status": 403,
+        "error": {
+          "errorCode": "FORBIDDEN_NATIONAL_SCOPE",
+          "errorParams": null,
+          "error": "Cannot assign project to laboratory 'C' outside your authorized national scope.",
+          "data": null
+        }
+      }
+    },
+    {
+      "id": "A05",
+      "title": "Coordinator creation grant and access",
+      "passed": true,
+      "details": {
+        "createStatus": 200
+      }
+    },
+    {
+      "id": "A06",
+      "title": "Explicit empty servicing labs without country fallback",
+      "passed": true,
+      "details": {
+        "patchStatus": 200,
+        "servicingCount": 0
+      }
+    },
+    {
+      "id": "A07",
+      "title": "Inactive laboratory governance guard",
+      "passed": true,
+      "details": {
+        "patchStatus": 400,
+        "syncStatus": 400,
+        "syncError": "LAB_INACTIVE"
+      }
+    },
+    {
+      "id": "A08",
+      "title": "Archival blocker with expected unaccounted samples",
+      "passed": true,
+      "details": {
+        "status": 422,
+        "error": "CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES"
+      }
+    },
+    {
+      "id": "A09",
+      "title": "Eligible archive and restore lifecycle",
+      "passed": true,
+      "details": {
+        "archiveStatus": 200,
+        "restoredStatus": "ACTIVE"
+      }
+    },
+    {
+      "id": "A10",
+      "title": "Denial of destructive sample detachment on delete",
+      "passed": true,
+      "details": {
+        "status": 400,
+        "samplePreserved": true
+      }
+    },
+    {
+      "id": "A11",
+      "title": "Atomic rollback on transaction failure",
+      "passed": true,
+      "details": {
+        "putStatus": 500,
+        "persistedName": "Initial Pristine Name"
+      }
+    },
+    {
+      "id": "A12",
+      "title": "Idempotency and duplicate command protection",
+      "passed": true,
+      "details": {
+        "firstStatus": 200,
+        "secondStatus": 200,
+        "collisionStatus": 409
+      }
+    },
+    {
+      "id": "A13",
+      "title": "Manifest duplicate detection and honest receipt",
+      "passed": true,
+      "details": {
+        "status": 200,
+        "data": {
+          "count": 1,
+          "skipped": 1
+        }
+      }
+    },
+    {
+      "id": "A14",
+      "title": "Import preview bounded validation and confidentiality",
+      "passed": true,
+      "details": {
+        "valid": false,
+        "hash": true,
+        "foreignHidden": true
+      }
+    },
+    {
+      "id": "A15",
+      "title": "Stage counts aggregation and physical receipt decoupling",
+      "passed": true,
+      "details": {
+        "registered": 5,
+        "stageSum": 5,
+        "everReceived": 3
+      }
+    },
+    {
+      "id": "A16",
+      "title": "Data reconciliation apply and idempotent rerun",
+      "passed": true,
+      "details": {
+        "before": 0,
+        "after": 1,
+        "rerunMissing": 0
+      }
+    },
+    {
+      "id": "A17",
+      "title": "Kobo explicit scoping and credential redaction",
+      "passed": true,
+      "details": {
+        "foreignStatus": 403,
+        "ownStatus": 200,
+        "redacted": true
+      }
+    },
+    {
+      "id": "A18",
+      "title": "Analysis plan modification respects recorded results",
+      "passed": true,
+      "details": {
+        "status": 409,
+        "error": "Cannot remove analysis 'CEC': a result is already recorded (15.2)"
+      }
+    },
+    {
+      "id": "A19",
+      "title": "Archived project read access and report stability",
+      "passed": true,
+      "details": {
+        "status": 200,
+        "projectStatus": "ACTIVE"
+      }
+    },
+    {
+      "id": "A20",
+      "title": "Protection against query-based scope spoofing",
+      "passed": true,
+      "details": {
+        "scopeStatus": 200,
+        "labStatus": 200
+      }
+    }
+  ]
+}
