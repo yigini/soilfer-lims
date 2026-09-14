@@ -1,0 +1,32 @@
+{
+  "time": "2026-09-14T12:47:34.737Z",
+  "scope": "Uncommitted source after 2a07e37. Function execution with synthetic dictionaries; not rendered UI or deployed acceptance.",
+  "sourceHashes": {
+    "config": "5ae60a88ec35d3a50da85b4bc330cbe1f03049a94a8ed085cf0114c06a5a736b",
+    "shell": "ed0936f002af3810acb3cf0daf66309bd43f0ada88dce424ca0765d491474f21"
+  },
+  "availability": [
+    {
+      "name": "absent",
+      "enabled": false,
+      "pass": true
+    },
+    {
+      "name": "explicit true",
+      "enabled": true,
+      "pass": true
+    },
+    {
+      "name": "explicit false",
+      "enabled": false,
+      "pass": true
+    }
+  ],
+  "translation": {
+    "presentFrenchCommon": true,
+    "missingFrenchCommon": "Language",
+    "missingFrenchRoot": "English root fallback",
+    "noticeCallbackRaised": true,
+    "pass": true
+  }
+}

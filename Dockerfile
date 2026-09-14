@@ -18,7 +18,8 @@ COPY server/ ./server/
 # Generate Prisma client (Prisma 7 uses prisma.config.ts)
 RUN cd server && npx prisma generate
 
-# Build the Vite app
+# Build the Vite app with explicit tutorial release enablement
+ENV VITE_TUTORIAL_ENABLED=true
 RUN cd client && npm run build
 
 

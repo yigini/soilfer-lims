@@ -1,0 +1,59 @@
+{
+  "time": "2026-09-14T12:51:53.584Z",
+  "scope": "Frozen current local client/dist; all API requests mocked; no backend, database or production access. Synthetic technician authentication verifies client behavior only.",
+  "sourceHead": "2a07e37bc48b10ff393af2a00a38e10b579d86ad",
+  "sourceShellSha256": "9655b5da5771ba0e5a6f3d6e2d677a30e5b8302a4698e15e3d74851f7987df6b",
+  "indexSha256": "39de659c99561b56d44118c273d6582989173d7c539014633b5f4b08500bfefb",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-BpEgDth_.js",
+      "sha256": "114dda5f8632bcf942e3af3bc5508582ee4650680335ec9d272760ff6a069c39"
+    },
+    {
+      "path": "/assets/TutorialShell-DBnTsSTn.css",
+      "sha256": "ddfa2508a6d18fc92852cdf676ba1f20ea7bf3e5457a1a3eba659985c12b2d7d"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2"
+  ],
+  "apiReads": [
+    "/api/public/i18n/bootstrap",
+    "/api/admin/settings",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/config/analyses",
+    "/api/auth/me",
+    "/api/workbench/queue",
+    "/api/workbench/v2/receipts",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/auth/me",
+    "/api/samples/TEST-SAMPLE/detail"
+  ],
+  "checks": {
+    "before": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "title": "A result with a history.",
+      "authIdentity": "map-exit-synthetic-tech"
+    },
+    "pending": {
+      "url": "/workbench?tutorialmode=true&tour=first-visit",
+      "detailHeld": true
+    },
+    "afterExitBeforeResponse": {
+      "url": "/workbench",
+      "guideCount": 0,
+      "session": null
+    },
+    "afterLateResponse": {
+      "url": "/workbench",
+      "guideCount": 0,
+      "session": false
+    }
+  },
+  "reproduced": false,
+  "expected": "After Exit, the pending sample verification is canceled or ignored; route stays /workbench and guide stays absent."
+}

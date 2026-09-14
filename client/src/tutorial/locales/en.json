@@ -508,5 +508,9 @@
     "defaultDesc": "A connected record connecting sample arrivals, analytical tasks, and verified reports.",
     "prepareTitle": "Sample preparation",
     "prepareDesc": "Soil samples are dried, crushed, and sieved so uniform test portions can be weighed for laboratory analysis."
-  }
+  },
+  "sampleForbiddenNotice": "Access denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.",
+  "sampleNotFoundNotice": "Sample not found. Select an authorized sample from your laboratory list.",
+  "sampleCheckError": "Unable to verify sample access. Select an authorized sample from your laboratory list.",
+  "sampleVerifying": "Verifying sample access..."
 }

@@ -508,5 +508,9 @@
     "defaultDesc": "Um registro conectado que vincula a chegada de amostras, tarefas analíticas e relatórios verificados.",
     "prepareTitle": "Preparação de amostras",
     "prepareDesc": "As amostras de solo são secas, trituradas e peneiradas para a pesagem de alíquotas homogêneas para análise."
-  }
+  },
+  "sampleForbiddenNotice": "Acesso negado: A amostra pertence a outro laboratório ou não está acessível no seu perfil atual. Selecione uma amostra autorizada na lista do seu laboratório.",
+  "sampleNotFoundNotice": "Amostra não encontrada. Selecione uma amostra autorizada na lista do seu laboratório.",
+  "sampleCheckError": "Não foi possível verificar o acesso à amostra. Selecione uma amostra autorizada na lista do seu laboratório.",
+  "sampleVerifying": "Verificando o acesso à amostra..."
 }

@@ -1,0 +1,30 @@
+# Checkpoint 08 — accept the lifecycle fixes; finish the finite remainder
+
+14 September 2026, approximately 14:23 Europe/Rome. Candidate **2a07e37bc48b10ff393af2a00a38e10b579d86ad** is pushed and CI **34842491625 succeeded**. Application diff remains inside the dedicated tutorial module. No competing application edits or production data tests.
+
+## Closed by independent evidence
+
+Focused browser rerun of independent-lifecycle-review07.cjs at 12:20:54 UTC against TutorialShell-Daiu6uSt.js / TutorialShell-DBnTsSTn.css confirms French chooser text, Next-only viewed progress, bounded outside-track progress, and **in-place disable removes the guide and storage without a reload**. No page errors/mutations. Index SHA e94c417fd7b214039f4fea4895c534a0250caf25a525d7ea22ec6a63c72dcc95. The script's old scope label says uncommitted-after-b7; the actual tested snapshot and current clean candidate are recorded here. These fixes are accepted; do not repeat the closed broad suites.
+
+Source also fixes completion styles, glossary labels and conditional fallback display. The removal harness now really builds a disposable copy with the mount/module removed; that is a substantial improvement. Independent removed-build verification is underway separately, so do not repeat it needlessly.
+
+## Three small code corrections still required
+
+1. **Make the availability default match its stated behavior.** `tutorialConfig.js` says default-off but its unset-environment branch is `: true`. Use the explicit true comparison with false when absent. Explicitly enable the approved tutorial release in the candidate build/deployment configuration and document that small configuration touch. A query flag and a build availability switch are different controls. Preserve opt-in-only loading/listeners and the now-working shutdown logic. No server/schema/auth changes or arbitrary retire date are needed.
+2. **Use the English dictionary for missing localized keys.** `t()` currently searches only the selected language then returns the supplied fallback or raw key. A call such as `t(currentChapter.titleKey)` would show a key while claiming English fallback. Resolve the corresponding English root/common key before the final diagnostic fallback, record when fallback actually occurs, and test one deliberately missing localized key. Existing equal-key dictionaries are not proof of this failure path.
+3. **Complete map context verification; the previous requirement remains open.** Shell451–465 still routes from raw text/path/query. The ordinary map page enforces its own permissions, and the improved test verifies one real accessible fixture map. However, a cleared selection can be repopulated from the old URL after an account/lab change. Use an existing authorized read-only sample lookup or verified loaded-record context before carrying it into guide navigation; handle pending/not-found/forbidden and discard stale responses. No new endpoint or RBAC rewrite. Test a **forbidden record under a signed-in account**, and a **same-document actor/lab change while the old sample route remains**. Checking sessionStorage, which already strips live IDs unconditionally, does not establish the latter. This is a guide-context issue, not evidence that server authorization was bypassed.
+
+## Evidence must describe what was exercised
+
+- T11 still injects role-track session state and checks counters/unavailable flags; it does not select/traverse all five tracks or perform their account handovers. Demonstrate remaining actual selectors/paths in one focused run, retaining already-proven auth behavior.
+- T14 has detailed French assertions plus Pause/Exit in five languages; call those specific checks passed, not a full rendered sweep of every locale/state. Complete remaining technical coverage or list it explicitly as partial. Human specialist/novice/physical-device reviews remain pending without blocking safe useful technical work.
+- The new removal static server returns index.html for `/api/*` instead of proxying the disposable backend. Its workbench assertion checks only absence of the guide; this can pass on an unauthorized/login/error page. Prove the removed build reaches the authenticated workbench heading and identity with working synthetic API responses. Independent removal verification is running to supply bounded evidence without altering your app files.
+- T21 contains a hardcoded b7fd307 live claim; parameterize or accurately record the actual tested release and build assets for each candidate. A prior release's smoke test cannot certify the next one.
+
+Do not expand the feature list or redesign working lessons. Finish these original requirements, retain the user's safe push/CI/deployment authorization, and report any actual cutover accurately. The latest independent live smoke remains b7fd307; no whole-application rollback is requested for tutorial gaps. Use short friendly updates, with completed checks separated from remaining checks.
+
+## 14:28 update — independent removal accepted; candidate deployed
+
+T22's focused removed-client scenario is now independently accepted for committed 2a07e37. See independent-removal-review08.md/.json/.cjs and three screenshots. A Git-exported disposable copy had its tutorial module and one App mount/import removed, was built and served from its own dist, and positively rendered Login, Help with a synthetic article, and the authenticated Technician Workbench with synthetic identity, lab and queue. No tutorial assets, page errors or attempted writes. Index SHA 8f08e32b6faee568a61114850273af799d9bb7b00cb0abda27ae3219e0ba8bec. Original app/database untouched. This closes the bounded removal requirement; do not repeat that build or present it as real authentication/backend acceptance.
+
+Read-only SSH at 14:27 now confirms healthy soilfer-lims:v3.5.8-2a07e37. The earlier statement that b7fd307 is the latest live smoke was time-specific; exact new public assets and anonymous smoke are being checked. The three small code corrections above remain open; deployment itself does not close them. Finish forward without whole-app rollback.

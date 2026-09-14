@@ -1,0 +1,76 @@
+{
+  "time": "2026-09-14T12:26:17.811Z",
+  "candidate": "2a07e37bc48b10ff393af2a00a38e10b579d86ad",
+  "scope": "Only a new isolated Git-exported client copy was modified. All API reads mocked; writes and external network blocked. No application backend/database or production access.",
+  "checks": {
+    "login": {
+      "route": "/login",
+      "usernameVisible": true,
+      "passwordVisible": true,
+      "heading": [
+        "Sign in to SoilFER LIMS"
+      ],
+      "guideCount": 0,
+      "authPostAttempted": false
+    },
+    "help": {
+      "route": "/help",
+      "heading": [
+        "At the bench"
+      ],
+      "syntheticArticleVisible": true,
+      "guideCount": 0
+    },
+    "workbench": {
+      "route": "/workbench",
+      "heading": "Technician Workbench",
+      "identityVisible": true,
+      "roleAndLabVisible": true,
+      "navigationVisible": true,
+      "queueFetched": true,
+      "guideCount": 0
+    }
+  },
+  "apiReads": [
+    "/api/public/i18n/bootstrap",
+    "/api/admin/settings",
+    "/api/config/analyses",
+    "/api/auth/me",
+    "/api/help/topics",
+    "/api/help/articles",
+    "/api/help/faqs",
+    "/api/notifications",
+    "/api/messages/conversations",
+    "/api/workbench/queue",
+    "/api/workbench/v2/receipts"
+  ],
+  "blockedWrites": [],
+  "blockedExternal": [
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2"
+  ],
+  "browserErrors": [],
+  "tempDirectory": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-independent-removal08-nomjas",
+  "removal": {
+    "importCountRemoved": 1,
+    "mountCountRemoved": 1,
+    "moduleExists": false,
+    "remainingTutorialReferencesInApp": false,
+    "retainedInertPageAnchors": true
+  },
+  "build": {
+    "exitCode": 0,
+    "log": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-independent-removal08-nomjas\\build.log",
+    "indexSHA256": "8f08e32b6faee568a61114850273af799d9bb7b00cb0abda27ae3219e0ba8bec",
+    "tutorialAssets": []
+  },
+  "servedDist": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-independent-removal08-nomjas\\client\\dist",
+  "servedOrigin": "http://127.0.0.1:55578",
+  "pass": true,
+  "limitations": [
+    "Synthetic authenticated session plus mocked /api/auth/me verifies client identity rendering; real credential acceptance was intentionally not tested.",
+    "This focused removal check does not certify backend operations, all permissions, human usability or a production deployment.",
+    "Temporary directory intentionally retained; no original directory was deleted or moved."
+  ]
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import './tutorial.css';
 import { useTutorialSession, PATH_STOPS } from './useTutorialSession';
 import { chapters } from './content/chapters';
@@ -56,6 +57,7 @@ export default function TutorialShell({ onExit, onPause }) {
     } = useTutorialSession(onExit, onPause);
 
     const {
+        token,
         authStatus,
         verifiedUser,
         isAuthenticated,
@@ -74,16 +76,41 @@ export default function TutorialShell({ onExit, onPause }) {
     const coachTitleRef = useRef(null);
     const containerRef = useRef(null);
     const priorFocusRef = useRef(null);
+    const isMountedRef = useRef(true);
+    const sampleLookupAbortRef = useRef(null);
+    const verifiedSampleRef = useRef(null); // { sampleId, humanInput, actorKey }
+    const sampleCheckSeqRef = useRef(0);
 
-    // Reset/clear any live refs if identity changed or actor/lab changed
+    // Cancel in-flight sample check and invalidate on unmount
     useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+            if (sampleLookupAbortRef.current) {
+                try { sampleLookupAbortRef.current.abort(); } catch {}
+                sampleLookupAbortRef.current = null;
+            }
+            sampleCheckSeqRef.current++;
+        };
+    }, []);
+
+    // Invalidate and cancel pending lookup on actor/lab/token, chapter, or sample changes
+    useEffect(() => {
+        if (sampleLookupAbortRef.current) {
+            try { sampleLookupAbortRef.current.abort(); } catch {}
+            sampleLookupAbortRef.current = null;
+        }
+        sampleCheckSeqRef.current++;
+
         if (identityChanged) {
             acknowledgeIdentityChange();
         }
         if (setSelectedSampleId) {
             setSelectedSampleId(null);
         }
-    }, [identityChanged, acknowledgeIdentityChange, verifiedUser?.id, verifiedUser?.labId]);
+        verifiedSampleRef.current = null;
+        setNavNotice(null);
+    }, [identityChanged, acknowledgeIdentityChange, verifiedUser?.id, verifiedUser?.labId, token, state?.step]);
 
     // Save previous active focus when entering tutorial
     useEffect(() => {
@@ -155,7 +182,26 @@ export default function TutorialShell({ onExit, onPause }) {
             if (val !== undefined) {
                 return val;
             }
-            // Track actual runtime fallback when non-English
+
+            // Key missing in active localized dictionary:
+            // Attempt to resolve corresponding English root or common key before returning raw string
+            let enVal = undefined;
+            if (state?.language !== 'en' && LOCALES.en) {
+                enVal = resolve(LOCALES.en, parts);
+                if (enVal === undefined && LOCALES.en.common) {
+                    enVal = resolve(LOCALES.en.common, parts);
+                }
+            }
+
+            if (enVal !== undefined) {
+                if (state?.language && state.language !== 'en' && !fallbackSeenRef.current.has(keyPath)) {
+                    fallbackSeenRef.current.add(keyPath);
+                    setTimeout(() => setFallbackOccurred(true), 0);
+                }
+                return enVal;
+            }
+
+            // If not found in English either, record fallback and return explicit fallback or raw keyPath
             if (state?.language && state.language !== 'en' && !fallbackSeenRef.current.has(keyPath)) {
                 fallbackSeenRef.current.add(keyPath);
                 setTimeout(() => setFallbackOccurred(true), 0);
@@ -179,17 +225,37 @@ export default function TutorialShell({ onExit, onPause }) {
     const currentChapter = chapters[step] || chapters[0];
     const currentTubePractice = (practiceByTube && (practiceByTube[sampleTube] || practiceByTube[1])) || {};
 
+    const handleExit = () => {
+        isMountedRef.current = false;
+        if (sampleLookupAbortRef.current) {
+            try { sampleLookupAbortRef.current.abort(); } catch {}
+            sampleLookupAbortRef.current = null;
+        }
+        sampleCheckSeqRef.current++;
+        verifiedSampleRef.current = null;
+        exitTutorial();
+    };
+
+    const handlePause = () => {
+        if (sampleLookupAbortRef.current) {
+            try { sampleLookupAbortRef.current.abort(); } catch {}
+            sampleLookupAbortRef.current = null;
+        }
+        sampleCheckSeqRef.current++;
+        pause();
+    };
+
     // Escape listener to pause
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && !state.paused && !mustChangePassword) {
                 e.preventDefault();
-                pause();
+                handlePause();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [state.paused, pause, mustChangePassword]);
+    }, [state.paused, mustChangePassword]);
 
     // Modal Mode: Trap Tab/Shift+Tab focus
     useEffect(() => {
@@ -362,10 +428,10 @@ export default function TutorialShell({ onExit, onPause }) {
     }
 
     const getChapterStatus = (index) => {
+        if (!activeStops.includes(index)) return 'unavailable';
         if (practicedSet.has(index)) return 'practiced';
         if (viewedSet.has(index)) return 'viewed';
         if (skippedSet.has(index)) return 'skipped';
-        if (!activeStops.includes(index)) return 'unavailable';
         if (index === step) return 'current';
         return 'pending';
     };
@@ -443,38 +509,157 @@ export default function TutorialShell({ onExit, onPause }) {
         return false;
     };
 
-    const performNavigation = (customUrl = null) => {
+    const performNavigation = async (customUrl = null) => {
         hasDirtyInputRef.current = false;
         if (customUrl) {
             navigate(customUrl);
             return;
         }
-        const pathMatch = location.pathname.match(/\/samples\/([^\/]+)/);
-        const querySampleId = new URLSearchParams(location.search).get('sampleId');
-        let rawSampleId = null;
-        try {
-            rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim())
-                || (pathMatch ? decodeURIComponent(pathMatch[1]) : null)
-                || querySampleId;
-        } catch {
-            rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim()) || querySampleId;
-        }
-        const currentSelectedSampleId = rawSampleId || null;
 
-        const targetPath = currentChapter.resolveRoute
-            ? currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: currentSelectedSampleId })
-            : currentChapter.route;
-        if (!targetPath) {
-            setNavNotice(t('sampleRequiredNotice', 'Select an authorized sample from the laboratory list to view its workflow map. Docked guidance remains active.'));
+        // Ignore navigation if guide is unmounting or exited
+        if (!isMountedRef.current) return;
+
+        const actorKey = verifiedUser ? `${verifiedUser.id}:${verifiedUser.labId || ''}` : 'anonymous';
+
+        if (currentChapter.resolveRoute) {
+            if (currentChapter.id === 'trace') {
+                const pathMatch = location.pathname.match(/\/samples\/([^\/]+)/);
+                const querySampleId = new URLSearchParams(location.search).get('sampleId');
+                let urlCandidate = null;
+                try {
+                    urlCandidate = pathMatch ? decodeURIComponent(pathMatch[1]) : (querySampleId || null);
+                } catch {
+                    urlCandidate = querySampleId || null;
+                }
+
+                // Selected sample from current user session
+                let candidateId = (state.selectedSampleId && state.selectedSampleId.trim()) || null;
+
+                // Fall back to urlCandidate only if no explicit selection in state
+                if (!candidateId && urlCandidate) {
+                    candidateId = urlCandidate;
+                }
+
+                if (!candidateId) {
+                    setNavNotice(t('sampleRequiredNotice', 'Select an authorized sample from the laboratory list to view its workflow map. Docked guidance remains active.'));
+                    return;
+                }
+
+                // Check if already verified for this exact actor
+                if (verifiedSampleRef.current && (verifiedSampleRef.current.sampleId === candidateId || verifiedSampleRef.current.humanInput === candidateId) && verifiedSampleRef.current.actorKey === actorKey) {
+                    const canonicalId = verifiedSampleRef.current.sampleId;
+                    const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: canonicalId });
+                    if (targetPath && isMountedRef.current) {
+                        const sep = targetPath.includes('?') ? '&' : '?';
+                        const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+                        navigate(finalUrl);
+                    }
+                    return;
+                }
+
+                // Invalidate any previous pending lookup
+                if (sampleLookupAbortRef.current) {
+                    try { sampleLookupAbortRef.current.abort(); } catch {}
+                    sampleLookupAbortRef.current = null;
+                }
+
+                const abortController = new AbortController();
+                sampleLookupAbortRef.current = abortController;
+                const currentSeq = ++sampleCheckSeqRef.current;
+
+                setNavNotice(t('sampleVerifying', 'Verifying sample access...'));
+
+                try {
+                    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                    const res = await axios.get(`/api/samples/${encodeURIComponent(candidateId)}/detail`, {
+                        headers,
+                        signal: abortController.signal,
+                        timeout: 6000
+                    });
+
+                    // Invalidate if sequence changed, request was aborted, or component unmounted/exited
+                    if (sampleCheckSeqRef.current !== currentSeq || abortController.signal.aborted || !isMountedRef.current) {
+                        return;
+                    }
+
+                    // Check that verified actor has not changed while waiting for response
+                    const freshActorKey = verifiedUser ? `${verifiedUser.id}:${verifiedUser.labId || ''}` : 'anonymous';
+                    if (freshActorKey !== actorKey) {
+                        return;
+                    }
+
+                    const canonicalSample = res.data?.sample;
+                    const canonicalId = canonicalSample?.id;
+
+                    if (res.status === 200 && canonicalId) {
+                        verifiedSampleRef.current = {
+                            sampleId: canonicalId,
+                            humanInput: candidateId,
+                            actorKey
+                        };
+                        setNavNotice(null);
+
+                        const targetPath = currentChapter.resolveRoute({
+                            isAuthenticated,
+                            user: verifiedUser,
+                            authStatus,
+                            selectedSampleId: canonicalId
+                        });
+
+                        if (targetPath && isMountedRef.current) {
+                            const sep = targetPath.includes('?') ? '&' : '?';
+                            const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+                            navigate(finalUrl);
+                        }
+                    } else {
+                        verifiedSampleRef.current = null;
+                        if (setSelectedSampleId) setSelectedSampleId(null);
+                        setNavNotice(t('sampleCheckError', 'Unable to verify sample access. Select an authorized sample from your laboratory list.'));
+                    }
+                } catch (err) {
+                    // Silent cancellation on abort / exit / context change
+                    if (axios.isCancel(err) || err.name === 'CanceledError' || err.name === 'AbortError' || abortController.signal.aborted) {
+                        return;
+                    }
+                    if (sampleCheckSeqRef.current !== currentSeq || !isMountedRef.current) {
+                        return;
+                    }
+                    verifiedSampleRef.current = null;
+                    if (setSelectedSampleId) setSelectedSampleId(null);
+                    const status = err.response?.status;
+                    if (status === 403) {
+                        setNavNotice(t('sampleForbiddenNotice', 'Access denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.'));
+                    } else if (status === 404) {
+                        setNavNotice(t('sampleNotFoundNotice', 'Sample not found. Select an authorized sample from your laboratory list.'));
+                    } else {
+                        setNavNotice(t('sampleCheckError', 'Unable to verify sample access. Select an authorized sample from your laboratory list.'));
+                    }
+                } finally {
+                    if (sampleLookupAbortRef.current === abortController) {
+                        sampleLookupAbortRef.current = null;
+                    }
+                }
+                return;
+            }
+
+            const targetPath = currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: state.selectedSampleId });
+            if (targetPath && isMountedRef.current) {
+                const sep = targetPath.includes('?') ? '&' : '?';
+                const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+                navigate(finalUrl);
+            }
             return;
         }
 
-        const sep = targetPath.includes('?') ? '&' : '?';
-        const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
-        navigate(finalUrl);
+        const targetPath = currentChapter.route;
+        if (targetPath && isMountedRef.current) {
+            const sep = targetPath.includes('?') ? '&' : '?';
+            const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+            navigate(finalUrl);
+        }
     };
 
-    const handleNavigateRealPage = () => {
+    const handleNavigateRealPage = async () => {
         if (!currentChapter.resolveRoute && !currentChapter.route) return;
 
         if (currentChapter.requiredPermission && !hasPermission(currentChapter.requiredPermission)) {
@@ -489,7 +674,7 @@ export default function TutorialShell({ onExit, onPause }) {
             return;
         }
 
-        performNavigation();
+        await performNavigation();
     };
 
     const renderQuickOverviewDiagram = (chapterId) => {
@@ -666,14 +851,14 @@ export default function TutorialShell({ onExit, onPause }) {
                             type="button"
                             className="quiet"
                             id="pause"
-                            onClick={pause}
+                            onClick={handlePause}
                         >
                             {t('common.pause', 'Pause')}
                         </button>
                         <button
                             type="button"
                             id="exit"
-                            onClick={exitTutorial}
+                            onClick={handleExit}
                         >
                             {t('common.exitGuide', 'Exit guide ↗')}
                         </button>
@@ -1232,7 +1417,7 @@ export default function TutorialShell({ onExit, onPause }) {
                             type="button"
                             className="quiet small"
                             id="pause"
-                            onClick={pause}
+                            onClick={handlePause}
                             style={{ padding: '4px 8px', minHeight: '30px' }}
                         >
                             {t('common.pause', 'Pause')}
@@ -1241,7 +1426,7 @@ export default function TutorialShell({ onExit, onPause }) {
                             type="button"
                             className="small"
                             id="exit"
-                            onClick={exitTutorial}
+                            onClick={handleExit}
                             style={{ padding: '4px 10px', minHeight: '30px' }}
                         >
                             {t('common.exitGuide', 'Exit guide ↗')}

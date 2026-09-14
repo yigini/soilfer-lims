@@ -508,5 +508,9 @@
     "defaultDesc": "Un registre connecté reliant l'arrivée des échantillons, les tâches analytiques et les rapports vérifiés.",
     "prepareTitle": "Préparation des échantillons",
     "prepareDesc": "Les échantillons de sol sont séchés, broyés et tamisés afin de peser des fractions homogènes pour les analyses."
-  }
+  },
+  "sampleForbiddenNotice": "Accès refusé : L'échantillon appartient à un autre laboratoire ou n'est pas accessible avec votre rôle actuel. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
+  "sampleNotFoundNotice": "Échantillon non trouvé. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
+  "sampleCheckError": "Impossible de vérifier l'accès à l'échantillon. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
+  "sampleVerifying": "Vérification de l'accès à l'échantillon..."
 }

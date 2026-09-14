@@ -508,5 +508,9 @@
     "defaultDesc": "Un registro conectado que vincula la llegada de muestras, las tareas analíticas y los informes verificados.",
     "prepareTitle": "Preparación de muestras",
     "prepareDesc": "Las muestras de suelo se secan, trituran y tamizan para pesar porciones de prueba homogéneas para el análisis."
-  }
+  },
+  "sampleForbiddenNotice": "Acceso denegado: La muestra pertenece a otro laboratorio o no es accesible con su rol actual. Seleccione una muestra autorizada de la lista de su laboratorio.",
+  "sampleNotFoundNotice": "Muestra no encontrada. Seleccione una muestra autorizada de la lista de su laboratorio.",
+  "sampleCheckError": "No se pudo verificar el acceso a la muestra. Seleccione una muestra autorizada de la lista de su laboratorio.",
+  "sampleVerifying": "Verificando acceso a la muestra..."
 }

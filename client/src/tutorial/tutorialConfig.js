@@ -3,11 +3,11 @@
 
 export const TUTORIAL_CONFIG = {
     // Master availability flag for the tutorial module
-    // Default-off build setting per implementation plan: configurable via build environment
-    // or set during rollout window. Defaults to true in candidate build if not explicitly disabled.
+    // Default-off build setting: enabled only when VITE_TUTORIAL_ENABLED is explicitly true.
+    // Evaluates to false by default when absent or unset.
     enabled: typeof import.meta.env !== 'undefined' && import.meta.env.VITE_TUTORIAL_ENABLED !== undefined
         ? (import.meta.env.VITE_TUTORIAL_ENABLED === 'true' || import.meta.env.VITE_TUTORIAL_ENABLED === true)
-        : true,
+        : false,
     // Optional retirement date (ISO string or timestamp). If Date.now() > retiredAt, guide is retired.
     // Default null means active while enabled.
     retiredAt: null

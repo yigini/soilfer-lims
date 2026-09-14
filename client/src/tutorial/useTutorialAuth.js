@@ -38,16 +38,16 @@ export function useTutorialAuth() {
     const { user: authContextUser, token } = useAuth();
     const [authStatus, setAuthStatus] = useState('verifying'); // 'verifying' | 'verified' | 'anonymous' | 'unavailable'
     const [verifiedUser, setVerifiedUser] = useState(null);
-    const priorUserIdRef = useRef(null);
+    const priorActorRef = useRef(null);
     const [identityChanged, setIdentityChanged] = useState(false);
 
     useEffect(() => {
         if (!token) {
             setVerifiedUser(null);
             setAuthStatus('anonymous');
-            if (priorUserIdRef.current !== null) {
+            if (priorActorRef.current !== null) {
                 setIdentityChanged(true);
-                priorUserIdRef.current = null;
+                priorActorRef.current = null;
             }
             return;
         }
@@ -64,15 +64,20 @@ export function useTutorialAuth() {
         .then(res => {
             const user = res.data?.data || res.data;
             if (user && user.id) {
-                if (priorUserIdRef.current && priorUserIdRef.current !== user.id) {
+                const actorKey = `${user.id}:${user.labId || ''}`;
+                if (priorActorRef.current && priorActorRef.current !== actorKey) {
                     setIdentityChanged(true);
                 }
-                priorUserIdRef.current = user.id;
+                priorActorRef.current = actorKey;
                 setVerifiedUser(user);
                 setAuthStatus('verified');
             } else {
                 setVerifiedUser(null);
                 setAuthStatus('anonymous');
+                if (priorActorRef.current !== null) {
+                    setIdentityChanged(true);
+                    priorActorRef.current = null;
+                }
             }
         })
         .catch(err => {
@@ -109,6 +114,7 @@ export function useTutorialAuth() {
     }, [authStatus, verifiedUser]);
 
     return {
+        token,
         authStatus,
         verifiedUser: effectiveUser,
         isAuthenticated: authStatus === 'verified' && Boolean(effectiveUser),
