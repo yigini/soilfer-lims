@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-14T01:54:47.702Z",
+  "checkedAt": "2026-09-14T02:18:31.076Z",
   "totalContracts": 20,
   "passedContracts": 20,
   "allPassed": true,
@@ -9,8 +9,32 @@
   "contracts": [
     {
       "id": "A01",
-      "title": "Foreign project scope isolation",
+      "title": "foreign project detail/stats/labs/samples/import run/Kobo metadata by known ID",
+      "expected": "Deny consistently; no target, lab names, counts, samples or foreign conflict details leaked",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "foreign_detail_denied_403",
+          "passed": true
+        },
+        {
+          "name": "foreign_stats_denied_403",
+          "passed": true
+        },
+        {
+          "name": "foreign_lab_access_denied_403",
+          "passed": true
+        },
+        {
+          "name": "foreign_samples_denied_403",
+          "passed": true
+        },
+        {
+          "name": "foreign_kobo_metadata_denied_403",
+          "passed": true
+        }
+      ],
       "details": {
         "detail": 403,
         "stats": 403,
@@ -21,8 +45,24 @@
     },
     {
       "id": "A02",
-      "title": "Servicing manager scope and boundary",
+      "title": "shared-project service manager list, detail, counts, samples, export",
+      "expected": "Identical own-lab sample scope; cannot archive/edit whole project or remove other lab",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "servicing_manager_sees_own_samples_only",
+          "passed": true
+        },
+        {
+          "name": "servicing_manager_archive_forbidden_403",
+          "passed": true
+        },
+        {
+          "name": "servicing_manager_lab_membership_modification_forbidden_403",
+          "passed": true
+        }
+      ],
       "details": {
         "sampleCount": 1,
         "archiveStatus": 403,
@@ -31,8 +71,20 @@
     },
     {
       "id": "A03",
-      "title": "Generic PUT status and junction protection",
+      "title": "owner manager generic PUT with status/owner/assignedLabIds",
+      "expected": "Reject or route through exact authorized command; unknown status rejected; no silent junction divergence",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "unknown_status_rejected_400",
+          "passed": true
+        },
+        {
+          "name": "generic_put_assignedLabIds_bypass_blocked_400",
+          "passed": true
+        }
+      ],
       "details": {
         "badStatus": 400,
         "junctionBypass": 400
@@ -40,8 +92,16 @@
     },
     {
       "id": "A04",
-      "title": "National manager country scope boundary",
+      "title": "national manager targets outside-country lab or multi-country governance beyond delegation",
+      "expected": "Deny; no partial project/config/grant/audit mutation",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "national_manager_cross_country_creation_denied_403",
+          "passed": true
+        }
+      ],
       "details": {
         "status": 403,
         "error": {
@@ -54,16 +114,40 @@
     },
     {
       "id": "A05",
-      "title": "Coordinator creation grant and access",
+      "title": "coordinator create/edit/read and empty grant",
+      "expected": "Consistent defined capability; newly created project has explicit authorized creator grant if creation allowed; empty scope never global",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "coordinator_create_succeeds",
+          "passed": true
+        },
+        {
+          "name": "creator_grant_allows_subsequent_read",
+          "passed": true
+        }
+      ],
       "details": {
         "createStatus": 200
       }
     },
     {
       "id": "A06",
-      "title": "Explicit empty servicing labs without country fallback",
+      "title": "remove all explicit service labs, including country-only fallback case",
+      "expected": "Explicit empty remains empty; no inferred grant resurrection",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "remove_servicing_labs_succeeds",
+          "passed": true
+        },
+        {
+          "name": "explicit_empty_remains_empty_no_country_fallback",
+          "passed": true
+        }
+      ],
       "details": {
         "patchStatus": 200,
         "servicingCount": 0
@@ -71,8 +155,20 @@
     },
     {
       "id": "A07",
-      "title": "Inactive laboratory governance guard",
+      "title": "inactive lab, lab transfer, staff deactivation/grant revocation",
+      "expected": "No new prohibited assignments/imports; pending work explicitly resolved; stale sessions and sync reauthorize",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "inactive_lab_servicing_assignment_rejected",
+          "passed": true
+        },
+        {
+          "name": "inactive_lab_sync_rejected_400",
+          "passed": true
+        }
+      ],
       "details": {
         "patchStatus": 400,
         "syncStatus": 400,
@@ -81,8 +177,16 @@
     },
     {
       "id": "A08",
-      "title": "Archival blocker with expected unaccounted samples",
+      "title": "archive with expected unaccounted shipment, active work/import/transfer",
+      "expected": "Blocking reasons; no state change or result approval; user can resolve each blocker",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "archive_blocked_by_expected_samples_422",
+          "passed": true
+        }
+      ],
       "details": {
         "status": 422,
         "error": "CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES"
@@ -90,8 +194,28 @@
     },
     {
       "id": "A09",
-      "title": "Eligible archive and restore lifecycle",
+      "title": "eligible archive/restore",
+      "expected": "Exactly one commit/audit receipt, valid response envelope; project/sample/history/report links remain intact",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "eligible_archive_succeeds_200",
+          "passed": true
+        },
+        {
+          "name": "archived_status_confirmed",
+          "passed": true
+        },
+        {
+          "name": "eligible_restore_succeeds_200",
+          "passed": true
+        },
+        {
+          "name": "restored_status_active",
+          "passed": true
+        }
+      ],
       "details": {
         "archiveStatus": 200,
         "restoredStatus": "ACTIVE"
@@ -99,8 +223,20 @@
     },
     {
       "id": "A10",
-      "title": "Denial of destructive sample detachment on delete",
+      "title": "delete active/released project",
+      "expected": "No sample unlinking; policy denies destructive operation, offers governed archive; only eligible empty draft tombstone succeeds",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "delete_with_samples_denied_400",
+          "passed": true
+        },
+        {
+          "name": "sample_links_preserved_untouched",
+          "passed": true
+        }
+      ],
       "details": {
         "status": 400,
         "samplePreserved": true
@@ -108,8 +244,20 @@
     },
     {
       "id": "A11",
-      "title": "Atomic rollback on transaction failure",
+      "title": "injected audit/database failure during create/update/membership/import chunk",
+      "expected": "Atomic rollback for the affected unit; no success-looking partial state; retry receipt exact",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "transaction_fails_with_500_on_audit_error",
+          "passed": true
+        },
+        {
+          "name": "atomic_rollback_leaves_persisted_record_pristine",
+          "passed": true
+        }
+      ],
       "details": {
         "putStatus": 500,
         "persistedName": "Initial Pristine Name"
@@ -117,18 +265,62 @@
     },
     {
       "id": "A12",
-      "title": "Idempotency and duplicate command protection",
+      "title": "lost response and duplicate same idempotency key; concurrent revision change",
+      "expected": "Exactly once effect; operation lookup returns result; stale conflict prevents overwrite",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "exact_once_manifest_execution",
+          "passed": true
+        },
+        {
+          "name": "lost_response_replay_no_mutation_duplication",
+          "passed": true
+        },
+        {
+          "name": "operation_command_receipt_lookup",
+          "passed": true
+        },
+        {
+          "name": "operation_route_lookup_200",
+          "passed": true
+        },
+        {
+          "name": "scope_revocation_before_replay_denied_403",
+          "passed": true
+        },
+        {
+          "name": "payload_collision_rejected_409",
+          "passed": true
+        },
+        {
+          "name": "stale_revision_conflict_prevented_409",
+          "passed": true
+        }
+      ],
       "details": {
         "firstStatus": 200,
-        "secondStatus": 200,
-        "collisionStatus": 409
+        "replayStatus": 200,
+        "lookupStatus": 200,
+        "revocationStatus": 403,
+        "collisionStatus": 409,
+        "staleStatus": 409,
+        "hasReceipt": true
       }
     },
     {
       "id": "A13",
-      "title": "Manifest duplicate detection and honest receipt",
+      "title": "duplicate sample in create/manifest",
+      "expected": "Honest row result or atomic rejection; never successful “N registered” if zero were created",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "honest_count_and_skipped_receipt",
+          "passed": true
+        }
+      ],
       "details": {
         "status": 200,
         "data": {
@@ -139,38 +331,154 @@
     },
     {
       "id": "A14",
-      "title": "Import preview bounded validation and confidentiality",
+      "title": "manifest invalid file/huge file/leading zero/localized header/duplicate/invalid target",
+      "expected": "Safe mapping preview, bounded server validation, exact rejected rows; no script execution or unintended identifier conversion",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "huge_payload_bounded_validation_400",
+          "passed": true
+        },
+        {
+          "name": "localized_header_mapping_es_fr_pt",
+          "passed": true
+        },
+        {
+          "name": "leading_zero_identifier_preservation",
+          "passed": true
+        },
+        {
+          "name": "script_injection_sanitization_400",
+          "passed": true
+        },
+        {
+          "name": "foreign_conflict_confidentiality",
+          "passed": true
+        },
+        {
+          "name": "invalid_destination_lab_rejected_400",
+          "passed": true
+        },
+        {
+          "name": "preview_to_commit_hash_tamper_detection_409",
+          "passed": true
+        },
+        {
+          "name": "destination_tampering_rejected_409",
+          "passed": true
+        },
+        {
+          "name": "expired_preview_token_rejected_409",
+          "passed": true
+        },
+        {
+          "name": "preview_to_commit_match_succeeds_200",
+          "passed": true
+        }
+      ],
       "details": {
-        "valid": false,
-        "hash": true,
-        "foreignHidden": true
+        "hugeStatus": 400,
+        "localizedCount": 3,
+        "tamperStatus": 409,
+        "destinationTamperStatus": 409,
+        "expiredStatus": 409,
+        "validCommitStatus": 200
       }
     },
     {
       "id": "A15",
-      "title": "Stage counts aggregation and physical receipt decoupling",
+      "title": "counts and scope across all known/unknown states",
+      "expected": "Registered equals stage sum; cumulative received is separate; unknown records visible; same-stage list total matches tile; no task double counting",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "registered_equals_stage_sum",
+          "passed": true
+        },
+        {
+          "name": "cumulative_received_decoupled_from_registered",
+          "passed": true
+        }
+      ],
       "details": {
-        "registered": 5,
-        "stageSum": 5,
-        "everReceived": 3
+        "registered": 6,
+        "stageSum": 6,
+        "everReceived": 1
       }
     },
     {
       "id": "A16",
-      "title": "Data reconciliation apply and idempotent rerun",
+      "title": "data reconcile dry run/apply/rerun",
+      "expected": "No grant expansion or sample/result loss; exact before/after references and counts; repeat is a no-op; ambiguity unresolved rather than guessed",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "dry_run_discrepancy_detection_no_mutations",
+          "passed": true
+        },
+        {
+          "name": "apply_unambiguous_reconciliation",
+          "passed": true
+        },
+        {
+          "name": "conflict_ambiguity_kept_unresolved_no_grant_expansion",
+          "passed": true
+        },
+        {
+          "name": "stale_superset_kept_unresolved_no_grant_expansion",
+          "passed": true
+        },
+        {
+          "name": "inactive_lab_conflict_kept_unresolved",
+          "passed": true
+        },
+        {
+          "name": "missing_owner_conflict_kept_unresolved",
+          "passed": true
+        },
+        {
+          "name": "country_only_no_automatic_grants",
+          "passed": true
+        },
+        {
+          "name": "explicit_empty_remains_empty",
+          "passed": true
+        },
+        {
+          "name": "rerun_idempotent_no_op",
+          "passed": true
+        }
+      ],
       "details": {
-        "before": 0,
-        "after": 1,
-        "rerunMissing": 0
+        "dryRunDiscrepancies": 10,
+        "unresolvedAmbiguities": 6,
+        "appliedCount": 4,
+        "rerunAppliedCount": 0
       }
     },
     {
       "id": "A17",
-      "title": "Kobo explicit scoping and credential redaction",
+      "title": "Kobo missing explicit target, two assets/labs, partial failure/retry, pause queued job",
+      "expected": "No first-project fallback or duplicate specimens; state rechecked; row and run receipt accurate; secrets absent",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "cross_lab_kobo_config_denied_403",
+          "passed": true
+        },
+        {
+          "name": "own_lab_kobo_config_retrieved_200",
+          "passed": true
+        },
+        {
+          "name": "api_token_strictly_redacted",
+          "passed": true
+        }
+      ],
       "details": {
         "foreignStatus": 403,
         "ownStatus": 200,
@@ -179,26 +487,133 @@
     },
     {
       "id": "A18",
-      "title": "Analysis plan modification respects recorded results",
+      "title": "project source/default plan changes with existing draft/ordered/released samples",
+      "expected": "Prior origin and effective plan remain; discard/receipt behavior stable; workbench gates/results unchanged",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "project_source_and_bundle_mutation_succeeds",
+          "passed": true
+        },
+        {
+          "name": "prior_origin_immutability_preserved",
+          "passed": true
+        },
+        {
+          "name": "effective_plan_stability_preserved",
+          "passed": true
+        },
+        {
+          "name": "workbench_gates_and_results_unchanged",
+          "passed": true
+        },
+        {
+          "name": "receipt_discard_stability_verified",
+          "passed": true
+        },
+        {
+          "name": "sample_order_protection_subcase_409",
+          "passed": true
+        }
+      ],
       "details": {
-        "status": 409,
-        "error": "Cannot remove analysis 'CEC': a result is already recorded (15.2)"
+        "projectUpdateStatus": 200,
+        "draftOrigin": "FIELD_GPS",
+        "orderProtectionStatus": 409
       }
     },
     {
       "id": "A19",
-      "title": "Archived project read access and report stability",
+      "title": "archived project through reports/SIS",
+      "expected": "Authorized released records remain available per release policy; unapproved/draft data inaccessible; project identity remains stable",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "eligible_project_archival_succeeds_200",
+          "passed": true
+        },
+        {
+          "name": "project_identity_remains_stable",
+          "passed": true
+        },
+        {
+          "name": "authorized_report_sample_lookup_published",
+          "passed": true
+        },
+        {
+          "name": "authorized_report_content_available",
+          "passed": true
+        },
+        {
+          "name": "unapproved_sample_report_denial_403",
+          "passed": true
+        },
+        {
+          "name": "sis_default_query_restricts_to_approved_released",
+          "passed": true
+        },
+        {
+          "name": "sis_wildcard_query_restricts_to_approved_released",
+          "passed": true
+        },
+        {
+          "name": "sis_pre_release_status_query_bypass_strictly_denied",
+          "passed": true
+        },
+        {
+          "name": "sis_approved_status_query_accessible",
+          "passed": true
+        },
+        {
+          "name": "sis_by_id_pre_release_lookup_denied_404",
+          "passed": true
+        },
+        {
+          "name": "sis_by_id_approved_released_lookup_accessible_200",
+          "passed": true
+        },
+        {
+          "name": "sis_geojson_and_matrix_strictly_enforce_release_policy",
+          "passed": true
+        },
+        {
+          "name": "archived_project_released_records_available",
+          "passed": true
+        },
+        {
+          "name": "unauthorized_scope_sis_denial",
+          "passed": true
+        }
+      ],
       "details": {
-        "status": 200,
-        "projectStatus": "ACTIVE"
+        "archiveStatus": 200,
+        "projectStatus": "COMPLETED",
+        "reportStatus": 200,
+        "sisDefaultCount": 2,
+        "preReleaseBypassDenied": true,
+        "approvedQueryCount": 1,
+        "byIdAppStatus": 200,
+        "byIdAccStatus": 404
       }
     },
     {
       "id": "A20",
-      "title": "Protection against query-based scope spoofing",
+      "title": "legacy endpoint/deep link/export/direct API and spoofed scope query",
+      "expected": "Same policy as new routes; no alternate bypass; bookmark opens correct authorized project",
       "passed": true,
+      "coverage": "VERIFIED",
+      "subcases": [
+        {
+          "name": "scope_all_query_spoof_prevented",
+          "passed": true
+        },
+        {
+          "name": "foreign_lab_query_spoof_prevented",
+          "passed": true
+        }
+      ],
       "details": {
         "scopeStatus": 200,
         "labStatus": 200

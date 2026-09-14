@@ -6,13 +6,33 @@ const { normalizeUnit } = require('../services/interpretationService');
 function buildSisWhere(sisAuth, query = {}) {
     const where = {};
 
-    // 1. Status Filter
-    if (query.status && (query.status === 'all' || query.status === '*')) {
-        // Return all statuses
-    } else if (query.status) {
-        where.status = query.status.toUpperCase();
+    // 1. Status Filter - Enforce release policy invariant for external consumers and viewers
+    const isRestrictedConsumer = sisAuth?.type === 'API_KEY' || ['VIEWER', 'EXTERNAL_VIEWER', 'NSIS_CONSUMER'].includes(sisAuth?.role);
+    const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED'];
+
+    if (isRestrictedConsumer) {
+        // External consumers and viewers are strictly restricted to approved/released samples
+        if (query.status && (query.status === 'all' || query.status === '*')) {
+            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
+        } else if (query.status) {
+            const requested = String(query.status).trim().toUpperCase();
+            if (AUTHORIZED_RELEASE_STATUSES.includes(requested)) {
+                where.status = requested;
+            } else {
+                // Requested status is not an approved release status; deny access per release policy invariant
+                where.status = '__denied_unapproved__';
+            }
+        } else {
+            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
+        }
     } else {
-        where.status = { not: 'CANCELLED' };
+        if (query.status && (query.status === 'all' || query.status === '*')) {
+            // Return all statuses
+        } else if (query.status) {
+            where.status = query.status.toUpperCase();
+        } else {
+            where.status = { not: 'CANCELLED' };
+        }
     }
 
     // 2. Country scoping - Intersect key permissions with query parameters
@@ -145,8 +165,8 @@ function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
     try { reception = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : (sample.receptionData || {}); } catch(e) {}
 
     // Extract GPS
-    const lat = field.latitude || field.lat || field.gps_lat || (field.coordinates ? field.coordinates.lat : null) || meta.latitude || meta.lat || meta.gpsY || null;
-    const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || meta.longitude || meta.lng || meta.gpsX || null;
+    const lat = field.latitude || field.lat || field.gps_lat || (field.coordinates ? field.coordinates.lat : null) || meta.latitude || meta.lat || meta.gpsY || sample.latitude || null;
+    const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || meta.longitude || meta.lng || meta.gpsX || sample.longitude || null;
     const accuracy = field.accuracy || field.gps_accuracy || (field.coordinates ? field.coordinates.accuracy : null) || meta.accuracy || null;
 
     // Depth resolution (Sample columns > field metadata > reception)

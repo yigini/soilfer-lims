@@ -244,6 +244,7 @@ function buildProjectSampleScope(actor, project, { authorizedLabIds = null } = {
 module.exports = {
     parseArray,
     canReadProject,
+    canAccessProject: canReadProject,
     canEditProjectPlan,
     canManageProjectAccess,
     canTransitionProject,

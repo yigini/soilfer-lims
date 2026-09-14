@@ -1,0 +1,33 @@
+# Pending implementation review — A12/A14/A16/A19 not yet fully accepted
+
+2026-09-14 02:09 UTC. Pending working-tree changes on a12bec3 observed while Antigravity runs tests; application code is not yet a new independently verified release. This is a source-level review, not a claim that the following cases were reproduced against production. No production writes or duplicate test runs.
+
+## S01: SIS release filter includes unapproved records and query bypass
+
+In server/controllers/sisController.js:buildSisWhere the default/API-key allowlist includes ACCEPTED. workflowContract.js:13 explicitly defines ACCEPTED as intake validated / lab ID assigned; it does not mean the analytical results were approved. The query branch only denies DRAFT, EXPECTED, PROCESSING and PENDING_MANIFEST, then accepts other requested statuses verbatim. An API consumer can therefore request RECEIVED, SUBMITTED_FULL, SUBMITTED_PARTIAL or other unapproved statuses. This contradicts A19 even if a DRAFT-only negative test passes.
+
+Apply the actual shared release policy as an invariant, then intersect query filters with it. Do not expand a denylist or infer release from the word ACCEPTED/COMPLETED. Confirm approved legacy and archived/released history semantics using authoritative release evidence. Exercise list, by-id, GeoJSON, matrix, spectra, delta and stats paths as applicable, with authenticated API-key fixtures for each canonical pre-release state and positive released-record cases. Do not regress the valid released SIS/report history behavior.
+
+## C01: command receipts are not atomic and do not cover full payload
+
+updateProject and uploadManifest call recordReceipt(null, ...) after their mutation transaction. Receipt failure can return an error after data committed; concurrent same-key requests may both act before the unique receipt insert. CommandReceiptService.checkReceipt compares actor/type/target, not payload. Project update and membership updates therefore do not detect reuse of a key with different changes; manifest compares only sample IDs, omitting destination and other behavior-changing fields. Membership replay is checked before current project authorization.
+
+Use one transaction for authorization/revision validation, mutation, audit and receipt. Bind a normalized payload hash including destination/action inputs; on retry reauthorize access before returning stored outcome. Handle concurrent duplicate keys and stale requests deterministically. Validate expectedRevision inside the mutation transaction; updateProject currently checks it outside. The real project UI currently has no expectedRevision/idempotencyKey/previewHash/targetLabId usage found under the project components/workspace, so optional API parameters alone do not provide real-user protection. Wire request creation, retry and receipt lookup to the UI. Test receipt/audit failure rollback, concurrent same-key calls, differing payloads, scope revocation before replay and the actual authorized operation lookup route.
+
+## C02: preview hash is only a checksum of IDs
+
+uploadManifest computes a public SHA256 of only submitted identifiers; the optional hash contains no actor/project/destination/revision/expiry. This detects changed IDs but cannot establish an authorized, current preview or prevent destination changes after preview. previewImport validates that a destination exists/is active but does not use it for canImportProjectSamples (which receives only the current actor lab). Implement the original preview/commit contract with authoritative binding and commit-time authorization. Preserve the separately secured legacy direct path if needed, but do not claim a checksum covers expired/stale previews or real UI wiring.
+
+## REC01: reconciliation still expands some conflicting grants
+
+reconcile_projects.js marks conflict only when both missingInJunction and missingInAssigned are nonempty. Example: authoritative junction servicing B, stale legacy JSON [B,C] => missingInJunction C, missingInAssigned empty => treated unambiguous and C is granted automatically. A removed service lab can be resurrected. This is not covered by a disjoint B-versus-C test.
+
+Use documented canonical authority and distinguish unknown legacy state from explicitly configured empty membership. Treat superset/subset mismatches conservatively, not just disjoint sets. Do not apply an automatic union of grants. Test stale superset, stale subset, explicit empty against stale JSON, inactive lab and missing owner conflicts through the actual production reconciliation function, preserving original access and record references.
+
+## Evidence and next step
+
+19-acceptance-coverage-verified.md is Antigravity-authored, although titled Independent Monitor; it already claims all20/full contracts verified while the above paths are pending. Correct attribution and coverage. Keep these requirements open; the new tests remain useful subcases but cannot certify unsupported behavior. No need to repeat unchanged R/H/I/K tests or redeploy evidence-only commits. Complete the focused implementation/contracts, then use the authorized safe release process and real lab journeys. Monitor ACTIVE.
+
+Handoff verified: Antigravity independently opened this new report from the workspace before a duplicate message was sent. Its visible response acknowledged the ACCEPTED-versus-release mismatch, explicit status-query bypass and receipt atomicity concern, and it is investigating them. No additional prompt sent to duplicate active work. Next monitor should inspect the focused corrections on a stable commit and verify representative denial/rollback cases; no full-acceptance claim accepted.
+
+Heartbeat 2026-09-14 02:19 UTC: Antigravity is still actively implementing this review, not idle or deploying. Pending code now restricts SIS query statuses to APPROVED/RELEASED, adds payload hashing, guarded preview tokens, a receipt lookup route and project-modal request headers; reconciliation now checks owner integrity and more ambiguity cases. These are source observations, not full acceptance. New code remains uncommitted on a12bec3. Latest visible run initially showed 17/20, followed by fixes/reruns; no duplicated tests or prompt were sent by this monitor against moving edits. Next stable review should check receipt transaction/replay concurrency, preservation of the SAME idempotency key on UI retry (current modal code generates a key inside submit), actor/destination-bound preview behavior, and archived released-data semantics. Continue evaluating exact original contracts without accepting the count of green subcases as full completion.

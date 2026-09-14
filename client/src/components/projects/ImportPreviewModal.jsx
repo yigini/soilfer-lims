@@ -63,7 +63,8 @@ export default function ImportPreviewModal({
 
         try {
             const res = await axios.post(`/api/projects/${project.id}/imports/preview`, {
-                sampleIds: lines
+                sampleIds: lines,
+                targetLabId: project.labId || undefined
             });
             setPreviewResult(res.data);
         } catch (err) {
@@ -82,9 +83,25 @@ export default function ImportPreviewModal({
         setErrorMessage('');
 
         try {
+            const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+
+            const headers = {
+                'x-idempotency-key': idempotencyKey
+            };
+            if (project.updatedAt) {
+                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            }
+
             const res = await axios.post(`/api/projects/${project.id}/manifest`, {
-                sampleIds: previewResult.validSampleIds
-            });
+                sampleIds: previewResult.validSampleIds,
+                previewHash: previewResult.previewHash,
+                previewToken: previewResult.previewToken,
+                targetLabId: previewResult.destinationLabId || project.labId || undefined,
+                idempotencyKey
+            }, { headers });
+
             onSuccess?.(res.data);
             onClose();
         } catch (err) {

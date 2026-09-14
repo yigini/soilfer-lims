@@ -2,6 +2,7 @@ const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const projectPolicyService = require('../services/projectPolicyService');
 const projectMembershipService = require('../services/projectMembershipService');
+const commandReceiptService = require('../services/commandReceiptService');
 const defaultAuditCreate = prisma.auditLog?.create;
 
 async function resolveAuthorizedNationalLabIds(user, tx = prisma) {
@@ -498,6 +499,24 @@ exports.updateProject = async (req, res) => {
             return res.status(403).json({ error: 'PROJECT_UPDATE_FORBIDDEN', message: 'Only the project owner laboratory manager or Super Administrator can modify project metadata.' });
         }
 
+        const payloadHash = commandReceiptService.computePayloadHash(updates);
+        const idempotencyKey = updates.idempotencyKey || req.headers['x-idempotency-key'];
+        if (idempotencyKey) {
+            const check = await commandReceiptService.checkReceipt(idempotencyKey, 'PROJECT_UPDATE', req.user.username, `Project:${project.id}`, payloadHash);
+            if (check.isExisting) {
+                if (check.conflict) {
+                    return res.status(409).json({ error: 'Idempotency key collision with differing command parameters' });
+                }
+                // Re-verify authorization before replay
+                if (!projectPolicyService.canEditProject(req.user, project)) {
+                    return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to edit this project.');
+                }
+                return res.json(check.receipt.parsedOutcome);
+            }
+        }
+
+        const expectedRevision = req.headers['if-match'] || req.headers['x-expected-revision'] || updates.expectedRevision || updates.expectedUpdatedAt;
+
         if (updates.code && updates.code !== project.code) {
             return res.status(400).json({ error: 'Cannot change Project Code' });
         }
@@ -510,16 +529,6 @@ exports.updateProject = async (req, res) => {
             }
             if (!projectPolicyService.canTransitionProject(req.user, project, updates.status)) {
                 return res.status(403).json({ error: 'PROJECT_TRANSITION_FORBIDDEN', message: 'You are not authorized to transition project lifecycle state.' });
-            }
-            if (['COMPLETED', 'ARCHIVED', 'CLOSED'].includes(updates.status)) {
-                try {
-                    await validateProjectClosure(project, prisma);
-                } catch (closureErr) {
-                    return res.status(closureErr.statusCode || 422).json({
-                        error: closureErr.code || 'CANNOT_CLOSE_PROJECT',
-                        message: closureErr.message
-                    });
-                }
             }
         }
 
@@ -574,10 +583,32 @@ exports.updateProject = async (req, res) => {
             }
         }
 
-        // Atomic Project Update and Audit Transaction (PM-08, P11)
+        // Atomic Project Update, Closure Validation, Audit and Command Receipt Transaction (PM-08, P11, C01)
         const updated = await prisma.$transaction(async (tx) => {
+            const currentProject = await tx.project.findUnique({
+                where: { id: project.id }
+            });
+            if (!currentProject) {
+                const notFound = new Error('Project not found');
+                notFound.statusCode = 404;
+                throw notFound;
+            }
+
+            // Validate expected revision inside transaction to prevent stale race conditions
+            if (expectedRevision) {
+                const projUpdatedIso = currentProject.updatedAt ? new Date(currentProject.updatedAt).toISOString() : null;
+                const projUpdatedMs = currentProject.updatedAt ? new Date(currentProject.updatedAt).getTime().toString() : null;
+                const matches = expectedRevision === projUpdatedIso || expectedRevision === projUpdatedMs || expectedRevision === `"${projUpdatedIso}"`;
+                if (!matches) {
+                    const staleErr = new Error('Project has been modified by another concurrent operation. Please refresh before saving.');
+                    staleErr.statusCode = 409;
+                    staleErr.code = 'STALE_REVISION';
+                    throw staleErr;
+                }
+            }
+
             if (updates.status !== undefined && ['COMPLETED', 'ARCHIVED', 'CLOSED'].includes(updates.status)) {
-                await validateProjectClosure(project, tx);
+                await validateProjectClosure(currentProject, tx);
             }
 
             const proj = await tx.project.update({
@@ -599,6 +630,17 @@ exports.updateProject = async (req, res) => {
                 await prisma.auditLog.create({ data: auditData });
             } else {
                 await tx.auditLog.create({ data: auditData });
+            }
+
+            if (idempotencyKey) {
+                await commandReceiptService.recordReceipt(tx, {
+                    idempotencyKey,
+                    commandType: 'PROJECT_UPDATE',
+                    targetResource: `Project:${project.id}`,
+                    actor: req.user.username,
+                    status: 'SUCCESS',
+                    outcome: { ...proj, payloadHash }
+                });
             }
 
             return proj;
@@ -647,6 +689,13 @@ exports.updateProject = async (req, res) => {
 
         res.json(updated);
     } catch (err) {
+        if (err.statusCode === 409 || err.code === 'STALE_REVISION') {
+            return res.status(409).json({
+                error: 'STALE_REVISION',
+                code: 'STALE_REVISION',
+                message: err.message
+            });
+        }
         if (err.statusCode === 422 || err.code === 'CANNOT_CLOSE_PROJECT' || err.code === 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES' || err.code === 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK') {
             return res.status(err.statusCode || 422).json({
                 error: err.code || 'CANNOT_CLOSE_PROJECT',
@@ -660,7 +709,7 @@ exports.updateProject = async (req, res) => {
 
 exports.uploadManifest = async (req, res) => {
     const { id } = req.params;
-    const { sampleIds } = req.body;
+    const { sampleIds, previewHash, previewToken, targetLabId: requestedLabId, idempotencyKey: bodyIdempKey } = req.body || {};
 
     if (!Array.isArray(sampleIds) || sampleIds.length === 0) {
         return res.status(400).json({ error: 'Valid sample ID list required' });
@@ -671,21 +720,79 @@ exports.uploadManifest = async (req, res) => {
             where: { OR: [{ id: String(id) }, { code: String(id) }] }
         });
         if (!project) return res.status(404).json({ error: 'Project not found' });
+        const uniqueSampleIds = [...new Set(sampleIds.map(s => String(s).trim()))];
+        const targetLabId = requestedLabId || req.user.labId || project.labId;
 
+        // User authorization for project
+        if (!projectPolicyService.canImportProjectSamples(req.user, project)) {
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
+        }
+
+        // Preview token / hash validation (C02)
+        const crypto = require('crypto');
+        const tokenInput = previewToken || req.headers['x-preview-token'];
+        const hashInput = previewHash || req.headers['x-preview-hash'];
+
+        if (tokenInput) {
+            let tokenData = null;
+            try {
+                tokenData = JSON.parse(Buffer.from(tokenInput, 'base64').toString('utf8'));
+            } catch {
+                return res.status(409).json({ error: 'PREVIEW_TOKEN_INVALID', message: 'Invalid preview token format.' });
+            }
+            const secret = process.env.JWT_SECRET || 'soilfer-secret-key';
+            const { signature, ...payloadToSign } = tokenData;
+            const expectedSig = crypto.createHmac('sha256', secret).update(JSON.stringify(payloadToSign)).digest('hex');
+            if (signature !== expectedSig) {
+                return res.status(409).json({ error: 'PREVIEW_TOKEN_TAMPERED', message: 'Preview token signature mismatch.' });
+            }
+            if (Date.now() > tokenData.expiresAt) {
+                return res.status(409).json({ error: 'PREVIEW_EXPIRED', message: 'Preview token has expired. Please regenerate preview.' });
+            }
+            if (tokenData.projectId && tokenData.projectId !== project.id) {
+                return res.status(409).json({ error: 'PREVIEW_PROJECT_MISMATCH', message: 'Preview token belongs to a different project.' });
+            }
+            if (tokenData.destinationLabId && tokenData.destinationLabId !== targetLabId) {
+                return res.status(409).json({ error: 'PREVIEW_DESTINATION_MISMATCH', message: 'Target laboratory does not match preview destination.' });
+            }
+            if (tokenData.actor && tokenData.actor !== req.user.username) {
+                return res.status(403).json({ error: 'PREVIEW_ACTOR_MISMATCH', message: 'Preview token was created by a different actor.' });
+            }
+            const computedIdsHash = crypto.createHash('sha256').update(JSON.stringify(uniqueSampleIds)).digest('hex');
+            if (tokenData.sampleIdsHash !== computedIdsHash) {
+                return res.status(409).json({ error: 'PREVIEW_HASH_MISMATCH', message: 'Manifest sample IDs do not match the preview token.' });
+            }
+        } else if (hashInput) {
+            const computedHash = crypto.createHash('sha256').update(JSON.stringify(uniqueSampleIds)).digest('hex');
+            const rawHash = crypto.createHash('sha256').update(JSON.stringify(sampleIds.map(s => String(s).trim()))).digest('hex');
+            if (hashInput !== computedHash && hashInput !== rawHash) {
+                return res.status(409).json({
+                    error: 'PREVIEW_HASH_MISMATCH',
+                    message: 'Manifest sample IDs do not match the preview hash. Preview may be expired, modified, or out of sequence.'
+                });
+            }
+        }
+
+        // Validate destination laboratory
+        if (!targetLabId) {
+            return res.status(400).json({ error: 'TARGET_LAB_REQUIRED', message: 'No target laboratory could be resolved for manifest import.' });
+        }
+
+        const destLab = await prisma.lab.findUnique({ where: { id: targetLabId } });
+        if (!destLab || !destLab.isActive) {
+            return res.status(400).json({ error: 'INVALID_DESTINATION_LAB', message: `Destination laboratory '${targetLabId}' does not exist or is inactive.` });
+        }
+
+        if (!projectPolicyService.canImportProjectSamples(req.user, project, targetLabId)) {
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
+        }
+
+        // Admissions status check
         if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'DELETED'].includes(project.status)) {
             return res.status(422).json({
                 error: 'PROJECT_ADMISSIONS_PAUSED',
                 message: `Cannot register or import samples into project '${project.code}' while status is ${project.status}. Admissions are paused.`
             });
-        }
-
-        let targetLabId = req.user.labId || project.labId;
-        if (!targetLabId) {
-            return res.status(400).json({ error: 'TARGET_LAB_REQUIRED', message: 'No target laboratory could be resolved for manifest import.' });
-        }
-
-        if (!projectPolicyService.canImportProjectSamples(req.user, project, targetLabId)) {
-            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
         // Validate identifier format
@@ -699,8 +806,22 @@ exports.uploadManifest = async (req, res) => {
             });
         }
 
+        // Idempotency check
+        const idempotencyKey = bodyIdempKey || req.headers['x-idempotency-key'];
+        const payloadHash = commandReceiptService.computePayloadHash({ sampleIds: uniqueSampleIds, targetLabId });
+        if (idempotencyKey) {
+            const check = await commandReceiptService.checkReceipt(idempotencyKey, 'PROJECT_MANIFEST_UPLOAD', req.user.username, `Project:${project.id}`, payloadHash);
+            if (check.isExisting) {
+                if (check.conflict) {
+                    return res.status(409).json({ error: 'Idempotency key collision with differing command parameters' });
+                }
+                return res.json(check.receipt.parsedOutcome);
+            }
+        }
+
+        const expectedRevision = req.headers['if-match'] || req.headers['x-expected-revision'] || req.body?.expectedRevision;
+
         // Check for duplicates within this batch and against existing db
-        const uniqueSampleIds = [...new Set(sampleIds.map(s => String(s).trim()))];
         const existing = await prisma.sample.findMany({
             where: {
                 OR: [
@@ -711,7 +832,7 @@ exports.uploadManifest = async (req, res) => {
             select: { id: true, originalId: true, projectId: true, projectCode: true }
         });
 
-        // CROSS-PROJECT VALIDATION (Neutral message without disclosing confidential foreign project codes):
+        // CROSS-PROJECT VALIDATION
         const crossProjectConflicts = existing.filter(e =>
             (e.projectId && e.projectId !== project.id) ||
             (e.projectCode && e.projectCode !== project.code)
@@ -734,8 +855,30 @@ exports.uploadManifest = async (req, res) => {
         const newIds = uniqueSampleIds.filter(sid => !existingIds.has(sid) && !existingOriginalIds.has(sid));
         const skippedCount = uniqueSampleIds.length - newIds.length;
 
-        if (newIds.length > 0) {
-            await prisma.$transaction(async (tx) => {
+        const outcome = {
+            messageCode: 'MANIFEST_PROCESSED',
+            messageParams: null,
+            message: `Successfully processed ${uniqueSampleIds.length} IDs.`,
+            data: { count: newIds.length, skipped: skippedCount },
+            requestSampleIds: uniqueSampleIds,
+            payloadHash
+        };
+
+        await prisma.$transaction(async (tx) => {
+            const currentProj = await tx.project.findUnique({ where: { id: project.id } });
+            if (expectedRevision) {
+                const projUpdatedIso = currentProj.updatedAt ? new Date(currentProj.updatedAt).toISOString() : null;
+                const projUpdatedMs = currentProj.updatedAt ? new Date(currentProj.updatedAt).getTime().toString() : null;
+                const matches = expectedRevision === projUpdatedIso || expectedRevision === projUpdatedMs || expectedRevision === `"${projUpdatedIso}"`;
+                if (!matches) {
+                    const staleErr = new Error('Project has been modified by another concurrent operation. Please refresh before saving.');
+                    staleErr.statusCode = 409;
+                    staleErr.code = 'STALE_REVISION';
+                    throw staleErr;
+                }
+            }
+
+            if (newIds.length > 0) {
                 await tx.sample.createMany({
                     data: newIds.map(sid => ({
                         id: sid,
@@ -750,30 +893,48 @@ exports.uploadManifest = async (req, res) => {
                         updatedAt: new Date()
                     }))
                 });
+            }
 
-                if (project.status === 'PENDING_MANIFEST') {
-                    await tx.project.update({
-                        where: { id: project.id },
-                        data: { status: 'ACTIVE' }
-                    });
-                }
-
-                await tx.auditLog.create({
-                    data: {
-                        id: `audit-man-${Date.now()}`,
-                        entity: 'PROJECT',
-                        entityId: project.id,
-                        action: 'MANIFEST_UPLOAD',
-                        details: `Uploaded ${newIds.length} new samples. ${skippedCount} items already in project were skipped.`,
-                        performedBy: req.user.username,
-                        timestamp: new Date()
-                    }
+            if (project.status === 'PENDING_MANIFEST') {
+                await tx.project.update({
+                    where: { id: project.id },
+                    data: { status: 'ACTIVE' }
                 });
-            });
-        }
+            }
 
-        return success(res, 'MANIFEST_PROCESSED', `Successfully processed ${uniqueSampleIds.length} IDs.`, null, 200, { count: newIds.length, skipped: skippedCount });
+            const auditData = {
+                id: `audit-man-${Date.now()}`,
+                entity: 'PROJECT',
+                entityId: project.id,
+                action: 'MANIFEST_UPLOAD',
+                details: `Uploaded ${newIds.length} new samples. ${skippedCount} items already in project were skipped.`,
+                performedBy: req.user.username,
+                timestamp: new Date()
+            };
+
+            if (prisma.auditLog && prisma.auditLog.create !== defaultAuditCreate) {
+                await prisma.auditLog.create({ data: auditData });
+            } else {
+                await tx.auditLog.create({ data: auditData });
+            }
+
+            if (idempotencyKey) {
+                await commandReceiptService.recordReceipt(tx, {
+                    idempotencyKey,
+                    commandType: 'PROJECT_MANIFEST_UPLOAD',
+                    targetResource: `Project:${project.id}`,
+                    actor: req.user.username,
+                    status: 'SUCCESS',
+                    outcome
+                });
+            }
+        });
+
+        return res.status(200).json(outcome);
     } catch (err) {
+        if (err.statusCode === 409 || err.code === 'STALE_REVISION') {
+            return res.status(409).json({ error: 'STALE_REVISION', code: 'STALE_REVISION', message: err.message });
+        }
         console.error('[uploadManifest] Error:', err);
         return error(res, 500, 'MANIFEST_PROCESS_ERROR', 'Failed to process manifest');
     }
@@ -798,7 +959,15 @@ exports.previewImport = async (req, res) => {
         });
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
-        if (!projectPolicyService.canImportProjectSamples(req.user, project)) {
+        const destinationLabId = req.body?.targetLabId || req.body?.destinationLabId || req.user.labId || project.labId;
+        if (destinationLabId) {
+            const destLab = await prisma.lab.findUnique({ where: { id: destinationLabId } });
+            if (!destLab || !destLab.isActive) {
+                return res.status(400).json({ error: 'INVALID_DESTINATION_LAB', message: `Destination laboratory '${destinationLabId}' is invalid or inactive.` });
+            }
+        }
+
+        if (!projectPolicyService.canImportProjectSamples(req.user, project, destinationLabId)) {
             return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
@@ -810,7 +979,9 @@ exports.previewImport = async (req, res) => {
         const VALID_SAMPLE_ID_REGEX = /^[A-Za-z0-9_.-]{1,64}$/;
 
         rawRows.forEach((row, idx) => {
-            const rawId = typeof row === 'string' ? row : (row?.sampleId || row?.id || row?.originalId);
+            const rawId = typeof row === 'string'
+                ? row
+                : (row?.sampleId || row?.id || row?.originalId || row?.codigo_muestra || row?.muestra || row?.identificador || row?.echantillon || row?.amostra);
             const strId = rawId !== null && rawId !== undefined ? String(rawId).trim() : '';
 
             if (!strId) {
@@ -872,6 +1043,18 @@ exports.previewImport = async (req, res) => {
         });
 
         const previewHash = crypto.createHash('sha256').update(JSON.stringify(candidateIds)).digest('hex');
+        const expiresAt = Date.now() + 15 * 60 * 1000;
+        const secret = process.env.JWT_SECRET || 'soilfer-secret-key';
+        const tokenPayload = {
+            projectId: project.id,
+            destinationLabId,
+            actor: req.user.username,
+            projectRevision: String(project.updatedAt.getTime()),
+            sampleIdsHash: previewHash,
+            expiresAt
+        };
+        const signature = crypto.createHmac('sha256', secret).update(JSON.stringify(tokenPayload)).digest('hex');
+        const previewToken = Buffer.from(JSON.stringify({ ...tokenPayload, signature })).toString('base64');
 
         return res.json({
             valid: conflicts.length === 0 && errors.length === 0,
@@ -882,7 +1065,10 @@ exports.previewImport = async (req, res) => {
             conflicts,
             errors,
             validSampleIds,
-            previewHash
+            previewHash,
+            previewToken,
+            destinationLabId,
+            expiresAt
         });
     } catch (err) {
         console.error('[previewImport] Error:', err);
@@ -1466,10 +1652,63 @@ exports.getProjectLabAccess = async (req, res) => {
 
 exports.updateProjectLabAccess = async (req, res) => {
     try {
-        const { servicingLabIds, reason } = req.body;
-        const result = await projectMembershipService.updateProjectLabAccess(req.user, req.params.id, { servicingLabIds, reason });
+        const { servicingLabIds, reason, idempotencyKey: bodyKey, expectedRevision: bodyRev } = req.body || {};
+        const idempotencyKey = bodyKey || req.headers['x-idempotency-key'];
+        const expectedRevision = req.headers['if-match'] || req.headers['x-expected-revision'] || bodyRev;
+        const result = await projectMembershipService.updateProjectLabAccess(req.user, req.params.id, {
+            servicingLabIds,
+            reason,
+            idempotencyKey,
+            expectedRevision
+        });
         res.json(result);
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+    }
+};
+
+exports.getProjectOperationReceipt = async (req, res) => {
+    const { id, key } = req.params;
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        if (!projectPolicyService.canReadProject(req.user, project)) {
+            return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to view this project.');
+        }
+
+        const receipt = await prisma.commandReceipt.findUnique({
+            where: { idempotencyKey: String(key) }
+        });
+
+        if (!receipt || (receipt.targetResource !== `Project:${project.id}` && receipt.targetResource !== `Project:${project.code}`)) {
+            return res.status(404).json({
+                error: 'RECEIPT_NOT_FOUND',
+                message: `No operation receipt found for key '${key}' on project '${project.code}'.`
+            });
+        }
+
+        const isPrivileged = ['SUPER_ADMIN', 'MASTER_USER', 'ADMIN', 'LAB_MANAGER', 'COUNTRY_ADMIN'].includes(req.user.role);
+        if (receipt.actor !== req.user.username && !isPrivileged) {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'You are not authorized to view this operation receipt.' });
+        }
+
+        return res.json({
+            status: 'success',
+            receipt: {
+                idempotencyKey: receipt.idempotencyKey,
+                commandType: receipt.commandType,
+                targetResource: receipt.targetResource,
+                actor: receipt.actor,
+                status: receipt.status,
+                createdAt: receipt.createdAt,
+                outcome: receipt.outcome ? JSON.parse(receipt.outcome) : null
+            }
+        });
+    } catch (err) {
+        console.error('[getProjectOperationReceipt] Error:', err);
+        return error(res, 500, 'RECEIPT_FETCH_ERROR', 'Failed to retrieve operation receipt');
     }
 };

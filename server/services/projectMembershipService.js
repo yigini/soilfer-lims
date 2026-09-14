@@ -2,6 +2,7 @@
 
 const prisma = require('../prisma');
 const projectPolicyService = require('./projectPolicyService');
+const CommandReceiptService = require('./commandReceiptService');
 const defaultAuditCreate = prisma.auditLog?.create;
 
 /**
@@ -235,16 +236,47 @@ async function getProjectLabAccess(actor, projectId, tx = prisma) {
 /**
  * Updates project servicing laboratories with safety and discrepancy repair.
  */
-async function updateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx = prisma) {
+async function updateProjectLabAccess(actor, projectId, { servicingLabIds, reason, idempotencyKey, expectedRevision }, tx = prisma) {
+    const project = await (tx === prisma ? prisma : tx).project.findUnique({
+        where: { id: projectId }
+    });
+    if (!project) {
+        const err = new Error('Project not found');
+        err.statusCode = 404;
+        err.code = 'PROJECT_NOT_FOUND';
+        throw err;
+    }
+
+    if (!projectPolicyService.canManageProjectAccess(actor, project)) {
+        const err = new Error('Only the project owner laboratory manager or Super Administrator may manage servicing laboratories');
+        err.statusCode = 403;
+        err.code = 'PROJECT_OWNER_REQUIRED';
+        throw err;
+    }
+
+    const payloadHash = CommandReceiptService.computePayloadHash({ servicingLabIds, reason });
+    if (idempotencyKey) {
+        const check = await CommandReceiptService.checkReceipt(idempotencyKey, 'PROJECT_LAB_ACCESS_UPDATE', actor.username, `Project:${projectId}`, payloadHash);
+        if (check.isExisting) {
+            if (check.conflict) {
+                const err = new Error('Idempotency key collision with differing command parameters');
+                err.statusCode = 409;
+                err.code = 'IDEMPOTENCY_CONFLICT';
+                throw err;
+            }
+            return check.receipt.parsedOutcome;
+        }
+    }
+
     if (tx === prisma) {
         return await prisma.$transaction(async (innerTx) => {
-            return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, innerTx);
+            return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason, idempotencyKey, expectedRevision }, innerTx);
         });
     }
-    return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx);
+    return await _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason, idempotencyKey, expectedRevision }, tx);
 }
 
-async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason }, tx) {
+async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabIds, reason, idempotencyKey, expectedRevision }, tx) {
     const project = await tx.project.findUnique({
         where: { id: projectId }
     });
@@ -253,6 +285,18 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         err.statusCode = 404;
         err.code = 'PROJECT_NOT_FOUND';
         throw err;
+    }
+
+    if (expectedRevision) {
+        const projUpdatedIso = project.updatedAt ? new Date(project.updatedAt).toISOString() : null;
+        const projUpdatedMs = project.updatedAt ? new Date(project.updatedAt).getTime().toString() : null;
+        const matches = expectedRevision === projUpdatedIso || expectedRevision === projUpdatedMs || expectedRevision === `"${projUpdatedIso}"`;
+        if (!matches) {
+            const err = new Error('Project has been modified by another concurrent operation. Please refresh before saving.');
+            err.statusCode = 409;
+            err.code = 'STALE_REVISION';
+            throw err;
+        }
     }
 
     if (!projectPolicyService.canManageProjectAccess(actor, project)) {
@@ -389,15 +433,29 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         await tx.auditLog.create({ data: auditData });
     }
 
-    return {
+    const outcome = {
         status: 'APPLIED',
         projectId: project.id,
         projectCode: project.code,
         ownerLabId: project.labId,
         servicingLabIds,
         addedLabs,
-        removedLabs
+        removedLabs,
+        payloadHash: CommandReceiptService.computePayloadHash({ servicingLabIds, reason })
     };
+
+    if (idempotencyKey) {
+        await CommandReceiptService.recordReceipt(tx, {
+            idempotencyKey,
+            commandType: 'PROJECT_LAB_ACCESS_UPDATE',
+            targetResource: `Project:${project.id}`,
+            actor: actor.username,
+            status: 'SUCCESS',
+            outcome
+        });
+    }
+
+    return outcome;
 }
 
 module.exports = {

@@ -86,7 +86,19 @@ export default function ProjectActionsModal({
                 defaultAnalysisBundle: editBundle || null,
                 status: editStatus
             };
-            await axios.put(`/api/projects/${project.id}`, payload);
+
+            const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+
+            const headers = {
+                'x-idempotency-key': idempotencyKey
+            };
+            if (project.updatedAt) {
+                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            }
+
+            await axios.put(`/api/projects/${project.id}`, payload, { headers });
             onSuccess?.('PROJECT_UPDATED');
             onClose();
         } catch (err) {

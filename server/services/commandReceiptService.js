@@ -11,9 +11,10 @@ class CommandReceiptService {
      * @param {string} commandType 
      * @param {string} actor 
      * @param {string} targetResource 
-     * @returns {Promise<{ isExisting: boolean, receipt?: object, conflict?: boolean }>}
+     * @param {string} [payloadHash]
+     * @returns {Promise<{ isExisting: boolean, receipt?: object, conflict?: boolean, reason?: string }>}
      */
-    static async checkReceipt(idempotencyKey, commandType, actor, targetResource) {
+    static async checkReceipt(idempotencyKey, commandType, actor, targetResource, payloadHash = null) {
         if (!idempotencyKey) {
             return { isExisting: false };
         }
@@ -28,7 +29,20 @@ class CommandReceiptService {
 
         // Verify that parameters match original command
         if (receipt.commandType !== commandType || receipt.actor !== actor || receipt.targetResource !== targetResource) {
-            return { isExisting: true, conflict: true, receipt };
+            return { isExisting: true, conflict: true, reason: 'METADATA_MISMATCH', receipt };
+        }
+
+        let parsedOutcome = null;
+        if (receipt.outcome) {
+            try {
+                parsedOutcome = JSON.parse(receipt.outcome);
+            } catch {
+                parsedOutcome = null;
+            }
+        }
+
+        if (payloadHash && parsedOutcome?.payloadHash && parsedOutcome.payloadHash !== payloadHash) {
+            return { isExisting: true, conflict: true, reason: 'PAYLOAD_HASH_MISMATCH', receipt: { ...receipt, parsedOutcome } };
         }
 
         return {
@@ -36,9 +50,30 @@ class CommandReceiptService {
             conflict: false,
             receipt: {
                 ...receipt,
-                parsedOutcome: receipt.outcome ? JSON.parse(receipt.outcome) : null
+                parsedOutcome
             }
         };
+    }
+
+    /**
+     * Compute a deterministic SHA256 hash of command parameters
+     * @param {object} payload 
+     * @returns {string|null}
+     */
+    static computePayloadHash(payload) {
+        if (!payload || typeof payload !== 'object') return null;
+        const crypto = require('crypto');
+        const clean = { ...payload };
+        delete clean.idempotencyKey;
+        delete clean.expectedRevision;
+        delete clean.previewHash;
+        delete clean.previewToken;
+        const sortedKeys = Object.keys(clean).sort();
+        const normalized = {};
+        for (const k of sortedKeys) {
+            normalized[k] = clean[k];
+        }
+        return crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
     }
 
     /**

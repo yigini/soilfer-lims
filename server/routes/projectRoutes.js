@@ -22,5 +22,6 @@ router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectContro
 
 router.get('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.getProjectLabAccess);
 router.patch('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.updateProjectLabAccess);
+router.get('/:id/operations/:key', checkPermission('MANAGE_PROJECTS'), projectController.getProjectOperationReceipt);
 
 module.exports = router;
