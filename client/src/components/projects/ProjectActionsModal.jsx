@@ -39,8 +39,16 @@ export default function ProjectActionsModal({
             setEditStatus(project?.status || 'ACTIVE');
             setErrorMessage('');
             setReason('');
+            commandRef.current = null;
         }
     }, [isOpen, initialActionType, project]);
+
+    const commandRef = React.useRef(null);
+
+    // Invalidate retained command key whenever form inputs are modified
+    React.useEffect(() => {
+        commandRef.current = null;
+    }, [editName, editClient, editDescription, editExpectedCount, editDeadline, editBundle, editStatus, reason]);
 
     React.useEffect(() => {
         if (isOpen && actionType === 'edit') {
@@ -68,7 +76,7 @@ export default function ProjectActionsModal({
     const canDelete = totalRegistered === 0;
 
     const handleSaveSettings = async (e) => {
-        e.preventDefault();
+        e?.preventDefault?.();
         if (!editName.trim()) {
             setErrorMessage(t('projects.create.nameRequired', 'Project name is required.'));
             return;
@@ -87,9 +95,36 @@ export default function ProjectActionsModal({
                 status: editStatus
             };
 
-            const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+            let idempotencyKey;
+            let isRetry = false;
+            if (commandRef.current && commandRef.current.action === 'edit' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
+                idempotencyKey = commandRef.current.key;
+                isRetry = true;
+            } else {
+                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+                commandRef.current = {
+                    key: idempotencyKey,
+                    action: 'edit',
+                    snapshot: JSON.parse(JSON.stringify(payload))
+                };
+            }
+
+            // If retrying an uncertain command, resolve existing receipt first
+            if (isRetry) {
+                try {
+                    const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
+                    if (receiptRes.data?.receipt?.outcome) {
+                        commandRef.current = null;
+                        onSuccess?.('PROJECT_UPDATED');
+                        onClose();
+                        return;
+                    }
+                } catch (receiptErr) {
+                    // No receipt recorded yet, proceed to execute mutation
+                }
+            }
 
             const headers = {
                 'x-idempotency-key': idempotencyKey
@@ -98,10 +133,16 @@ export default function ProjectActionsModal({
                 headers['if-match'] = String(new Date(project.updatedAt).getTime());
             }
 
-            await axios.put(`/api/projects/${project.id}`, payload, { headers });
+            await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
+            commandRef.current = null;
             onSuccess?.('PROJECT_UPDATED');
             onClose();
         } catch (err) {
+            const status = err.response?.status;
+            const errCode = err.response?.data?.code || err.response?.data?.error;
+            if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
+                commandRef.current = null;
+            }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update project settings');
         } finally {
             setSubmitting(false);
@@ -118,10 +159,55 @@ export default function ProjectActionsModal({
         setErrorMessage('');
         try {
             const nextStatus = isPaused ? 'ACTIVE' : 'PAUSED';
-            await axios.put(`/api/projects/${project.id}`, { status: nextStatus, reason });
+            const payload = { status: nextStatus, reason: reason.trim() };
+
+            let idempotencyKey;
+            let isRetry = false;
+            if (commandRef.current && commandRef.current.action === 'pause' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
+                idempotencyKey = commandRef.current.key;
+                isRetry = true;
+            } else {
+                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : (`proj-pause-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+                commandRef.current = {
+                    key: idempotencyKey,
+                    action: 'pause',
+                    snapshot: JSON.parse(JSON.stringify(payload))
+                };
+            }
+
+            if (isRetry) {
+                try {
+                    const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
+                    if (receiptRes.data?.receipt?.outcome) {
+                        commandRef.current = null;
+                        onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
+                        onClose();
+                        return;
+                    }
+                } catch (receiptErr) {
+                    // No receipt yet, execute mutation
+                }
+            }
+
+            const headers = {
+                'x-idempotency-key': idempotencyKey
+            };
+            if (project.updatedAt) {
+                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            }
+
+            await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
+            commandRef.current = null;
             onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
             onClose();
         } catch (err) {
+            const status = err.response?.status;
+            const errCode = err.response?.data?.code || err.response?.data?.error;
+            if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
+                commandRef.current = null;
+            }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update status');
         } finally {
             setSubmitting(false);
@@ -133,10 +219,55 @@ export default function ProjectActionsModal({
         setSubmitting(true);
         setErrorMessage('');
         try {
-            await axios.post(`/api/projects/${project.id}/archive`, { reason });
+            const payload = { reason: reason.trim() };
+
+            let idempotencyKey;
+            let isRetry = false;
+            if (commandRef.current && commandRef.current.action === 'archive' && JSON.stringify(commandRef.current.snapshot) === JSON.stringify(payload)) {
+                idempotencyKey = commandRef.current.key;
+                isRetry = true;
+            } else {
+                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : (`proj-arch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+                commandRef.current = {
+                    key: idempotencyKey,
+                    action: 'archive',
+                    snapshot: JSON.parse(JSON.stringify(payload))
+                };
+            }
+
+            if (isRetry) {
+                try {
+                    const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
+                    if (receiptRes.data?.receipt?.outcome) {
+                        commandRef.current = null;
+                        onSuccess?.('PROJECT_ARCHIVED');
+                        onClose();
+                        return;
+                    }
+                } catch (receiptErr) {
+                    // No receipt yet, execute mutation
+                }
+            }
+
+            const headers = {
+                'x-idempotency-key': idempotencyKey
+            };
+            if (project.updatedAt) {
+                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            }
+
+            await axios.post(`/api/projects/${project.id}/archive`, { ...payload, idempotencyKey }, { headers });
+            commandRef.current = null;
             onSuccess?.('PROJECT_ARCHIVED');
             onClose();
         } catch (err) {
+            const status = err.response?.status;
+            const errCode = err.response?.data?.code || err.response?.data?.error;
+            if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
+                commandRef.current = null;
+            }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to archive project');
         } finally {
             setSubmitting(false);
@@ -389,7 +520,7 @@ export default function ProjectActionsModal({
                                 disabled={submitting}
                                 className="btn-primary text-xs"
                             >
-                                {submitting ? t('common.loading', 'Saving…') : t('common.save', 'Save changes')}
+                                {submitting ? t('common.loading', 'Saving…') : (commandRef.current?.action === 'edit' ? t('common.retry', 'Retry saving') : t('common.save', 'Save changes'))}
                             </button>
                         </div>
                     </form>
@@ -434,7 +565,7 @@ export default function ProjectActionsModal({
                                 disabled={submitting || !reason.trim()}
                                 className="btn-primary text-xs"
                             >
-                                {submitting ? t('common.loading', 'Updating…') : t('common.confirm', 'Confirm transition')}
+                                {submitting ? t('common.loading', 'Updating…') : (commandRef.current?.action === 'pause' ? t('common.retry', 'Retry transition') : t('common.confirm', 'Confirm transition'))}
                             </button>
                         </div>
                     </div>
@@ -520,7 +651,7 @@ export default function ProjectActionsModal({
                                         disabled={submitting || !reason.trim()}
                                         className="btn-primary text-xs"
                                     >
-                                        {submitting ? t('common.loading', 'Archiving…') : t('projects.actions.confirmArchive', 'Archive project')}
+                                        {submitting ? t('common.loading', 'Archiving…') : (commandRef.current?.action === 'archive' ? t('common.retry', 'Retry archive') : t('projects.actions.confirmArchive', 'Archive project'))}
                                     </button>
                                 </div>
                             </div>

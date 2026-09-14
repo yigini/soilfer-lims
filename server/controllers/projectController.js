@@ -732,9 +732,9 @@ exports.uploadManifest = async (req, res) => {
         const crypto = require('crypto');
         const tokenInput = previewToken || req.headers['x-preview-token'];
         const hashInput = previewHash || req.headers['x-preview-hash'];
+        let tokenData = null;
 
         if (tokenInput) {
-            let tokenData = null;
             try {
                 tokenData = JSON.parse(Buffer.from(tokenInput, 'base64').toString('utf8'));
             } catch {
@@ -878,6 +878,19 @@ exports.uploadManifest = async (req, res) => {
                 }
             }
 
+            // Signed preview token revision check (C02): tokenData.projectRevision must match current revision
+            if (tokenData && tokenData.projectRevision) {
+                const projUpdatedIso = currentProj.updatedAt ? new Date(currentProj.updatedAt).toISOString() : null;
+                const projUpdatedMs = currentProj.updatedAt ? new Date(currentProj.updatedAt).getTime().toString() : null;
+                const tokenMatches = tokenData.projectRevision === projUpdatedIso || tokenData.projectRevision === projUpdatedMs || tokenData.projectRevision === `"${projUpdatedIso}"`;
+                if (!tokenMatches) {
+                    const staleErr = new Error('Preview token is based on an obsolete project revision. Please regenerate preview.');
+                    staleErr.statusCode = 409;
+                    staleErr.code = 'PREVIEW_STALE_REVISION';
+                    throw staleErr;
+                }
+            }
+
             if (newIds.length > 0) {
                 await tx.sample.createMany({
                     data: newIds.map(sid => ({
@@ -932,8 +945,8 @@ exports.uploadManifest = async (req, res) => {
 
         return res.status(200).json(outcome);
     } catch (err) {
-        if (err.statusCode === 409 || err.code === 'STALE_REVISION') {
-            return res.status(409).json({ error: 'STALE_REVISION', code: 'STALE_REVISION', message: err.message });
+        if (err.statusCode === 409 || err.code === 'STALE_REVISION' || err.code === 'PREVIEW_STALE_REVISION') {
+            return res.status(409).json({ error: err.code || 'STALE_REVISION', code: err.code || 'STALE_REVISION', message: err.message });
         }
         console.error('[uploadManifest] Error:', err);
         return error(res, 500, 'MANIFEST_PROCESS_ERROR', 'Failed to process manifest');
@@ -1042,22 +1055,27 @@ exports.previewImport = async (req, res) => {
             }
         });
 
-        const previewHash = crypto.createHash('sha256').update(JSON.stringify(candidateIds)).digest('hex');
+        const previewHash = validSampleIds.length > 0
+            ? crypto.createHash('sha256').update(JSON.stringify(validSampleIds)).digest('hex')
+            : null;
         const expiresAt = Date.now() + 15 * 60 * 1000;
         const secret = process.env.JWT_SECRET || 'soilfer-secret-key';
-        const tokenPayload = {
-            projectId: project.id,
-            destinationLabId,
-            actor: req.user.username,
-            projectRevision: String(project.updatedAt.getTime()),
-            sampleIdsHash: previewHash,
-            expiresAt
-        };
-        const signature = crypto.createHmac('sha256', secret).update(JSON.stringify(tokenPayload)).digest('hex');
-        const previewToken = Buffer.from(JSON.stringify({ ...tokenPayload, signature })).toString('base64');
+        let previewToken = null;
+        if (validSampleIds.length > 0) {
+            const tokenPayload = {
+                projectId: project.id,
+                destinationLabId,
+                actor: req.user.username,
+                projectRevision: String(project.updatedAt.getTime()),
+                sampleIdsHash: previewHash,
+                expiresAt
+            };
+            const signature = crypto.createHmac('sha256', secret).update(JSON.stringify(tokenPayload)).digest('hex');
+            previewToken = Buffer.from(JSON.stringify({ ...tokenPayload, signature })).toString('base64');
+        }
 
         return res.json({
-            valid: conflicts.length === 0 && errors.length === 0,
+            valid: conflicts.length === 0 && errors.length === 0 && validSampleIds.length > 0,
             totalRows: rawRows.length,
             validCount: validSampleIds.length,
             conflictCount: conflicts.length,
@@ -1088,9 +1106,42 @@ exports.archiveProject = async (req, res) => {
             return res.status(403).json({ error: 'Cannot archive projects from another lab. Access denied.' });
         }
 
+        const idempotencyKey = req.body?.idempotencyKey || req.headers['x-idempotency-key'];
+        const expectedRevision = req.headers['if-match'] || req.headers['x-expected-revision'] || req.body?.expectedRevision;
+        const payloadHash = commandReceiptService.computePayloadHash({ reason: req.body?.reason || '' });
+
+        if (idempotencyKey) {
+            const check = await commandReceiptService.checkReceipt(idempotencyKey, 'PROJECT_ARCHIVE', req.user.username, `Project:${project.id}`, payloadHash);
+            if (check.isExisting) {
+                if (check.conflict) {
+                    return res.status(409).json({ error: 'Idempotency key collision with differing command parameters' });
+                }
+                return res.json(check.receipt.parsedOutcome);
+            }
+        }
+
         const updated = await prisma.$transaction(async (tx) => {
+            const currentProj = await tx.project.findUnique({ where: { id: project.id } });
+            if (!currentProj) {
+                const notFound = new Error('Project not found');
+                notFound.statusCode = 404;
+                throw notFound;
+            }
+
+            if (expectedRevision) {
+                const projUpdatedIso = currentProj.updatedAt ? new Date(currentProj.updatedAt).toISOString() : null;
+                const projUpdatedMs = currentProj.updatedAt ? new Date(currentProj.updatedAt).getTime().toString() : null;
+                const matches = expectedRevision === projUpdatedIso || expectedRevision === projUpdatedMs || expectedRevision === `"${projUpdatedIso}"`;
+                if (!matches) {
+                    const staleErr = new Error('Project has been modified by another concurrent operation. Please refresh before saving.');
+                    staleErr.statusCode = 409;
+                    staleErr.code = 'STALE_REVISION';
+                    throw staleErr;
+                }
+            }
+
             // Check for unresolved expected samples and active analytical work atomically within transaction
-            await validateProjectClosure(project, tx);
+            await validateProjectClosure(currentProj, tx);
 
             const p = await tx.project.update({
                 where: { id: project.id },
@@ -1109,11 +1160,33 @@ exports.archiveProject = async (req, res) => {
                 }
             });
 
-            return p;
+            const outcomePayload = {
+                status: 'success',
+                messageCode: 'PROJECT_ARCHIVED',
+                message: 'Project archived',
+                data: { code: project.code, project: p }
+            };
+
+            if (idempotencyKey) {
+                await commandReceiptService.recordReceipt(tx, {
+                    idempotencyKey,
+                    commandType: 'PROJECT_ARCHIVE',
+                    targetResource: `Project:${project.id}`,
+                    actor: req.user.username,
+                    status: 'SUCCESS',
+                    payloadHash,
+                    outcome: outcomePayload
+                });
+            }
+
+            return outcomePayload;
         });
 
-        return success(res, 'PROJECT_ARCHIVED', 'Project archived', { code: project.code }, 200, { project: updated });
+        return res.json(updated);
     } catch (err) {
+        if (err.statusCode === 409 || err.code === 'STALE_REVISION') {
+            return res.status(409).json({ error: err.code || 'STALE_REVISION', code: 'STALE_REVISION', message: err.message });
+        }
         if (err.statusCode === 422 || err.code === 'CANNOT_ARCHIVE_WITH_EXPECTED_SAMPLES' || err.code === 'CANNOT_ARCHIVE_WITH_ACTIVE_WORK') {
             return res.status(err.statusCode || 422).json({
                 error: err.code || 'CANNOT_ARCHIVE_PROJECT',

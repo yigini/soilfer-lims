@@ -246,6 +246,7 @@ module.exports = {
     canReadProject,
     canAccessProject: canReadProject,
     canEditProjectPlan,
+    canEditProject: canEditProjectPlan,
     canManageProjectAccess,
     canTransitionProject,
     canImportProjectSamples,

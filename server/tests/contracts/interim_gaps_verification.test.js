@@ -297,26 +297,41 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             // Query with issued key against data exchange
             const liveKey = res.body.apiKey;
 
-            // Create a foreign sample in labB
+            // Create authorized RELEASED sample in labA
+            const releasedSampleA = await prisma.sample.create({
+                data: {
+                    id: 'SMP-REL-A-' + testPrefix,
+                    originalId: 'ORIG-REL-A-' + testPrefix,
+                    labId: labA.id,
+                    assignedLab: labA.id,
+                    status: 'RELEASED'
+                }
+            });
+
+            // Create a foreign RELEASED sample in labB
             const foreignSample = await prisma.sample.create({
                 data: {
                     id: 'SMP-FOREIGN-' + testPrefix,
                     originalId: 'ORIG-FOREIGN-' + testPrefix,
                     labId: labB.id,
                     assignedLab: labB.id,
-                    status: 'ACCEPTED'
+                    status: 'RELEASED'
                 }
             });
 
-            // Scoped key can query /samples and sees only authorized labA sample
+            // Scoped key can query /samples and sees only authorized labA released sample
             const samplesRes = await request(app)
                 .get('/api/v1/data-exchange/samples')
                 .set('x-api-key', liveKey);
 
             expect(samplesRes.status).toBe(200);
             const returnedIds = (samplesRes.body.data || []).map(s => s.id);
-            expect(returnedIds).toContain(testSample.originalId || testSample.id);
+            // Authorized released sample is visible
+            expect(returnedIds).toContain(releasedSampleA.originalId || releasedSampleA.id);
+            // Foreign lab sample is denied
             expect(returnedIds).not.toContain(foreignSample.originalId || foreignSample.id);
+            // Pre-release ACCEPTED sample in authorized lab is denied (SIS release protection preserved)
+            expect(returnedIds).not.toContain(testSample.originalId || testSample.id);
 
             // Explicitly requesting unauthorized lab returns empty
             const unauthQueryRes = await request(app)
@@ -326,7 +341,8 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             expect(unauthQueryRes.status).toBe(200);
             expect(unauthQueryRes.body.data).toHaveLength(0);
 
-            // Clean up foreign sample
+            // Clean up temporary samples
+            await prisma.sample.delete({ where: { id: releasedSampleA.id } }).catch(() => {});
             await prisma.sample.delete({ where: { id: foreignSample.id } }).catch(() => {});
         });
     });

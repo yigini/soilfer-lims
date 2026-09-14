@@ -16,6 +16,12 @@ export default function ImportPreviewModal({
     const [previewResult, setPreviewResult] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [committing, setCommitting] = useState(false);
+    const commitCommandRef = React.useRef(null);
+
+    // Invalidate retained commit key when input, preview, or modal state changes
+    React.useEffect(() => {
+        commitCommandRef.current = null;
+    }, [rawInput, previewResult, isOpen]);
 
     if (!isOpen || !project) return null;
 
@@ -39,6 +45,7 @@ export default function ImportPreviewModal({
                 setRawInput(ids.join('\n'));
                 setPreviewResult(null);
                 setErrorMessage('');
+                commitCommandRef.current = null;
             } catch (err) {
                 setErrorMessage('Failed to read spreadsheet file');
             }
@@ -60,6 +67,7 @@ export default function ImportPreviewModal({
         setLoading(true);
         setErrorMessage('');
         setPreviewResult(null);
+        commitCommandRef.current = null;
 
         try {
             const res = await axios.post(`/api/projects/${project.id}/imports/preview`, {
@@ -83,9 +91,42 @@ export default function ImportPreviewModal({
         setErrorMessage('');
 
         try {
-            const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+            const snapshot = {
+                sampleIds: previewResult.validSampleIds,
+                previewHash: previewResult.previewHash,
+                previewToken: previewResult.previewToken,
+                targetLabId: previewResult.destinationLabId || project.labId || undefined
+            };
+
+            let idempotencyKey;
+            let isRetry = false;
+            if (commitCommandRef.current && JSON.stringify(commitCommandRef.current.snapshot) === JSON.stringify(snapshot)) {
+                idempotencyKey = commitCommandRef.current.key;
+                isRetry = true;
+            } else {
+                idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+                commitCommandRef.current = {
+                    key: idempotencyKey,
+                    snapshot: JSON.parse(JSON.stringify(snapshot))
+                };
+            }
+
+            // If retrying an uncertain commit, attempt receipt lookup first
+            if (isRetry) {
+                try {
+                    const checkRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
+                    if (checkRes.data?.receipt?.outcome) {
+                        commitCommandRef.current = null;
+                        onSuccess?.(checkRes.data.receipt.outcome);
+                        onClose();
+                        return;
+                    }
+                } catch (checkErr) {
+                    // Receipt not found yet, proceed with manifest POST
+                }
+            }
 
             const headers = {
                 'x-idempotency-key': idempotencyKey
@@ -102,9 +143,15 @@ export default function ImportPreviewModal({
                 idempotencyKey
             }, { headers });
 
+            commitCommandRef.current = null;
             onSuccess?.(res.data);
             onClose();
         } catch (err) {
+            const status = err.response?.status;
+            const errCode = err.response?.data?.code || err.response?.data?.error;
+            if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
+                commitCommandRef.current = null;
+            }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to register manifest samples');
         } finally {
             setCommitting(false);
@@ -252,7 +299,9 @@ export default function ImportPreviewModal({
                             >
                                 {committing
                                     ? t('common.loading', 'Registering…')
-                                    : t('projects.import.registerEligible', { count: previewResult.validCount }, 'Register {{count}} expected samples')}
+                                    : (commitCommandRef.current
+                                        ? t('common.retry', 'Retry registration')
+                                        : t('projects.import.registerEligible', { count: previewResult.validCount }, 'Register {{count}} expected samples'))}
                             </button>
                         </div>
                     </div>
