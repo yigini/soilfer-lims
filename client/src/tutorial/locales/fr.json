@@ -512,5 +512,8 @@
   "sampleForbiddenNotice": "Accès refusé : L'échantillon appartient à un autre laboratoire ou n'est pas accessible avec votre rôle actuel. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
   "sampleNotFoundNotice": "Échantillon non trouvé. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
   "sampleCheckError": "Impossible de vérifier l'accès à l'échantillon. Sélectionnez un échantillon autorisé dans la liste de votre laboratoire.",
-  "sampleVerifying": "Vérification de l'accès à l'échantillon..."
+  "sampleVerifying": "Vérification de l'accès à l'échantillon...",
+  "expandGuide": "Agrandir le guide ↗",
+  "coachCollapsed": "Guide tutoriel (réduit)",
+  "collapse": "Réduire"
 }

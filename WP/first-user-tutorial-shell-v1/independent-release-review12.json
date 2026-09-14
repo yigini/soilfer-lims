@@ -1,0 +1,31 @@
+{
+  "time": "2026-09-14T15:56:17.6435828+02:00",
+  "head": "be9309384050f9f6b940c8e41f6a89258fceb050",
+  "status": 200,
+  "indexHash": "63caa88f312186ed3d5a60455bb5e4463c280042b58200228b5492a19931c28d",
+  "indexMatches": true,
+  "health": {
+    "status": "ok",
+    "uptime": 133.742060028
+  },
+  "assets": [
+    {
+      "path": "/assets/index-BfVKG1YK.js",
+      "localHash": "fa8d55127c2069baa8e405fbe7fb02df971ee4ef2210a76c509425334ce57548",
+      "publicHash": "fa8d55127c2069baa8e405fbe7fb02df971ee4ef2210a76c509425334ce57548",
+      "matches": true
+    },
+    {
+      "path": "/assets/TutorialShell-Bb5_VIl7.js",
+      "localHash": "a40a0fbe134896fb700351ba73795969f24a957ee76d9b5aebb6b82c2c65d4b4",
+      "publicHash": "a40a0fbe134896fb700351ba73795969f24a957ee76d9b5aebb6b82c2c65d4b4",
+      "matches": true
+    },
+    {
+      "path": "/assets/TutorialShell-DBnTsSTn.css",
+      "localHash": "ddfa2508a6d18fc92852cdf676ba1f20ea7bf3e5457a1a3eba659985c12b2d7d",
+      "publicHash": "ddfa2508a6d18fc92852cdf676ba1f20ea7bf3e5457a1a3eba659985c12b2d7d",
+      "matches": true
+    }
+  ]
+}

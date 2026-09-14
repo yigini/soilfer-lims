@@ -36,11 +36,17 @@
   bottom: 24px !important;
   width: 440px !important;
   max-width: calc(100vw - 48px) !important;
-  max-height: 88vh !important;
+  max-height: calc(100vh - 360px) !important;
   background: transparent !important;
   pointer-events: none !important;
   overflow: visible !important;
   z-index: 8500 !important;
+}
+
+#soilfer-tutorial-overlay.docked.on-login {
+  left: 24px !important;
+  right: auto !important;
+  inset: auto auto 24px 24px !important;
 }
 
 #soilfer-tutorial-overlay.docked > * {
@@ -50,9 +56,16 @@
 #soilfer-tutorial-overlay.docked .coach {
   position: static !important;
   width: 100% !important;
-  max-height: 85vh !important;
+  max-height: calc(100vh - 365px) !important;
   overflow-y: auto !important;
   box-shadow: 0 16px 36px rgba(34, 55, 42, 0.22) !important;
+}
+
+#soilfer-tutorial-overlay.docked .coach.coach-collapsed {
+  max-height: none !important;
+  overflow: visible !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(34, 55, 42, 0.18) !important;
 }
 
 @media (max-width: 600px) {

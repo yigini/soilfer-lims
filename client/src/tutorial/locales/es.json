@@ -512,5 +512,8 @@
   "sampleForbiddenNotice": "Acceso denegado: La muestra pertenece a otro laboratorio o no es accesible con su rol actual. Seleccione una muestra autorizada de la lista de su laboratorio.",
   "sampleNotFoundNotice": "Muestra no encontrada. Seleccione una muestra autorizada de la lista de su laboratorio.",
   "sampleCheckError": "No se pudo verificar el acceso a la muestra. Seleccione una muestra autorizada de la lista de su laboratorio.",
-  "sampleVerifying": "Verificando acceso a la muestra..."
+  "sampleVerifying": "Verificando acceso a la muestra...",
+  "expandGuide": "Expandir guía ↗",
+  "coachCollapsed": "Guía del tutorial (plegada)",
+  "collapse": "Minimizar"
 }

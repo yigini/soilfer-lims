@@ -512,5 +512,8 @@
   "sampleForbiddenNotice": "Access denied: Sample belongs to another laboratory or is not accessible under your current role. Select an authorized sample from your laboratory list.",
   "sampleNotFoundNotice": "Sample not found. Select an authorized sample from your laboratory list.",
   "sampleCheckError": "Unable to verify sample access. Select an authorized sample from your laboratory list.",
-  "sampleVerifying": "Verifying sample access..."
+  "sampleVerifying": "Verifying sample access...",
+  "expandGuide": "Expand guide ↗",
+  "coachCollapsed": "Tutorial coach (collapsed)",
+  "collapse": "Minimize"
 }

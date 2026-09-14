@@ -512,5 +512,8 @@
   "sampleForbiddenNotice": "Acesso negado: A amostra pertence a outro laboratório ou não está acessível no seu perfil atual. Selecione uma amostra autorizada na lista do seu laboratório.",
   "sampleNotFoundNotice": "Amostra não encontrada. Selecione uma amostra autorizada na lista do seu laboratório.",
   "sampleCheckError": "Não foi possível verificar o acesso à amostra. Selecione uma amostra autorizada na lista do seu laboratório.",
-  "sampleVerifying": "Verificando o acesso à amostra..."
+  "sampleVerifying": "Verificando o acesso à amostra...",
+  "expandGuide": "Expandir guia ↗",
+  "coachCollapsed": "Guia do tutorial (recolhido)",
+  "collapse": "Minimizar"
 }
