@@ -1044,7 +1044,17 @@ async function runBrowserJourneys() {
     // Click back to close modal
     await page.locator('button:has-text("Back")').click();
 
-    // 3. Document Concrete UI Gap & Reconcile non-arrivals
+    // Record User Closure Journey as GAP / NOT RUN due to missing UI bulk-cancellation control
+    recordOutcome(
+        'Journey 6 (UI)',
+        'Pause admissions -> 422 gate -> Review archival readiness -> 37 expected blocker -> UI sample disposition',
+        'PUT /api/projects/:code (PAUSED): 200; POST /reception/intake: 422',
+        'DOM badge "Paused"; Modal "This project is not ready to archive." (37 expected); Archive button absent',
+        'Project PAUSED; 37 samples EXPECTED; UI lacks non-arrival cancellation control',
+        'GAP/NOT RUN'
+    );
+
+    // 3. Document Concrete UI Gap & Reconcile non-arrivals for Archival Fixture Test
     console.log('  [REPORTED GAP] UI lacks a bulk-cancellation action for un-arrived expected samples in Project Workspace.');
     console.log('  Reconciling non-arrivals via authorized project sample administration: status = "CANCELLED".');
 
@@ -1145,14 +1155,14 @@ async function runBrowserJourneys() {
     assert(sisSamples.some(s => s.originalId === '000101' || s.sampleId === '000101'), 'Sample 000101 must be accessible via SIS export');
 
     recordOutcome(
-        'Journey 6',
-        'Project actions ▾ -> Pause new admissions -> verify 422 gate -> Review archival readiness -> assert blocked notice (37 expected) -> reconcile via admin -> re-open modal -> Archive project -> assert exact "Archived" badge -> restoreProject -> verify admissions guard -> SIS read',
-        'PUT /api/projects/:code (PAUSED): 200; POST /reception/intake: 422; POST /archive: 200; POST /restore: 200; GET /sis/samples: 200',
-        'DOM badge "Paused"; Modal "This project is not ready to archive." (37 expected); Modal "Project is eligible for archival."; DOM badge strictly "Archived"',
-        'Project.status COMPLETED -> RESTORED (ACTIVE); Sample 000101 RELEASED & accessible in SIS',
+        'Journey 6 (Arch)',
+        'Fixture reconciled -> Review archival readiness -> Archive project -> assert "Archived" badge -> restoreProject -> verify admissions guard -> SIS read',
+        'POST /archive: 200; POST /restore: 200; GET /sis/samples: 200',
+        'Modal "Project is eligible for archival."; DOM badge strictly "Archived"; 0 active sync jobs',
+        'Project COMPLETED -> RESTORED (ACTIVE); Kobo unconfigured; 000101 in SIS',
         'PASS'
     );
-    console.log(`✓ Journey 6 complete: Admissions pause, UI archival blocking, exact "Archived" badge, restore and SIS verified`);
+    console.log(`✓ Journey 6 fixture component test complete: UI archival blocking, exact "Archived" badge, restore and SIS verified`);
 
     // Teardown
     await browser.close();
@@ -1171,30 +1181,30 @@ async function runBrowserJourneys() {
     } catch {}
 
     // Output Compact Per-Step Outcome Table
-    console.log('\n' + '='.repeat(130));
+    console.log('\n' + '='.repeat(140));
     console.log('  COMPACT PER-STEP BROWSER UI ACCEPTANCE OUTCOME TABLE');
-    console.log('='.repeat(130));
+    console.log('='.repeat(140));
     console.log(
-        '| ' + 'Journey / Step'.padEnd(16) +
+        '| ' + 'Journey / Step'.padEnd(18) +
         '| ' + 'Browser UI Action'.padEnd(36) +
         '| ' + 'Observed API Outcome'.padEnd(28) +
         '| ' + 'Exact DOM Assertion'.padEnd(30) +
         '| ' + 'Authoritative State'.padEnd(26) +
-        '| ' + 'Status'.padEnd(6) + ' |'
+        '| ' + 'Status'.padEnd(12) + ' |'
     );
-    console.log('|' + '-'.repeat(18) + '|' + '-'.repeat(38) + '|' + '-'.repeat(30) + '|' + '-'.repeat(32) + '|' + '-'.repeat(28) + '|' + '-'.repeat(8) + '|');
+    console.log('|' + '-'.repeat(20) + '|' + '-'.repeat(38) + '|' + '-'.repeat(30) + '|' + '-'.repeat(32) + '|' + '-'.repeat(28) + '|' + '-'.repeat(14) + '|');
 
     for (const row of stepOutcomes) {
         console.log(
-            '| ' + row.step.slice(0, 16).padEnd(16) +
+            '| ' + row.step.slice(0, 18).padEnd(18) +
             '| ' + row.action.slice(0, 36).padEnd(36) +
             '| ' + row.observedApi.slice(0, 28).padEnd(28) +
             '| ' + row.exactDomAssertion.slice(0, 30).padEnd(30) +
             '| ' + row.authoritativeState.slice(0, 26).padEnd(26) +
-            '| ' + row.outcome.padEnd(6) + ' |'
+            '| ' + row.outcome.padEnd(12) + ' |'
         );
     }
-    console.log('='.repeat(130));
+    console.log('='.repeat(140));
 }
 
 runBrowserJourneys().catch(err => {
