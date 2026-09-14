@@ -1153,11 +1153,17 @@ exports.getProjectSamples = async (req, res) => {
 
         const stageStatusMap = {
             '0': ['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'],
+            'awaitingArrival': ['EXPECTED', 'PENDING_MANIFEST', 'COLLECTED'],
             '1': ['RECEIVED', 'ACCEPTED', 'DRYING', 'GRINDING', 'PREPARED'],
+            'intakeInProgress': ['RECEIVED', 'ACCEPTED', 'DRYING', 'GRINDING', 'PREPARED'],
             '2': ['PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS'],
+            'labWork': ['PROCESSING', 'IN_LAB', 'ANALYSIS_IN_PROGRESS', 'ANALYSIS'],
             '3': ['SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED'],
+            'awaitingReview': ['SUBMITTED_FULL', 'SUBMITTED_PARTIAL', 'SUBMITTED'],
             '4': ['RELEASED', 'APPROVED', 'ARCHIVED'],
-            '5': ['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED']
+            'released': ['RELEASED', 'APPROVED', 'ARCHIVED'],
+            '5': ['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED'],
+            'rejectedOrCancelled': ['RECEIVED_REJECTED', 'REJECTED', 'CANCELLED', 'DISPOSED', 'FAILED']
         };
 
         const extraConditions = [];
@@ -1176,12 +1182,16 @@ exports.getProjectSamples = async (req, res) => {
             }
         }
 
-        // Stage filter
+        // Stage filter: supports numeric index ('0'-'5'), named stage key, or direct status
         if (req.query.stage !== undefined && req.query.stage !== '' && req.query.stage !== 'all') {
-            const stageKey = String(req.query.stage);
+            const stageKey = String(req.query.stage).trim();
             if (stageStatusMap[stageKey]) {
                 extraConditions.push({
                     status: { in: stageStatusMap[stageKey] }
+                });
+            } else {
+                extraConditions.push({
+                    status: stageKey
                 });
             }
         }
