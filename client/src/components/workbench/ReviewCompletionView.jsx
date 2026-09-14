@@ -99,7 +99,13 @@ export default function ReviewCompletionView({
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                                    {item.value ?? (item.values ? item.values.join('/') : '3/3 checks')}
+                                    {item.value ?? (
+                                        item.values ? (
+                                            Array.isArray(item.values)
+                                                ? item.values.join('/')
+                                                : `${item.values.sand ?? ''}/${item.values.silt ?? ''}/${item.values.clay ?? ''}`
+                                        ) : '3/3 checks'
+                                    )}
                                 </span>
                                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
                                     ✓ Included

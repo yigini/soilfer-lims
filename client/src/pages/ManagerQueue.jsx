@@ -387,7 +387,9 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
     const Icon = config.icon;
 
-    const title = item.labId || (type === 'assign' ? `Sample ${item.sampleId}` : (String(item.originalId) || item.type));
+    const title = (type === 'assign' || type === 'review')
+        ? `Sample ${item.sampleId || item.id}`
+        : (item.labId || (String(item.originalId) || item.type));
     const subtitle = type === 'assign'
         ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
         : (type === 'review' && item.isAggregated)
@@ -396,10 +398,13 @@ const QueueCard = ({ item, type, navigate, t }) => {
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
+    const targetUrl = type === 'review'
+        ? `/samples/${item.sampleId || item.id}?tab=review`
+        : `/samples/${item.sampleId || item.id}`;
 
     return (
         <button
-            onClick={() => navigate(`/samples/${item.sampleId || item.id}`)}
+            onClick={() => navigate(targetUrl)}
             className="group bg-sf-surface rounded-xl border border-sf-divider shadow-sm hover:shadow-md hover:border-sf-emerald transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-sf-emerald"
             aria-label={`${config.label}: ${title}`}
         >
@@ -419,9 +424,9 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
                 <div className="mb-4">
                     <h3 className="font-bold text-sf-text text-lg truncate leading-tight" title={title}>{title}</h3>
-                    {item.labId && item.originalId && (
+                    {(item.originalId || item.sampleId) && (
                         <div className="text-[10px] text-sf-muted font-mono mt-0.5 uppercase tracking-tighter">
-                            ID: {item.originalId}
+                            ID: {item.originalId || item.sampleId}
                         </div>
                     )}
                     <div className="text-[11px] text-sf-muted font-bold mt-2 min-h-[1.5rem] line-clamp-2">
