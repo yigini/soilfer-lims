@@ -59,7 +59,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
     let labA, labB, labC;
     let proj1, proj2, projPaused;
     let configA1, configA2, configB1;
-    let tokenAdmin, tokenLabA, tokenLabB, tokenLabC;
+    let tokenAdmin, tokenLabA, tokenLabB, tokenLabC, tokenNationalGTM;
 
     beforeAll(async () => {
         // Setup 3 labs
@@ -86,11 +86,15 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
         const userC = await prisma.user.create({
             data: { id: 'usr-c-' + SUFFIX, username: 'user_c_' + SUFFIX, email: 'c@' + SUFFIX + '.test', password: 'h', role: 'LAB_MANAGER', labId: labC.id, tokenVersion: 1 }
         });
+        const nationalUserGTM = await prisma.user.create({
+            data: { id: 'usr-nat-' + SUFFIX, username: 'nat_' + SUFFIX, email: 'nat@' + SUFFIX + '.test', password: 'h', role: 'MASTER_USER', countries: JSON.stringify(['Guatemala']), tokenVersion: 1 }
+        });
 
         tokenAdmin = 'Bearer ' + jwt.sign({ id: adminUser.id, username: adminUser.username, role: adminUser.role, tokenVersion: 1 }, process.env.JWT_SECRET);
         tokenLabA = 'Bearer ' + jwt.sign({ id: userA.id, username: userA.username, role: userA.role, labId: labA.id, tokenVersion: 1 }, process.env.JWT_SECRET);
         tokenLabB = 'Bearer ' + jwt.sign({ id: userB.id, username: userB.username, role: userB.role, labId: labB.id, tokenVersion: 1 }, process.env.JWT_SECRET);
         tokenLabC = 'Bearer ' + jwt.sign({ id: userC.id, username: userC.username, role: userC.role, labId: labC.id, tokenVersion: 1 }, process.env.JWT_SECRET);
+        tokenNationalGTM = 'Bearer ' + jwt.sign({ id: nationalUserGTM.id, username: nationalUserGTM.username, role: nationalUserGTM.role, countries: nationalUserGTM.countries, tokenVersion: 1 }, process.env.JWT_SECRET);
 
         // Projects
         proj1 = await prisma.project.create({
@@ -181,6 +185,14 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
         // Verify dev.db was never modified
         const devDbHashAfter = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
         expect(devDbHashAfter).toBe(devDbHashBefore);
+    });
+
+    beforeEach(() => {
+        jest.resetAllMocks();
+        koboService.transformSubmission.mockImplementation((sub) => [{
+            original_id: sub.sample_id || sub.original_id || ('SMP-' + (sub._id || sub._uuid || Date.now())),
+            site_id: 'site-default'
+        }]);
     });
 
     const request = require('supertest');
@@ -331,6 +343,65 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
             expect(res.body.configured).toBe(true);
             expect(res.body.koboFormId).toBe(configB1.formId);
         });
+
+        it('K02: rejects servicing laboratory manager attempting to access foreign lab configuration with 403 FORBIDDEN_CONFIG_SCOPE', async () => {
+            const res = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?configId=${configA1.id}`)
+                .set('Authorization', tokenLabB);
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toBe('FORBIDDEN_CONFIG_SCOPE');
+            expect(res.body.message).toContain('Requested Kobo configuration is outside your authorized laboratory scope');
+        });
+
+        it('K02: rejects servicing laboratory manager attempting to access foreign labId with 403 FORBIDDEN_LAB_SCOPE', async () => {
+            const res = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?labId=${labA.id}`)
+                .set('Authorization', tokenLabB);
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toBe('FORBIDDEN_LAB_SCOPE');
+            expect(res.body.message).toContain('Specified laboratory is outside your authorized scope');
+        });
+
+        it('K02: allows owner laboratory manager to coordinate and view servicing laboratory configuration', async () => {
+            const res = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?configId=${configB1.id}`)
+                .set('Authorization', tokenLabA);
+
+            expect(res.status).toBe(200);
+            expect(res.body.configured).toBe(true);
+            expect(res.body.koboFormId).toBe(configB1.formId);
+        });
+
+        it('K02: allows national admin within their authorized country but denies foreign country configuration', async () => {
+            // Lab A is Guatemala -> allowed for nationalUserGTM
+            const allowedRes = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?configId=${configA1.id}`)
+                .set('Authorization', tokenNationalGTM);
+
+            expect(allowedRes.status).toBe(200);
+            expect(allowedRes.body.configured).toBe(true);
+            expect(allowedRes.body.koboFormId).toBe(configA1.formId);
+
+            // Lab B is Honduras -> denied for nationalUserGTM
+            const deniedRes = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?configId=${configB1.id}`)
+                .set('Authorization', tokenNationalGTM);
+
+            expect(deniedRes.status).toBe(403);
+            expect(deniedRes.body.error).toBe('FORBIDDEN_CONFIG_SCOPE');
+        });
+
+        it('K02: strictly redacts secret tokens from responses across all configurations', async () => {
+            const res = await request(app)
+                .get(`/api/projects/${proj1.id}/kobo-config?configId=${configA1.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(200);
+            expect(res.body.apiToken).toBeUndefined();
+            expect(res.body.token).toBeUndefined();
+        });
     });
 
     describe('4. Admissions & Membership Commit-Time Protection in Kobo Sync', () => {
@@ -358,7 +429,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
 
             expect(res.status).toBe(200);
             expect(res.body.newSamples).toBe(0);
-            expect(res.body.skipped).toBe(2);
+            expect(res.body.skipped).toBe(0);
             expect(res.body.message).toContain('admissions paused');
         });
 
@@ -384,8 +455,205 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
                 .post(`/api/kobo/sync/${labC.id}?configId=${unauthorizedConfig.id}`)
                 .set('Authorization', tokenAdmin);
 
-            expect(res.status).toBe(500);
-            expect(res.body.error).toContain('is not an authorized servicing laboratory for project');
+            expect(res.status).toBe(403);
+            expect(res.body.error).toContain('FORBIDDEN');
+            expect(res.body.message).toContain('is not an authorized servicing laboratory for project');
+        });
+    });
+
+    describe('5. Lifecycle & Invariant Protection (K03, Mid-Fetch Deactivation, Atomic Multi-Sample & Cursor Preservation)', () => {
+        let testLabD, testProjD, testConfigD;
+
+        beforeAll(async () => {
+            testLabD = await prisma.lab.create({
+                data: { id: 'LAB-D-' + SUFFIX, code: 'LD-' + SUFFIX.slice(-3), name: 'Lab D ' + SUFFIX, country: 'Guatemala', isActive: true }
+            });
+            testProjD = await prisma.project.create({
+                data: { id: 'PROJ-D-' + SUFFIX, code: 'PROJ-D-' + SUFFIX, name: 'Project D ' + SUFFIX, status: 'ACTIVE', projectType: 'KOBO_LINKED', labId: testLabD.id }
+            });
+            testConfigD = await prisma.koboConfig.create({
+                data: {
+                    id: 'CFG-D1-' + SUFFIX,
+                    labId: testLabD.id,
+                    projectCode: testProjD.code,
+                    koboServerUrl: 'https://kobo.fixture.test',
+                    formId: 'form_d1_' + SUFFIX,
+                    apiToken: 'token_d1',
+                    isActive: true,
+                    lastSubmissionId: '100'
+                }
+            });
+        });
+
+        it('K03: rejects sync into inactive laboratory even when sync actor is SUPER_ADMIN and creates 0 samples', async () => {
+            await prisma.lab.update({
+                where: { id: testLabD.id },
+                data: { isActive: false }
+            });
+
+            const res = await request(app)
+                .post(`/api/kobo/sync/${testLabD.id}?configId=${testConfigD.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(400);
+            expect(res.body.error).toBe('LAB_INACTIVE');
+            expect(res.body.message).toContain('is inactive. Sample intake is disallowed for inactive laboratories.');
+
+            const createdCount = await prisma.sample.count({ where: { assignedLab: testLabD.id } });
+            expect(createdCount).toBe(0);
+
+            // Re-activate testLabD for subsequent lifecycle tests
+            await prisma.lab.update({
+                where: { id: testLabD.id },
+                data: { isActive: true }
+            });
+        });
+
+        it('rolls back commit transaction and preserves cursor when laboratory is deactivated mid-fetch', async () => {
+            koboService.fetchSubmissions.mockImplementationOnce(async () => {
+                // Simulate race condition: lab is deactivated after fetchSubmissions starts
+                await prisma.lab.update({
+                    where: { id: testLabD.id },
+                    data: { isActive: false }
+                });
+                return [{ _id: 102, _uuid: 'u-102' }];
+            });
+
+            koboService.transformSubmission.mockReturnValueOnce([
+                { original_id: 'MID-FETCH-SAMPLE-102', site_id: 'site-102' }
+            ]);
+
+            const res = await request(app)
+                .post(`/api/kobo/sync/${testLabD.id}?configId=${testConfigD.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(200);
+            expect(res.body.newSamples).toBe(0);
+            expect(res.body.skipped).toBe(1);
+            expect(res.body.skippedReasons[0].reason).toContain('LAB_INACTIVE');
+
+            // Sample must NOT be created
+            const sample = await prisma.sample.findFirst({ where: { originalId: 'MID-FETCH-SAMPLE-102' } });
+            expect(sample).toBeNull();
+
+            // Cursor in database must NOT have advanced past 100
+            const freshConfig = await prisma.koboConfig.findUnique({ where: { id: testConfigD.id } });
+            expect(freshConfig.lastSubmissionId).toBe('100');
+
+            // Restore lab active state
+            await prisma.lab.update({
+                where: { id: testLabD.id },
+                data: { isActive: true }
+            });
+        });
+
+        it('atomically rolls back multi-sample submission and preserves cursor when admissions pause mid-fetch', async () => {
+            koboService.fetchSubmissions.mockImplementationOnce(async () => {
+                // Simulate admissions paused mid-fetch
+                await prisma.project.update({
+                    where: { code: testProjD.code },
+                    data: { status: 'PAUSED' }
+                });
+                return [{ _id: 103, _uuid: 'u-103' }];
+            });
+
+            // 1 submission generates 2 depth samples (topsoil and subsoil)
+            koboService.transformSubmission.mockReturnValueOnce([
+                { original_id: 'MULTI-SAMPLE-103-TOP', site_id: 'site-103', depth: '0-20' },
+                { original_id: 'MULTI-SAMPLE-103-SUB', site_id: 'site-103', depth: '20-50' }
+            ]);
+
+            const res = await request(app)
+                .post(`/api/kobo/sync/${testLabD.id}?configId=${testConfigD.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(200);
+            expect(res.body.newSamples).toBe(0);
+            expect(res.body.skipped).toBe(2);
+            expect(res.body.skippedReasons[0].reason).toContain('ADMISSION_POLICY_BLOCKED');
+
+            // Neither sample should exist
+            const sampleTop = await prisma.sample.findFirst({ where: { originalId: 'MULTI-SAMPLE-103-TOP' } });
+            const sampleSub = await prisma.sample.findFirst({ where: { originalId: 'MULTI-SAMPLE-103-SUB' } });
+            expect(sampleTop).toBeNull();
+            expect(sampleSub).toBeNull();
+
+            // Cursor must still be '100'
+            const freshConfig = await prisma.koboConfig.findUnique({ where: { id: testConfigD.id } });
+            expect(freshConfig.lastSubmissionId).toBe('100');
+
+            // Unpause project for recovery
+            await prisma.project.update({
+                where: { code: testProjD.code },
+                data: { status: 'ACTIVE' }
+            });
+        });
+
+        it('retains cursor up to highest successful submission without advancing past retriable failures, and recovers on next sync', async () => {
+            // Batch with 2 submissions: 104 (valid) and 105 (blocked by paused project)
+            koboService.fetchSubmissions.mockResolvedValueOnce([
+                { _id: 104, _uuid: 'u-104' },
+                { _id: 105, _uuid: 'u-105' }
+            ]);
+
+            koboService.transformSubmission
+                .mockReturnValueOnce([{ original_id: 'SAMPLE-104-OK', site_id: 'site-104' }])
+                .mockImplementationOnce(() => {
+                    // Synchronously pause project before submission 105 commits
+                    const db = new Database(fixtureDbPath);
+                    db.prepare("UPDATE Project SET status = 'PAUSED' WHERE code = ?").run(testProjD.code);
+                    db.close();
+                    return [{ original_id: 'SAMPLE-105-BLOCKED', site_id: 'site-105' }];
+                });
+
+            // Allow short microtask tick for project pause
+            const res = await request(app)
+                .post(`/api/kobo/sync/${testLabD.id}?configId=${testConfigD.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(200);
+            expect(res.body.newSamples).toBe(1); // 104 succeeded
+            expect(res.body.skipped).toBe(1);    // 105 blocked
+
+            // Verify sample 104 was created and sample 105 was NOT created
+            const sample104 = await prisma.sample.findFirst({ where: { originalId: 'SAMPLE-104-OK' } });
+            const sample105 = await prisma.sample.findFirst({ where: { originalId: 'SAMPLE-105-BLOCKED' } });
+            expect(sample104).not.toBeNull();
+            expect(sample105).toBeNull();
+
+            // Cursor in DB must be '104', NOT '105'
+            const configAfterBatch = await prisma.koboConfig.findUnique({ where: { id: testConfigD.id } });
+            expect(configAfterBatch.lastSubmissionId).toBe('104');
+
+            // RECOVERY TEST: Project admissions are reopened
+            await prisma.project.update({
+                where: { code: testProjD.code },
+                data: { status: 'ACTIVE' }
+            });
+
+            // Next sync runs, Kobo receives sinceId = 104 and returns submission 105
+            koboService.fetchSubmissions.mockImplementationOnce(async (url, form, token, sinceId) => {
+                expect(sinceId).toBe('104');
+                return [{ _id: 105, _uuid: 'u-105' }];
+            });
+            koboService.transformSubmission.mockReturnValueOnce([
+                { original_id: 'SAMPLE-105-RECOVERED', site_id: 'site-105' }
+            ]);
+
+            const recoveryRes = await request(app)
+                .post(`/api/kobo/sync/${testLabD.id}?configId=${testConfigD.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(recoveryRes.status).toBe(200);
+            expect(recoveryRes.body.newSamples).toBe(1);
+            expect(recoveryRes.body.skipped).toBe(0);
+
+            // Verify recovered sample was created and cursor advanced to 105
+            const sampleRecovered = await prisma.sample.findFirst({ where: { originalId: 'SAMPLE-105-RECOVERED' } });
+            expect(sampleRecovered).not.toBeNull();
+
+            const finalConfig = await prisma.koboConfig.findUnique({ where: { id: testConfigD.id } });
+            expect(finalConfig.lastSubmissionId).toBe('105');
         });
     });
 });

@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-09-14T01:16:33.479Z",
+  "baseline": "1f4a6f4a2f219eb745e241829279552624f8a21c",
+  "sourceUnchanged": true,
+  "externalCallsMocked": 1,
+  "results": [
+    {
+      "id": "K02",
+      "case": "Service manager explicit config ID must not widen own-lab configuration visibility",
+      "passed": false,
+      "own": {
+        "status": 200,
+        "body": {
+          "configured": true,
+          "koboServerUrl": "https://fixture.invalid",
+          "koboFormId": "ASSET-B",
+          "isActive": true,
+          "lastSyncAt": null,
+          "canEdit": false
+        }
+      },
+      "foreign": {
+        "status": 200,
+        "body": {
+          "configured": true,
+          "koboServerUrl": "https://fixture.invalid",
+          "koboFormId": "ASSET-A",
+          "isActive": true,
+          "lastSyncAt": null,
+          "canEdit": false
+        }
+      }
+    },
+    {
+      "id": "K03",
+      "case": "No Kobo intake into inactive servicing lab even when sync actor is admin",
+      "passed": false,
+      "sync": {
+        "status": 200,
+        "body": {
+          "newSamples": 1,
+          "skipped": 0,
+          "lastSubmissionId": "1"
+        }
+      },
+      "createdSampleCount": 1
+    }
+  ]
+}
