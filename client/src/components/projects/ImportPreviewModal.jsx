@@ -3,9 +3,12 @@ import axios from 'axios';
 import { X, Upload, CheckCircle2, AlertTriangle, AlertCircle, FileText, ArrowRight, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '../../context/LanguageContext';
-
-// Persistent registry of unresolved/in-flight manifest imports across modal lifecycle and prop updates
-const pendingManifestStore = new Map();
+import { useAuth } from '../../context/AuthContext';
+import {
+    getPendingManifest,
+    setPendingManifest,
+    deletePendingManifest
+} from '../../services/pendingGovernanceStore';
 
 export default function ImportPreviewModal({
     isOpen,
@@ -14,19 +17,21 @@ export default function ImportPreviewModal({
     onSuccess
 }) {
     const { t } = useLanguage();
+    const { user } = useAuth();
+    const actorId = user?.id || 'anonymous';
+
     const [rawInput, setRawInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [previewResult, setPreviewResult] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [committing, setCommitting] = useState(false);
 
-    const opKey = project?.id;
-    const [unresolvedOp, setUnresolvedOp] = useState(() => (opKey ? pendingManifestStore.get(opKey) || null : null));
+    const [unresolvedOp, setUnresolvedOp] = useState(() => (project?.id ? getPendingManifest(actorId, project.id) : null));
 
-    // Retain unresolved operation across background prop refreshes and modal reopens
+    // Retain unresolved operation across background prop refreshes and modal reopens for same actor
     React.useEffect(() => {
-        if (isOpen && opKey) {
-            const existing = pendingManifestStore.get(opKey);
+        if (isOpen && project?.id) {
+            const existing = getPendingManifest(actorId, project.id);
             if (existing) {
                 setUnresolvedOp(existing);
                 if (!previewResult && existing.previewResult) {
@@ -38,8 +43,18 @@ export default function ImportPreviewModal({
             } else {
                 setUnresolvedOp(null);
             }
+        } else if (!isOpen) {
+            setUnresolvedOp(null);
         }
-    }, [isOpen, opKey]);
+    }, [isOpen, project?.id, actorId]);
+
+    // Invalidate sensitive visible state on account switch or logout
+    React.useEffect(() => {
+        setRawInput('');
+        setPreviewResult(null);
+        setErrorMessage('');
+        setUnresolvedOp(null);
+    }, [actorId]);
 
     if (!isOpen || !project) return null;
 
@@ -105,7 +120,7 @@ export default function ImportPreviewModal({
         try {
             const res = await axios.get(`/api/projects/${project.id}/operations/${unresolvedOp.idempotencyKey}`);
             if (res.data?.receipt?.outcome) {
-                pendingManifestStore.delete(project.id);
+                deletePendingManifest(actorId, project.id);
                 setUnresolvedOp(null);
                 onSuccess?.(res.data.receipt.outcome);
                 onClose();
@@ -125,7 +140,7 @@ export default function ImportPreviewModal({
 
     const handleDiscardUnresolved = () => {
         if (project) {
-            pendingManifestStore.delete(project.id);
+            deletePendingManifest(actorId, project.id);
         }
         setUnresolvedOp(null);
         setErrorMessage('');
@@ -143,7 +158,13 @@ export default function ImportPreviewModal({
             targetLabId: previewResult.destinationLabId || project.labId || undefined
         };
 
-        if (unresolvedOp && JSON.stringify(unresolvedOp.snapshot.sampleIds) !== JSON.stringify(snapshot.sampleIds)) {
+        const isSnapshotEqual = unresolvedOp?.snapshot &&
+            JSON.stringify(unresolvedOp.snapshot.sampleIds) === JSON.stringify(snapshot.sampleIds) &&
+            unresolvedOp.snapshot.previewHash === snapshot.previewHash &&
+            unresolvedOp.snapshot.previewToken === snapshot.previewToken &&
+            unresolvedOp.snapshot.targetLabId === snapshot.targetLabId;
+
+        if (unresolvedOp && !isSnapshotEqual) {
             setErrorMessage(t('projects.import.unresolvedConflictNotice', 'A previous manifest registration attempt is still unconfirmed. Recover the previous outcome or click "Discard attempt" before submitting new values.'));
             return;
         }
@@ -157,15 +178,20 @@ export default function ImportPreviewModal({
                 ? crypto.randomUUID()
                 : (`man-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
 
+        const expectedRevision = unresolvedOp?.expectedRevision !== undefined
+            ? unresolvedOp.expectedRevision
+            : (project.updatedAt ? String(new Date(project.updatedAt).getTime()) : null);
+
         const commandRecord = {
             idempotencyKey,
             projectId: project.id,
             snapshot: JSON.parse(JSON.stringify(snapshot)),
+            expectedRevision,
             rawInput,
             previewResult,
             status: 'uncertain'
         };
-        pendingManifestStore.set(project.id, commandRecord);
+        setPendingManifest(actorId, project.id, commandRecord);
         setUnresolvedOp(commandRecord);
 
         try {
@@ -174,7 +200,7 @@ export default function ImportPreviewModal({
                 try {
                     const checkRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (checkRes.data?.receipt?.outcome) {
-                        pendingManifestStore.delete(project.id);
+                        deletePendingManifest(actorId, project.id);
                         setUnresolvedOp(null);
                         onSuccess?.(checkRes.data.receipt.outcome);
                         onClose();
@@ -188,8 +214,8 @@ export default function ImportPreviewModal({
             const headers = {
                 'x-idempotency-key': idempotencyKey
             };
-            if (project.updatedAt) {
-                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            if (commandRecord.expectedRevision) {
+                headers['if-match'] = commandRecord.expectedRevision;
             }
 
             const res = await axios.post(`/api/projects/${project.id}/manifest`, {
@@ -200,7 +226,7 @@ export default function ImportPreviewModal({
                 idempotencyKey
             }, { headers });
 
-            pendingManifestStore.delete(project.id);
+            deletePendingManifest(actorId, project.id);
             setUnresolvedOp(null);
             onSuccess?.(res.data);
             onClose();
@@ -208,7 +234,7 @@ export default function ImportPreviewModal({
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                pendingManifestStore.delete(project.id);
+                deletePendingManifest(actorId, project.id);
                 setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to register manifest samples');

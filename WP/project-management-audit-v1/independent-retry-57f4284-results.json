@@ -1,0 +1,82 @@
+{
+  "checkedAt": "2026-09-14T03:01:19.616Z",
+  "baseline": "57f428456fedf610bfc533e44791d87a05330fe0",
+  "sourceUnchanged": true,
+  "results": [
+    {
+      "id": "C01-ARCHIVE-PAYLOAD",
+      "passed": true,
+      "initialStatus": 200,
+      "sameStatus": 200,
+      "changedStatus": 409,
+      "receipt": {
+        "id": "c5676d33-dab4-4e5e-87fc-13892ef54807",
+        "idempotencyKey": "archive-one",
+        "commandType": "PROJECT_ARCHIVE",
+        "targetResource": "Project:ARCH",
+        "actor": "admin",
+        "status": "SUCCESS",
+        "outcome": "{\"status\":\"success\",\"messageCode\":\"PROJECT_ARCHIVED\",\"message\":\"Project archived\",\"data\":{\"code\":\"ARCH\",\"project\":{\"id\":\"ARCH\",\"code\":\"ARCH\",\"name\":\"ARCH\",\"description\":null,\"notes\":null,\"client\":null,\"startDate\":null,\"deliveryDeadline\":null,\"status\":\"COMPLETED\",\"projectType\":\"OPEN_INTAKE\",\"expectedSampleCount\":0,\"priority\":\"NORMAL\",\"defaultAnalysisBundle\":null,\"labId\":\"A\",\"countries\":null,\"assignedLabIds\":null,\"createdAt\":\"2026-09-14T03:01:19.469Z\",\"updatedAt\":\"2026-09-14T03:01:19.567Z\"}},\"payloadHash\":\"80dd5cec76a498f0ee304449a907e5bf50b312b9fe7836306383a3bc6eb77414\"}",
+        "createdAt": "2026-09-14T03:01:19.569Z"
+      }
+    },
+    {
+      "id": "C02-MIXED",
+      "passed": true,
+      "preview": {
+        "status": 200,
+        "body": {
+          "valid": false,
+          "totalRows": 2,
+          "validCount": 1,
+          "conflictCount": 1,
+          "errorCount": 0,
+          "conflicts": [
+            {
+              "sampleId": "EXISTING",
+              "error": "ALREADY_EXISTS_IN_DB",
+              "existingProject": "IMPORT",
+              "isSameProject": true
+            }
+          ],
+          "errors": [],
+          "validSampleIds": [
+            "NEW-001"
+          ],
+          "previewHash": "457be33b12863b7182028ecbfabd4f7a2da82596feb440b673deb54e22e81d1d",
+          "previewToken": "eyJwcm9qZWN0SWQiOiJJTVBPUlQiLCJkZXN0aW5hdGlvbkxhYklkIjoiQSIsImFjdG9yIjoiYWRtaW4iLCJwcm9qZWN0UmV2aXNpb24iOiIxNzg5MzU0ODc5NDY5Iiwic2FtcGxlSWRzSGFzaCI6IjQ1N2JlMzNiMTI4NjNiNzE4MjAyOGVjYmZhYmQ0ZjdhMmRhODI1OTZmZWI0NDBiNjczZGViNTRlMjJlODFkMWQiLCJleHBpcmVzQXQiOjE3ODkzNTU3Nzk1OTIsInNpZ25hdHVyZSI6IjM4ODBiZWMyZDEzZmQyNmRmMGZlMzM2YzE2NzRkNWY1MTYwNjdmZTA0ZGE5NTcyZWNiMTAxZGRkODBiMDg1NDIifQ==",
+          "destinationLabId": "A",
+          "expiresAt": 1789355779592
+        }
+      },
+      "commit": {
+        "status": 200,
+        "body": {
+          "messageCode": "MANIFEST_PROCESSED",
+          "messageParams": null,
+          "message": "Successfully processed 1 IDs.",
+          "data": {
+            "count": 1,
+            "skipped": 0
+          },
+          "requestSampleIds": [
+            "NEW-001"
+          ],
+          "payloadHash": "d9ffb01c862edd6bd0a82a6e10b2854d3b350f5d1426564196e440978a774a71"
+        }
+      }
+    },
+    {
+      "id": "C02-STALE-FRESH-HEADER",
+      "passed": true,
+      "staleCommit": {
+        "status": 409,
+        "body": {
+          "error": "PREVIEW_STALE_REVISION",
+          "code": "PREVIEW_STALE_REVISION",
+          "message": "Preview token is based on an obsolete project revision. Please regenerate preview."
+        }
+      }
+    }
+  ]
+}

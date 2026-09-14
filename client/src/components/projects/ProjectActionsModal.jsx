@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-
-// Persistent registry of unresolved/in-flight project operations across modal lifecycle and prop updates
-const pendingOperationsStore = new Map();
+import { useAuth } from '../../context/AuthContext';
+import {
+    getPendingOperation,
+    setPendingOperation,
+    deletePendingOperation,
+    findPendingOperationForProject
+} from '../../services/pendingGovernanceStore';
 
 export default function ProjectActionsModal({
     isOpen,
@@ -15,6 +19,9 @@ export default function ProjectActionsModal({
     initialActionType = 'menu'
 }) {
     const { t } = useLanguage();
+    const { user } = useAuth();
+    const actorId = user?.id || 'anonymous';
+
     const [submitting, setSubmitting] = useState(false);
     const [actionType, setActionType] = useState(initialActionType); // 'menu' | 'edit' | 'pause' | 'archive' | 'delete'
     const [reason, setReason] = useState('');
@@ -30,13 +37,13 @@ export default function ProjectActionsModal({
     const [editStatus, setEditStatus] = useState(project?.status || 'ACTIVE');
     const [catalogueGroups, setCatalogueGroups] = useState([]);
 
-    const opKey = project ? `${project.id}:${actionType}` : null;
     const findActiveOp = () => {
         if (!project) return null;
-        if (opKey && pendingOperationsStore.has(opKey)) {
-            return pendingOperationsStore.get(opKey);
+        if (actionType && actionType !== 'menu') {
+            const specific = getPendingOperation(actorId, project.id, actionType);
+            if (specific) return specific;
         }
-        return Array.from(pendingOperationsStore.values()).find(op => op.projectId === project.id) || null;
+        return findPendingOperationForProject(actorId, project.id);
     };
     const [unresolvedOp, setUnresolvedOp] = useState(findActiveOp);
 
@@ -55,7 +62,7 @@ export default function ProjectActionsModal({
         }
     }, [isOpen, initialActionType]);
 
-    // Retain unresolved operation across background prop refreshes and modal reopens
+    // Retain unresolved operation across background prop refreshes and modal reopens for the same actor
     React.useEffect(() => {
         if (isOpen && project) {
             const active = findActiveOp();
@@ -63,8 +70,17 @@ export default function ProjectActionsModal({
             if (active && active.action === 'archive' && active.snapshot?.reason && !reason) {
                 setReason(active.snapshot.reason);
             }
+        } else if (!isOpen) {
+            setUnresolvedOp(null);
         }
-    }, [isOpen, opKey, project?.id, actionType]);
+    }, [isOpen, project?.id, actionType, actorId]);
+
+    // Reset sensitive form state when actor switches
+    React.useEffect(() => {
+        setReason('');
+        setErrorMessage('');
+        setUnresolvedOp(null);
+    }, [actorId]);
 
     React.useEffect(() => {
         if (isOpen && actionType === 'edit') {
@@ -99,10 +115,7 @@ export default function ProjectActionsModal({
         try {
             const res = await axios.get(`/api/projects/${project.id}/operations/${unresolvedOp.idempotencyKey}`);
             if (res.data?.receipt?.outcome) {
-                if (unresolvedOp?.action) {
-                    pendingOperationsStore.delete(`${project.id}:${unresolvedOp.action}`);
-                }
-                if (opKey) pendingOperationsStore.delete(opKey);
+                deletePendingOperation(actorId, project.id, unresolvedOp.action);
                 setUnresolvedOp(null);
                 onSuccess?.(unresolvedOp.action === 'archive' ? 'PROJECT_ARCHIVED' : (unresolvedOp.action === 'pause' ? 'PROJECT_PAUSED' : 'PROJECT_UPDATED'));
                 onClose();
@@ -122,14 +135,14 @@ export default function ProjectActionsModal({
 
     // Discard unresolved command identity to intentionally start a fresh operation
     const handleDiscardUnresolved = () => {
-        if (unresolvedOp?.action) {
-            pendingOperationsStore.delete(`${project.id}:${unresolvedOp.action}`);
-        }
-        if (opKey) {
-            pendingOperationsStore.delete(opKey);
+        if (unresolvedOp?.action && project) {
+            deletePendingOperation(actorId, project.id, unresolvedOp.action);
         }
         setUnresolvedOp(null);
         setErrorMessage('');
+        if (unresolvedOp?.action === 'archive') {
+            setReason('');
+        }
     };
 
     const handleSaveSettings = async (e) => {
@@ -164,15 +177,20 @@ export default function ProjectActionsModal({
                 ? crypto.randomUUID()
                 : (`proj-upd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
 
+        const expectedRevision = unresolvedOp?.expectedRevision !== undefined
+            ? unresolvedOp.expectedRevision
+            : (project.updatedAt ? String(new Date(project.updatedAt).getTime()) : null);
+
         // Mark in-flight/uncertain
         const commandRecord = {
             idempotencyKey,
             action: 'edit',
             projectId: project.id,
             snapshot: JSON.parse(JSON.stringify(payload)),
+            expectedRevision,
             status: 'uncertain'
         };
-        pendingOperationsStore.set(opKey, commandRecord);
+        setPendingOperation(actorId, project.id, 'edit', commandRecord);
         setUnresolvedOp(commandRecord);
 
         try {
@@ -181,7 +199,7 @@ export default function ProjectActionsModal({
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        pendingOperationsStore.delete(opKey);
+                        deletePendingOperation(actorId, project.id, 'edit');
                         setUnresolvedOp(null);
                         onSuccess?.('PROJECT_UPDATED');
                         onClose();
@@ -195,12 +213,12 @@ export default function ProjectActionsModal({
             const headers = {
                 'x-idempotency-key': idempotencyKey
             };
-            if (project.updatedAt) {
-                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            if (commandRecord.expectedRevision) {
+                headers['if-match'] = commandRecord.expectedRevision;
             }
 
             await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
-            pendingOperationsStore.delete(opKey);
+            deletePendingOperation(actorId, project.id, 'edit');
             setUnresolvedOp(null);
             onSuccess?.('PROJECT_UPDATED');
             onClose();
@@ -208,7 +226,7 @@ export default function ProjectActionsModal({
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                pendingOperationsStore.delete(opKey);
+                deletePendingOperation(actorId, project.id, 'edit');
                 setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update project settings');
@@ -240,14 +258,19 @@ export default function ProjectActionsModal({
                 ? crypto.randomUUID()
                 : (`proj-pause-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
 
+        const expectedRevision = unresolvedOp?.expectedRevision !== undefined
+            ? unresolvedOp.expectedRevision
+            : (project.updatedAt ? String(new Date(project.updatedAt).getTime()) : null);
+
         const commandRecord = {
             idempotencyKey,
             action: 'pause',
             projectId: project.id,
             snapshot: JSON.parse(JSON.stringify(payload)),
+            expectedRevision,
             status: 'uncertain'
         };
-        pendingOperationsStore.set(opKey, commandRecord);
+        setPendingOperation(actorId, project.id, 'pause', commandRecord);
         setUnresolvedOp(commandRecord);
 
         try {
@@ -255,7 +278,7 @@ export default function ProjectActionsModal({
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        pendingOperationsStore.delete(opKey);
+                        deletePendingOperation(actorId, project.id, 'pause');
                         setUnresolvedOp(null);
                         onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
                         onClose();
@@ -269,12 +292,12 @@ export default function ProjectActionsModal({
             const headers = {
                 'x-idempotency-key': idempotencyKey
             };
-            if (project.updatedAt) {
-                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            if (commandRecord.expectedRevision) {
+                headers['if-match'] = commandRecord.expectedRevision;
             }
 
             await axios.put(`/api/projects/${project.id}`, { ...payload, idempotencyKey }, { headers });
-            pendingOperationsStore.delete(opKey);
+            deletePendingOperation(actorId, project.id, 'pause');
             setUnresolvedOp(null);
             onSuccess?.(nextStatus === 'ACTIVE' ? 'PROJECT_RESUMED' : 'PROJECT_PAUSED');
             onClose();
@@ -282,7 +305,7 @@ export default function ProjectActionsModal({
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                pendingOperationsStore.delete(opKey);
+                deletePendingOperation(actorId, project.id, 'pause');
                 setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to update status');
@@ -310,14 +333,19 @@ export default function ProjectActionsModal({
                 ? crypto.randomUUID()
                 : (`proj-arch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
 
+        const expectedRevision = unresolvedOp?.expectedRevision !== undefined
+            ? unresolvedOp.expectedRevision
+            : (project.updatedAt ? String(new Date(project.updatedAt).getTime()) : null);
+
         const commandRecord = {
             idempotencyKey,
             action: 'archive',
             projectId: project.id,
             snapshot: JSON.parse(JSON.stringify(payload)),
+            expectedRevision,
             status: 'uncertain'
         };
-        pendingOperationsStore.set(opKey, commandRecord);
+        setPendingOperation(actorId, project.id, 'archive', commandRecord);
         setUnresolvedOp(commandRecord);
 
         try {
@@ -325,7 +353,7 @@ export default function ProjectActionsModal({
                 try {
                     const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
                     if (receiptRes.data?.receipt?.outcome) {
-                        pendingOperationsStore.delete(opKey);
+                        deletePendingOperation(actorId, project.id, 'archive');
                         setUnresolvedOp(null);
                         onSuccess?.('PROJECT_ARCHIVED');
                         onClose();
@@ -339,12 +367,12 @@ export default function ProjectActionsModal({
             const headers = {
                 'x-idempotency-key': idempotencyKey
             };
-            if (project.updatedAt) {
-                headers['if-match'] = String(new Date(project.updatedAt).getTime());
+            if (commandRecord.expectedRevision) {
+                headers['if-match'] = commandRecord.expectedRevision;
             }
 
             await axios.post(`/api/projects/${project.id}/archive`, { ...payload, idempotencyKey }, { headers });
-            pendingOperationsStore.delete(opKey);
+            deletePendingOperation(actorId, project.id, 'archive');
             setUnresolvedOp(null);
             onSuccess?.('PROJECT_ARCHIVED');
             onClose();
@@ -352,7 +380,7 @@ export default function ProjectActionsModal({
             const status = err.response?.status;
             const errCode = err.response?.data?.code || err.response?.data?.error;
             if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
-                pendingOperationsStore.delete(opKey);
+                deletePendingOperation(actorId, project.id, 'archive');
                 setUnresolvedOp(null);
             }
             setErrorMessage(err.response?.data?.message || err.response?.data?.error || 'Failed to archive project');

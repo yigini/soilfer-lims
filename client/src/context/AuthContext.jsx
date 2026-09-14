@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLanguage } from './LanguageContext';
 import { clearStoredSessionOverride } from '../lib/appearance';
 import { clearUserHelpCache } from '../services/offline/offlineDb';
+import { clearAllPendingGovernance } from '../services/pendingGovernanceStore';
 
 const AuthContext = createContext();
 
@@ -108,6 +109,7 @@ export const AuthProvider = ({ children }) => {
             const res = await axios.post('/api/auth/login', { username, password });
             const payload = res.data?.data || res.data;
             const { token: newToken, user: userData } = payload;
+            clearAllPendingGovernance();
             localStorage.setItem('token', newToken);
             localStorage.setItem('user', JSON.stringify(userData));
             axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -121,6 +123,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        clearAllPendingGovernance();
         if (user?.id) {
             clearUserHelpCache({ userId: user.id }).catch(() => {});
         }
