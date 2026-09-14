@@ -199,7 +199,7 @@ export default function ImportPreviewModal({
                                         <tr key={`c-${i}`} className="bg-amber-50/30 dark:bg-amber-950/10">
                                             <td className="py-1.5 px-3 font-mono font-medium text-sf-text">{c.sampleId}</td>
                                             <td className="py-1.5 px-3 text-amber-700 dark:text-amber-300 text-[11px]">
-                                                {t('projects.import.conflictWithProj', 'Already in project {{proj}}', { proj: c.existingProject || 'LIMS' })}
+                                                {t('projects.import.conflictWithProj', { proj: c.existingProject || 'LIMS' }, 'Already in project {{proj}}')}
                                             </td>
                                         </tr>
                                     ))}
@@ -235,7 +235,7 @@ export default function ImportPreviewModal({
                             >
                                 {committing
                                     ? t('common.loading', 'Registering…')
-                                    : t('projects.import.registerEligible', 'Register {{count}} expected samples', { count: previewResult.validCount })}
+                                    : t('projects.import.registerEligible', { count: previewResult.validCount }, 'Register {{count}} expected samples')}
                             </button>
                         </div>
                     </div>

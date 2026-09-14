@@ -41,9 +41,9 @@ export const Header = ({ onMenuClick }) => {
     };
 
     const bellTitle = hasUnreadMessages
-        ? t('header.newMessagesTooltip', '{{count}} new message(s) - Click to open Message Exchange', { count: unreadMessageCount })
+        ? t('header.newMessagesTooltip', { count: unreadMessageCount }, '{{count}} new message(s) - Click to open Message Exchange')
         : effectiveUnread > 0
-            ? t('header.notificationsCount', '{{count}} unread notification(s)', { count: effectiveUnread })
+            ? t('header.notificationsCount', { count: effectiveUnread }, '{{count}} unread notification(s)')
             : t('header.notifications', 'Notifications');
 
     return (

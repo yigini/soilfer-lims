@@ -81,8 +81,8 @@ export default function SamplesTab({
                     </h2>
                     <p className="text-xs text-sf-muted mt-0.5">
                         {capabilities.isScopedOnly
-                            ? t('projects.samples.scopedCount', 'Only samples in your authorized lab scope · {{count}} matching samples', { count: totalCount })
-                            : t('projects.samples.wholeCount', 'Authorized project samples · {{count}} matching samples', { count: totalCount })}
+                            ? t('projects.samples.scopedCount', { count: totalCount }, 'Only samples in your authorized lab scope · {{count}} matching samples')
+                            : t('projects.samples.wholeCount', { count: totalCount }, 'Authorized project samples · {{count}} matching samples')}
                     </p>
                 </div>
 
@@ -101,7 +101,7 @@ export default function SamplesTab({
                 <div className="p-3.5 rounded-xl border border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
                         <AlertCircle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
-                        <span>{t('projects.samples.fetchError', 'Failed to load samples: {{error}}', { error })}</span>
+                        <span>{t('projects.samples.fetchError', { error }, 'Failed to load samples: {{error}}')}</span>
                     </div>
                     {onRetry && (
                         <button
@@ -127,7 +127,7 @@ export default function SamplesTab({
                         className="text-xs rounded-lg border border-sf-border bg-sf-inset px-2.5 py-1.5 font-medium text-sf-text"
                     >
                         <option value="all">
-                            {t('projects.samples.allStages', 'All stages ({{count}})', { count: counts?.registered ?? totalCount })}
+                            {t('projects.samples.allStages', { count: counts?.registered ?? totalCount }, 'All stages ({{count}})')}
                         </option>
                         {stageLabels.map((lbl, idx) => (
                             <option key={idx} value={String(idx)}>
@@ -148,6 +148,7 @@ export default function SamplesTab({
                     <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-sf-muted" />
                     <input
                         type="text"
+                        aria-label={t('projects.samples.searchAriaLabel', 'Search project samples by field or laboratory ID')}
                         placeholder={t('projects.samples.searchPlaceholder', 'Find a field or laboratory ID…')}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
@@ -255,7 +256,9 @@ export default function SamplesTab({
                                                     {sample.originalId || sample.id}
                                                 </div>
                                                 <div className="text-[11px] text-sf-muted font-mono">
-                                                    {sample.labId ? `Accession: ${sample.labId}` : t('projects.samples.notAssignedYet', 'Lab accession pending')}
+                                                    {sample.labId
+                                                        ? t('projects.samples.accession', { labId: sample.labId }, `Accession: ${sample.labId}`)
+                                                        : t('projects.samples.notAssignedYet', 'Lab accession pending')}
                                                 </div>
                                             </td>
                                             <td className="py-3 px-4 text-sf-text">
@@ -307,11 +310,11 @@ export default function SamplesTab({
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 border-t border-sf-divider bg-sf-inset text-xs text-sf-muted">
                     <div className="flex items-center gap-2">
                         <span>
-                            {t('projects.samples.showingRange', 'Showing {{start}} to {{end}} of {{total}} samples', {
+                            {t('projects.samples.showingRange', {
                                 start: totalCount === 0 ? 0 : (page - 1) * limit + 1,
                                 end: Math.min(page * limit, totalCount),
                                 total: totalCount
-                            })}
+                            }, 'Showing {{start}} to {{end}} of {{total}} samples')}
                         </span>
                         {isFiltered && totalCount > 0 && (
                             <span className="text-[11px] font-medium text-sf-primary bg-sf-surface px-2 py-0.5 rounded border border-sf-divider">

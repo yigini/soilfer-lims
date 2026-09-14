@@ -905,8 +905,11 @@
       "noSamplesYet": "No samples registered in this project yet",
       "noSamplesDesc": "Import a pre-registered manifest or sync from KoboToolbox to begin intake.",
       "filteredNotice": "(filtered)",
-      "fetchError": "Failed to load samples: {{error}}"
-    }
+      "fetchError": "Failed to load samples: {{error}}",
+      "accession": "Accession: {{labId}}",
+      "searchAriaLabel": "Search project samples by field or laboratory ID"
+    },
+    "draft": "Draft"
   },
   "users": {
     "title": "Laboratory Staff & Users",

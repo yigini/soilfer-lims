@@ -148,7 +148,7 @@ export default function AnalysisPlanTab({
                                         {t('projects.plan.catalogueLoadErrorTitle', 'Failed to load analysis catalogue definitions')}
                                     </h3>
                                     <p className="text-xs text-red-700 dark:text-red-300">
-                                        {t('projects.plan.catalogueLoadErrorDesc', 'The system could not retrieve master methods or packages from the server: {{error}}', { error: fetchError })}
+                                        {t('projects.plan.catalogueLoadErrorDesc', { error: fetchError }, 'The system could not retrieve master methods or packages from the server: {{error}}')}
                                     </p>
                                 </div>
                             </div>

@@ -91,7 +91,7 @@ export default function Projects() {
                 dueText = t('projects.attention.admissionsPaused', 'Admissions paused');
                 isAttention = true;
             } else if (counts.awaitingArrival > 0) {
-                dueText = t('projects.attention.samplesExpected', '{{count}} expected samples overdue', { count: counts.awaitingArrival });
+                dueText = t('projects.attention.samplesExpected', { count: counts.awaitingArrival }, '{{count}} expected samples overdue');
                 isAttention = true;
             } else if (p.deliveryDeadline && new Date(p.deliveryDeadline) < new Date() && p.status === 'ACTIVE') {
                 dueText = t('projects.attention.deliveryOverdue', 'Delivery deadline reached');
@@ -246,7 +246,7 @@ export default function Projects() {
                         </p>
                         <p className="text-xs text-sf-muted">
                             {filterTab === 'attention'
-                                ? t('projects.viewAllHelper', 'View all {{count}} active projects in the overview.', { count: projects.length })
+                                ? t('projects.viewAllHelper', { count: projects.length }, 'View all {{count}} active projects in the overview.')
                                 : t('projects.noProjectsSub', 'Try adjusting your search query or filters.')}
                         </p>
                         {filterTab === 'attention' && (

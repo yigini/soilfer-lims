@@ -1325,12 +1325,121 @@ exports.getProjectKoboConfig = async (req, res) => {
             return res.json({ configured: false });
         }
 
-        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
-        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.role);
+        const isOwnerManager = req.user?.role === 'LAB_MANAGER' && project.labId === req.user?.labId;
+        const isProjectManager = req.user?.role === 'PROJECT_MANAGER';
+        const isNationalAdmin = ['MASTER_USER', 'COUNTRY_ADMIN'].includes(req.user?.role);
 
-        const userLabConfig = req.user.labId ? configs.find(c => c.labId === req.user.labId) : null;
-        const ownerLabConfig = configs.find(c => c.labId === project.labId);
-        const config = userLabConfig || ownerLabConfig || configs[0];
+        let eligibleConfigs = [];
+        if (isAdmin || isOwnerManager) {
+            // Admins and Coordinating/Owner Lab Managers have project-wide configuration oversight
+            eligibleConfigs = configs;
+        } else if (isProjectManager) {
+            const userProjects = projectPolicyService.parseArray(req.user?.projects);
+            if (userProjects.includes(project.code) || userProjects.includes(project.id)) {
+                eligibleConfigs = configs;
+            }
+        } else if (isNationalAdmin) {
+            const actorCountries = projectPolicyService.parseArray(req.user?.countries);
+            if (actorCountries.length > 0) {
+                const configLabIds = Array.from(new Set(configs.map(c => c.labId).filter(Boolean)));
+                const unknownLabIds = configLabIds.filter(lid => !labCountries[lid]);
+                if (unknownLabIds.length > 0) {
+                    const extraLabs = await prisma.lab.findMany({
+                        where: { id: { in: unknownLabIds } },
+                        select: { id: true, country: true }
+                    });
+                    extraLabs.forEach(l => { labCountries[l.id] = l.country; });
+                }
+                eligibleConfigs = configs.filter(c => labCountries[c.labId] && actorCountries.includes(labCountries[c.labId]));
+            }
+        } else if (req.user?.labId) {
+            // Participating / Servicing laboratory roles are strictly bounded to their own laboratory's configs
+            eligibleConfigs = configs.filter(c => c.labId === req.user.labId);
+        }
+
+        let config = null;
+        const requestedConfigId = req.query?.configId;
+        const requestedLabId = req.query?.labId;
+
+        if (requestedConfigId) {
+            // An explicit identifier narrows scope, never widens it
+            const targetConfig = configs.find(c => c.id === requestedConfigId);
+            if (!targetConfig) {
+                return res.status(404).json({ error: 'NOT_FOUND', message: 'Specified Kobo configuration not found for this project.' });
+            }
+            if (!eligibleConfigs.some(c => c.id === requestedConfigId)) {
+                return res.status(403).json({ error: 'FORBIDDEN_CONFIG_SCOPE', message: 'Requested Kobo configuration is outside your authorized laboratory scope.' });
+            }
+            config = targetConfig;
+        } else if (requestedLabId) {
+            const labExistsInProject = configs.some(c => c.labId === requestedLabId);
+            if (!labExistsInProject) {
+                return res.status(404).json({ error: 'NOT_FOUND', message: 'No configuration found for the specified laboratory.' });
+            }
+            const matchingLabConfigs = eligibleConfigs.filter(c => c.labId === requestedLabId);
+            if (matchingLabConfigs.length === 0) {
+                return res.status(403).json({ error: 'FORBIDDEN_LAB_SCOPE', message: 'Specified laboratory is outside your authorized scope.' });
+            }
+            if (matchingLabConfigs.length === 1) {
+                config = matchingLabConfigs[0];
+            } else {
+                return res.json({
+                    configured: false,
+                    ambiguous: true,
+                    message: 'Multiple configurations exist for the specified laboratory. Explicit configId required.'
+                });
+            }
+        } else {
+            // No explicit identifier provided: resolve based on actor's scope
+            if (eligibleConfigs.length === 0) {
+                return res.json({ configured: false, message: 'No Kobo configuration found for your laboratory scope.' });
+            }
+
+            if (req.user?.labId) {
+                const ownConfigs = eligibleConfigs.filter(c => c.labId === req.user.labId);
+                if (ownConfigs.length === 1) {
+                    config = ownConfigs[0];
+                } else if (ownConfigs.length > 1) {
+                    return res.json({
+                        configured: false,
+                        ambiguous: true,
+                        message: 'Multiple active Kobo configurations exist for your laboratory in this project. Explicit configId required.'
+                    });
+                } else if (isOwnerManager || isAdmin) {
+                    const ownerConfigs = eligibleConfigs.filter(c => c.labId === project.labId);
+                    if (ownerConfigs.length === 1) {
+                        config = ownerConfigs[0];
+                    } else if (ownerConfigs.length > 1) {
+                        return res.json({
+                            configured: false,
+                            ambiguous: true,
+                            message: 'Multiple configurations exist for the coordinating laboratory. Explicit configId required.'
+                        });
+                    } else {
+                        return res.json({ configured: false, message: 'No Kobo configuration found for your laboratory scope.' });
+                    }
+                } else {
+                    return res.json({ configured: false, message: 'No Kobo configuration found for your laboratory scope.' });
+                }
+            } else {
+                // Actor without specific labId (e.g. global admin or country admin)
+                if (eligibleConfigs.length === 1) {
+                    config = eligibleConfigs[0];
+                } else {
+                    return res.json({
+                        configured: false,
+                        ambiguous: true,
+                        message: 'Multiple Kobo configurations exist for this project across participating laboratories. Explicit labId or configId required.'
+                    });
+                }
+            }
+        }
+
+        if (!config) {
+            return res.json({ configured: false });
+        }
+
         // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
         res.json({
             configured: true,
