@@ -1,0 +1,36 @@
+{
+  "time": "2026-09-14T12:15:29.752Z",
+  "scope": "Uncommitted snapshot after b7fd307; mocked API, blocked external requests, no database access.",
+  "assets": [
+    "/assets/TutorialShell-Daiu6uSt.js",
+    "/assets/TutorialShell-DBnTsSTn.css"
+  ],
+  "indexSha256": "e94c417fd7b214039f4fea4895c534a0250caf25a525d7ea22ec6a63c72dcc95",
+  "errors": [],
+  "mutations": [],
+  "checks": {
+    "chooser": {
+      "englishSketch": false,
+      "englishPath": false,
+      "frenchUsername": true
+    },
+    "nextProgress": {
+      "viewed": [
+        0
+      ],
+      "practiced": [],
+      "position": "02 / 09"
+    },
+    "offTrack": {
+      "title": "Un résultat avec un historique.",
+      "position": "Hors parcours actuel (01 / 09)",
+      "progress": "1",
+      "maximum": "9"
+    },
+    "disableWithoutReload": {
+      "guideVisible": false,
+      "guideStorage": false,
+      "note": "Document remains open; no page.goto/reload substituted for in-place retirement."
+    }
+  }
+}

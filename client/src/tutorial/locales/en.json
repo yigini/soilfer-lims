@@ -79,7 +79,22 @@
     "statusCurrent": "Current step",
     "statusPending": "Upcoming",
     "allChapters": "Curriculum chapters",
-    "completed": "completed"
+    "completed": "completed",
+    "pathInfoQuick": "The next button will follow the short overview.",
+    "pathInfoRole": "Choose your role on the next screen.",
+    "pathInfoFull": "The full laboratory story is selected.",
+    "loginSketchUsername": "Username",
+    "loginSketchUsernamePlaceholder": "Your assigned account",
+    "loginSketchPassword": "Password",
+    "loginSketchPasswordPlaceholder": "Provided by your facilitator",
+    "loginSketchSignIn": "Sign in",
+    "loginSketchNote": "This is a sketch of the login flow. Real sign-in happens on the application page.",
+    "statusViewed": "Viewed",
+    "statusPracticed": "Practiced & completed",
+    "practiced": "practiced",
+    "viewed": "viewed",
+    "fallbackNotice": "Standard English fallback displayed for unverified terminology.",
+    "stateVerified": "Verified"
   },
   "roles": {
     "visitor": "Visitor",
@@ -167,7 +182,8 @@
       "nodeReportsTitle": "Reports & Help",
       "nodeReportsDesc": "Find results & guidance",
       "notice": "Missing a sample? Check your account/laboratory, the identifier and any filters. If it is still missing, ask the responsible person for help."
-    }
+    },
+    "basicsProgress": "Basics {current} / {total}"
   },
   "chapters": {
     "welcome": {
@@ -450,14 +466,28 @@
     "workbench": "The technician's place to record assigned work.",
     "draft": "Saved work that is not yet submitted for checking.",
     "submit": "Hand completed work to the person who checks it.",
-    "auditHistory": "A record of who did what and when."
+    "auditHistory": "A record of who did what and when.",
+    "termLims": "LIMS",
+    "termSample": "Sample",
+    "termProject": "Project",
+    "termSpectrum": "Spectrum",
+    "termMirNir": "MIR / NIR",
+    "termQc": "QC",
+    "termKobo": "Kobo",
+    "termSis": "SIS",
+    "termLot": "Lot",
+    "termWorkbench": "Workbench",
+    "termDraft": "Draft",
+    "termSubmit": "Submit",
+    "termAuditHistory": "Audit history"
   },
   "aria": {
     "chaptersNav": "Tutorial chapters navigation",
     "coach": "First-visit guide docked coach",
     "progress": "Tutorial progress",
     "sampleTube": "Focus practice sample {num}",
-    "mobileToggle": "Toggle tutorial coach view"
+    "mobileToggle": "Toggle tutorial coach view",
+    "appFrame": "Illustrative application screen"
   },
   "quickOverview": {
     "identityTitle": "Roles and access",
@@ -475,6 +505,8 @@
     "finishTitle": "Connected workflow",
     "finishDesc": "From initial field collection to physical reception, bench analysis, and authorized reports, the platform keeps records connected.",
     "defaultTitle": "Laboratory overview",
-    "defaultDesc": "A connected record connecting sample arrivals, analytical tasks, and verified reports."
+    "defaultDesc": "A connected record connecting sample arrivals, analytical tasks, and verified reports.",
+    "prepareTitle": "Sample preparation",
+    "prepareDesc": "Soil samples are dried, crushed, and sieved so uniform test portions can be weighed for laboratory analysis."
   }
 }

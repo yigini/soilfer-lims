@@ -75,11 +75,26 @@
     "reset": "Reiniciar",
     "statusDone": "Practicado y completado",
     "statusSkipped": "Omitido",
-    "statusUnavailable": "No en la ruta actual",
+    "statusUnavailable": "Fuera de la ruta actual",
     "statusCurrent": "Paso actual",
     "statusPending": "Próximo",
     "allChapters": "Capítulos del plan de estudios",
-    "completed": "completados"
+    "completed": "completados",
+    "pathInfoQuick": "El botón siguiente seguirá el resumen breve.",
+    "pathInfoRole": "Elija su rol en la pantalla siguiente.",
+    "pathInfoFull": "El recorrido completo del laboratorio está seleccionado.",
+    "loginSketchUsername": "Usuario",
+    "loginSketchUsernamePlaceholder": "Su cuenta asignada",
+    "loginSketchPassword": "Contraseña",
+    "loginSketchPasswordPlaceholder": "Proporcionada por su facilitador",
+    "loginSketchSignIn": "Iniciar sesión",
+    "loginSketchNote": "Este es un esquema del inicio de sesión. El inicio de sesión real ocurre en la página de la aplicación.",
+    "statusViewed": "Visto",
+    "statusPracticed": "Practicado y completado",
+    "practiced": "practicadas",
+    "viewed": "vistas",
+    "fallbackNotice": "Texto estándar en inglés mostrado si falta un término traducido.",
+    "stateVerified": "Verificado"
   },
   "roles": {
     "visitor": "Visitante",
@@ -167,7 +182,8 @@
       "nodeReportsTitle": "Reportes y Ayuda",
       "nodeReportsDesc": "Consultar resultados y orientación",
       "notice": "¿Falta una muestra? Revise el laboratorio activo, el código y los filtros. Si continúa sin aparecer, solicite ayuda a la persona responsable."
-    }
+    },
+    "basicsProgress": "Conceptos básicos {current} / {total}"
   },
   "chapters": {
     "welcome": {
@@ -450,14 +466,28 @@
     "workbench": "Espacio de trabajo del técnico para registrar las tareas asignadas.",
     "draft": "Trabajo guardado que aún no se ha enviado para su revisión formal.",
     "submit": "Entregar el trabajo completado a la persona responsable de revisarlo.",
-    "auditHistory": "Registro cronológico de quién realizó cada acción y en qué momento."
+    "auditHistory": "Registro cronológico de quién realizó cada acción y en qué momento.",
+    "termLims": "LIMS",
+    "termSample": "Muestra",
+    "termProject": "Proyecto",
+    "termSpectrum": "Espectro",
+    "termMirNir": "MIR / NIR",
+    "termQc": "Control de calidad (QC)",
+    "termKobo": "Kobo",
+    "termSis": "SIS",
+    "termLot": "Lote",
+    "termWorkbench": "Mesa de trabajo",
+    "termDraft": "Borrador",
+    "termSubmit": "Enviar",
+    "termAuditHistory": "Historial de auditoría"
   },
   "aria": {
     "chaptersNav": "Navegación de capítulos del tutorial",
     "coach": "Guía de primera visita",
     "progress": "Progreso del tutorial",
     "sampleTube": "Enfocar muestra de práctica {num}",
-    "mobileToggle": "Alternar vista de la guía"
+    "mobileToggle": "Alternar vista de la guía",
+    "appFrame": "Pantalla ilustrativa de la aplicación"
   },
   "quickOverview": {
     "identityTitle": "Roles y acceso",
@@ -475,6 +505,8 @@
     "finishTitle": "Flujo conectado",
     "finishDesc": "Desde la recolección en campo hasta la recepción física, el análisis y los informes autorizados, la plataforma mantiene los registros conectados.",
     "defaultTitle": "Resumen del laboratorio",
-    "defaultDesc": "Un registro conectado que vincula la llegada de muestras, las tareas analíticas y los informes verificados."
+    "defaultDesc": "Un registro conectado que vincula la llegada de muestras, las tareas analíticas y los informes verificados.",
+    "prepareTitle": "Preparación de muestras",
+    "prepareDesc": "Las muestras de suelo se secan, muelen y tamizan para pesar porciones de prueba homogéneas para el análisis."
   }
 }

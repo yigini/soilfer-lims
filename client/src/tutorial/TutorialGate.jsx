@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { STORAGE_KEY, getStoredSession, isSessionExpired } from './useTutorialSession';
+import { isTutorialAvailable } from './tutorialConfig';
 
 const TutorialShell = React.lazy(() => import('./TutorialShell'));
 
@@ -37,7 +38,41 @@ export default function TutorialGate() {
     const [mode, setMode] = useState('none'); // 'none' | 'chip' | 'full'
     const isSameDocumentActiveRef = useRef(false);
 
+    // Active opt-in only reactive recheck: deactivates an already-open guide when availability changes or expires
     useEffect(() => {
+        if (mode === 'none') return;
+
+        const checkLiveAvailability = () => {
+            if (!isTutorialAvailable()) {
+                try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+                isSameDocumentActiveRef.current = false;
+                setMode('none');
+            }
+        };
+
+        document.addEventListener('visibilitychange', checkLiveAvailability);
+        window.addEventListener('visibilitychange', checkLiveAvailability);
+        window.addEventListener('storage', checkLiveAvailability);
+
+        const intervalId = setInterval(checkLiveAvailability, 500);
+
+        return () => {
+            document.removeEventListener('visibilitychange', checkLiveAvailability);
+            window.removeEventListener('visibilitychange', checkLiveAvailability);
+            window.removeEventListener('storage', checkLiveAvailability);
+            clearInterval(intervalId);
+        };
+    }, [mode]);
+
+    useEffect(() => {
+        // Module-local availability and retirement check
+        if (!isTutorialAvailable()) {
+            try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+            isSameDocumentActiveRef.current = false;
+            setMode('none');
+            return;
+        }
+
         const search = new URLSearchParams(location.search);
         const tutorialMode = search.get('tutorialmode');
 
@@ -115,8 +150,8 @@ export default function TutorialGate() {
         navigate(nextUrl, { replace: true });
     };
 
-    if (mode === 'none') {
-        return null; // Zero lazy chunk loaded for ordinary visits
+    if (mode === 'none' || !isTutorialAvailable()) {
+        return null; // Zero lazy chunk loaded for ordinary visits or when disabled/retired
     }
 
     if (mode === 'chip') {

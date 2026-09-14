@@ -127,6 +127,14 @@ export default function TutorialShell({ onExit, onPause }) {
     // Active translation dictionary
     const dict = LOCALES[state?.language] || LOCALES.en;
 
+    const [fallbackOccurred, setFallbackOccurred] = useState(false);
+    const fallbackSeenRef = useRef(new Set());
+
+    useEffect(() => {
+        fallbackSeenRef.current.clear();
+        setFallbackOccurred(false);
+    }, [state?.language, state?.step, state?.introStage]);
+
     const t = useMemo(() => {
         return (keyPath, fallback = '') => {
             if (!keyPath) return fallback || '';
@@ -144,9 +152,17 @@ export default function TutorialShell({ onExit, onPause }) {
             if (val === undefined && dict?.common) {
                 val = resolve(dict.common, parts);
             }
-            return val !== undefined ? val : (fallback || keyPath);
+            if (val !== undefined) {
+                return val;
+            }
+            // Track actual runtime fallback when non-English
+            if (state?.language && state.language !== 'en' && !fallbackSeenRef.current.has(keyPath)) {
+                fallbackSeenRef.current.add(keyPath);
+                setTimeout(() => setFallbackOccurred(true), 0);
+            }
+            return fallback || keyPath;
         };
-    }, [dict]);
+    }, [dict, state?.language]);
 
     const {
         step = 0,
@@ -306,6 +322,11 @@ export default function TutorialShell({ onExit, onPause }) {
         };
     }, [isModalMode, state.paused, currentChapter, location.pathname, location.search, mustChangePassword, chosenPath]);
 
+    const viewedSet = useMemo(() => new Set(state?.viewed || []), [state?.viewed]);
+    const practicedSet = useMemo(() => new Set(state?.practiced || []), [state?.practiced]);
+    const skippedSet = useMemo(() => new Set(state?.skipped || []), [state?.skipped]);
+    const doneSet = useMemo(() => new Set(state?.practiced || state?.done || []), [state?.practiced, state?.done]);
+
     if (!state.active || mustChangePassword) return null;
 
     if (state.paused) {
@@ -340,12 +361,51 @@ export default function TutorialShell({ onExit, onPause }) {
         );
     }
 
-    const doneSet = new Set(done);
+    const getChapterStatus = (index) => {
+        if (practicedSet.has(index)) return 'practiced';
+        if (viewedSet.has(index)) return 'viewed';
+        if (skippedSet.has(index)) return 'skipped';
+        if (!activeStops.includes(index)) return 'unavailable';
+        if (index === step) return 'current';
+        return 'pending';
+    };
+
+    const getChapterStatusLabel = (status) => {
+        switch (status) {
+            case 'practiced': return t('common.statusPracticed', 'Practiced & completed');
+            case 'viewed': return t('common.statusViewed', 'Viewed');
+            case 'skipped': return t('common.statusSkipped', 'Skipped');
+            case 'unavailable': return t('common.statusUnavailable', 'Not in current track');
+            case 'current': return t('common.statusCurrent', 'Current step');
+            default: return t('common.statusPending', 'Upcoming');
+        }
+    };
+
+    const getChapterStatusIcon = (status, index) => {
+        switch (status) {
+            case 'practiced': return '✓';
+            case 'viewed': return '👁';
+            case 'skipped': return '↷';
+            case 'unavailable': return '⊘';
+            default: return String(index + 1).padStart(2, '0');
+        }
+    };
+
+    const currentStopIndex = activeStops.indexOf(step);
+    const isOffTrack = currentStopIndex === -1;
+    const lastTrackIndex = activeStops.reduce((acc, s, idx) => (viewedSet.has(s) || practicedSet.has(s) || s === step ? idx : acc), 0);
+    const displayStepNum = !isOffTrack ? currentStopIndex + 1 : lastTrackIndex + 1;
+    const totalStops = activeStops.length;
+
     const titleText = isFoundation ? t(currentFoundation.titleKey) : t(currentChapter.titleKey);
     const copyText = isFoundation ? t(currentFoundation.copyKey) : t(currentChapter.copyKey);
     const whyText = isFoundation ? t(currentFoundation.whyKey) : t(currentChapter.whyKey);
     const nextBtnText = isFoundation ? t(currentFoundation.nextKey) : t(currentChapter.nextKey);
-    const badgeText = isFoundation ? t('foundation.f01.subtitle', 'Start here · no account needed') : t(currentChapter.nameKey);
+    const badgeText = isFoundation
+        ? t('foundation.f01.subtitle', 'Start here · no account needed')
+        : isOffTrack
+            ? `${t(currentChapter.nameKey)} (${t('common.statusUnavailable', 'Outside current track')})`
+            : t(currentChapter.nameKey);
 
     const glossaryList = glossaryEntriesByChapter[step] || glossaryEntriesByChapter.default;
 
@@ -391,10 +451,15 @@ export default function TutorialShell({ onExit, onPause }) {
         }
         const pathMatch = location.pathname.match(/\/samples\/([^\/]+)/);
         const querySampleId = new URLSearchParams(location.search).get('sampleId');
-        const rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim())
-            || (pathMatch ? decodeURIComponent(pathMatch[1]) : null)
-            || querySampleId;
-        const currentSelectedSampleId = rawSampleId ? encodeURIComponent(rawSampleId) : null;
+        let rawSampleId = null;
+        try {
+            rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim())
+                || (pathMatch ? decodeURIComponent(pathMatch[1]) : null)
+                || querySampleId;
+        } catch {
+            rawSampleId = (state.selectedSampleId && state.selectedSampleId.trim()) || querySampleId;
+        }
+        const currentSelectedSampleId = rawSampleId || null;
 
         const targetPath = currentChapter.resolveRoute
             ? currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus, selectedSampleId: currentSelectedSampleId })
@@ -461,6 +526,18 @@ export default function TutorialShell({ onExit, onPause }) {
                             <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
                                 <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.intakeTitle', 'Sample intake')}:</b>
                                 {t('quickOverview.intakeDesc', 'The laboratory checks the container, records an illustrative sample mass (such as 485.2 g), and confirms physical arrival.')}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'prepare':
+                return (
+                    <div className="panel" style={{ background: '#fcfdfb', border: '1px solid #dce3da', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#eaf4e9', padding: '10px', borderRadius: '8px', fontSize: '24px' }}>🥣</div>
+                            <div style={{ fontSize: '12px', color: '#2d3748', flex: 1 }}>
+                                <b style={{ color: '#213b32', display: 'block', marginBottom: '2px' }}>{t('quickOverview.prepareTitle', 'Sample preparation')}:</b>
+                                {t('quickOverview.prepareDesc', 'Soil samples are dried, crushed, and sieved so uniform test portions can be weighed for laboratory analysis.')}
                             </div>
                         </div>
                     </div>
@@ -610,23 +687,21 @@ export default function TutorialShell({ onExit, onPause }) {
                         <div className="caps">{t('common.capsFollowSample', 'Follow the sample')}</div>
                         {chapters.map((ch, i) => {
                             const isActive = i === step;
-                            const isDone = doneSet.has(i);
-                            const isSkipped = state.skipped && state.skipped.includes(i);
-                            const isUnavailable = !activeStops.includes(i);
+                            const status = getChapterStatus(i);
                             return (
                                 <button
                                     key={ch.id}
                                     type="button"
-                                    className={`chapter ${isActive ? 'active' : ''} ${isDone ? 'done' : ''} ${isSkipped ? 'skipped' : ''} ${isUnavailable ? 'unavailable' : ''}`}
+                                    className={`chapter ${isActive ? 'active' : ''} ${status}`}
                                     data-step={i}
-                                    data-status={isDone ? 'practiced' : isSkipped ? 'skipped' : isUnavailable ? 'unavailable' : 'pending'}
+                                    data-status={status}
                                     aria-current={isActive ? 'step' : undefined}
                                     onClick={() => {
                                         setIntroStage(3);
                                         setStep(i);
                                     }}
                                 >
-                                    <i>{isDone ? '✓' : isSkipped ? '↷' : isUnavailable ? '⊘' : String(i + 1).padStart(2, '0')}</i>
+                                    <i>{getChapterStatusIcon(status, i)}</i>
                                     <span>{t(ch.nameKey)}</span>
                                 </button>
                             );
@@ -657,7 +732,7 @@ export default function TutorialShell({ onExit, onPause }) {
 
                         <div className="workspace">
                             {/* App Presentation Screen */}
-                            <section className="app-frame" aria-label="Illustrative application screen">
+                            <section className="app-frame" aria-label={t('aria.appFrame', 'Illustrative application screen')}>
                                 <div className="frame-bar">
                                     <span className="route" id="route">
                                         {isFoundation ? '/login?tutorialmode=true&tour=first-visit' : currentChapter.route}
@@ -844,7 +919,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                                             <div id="f03SelectionDetails" className="status" style={{ marginTop: '10px' }}>
                                                                 {t('foundation.f03.sampleSelected')
                                                                     .replace('{id}', state.f03SelectedId)
-                                                                    .replace('{state}', 'Verified')}
+                                                                    .replace('{state}', t('common.stateVerified', 'Verified'))}
                                                             </div>
                                                         )}
                                                     </div>
@@ -916,25 +991,25 @@ export default function TutorialShell({ onExit, onPause }) {
                                                 </div>
                                                 <div className="path-choice" id="pathInfo">
                                                     {chosenPath === 'quick'
-                                                        ? 'The next button will follow the short overview.'
+                                                        ? t('common.pathInfoQuick', 'The next button will follow the short overview.')
                                                         : chosenPath === 'role'
-                                                            ? 'Choose your role on the next screen.'
-                                                            : 'The full laboratory story is selected.'}
+                                                            ? t('common.pathInfoRole', 'Choose your role on the next screen.')
+                                                            : t('common.pathInfoFull', 'The full laboratory story is selected.')}
                                                 </div>
                                             </div>
 
                                             <div className="login-form">
                                                 <h3 style={{ marginBottom: '18px' }}>{t('common.signInPrompt', 'Sign in to your laboratory')}</h3>
                                                 <label className="label">
-                                                    Username
-                                                    <input disabled placeholder="Your assigned account" />
+                                                    {t('common.loginSketchUsername', 'Username')}
+                                                    <input disabled placeholder={t('common.loginSketchUsernamePlaceholder', 'Your assigned account')} />
                                                 </label>
                                                 <label className="label">
-                                                    Password
-                                                    <input disabled type="password" placeholder="Provided by your facilitator" />
+                                                    {t('common.loginSketchPassword', 'Password')}
+                                                    <input disabled type="password" placeholder={t('common.loginSketchPasswordPlaceholder', 'Provided by your facilitator')} />
                                                 </label>
-                                                <button disabled className="primary">Sign in</button>
-                                                <p>This is a sketch of the login flow. Real sign-in happens on the application page.</p>
+                                                <button disabled className="primary">{t('common.loginSketchSignIn', 'Sign in')}</button>
+                                                <p>{t('common.loginSketchNote', 'This is a sketch of the login flow. Real sign-in happens on the application page.')}</p>
                                             </div>
                                         </div>
                                     )}
@@ -948,8 +1023,10 @@ export default function TutorialShell({ onExit, onPause }) {
                                         <strong>{t('common.yourLabVisit', 'YOUR LAB VISIT')}</strong>
                                         <span id="position">
                                             {isFoundation
-                                                ? `Basics ${introStage + 1} / 3`
-                                                : `${String(step + 1).padStart(2, '0')} / ${chapters.length}`}
+                                                ? t('foundation.basicsProgress', 'Basics {current} / {total}').replace('{current}', String(introStage + 1)).replace('{total}', '3')
+                                                : isOffTrack
+                                                    ? `${t('common.statusUnavailable', 'Outside current track')} (${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')})`
+                                                    : `${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')}`}
                                         </span>
                                     </div>
                                     <div
@@ -957,13 +1034,13 @@ export default function TutorialShell({ onExit, onPause }) {
                                         role="progressbar"
                                         aria-label={t('aria.progress', 'Tutorial progress')}
                                         aria-valuemin="0"
-                                        aria-valuemax="12"
-                                        aria-valuenow={step + 1}
+                                        aria-valuemax={totalStops}
+                                        aria-valuenow={Math.min(displayStepNum, totalStops)}
                                         id="progress"
                                     >
                                         <span
                                             id="progressFill"
-                                            style={{ width: `${((step + 1) / chapters.length) * 100}%` }}
+                                            style={{ width: `${(Math.min(displayStepNum, totalStops) / totalStops) * 100}%` }}
                                         ></span>
                                     </div>
                                 </div>
@@ -984,7 +1061,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                         <summary>{t('common.wordsUsedHere', 'Words used here')}</summary>
                                         {glossaryList.map((item) => (
                                             <p key={item.term}>
-                                                <b>{item.term}</b> · {t(item.meaningKey)}
+                                                <b>{item.termKey ? t(item.termKey, item.term) : item.term}</b> · {t(item.meaningKey)}
                                             </p>
                                         ))}
                                     </details>
@@ -1031,6 +1108,11 @@ export default function TutorialShell({ onExit, onPause }) {
                                             {isFoundation ? t('common.skipBasics', 'Skip basics') : t('common.skipLesson', 'Skip lesson')}
                                         </button>
                                     </div>
+                                    {fallbackOccurred && (
+                                        <div id="fallbackNoticeModal" className="muted" style={{ fontSize: '10px', marginTop: '6px', textAlign: 'center' }}>
+                                            {t('common.fallbackNotice', 'Standard English fallback displayed for unverified terminology.')}
+                                        </div>
+                                    )}
                                 </div>
                             </aside>
                         </div>
@@ -1120,7 +1202,9 @@ export default function TutorialShell({ onExit, onPause }) {
                     <div className="row" style={{ alignItems: 'center', marginBottom: '8px' }}>
                         <span className="badge">{badgeText}</span>
                         <span id="position" style={{ fontSize: '11px', fontWeight: 700, color: '#66756e' }}>
-                            {String(step + 1).padStart(2, '0')} / {chapters.length}
+                            {isOffTrack
+                                ? `${t('common.statusUnavailable', 'Outside current track')} (${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')})`
+                                : `${String(displayStepNum).padStart(2, '0')} / ${String(totalStops).padStart(2, '0')}`}
                         </span>
 
                         {/* In-Guide Language Selector */}
@@ -1184,14 +1268,14 @@ export default function TutorialShell({ onExit, onPause }) {
                         role="progressbar"
                         aria-label={t('aria.progress', 'Tutorial progress')}
                         aria-valuemin="0"
-                        aria-valuemax={chapters.length}
-                        aria-valuenow={step + 1}
+                        aria-valuemax={totalStops}
+                        aria-valuenow={Math.min(displayStepNum, totalStops)}
                         id="progress"
                         style={{ marginTop: '10px' }}
                     >
                         <span
                             id="progressFill"
-                            style={{ width: `${((step + 1) / chapters.length) * 100}%` }}
+                            style={{ width: `${(Math.min(displayStepNum, totalStops) / totalStops) * 100}%` }}
                         ></span>
                     </div>
                 </div>
@@ -1511,21 +1595,19 @@ export default function TutorialShell({ onExit, onPause }) {
                     {/* Curriculum Progress Index */}
                     <details id="curriculumIndex" style={{ marginTop: '12px' }}>
                         <summary style={{ fontSize: '12px', fontWeight: 600, color: '#245942', cursor: 'pointer' }}>
-                            {t('common.allChapters', 'Curriculum chapters')} ({done.length} {t('common.completed', 'completed')})
+                            {t('common.allChapters', 'Curriculum chapters')} ({(state?.practiced || []).length} {t('common.practiced', 'practiced')}, {(state?.viewed || []).length} {t('common.viewed', 'viewed')})
                         </summary>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
                             {chapters.map((ch, i) => {
                                 const isActive = i === step;
-                                const isDone = doneSet.has(i);
-                                const isSkipped = state.skipped && state.skipped.includes(i);
-                                const isUnavailable = !activeStops.includes(i);
+                                const status = getChapterStatus(i);
                                 return (
                                     <button
                                         key={ch.id}
                                         type="button"
-                                        className={`chapter ${isActive ? 'active' : ''} ${isDone ? 'done' : ''} ${isSkipped ? 'skipped' : ''} ${isUnavailable ? 'unavailable' : ''}`}
+                                        className={`chapter ${isActive ? 'active' : ''} ${status}`}
                                         data-step={i}
-                                        data-status={isDone ? 'practiced' : isSkipped ? 'skipped' : isUnavailable ? 'unavailable' : 'pending'}
+                                        data-status={status}
                                         onClick={() => setStep(i)}
                                         style={{
                                             display: 'flex',
@@ -1535,26 +1617,18 @@ export default function TutorialShell({ onExit, onPause }) {
                                             fontSize: '11px',
                                             borderRadius: '6px',
                                             border: isActive ? '1px solid #245942' : '1px solid #e5e7eb',
-                                            background: isActive ? '#eaf2e7' : '#fff',
+                                            background: isActive ? '#eaf2e7' : (status === 'practiced' ? '#f0fdf4' : (status === 'viewed' ? '#f8fafc' : '#fff')),
                                             cursor: 'pointer'
                                         }}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ fontWeight: 700, width: '18px' }}>
-                                                {isDone ? '✓' : isSkipped ? '↷' : isUnavailable ? '⊘' : String(i + 1).padStart(2, '0')}
+                                            <span style={{ fontWeight: 700, width: '18px', color: status === 'practiced' ? '#065f46' : (status === 'viewed' ? '#0369a1' : 'inherit') }}>
+                                                {getChapterStatusIcon(status, i)}
                                             </span>
                                             <span>{t(ch.nameKey)}</span>
                                         </div>
                                         <span className="small muted">
-                                            {isDone
-                                                ? t('common.statusDone', 'Practiced & completed')
-                                                : isSkipped
-                                                    ? t('common.statusSkipped', 'Skipped')
-                                                    : isUnavailable
-                                                        ? t('common.statusUnavailable', 'Not in current track')
-                                                        : isActive
-                                                            ? t('common.statusCurrent', 'Current step')
-                                                            : t('common.statusPending', 'Upcoming')}
+                                            {getChapterStatusLabel(status)}
                                         </span>
                                     </button>
                                 );
@@ -1567,7 +1641,7 @@ export default function TutorialShell({ onExit, onPause }) {
                         <summary>{t('common.wordsUsedHere', 'Words used here')}</summary>
                         {glossaryList.map((item) => (
                             <p key={item.term} style={{ fontSize: '12px', marginTop: '6px' }}>
-                                <b>{item.term}</b> · {t(item.meaningKey)}
+                                <b>{item.termKey ? t(item.termKey, item.term) : item.term}</b> · {t(item.meaningKey)}
                             </p>
                         ))}
                     </details>
@@ -1626,6 +1700,11 @@ export default function TutorialShell({ onExit, onPause }) {
                             {t('common.skipLesson', 'Skip lesson')}
                         </button>
                     </div>
+                    {fallbackOccurred && (
+                        <div id="fallbackNotice" className="muted" style={{ fontSize: '10px', marginTop: '8px', textAlign: 'center' }}>
+                            {t('common.fallbackNotice', 'Standard English fallback displayed for unverified terminology.')}
+                        </div>
+                    )}
                 </div>
             </aside>
 

@@ -60,24 +60,24 @@ export const f03PracticeSamples = [
 
 export const glossaryEntriesByChapter = {
     0: [
-        { term: 'LIMS', meaningKey: 'glossary.lims' },
-        { term: 'Sample', meaningKey: 'glossary.sample' },
-        { term: 'Project', meaningKey: 'glossary.project' }
+        { term: 'LIMS', termKey: 'glossary.termLims', meaningKey: 'glossary.lims' },
+        { term: 'Sample', termKey: 'glossary.termSample', meaningKey: 'glossary.sample' },
+        { term: 'Project', termKey: 'glossary.termProject', meaningKey: 'glossary.project' }
     ],
     7: [
-        { term: 'Spectrum', meaningKey: 'glossary.spectrum' },
-        { term: 'MIR / NIR', meaningKey: 'glossary.mir_nir' },
-        { term: 'QC', meaningKey: 'glossary.qc' }
+        { term: 'Spectrum', termKey: 'glossary.termSpectrum', meaningKey: 'glossary.spectrum' },
+        { term: 'MIR / NIR', termKey: 'glossary.termMirNir', meaningKey: 'glossary.mir_nir' },
+        { term: 'QC', termKey: 'glossary.termQc', meaningKey: 'glossary.qc' }
     ],
     10: [
-        { term: 'Kobo', meaningKey: 'glossary.kobo' },
-        { term: 'SIS', meaningKey: 'glossary.sis' },
-        { term: 'Lot', meaningKey: 'glossary.lot' }
+        { term: 'Kobo', termKey: 'glossary.termKobo', meaningKey: 'glossary.kobo' },
+        { term: 'SIS', termKey: 'glossary.termSis', meaningKey: 'glossary.sis' },
+        { term: 'Lot', termKey: 'glossary.termLot', meaningKey: 'glossary.lot' }
     ],
     default: [
-        { term: 'Workbench', meaningKey: 'glossary.workbench' },
-        { term: 'Draft', meaningKey: 'glossary.draft' },
-        { term: 'Submit', meaningKey: 'glossary.submit' },
-        { term: 'Audit history', meaningKey: 'glossary.auditHistory' }
+        { term: 'Workbench', termKey: 'glossary.termWorkbench', meaningKey: 'glossary.workbench' },
+        { term: 'Draft', termKey: 'glossary.termDraft', meaningKey: 'glossary.draft' },
+        { term: 'Submit', termKey: 'glossary.termSubmit', meaningKey: 'glossary.submit' },
+        { term: 'Audit history', termKey: 'glossary.termAuditHistory', meaningKey: 'glossary.auditHistory' }
     ]
 };

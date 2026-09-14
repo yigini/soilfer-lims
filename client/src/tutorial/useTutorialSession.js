@@ -6,7 +6,7 @@ export const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours maximum lifetime
 
 export const PATH_STOPS = {
     full: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-    quick: [0, 1, 2, 3, 8, 9, 12, 15],
+    quick: [0, 1, 2, 3, 8, 9, 10, 12, 15],
     role_reception: [0, 1, 2, 3, 4, 15],
     role_technician: [0, 1, 5, 6, 7, 8, 9, 10, 11, 15],
     role_manager: [0, 1, 5, 12, 13, 14, 15],
@@ -76,6 +76,8 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
                 path: 'full',
                 roleChoice: 'reception',
                 sampleTube: 1,
+                viewed: [],
+                practiced: [],
                 done: [],
                 skipped: [],
                 paused: false,
@@ -94,6 +96,10 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
 
         const initialLanguage = resolveInitialLocale();
 
+        // Migrate older session: conservative migration of done -> viewed
+        const migratedViewed = saved?.viewed ?? (saved?.done ?? []);
+        const migratedPracticed = saved?.practiced ?? [];
+
         return {
             active: isOptInUrl || Boolean(saved && saved.active),
             step: saved?.step ?? 0,
@@ -101,7 +107,9 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
             path: saved?.path ?? 'full',
             roleChoice: saved?.roleChoice ?? 'reception',
             sampleTube: saved?.sampleTube ?? 1,
-            done: saved?.done ?? [],
+            viewed: migratedViewed,
+            practiced: migratedPracticed,
+            done: saved?.done ?? migratedPracticed,
             skipped: saved?.skipped ?? [],
             paused: isOptInUrl ? false : (saved?.paused ?? false),
             language: saved?.language ? normalizeLocale(saved.language) : initialLanguage,
@@ -212,13 +220,33 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
         setState(prev => ({ ...prev, language: normalized, lastActivityAt: Date.now() }));
     }, []);
 
-    const markDone = useCallback((stepIndex) => {
+    const markPracticed = useCallback((stepIndex) => {
         setState(prev => {
-            const doneSet = new Set(prev.done);
+            const practicedSet = new Set(prev.practiced || []);
+            practicedSet.add(stepIndex);
+            const viewedSet = new Set(prev.viewed || []);
+            viewedSet.add(stepIndex);
+            const doneSet = new Set(prev.done || []);
             doneSet.add(stepIndex);
-            return { ...prev, done: Array.from(doneSet), lastActivityAt: Date.now() };
+            return {
+                ...prev,
+                practiced: Array.from(practicedSet),
+                viewed: Array.from(viewedSet),
+                done: Array.from(doneSet),
+                lastActivityAt: Date.now()
+            };
         });
     }, []);
+
+    const markViewed = useCallback((stepIndex) => {
+        setState(prev => {
+            const viewedSet = new Set(prev.viewed || []);
+            viewedSet.add(stepIndex);
+            return { ...prev, viewed: Array.from(viewedSet), lastActivityAt: Date.now() };
+        });
+    }, []);
+
+    const markDone = markPracticed;
 
     const markSkipped = useCallback((stepIndex) => {
         setState(prev => {
@@ -234,8 +262,8 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
                 return { ...prev, introStage: prev.introStage + 1, lastActivityAt: Date.now() };
             }
 
-            const doneSet = new Set(prev.done);
-            doneSet.add(prev.step);
+            const viewedSet = new Set(prev.viewed || []);
+            viewedSet.add(prev.step);
 
             const stops = activeStops;
             const currentIndex = stops.indexOf(prev.step);
@@ -244,13 +272,13 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
             if (currentIndex !== -1 && currentIndex < stops.length - 1) {
                 nextChapter = stops[currentIndex + 1];
             } else if (prev.step >= 15) {
-                return { ...prev, step: 0, introStage: 0, done: Array.from(doneSet), lastActivityAt: Date.now() };
+                return { ...prev, step: 0, introStage: 0, viewed: Array.from(viewedSet), lastActivityAt: Date.now() };
             }
 
             return {
                 ...prev,
                 step: Math.min(15, nextChapter),
-                done: Array.from(doneSet),
+                viewed: Array.from(viewedSet),
                 lastActivityAt: Date.now()
             };
         });
@@ -412,6 +440,8 @@ export function useTutorialSession(onExitCallback, onPauseCallback) {
         setSampleTube,
         setLanguage,
         markDone,
+        markPracticed,
+        markViewed,
         markSkipped,
         nextStep,
         prevStep,

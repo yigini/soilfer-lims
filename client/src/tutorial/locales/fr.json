@@ -75,11 +75,26 @@
     "reset": "Réinitialiser",
     "statusDone": "Pratiqué et terminé",
     "statusSkipped": "Ignoré",
-    "statusUnavailable": "Pas dans le parcours actuel",
+    "statusUnavailable": "Hors parcours actuel",
     "statusCurrent": "Étape actuelle",
     "statusPending": "À venir",
     "allChapters": "Chapitres du programme",
-    "completed": "terminés"
+    "completed": "terminés",
+    "pathInfoQuick": "Le bouton suivant suivra la vue d'ensemble courte.",
+    "pathInfoRole": "Choisissez votre rôle sur l'écran suivant.",
+    "pathInfoFull": "Le parcours complet du laboratoire est sélectionné.",
+    "loginSketchUsername": "Nom d'utilisateur",
+    "loginSketchUsernamePlaceholder": "Votre compte assigné",
+    "loginSketchPassword": "Mot de passe",
+    "loginSketchPasswordPlaceholder": "Fourni par votre facilitateur",
+    "loginSketchSignIn": "Se connecter",
+    "loginSketchNote": "Ceci est un aperçu de la connexion. La véritable connexion s'effectue sur la page de l'application.",
+    "statusViewed": "Consulté",
+    "statusPracticed": "Pratiqué et terminé",
+    "practiced": "pratiquées",
+    "viewed": "consultées",
+    "fallbackNotice": "Texte standard affiché en cas de terme non traduit.",
+    "stateVerified": "Vérifié"
   },
   "roles": {
     "visitor": "Visiteur",
@@ -167,7 +182,8 @@
       "nodeReportsTitle": "Rapports et Aide",
       "nodeReportsDesc": "Consulter les résultats et instructions",
       "notice": "Un échantillon manque ? Vérifiez le laboratoire sélectionné, l'identifiant et les filtres. Si le problème persiste, demandez de l'aide."
-    }
+    },
+    "basicsProgress": "Notions de base {current} / {total}"
   },
   "chapters": {
     "welcome": {
@@ -450,14 +466,28 @@
     "workbench": "Espace de travail du technicien pour saisir les analyses qui lui sont assignées.",
     "draft": "Travail enregistré temporairement, pas encore transmis pour vérification.",
     "submit": "Transmettre officiellement les mesures achevées au responsable de validation.",
-    "auditHistory": "Historique chronologique et horodaté de toutes les interventions effectuées."
+    "auditHistory": "Historique chronologique et horodaté de toutes les interventions effectuées.",
+    "termLims": "LIMS",
+    "termSample": "Échantillon",
+    "termProject": "Projet",
+    "termSpectrum": "Spectre",
+    "termMirNir": "MIR / NIR",
+    "termQc": "Contrôle qualité (QC)",
+    "termKobo": "Kobo",
+    "termSis": "SIS",
+    "termLot": "Lot",
+    "termWorkbench": "Paillasse",
+    "termDraft": "Brouillon",
+    "termSubmit": "Soumettre",
+    "termAuditHistory": "Historique d'audit"
   },
   "aria": {
     "chaptersNav": "Navigation des chapitres du tutoriel",
     "coach": "Guide de première visite",
     "progress": "Progression du tutoriel",
     "sampleTube": "Cibler l'échantillon de pratique {num}",
-    "mobileToggle": "Basculer la vue du guide"
+    "mobileToggle": "Basculer la vue du guide",
+    "appFrame": "Écran illustratif de l'application"
   },
   "quickOverview": {
     "identityTitle": "Rôles et accès",
@@ -475,6 +505,8 @@
     "finishTitle": "Flux connecté",
     "finishDesc": "De la collecte sur le terrain à la réception physique, l'analyse et les rapports autorisés, la plateforme garde les registres connectés.",
     "defaultTitle": "Aperçu du laboratoire",
-    "defaultDesc": "Un registre connecté reliant l'arrivée des échantillons, les tâches analytiques et les rapports vérifiés."
+    "defaultDesc": "Un registre connecté reliant l'arrivée des échantillons, les tâches analytiques et les rapports vérifiés.",
+    "prepareTitle": "Préparation des échantillons",
+    "prepareDesc": "Les échantillons de sol sont séchés, broyés et tamisés afin de peser des fractions homogènes pour les analyses."
   }
 }

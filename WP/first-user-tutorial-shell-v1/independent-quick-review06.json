@@ -1,0 +1,518 @@
+{
+  "time": "2026-09-14T11:49:56.134Z",
+  "sourceCommit": "b7fd307b1bcd393d72a09aac01a0eae9cbf9eccc",
+  "assets": [
+    "/assets/TutorialShell-D1vt1_Ss.css",
+    "/assets/TutorialShell-DGCcgMWQ.js"
+  ],
+  "indexSha256": "6fe2302c0d7ff149a44fc95b80a1396c596f904c617d01736583540bf80d63fa",
+  "scope": "Local snapshot, actual anonymous guide clicks, mocked APIs and blocked external network. No database/backend/production writes.",
+  "locales": {
+    "en": {
+      "foundations": [
+        {
+          "title": "A shared record for the laboratory.",
+          "text": "FIRST-VISIT GUIDE · GUIDED PLATFORM WALKTHROUGH\nPractice exercises use synthetic example data · no LIMS records are changed\n14 September 2026\nSoilFER\nLIMS\nLanguage:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nExit guide ↗\nFOLLOW THE SAMPLE\n01\nWelcome\n02\nYour role\n03\nField to lab\n04\nReception\n05\nPhysical receipt\n06\nAssignment\n07\nEquipment\n08\nInventory\n09\nPreparation\n10\nAnalysis bench\n11\nTexture\n12\nSpectroscopy\n13\nReview\n14\nMap & report\n15\nReports\n16\nYour next step\nA GUIDED LABORATORY VISIT\n\nOne sample to follow. Five to keep in view.\n\nV\nVisitor\nPreview persona · not a signed-in account\n/login?tutorialmode=true&tour=first-visit\nIllustrative overview · no account needed\nSTART HERE · NO ACCOUNT NEEDED\nA shared record for the laboratory.\n\nLIMS means Laboratory Information Management System. It connects the sample, the work people do and the results they report.\n\nImagine a labelled bag of soil arrives.\n1\nReceive & identify\nReception team\n2\nPrepare & analyse\nTechnician\n3\nCheck & report\nReviewer\n\nPeople perform the laboratory work. The platform keeps the connected records.\n\nA quick check\n\nA sample is “expected”. Has its container arrived?\n\nYes\nNot necessarily\nYOUR LAB VISIT\nBasics 1 / 3\nStart here · no account needed\nA shared record for the laboratory.\n\nLIMS means Laboratory Information Management System. It helps the team know which sample they have, what work is needed, who is doing it, and which results have been checked.\n\nWhy this matters\nWords used here\nSee how the records fit →\n← Back\nSkip basics\nPRACTICE SAMPLE PASSPORT\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nNot a real record\n\nFirst-visit guide available in English, Spanish, Latin American Spanish, French, and Portuguese."
+        },
+        {
+          "title": "One sample. Connected work.",
+          "text": "FIRST-VISIT GUIDE · GUIDED PLATFORM WALKTHROUGH\nPractice exercises use synthetic example data · no LIMS records are changed\n14 September 2026\nSoilFER\nLIMS\nLanguage:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nExit guide ↗\nFOLLOW THE SAMPLE\n01\nWelcome\n02\nYour role\n03\nField to lab\n04\nReception\n05\nPhysical receipt\n06\nAssignment\n07\nEquipment\n08\nInventory\n09\nPreparation\n10\nAnalysis bench\n11\nTexture\n12\nSpectroscopy\n13\nReview\n14\nMap & report\n15\nReports\n16\nYour next step\nA GUIDED LABORATORY VISIT\n\nOne sample to follow. Five to keep in view.\n\nV\nVisitor\nPreview persona · not a signed-in account\n/login?tutorialmode=true&tour=first-visit\nIllustrative overview · no account needed\nTHE SAME SAMPLE THROUGHOUT\nOne sample. Connected work.\n\nOne sample can require pH, texture and other analyses.\n\nLaboratory\nThe facility and team handling the work\nProject\nRelated samples and work across facilities\n\nA project may involve more than one laboratory.\n\nExample sample · TRAIN-US-001\nA\nSample record\nIdentity & progress\nB\nTasks & results\npH · texture\nC\nReport\nAuthorized results\n\nThe field identifier links to collection. The laboratory identifier helps you match the container to its record.\n\nA quick check\n\nOne sample needs pH and texture tests. How many sample records is that?\n\nOne sample\nTwo samples\nYOUR LAB VISIT\nBasics 2 / 3\nStart here · no account needed\nOne sample. Connected work.\n\nA sample can need several tests. Its sample page, assigned tasks and report are connected views of the same work, not separate copies to enter again.\n\nWhy this matters\nWords used here\nFind your way around →\n← Back\nSkip basics\nPRACTICE SAMPLE PASSPORT\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nNot a real record\n\nFirst-visit guide available in English, Spanish, Latin American Spanish, French, and Portuguese."
+        },
+        {
+          "title": "Where should I go next?",
+          "text": "FIRST-VISIT GUIDE · GUIDED PLATFORM WALKTHROUGH\nPractice exercises use synthetic example data · no LIMS records are changed\n14 September 2026\nSoilFER\nLIMS\nLanguage:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nExit guide ↗\nFOLLOW THE SAMPLE\n01\nWelcome\n02\nYour role\n03\nField to lab\n04\nReception\n05\nPhysical receipt\n06\nAssignment\n07\nEquipment\n08\nInventory\n09\nPreparation\n10\nAnalysis bench\n11\nTexture\n12\nSpectroscopy\n13\nReview\n14\nMap & report\n15\nReports\n16\nYour next step\nA GUIDED LABORATORY VISIT\n\nOne sample to follow. Five to keep in view.\n\nV\nVisitor\nPreview persona · not a signed-in account\n/login?tutorialmode=true&tour=first-visit\nIllustrative overview · no account needed\nYOUR MAP OF THE PLATFORM\nWhere should I go next?\n\nThese destinations show different parts of connected work.\n\n⌂\nHome\nWhat needs attention\n1\nSamples\nFind identity & history\n2\nWorkbench\nRecord assigned work\n3\nReview queue\nCheck submitted work\n?\nReports & Help\nFind results & guidance\nYour first day, made clear.\nPractice only · no LIMS writes\nAll\nExpected\nReceived\nSAMPLE ID\tFIELD ID\tSTATE\nTRAIN-US-001\tGTM-DEMO-101\tReceived\nTRAIN-US-002\tGTM-DEMO-102\tExpected\nTRAIN-US-003\tGTM-DEMO-103\tReceived\nA quick check\n\nYou saved a draft result. Who acts next?\n\nI still need to complete and submit it\nThe reviewer can already approve it\nYOUR LAB VISIT\nBasics 3 / 3\nStart here · no account needed\nWhere should I go next?\n\nHome shows what needs attention. Samples tells you the story of a sample. The workbench is where a technician records the assigned work.\n\nWhy this matters\nWords used here\nChoose my learning path →\n← Back\nSkip basics\nPRACTICE SAMPLE PASSPORT\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nNot a real record\n\nFirst-visit guide available in English, Spanish, Latin American Spanish, French, and Portuguese."
+        }
+      ],
+      "stops": [
+        {
+          "step": 1,
+          "path": "quick",
+          "title": "Start with the right role.",
+          "position": "02 / 09",
+          "copy": "Your account determines which laboratory and tasks you can access. The story changes roles; your real account changes only when you sign in.",
+          "text": "Your role\n02 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nStart with the right role.\n\nYour account determines which laboratory and tasks you can access. The story changes roles; your real account changes only when you sign in.\n\nWhy this matters\nIllustrative overview · no account needed\nYour role\n🔐\nRoles and access:\nEach laboratory role has clear responsibilities, from receiving samples to recording tests and reviewing final results.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 1 viewed)\nWords used here\nSee the field connection →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 2,
+          "path": "quick",
+          "title": "Expected is not received.",
+          "position": "03 / 09",
+          "copy": "Field records bring identity and location into the project. Five samples may be expected, but arrival must still be checked at the laboratory.",
+          "text": "Field to lab\n03 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nExpected is not received.\n\nField records bring identity and location into the project. Five samples may be expected, but arrival must still be checked at the laboratory.\n\nWhy this matters\nIllustrative overview · no account needed\nField to lab\n🌾\nField collection:\nSamples arrive with field identifiers and location notes, linking laboratory work back to where the soil was collected.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 2 viewed)\nWords used here\nGo to sample reception →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 3,
+          "path": "quick",
+          "title": "Match the container first.",
+          "position": "04 / 09",
+          "copy": "Check the field ID, project and location. Record the mass and condition only after the container is physically present.",
+          "text": "Reception\n04 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nMatch the container first.\n\nCheck the field ID, project and location. Record the mass and condition only after the container is physically present.\n\nWhy this matters\nIllustrative overview · no account needed\nReception\n⚖️\nSample intake:\nThe laboratory checks the container, records an illustrative sample mass (such as 485.2 g), and confirms physical arrival.\nPractice only · no LIMS writes\nPhysical arrival\nPractice only · no LIMS writes\nReceived mass (g)\nContainer condition\nContainer intact\nLabel does not match\nCheck this practice intake\nMatch the label and enter a positive mass.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 3 viewed)\nWords used here\nContinue to preparation →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 8,
+          "path": "quick",
+          "title": "Preparation is evidence.",
+          "position": "05 / 09",
+          "copy": "Practice the checklist below. In the real lab, confirm a step only when you have carried it out and have the required record.",
+          "text": "Preparation\n05 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nPreparation is evidence.\n\nPractice the checklist below. In the real lab, confirm a step only when you have carried it out and have the required record.\n\nWhy this matters\nIllustrative overview · no account needed\nPreparation\n🥣\nSample preparation:\nSoil samples are dried, crushed, and sieved so uniform test portions can be weighed for laboratory analysis.\nPractice only · no LIMS writes\nPreparation practice\nMatch the sample label to its intake record.\nVerify the applicable drying and preparation records.\nConfirm prepared portions are labelled for their analyses.\nVerify practice checklist\n0 of 3 checks selected.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 4 viewed)\nWords used here\nSee the analysis bench →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 9,
+          "path": "quick",
+          "title": "One method. A clear batch.",
+          "position": "06 / 09",
+          "copy": "Use a method worksheet to work through samples consistently. Read the identity, method and unit before entering a result.",
+          "text": "Analysis bench\n06 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nOne method. A clear batch.\n\nUse a method worksheet to work through samples consistently. Read the identity, method and unit before entering a result.\n\nWhy this matters\nIllustrative overview · no account needed\nAnalysis bench\n🧪\nBench testing:\nTechnicians perform tests following the laboratory's configured analytical methods and quality checks, recording measurements like pH.\nPractice only · no LIMS writes\nSAMPLE\tMETHOD\tREADING\tSTATE\nTRAIN-US-001\tpH in water\t\tPractice entry\nTRAIN-US-002\tpH in water\t—\tNot entered\nTRAIN-US-003\tpH in water\t—\tNot entered\nTRAIN-US-004\tpH in water\t—\tNot entered\nTRAIN-US-005\tpH in water\t—\tNot entered\n1\nDraft\nWork in progress\n2\nRecord determination\nChecked entry\n3\nSubmit for review\nReviewer handover\nCheck practice reading\nThis field belongs to the preview, not the real workbench.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 5 viewed)\nWords used here\nTry a grouped result →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 10,
+          "path": "quick",
+          "title": "Three fractions. One result.",
+          "position": "07 / 09",
+          "copy": "Sand, silt and clay belong together. Try a total that does not close, then correct it before marking the practice complete.",
+          "text": "Texture\n07 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nThree fractions. One result.\n\nSand, silt and clay belong together. Try a total that does not close, then correct it before marking the practice complete.\n\nWhy this matters\nIllustrative overview · no account needed\nTexture\n🔬\nSoil texture:\nMeasurements of sand, silt, and clay fractions are checked to ensure their sum closes to 100% for proper soil texture classification.\nPractice only · no LIMS writes\nSand (%)\nSilt (%)\nClay (%)\nPRACTICE TOTAL\n100.0%\nCloses to 100%\nPractice values close correctly. The real method defines precision and tolerance.\nAnd the texture class?\n\nThe production report should use the validated classification rule and result revision. This guide does not calculate a substitute class.\n\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 6 viewed)\nWords used here\nExplore spectral evidence →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 12,
+          "path": "quick",
+          "title": "Review the evidence.",
+          "position": "08 / 09",
+          "copy": "A manager reviews submitted work. Practice returning one result with a clear reason so the technician knows what needs attention.",
+          "text": "Review\n08 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nReview the evidence.\n\nA manager reviews submitted work. Practice returning one result with a clear reason so the technician knows what needs attention.\n\nWhy this matters\nIllustrative overview · no account needed\nReview\n📋\nQuality review:\nA supervisor or manager reviews the submitted measurements against quality thresholds before authorizing the report.\nPractice only · no LIMS writes\nTexture · TRAIN-US-001\nReview example\n\nSand 35% · Silt 35% · Clay 30%\nQC evidence: needs inspection, not assumed PASS.\n\nReturn for correction\nTell the technician what to check\nPractice returning the result\nA meaningful reason is required before returning a result.\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 7 viewed)\nWords used here\nFollow the workflow map →\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 15,
+          "path": "quick",
+          "title": "Ready to explore your role.",
+          "position": "09 / 09",
+          "copy": "You have seen how the work fits together. Next, use the account and designated test samples agreed with the facilitator.",
+          "text": "Your next step\n09 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nExit guide ↗\nV\nVisitor (No account)\nReady to explore your role.\n\nYou have seen how the work fits together. Next, use the account and designated test samples agreed with the facilitator.\n\nWhy this matters\nIllustrative overview · no account needed\nYour next step\n✨\nConnected workflow:\nFrom initial field collection to physical reception, bench analysis, and authorized reports, the platform keeps records connected.\nBefore you begin testing\n\n01 Confirm your account, laboratory and testing role.\n\n02 Use only the designated test samples.\n\n03 Report one distinct problem per GitHub issue.\n\nOpen Help Centre ↗\nReport an issue on GitHub ↗\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nCurriculum chapters (0 practiced, 8 viewed)\nWords used here\nReturn to the beginning ↺\n← Back\nSkip lesson\nStandard English fallback displayed for unverified terminology.",
+          "goCount": 0,
+          "url": "/login"
+        }
+      ],
+      "pathChooser": "FIRST-VISIT GUIDE · GUIDED PLATFORM WALKTHROUGH\nPractice exercises use synthetic example data · no LIMS records are changed\n14 September 2026\nSoilFER\nLIMS\nLanguage:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nExit guide ↗\nFOLLOW THE SAMPLE\n01\nWelcome\n02\nYour role\n03\nField to lab\n04\nReception\n05\nPhysical receipt\n06\nAssignment\n07\nEquipment\n08\nInventory\n09\nPreparation\n10\nAnalysis bench\n11\nTexture\n12\nSpectroscopy\n13\nReview\n14\nMap & report\n15\nReports\n16\nYour next step\nA GUIDED LABORATORY VISIT\n\nOne sample to follow. Five to keep in view.\n\nV\nVisitor\nPreview persona · not a signed-in account\n/login\nIllustrative overview · no account needed\nWELCOME TO SOILFER\nFrom field to trusted result.\n\nA guided introduction to the people, steps and evidence behind every sample.\n\nFollow a sample\nThe full laboratory story\n16–18 min →\nShow me the platform\nA short first impression\n3 min →\nLearn my role\nStart where your work happens\n4–8 min →\nThe full laboratory story is selected.\nSign in to your laboratory\nUsername\nPassword\nSign in\n\nThis is a sketch of the login flow. Real sign-in happens on the application page.\n\nYOUR LAB VISIT\n01 / 16\nWelcome\nYour first day, made clear.\n\nFollow a sample from arrival to its final report. Choose a quick overview, the full lab story, or the work your role handles.\n\nWhy this matters\nWords used here\nStart my visit →\n← Back\nSkip lesson\nPRACTICE SAMPLE PASSPORT\nTRAIN-US-001 · SOILFER-US example\n001\n002\n003\n004\n005\nNot a real record\n\nFirst-visit guide available in English, Spanish, Latin American Spanish, French, and Portuguese.",
+      "endState": {
+        "active": true,
+        "step": 15,
+        "introStage": 3,
+        "path": "quick",
+        "roleChoice": "reception",
+        "sampleTube": 1,
+        "viewed": [
+          0,
+          1,
+          2,
+          3,
+          8,
+          9,
+          10,
+          12
+        ],
+        "practiced": [],
+        "done": [],
+        "skipped": [],
+        "paused": false,
+        "language": "en",
+        "practiceByTube": {
+          "1": {
+            "intakeMass": "485.2",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "6.85",
+            "benchStatusCode": "initial",
+            "texture": [
+              35,
+              35,
+              30
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "2": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "3": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "4": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "5": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          }
+        },
+        "f03Search": "",
+        "f03Filter": "all",
+        "f03SelectedId": null,
+        "equipmentStatus": "ready",
+        "inventoryLot": "LOT-2026-08",
+        "timestamp": 1789386596595,
+        "lastActivityAt": 1789386597406
+      },
+      "underlyingLoginPresent": 1
+    },
+    "fr": {
+      "foundations": [
+        {
+          "title": "Un registre partagé pour le laboratoire.",
+          "text": "GUIDE DE PREMIÈRE VISITE · PARCOURS GUIDÉ DE LA PLATEFORME\nLes exercices utilisent des données synthétiques d'exemple · aucun enregistrement LIMS n'est modifié\n14 septembre 2026\nSoilFER\nLIMS\nLangue:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nQuitter le guide ↗\nSUIVRE L'ÉCHANTILLON\n01\nBienvenue\n02\nVotre rôle\n03\nDu terrain au labo\n04\nRéception\n05\nRéception physique\n06\nAffectation\n07\nÉquipements\n08\nInventaire\n09\nPréparation\n10\nPaillasse d'analyse\n11\nTexture\n12\nSpectroscopie\n13\nRévision\n14\nCarte & rapport\n15\nRapports\n16\nVotre prochaine étape\nUNE VISITE GUIDÉE DU LABORATOIRE\n\nUn échantillon à suivre. Cinq sous les yeux.\n\nV\nVisiteur\nProfil de démonstration · aucun compte connecté\n/login?tutorialmode=true&tour=first-visit\nAperçu illustré · aucun compte requis\nCOMMENCEZ ICI · AUCUN COMPTE REQUIS\nUn registre partagé pour le laboratoire.\n\nLIMS signifie Système de Gestion des Informations de Laboratoire. Il relie l'échantillon, le travail effectué et les résultats publiés.\n\nImaginez qu'un sachet de sol étiqueté arrive.\n1\nRéceptionner et identifier\nÉquipe de réception\n2\nPréparer et analyser\nTechnicien de laboratoire\n3\nVérifier et rapporter\nRéviseur / Responsable\n\nLe personnel effectue le travail de laboratoire. La plateforme assure le suivi des enregistrements connectés.\n\nUne vérification rapide\n\nUn échantillon est indiqué comme «attendu». Son contenant est-il arrivé?\n\nOui\nPas nécessairement\nVOTRE VISITE DU LABORATOIRE\nBasics 1 / 3\nCommencez ici · aucun compte requis\nUn registre partagé pour le laboratoire.\n\nLIMS signifie Système de Gestion des Informations de Laboratoire. Il aide l'équipe à savoir quel échantillon elle possède, quel travail est requis, qui le réalise et quels résultats ont été validés.\n\nPourquoi c'est important\nMots utilisés ici\nVoir comment s'articulent les registres →\n← Retour\nIgnorer les bases\nPASSEPORT D'ÉCHANTILLON D'EXERCICE\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nPas un enregistrement réel\n\nGuide de première visite disponible en anglais, espagnol, espagnol d'Amérique latine, français et portugais."
+        },
+        {
+          "title": "Un échantillon. Des travaux reliés.",
+          "text": "GUIDE DE PREMIÈRE VISITE · PARCOURS GUIDÉ DE LA PLATEFORME\nLes exercices utilisent des données synthétiques d'exemple · aucun enregistrement LIMS n'est modifié\n14 septembre 2026\nSoilFER\nLIMS\nLangue:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nQuitter le guide ↗\nSUIVRE L'ÉCHANTILLON\n01\nBienvenue\n02\nVotre rôle\n03\nDu terrain au labo\n04\nRéception\n05\nRéception physique\n06\nAffectation\n07\nÉquipements\n08\nInventaire\n09\nPréparation\n10\nPaillasse d'analyse\n11\nTexture\n12\nSpectroscopie\n13\nRévision\n14\nCarte & rapport\n15\nRapports\n16\nVotre prochaine étape\nUNE VISITE GUIDÉE DU LABORATOIRE\n\nUn échantillon à suivre. Cinq sous les yeux.\n\nV\nVisiteur\nProfil de démonstration · aucun compte connecté\n/login?tutorialmode=true&tour=first-visit\nAperçu illustré · aucun compte requis\nLE MÊME ÉCHANTILLON D'UN BOUT À L'AUTRE\nUn échantillon. Des travaux reliés.\n\nUn échantillon peut nécessiter des analyses de pH, de texture et d'autres paramètres.\n\nLaboratoire\nL'installation et l'équipe chargées des analyses\nProjet\nÉchantillons et analyses associés entre établissements\n\nUn projet peut impliquer plusieurs laboratoires.\n\nÉchantillon d'exemple · TRAIN-US-001\nA\nFiche échantillon\nIdentité et progression\nB\nTâches et analyses\npH · texture\nC\nRapport\nRésultats autorisés\n\nL'identifiant de terrain renvoie à la collecte. L'identifiant de laboratoire permet d'associer le contenant physique à sa fiche.\n\nUne vérification rapide\n\nUn échantillon nécessite des tests de pH et de texture. Combien de fiches d'échantillon cela représente-t-il?\n\nUn seul échantillon\nDeux échantillons\nVOTRE VISITE DU LABORATOIRE\nBasics 2 / 3\nCommencez ici · aucun compte requis\nUn échantillon. Des travaux reliés.\n\nUn échantillon peut nécessiter plusieurs analyses. Sa fiche d'échantillon, ses tâches et son rapport sont des vues connectées d'un même travail, pas des copies à ressaisir.\n\nPourquoi c'est important\nMots utilisés ici\nDécouvrir la navigation →\n← Retour\nIgnorer les bases\nPASSEPORT D'ÉCHANTILLON D'EXERCICE\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nPas un enregistrement réel\n\nGuide de première visite disponible en anglais, espagnol, espagnol d'Amérique latine, français et portugais."
+        },
+        {
+          "title": "Où dois-je aller ensuite?",
+          "text": "GUIDE DE PREMIÈRE VISITE · PARCOURS GUIDÉ DE LA PLATEFORME\nLes exercices utilisent des données synthétiques d'exemple · aucun enregistrement LIMS n'est modifié\n14 septembre 2026\nSoilFER\nLIMS\nLangue:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nQuitter le guide ↗\nSUIVRE L'ÉCHANTILLON\n01\nBienvenue\n02\nVotre rôle\n03\nDu terrain au labo\n04\nRéception\n05\nRéception physique\n06\nAffectation\n07\nÉquipements\n08\nInventaire\n09\nPréparation\n10\nPaillasse d'analyse\n11\nTexture\n12\nSpectroscopie\n13\nRévision\n14\nCarte & rapport\n15\nRapports\n16\nVotre prochaine étape\nUNE VISITE GUIDÉE DU LABORATOIRE\n\nUn échantillon à suivre. Cinq sous les yeux.\n\nV\nVisiteur\nProfil de démonstration · aucun compte connecté\n/login?tutorialmode=true&tour=first-visit\nAperçu illustré · aucun compte requis\nVOTRE PLAN DE LA PLATEFORME\nOù dois-je aller ensuite?\n\nCes destinations présentent différents aspects du travail connecté.\n\n⌂\nAccueil\nLes éléments requérant votre attention\n1\nÉchantillons\nRetrouver l'identité et l'historique\n2\nPaillasse\nSaisir le travail assigné\n3\nFile de révision\nVérifier le travail soumis\n?\nRapports et Aide\nConsulter les résultats et instructions\nVotre premier jour, en toute clarté.\nPratique uniquement · aucune écriture dans LIMS\nTous\nAttendu\nReçu\nID ÉCHANTILLON\tID TERRAIN\tÉTAT\nTRAIN-US-001\tGTM-DEMO-101\tReçu\nTRAIN-US-002\tGTM-DEMO-102\tAttendu\nTRAIN-US-003\tGTM-DEMO-103\tReçu\nUne vérification rapide\n\nVous avez enregistré un résultat en brouillon. Qui intervient ensuite?\n\nJe dois encore le finaliser et le soumettre\nLe réviseur peut déjà l'approuver\nVOTRE VISITE DU LABORATOIRE\nBasics 3 / 3\nCommencez ici · aucun compte requis\nOù dois-je aller ensuite?\n\nL'Accueil montre ce qui requiert votre attention. Échantillons retrace l'historique d'un échantillon. La paillasse est l'endroit où le technicien saisit le travail assigné.\n\nPourquoi c'est important\nMots utilisés ici\nChoisir mon parcours d'apprentissage →\n← Retour\nIgnorer les bases\nPASSEPORT D'ÉCHANTILLON D'EXERCICE\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nPas un enregistrement réel\n\nGuide de première visite disponible en anglais, espagnol, espagnol d'Amérique latine, français et portugais."
+        }
+      ],
+      "stops": [
+        {
+          "step": 1,
+          "path": "quick",
+          "title": "Commencez avec le bon rôle.",
+          "position": "02 / 09",
+          "copy": "Votre compte détermine le laboratoire et les tâches auxquels vous avez accès. Le récit change de rôle; votre compte réel ne change que lors de la connexion.",
+          "text": "Votre rôle\n02 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nCommencez avec le bon rôle.\n\nVotre compte détermine le laboratoire et les tâches auxquels vous avez accès. Le récit change de rôle; votre compte réel ne change que lors de la connexion.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nVotre rôle\n🔐\nRôles et accès:\nChaque rôle de laboratoire a des responsabilités claires, de la réception des échantillons à la saisie des analyses et à la révision des résultats.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 1 consultées)\nMots utilisés ici\nVoir la liaison terrain →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 2,
+          "path": "quick",
+          "title": "Attendu ne veut pas dire reçu.",
+          "position": "03 / 09",
+          "copy": "Les enregistrements de terrain apportent l'identité et la localisation au projet. Cinq échantillons peuvent être attendus, mais l'arrivée doit être constatée au laboratoire.",
+          "text": "Du terrain au labo\n03 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nAttendu ne veut pas dire reçu.\n\nLes enregistrements de terrain apportent l'identité et la localisation au projet. Cinq échantillons peuvent être attendus, mais l'arrivée doit être constatée au laboratoire.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nDu terrain au labo\n🌾\nCollecte sur le terrain:\nLes échantillons arrivent avec des identifiants de terrain et des notes de localisation, reliant le travail du laboratoire au lieu de prélèvement.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 2 consultées)\nMots utilisés ici\nAller à la réception des échantillons →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 3,
+          "path": "quick",
+          "title": "Vérifiez d'abord le contenant.",
+          "position": "04 / 09",
+          "copy": "Contrôlez l'identifiant de terrain, le projet et le site. Enregistrez la masse et l'état seulement lorsque le contenant est physiquement présent.",
+          "text": "Réception\n04 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nVérifiez d'abord le contenant.\n\nContrôlez l'identifiant de terrain, le projet et le site. Enregistrez la masse et l'état seulement lorsque le contenant est physiquement présent.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nRéception\n⚖️\nRéception d'échantillons:\nLe laboratoire vérifie le contenant, enregistre une masse d'échantillon illustrative (comme 485,2 g) et confirme l'arrivée physique.\nPratique uniquement · aucune écriture dans LIMS\nArrivée physique\nExercice uniquement · aucune écriture LIMS\nMasse reçue (g)\nÉtat du contenant\nContenant intact\nL'étiquette ne correspond pas\nVérifier cette réception d'exercice\nVérifiez l'étiquette et saisissez une masse positive.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 3 consultées)\nMots utilisés ici\nContinuer vers la préparation →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 8,
+          "path": "quick",
+          "title": "La préparation est une preuve.",
+          "position": "05 / 09",
+          "copy": "Pratiquez la liste de contrôle ci-dessous. Au laboratoire, confirmez une étape uniquement lorsque vous l'avez réalisée avec l'enregistrement requis.",
+          "text": "Préparation\n05 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nLa préparation est une preuve.\n\nPratiquez la liste de contrôle ci-dessous. Au laboratoire, confirmez une étape uniquement lorsque vous l'avez réalisée avec l'enregistrement requis.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nPréparation\n🥣\nPréparation des échantillons:\nLes échantillons de sol sont séchés, broyés et tamisés afin de peser des fractions homogènes pour les analyses.\nPratique uniquement · aucune écriture dans LIMS\nExercice de préparation\nVérifier que l'étiquette correspond à la fiche de réception.\nContrôler les fiches applicables de séchage et de préparation.\nConfirmer que les fractions préparées sont étiquetées pour leurs analyses.\nVérifier la liste de contrôle\n0 sur 3 vérifications sélectionnées.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 4 consultées)\nMots utilisés ici\nVoir la paillasse d'analyse →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 9,
+          "path": "quick",
+          "title": "Une méthode. Une série claire.",
+          "position": "06 / 09",
+          "copy": "Utilisez une feuille de méthode pour traiter les échantillons de manière cohérente. Vérifiez l'identité, la méthode et l'unité avant de saisir un résultat.",
+          "text": "Paillasse d'analyse\n06 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nUne méthode. Une série claire.\n\nUtilisez une feuille de méthode pour traiter les échantillons de manière cohérente. Vérifiez l'identité, la méthode et l'unité avant de saisir un résultat.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nPaillasse d'analyse\n🧪\nAnalyses à la paillasse:\nLes techniciens effectuent des tests selon les méthodes analytiques et contrôles qualité configurés, en enregistrant des mesures comme le pH.\nPratique uniquement · aucune écriture dans LIMS\nÉCHANTILLON\tMÉTHODE\tLECTURE\tÉTAT\nTRAIN-US-001\tpH dans l'eau\t\tSaisie d'exercice\nTRAIN-US-002\tpH dans l'eau\t—\tNon renseigné\nTRAIN-US-003\tpH dans l'eau\t—\tNon renseigné\nTRAIN-US-004\tpH dans l'eau\t—\tNon renseigné\nTRAIN-US-005\tpH dans l'eau\t—\tNon renseigné\n1\nBrouillon\nTravail en cours\n2\nEnregistrer la mesure\nSaisie vérifiée\n3\nSoumettre pour révision\nTransmission au réviseur\nVérifier la mesure d'exercice\nCe champ appartient à la démonstration, pas à la paillasse réelle.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 5 consultées)\nMots utilisés ici\nEssayer un résultat groupé →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 10,
+          "path": "quick",
+          "title": "Trois fractions. Un seul résultat.",
+          "position": "07 / 09",
+          "copy": "Sable, limon et argile sont indissociables. Essayez un total différent de 100%, puis corrigez-le avant de valider l'exercice.",
+          "text": "Texture\n07 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nTrois fractions. Un seul résultat.\n\nSable, limon et argile sont indissociables. Essayez un total différent de 100%, puis corrigez-le avant de valider l'exercice.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nTexture\n🔬\nTexture du sol:\nLes fractions de sable, limon et argile sont vérifiées pour s'assurer que leur somme fait 100% pour classifier la texture du sol.\nPratique uniquement · aucune écriture dans LIMS\nSable (%)\nLimon (%)\nArgile (%)\nTOTAL D'EXERCICE\n100.0%\nTotal égal à 100%\nLes fractions sont équilibrées à 100%. La méthode réelle définit la précision et la tolérance.\nEt la classe texturale?\n\nLe rapport officiel utilise la règle de classification validée et la révision du résultat. Ce guide ne calcule pas de classe de substitution.\n\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 6 consultées)\nMots utilisés ici\nExplorer les données spectrales →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 12,
+          "path": "quick",
+          "title": "Examiner les preuves.",
+          "position": "08 / 09",
+          "copy": "Un responsable examine le travail soumis. Entraînez-vous à renvoyer un résultat avec un motif clair afin que le technicien sache quoi corriger.",
+          "text": "Révision\n08 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nExaminer les preuves.\n\nUn responsable examine le travail soumis. Entraînez-vous à renvoyer un résultat avec un motif clair afin que le technicien sache quoi corriger.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nRévision\n📋\nContrôle qualité:\nUn superviseur ou responsable examine les mesures soumises selon les critères de qualité avant d'autoriser le rapport.\nPratique uniquement · aucune écriture dans LIMS\nTexture · TRAIN-US-001\nExemple de révision\n\nSand 35% · Silt 35% · Clay 30%\nContrôle qualité: nécessite une inspection, ne pas supposer CONFORME sans vérification.\n\nRenvoyer pour correction\nIndiquez au technicien l'élément à vérifier\nPratiquer le renvoi du résultat\nUn motif précis est obligatoire avant de renvoyer un résultat.\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 7 consultées)\nMots utilisés ici\nSuivre la carte de déroulement →\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        },
+        {
+          "step": 15,
+          "path": "quick",
+          "title": "Prêt à explorer votre rôle.",
+          "position": "09 / 09",
+          "copy": "Vous avez découvert comment le travail s'articule. Utilisez maintenant votre compte et les échantillons d'essai désignés par votre formateur.",
+          "text": "Votre prochaine étape\n09 / 09\nEN\nES\nES-419\nFR\nPT\nPause\nQuitter le guide ↗\nV\nVisiteur (Non connecté)\nPrêt à explorer votre rôle.\n\nVous avez découvert comment le travail s'articule. Utilisez maintenant votre compte et les échantillons d'essai désignés par votre formateur.\n\nPourquoi c'est important\nAperçu illustré · aucun compte requis\nVotre prochaine étape\n✨\nFlux connecté:\nDe la collecte sur le terrain à la réception physique, l'analyse et les rapports autorisés, la plateforme garde les registres connectés.\nAvant de commencer les essais\n\n01 Confirmez votre compte, laboratoire et rôle de test.\n\n02 Utilisez uniquement les échantillons de test désignés.\n\n03 Signalez un problème distinct par ticket GitHub.\n\nOuvrir le Centre d'Aide ↗\nSignaler un problème sur GitHub ↗\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nChapitres du programme (0 pratiquées, 8 consultées)\nMots utilisés ici\nRevenir au début ↺\n← Retour\nIgnorer la leçon\nTexte standard affiché en cas de terme non traduit.",
+          "goCount": 0,
+          "url": "/login"
+        }
+      ],
+      "pathChooser": "GUIDE DE PREMIÈRE VISITE · PARCOURS GUIDÉ DE LA PLATEFORME\nLes exercices utilisent des données synthétiques d'exemple · aucun enregistrement LIMS n'est modifié\n14 septembre 2026\nSoilFER\nLIMS\nLangue:\nEnglish\nEspañol\nEspañol (América Latina)\nFrançais\nPortuguês\nPause\nQuitter le guide ↗\nSUIVRE L'ÉCHANTILLON\n01\nBienvenue\n02\nVotre rôle\n03\nDu terrain au labo\n04\nRéception\n05\nRéception physique\n06\nAffectation\n07\nÉquipements\n08\nInventaire\n09\nPréparation\n10\nPaillasse d'analyse\n11\nTexture\n12\nSpectroscopie\n13\nRévision\n14\nCarte & rapport\n15\nRapports\n16\nVotre prochaine étape\nUNE VISITE GUIDÉE DU LABORATOIRE\n\nUn échantillon à suivre. Cinq sous les yeux.\n\nV\nVisiteur\nProfil de démonstration · aucun compte connecté\n/login\nAperçu illustré · aucun compte requis\nBIENVENUE SUR SOILFER\nDu terrain au résultat fiable.\n\nUne introduction guidée aux personnes, étapes et preuves associées à chaque échantillon.\n\nSuivre un échantillon\nL'histoire complète du laboratoire\n16–18 min →\nDécouvrir la plateforme\nUn premier aperçu rapide\n3 min →\nDécouvrir mon rôle\nCommencez là où votre travail s'effectue\n4–8 min →\nLe parcours complet du laboratoire est sélectionné.\nConnectez-vous à votre laboratoire\nNom d'utilisateur\nMot de passe\nSe connecter\n\nCeci est un aperçu de la connexion. La véritable connexion s'effectue sur la page de l'application.\n\nVOTRE VISITE DU LABORATOIRE\n01 / 16\nBienvenue\nVotre premier jour, en toute clarté.\n\nSuivez un échantillon de son arrivée à son rapport final. Choisissez un aperçu rapide, l'histoire complète ou le parcours dédié à votre rôle.\n\nPourquoi c'est important\nMots utilisés ici\nCommencer ma visite →\n← Retour\nIgnorer la leçon\nPASSEPORT D'ÉCHANTILLON D'EXERCICE\nTRAIN-US-001 · Exemple SOILFER-US\n001\n002\n003\n004\n005\nPas un enregistrement réel\n\nGuide de première visite disponible en anglais, espagnol, espagnol d'Amérique latine, français et portugais.",
+      "endState": {
+        "active": true,
+        "step": 15,
+        "introStage": 3,
+        "path": "quick",
+        "roleChoice": "reception",
+        "sampleTube": 1,
+        "viewed": [
+          0,
+          1,
+          2,
+          3,
+          8,
+          9,
+          10,
+          12
+        ],
+        "practiced": [],
+        "done": [],
+        "skipped": [],
+        "paused": false,
+        "language": "fr",
+        "practiceByTube": {
+          "1": {
+            "intakeMass": "485.2",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "6.85",
+            "benchStatusCode": "initial",
+            "texture": [
+              35,
+              35,
+              30
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "2": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "3": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "4": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          },
+          "5": {
+            "intakeMass": "",
+            "condition": "intact",
+            "intakeStatusCode": "initial",
+            "receiptStatusCode": "initial",
+            "assignmentStatusCode": "initial",
+            "assignmentAssignee": "techA",
+            "checks": [
+              false,
+              false,
+              false
+            ],
+            "prepVerified": false,
+            "benchValue": "",
+            "benchStatusCode": "initial",
+            "texture": [
+              "",
+              "",
+              ""
+            ],
+            "spectrumLoaded": false,
+            "reviewReason": "",
+            "reviewSubmitted": false
+          }
+        },
+        "f03Search": "",
+        "f03Filter": "all",
+        "f03SelectedId": null,
+        "equipmentStatus": "ready",
+        "inventoryLot": "LOT-2026-08",
+        "timestamp": 1789386597675,
+        "lastActivityAt": 1789386598324
+      },
+      "underlyingLoginPresent": 1
+    }
+  },
+  "mutationRequests": [],
+  "errors": []
+}

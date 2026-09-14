@@ -109,9 +109,14 @@
   }
 }
 
+#soilfer-tutorial-overlay .chapter.practiced i,
 #soilfer-tutorial-overlay .chapter.done i {
   background: #d1fae5;
   color: #065f46;
+}
+#soilfer-tutorial-overlay .chapter.viewed i {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 #soilfer-tutorial-overlay .chapter.skipped i {
   background: #fef3c7;
