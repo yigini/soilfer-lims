@@ -1445,72 +1445,92 @@ exports.deleteSample = async (req, res) => {
             } catch (e) {}
         }
 
-        if (hasExternalProvenance) {
+        // Conservative provenance evaluation:
+        // A sample is pre-registered / project-persisted (and must REVERT, never hard-delete) if:
+        // - It is linked to any project (projectId or projectCode)
+        // - OR it has external intake provenance (Kobo, manifest, etc.)
+        // - Only an unattached sample with NO project and NO external provenance that is a walk-in may be deleted.
+        // - Ambiguous origin without project is conservatively reverted to EXPECTED.
+        if (sample.projectId || sample.projectCode) {
             isPreRegistered = true;
-        } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+        } else if (hasExternalProvenance) {
             isPreRegistered = true;
-        } else if (sample.projectId || sample.projectCode) {
-            const project = await prisma.project.findFirst({
-                where: sample.projectId
-                    ? { id: sample.projectId }
-                    : { code: sample.projectCode }
-            });
-            if (project && (project.projectType === 'KOBO_LINKED' || project.projectType === 'TEMPLATE_PREDEFINED_IDS')) {
-                isPreRegistered = true;
-            }
+        } else if (isWalkIn) {
+            isPreRegistered = false;
+        } else {
+            isPreRegistered = true; // Conservative fallback
         }
 
         if (isPreRegistered) {
-            // REVERT to EXPECTED: Clear intake data but keep the sample record
-            await prisma.$transaction([
-                prisma.workItem.deleteMany({ where: { sampleId: String(id) } }),
-                prisma.submission.deleteMany({ where: { sampleId: String(id) } }),
-                prisma.result.deleteMany({ where: { sampleId: String(id) } })
-            ]);
+            // REVERT to EXPECTED — fully atomic transaction
+            await prisma.$transaction(async (tx) => {
+                await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
+                await tx.submission.deleteMany({ where: { sampleId: String(id) } });
+                await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
+                await tx.result.deleteMany({ where: { sampleId: String(id) } });
 
-            const { transitionSample } = require('../services/sampleStateService');
-            await transitionSample(id, 'EXPECTED', user, 'Sample reset/reverted to EXPECTED by manager', {
-                receptionData: null,
-                receptionDate: null,
-                receivedBy: null,
-                dryingStatus: null,
-                preparationStatus: null,
-                acceptedBy: null,
-                acceptedAt: null,
-                approvedBy: null,
-                approvedAt: null,
-                requiredAnalyses: null,
-                analysisGroupIds: null,
-                lastSubmissionId: null,
-                lastSubmissionType: null,
-                lastSubmissionAt: null
-            });
-
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-revert-${Date.now()}`,
-                    entity: 'SAMPLE',
-                    entityId: id,
+                const sampleHistory = typeof sample.history === 'string'
+                    ? JSON.parse(sample.history)
+                    : (sample.history || []);
+                sampleHistory.push({
+                    status: 'EXPECTED',
                     action: 'REVERT_TO_EXPECTED',
-                    performedBy: user.username,
-                    details: `Reverted pre-registered sample ${sample.originalId} back to EXPECTED (cleared intake data). Sample record preserved.`,
-                    timestamp: new Date()
-                }
+                    changedBy: user.username,
+                    timestamp: new Date(),
+                    note: 'Sample reset/reverted to EXPECTED by manager'
+                });
+
+                await tx.sample.update({
+                    where: { id: String(id) },
+                    data: {
+                        status: 'EXPECTED',
+                        labId: null,
+                        receptionData: null,
+                        receptionDate: null,
+                        receivedBy: null,
+                        dryingStatus: null,
+                        preparationStatus: null,
+                        acceptedBy: null,
+                        acceptedAt: null,
+                        approvedBy: null,
+                        approvedAt: null,
+                        requiredAnalyses: null,
+                        analysisGroupIds: null,
+                        lastSubmissionId: null,
+                        lastSubmissionType: null,
+                        lastSubmissionAt: null,
+                        assignedLab: sample.assignedLab,
+                        history: JSON.stringify(sampleHistory)
+                    }
+                });
+
+                await tx.auditLog.create({
+                    data: {
+                        id: `audit-revert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        entity: 'SAMPLE',
+                        entityId: id,
+                        action: 'REVERT_TO_EXPECTED',
+                        performedBy: user.username,
+                        details: `Reverted pre-registered sample ${sample.originalId} back to EXPECTED (cleared intake data). Sample record preserved.`,
+                        timestamp: new Date(),
+                        sampleId: String(id)
+                    }
+                });
             });
 
             return res.json({ message: 'Sample intake discarded. Sample reverted to EXPECTED status.', reverted: true });
         }
 
-        // HARD DELETE for walk-in / open-intake samples
-        await prisma.$transaction([
-            prisma.workItem.deleteMany({ where: { sampleId: String(id) } }),
-            prisma.submission.deleteMany({ where: { sampleId: String(id) } }),
-            prisma.spectralData.deleteMany({ where: { sampleId: String(id) } }),
-            prisma.result.deleteMany({ where: { sampleId: String(id) } }),
-            prisma.sample.delete({ where: { id: String(id) } }),
-            prisma.auditLog.create({
+        // HARD DELETE for walk-in samples — fully atomic transaction
+        await prisma.$transaction(async (tx) => {
+            await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
+            await tx.submission.deleteMany({ where: { sampleId: String(id) } });
+            await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
+            await tx.result.deleteMany({ where: { sampleId: String(id) } });
+
+            await tx.auditLog.create({
                 data: {
-                    id: `audit-del-${Date.now()}`,
+                    id: `audit-del-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     entity: 'SAMPLE',
                     entityId: id,
                     action: 'DELETE',
@@ -1518,8 +1538,10 @@ exports.deleteSample = async (req, res) => {
                     details: `Hard deleted sample ${sample.labId || sample.originalId} and associated data.`,
                     timestamp: new Date()
                 }
-            })
-        ]);
+            });
+
+            await tx.sample.delete({ where: { id: String(id) } });
+        });
 
         res.json({ message: 'Sample deleted successfully' });
     } catch (error) {
@@ -1617,19 +1639,14 @@ exports.batchDeleteSamples = async (req, res) => {
                 } catch (e) {}
             }
 
-            if (hasExternalProvenance) {
+            if (sample.projectId || sample.projectCode) {
                 isPreRegistered = true;
-            } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+            } else if (hasExternalProvenance) {
                 isPreRegistered = true;
-            } else if (sample.projectId || sample.projectCode) {
-                const project = await prisma.project.findFirst({
-                    where: sample.projectId
-                        ? { id: sample.projectId }
-                        : { code: sample.projectCode }
-                });
-                if (project && (project.projectType === 'KOBO_LINKED' || project.projectType === 'TEMPLATE_PREDEFINED_IDS')) {
-                    isPreRegistered = true;
-                }
+            } else if (isWalkIn) {
+                isPreRegistered = false;
+            } else {
+                isPreRegistered = true; // Conservative fallback
             }
 
             if (isPreRegistered) {
@@ -1639,47 +1656,65 @@ exports.batchDeleteSamples = async (req, res) => {
             }
         }
 
-        const txOps = [];
+        // Execute batch revert and delete in a single atomic transaction
+        await prisma.$transaction(async (tx) => {
+            if (toRevert.length > 0) {
+                const revertIds = toRevert.map(s => String(s.id));
+                await tx.workItem.deleteMany({ where: { sampleId: { in: revertIds } } });
+                await tx.submission.deleteMany({ where: { sampleId: { in: revertIds } } });
+                await tx.spectralData.deleteMany({ where: { sampleId: { in: revertIds } } });
+                await tx.result.deleteMany({ where: { sampleId: { in: revertIds } } });
 
-        // REVERT: Project samples → back to EXPECTED
-        for (const sample of toRevert) {
-            const { transitionSample } = require('../services/sampleStateService');
-            await transitionSample(sample.id, 'EXPECTED', user, 'Draft/intake discarded. Sample reverted to EXPECTED status.', {
-                labId: null,
-                receptionData: null,
-                receptionDate: null,
-                receivedBy: null,
-                requiredAnalyses: null,
-                analysisGroupIds: null,
-                assignedLab: sample.assignedLab,
-                history: JSON.stringify([{
-                    status: 'EXPECTED',
-                    action: 'REVERT_TO_EXPECTED',
-                    changedBy: user.username,
-                    timestamp: new Date(),
-                    note: 'Draft/intake discarded. Sample reverted to EXPECTED status.'
-                }])
-            }).catch(e => console.warn('[undoReception] Warning reverting sample:', e.message));
+                for (const sample of toRevert) {
+                    const sampleHistory = typeof sample.history === 'string'
+                        ? JSON.parse(sample.history)
+                        : (sample.history || []);
+                    sampleHistory.push({
+                        status: 'EXPECTED',
+                        action: 'REVERT_TO_EXPECTED',
+                        changedBy: user.username,
+                        timestamp: new Date(),
+                        note: 'Draft/intake discarded. Sample reverted to EXPECTED status.'
+                    });
 
-            txOps.push(prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } }));
-            txOps.push(prisma.result.deleteMany({ where: { sampleId: String(sample.id) } }));
-        }
+                    await tx.sample.update({
+                        where: { id: String(sample.id) },
+                        data: {
+                            status: 'EXPECTED',
+                            labId: null,
+                            receptionData: null,
+                            receptionDate: null,
+                            receivedBy: null,
+                            dryingStatus: null,
+                            preparationStatus: null,
+                            acceptedBy: null,
+                            acceptedAt: null,
+                            approvedBy: null,
+                            approvedAt: null,
+                            requiredAnalyses: null,
+                            analysisGroupIds: null,
+                            lastSubmissionId: null,
+                            lastSubmissionType: null,
+                            lastSubmissionAt: null,
+                            assignedLab: sample.assignedLab,
+                            history: JSON.stringify(sampleHistory)
+                        }
+                    });
+                }
+            }
 
-        // HARD DELETE: Walk-in/open samples
-        if (toDelete.length > 0) {
-            const deleteIds = toDelete.map(s => s.id);
-            txOps.push(prisma.workItem.deleteMany({ where: { sampleId: { in: deleteIds } } }));
-            txOps.push(prisma.submission.deleteMany({ where: { sampleId: { in: deleteIds } } }));
-            txOps.push(prisma.spectralData.deleteMany({ where: { sampleId: { in: deleteIds } } }));
-            txOps.push(prisma.result.deleteMany({ where: { sampleId: { in: deleteIds } } }));
-            txOps.push(prisma.sample.deleteMany({ where: { id: { in: deleteIds } } }));
-        }
+            if (toDelete.length > 0) {
+                const deleteIds = toDelete.map(s => String(s.id));
+                await tx.workItem.deleteMany({ where: { sampleId: { in: deleteIds } } });
+                await tx.submission.deleteMany({ where: { sampleId: { in: deleteIds } } });
+                await tx.spectralData.deleteMany({ where: { sampleId: { in: deleteIds } } });
+                await tx.result.deleteMany({ where: { sampleId: { in: deleteIds } } });
+                await tx.sample.deleteMany({ where: { id: { in: deleteIds } } });
+            }
 
-        // Audit log
-        txOps.push(
-            prisma.auditLog.create({
+            await tx.auditLog.create({
                 data: {
-                    id: `audit-batch-del-${Date.now()}`,
+                    id: `audit-batch-del-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     entity: 'SAMPLE',
                     entityId: 'BATCH',
                     action: toRevert.length > 0 ? 'BATCH_DISCARD' : 'BATCH_DELETE',
@@ -1688,10 +1723,8 @@ exports.batchDeleteSamples = async (req, res) => {
                     timestamp: new Date(),
                     before: JSON.stringify(samples.map(s => s.id))
                 }
-            })
-        );
-
-        await prisma.$transaction(txOps);
+            });
+        });
 
         const msg = toRevert.length > 0
             ? `${samples.length} samples discarded (${toRevert.length} reverted to EXPECTED, ${toDelete.length} removed).`

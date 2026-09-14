@@ -131,23 +131,55 @@ exports.processIntake = async (req, res) => {
             where: { originalId: String(originalId) }
         });
 
-        // Validate project admission policy (PM-14 / Admissions invariant)
-        const candidateProjectId = projectId || (sample ? (sample.projectId || sample.projectCode) : (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null)));
+        let isNewlyCreatedDeskSample = false;
 
-        if (candidateProjectId) {
-            const project = await prisma.project.findFirst({
-                where: {
-                    OR: [
-                        { id: String(candidateProjectId) },
-                        { code: String(candidateProjectId) }
-                    ]
-                }
-            });
-            if (project && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
-                return res.status(422).json({
-                    error: 'PROJECT_ADMISSIONS_PAUSED',
-                    message: `Cannot receive sample: Admissions for project ${project.code || project.id} are ${project.status.toLowerCase()}. New sample intake is currently paused or closed.`
+        if (sample) {
+            // Authoritative: Existing sample's persisted project governs admission policy
+            const persistedProjectId = sample.projectId || sample.projectCode;
+            if (persistedProjectId) {
+                const existingProject = await prisma.project.findFirst({
+                    where: {
+                        OR: [
+                            { id: String(persistedProjectId) },
+                            { code: String(persistedProjectId) }
+                        ]
+                    }
                 });
+                if (existingProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(existingProject.status)) {
+                    return res.status(422).json({
+                        error: 'PROJECT_ADMISSIONS_PAUSED',
+                        message: `Cannot receive sample: Admissions for project ${existingProject.code || existingProject.id} are ${existingProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                    });
+                }
+
+                // Check for contradictory request projectId override
+                if (projectId && String(projectId) !== String(sample.projectId) && String(projectId) !== String(sample.projectCode)) {
+                    return res.status(400).json({
+                        error: 'CROSS_PROJECT_CONFLICT',
+                        message: `Sample ${originalId} is already registered to project ${sample.projectId || sample.projectCode}. Direct project reassignment via intake is not permitted.`
+                    });
+                }
+            }
+        } else {
+            // Brand new sample registration at reception desk
+            isNewlyCreatedDeskSample = true;
+            const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
+
+            if (candidateProjectId) {
+                const targetProject = await prisma.project.findFirst({
+                    where: {
+                        OR: [
+                            { id: String(candidateProjectId) },
+                            { code: String(candidateProjectId) }
+                        ]
+                    }
+                });
+                if (targetProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
+                    return res.status(422).json({
+                        error: 'PROJECT_ADMISSIONS_PAUSED',
+                        message: `Cannot receive sample: Admissions for project ${targetProject.code || targetProject.id} are ${targetProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                    });
+                }
             }
         }
 
@@ -361,7 +393,7 @@ exports.processIntake = async (req, res) => {
                     analysisJustification: justification || null,
                     submitterDetails: submitterDetails || null,
                     samplingDetails: samplingDetails || null,
-                    isWalkIn: isWalkIn || false,
+                    isWalkIn: isNewlyCreatedDeskSample ? (isWalkIn || false) : false,
                     receivedMass: parsedMass,
                     moistureOnArrival,
                     foreignMaterial,
@@ -377,7 +409,7 @@ exports.processIntake = async (req, res) => {
             if (existingProjectId) {
                 updateData.projectId = sample.projectId || undefined;
                 updateData.projectCode = sample.projectCode || undefined;
-            } else if (isWalkIn) {
+            } else if (isNewlyCreatedDeskSample && isWalkIn) {
                 updateData.projectCode = null;
                 updateData.projectId = null;
             } else if (projectId) {
@@ -859,72 +891,90 @@ exports.discardDraft = async (req, res) => {
             } catch (e) {}
         }
 
-        // 3. Evaluate provenance:
-        // - External provenance (Kobo, manifest, etc.) is always pre-registered
-        // - Any sample linked to a project that was not born as an ad-hoc walk-in is pre-registered
-        // - Any sample linked to a KOBO_LINKED or TEMPLATE_PREDEFINED_IDS project is pre-registered
-        if (hasExternalProvenance) {
+        // 3. Conservative provenance evaluation:
+        // A sample is pre-registered / project-persisted (and must REVERT, never hard-delete) if:
+        // - It is linked to any project (projectId or projectCode)
+        // - OR it has external intake provenance (Kobo, manifest, etc.)
+        // - Only an unattached sample with NO project and NO external provenance that is a walk-in may be deleted.
+        // - Ambiguous origin without project is conservatively reverted to EXPECTED.
+        if (sample.projectId || sample.projectCode) {
             isPreRegistered = true;
-        } else if ((sample.projectId || sample.projectCode) && !isWalkIn) {
+        } else if (hasExternalProvenance) {
             isPreRegistered = true;
-        } else if (sample.projectId || sample.projectCode) {
-            const project = await prisma.project.findFirst({
-                where: sample.projectId
-                    ? { id: sample.projectId }
-                    : { code: sample.projectCode }
-            });
-            if (project && (project.projectType === 'KOBO_LINKED' || project.projectType === 'TEMPLATE_PREDEFINED_IDS')) {
-                isPreRegistered = true;
-            }
+        } else if (isWalkIn) {
+            isPreRegistered = false;
+        } else {
+            isPreRegistered = true; // Conservative fallback
         }
 
         if (isPreRegistered) {
-            // REVERT to EXPECTED — transactional (Finding #8)
-            await prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
-            await prisma.result.deleteMany({ where: { sampleId: String(sample.id) } });
+            // REVERT to EXPECTED — fully atomic transaction
+            await prisma.$transaction(async (tx) => {
+                await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.spectralData.deleteMany({ where: { sampleId: String(sample.id) } });
 
-            const { transitionSample } = require('../services/sampleStateService');
-            await transitionSample(sample.id, 'EXPECTED', user, 'Draft/intake discarded by reception. Sample reverted to EXPECTED.', {
-                labId: null,
-                receptionData: null,
-                receptionDate: null,
-                receivedBy: null,
-                requiredAnalyses: null,
-                analysisGroupIds: null,
-                assignedLab: sample.assignedLab,
-                history: JSON.stringify([{
+                const sampleHistory = typeof sample.history === 'string'
+                    ? JSON.parse(sample.history)
+                    : (sample.history || []);
+                sampleHistory.push({
                     status: 'EXPECTED',
                     action: 'REVERT_TO_EXPECTED',
                     changedBy: user.username,
                     timestamp: new Date(),
                     note: 'Draft/intake discarded by reception. Sample reverted to EXPECTED.'
-                }])
-            });
+                });
 
-            await prisma.auditLog.create({
-                data: {
-                    id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                    entity: 'SAMPLE',
-                    entityId: String(sample.id),
-                    action: 'DRAFT_DISCARDED',
+                await tx.sample.update({
+                    where: { id: String(sample.id) },
+                    data: {
+                        status: 'EXPECTED',
+                        labId: null,
+                        receptionData: null,
+                        receptionDate: null,
+                        receivedBy: null,
+                        requiredAnalyses: null,
+                        analysisGroupIds: null,
+                        dryingStatus: null,
+                        preparationStatus: null,
+                        acceptedBy: null,
+                        acceptedAt: null,
+                        approvedBy: null,
+                        approvedAt: null,
+                        lastSubmissionId: null,
+                        lastSubmissionType: null,
+                        lastSubmissionAt: null,
+                        assignedLab: sample.assignedLab,
+                        history: JSON.stringify(sampleHistory)
+                    }
+                });
+
+                await tx.auditLog.create({
+                    data: {
+                        id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        entity: 'SAMPLE',
+                        entityId: String(sample.id),
+                        action: 'DRAFT_DISCARDED',
                         details: `Project sample ${sample.originalId} reverted to EXPECTED by reception.`,
                         performedBy: user.username,
                         timestamp: new Date(),
                         sampleId: String(sample.id)
                     }
                 });
+            });
+
             console.log(`[DISCARD] Reverted project sample ${sample.id} to EXPECTED`);
             return res.json({ success: true, message: `Sample ${sample.originalId} reverted to EXPECTED.` });
         } else {
-            // HARD DELETE walk-in — transactional (Finding #8)
-            // Archive audit evidence before deleting sample
-            await prisma.$transaction([
-                prisma.workItem.deleteMany({ where: { sampleId: String(sample.id) } }),
-                prisma.result.deleteMany({ where: { sampleId: String(sample.id) } }),
-                prisma.submission.deleteMany({ where: { sampleId: String(sample.id) } }),
-                prisma.spectralData.deleteMany({ where: { sampleId: String(sample.id) } }),
-                // Log the discard BEFORE deleting the sample (audit trail preserved)
-                prisma.auditLog.create({
+            // HARD DELETE walk-in — fully atomic transaction
+            await prisma.$transaction(async (tx) => {
+                await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
+                await tx.spectralData.deleteMany({ where: { sampleId: String(sample.id) } });
+
+                await tx.auditLog.create({
                     data: {
                         id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                         entity: 'SAMPLE',
@@ -934,9 +984,11 @@ exports.discardDraft = async (req, res) => {
                         performedBy: user.username,
                         timestamp: new Date()
                     }
-                }),
-                prisma.sample.delete({ where: { id: String(sample.id) } })
-            ]);
+                });
+
+                await tx.sample.delete({ where: { id: String(sample.id) } });
+            });
+
             console.log(`[DISCARD] Hard deleted walk-in sample ${sample.id}`);
             return res.json({ success: true, message: `Sample ${sample.originalId} deleted.` });
         }
@@ -1333,11 +1385,20 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         { id: { in: sampleOriginalIds } }
                     ]
                 },
-                select: { projectId: true, projectCode: true }
+                select: { id: true, originalId: true, projectId: true, projectCode: true }
             });
             for (const es of existingSamplesWithProj) {
                 if (es.projectId) projectRefs.add(String(es.projectId));
                 if (es.projectCode) projectRefs.add(String(es.projectCode));
+
+                const csgProj = csgInput.projectId || csgInput.projectCode;
+                const sampleProj = es.projectId || es.projectCode;
+                if (csgProj && sampleProj && String(csgProj) !== String(es.projectId) && String(csgProj) !== String(es.projectCode)) {
+                    return res.status(400).json({
+                        error: 'CROSS_PROJECT_CONFLICT',
+                        message: `Sample ${es.originalId || es.id} is already registered to project ${sampleProj}. Direct project reassignment via consignment intake is not permitted.`
+                    });
+                }
             }
         }
 
