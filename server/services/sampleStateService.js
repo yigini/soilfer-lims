@@ -22,7 +22,7 @@ class TransitionError extends Error {
  * @param {object} extraData - Additional sample fields to update atomically
  * @returns {Promise<object>} - Updated sample
  */
-async function transitionSample(sampleId, nextStatus, actor, reason = null, extraData = {}) {
+async function transitionSample(sampleId, nextStatus, actor, reason = null, extraData = {}, tx = null) {
     // 1. Validation of target status
     if (workflow.isLegacySampleState(nextStatus)) {
         throw new TransitionError(
@@ -44,9 +44,8 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
 
     const actorUsername = typeof actor === 'object' && actor ? (actor.username || actor.name || 'SYSTEM') : (actor || 'SYSTEM');
 
-    // 2. Atomic Transition Transaction
-    return await prisma.$transaction(async (tx) => {
-        const sample = await tx.sample.findUnique({
+    const executeTransition = async (client) => {
+        const sample = await client.sample.findUnique({
             where: { id: String(sampleId) }
         });
 
@@ -59,7 +58,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         // Same status is a no-op update for extraData
         if (currentStatus === nextStatus) {
             if (Object.keys(extraData).length > 0) {
-                return await tx.sample.update({
+                return await client.sample.update({
                     where: { id: String(sampleId) },
                     data: { ...extraData }
                 });
@@ -79,7 +78,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         }
 
         // Execute sample update
-        const updatedSample = await tx.sample.update({
+        const updatedSample = await client.sample.update({
             where: { id: String(sampleId) },
             data: {
                 status: nextStatus,
@@ -89,7 +88,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         });
 
         // Insert audit log
-        await tx.auditLog.create({
+        await client.auditLog.create({
             data: {
                 id: crypto.randomUUID(),
                 entity: 'SAMPLE',
@@ -104,7 +103,15 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         });
 
         return updatedSample;
-    });
+    };
+
+    if (tx) {
+        return await executeTransition(tx);
+    } else {
+        return await prisma.$transaction(async (innerTx) => {
+            return await executeTransition(innerTx);
+        });
+    }
 }
 
 module.exports = {

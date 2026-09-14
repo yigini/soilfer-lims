@@ -5,6 +5,8 @@ const idGenerator = require('../services/idGenerator');
 const { parseCoordinates } = require('../utils/coordParser');
 const adminBoundaries = require('../data/adminBoundaries.json');
 const crypto = require('crypto');
+const sampleOriginService = require('../services/sampleOriginService');
+const sampleStateService = require('../services/sampleStateService');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -224,6 +226,7 @@ exports.processIntake = async (req, res) => {
                 }
             }
 
+            const isWalkInDeskSample = !finalProjectId && isWalkIn;
             sample = await prisma.sample.create({
                 data: {
                     id: sampleId,
@@ -232,6 +235,7 @@ exports.processIntake = async (req, res) => {
                     projectCode: finalProjectId || null,
                     projectId: finalProjectId || null,
                     assignedLab: user.labId,
+                    metadata: JSON.stringify(isWalkInDeskSample ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN } : {}),
                     history: JSON.stringify([])
                 }
             });
@@ -375,6 +379,11 @@ exports.processIntake = async (req, res) => {
                 ? parseFloat(receivedMass)
                 : null;
 
+            // Authoritative origin resolution:
+            // Prevents client flags from downgrading project samples to walk-in,
+            // while preserving legitimate desk walk-in origin across repeated saves (I02, I03).
+            const originInfo = sampleOriginService.resolveOriginForSave(sample, isNewlyCreatedDeskSample, { isWalkIn, projectId });
+
             const updateData = {
                 status: targetDraftStatus,
                 history: JSON.stringify(history),
@@ -393,7 +402,8 @@ exports.processIntake = async (req, res) => {
                     analysisJustification: justification || null,
                     submitterDetails: submitterDetails || null,
                     samplingDetails: samplingDetails || null,
-                    isWalkIn: isNewlyCreatedDeskSample ? (isWalkIn || false) : false,
+                    isWalkIn: originInfo.isWalkIn,
+                    origin: originInfo.origin,
                     receivedMass: parsedMass,
                     moistureOnArrival,
                     foreignMaterial,
@@ -409,7 +419,7 @@ exports.processIntake = async (req, res) => {
             if (existingProjectId) {
                 updateData.projectId = sample.projectId || undefined;
                 updateData.projectCode = sample.projectCode || undefined;
-            } else if (isNewlyCreatedDeskSample && isWalkIn) {
+            } else if (originInfo.isWalkIn) {
                 updateData.projectCode = null;
                 updateData.projectId = null;
             } else if (projectId) {
@@ -848,9 +858,13 @@ exports.discardDraft = async (req, res) => {
             return res.status(404).json({ error: 'Sample not found.' });
         }
 
-        // Only DRAFT and RECEIVED can be discarded
-        if (!['DRAFT', 'RECEIVED', 'COLLECTED'].includes(sample.status)) {
-            return res.status(403).json({ error: `Cannot discard sample in status '${sample.status}'. Only DRAFT/RECEIVED samples can be discarded.` });
+        // Only initial intake stages can be discarded
+        const discardableStatuses = ['DRAFT', 'RECEIVED', 'COLLECTED', 'EXPECTED'];
+        if (!discardableStatuses.includes(sample.status)) {
+            return res.status(409).json({
+                error: 'ILLEGAL_STATUS_TRANSITION',
+                message: `Cannot discard sample in status '${sample.status}'. Only draft or unreceived samples can be discarded.`
+            });
         }
 
         // Lab scope check
@@ -858,66 +872,46 @@ exports.discardDraft = async (req, res) => {
             return res.status(403).json({ error: 'You can only discard samples from your own lab.' });
         }
 
-        // Determine if this is a pre-registered sample vs an ad-hoc walk-in draft created at reception desk
-        let isPreRegistered = false;
+        // Determine if this is a disposable desk walk-in draft vs pre-registered/project sample
+        const isDeskWalkIn = sampleOriginService.isDisposableDeskDraft(sample);
 
-        // 1. Inspect sample-level fieldMetadata / metadata for external intake provenance
-        let hasExternalProvenance = false;
-        if (sample.fieldMetadata) {
-            try {
-                const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
-                if (fm && (fm.kobo_submission_id || fm.site_id || fm.source === 'KOBO' || fm.source === 'MANIFEST' || fm.source === 'EXTERNAL')) {
-                    hasExternalProvenance = true;
-                }
-            } catch (e) {}
-        }
-        if (sample.metadata) {
-            try {
-                const m = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata;
-                if (m && (m.kobo_id || m.kobo_uuid || m.manifest || m.preRegistered || m.externalSource)) {
-                    hasExternalProvenance = true;
-                }
-            } catch (e) {}
-        }
-
-        // 2. Inspect receptionData to check if sample was created as an ad-hoc walk-in
-        let isWalkIn = false;
-        if (sample.receptionData) {
-            try {
-                const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
-                if (rd?.isWalkIn === true) {
-                    isWalkIn = true;
-                }
-            } catch (e) {}
-        }
-
-        // 3. Conservative provenance evaluation:
-        // A sample is pre-registered / project-persisted (and must REVERT, never hard-delete) if:
-        // - It is linked to any project (projectId or projectCode)
-        // - OR it has external intake provenance (Kobo, manifest, etc.)
-        // - Only an unattached sample with NO project and NO external provenance that is a walk-in may be deleted.
-        // - Ambiguous origin without project is conservatively reverted to EXPECTED.
-        if (sample.projectId || sample.projectCode) {
-            isPreRegistered = true;
-        } else if (hasExternalProvenance) {
-            isPreRegistered = true;
-        } else if (isWalkIn) {
-            isPreRegistered = false;
-        } else {
-            isPreRegistered = true; // Conservative fallback
-        }
-
-        if (isPreRegistered) {
-            // REVERT to EXPECTED — fully atomic transaction
+        if (!isDeskWalkIn) {
+            // REVERT to EXPECTED — fully atomic transaction with canonical workflow validation (I04)
             await prisma.$transaction(async (tx) => {
+                const current = await tx.sample.findUnique({ where: { id: String(sample.id) } });
+                if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+                if (!discardableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot discard sample in status '${current.status}'. Samples in progress or completed cannot be reset.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+
+                // Check for results or completed work
+                const resultCount = await tx.result.count({ where: { sampleId: String(sample.id) } });
+                if (resultCount > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+                }
+                const activeWork = await tx.workItem.findMany({
+                    where: {
+                        sampleId: String(sample.id),
+                        status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
+                    }
+                });
+                if (activeWork.length > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+                }
+
                 await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.spectralData.deleteMany({ where: { sampleId: String(sample.id) } });
 
-                const sampleHistory = typeof sample.history === 'string'
-                    ? JSON.parse(sample.history)
-                    : (sample.history || []);
+                const sampleHistory = typeof current.history === 'string'
+                    ? JSON.parse(current.history)
+                    : (current.history || []);
                 sampleHistory.push({
                     status: 'EXPECTED',
                     action: 'REVERT_TO_EXPECTED',
@@ -926,10 +920,13 @@ exports.discardDraft = async (req, res) => {
                     note: 'Draft/intake discarded by reception. Sample reverted to EXPECTED.'
                 });
 
-                await tx.sample.update({
-                    where: { id: String(sample.id) },
-                    data: {
-                        status: 'EXPECTED',
+                // Canonical transition inside transaction (enforces workflowContract graph and logs transition audit)
+                await sampleStateService.transitionSample(
+                    current.id,
+                    'EXPECTED',
+                    user,
+                    'Draft/intake discarded by reception. Sample reverted to EXPECTED.',
+                    {
                         labId: null,
                         receptionData: null,
                         receptionDate: null,
@@ -945,10 +942,11 @@ exports.discardDraft = async (req, res) => {
                         lastSubmissionId: null,
                         lastSubmissionType: null,
                         lastSubmissionAt: null,
-                        assignedLab: sample.assignedLab,
+                        assignedLab: current.assignedLab,
                         history: JSON.stringify(sampleHistory)
-                    }
-                });
+                    },
+                    tx
+                );
 
                 await tx.auditLog.create({
                     data: {
@@ -967,8 +965,24 @@ exports.discardDraft = async (req, res) => {
             console.log(`[DISCARD] Reverted project sample ${sample.id} to EXPECTED`);
             return res.json({ success: true, message: `Sample ${sample.originalId} reverted to EXPECTED.` });
         } else {
-            // HARD DELETE walk-in — fully atomic transaction
+            // HARD DELETE walk-in — fully atomic transaction with safety validation
             await prisma.$transaction(async (tx) => {
+                const current = await tx.sample.findUnique({ where: { id: String(sample.id) } });
+                if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+                if (!discardableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot delete walk-in sample in status '${current.status}'.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+
+                const resultCount = await tx.result.count({ where: { sampleId: String(sample.id) } });
+                if (resultCount > 0) {
+                    throw new sampleStateService.TransitionError('Cannot delete sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+                }
+
                 await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
@@ -993,6 +1007,12 @@ exports.discardDraft = async (req, res) => {
             return res.json({ success: true, message: `Sample ${sample.originalId} deleted.` });
         }
     } catch (error) {
+        if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
+            return res.status(error.statusCode || 409).json({
+                error: error.code || 'ILLEGAL_STATUS_TRANSITION',
+                message: error.message
+            });
+        }
         console.error('[discardDraft] ERROR:', error);
         res.status(500).json({ error: 'Failed to discard: ' + error.message });
     }
