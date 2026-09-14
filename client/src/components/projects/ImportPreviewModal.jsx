@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, Upload, CheckCircle2, AlertTriangle, AlertCircle, FileText, ArrowRight, RefreshCw } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertTriangle, AlertCircle, FileText, FileSpreadsheet, ArrowRight, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -48,41 +48,138 @@ export default function ImportPreviewModal({
         }
     }, [isOpen, project?.id, actorId]);
 
+    const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
+    const [parsedSheetData, setParsedSheetData] = useState(null);
+
     // Invalidate sensitive visible state on account switch or logout
     React.useEffect(() => {
         setRawInput('');
         setPreviewResult(null);
         setErrorMessage('');
         setUnresolvedOp(null);
+        setUploadedFileInfo(null);
+        setParsedSheetData(null);
     }, [actorId]);
 
     if (!isOpen || !project) return null;
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB limit
+    const MAX_BATCH_ROWS = 2000;
+
+    const LOCALIZED_SAMPLE_HEADERS = [
+        'sample id', 'sample_id', 'sampleid', 'sample code', 'sample_code', 'sample', 'id', 'identifier', 'code',
+        'identificador', 'identificador de muestra', 'id_muestra', 'id muestra', 'codigo', 'código', 'muestra', 'código de muestra',
+        'identifiant', 'id_echantillon', 'id echantillon', 'échantillon', 'echantillon', 'code echantillon', 'numéro d’échantillon',
+        'amostra', 'id_amostra', 'id amostra', 'código da amostra', 'codigo da amostra', 'identificador da amostra'
+    ];
+
+    const extractIdsFromColumn = (rows, colIdx, hasHeader) => {
+        const startRow = hasHeader ? 1 : 0;
+        const dataRows = rows.slice(startRow);
+
+        if (dataRows.length > MAX_BATCH_ROWS) {
+            setErrorMessage(t('projects.import.tooManyRows', `File contains ${dataRows.length} rows, which exceeds the maximum allowed batch size of ${MAX_BATCH_ROWS} samples.`));
+            return;
+        }
+
+        const ids = dataRows
+            .map(r => String(r[colIdx] ?? '').trim())
+            .filter(id => {
+                if (!id) return false;
+                if (hasHeader && LOCALIZED_SAMPLE_HEADERS.includes(id.toLowerCase())) return false;
+                return true;
+            });
+
+        setRawInput(ids.join('\n'));
+    };
 
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        if (file.size > MAX_FILE_SIZE) {
+            setErrorMessage(t('projects.import.fileTooLarge', `File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds maximum allowed limit of 5 MB.`));
+            e.target.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = (evt) => {
             try {
-                const bstr = evt.target.result;
-                const wb = XLSX.read(bstr, { type: 'binary' });
+                const data = new Uint8Array(evt.target.result);
+                // raw: false ensures cellText is preserved, maintaining leading zeros in identifiers (e.g. '000124')
+                const wb = XLSX.read(data, { type: 'array', raw: false, cellText: true });
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
 
-                const ids = data
-                    .map(row => String(row[0] || '').trim())
-                    .filter(id => id && id.toLowerCase() !== 'sample id' && id.toLowerCase() !== 'sample_id');
+                if (!rows || rows.length === 0) {
+                    setErrorMessage(t('projects.import.emptyFile', 'The selected spreadsheet file is empty.'));
+                    return;
+                }
 
-                setRawInput(ids.join('\n'));
+                const headerRow = rows[0] || [];
+                let detectedColIdx = 0;
+                let headerDetected = false;
+
+                // Check all columns for exact localized header match
+                for (let c = 0; c < headerRow.length; c++) {
+                    const headerText = String(headerRow[c] || '').trim().toLowerCase();
+                    if (LOCALIZED_SAMPLE_HEADERS.includes(headerText)) {
+                        detectedColIdx = c;
+                        headerDetected = true;
+                        break;
+                    }
+                }
+
+                // If not exact match, check fuzzy contains
+                if (!headerDetected && headerRow.length > 0) {
+                    for (let c = 0; c < headerRow.length; c++) {
+                        const headerText = String(headerRow[c] || '').trim().toLowerCase();
+                        if (LOCALIZED_SAMPLE_HEADERS.some(h => headerText.includes(h))) {
+                            detectedColIdx = c;
+                            headerDetected = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Compute column descriptors for dropdown
+                const columns = headerRow.map((colName, idx) => {
+                    const name = String(colName || '').trim();
+                    const letter = String.fromCharCode(65 + (idx % 26));
+                    return {
+                        index: idx,
+                        label: name ? `Column ${letter}: "${name}"` : `Column ${letter}`,
+                        headerText: name
+                    };
+                });
+
+                setParsedSheetData(rows);
+                setUploadedFileInfo({
+                    fileName: file.name,
+                    columns,
+                    selectedColIdx: detectedColIdx,
+                    hasHeader: headerDetected
+                });
+
+                extractIdsFromColumn(rows, detectedColIdx, headerDetected);
                 setPreviewResult(null);
                 setErrorMessage('');
             } catch (err) {
-                setErrorMessage('Failed to read spreadsheet file');
+                setErrorMessage(t('projects.import.readError', 'Failed to read spreadsheet file: ' + err.message));
             }
         };
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
+    };
+
+    const handleColumnChange = (newColIdx) => {
+        if (!parsedSheetData || !uploadedFileInfo) return;
+        const colIdx = parseInt(newColIdx, 10);
+        setUploadedFileInfo(prev => ({ ...prev, selectedColIdx: colIdx }));
+        extractIdsFromColumn(parsedSheetData, colIdx, uploadedFileInfo.hasHeader);
+        setPreviewResult(null);
+        setErrorMessage('');
     };
 
     const handleRunPreview = async () => {
@@ -318,6 +415,46 @@ export default function ImportPreviewModal({
                                 />
                             </label>
                         </div>
+
+                        {uploadedFileInfo && (
+                            <div className="p-3 rounded-xl border border-sf-border bg-sf-inset space-y-2">
+                                <div className="flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-2 font-medium text-sf-text">
+                                        <FileSpreadsheet className="w-4 h-4 text-sf-primary shrink-0" />
+                                        <span className="truncate max-w-[280px]">{uploadedFileInfo.fileName}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setUploadedFileInfo(null);
+                                            setParsedSheetData(null);
+                                            setRawInput('');
+                                        }}
+                                        className="text-[11px] text-sf-muted hover:text-red-600 transition-colors"
+                                    >
+                                        {t('common.clear', 'Clear file')}
+                                    </button>
+                                </div>
+                                {uploadedFileInfo.columns.length > 1 && (
+                                    <div className="flex items-center gap-2 text-xs pt-1 border-t border-sf-divider">
+                                        <label className="text-sf-muted whitespace-nowrap text-[11px]">
+                                            {t('projects.import.columnSelect', 'Sample ID column:')}
+                                        </label>
+                                        <select
+                                            value={uploadedFileInfo.selectedColIdx}
+                                            onChange={(e) => handleColumnChange(e.target.value)}
+                                            className="w-full text-xs rounded-lg border border-sf-border bg-sf-surface p-1 text-sf-text focus:ring-1 focus:ring-sf-primary focus:outline-none"
+                                        >
+                                            {uploadedFileInfo.columns.map(col => (
+                                                <option key={col.index} value={col.index}>
+                                                    {col.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         <textarea
                             value={rawInput}

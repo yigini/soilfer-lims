@@ -90,9 +90,15 @@ export default function LabsAndPeopleTab({
                                                 </span>
                                             </td>
                                             <td className="py-3 px-4">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300">
-                                                    {t('projects.team.activeStatus', 'Active')}
-                                                </span>
+                                                {lab.isActive !== false ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300">
+                                                        {t('projects.team.activeStatus', 'Active')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300">
+                                                        {t('projects.team.inactiveStatus', 'Inactive / Unavailable')}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="py-3 px-4 text-sf-muted">
                                                 {isOwner ? t('projects.team.projectCoordination', 'Project coordination') : t('projects.team.ownLabWork', 'Own-lab work')}

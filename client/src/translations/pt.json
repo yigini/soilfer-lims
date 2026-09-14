@@ -45,7 +45,9 @@
     "copied": "Copiado!",
     "done": "Concluído",
     "generating": "Gerando...",
-    "showingRange": "Exibindo {{from}} - {{to}} de {{total}}"
+    "showingRange": "Exibindo {{from}} - {{to}} de {{total}}",
+    "none": "Nenhum",
+    "inactive": "Inativo"
   },
   "login": {
     "title": "Entrar no SoilFER LIMS",
@@ -569,7 +571,36 @@
       "archiveReasonPlaceholder": "e.g. Sampling season concluded and all certificates released…",
       "confirmArchive": "Archive project",
       "deleteWarningTitle": "Move empty project to trash",
-      "deleteWarningDesc": "This action will soft-delete this draft project. It is permitted only because no samples were ever registered to it."
+      "deleteWarningDesc": "This action will soft-delete this draft project. It is permitted only because no samples were ever registered to it.",
+      "receiptNotFoundYet": "Nenhum comprovante concluído foi registrado no servidor para esta tentativa. Você pode tentar novamente ou descartar com segurança.",
+      "unresolvedConflictNotice": "Uma operação anterior ainda não foi confirmada. Recupere o resultado anterior ou clique em 'Descartar tentativa' antes de enviar novos valores.",
+      "labAccessReasonRequired": "Forneça uma justificativa para a modificação do acesso ao laboratório.",
+      "resolveWorkNotice": "Para remover este laboratório, reatribua ou conclua as análises de amostras pendentes na Bancada Técnica.",
+      "editSettingsTitle": "Configurações do projeto",
+      "labAccessTitle": "Gerenciar laboratórios de atendimento",
+      "unresolvedTitle": "Operação anterior não confirmada",
+      "unresolvedDesc": "Uma tentativa de operação anterior pode ter sido processada pelo servidor antes da interrupção da conexão.",
+      "recoverAttempt": "Recuperar tentativa anterior",
+      "discardAttempt": "Descartar tentativa",
+      "editSettingsBtn": "Editar configurações do projeto",
+      "editSettingsSub": "Modificar título, descrição ou status de ativação do projeto.",
+      "manageLabAccessBtn": "Gerenciar laboratórios de atendimento e acesso",
+      "manageLabAccessSub": "Autorizar instalações analíticas adicionais ou revisar atribuições ativas.",
+      "activateProjectLabel": "O projeto está ativo",
+      "activateProjectDesc": "Projetos ativos permitem o registro de amostras, entrada em lote e processamento analítico.",
+      "retrySaving": "Tentando salvar novamente…",
+      "retryTransition": "Tentando transição novamente…",
+      "retryArchive": "Tentando arquivar novamente…",
+      "coordinatingOwnerLabel": "Laboratório principal coordenador (Proprietário)",
+      "ownerImmutableNote": "O laboratório principal é o proprietário deste projeto e não pode ser removido.",
+      "removalBlockedTitle": "Não é possível remover laboratório com trabalho ativo",
+      "servicingLabsLabel": "Laboratórios de atendimento autorizados",
+      "servicingLabsDesc": "Selecione as instalações analíticas autorizadas a receber e processar amostras para este projeto.",
+      "noOtherLabs": "Nenhum outro laboratório ativo disponível no diretório.",
+      "reasonForChange": "Motivo da alteração de membros (obrigatório)",
+      "labAccessPlaceholder": "ex.: Atribuição de atendimento regional autorizada para a Fase 2…",
+      "retrySave": "Tentar salvar novamente",
+      "saveLabAccessBtn": "Salvar acesso ao laboratório"
     },
     "viewDetails": "Ver Detalhes",
     "viewSamples": "Ver Amostras",
@@ -786,7 +817,8 @@
       "membershipAllowsTitle": "What this membership allows",
       "membershipAllowsDesc": "Servicing staff can receive, prepare, measure, and review assigned samples for their laboratory. Project membership does not grant permission to edit user roles, approve unsubmitted results, or administer other laboratories.",
       "safeRemovalNotice": "Safe laboratory removal",
-      "safeRemovalDesc": "A laboratory cannot be removed while active samples or unreviewed results require an accountable facility."
+      "safeRemovalDesc": "A laboratory cannot be removed while active samples or unreviewed results require an accountable facility.",
+      "inactiveStatus": "Inativo / Indisponível"
     },
     "connections": {
       "manifestsTitle": "Expected sample manifests",
@@ -835,7 +867,15 @@
       "conflictWithProj": "Already in project {{proj}}",
       "validOutcome": "Ready as expected",
       "editRows": "← Edit rows",
-      "registerEligible": "Register {{count}} expected samples"
+      "registerEligible": "Register {{count}} expected samples",
+      "emptyFile": "A planilha enviada não contém linhas de dados.",
+      "readError": "Falha ao ler o arquivo de planilha: ",
+      "receiptNotFoundYet": "Nenhum comprovante concluído foi registrado no servidor para esta tentativa. Você pode tentar novamente ou descartar com segurança.",
+      "unresolvedConflictNotice": "Uma tentativa anterior de registro de manifesto ainda não foi confirmada. Recupere o resultado anterior ou clique em 'Descartar tentativa' antes de enviar novos valores.",
+      "unresolvedTitle": "Tentativa de registro anterior não confirmada",
+      "unresolvedDesc": "Uma tentativa anterior de registro de manifesto pode ter sido processada pelo servidor antes da interrupção da conexão.",
+      "columnSelect": "Coluna de ID da amostra:",
+      "retryRegistration": "Tentando registro novamente…"
     },
     "create": {
       "modalTitle": "Create new project",
@@ -851,7 +891,8 @@
       "predefinedManifest": "Predefined Manifest",
       "koboLinked": "KoboToolbox Linked",
       "targetCountLabel": "Expected sample count",
-      "createBtn": "Create project draft"
+      "createBtn": "Create project draft",
+      "descriptionLabel": "Descrição do projeto"
     },
     "guide": {
       "title": "Working with a project",

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings, RefreshCw } from 'lucide-react';
+import { X, AlertCircle, AlertTriangle, CheckCircle2, Pause, Play, Archive, Trash2, Settings, RefreshCw, Building2, Shield, Users, Lock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -23,7 +23,7 @@ export default function ProjectActionsModal({
     const actorId = user?.id || 'anonymous';
 
     const [submitting, setSubmitting] = useState(false);
-    const [actionType, setActionType] = useState(initialActionType); // 'menu' | 'edit' | 'pause' | 'archive' | 'delete'
+    const [actionType, setActionType] = useState(initialActionType); // 'menu' | 'edit' | 'pause' | 'archive' | 'delete' | 'lab-access'
     const [reason, setReason] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -36,6 +36,13 @@ export default function ProjectActionsModal({
     const [editBundle, setEditBundle] = useState(project?.defaultAnalysisBundle || '');
     const [editStatus, setEditStatus] = useState(project?.status || 'ACTIVE');
     const [catalogueGroups, setCatalogueGroups] = useState([]);
+
+    // Lab-access governance state
+    const [labAccessData, setLabAccessData] = useState(null);
+    const [allLabs, setAllLabs] = useState([]);
+    const [selectedServicingIds, setSelectedServicingIds] = useState([]);
+    const [labAccessReason, setLabAccessReason] = useState('');
+    const [blockerNotice, setBlockerNotice] = useState(null);
 
     const findActiveOp = () => {
         if (!project) return null;
@@ -59,6 +66,8 @@ export default function ProjectActionsModal({
             setEditStatus(project?.status || 'ACTIVE');
             setErrorMessage('');
             setReason('');
+            setLabAccessReason('');
+            setBlockerNotice(null);
         }
     }, [isOpen, initialActionType]);
 
@@ -70,6 +79,17 @@ export default function ProjectActionsModal({
             if (active && active.action === 'archive' && active.snapshot?.reason && !reason) {
                 setReason(active.snapshot.reason);
             }
+            if (active && active.action === 'pause' && active.snapshot?.reason && !reason) {
+                setReason(active.snapshot.reason);
+            }
+            if (active && active.action === 'lab-access') {
+                if (active.snapshot?.reason && !labAccessReason) {
+                    setLabAccessReason(active.snapshot.reason);
+                }
+                if (Array.isArray(active.snapshot?.servicingLabIds)) {
+                    setSelectedServicingIds(active.snapshot.servicingLabIds);
+                }
+            }
         } else if (!isOpen) {
             setUnresolvedOp(null);
         }
@@ -78,6 +98,8 @@ export default function ProjectActionsModal({
     // Reset sensitive form state when actor switches
     React.useEffect(() => {
         setReason('');
+        setLabAccessReason('');
+        setBlockerNotice(null);
         setErrorMessage('');
         setUnresolvedOp(null);
     }, [actorId]);
@@ -94,7 +116,28 @@ export default function ProjectActionsModal({
                     console.warn('[ProjectActionsModal] Failed to load analysis groups:', err.message);
                 });
         }
-    }, [isOpen, actionType]);
+
+        if (isOpen && (actionType === 'lab-access' || initialActionType === 'lab-access') && project) {
+            axios.get(`/api/projects/${project.id}/lab-access`)
+                .then(res => {
+                    setLabAccessData(res.data);
+                    setSelectedServicingIds(res.data?.servicingLabIds || []);
+                })
+                .catch(err => {
+                    console.warn('[ProjectActionsModal] Failed to load lab access:', err.message);
+                });
+
+            axios.get('/api/labs')
+                .then(res => {
+                    if (Array.isArray(res.data)) {
+                        setAllLabs(res.data);
+                    }
+                })
+                .catch(err => {
+                    console.warn('[ProjectActionsModal] Failed to load labs:', err.message);
+                });
+        }
+    }, [isOpen, actionType, initialActionType, project?.id]);
 
     if (!isOpen || !project) return null;
 
@@ -404,6 +447,110 @@ export default function ProjectActionsModal({
         }
     };
 
+    const handleToggleServicingLab = (labId) => {
+        setSelectedServicingIds(prev => {
+            if (prev.includes(labId)) {
+                return prev.filter(id => id !== labId);
+            } else {
+                return [...prev, labId];
+            }
+        });
+        setBlockerNotice(null);
+        setErrorMessage('');
+    };
+
+    const handleSaveLabAccess = async (e) => {
+        e?.preventDefault();
+        if (!project) return;
+        if (!labAccessReason.trim()) {
+            setErrorMessage(t('projects.actions.labAccessReasonRequired', 'Please provide an operational reason for changing laboratory access.'));
+            return;
+        }
+
+        const payload = {
+            servicingLabIds: selectedServicingIds,
+            reason: labAccessReason.trim()
+        };
+
+        if (unresolvedOp && unresolvedOp.action === 'lab-access' && JSON.stringify(unresolvedOp.snapshot) !== JSON.stringify(payload)) {
+            setErrorMessage(t('projects.actions.unresolvedConflictNotice', 'A previous request is still unconfirmed. Recover the previous outcome or click "Discard previous attempt" before submitting new values.'));
+            return;
+        }
+
+        setSubmitting(true);
+        setErrorMessage('');
+        setBlockerNotice(null);
+
+        const idempotencyKey = unresolvedOp
+            ? unresolvedOp.idempotencyKey
+            : (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : (`proj-lab-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`));
+
+        const expectedRevision = unresolvedOp?.expectedRevision !== undefined
+            ? unresolvedOp.expectedRevision
+            : (project.updatedAt ? String(new Date(project.updatedAt).getTime()) : null);
+
+        const commandRecord = {
+            idempotencyKey,
+            action: 'lab-access',
+            projectId: project.id,
+            snapshot: JSON.parse(JSON.stringify(payload)),
+            expectedRevision,
+            status: 'uncertain'
+        };
+        setPendingOperation(actorId, project.id, 'lab-access', commandRecord);
+        setUnresolvedOp(commandRecord);
+
+        try {
+            if (unresolvedOp) {
+                try {
+                    const receiptRes = await axios.get(`/api/projects/${project.id}/operations/${idempotencyKey}`);
+                    if (receiptRes.data?.receipt?.outcome) {
+                        deletePendingOperation(actorId, project.id, 'lab-access');
+                        setUnresolvedOp(null);
+                        onSuccess?.('LAB_ACCESS_UPDATED');
+                        onClose();
+                        return;
+                    }
+                } catch (receiptErr) {
+                    // Proceed with PATCH
+                }
+            }
+
+            const headers = {
+                'x-idempotency-key': idempotencyKey
+            };
+            if (commandRecord.expectedRevision) {
+                headers['if-match'] = commandRecord.expectedRevision;
+            }
+
+            await axios.patch(`/api/projects/${project.id}/lab-access`, { ...payload, idempotencyKey }, { headers });
+            deletePendingOperation(actorId, project.id, 'lab-access');
+            setUnresolvedOp(null);
+            onSuccess?.('LAB_ACCESS_UPDATED');
+            onClose();
+        } catch (err) {
+            const status = err.response?.status;
+            const errCode = err.response?.data?.code || err.response?.data?.error;
+            const errMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to update laboratory access';
+
+            if (errCode === 'CANNOT_REMOVE_LAB_WITH_ACTIVE_WORK') {
+                setBlockerNotice({
+                    message: errMsg,
+                    detail: t('projects.actions.resolveWorkNotice', 'Outstanding samples or analytical work items exist at the removed laboratory. Transfer or complete active work in the Samples or Tech Workbench tabs before removing access.')
+                });
+            }
+            if (status === 409 && (errCode === 'STALE_REVISION' || errCode === 'PREVIEW_STALE_REVISION')) {
+                deletePendingOperation(actorId, project.id, 'lab-access');
+                setUnresolvedOp(null);
+            }
+            setErrorMessage(errMsg);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
             <div className="bg-sf-surface border border-sf-divider rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-auto">
@@ -412,6 +559,7 @@ export default function ProjectActionsModal({
                     <h2 className="text-lg font-bold text-sf-text">
                         {actionType === 'menu' && t('projects.actions.modalTitle', 'Project governance actions')}
                         {actionType === 'edit' && t('projects.actions.editSettingsTitle', 'Edit project settings & plan')}
+                        {actionType === 'lab-access' && t('projects.actions.labAccessTitle', 'Servicing laboratories & access')}
                         {actionType === 'pause' && (isPaused ? t('projects.actions.resumeTitle', 'Resume new admissions') : t('projects.actions.pauseTitle', 'Pause new admissions'))}
                         {actionType === 'archive' && t('projects.actions.archiveTitle', 'Review archival readiness')}
                         {actionType === 'delete' && t('projects.actions.deleteTitle', 'Delete empty project')}
@@ -494,6 +642,26 @@ export default function ProjectActionsModal({
                                     </div>
                                     <div className="text-[11px] text-sf-muted mt-0.5">
                                         {t('projects.actions.editSettingsSub', 'Update metadata, client organization, deadlines, and default analysis package from the catalogue.')}
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Option: Manage Servicing Laboratories & Access */}
+                            <button
+                                onClick={() => {
+                                    setActionType('lab-access');
+                                    const active = findActiveOp();
+                                    setLabAccessReason(active?.action === 'lab-access' ? active.snapshot?.reason || '' : '');
+                                }}
+                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                            >
+                                <Building2 className="w-5 h-5 text-sf-primary mt-0.5" />
+                                <div>
+                                    <div className="font-bold text-xs text-sf-text">
+                                        {t('projects.actions.manageLabAccessBtn', 'Manage servicing laboratories & access')}
+                                    </div>
+                                    <div className="text-[11px] text-sf-muted mt-0.5">
+                                        {t('projects.actions.manageLabAccessSub', 'Configure authorized partner laboratories, review active work blockers, and update servicing scope.')}
                                     </div>
                                 </div>
                             </button>
@@ -843,6 +1011,122 @@ export default function ProjectActionsModal({
                             </button>
                         </div>
                     </div>
+                )}
+
+                {/* Subview: Servicing Laboratories & Access */}
+                {actionType === 'lab-access' && (
+                    <form onSubmit={handleSaveLabAccess} className="space-y-4 pt-1">
+                        <div className="p-3.5 rounded-xl bg-sf-inset border border-sf-divider text-xs space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sf-muted font-medium">{t('projects.actions.coordinatingOwnerLabel', 'Primary Coordinating Owner:')}</span>
+                                <span className="inline-flex items-center gap-1 font-bold text-sf-primary bg-sf-primary/10 px-2 py-0.5 rounded-md border border-sf-primary/20">
+                                    <Shield className="w-3.5 h-3.5" />
+                                    {project.labId || labAccessData?.ownerLabId || t('common.none', 'None')}
+                                </span>
+                            </div>
+                            <p className="text-[11px] text-sf-muted">
+                                {t('projects.actions.ownerImmutableNote', 'The primary owner laboratory is established at project creation and cannot be removed through servicing management.')}
+                            </p>
+                        </div>
+
+                        {/* Blocker Alert if removal blocked */}
+                        {blockerNotice && (
+                            <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <strong className="font-bold block">{t('projects.actions.removalBlockedTitle', 'Cannot remove laboratory with active work')}</strong>
+                                        <p className="mt-0.5 text-[11px]">{blockerNotice.message}</p>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] opacity-90 pl-7">{blockerNotice.detail}</p>
+                            </div>
+                        )}
+
+                        {/* Servicing Labs Selection */}
+                        <div className="space-y-2">
+                            <label className="block text-xs font-semibold text-sf-text">
+                                {t('projects.actions.servicingLabsLabel', 'Authorized servicing laboratories')}
+                            </label>
+                            <p className="text-[11px] text-sf-muted">
+                                {t('projects.actions.servicingLabsDesc', 'Select analytical facilities authorized to receive and process samples for this project.')}
+                            </p>
+
+                            <div className="max-h-52 overflow-y-auto space-y-1.5 p-2 rounded-xl border border-sf-border bg-sf-inset">
+                                {allLabs
+                                    .filter(l => l.id !== (project.labId || labAccessData?.ownerLabId))
+                                    .map(lab => {
+                                        const isSelected = selectedServicingIds.includes(lab.id);
+                                        const isInactive = lab.isActive === false;
+                                        return (
+                                            <label
+                                                key={lab.id}
+                                                className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors cursor-pointer ${
+                                                    isSelected
+                                                        ? 'bg-sf-surface border-sf-primary/40 shadow-xs'
+                                                        : 'bg-sf-surface/50 border-sf-divider hover:bg-sf-surface'
+                                                } ${isInactive ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        disabled={isInactive || submitting}
+                                                        onChange={() => !isInactive && handleToggleServicingLab(lab.id)}
+                                                        className="rounded border-sf-border text-sf-primary focus:ring-sf-primary"
+                                                    />
+                                                    <div>
+                                                        <div className="font-bold text-xs text-sf-text">{lab.name || lab.code || lab.id}</div>
+                                                        <div className="text-[11px] text-sf-muted font-mono">{lab.code || lab.id} · {lab.country || '—'}</div>
+                                                    </div>
+                                                </div>
+                                                {isInactive && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-semibold">
+                                                        {t('common.inactive', 'Inactive')}
+                                                    </span>
+                                                )}
+                                            </label>
+                                        );
+                                    })}
+                                {allLabs.filter(l => l.id !== (project.labId || labAccessData?.ownerLabId)).length === 0 && (
+                                    <div className="p-4 text-center text-xs text-sf-muted">
+                                        {t('projects.actions.noOtherLabs', 'No other active laboratories available in directory.')}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Reason field (required for audit) */}
+                        <div>
+                            <label className="block text-xs font-semibold text-sf-text mb-1">
+                                {t('projects.actions.reasonForChange', 'Reason for membership change (required)')}
+                            </label>
+                            <textarea
+                                value={labAccessReason}
+                                onChange={(e) => setLabAccessReason(e.target.value)}
+                                placeholder={t('projects.actions.labAccessPlaceholder', 'e.g. Authorized regional servicing assignment for Phase 2 intake…')}
+                                rows={3}
+                                className="w-full text-xs rounded-xl border border-sf-border bg-sf-inset p-3 text-sf-text placeholder:text-sf-muted focus:ring-2 focus:ring-sf-primary focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setActionType('menu')}
+                                className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-sf-border text-sf-muted hover:bg-sf-hover"
+                            >
+                                {t('common.back', 'Back')}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={submitting || !labAccessReason.trim()}
+                                className="btn-primary text-xs flex items-center gap-1.5"
+                            >
+                                {submitting ? t('common.loading', 'Saving…') : (unresolvedOp?.action === 'lab-access' ? t('projects.actions.retrySave', 'Retry save') : t('projects.actions.saveLabAccessBtn', 'Save laboratory access'))}
+                            </button>
+                        </div>
+                    </form>
                 )}
             </div>
         </div>

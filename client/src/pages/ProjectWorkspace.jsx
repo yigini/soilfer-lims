@@ -351,7 +351,7 @@ export default function ProjectWorkspace() {
                         labAccess={labAccess}
                         capabilities={capabilities}
                         userRole={user?.role}
-                        onOpenManageLabs={() => navigate(`/admin/labs?projectCode=${encodeURIComponent(project?.code)}`)}
+                        onOpenManageLabs={() => handleOpenActionsModal('lab-access')}
                     />
                 )}
 

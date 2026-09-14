@@ -45,7 +45,9 @@
     "copied": "Copied!",
     "done": "Done",
     "generating": "Generating...",
-    "showingRange": "Showing {{from}} - {{to}} of {{total}}"
+    "showingRange": "Showing {{from}} - {{to}} of {{total}}",
+    "none": "None",
+    "inactive": "Inactive"
   },
   "login": {
     "title": "Sign in to SoilFER LIMS",
@@ -569,7 +571,36 @@
       "archiveReasonPlaceholder": "e.g. Sampling season concluded and all certificates released…",
       "confirmArchive": "Archive project",
       "deleteWarningTitle": "Move empty project to trash",
-      "deleteWarningDesc": "This action will soft-delete this draft project. It is permitted only because no samples were ever registered to it."
+      "deleteWarningDesc": "This action will soft-delete this draft project. It is permitted only because no samples were ever registered to it.",
+      "receiptNotFoundYet": "No completed receipt recorded on server for this attempt. You may safely retry or discard.",
+      "unresolvedConflictNotice": "A previous operation is still unconfirmed. Recover the previous outcome or click 'Discard attempt' before submitting new values.",
+      "labAccessReasonRequired": "Please provide a reason for the laboratory access modification.",
+      "resolveWorkNotice": "To remove this laboratory, reassign or complete pending sample analyses in the Tech Workbench.",
+      "editSettingsTitle": "Project Settings",
+      "labAccessTitle": "Manage Servicing Laboratories",
+      "unresolvedTitle": "Unconfirmed previous operation",
+      "unresolvedDesc": "A previous operation attempt may have been processed by the server before the connection was interrupted.",
+      "recoverAttempt": "Recover previous attempt",
+      "discardAttempt": "Discard attempt",
+      "editSettingsBtn": "Edit project settings",
+      "editSettingsSub": "Modify project title, description, or activation status.",
+      "manageLabAccessBtn": "Manage servicing laboratories & access",
+      "manageLabAccessSub": "Authorize additional analytical facilities or review active assignments.",
+      "activateProjectLabel": "Project is Active",
+      "activateProjectDesc": "Active projects allow sample registration, batch intake, and analytical processing.",
+      "retrySaving": "Retrying save…",
+      "retryTransition": "Retrying transition…",
+      "retryArchive": "Retrying archive…",
+      "coordinatingOwnerLabel": "Coordinating Primary Laboratory (Owner)",
+      "ownerImmutableNote": "The primary laboratory owns this project and cannot be removed.",
+      "removalBlockedTitle": "Cannot remove laboratory with active work",
+      "servicingLabsLabel": "Authorized servicing laboratories",
+      "servicingLabsDesc": "Select analytical facilities authorized to receive and process samples for this project.",
+      "noOtherLabs": "No other active laboratories available in directory.",
+      "reasonForChange": "Reason for membership change (required)",
+      "labAccessPlaceholder": "e.g. Authorized regional servicing assignment for Phase 2 intake…",
+      "retrySave": "Retry save",
+      "saveLabAccessBtn": "Save laboratory access"
     },
     "viewDetails": "View Details",
     "viewSamples": "View Samples",
@@ -786,7 +817,8 @@
       "membershipAllowsTitle": "What this membership allows",
       "membershipAllowsDesc": "Servicing staff can receive, prepare, measure, and review assigned samples for their laboratory. Project membership does not grant permission to edit user roles, approve unsubmitted results, or administer other laboratories.",
       "safeRemovalNotice": "Safe laboratory removal",
-      "safeRemovalDesc": "A laboratory cannot be removed while active samples or unreviewed results require an accountable facility."
+      "safeRemovalDesc": "A laboratory cannot be removed while active samples or unreviewed results require an accountable facility.",
+      "inactiveStatus": "Inactive / Unavailable"
     },
     "connections": {
       "manifestsTitle": "Expected sample manifests",
@@ -835,7 +867,15 @@
       "conflictWithProj": "Already in project {{proj}}",
       "validOutcome": "Ready as expected",
       "editRows": "← Edit rows",
-      "registerEligible": "Register {{count}} expected samples"
+      "registerEligible": "Register {{count}} expected samples",
+      "emptyFile": "The uploaded spreadsheet contains no data rows.",
+      "readError": "Failed to read spreadsheet file: ",
+      "receiptNotFoundYet": "No completed receipt recorded on server for this attempt. You may safely retry or discard.",
+      "unresolvedConflictNotice": "A previous manifest registration attempt is still unconfirmed. Recover the previous outcome or click 'Discard attempt' before submitting new values.",
+      "unresolvedTitle": "Unconfirmed previous registration attempt",
+      "unresolvedDesc": "A previous manifest registration attempt may have been processed by the server before the connection was interrupted.",
+      "columnSelect": "Sample ID column:",
+      "retryRegistration": "Retrying registration…"
     },
     "create": {
       "modalTitle": "Create new project",
@@ -851,7 +891,8 @@
       "predefinedManifest": "Predefined Manifest",
       "koboLinked": "KoboToolbox Linked",
       "targetCountLabel": "Expected sample count",
-      "createBtn": "Create project draft"
+      "createBtn": "Create project draft",
+      "descriptionLabel": "Project description"
     },
     "guide": {
       "title": "Working with a project",
