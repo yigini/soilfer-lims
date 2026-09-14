@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function PracticePreparation({ checks, onUpdate, onMarkDone, t }) {
-    const [verified, setVerified] = useState(false);
-
+export default function PracticePreparation({ checks = [false, false, false], prepVerified = false, onUpdate, onMarkDone, t }) {
     const labels = [
         t('practice.prep.check0', 'Match the sample label to its intake record.'),
         t('practice.prep.check1', 'Verify the applicable drying and preparation records.'),
@@ -13,11 +11,11 @@ export default function PracticePreparation({ checks, onUpdate, onMarkDone, t })
         const next = [...checks];
         next[index] = !next[index];
         onUpdate('checks', next);
-        setVerified(false);
+        onUpdate('prepVerified', false);
     };
 
     const handleVerify = () => {
-        setVerified(true);
+        onUpdate('prepVerified', true);
         onMarkDone();
     };
 
@@ -51,7 +49,7 @@ export default function PracticePreparation({ checks, onUpdate, onMarkDone, t })
                 {t('practice.prep.button', 'Verify practice checklist')}
             </button>
             <div id="prepStatus" className="status" role="status">
-                {verified
+                {prepVerified
                     ? t('practice.prep.verifiedStatus', 'Practice checklist verified. No actual preparation record was changed.')
                     : t('practice.prep.countSelected', '{count} of 3 checks selected.').replace('{count}', String(checkedCount))}
             </div>

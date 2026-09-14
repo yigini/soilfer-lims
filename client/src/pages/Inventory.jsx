@@ -582,7 +582,7 @@ const Inventory = () => {
     };
 
     return (
-        <div className="flex flex-col h-full gap-4 pb-4">
+        <div className="flex flex-col h-full gap-4 pb-4" data-tour="inventory-container">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>

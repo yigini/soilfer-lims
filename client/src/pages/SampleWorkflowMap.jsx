@@ -175,7 +175,7 @@ export default function SampleWorkflowMap() {
     const selectedId = selectedItem?.id || selectedItem?.workItemId;
 
     return (
-        <div className="sf-concept" id="soilfer-workflow-redesign">
+        <div className="sf-concept" id="soilfer-workflow-redesign" data-tour="workflow-map-container">
             {/* Header / Summary / View Switcher */}
             <WorkflowHeader
                 sample={sample}

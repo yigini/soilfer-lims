@@ -1,0 +1,41 @@
+{
+  "time": "2026-09-14T10:48:44.011Z",
+  "scope": "Existing built client snapshot; isolated browser; mocked APIs; blocked external network; no database or production writes",
+  "assets": [
+    "/assets/TutorialShell-BYrzxXl2.css",
+    "/assets/TutorialShell-Cg5UzekW.js"
+  ],
+  "indexSha256": "15f94a22bbac3e7c29403f5e81eab01b32b676fb9d428807dc5c290614d581dd",
+  "checks": {
+    "server500CachedVerification": {
+      "meRequests": 2,
+      "beforeRelease": {
+        "title": "Start with the right role.",
+        "cachedNameVisible": false
+      },
+      "beforeGo": "/login?tutorialmode=true&lang=en",
+      "afterGo": "/login?tutorialmode=true",
+      "cachedNameVisible": false,
+      "interpretation": "Identity chapter resolves / only when hook isAuthenticated is true; /login when false. A 500 response must stay unavailable."
+    },
+    "runtimeMustChangePassword": {
+      "meRequests": 3,
+      "overlayBefore": 1,
+      "overlayAfter": 0,
+      "ordinaryPasswordInputs": 1,
+      "serverValidatedFlag": true,
+      "errors": []
+    },
+    "exitThenRefresh": {
+      "afterExit": {
+        "url": "/login?lang=en&keep=example#section",
+        "overlays": 0,
+        "storedGuide": null
+      },
+      "afterRefresh": {
+        "url": "/login?lang=en&keep=example#section",
+        "overlays": 0
+      }
+    }
+  }
+}

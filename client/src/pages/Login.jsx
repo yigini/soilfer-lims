@@ -209,7 +209,7 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleLogin} className="space-y-6" data-tour="login-form">
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-sf-text ml-1" htmlFor="username">
                                 {t('login.username') || 'Username or ID'}

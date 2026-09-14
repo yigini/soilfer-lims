@@ -61,7 +61,17 @@
     "roleLabTechnician": "Laboratory technician",
     "roleLabManager": "Laboratory manager",
     "roleProjectCoordinator": "Project coordinator",
-    "roleViewerAuditor": "Viewer / auditor"
+    "roleViewerAuditor": "Viewer / auditor",
+    "roleTrack": "Role track",
+    "beforeYouBegin": "Before you begin testing",
+    "targetHighlighted": "✓ Target element highlighted on this page",
+    "duplicateAnchor": "Multiple matching elements found. Guidance remains docked.",
+    "goToPage": "Go to page →",
+    "permissionDenied": "This route requires {role} permissions. Please sign in with an authorized account.",
+    "unsavedDraftWarning": "You may have unsaved work on this page. Continue to next guide destination?",
+    "sampleRequiredNotice": "Select a sample from the laboratory list to view its workflow map. Docked guidance remains active.",
+    "cancel": "Cancel",
+    "discardAndProceed": "Discard & Proceed"
   },
   "roles": {
     "visitor": "Visitor",
@@ -235,6 +245,41 @@
       "copy": "You have seen how the work fits together. Next, use the account and designated test samples agreed with the facilitator.",
       "why": "A tutorial is an introduction, not a competency certificate or proof that every application workflow has passed acceptance.",
       "next": "Return to the beginning ↺"
+    },
+    "receipt": {
+      "name": "Physical receipt",
+      "title": "Record arrival when the container is here.",
+      "copy": "Check mass, container integrity and chain of custody. Practice confirming arrival before work begins.",
+      "why": "Expected samples are not laboratory work until physically intaken and verified.",
+      "next": "Proceed to assignment →"
+    },
+    "assignment": {
+      "name": "Assignment",
+      "title": "Ordered work needs technician readiness.",
+      "copy": "Check method assignment and preparation dependencies. Work cannot begin without assignment.",
+      "why": "Assigning work ensures the correct method revision, technician capability and instrument readiness.",
+      "next": "Check equipment readiness →"
+    },
+    "equipment": {
+      "name": "Equipment",
+      "title": "Check the instrument before you use it.",
+      "copy": "Inspect status, readiness and calibration. Choose a calibrated instrument for testing.",
+      "why": "Instruments must be in service and within calibration before analytical measurements.",
+      "next": "Check inventory materials →"
+    },
+    "inventory": {
+      "name": "Inventory",
+      "title": "Use the right material and lot.",
+      "copy": "Inspect quantity, expiry dates and lot numbers. Viewing stock does not consume it.",
+      "why": "Chemicals and standards must be unexpired and verified for the specific analysis batch.",
+      "next": "Proceed to sample preparation →"
+    },
+    "reports": {
+      "name": "Reports",
+      "title": "A released result has version and history.",
+      "copy": "Inspect released results, methods, revisions and sign-off signatures.",
+      "why": "Official reports connect approved determinations to author, reviewer and laboratory accreditation.",
+      "next": "Complete your visit →"
     }
   },
   "practice": {

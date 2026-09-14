@@ -409,7 +409,7 @@ const SpectralLibrary = () => {
     );
 
     return (
-        <div className="p-6 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+        <div className="p-6 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800" data-tour="spectral-library-container">
             {/* Premium Header */}
             <div className="mb-8">
                 <div className="flex justify-between items-start">

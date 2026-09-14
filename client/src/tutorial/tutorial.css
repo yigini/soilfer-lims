@@ -62,8 +62,31 @@
     bottom: 10px !important;
     width: auto !important;
     max-width: calc(100vw - 20px) !important;
+    max-height: 85vh !important;
+  }
+
+  /* Keep coach-top visibly reachable at all times on mobile */
+  #soilfer-tutorial-overlay .coach-top {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 10px 14px !important;
+  }
+
+  #soilfer-tutorial-overlay .coach-top .row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    font-size: 11px !important;
+  }
+
+  #soilfer-tutorial-overlay .coach-foot .row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
 }
+
 
 /* Target element highlight on real pages */
 .sf-tutorial-target-highlight {

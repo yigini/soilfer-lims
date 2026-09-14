@@ -1,28 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function PracticeIntake({ sample, mass, condition, onUpdate, onMarkDone, t }) {
-    const [status, setStatus] = useState({
-        text: t('practice.intake.initialStatus', 'Match the label and enter a positive mass.'),
-        isError: false
-    });
-
+export default function PracticeIntake({ sample, mass = '', condition = 'intact', intakeStatusCode = 'initial', onUpdate, onMarkDone, t }) {
     const handleCheck = () => {
         const m = Number(String(mass).replace(',', '.'));
         const ok = String(mass).trim() !== '' && Number.isFinite(m) && m > 0 && condition === 'intact';
 
         if (ok) {
-            setStatus({
-                text: t('practice.intake.success', 'Practice checked: the container matches and a positive mass is recorded in this exercise.'),
-                isError: false
-            });
+            onUpdate('intakeStatusCode', 'success');
             onMarkDone();
         } else {
-            setStatus({
-                text: t('practice.intake.error', 'Check the container identity and enter a positive mass. A mismatch needs resolution.'),
-                isError: true
-            });
+            onUpdate('intakeStatusCode', 'error');
         }
     };
+
+    const handleMassChange = (val) => {
+        onUpdate('intakeMass', val);
+        onUpdate('intakeStatusCode', 'initial');
+    };
+
+    const handleConditionChange = (val) => {
+        onUpdate('condition', val);
+        onUpdate('intakeStatusCode', 'initial');
+    };
+
+    let statusText = t('practice.intake.initialStatus', 'Match the label and enter a positive mass.');
+    let isError = false;
+    if (intakeStatusCode === 'success') {
+        statusText = t('practice.intake.success', 'Practice checked: the container matches and a positive mass is recorded in this exercise.');
+    } else if (intakeStatusCode === 'error') {
+        statusText = t('practice.intake.error', 'Check the container identity and enter a positive mass. A mismatch needs resolution.');
+        isError = true;
+    }
 
     return (
         <div className="panel focus">
@@ -37,7 +45,7 @@ export default function PracticeIntake({ sample, mass, condition, onUpdate, onMa
                         id="mass"
                         inputMode="decimal"
                         value={mass}
-                        onChange={(e) => onUpdate('intakeMass', e.target.value)}
+                        onChange={(e) => handleMassChange(e.target.value)}
                         placeholder="e.g. 485.2"
                     />
                 </label>
@@ -46,7 +54,7 @@ export default function PracticeIntake({ sample, mass, condition, onUpdate, onMa
                     <select
                         id="condition"
                         value={condition}
-                        onChange={(e) => onUpdate('condition', e.target.value)}
+                        onChange={(e) => handleConditionChange(e.target.value)}
                     >
                         <option value="intact">{t('practice.intake.condIntact', 'Container intact')}</option>
                         <option value="mismatch">{t('practice.intake.condMismatch', 'Label does not match')}</option>
@@ -65,9 +73,9 @@ export default function PracticeIntake({ sample, mass, condition, onUpdate, onMa
             <div
                 id="intakeStatus"
                 role="status"
-                className={`status ${status.isError ? 'error' : ''}`}
+                className={`status ${isError ? 'error' : ''}`}
             >
-                {status.text}
+                {statusText}
             </div>
         </div>
     );

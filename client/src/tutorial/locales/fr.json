@@ -37,7 +37,7 @@
     "signedInAs": "Connecté en tant que",
     "notSignedIn": "Visiteur (Non connecté)",
     "practiceBadge": "Pratique uniquement · aucune écriture dans LIMS",
-    "missingAnchor": "Élément non visible sur cette page. Le guide reste actif.",
+    "missingAnchor": "Élément cible absent de cette vue. Le guide reste actif.",
     "capsFollowSample": "Suivre l'échantillon",
     "capsGuidedVisit": "Une visite guidée du laboratoire",
     "tableSampleId": "ID échantillon",
@@ -61,7 +61,17 @@
     "roleLabTechnician": "Technicien de laboratoire",
     "roleLabManager": "Responsable de laboratoire",
     "roleProjectCoordinator": "Coordinateur de projet",
-    "roleViewerAuditor": "Observateur / auditeur"
+    "roleViewerAuditor": "Observateur / auditeur",
+    "roleTrack": "Parcours par rôle",
+    "beforeYouBegin": "Avant de commencer les essais",
+    "targetHighlighted": "✓ Élément cible mis en surbrillance sur cette page",
+    "duplicateAnchor": "Plusieurs éléments correspondants trouvés. Le guide reste ancré.",
+    "goToPage": "Aller à la page →",
+    "permissionDenied": "Cet itinéraire nécessite les autorisations de {role}. Veuillez vous connecter avec un compte autorisé.",
+    "unsavedDraftWarning": "Vous avez peut-être des données non enregistrées sur cette page. Continuer vers la destination suivante du guide ?",
+    "sampleRequiredNotice": "Sélectionnez un échantillon dans la liste du laboratoire pour afficher sa carte des flux. Le guide ancré reste actif.",
+    "cancel": "Annuler",
+    "discardAndProceed": "Ignorer et continuer"
   },
   "roles": {
     "visitor": "Visiteur",
@@ -235,6 +245,41 @@
       "copy": "Vous avez découvert comment le travail s'articule. Utilisez maintenant votre compte et les échantillons d'essai désignés par votre formateur.",
       "why": "Un tutoriel est une découverte, pas un certificat de qualification ni la preuve que chaque flux a satisfait à ses critères d'acceptation.",
       "next": "Revenir au début ↺"
+    },
+    "receipt": {
+      "name": "Réception physique",
+      "title": "Enregistrez l'arrivée lorsque le conteneur est présent.",
+      "copy": "Vérifiez la masse, l'intégrité du récipient et la chaîne de contrôle.",
+      "why": "Les échantillons attendus ne constituent pas un travail de laboratoire avant d'être physiquement reçus et vérifiés.",
+      "next": "Passer à l'affectation →"
+    },
+    "assignment": {
+      "name": "Affectation",
+      "title": "Le travail commandé nécessite des techniciens prêts.",
+      "copy": "Vérifiez l'affectation de la méthode et les dépendances de préparation.",
+      "why": "L'affectation garantit la bonne révision de la méthode et la disponibilité des instruments.",
+      "next": "Vérifier les équipements →"
+    },
+    "equipment": {
+      "name": "Équipements",
+      "title": "Vérifiez l'instrument avant de l'utiliser.",
+      "copy": "Inspectez l'état, la disponibilité et l'étalonnage. Choisissez un instrument étalonné.",
+      "why": "Les instruments doivent être en service et étalonnés avant les mesures analytiques.",
+      "next": "Vérifier les réactifs et consommables →"
+    },
+    "inventory": {
+      "name": "Inventaire",
+      "title": "Utilisez le bon matériel et le bon lot.",
+      "copy": "Inspectez la quantité, les dates d'expiration et les numéros de lot. Consulter le stock ne le consomme pas.",
+      "why": "Les réactifs et étalons doivent être valides et vérifiés pour la série d'analyses.",
+      "next": "Passer à la préparation →"
+    },
+    "reports": {
+      "name": "Rapports",
+      "title": "Un résultat validé a une version et un historique.",
+      "copy": "Inspectez les résultats validés, les méthodes, les révisions et les signatures d'approbation.",
+      "why": "Les rapports officiels associent les déterminations approuvées à l'auteur, au vérificateur et à l'accréditation.",
+      "next": "Terminer votre visite →"
     }
   },
   "practice": {

@@ -157,7 +157,7 @@ const ResultReports = () => {
     // ─── RENDER ──────────────────────────────────────────
 
     return (
-        <div className="p-6 lg:p-8 h-full bg-sf-canvas overflow-y-auto">
+        <div className="p-6 lg:p-8 h-full bg-sf-canvas overflow-y-auto" data-tour="result-reports-container">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-black text-sf-text flex items-center gap-3">

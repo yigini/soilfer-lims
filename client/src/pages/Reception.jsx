@@ -1313,7 +1313,7 @@ const Reception = () => {
 
     if (!mode) {
         return (
-            <div className="p-4 md:p-6 max-w-6xl mx-auto min-h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300">
+            <div className="p-4 md:p-6 max-w-6xl mx-auto min-h-[90vh] flex flex-col justify-center animate-in fade-in zoom-in duration-300" data-tour="reception-container">
                 <div className="hidden md:block">
                     <WedgeModeBar
                         isWedgeMode={isWedgeMode}
@@ -1466,7 +1466,7 @@ const Reception = () => {
 
     if (mode === 'PROJECT' && !sessionProject) {
         return (
-            <div className="p-4 md:p-10 max-w-2xl mx-auto animate-in slide-in-from-right">
+            <div className="p-4 md:p-10 max-w-2xl mx-auto animate-in slide-in-from-right" data-tour="reception-container">
                 <button onClick={() => setMode(null)} className="flex items-center gap-2 text-sf-muted hover:text-sf-text mb-6 font-medium"><ArrowLeft size={20} /> Back</button>
                 <div className="bg-sf-surface p-8 rounded-xl shadow-xl border border-sf-divider">
                     <h2 className="text-2xl font-bold text-sf-text mb-6">Select Project Session</h2>
@@ -1499,7 +1499,7 @@ const Reception = () => {
     }
 
     return (
-        <div className="p-3 sm:p-6 max-w-7xl mx-auto">
+        <div className="p-3 sm:p-6 max-w-7xl mx-auto" data-tour="reception-container">
             {/* STAGE D: WEDGE SCANNER TOOLBAR (RC-16) - Desktop Workstations */}
             <div className="hidden md:block">
                 <WedgeModeBar

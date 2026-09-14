@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function PracticeReviewReturn({ sample, reviewReason, onUpdate, onMarkDone, t }) {
-    const [status, setStatus] = useState(
-        t('practice.review.initialStatus', 'A meaningful reason is required before returning a result.')
-    );
-
+export default function PracticeReviewReturn({ sample, reviewReason = '', reviewSubmitted = false, onUpdate, onMarkDone, t }) {
     const handleReturn = () => {
         if (!reviewReason || !reviewReason.trim()) return;
-        setStatus(`${t('practice.review.handoverPrefix', 'Practice handover to technician:')} ${reviewReason.trim()}`);
+        onUpdate('reviewSubmitted', true);
         onMarkDone();
     };
+
+    const handleReasonChange = (val) => {
+        onUpdate('reviewReason', val);
+        onUpdate('reviewSubmitted', false);
+    };
+
+    let statusText = t('practice.review.initialStatus', 'A meaningful reason is required before returning a result.');
+    if (reviewSubmitted && reviewReason && reviewReason.trim()) {
+        statusText = `${t('practice.review.handoverPrefix', 'Practice handover to technician:')} ${reviewReason.trim()}`;
+    }
 
     return (
         <>
@@ -30,7 +36,7 @@ export default function PracticeReviewReturn({ sample, reviewReason, onUpdate, o
                     <input
                         id="reason"
                         value={reviewReason}
-                        onChange={(e) => onUpdate('reviewReason', e.target.value)}
+                        onChange={(e) => handleReasonChange(e.target.value)}
                         placeholder={t('practice.review.placeholder', 'For example: verify the replicate discrepancy')}
                     />
                 </label>
@@ -44,7 +50,7 @@ export default function PracticeReviewReturn({ sample, reviewReason, onUpdate, o
                     {t('practice.review.button', 'Practice returning the result')}
                 </button>
                 <div className="status" id="reviewStatus" role="status">
-                    {status}
+                    {statusText}
                 </div>
             </div>
         </>

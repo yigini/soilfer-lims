@@ -1,29 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function PracticeWorksheetPH({ sample, benchValue, onUpdate, onMarkDone, t }) {
-    const [status, setStatus] = useState({
-        text: t('practice.bench.initialStatus', 'This field belongs to the preview, not the real workbench.'),
-        isError: false
-    });
-
+export default function PracticeWorksheetPH({ sample, benchValue = '', benchStatusCode = 'initial', onUpdate, onMarkDone, t }) {
     const handleCheck = () => {
         const str = String(benchValue || '').trim();
         const v = Number(str.replace(',', '.'));
         const ok = str !== '' && Number.isFinite(v);
 
         if (ok) {
-            setStatus({
-                text: `${t('practice.bench.previewPrefix', 'Practice preview:')} ${v.toFixed(2)}. ${t('practice.bench.previewSuffix', 'In LIMS, confirm the configured method and limits before recording.')}`,
-                isError: false
-            });
+            onUpdate('benchStatusCode', 'success');
             onMarkDone();
         } else {
-            setStatus({
-                text: t('practice.bench.error', 'Enter a valid numeric reading.'),
-                isError: true
-            });
+            onUpdate('benchStatusCode', 'error');
         }
     };
+
+    const handleValueChange = (val) => {
+        onUpdate('benchValue', val);
+        onUpdate('benchStatusCode', 'initial');
+    };
+
+    const str = String(benchValue || '').trim();
+    const v = Number(str.replace(',', '.'));
+    let statusText = t('practice.bench.initialStatus', 'This field belongs to the preview, not the real workbench.');
+    let isError = false;
+    if (benchStatusCode === 'success') {
+        const numStr = Number.isFinite(v) ? v.toFixed(2) : '';
+        statusText = `${t('practice.bench.previewPrefix', 'Practice preview:')} ${numStr}. ${t('practice.bench.previewSuffix', 'In LIMS, confirm the configured method and limits before recording.')}`;
+    } else if (benchStatusCode === 'error') {
+        statusText = t('practice.bench.error', 'Enter a valid numeric reading.');
+        isError = true;
+    }
 
     return (
         <>
@@ -50,7 +56,7 @@ export default function PracticeWorksheetPH({ sample, benchValue, onUpdate, onMa
                                                 inputMode="decimal"
                                                 aria-label={t('practice.bench.ariaPh', 'Practice pH reading')}
                                                 value={benchValue}
-                                                onChange={(e) => onUpdate('benchValue', e.target.value)}
+                                                onChange={(e) => handleValueChange(e.target.value)}
                                             />
                                         ) : (
                                             <span className="muted">—</span>
@@ -97,11 +103,11 @@ export default function PracticeWorksheetPH({ sample, benchValue, onUpdate, onMa
                 {t('practice.bench.button', 'Check practice reading')}
             </button>
             <div
-                className={`status ${status.isError ? 'error' : ''}`}
+                className={`status ${isError ? 'error' : ''}`}
                 role="status"
                 id="phStatus"
             >
-                {status.text}
+                {statusText}
             </div>
         </>
     );

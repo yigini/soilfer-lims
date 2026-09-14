@@ -906,7 +906,7 @@ export const HelpCentre = () => {
     };
 
     return (
-        <div className="min-h-screen bg-sf-canvas pb-20">
+        <div className="min-h-screen bg-sf-canvas pb-20" data-tour="help-container">
             {/* Offline Status Notice */}
             {isOffline && (
                 <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between">

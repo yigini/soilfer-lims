@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './tutorial.css';
 import { useTutorialSession, PATH_STOPS } from './useTutorialSession';
 import { chapters } from './content/chapters';
 import { foundations, f03PracticeSamples, glossaryEntriesByChapter } from './content/foundations';
+import { useTutorialAuth } from './useTutorialAuth';
 
 import PracticeIntake from './practice/PracticeIntake';
 import PracticePreparation from './practice/PracticePreparation';
@@ -27,6 +29,9 @@ const LOCALES = {
 };
 
 export default function TutorialShell({ onExit, onPause }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const {
         state,
         setStep,
@@ -46,12 +51,31 @@ export default function TutorialShell({ onExit, onPause }) {
         exitTutorial
     } = useTutorialSession(onExit, onPause);
 
+    const {
+        authStatus,
+        verifiedUser,
+        isAuthenticated,
+        mustChangePassword,
+        identityChanged,
+        acknowledgeIdentityChange,
+        hasPermission
+    } = useTutorialAuth();
+
     const [mobileExpanded, setMobileExpanded] = useState(false);
     const [basicAnswer, setBasicAnswer] = useState(null);
-    const [targetElementFound, setTargetElementFound] = useState(false);
+    const [targetAnchorStatus, setTargetAnchorStatus] = useState('searching'); // 'searching' | 'found' | 'duplicate' | 'missing'
+    const [showDraftDialog, setShowDraftDialog] = useState(false);
+    const [navNotice, setNavNotice] = useState(null);
     const coachTitleRef = useRef(null);
     const containerRef = useRef(null);
     const priorFocusRef = useRef(null);
+
+    // Reset/clear any live refs if identity changed
+    useEffect(() => {
+        if (identityChanged) {
+            acknowledgeIdentityChange();
+        }
+    }, [identityChanged, acknowledgeIdentityChange]);
 
     // Save previous active focus when entering tutorial
     useEffect(() => {
@@ -63,32 +87,28 @@ export default function TutorialShell({ onExit, onPause }) {
         };
     }, []);
 
-    // Read real authenticated user from localStorage
-    const authUser = useMemo(() => {
-        try {
-            const raw = localStorage.getItem('user');
-            if (raw) return JSON.parse(raw);
-        } catch {}
-        return null;
-    }, []);
-
-    // Priority 3: Yield priority if mandatory password change is active
-    if (authUser && authUser.mustChangePassword) {
-        return null;
-    }
 
     // Active translation dictionary
-    const dict = LOCALES[state.language] || LOCALES.en;
+    const dict = LOCALES[state?.language] || LOCALES.en;
 
     const t = useMemo(() => {
         return (keyPath, fallback = '') => {
+            if (!keyPath) return fallback || '';
+            const resolve = (obj, pArray) => {
+                let curr = obj;
+                for (const p of pArray) {
+                    if (!curr || typeof curr !== 'object') return undefined;
+                    curr = curr[p];
+                }
+                return curr;
+            };
+
             const parts = keyPath.split('.');
-            let curr = dict;
-            for (const p of parts) {
-                if (!curr || typeof curr !== 'object') return fallback || keyPath;
-                curr = curr[p];
+            let val = resolve(dict, parts);
+            if (val === undefined && dict?.common) {
+                val = resolve(dict.common, parts);
             }
-            return curr !== undefined ? curr : (fallback || keyPath);
+            return val !== undefined ? val : (fallback || keyPath);
         };
     }, [dict]);
 
@@ -110,18 +130,18 @@ export default function TutorialShell({ onExit, onPause }) {
     // Escape listener to pause
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && !state.paused) {
+            if (e.key === 'Escape' && !state.paused && !mustChangePassword) {
                 e.preventDefault();
                 pause();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [state.paused, pause]);
+    }, [state.paused, pause, mustChangePassword]);
 
     // Modal Mode: Trap Tab/Shift+Tab focus
     useEffect(() => {
-        if (!isModalMode || state.paused) return;
+        if (!isModalMode || state.paused || mustChangePassword) return;
 
         const handleTabKey = (e) => {
             if (e.key !== 'Tab') return;
@@ -151,40 +171,106 @@ export default function TutorialShell({ onExit, onPause }) {
 
         window.addEventListener('keydown', handleTabKey);
         return () => window.removeEventListener('keydown', handleTabKey);
-    }, [isModalMode, state.paused]);
+    }, [isModalMode, state.paused, mustChangePassword]);
 
-    // Focus title when step changes
+    // Focus title when step changes (guarded against hidden elements on mobile)
     useEffect(() => {
+        if (mustChangePassword) return;
         if (coachTitleRef.current) {
-            coachTitleRef.current.focus({ preventScroll: true });
+            const el = coachTitleRef.current;
+            const style = window.getComputedStyle(el);
+            if (style.display !== 'none' && style.visibility !== 'hidden') {
+                el.focus({ preventScroll: true });
+            }
         }
-    }, [step, introStage]);
+    }, [step, introStage, mustChangePassword]);
 
-    // Highlight target anchor on real page in docked mode
+    // Highlight target anchor on real page in docked mode (exact-one matching with 2.5s bounded retry)
     useEffect(() => {
-        if (isModalMode || state.paused) {
-            setTargetElementFound(false);
+        if (isModalMode || state.paused || mustChangePassword) {
+            setTargetAnchorStatus('missing');
             return;
         }
 
         const selector = currentChapter.targetAnchor;
-        let el = null;
-        if (selector) {
-            try { el = document.querySelector(selector); } catch {}
+        if (!selector) {
+            setTargetAnchorStatus('missing');
+            return;
         }
 
-        if (el) {
-            setTargetElementFound(true);
-            el.classList.add('sf-tutorial-target-highlight');
-            return () => {
-                el.classList.remove('sf-tutorial-target-highlight');
-            };
-        } else {
-            setTargetElementFound(false);
-        }
-    }, [isModalMode, state.paused, currentChapter]);
+        let isMounted = true;
+        let activeHighlightEl = null;
+        const startTime = Date.now();
+        const TIMEOUT_MS = 2500;
+        let timerId = null;
 
-    if (!state.active) return null;
+        setTargetAnchorStatus('searching');
+
+        const isVisible = (el) => {
+            if (!el || !el.isConnected) return false;
+            const style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        };
+
+        const checkAnchor = () => {
+            if (!isMounted) return;
+
+            let allMatches = [];
+            try {
+                allMatches = Array.from(document.querySelectorAll(selector));
+            } catch {
+                setTargetAnchorStatus('missing');
+                return;
+            }
+
+            const visibleMatches = allMatches.filter(isVisible);
+
+            if (visibleMatches.length === 1) {
+                const matchedEl = visibleMatches[0];
+                if (activeHighlightEl && activeHighlightEl !== matchedEl) {
+                    activeHighlightEl.classList.remove('sf-tutorial-target-highlight');
+                }
+                activeHighlightEl = matchedEl;
+                matchedEl.classList.add('sf-tutorial-target-highlight');
+                setTargetAnchorStatus('found');
+                return;
+            }
+
+            if (visibleMatches.length > 1) {
+                if (activeHighlightEl) {
+                    activeHighlightEl.classList.remove('sf-tutorial-target-highlight');
+                    activeHighlightEl = null;
+                }
+                setTargetAnchorStatus('duplicate');
+                return;
+            }
+
+            // 0 visible matches: retry within bounded 2.5s window
+            if (Date.now() - startTime < TIMEOUT_MS) {
+                timerId = setTimeout(checkAnchor, 100);
+            } else {
+                if (activeHighlightEl) {
+                    activeHighlightEl.classList.remove('sf-tutorial-target-highlight');
+                    activeHighlightEl = null;
+                }
+                setTargetAnchorStatus('missing');
+            }
+        };
+
+        checkAnchor();
+
+        return () => {
+            isMounted = false;
+            if (timerId) clearTimeout(timerId);
+            if (activeHighlightEl) {
+                activeHighlightEl.classList.remove('sf-tutorial-target-highlight');
+            }
+        };
+    }, [isModalMode, state.paused, currentChapter, location.pathname, location.search, mustChangePassword]);
+
+    if (!state.active || mustChangePassword) return null;
 
     if (state.paused) {
         return (
@@ -244,12 +330,51 @@ export default function TutorialShell({ onExit, onPause }) {
         return matchesFilter && matchesSearch;
     });
 
-    const handleNavigateRealPage = () => {
-        if (!currentChapter.route) return;
-        const target = currentChapter.route.split(' ')[0].split('?')[0];
-        if (target && target.startsWith('/')) {
-            window.location.assign(target);
+    const hasDirtyDraft = () => {
+        try {
+            const inputs = document.querySelectorAll('input:not([type="hidden"]):not([readonly]):not([disabled]), textarea:not([readonly]):not([disabled]), select:not([disabled])');
+            for (const input of inputs) {
+                if (containerRef.current && containerRef.current.contains(input)) continue;
+                if (input.closest('[data-sf-tutorial]')) continue;
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    if (input.checked !== input.defaultChecked) return true;
+                } else if (input.value !== input.defaultValue && input.value.trim() !== '') {
+                    return true;
+                }
+            }
+        } catch {}
+        return false;
+    };
+
+    const performNavigation = () => {
+        const targetPath = currentChapter.resolveRoute
+            ? currentChapter.resolveRoute({ isAuthenticated, user: verifiedUser, authStatus })
+            : currentChapter.route;
+        if (!targetPath) {
+            setNavNotice(t('sampleRequiredNotice', 'Select a sample from the laboratory list to view its workflow map. Docked guidance remains active.'));
+            return;
         }
+
+        const sep = targetPath.includes('?') ? '&' : '?';
+        const finalUrl = targetPath.includes('tutorialmode=') ? targetPath : `${targetPath}${sep}tutorialmode=true`;
+        navigate(finalUrl);
+    };
+
+    const handleNavigateRealPage = () => {
+        if (!currentChapter.resolveRoute && !currentChapter.route) return;
+
+        if (currentChapter.requiredPermission && !hasPermission(currentChapter.requiredPermission)) {
+            setNavNotice(t('permissionDenied', 'Permission required to access this section.'));
+            return;
+        }
+        setNavNotice(null);
+
+        if (hasDirtyDraft()) {
+            setShowDraftDialog(true);
+            return;
+        }
+
+        performNavigation();
     };
 
     // =========================================================================
@@ -363,14 +488,14 @@ export default function TutorialShell({ onExit, onPause }) {
                             </div>
                             <div className="role">
                                 <div className="avatar" id="avatar">
-                                    {authUser ? (authUser.name ? authUser.name[0] : 'U') : 'V'}
+                                    {verifiedUser ? (verifiedUser.name ? verifiedUser.name[0] : 'U') : 'V'}
                                 </div>
                                 <div>
                                     <b id="roleLabel">
-                                        {authUser ? authUser.name : t('roles.visitor', 'Visitor')}
+                                        {verifiedUser ? verifiedUser.name : t('roles.visitor', 'Visitor')}
                                     </b>
                                     <div className="muted small">
-                                        {authUser ? `${authUser.role} · ${authUser.labId || 'LAB'}` : t('common.previewPersona', 'Preview persona · not a signed-in account')}
+                                        {verifiedUser ? `${verifiedUser.role} · ${verifiedUser.labId || 'LAB'}` : t('common.previewPersona', 'Preview persona · not a signed-in account')}
                                     </div>
                                 </div>
                             </div>
@@ -887,11 +1012,11 @@ export default function TutorialShell({ onExit, onPause }) {
                             className="avatar"
                             style={{ width: '22px', height: '22px', fontSize: '10px' }}
                         >
-                            {authUser ? (authUser.name ? authUser.name[0] : 'U') : 'V'}
+                            {verifiedUser ? (verifiedUser.name ? verifiedUser.name[0] : 'U') : 'V'}
                         </div>
                         <div>
-                            <b>{authUser ? authUser.name : t('common.notSignedIn', 'Visitor (No account)')}</b>
-                            {authUser && <span className="muted"> · {authUser.role}</span>}
+                            <b>{verifiedUser ? verifiedUser.name : t('common.notSignedIn', 'Visitor (No account)')}</b>
+                            {verifiedUser && <span className="muted"> · {verifiedUser.role}</span>}
                         </div>
                     </div>
 
@@ -901,7 +1026,7 @@ export default function TutorialShell({ onExit, onPause }) {
                         role="progressbar"
                         aria-label={t('aria.progress', 'Tutorial progress')}
                         aria-valuemin="0"
-                        aria-valuemax="12"
+                        aria-valuemax={chapters.length}
                         aria-valuenow={step + 1}
                         id="progress"
                         style={{ marginTop: '10px' }}
@@ -939,27 +1064,41 @@ export default function TutorialShell({ onExit, onPause }) {
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                            <span className="route" id="route" style={{ fontWeight: 600 }}>{currentChapter.route}</span>
-                            {currentChapter.route && (
+                            <span className="route" id="route" style={{ fontWeight: 600 }}>{currentChapter.routeDisplay || currentChapter.route}</span>
+                            {(currentChapter.resolveRoute || currentChapter.route) && (
                                 <button
                                     type="button"
                                     className="quiet small"
+                                    id="goToPage"
                                     onClick={handleNavigateRealPage}
                                     style={{ padding: '2px 8px', minHeight: '26px', color: '#245942', fontWeight: 700 }}
                                 >
-                                    {t('common.navigate', 'Go to page →')}
+                                    {t('goToPage', 'Go to page →')}
                                 </button>
                             )}
                         </div>
 
                         {/* Anchor Check Indicator */}
-                        {targetElementFound ? (
-                            <div style={{ color: '#245942', fontWeight: 600, fontSize: '11px' }}>
-                                ✓ Target element highlighted on this page
+                        {targetAnchorStatus === 'found' && (
+                            <div style={{ color: '#245942', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span>✓</span> {t('targetHighlighted', 'Target element highlighted on this page')}
                             </div>
-                        ) : (
+                        )}
+                        {targetAnchorStatus === 'duplicate' && (
+                            <div style={{ color: '#b45309', fontWeight: 600, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span>⚠</span> {t('duplicateAnchor', 'Multiple matching elements found. Target highlight disabled to prevent ambiguity.')}
+                            </div>
+                        )}
+                        {targetAnchorStatus === 'missing' && (
                             <div className="muted" style={{ fontSize: '11px' }}>
-                                {t('common.missingAnchor', 'Target element not present on this page view. Docked guidance remains active.')}
+                                {t('missingAnchor', 'Target element not present on this page view. Docked guidance remains active.')}
+                            </div>
+                        )}
+
+                        {navNotice && (
+                            <div style={{ marginTop: '8px', padding: '6px 8px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '4px', color: '#991b1b', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>{navNotice}</span>
+                                <button type="button" onClick={() => setNavNotice(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', color: '#991b1b' }}>✕</button>
                             </div>
                         )}
                     </div>
@@ -969,7 +1108,7 @@ export default function TutorialShell({ onExit, onPause }) {
                         <div className="panel" style={{ padding: '12px', marginTop: '10px' }}>
                             <div className="row">
                                 <h3 style={{ fontSize: '13px' }}>{t('common.exploreRole', 'Explore a specific role')}</h3>
-                                <span className="badge clay">Role track</span>
+                                <span className="badge clay">{t('roleTrack', 'Role track')}</span>
                             </div>
                             <label className="label" htmlFor="roleSelect" style={{ marginTop: '8px' }}>
                                 {t('common.chooseRoleTrack', 'Choose a role track:')}
@@ -1014,6 +1153,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                     sample={sampleTube}
                                     mass={currentTubePractice.intakeMass}
                                     condition={currentTubePractice.condition}
+                                    intakeStatusCode={currentTubePractice.intakeStatusCode}
                                     onUpdate={updatePractice}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
@@ -1023,6 +1163,7 @@ export default function TutorialShell({ onExit, onPause }) {
                             {currentChapter.practiceType === 'prepare' && (
                                 <PracticePreparation
                                     checks={currentTubePractice.checks}
+                                    prepVerified={currentTubePractice.prepVerified}
                                     onUpdate={updatePractice}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
@@ -1033,6 +1174,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                 <PracticeWorksheetPH
                                     sample={sampleTube}
                                     benchValue={currentTubePractice.benchValue}
+                                    benchStatusCode={currentTubePractice.benchStatusCode}
                                     onUpdate={updatePractice}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
@@ -1062,6 +1204,7 @@ export default function TutorialShell({ onExit, onPause }) {
                                 <PracticeReviewReturn
                                     sample={sampleTube}
                                     reviewReason={currentTubePractice.reviewReason}
+                                    reviewSubmitted={currentTubePractice.reviewSubmitted}
                                     onUpdate={updatePractice}
                                     onMarkDone={() => markDone(step)}
                                     t={t}
@@ -1077,10 +1220,10 @@ export default function TutorialShell({ onExit, onPause }) {
                         </div>
                     )}
 
-                    {/* Step 11: Next steps and Help links */}
-                    {step === 11 && (
+                    {/* Finish step: Next steps and Help links */}
+                    {(currentChapter.id === 'finish' || step === chapters.length - 1) && (
                         <div className="panel focus" style={{ marginTop: '14px', padding: '12px' }}>
-                            <h3 style={{ fontSize: '13px' }}>Before you begin testing</h3>
+                            <h3 style={{ fontSize: '13px' }}>{t('beforeYouBegin', 'Before you begin testing')}</h3>
                             <div className="stack small" style={{ marginTop: '8px', fontSize: '12px' }}>
                                 <p>{t('practice.finish.step1')}</p>
                                 <p>{t('practice.finish.step2')}</p>
@@ -1197,6 +1340,64 @@ export default function TutorialShell({ onExit, onPause }) {
                     </div>
                 </div>
             </aside>
+
+            {/* Draft Warning Confirmation Dialog */}
+            {showDraftDialog && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px'
+                    }}
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="draft-warning-title"
+                >
+                    <div
+                        style={{
+                            background: '#ffffff',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            maxWidth: '440px',
+                            width: '100%',
+                            boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+                            border: '1px solid #dce3da'
+                        }}
+                    >
+                        <h4 id="draft-warning-title" style={{ margin: '0 0 10px', fontSize: '15px', fontWeight: 700, color: '#213b32' }}>
+                            {t('unsavedDraftWarning', 'You have unsaved changes on this page. Discard changes and navigate to this lesson?')}
+                        </h4>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}>
+                            <button
+                                type="button"
+                                className="quiet"
+                                id="draftCancelBtn"
+                                onClick={() => setShowDraftDialog(false)}
+                                style={{ padding: '6px 14px', fontSize: '13px' }}
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                type="button"
+                                className="primary"
+                                id="draftDiscardBtn"
+                                onClick={() => {
+                                    setShowDraftDialog(false);
+                                    performNavigation();
+                                }}
+                                style={{ padding: '6px 14px', fontSize: '13px' }}
+                            >
+                                {t('common.discardAndProceed', 'Discard & Proceed')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

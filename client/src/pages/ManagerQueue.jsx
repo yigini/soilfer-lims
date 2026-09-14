@@ -271,7 +271,7 @@ const ManagerQueue = () => {
     };
 
     return (
-        <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8" data-tour="manager-queue-container">
             <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Queue')}</h1>

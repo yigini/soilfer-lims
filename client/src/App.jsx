@@ -231,6 +231,7 @@ const Layout = ({ children }) => {
                             <Link
                                 key={item.path}
                                 to={item.path}
+                                data-tour={`nav-${item.path === '/' ? 'dashboard' : item.path.replace('/', '')}`}
                                 onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5'} py-2.5 rounded-lg text-sm transition-all ${
                                     isActive

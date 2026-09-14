@@ -37,7 +37,7 @@
     "signedInAs": "Sesión iniciada como",
     "notSignedIn": "Visitante (Sin cuenta)",
     "practiceBadge": "Solo práctica · no se escribe en LIMS",
-    "missingAnchor": "Elemento no visible en esta página. La guía permanece activa.",
+    "missingAnchor": "El elemento objetivo no está presente en esta vista. La guía permanece activa.",
     "capsFollowSample": "Siga la muestra",
     "capsGuidedVisit": "Una visita guiada al laboratorio",
     "tableSampleId": "ID de muestra",
@@ -61,7 +61,17 @@
     "roleLabTechnician": "Técnico de laboratorio",
     "roleLabManager": "Gerente de laboratorio",
     "roleProjectCoordinator": "Coordinador de proyecto",
-    "roleViewerAuditor": "Visualizador / auditor"
+    "roleViewerAuditor": "Visualizador / auditor",
+    "roleTrack": "Trayectoria de rol",
+    "beforeYouBegin": "Antes de comenzar los ensayos",
+    "targetHighlighted": "✓ Elemento objetivo resaltado en esta página",
+    "duplicateAnchor": "Múltiples elementos coincidentes encontrados. La guía permanece fija.",
+    "goToPage": "Ir a la página →",
+    "permissionDenied": "Esta ruta requiere permisos de {role}. Inicie sesión con una cuenta autorizada.",
+    "unsavedDraftWarning": "Es posible que tenga trabajo no guardado en esta página. ¿Continuar al siguiente destino de la guía?",
+    "sampleRequiredNotice": "Seleccione una muestra de la lista de laboratorio para ver su mapa de flujo de trabajo. La guía anclada permanece activa.",
+    "cancel": "Cancelar",
+    "discardAndProceed": "Descartar y continuar"
   },
   "roles": {
     "visitor": "Visitante",
@@ -235,6 +245,41 @@
       "copy": "Ha visto cómo se articula todo el trabajo. A continuación, use la cuenta y las muestras de prueba asignadas por su facilitador.",
       "why": "Un tutorial es una introducción, no un certificado de competencia ni prueba de que cada flujo haya pasado su aceptación.",
       "next": "Volver al inicio ↺"
+    },
+    "receipt": {
+      "name": "Recepción física",
+      "title": "Registre la llegada cuando el contenedor esté aquí.",
+      "copy": "Verifique la masa, la integridad del contenedor y la custodia. Practique la confirmación de llegada.",
+      "why": "Las muestras esperadas no son trabajo de laboratorio hasta ser recibidas y verificadas físicamente.",
+      "next": "Proceder a la asignación →"
+    },
+    "assignment": {
+      "name": "Asignación",
+      "title": "El trabajo ordenado requiere técnicos preparados.",
+      "copy": "Verifique la asignación de métodos y las dependencias de preparación.",
+      "why": "La asignación garantiza la revisión correcta del método y la disponibilidad del técnico y del equipo.",
+      "next": "Verificar equipos →"
+    },
+    "equipment": {
+      "name": "Equipos",
+      "title": "Verifique el instrumento antes de usarlo.",
+      "copy": "Inspeccione el estado, la operatividad y la calibración. Seleccione un instrumento calibrado.",
+      "why": "Los instrumentos deben estar operativos y calibrados antes de realizar mediciones.",
+      "next": "Verificar inventario →"
+    },
+    "inventory": {
+      "name": "Inventario",
+      "title": "Use el material y lote correctos.",
+      "copy": "Inspeccione cantidades, fechas de caducidad y números de lote. Ver stock no lo consume.",
+      "why": "Los reactivos y estándares deben estar vigentes y verificados para el lote de análisis.",
+      "next": "Proceder a la preparación →"
+    },
+    "reports": {
+      "name": "Informes",
+      "title": "Un resultado emitido tiene versión e historial.",
+      "copy": "Inspeccione resultados emitidos, métodos, revisiones y firmas de aprobación.",
+      "why": "Los informes oficiales conectan determinaciones aprobadas con autores, revisores y acreditaciones.",
+      "next": "Completar la visita →"
     }
   },
   "practice": {

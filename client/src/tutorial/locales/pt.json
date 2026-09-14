@@ -37,7 +37,7 @@
     "signedInAs": "Conectado como",
     "notSignedIn": "Visitante (Não conectado)",
     "practiceBadge": "Apenas prática · nenhuma gravação no LIMS",
-    "missingAnchor": "Elemento não visível nesta página. O guia permanece ativo.",
+    "missingAnchor": "Elemento alvo não presente nesta visualização. O guia permanece ativo.",
     "capsFollowSample": "Seguir a amostra",
     "capsGuidedVisit": "Uma visita guiada ao laboratório",
     "tableSampleId": "ID da amostra",
@@ -61,7 +61,17 @@
     "roleLabTechnician": "Técnico de laboratório",
     "roleLabManager": "Gerente de laboratório",
     "roleProjectCoordinator": "Coordenador de projeto",
-    "roleViewerAuditor": "Visualizador / auditor"
+    "roleViewerAuditor": "Visualizador / auditor",
+    "roleTrack": "Trilha de função",
+    "beforeYouBegin": "Antes de iniciar os ensaios",
+    "targetHighlighted": "✓ Elemento alvo destacado nesta página",
+    "duplicateAnchor": "Vários elementos correspondentes encontrados. O guia permanece fixo.",
+    "goToPage": "Ir para a página →",
+    "permissionDenied": "Esta rota requer permissões de {role}. Faça login com uma conta autorizada.",
+    "unsavedDraftWarning": "Você pode ter trabalho não salvo nesta página. Continuar para o próximo destino do guia?",
+    "sampleRequiredNotice": "Selecione uma amostra da lista do laboratório para visualizar seu mapa de fluxo de trabalho. O guia fixado permanece ativo.",
+    "cancel": "Cancelar",
+    "discardAndProceed": "Descartar e continuar"
   },
   "roles": {
     "visitor": "Visitante",
@@ -235,6 +245,41 @@
       "copy": "Você conheceu a articulação completa do trabalho. Em seguida, utilize sua conta e as amostras de teste acordadas com o instrutor.",
       "why": "Um tutorial é uma introdução prática, não uma certificação de competência nem prova de que cada fluxo tenha passado por sua validação final.",
       "next": "Voltar ao início ↺"
+    },
+    "receipt": {
+      "name": "Recebimento físico",
+      "title": "Registre a chegada quando o recipiente estiver presente.",
+      "copy": "Verifique a massa, a integridade do recipiente e a cadeia de custódia.",
+      "why": "Amostras esperadas não são trabalho de laboratório até serem fisicamente recebidas e verificadas.",
+      "next": "Prosseguir para a atribuição →"
+    },
+    "assignment": {
+      "name": "Atribuição",
+      "title": "O trabalho solicitado requer técnicos preparados.",
+      "copy": "Verifique a atribuição de métodos e as dependências de preparação.",
+      "why": "A atribuição garante a revisão correta do método e a prontidão do técnico e dos instrumentos.",
+      "next": "Verificar equipamentos →"
+    },
+    "equipment": {
+      "name": "Equipamentos",
+      "title": "Verifique o instrumento antes de usá-lo.",
+      "copy": "Inspecione o status, a prontidão e a calibração. Escolha um instrumento calibrado.",
+      "why": "Os instrumentos devem estar em serviço e calibrados antes das medições analíticas.",
+      "next": "Verificar materiais de inventário →"
+    },
+    "inventory": {
+      "name": "Inventário",
+      "title": "Use o material e lote corretos.",
+      "copy": "Inspecione quantidade, datas de validade e números de lote. Visualizar estoque não o consome.",
+      "why": "Reagentes e padrões devem estar válidos e verificados para o lote de análise.",
+      "next": "Prosseguir para a preparação →"
+    },
+    "reports": {
+      "name": "Relatórios",
+      "title": "Um resultado liberado possui versão e histórico.",
+      "copy": "Inspecione resultados liberados, métodos, revisões e assinaturas de aprovação.",
+      "why": "Relatórios oficiais vinculam determinações aprovadas ao autor, revisor e à acreditação do laboratório.",
+      "next": "Concluir sua visita →"
     }
   },
   "practice": {

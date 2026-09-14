@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import { STORAGE_KEY, getStoredSession, isSessionExpired } from './useTutorialSession';
 
 const TutorialShell = React.lazy(() => import('./TutorialShell'));
-
-const STORAGE_KEY = 'soilfer_tutorial_v1';
-const MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
 
 class TutorialErrorBoundary extends React.Component {
     constructor(props) {
@@ -31,70 +31,88 @@ class TutorialErrorBoundary extends React.Component {
 }
 
 export default function TutorialGate() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { locale } = useLanguage();
     const [mode, setMode] = useState('none'); // 'none' | 'chip' | 'full'
+    const isSameDocumentActiveRef = useRef(false);
 
     useEffect(() => {
-        const evaluateMode = () => {
-            try {
-                const search = new URLSearchParams(window.location.search);
-                const tutorialMode = search.get('tutorialmode');
+        const search = new URLSearchParams(location.search);
+        const tutorialMode = search.get('tutorialmode');
 
-                if (tutorialMode === 'false') {
-                    sessionStorage.removeItem(STORAGE_KEY);
-                    setMode('none');
-                    return;
-                }
-
-                if (tutorialMode === 'true') {
-                    setMode('full');
-                    return;
-                }
-
-                // If no tutorialmode query parameter, inspect session
-                const raw = sessionStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && parsed.active && (Date.now() - (parsed.timestamp || 0) < MAX_AGE_MS)) {
-                        // Unflagged document load with existing session shows Resume invitation chip,
-                        // never an unsolicited full overlay
-                        setMode('chip');
-                        return;
-                    } else {
-                        sessionStorage.removeItem(STORAGE_KEY);
-                    }
-                }
-            } catch {
-                try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
-            }
+        if (tutorialMode === 'false') {
+            try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+            isSameDocumentActiveRef.current = false;
             setMode('none');
-        };
+            return;
+        }
 
-        evaluateMode();
+        if (tutorialMode === 'true') {
+            const stored = getStoredSession();
+            if (stored && isSessionExpired(stored)) {
+                try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+                isSameDocumentActiveRef.current = false;
+                setMode('none');
+                return;
+            }
+            isSameDocumentActiveRef.current = true;
+            setMode('full');
+            return;
+        }
 
-        // Custom event so same-document navigations or exits can update the gate immediately
-        const handleCustomUpdate = () => evaluateMode();
+        // No tutorialmode parameter in URL
+        // If this is a same-document SPA navigation and the guide was active in this session:
+        if (isSameDocumentActiveRef.current) {
+            const stored = getStoredSession();
+            if (stored && stored.active && !stored.paused && !isSessionExpired(stored)) {
+                setMode('full');
+                return;
+            }
+        }
 
-        window.addEventListener('popstate', evaluateMode);
-        window.addEventListener('hashchange', evaluateMode);
-        window.addEventListener('soilfer_tutorial_update', handleCustomUpdate);
-
-        return () => {
-            window.removeEventListener('popstate', evaluateMode);
-            window.removeEventListener('hashchange', evaluateMode);
-            window.removeEventListener('soilfer_tutorial_update', handleCustomUpdate);
-        };
-    }, []);
+        // Otherwise, it is an unflagged document visit. Inspect session:
+        const stored = getStoredSession();
+        if (stored && stored.active && !isSessionExpired(stored)) {
+            // Unflagged document load with existing active session shows Resume invitation chip,
+            // never an unsolicited full overlay
+            setMode('chip');
+        } else {
+            setMode('none');
+        }
+    }, [location.pathname, location.search]);
 
     const handleResume = () => {
+        const stored = getStoredSession();
+        if (!stored || isSessionExpired(stored)) {
+            try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+            setMode('none');
+            return;
+        }
+        stored.paused = false;
+        stored.lastActivityAt = Date.now();
         try {
-            const raw = sessionStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                parsed.paused = false;
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-            }
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
         } catch {}
+        isSameDocumentActiveRef.current = true;
         setMode('full');
+
+        // Add tutorialmode=true to current URL
+        const params = new URLSearchParams(location.search);
+        params.set('tutorialmode', 'true');
+        navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+    };
+
+    const handleExit = () => {
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+        isSameDocumentActiveRef.current = false;
+        setMode('none');
+        const params = new URLSearchParams(location.search);
+        params.delete('tutorialmode');
+        params.delete('tour');
+        const qs = params.toString();
+        const nextUrl = location.pathname + (qs ? `?${qs}` : '') + location.hash;
+        navigate(nextUrl, { replace: true });
     };
 
     if (mode === 'none') {
@@ -102,6 +120,17 @@ export default function TutorialGate() {
     }
 
     if (mode === 'chip') {
+        const resumeLabels = {
+            en: 'Resume guide →',
+            es: 'Reanudar guía →',
+            'es-419': 'Reanudar guía →',
+            fr: 'Reprendre le guide →',
+            pt: 'Retomar guia →'
+        };
+        const stored = getStoredSession();
+        const activeLang = stored?.language || locale;
+        const label = resumeLabels[activeLang] || resumeLabels.en;
+
         return (
             <div data-sf-tutorial="root">
                 <button
@@ -127,7 +156,7 @@ export default function TutorialGate() {
                     }}
                     onClick={handleResume}
                 >
-                    Resume guide →
+                    {label}
                 </button>
             </div>
         );
@@ -137,7 +166,7 @@ export default function TutorialGate() {
         <TutorialErrorBoundary>
             <React.Suspense fallback={null}>
                 <TutorialShell
-                    onExit={() => setMode('none')}
+                    onExit={handleExit}
                 />
             </React.Suspense>
         </TutorialErrorBoundary>

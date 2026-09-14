@@ -1,0 +1,54 @@
+{
+  "time": "2026-09-14T10:48:47.912Z",
+  "candidate": "7ddf79b",
+  "assets": [
+    "/assets/TutorialShell-BYrzxXl2.css",
+    "/assets/TutorialShell-Cg5UzekW.js"
+  ],
+  "scope": "Built client snapshot, mocked API, blocked external network; no database or production writes",
+  "identity": {
+    "url": "/login?tutorialmode=true&lang=en",
+    "guideRole": null,
+    "title": "Start with the right role."
+  },
+  "field": {
+    "route": "/projects",
+    "highlightCount": 0,
+    "fallback": false,
+    "documentsAfterGo": [],
+    "guideCountAfterGo": 1,
+    "resumeAfterGo": 0
+  },
+  "prepTubeSwitch": {
+    "before": "Practice checklist verified. No actual preparation record was changed.",
+    "after": "0 of 3 checks selected.",
+    "checked": 0,
+    "verifyDisabled": true
+  },
+  "mobile": {
+    "pause": true,
+    "exit": true,
+    "language": true,
+    "toggle": true,
+    "expandedExit": true,
+    "expandedPause": true
+  },
+  "frenchFinish": {
+    "title": "Prêt à explorer votre rôle.",
+    "englishFinish": false
+  },
+  "appLocale": {
+    "stored": "fr",
+    "tutorialTitle": "Un registre partagé pour le laboratoire.",
+    "guideLanguage": "fr"
+  },
+  "authRevalidation": {
+    "appCachedName": "Fresh Staff",
+    "tutorialStillOld": false
+  },
+  "actualChunkFailure": {
+    "blocked": 2,
+    "passwordInputs": 1,
+    "tutorial": 0
+  }
+}
