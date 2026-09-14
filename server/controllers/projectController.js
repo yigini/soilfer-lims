@@ -1328,9 +1328,74 @@ exports.getProjectKoboConfig = async (req, res) => {
         const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
         const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
 
-        const userLabConfig = req.user.labId ? configs.find(c => c.labId === req.user.labId) : null;
-        const ownerLabConfig = configs.find(c => c.labId === project.labId);
-        const config = userLabConfig || ownerLabConfig || configs[0];
+        let config = null;
+        const requestedConfigId = req.query?.configId;
+        const requestedLabId = req.query?.labId;
+
+        if (requestedConfigId) {
+            config = configs.find(c => c.id === requestedConfigId);
+            if (!config) {
+                return res.json({ configured: false, message: 'Specified Kobo configuration not found for this project.' });
+            }
+        } else if (req.user.labId) {
+            const matchingConfigs = configs.filter(c => c.labId === req.user.labId);
+            if (matchingConfigs.length === 1) {
+                config = matchingConfigs[0];
+            } else if (matchingConfigs.length > 1) {
+                return res.json({
+                    configured: false,
+                    ambiguous: true,
+                    message: 'Multiple active Kobo configurations exist for your laboratory in this project. Explicit configId required.'
+                });
+            } else {
+                if (isOwnerManager || isAdmin) {
+                    const ownerConfigs = configs.filter(c => c.labId === project.labId);
+                    if (ownerConfigs.length === 1) {
+                        config = ownerConfigs[0];
+                    } else if (ownerConfigs.length > 1) {
+                        return res.json({
+                            configured: false,
+                            ambiguous: true,
+                            message: 'Multiple configurations exist for the coordinating laboratory. Explicit configId required.'
+                        });
+                    } else {
+                        return res.json({ configured: false, message: 'No Kobo configuration found for your laboratory scope.' });
+                    }
+                } else {
+                    return res.json({ configured: false, message: 'No Kobo configuration found for your laboratory scope.' });
+                }
+            }
+        } else {
+            // Global admin without specific labId
+            if (requestedLabId) {
+                const labConfigs = configs.filter(c => c.labId === requestedLabId);
+                if (labConfigs.length === 1) {
+                    config = labConfigs[0];
+                } else if (labConfigs.length > 1) {
+                    return res.json({
+                        configured: false,
+                        ambiguous: true,
+                        message: 'Multiple configurations exist for the specified laboratory. Explicit configId required.'
+                    });
+                } else {
+                    return res.json({ configured: false, message: 'No configuration found for the specified laboratory.' });
+                }
+            } else if (configs.length === 1) {
+                config = configs[0];
+            } else {
+                // Multiple configurations exist across different labs/assets: do NOT arbitrarily guess configs[0]
+                return res.json({
+                    configured: false,
+                    ambiguous: true,
+                    message: 'Multiple Kobo configurations exist for this project across participating laboratories. Explicit labId or configId required.'
+                });
+            }
+        }
+
+        if (!config) {
+            return res.json({ configured: false });
+        }
+
         // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
         res.json({
             configured: true,

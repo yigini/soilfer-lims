@@ -149,6 +149,9 @@ export const LanguageProvider = ({ children }) => {
 
             if (typeof paramsOrFallback === 'string') {
                 fallback = paramsOrFallback;
+                if (typeof maybeFallback === 'object' && maybeFallback !== null) {
+                    params = maybeFallback;
+                }
             } else if (typeof paramsOrFallback === 'object' && paramsOrFallback !== null) {
                 params = paramsOrFallback;
                 if (typeof maybeFallback === 'string') {

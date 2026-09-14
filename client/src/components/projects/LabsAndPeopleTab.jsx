@@ -64,7 +64,7 @@ export default function LabsAndPeopleTab({
                                     <td colSpan={4} className="py-6 text-center text-sf-muted">
                                         {project?.labId ? (
                                             <span>
-                                                {t('projects.team.ownerLabOnly', 'Primary Coordinating Lab: {{lab}}', { lab: project.labId })}
+                                                {t('projects.team.ownerLabOnly', { lab: project.labId }, 'Primary Coordinating Lab: {{lab}}')}
                                             </span>
                                         ) : (
                                             <span>{t('projects.team.noLabsAssigned', 'No servicing laboratories explicitly assigned.')}</span>

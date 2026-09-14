@@ -39,6 +39,14 @@ export default function WorkspaceHeader({
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-blue-300'
                 : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-300';
 
+    const statusDisplay = isDraft
+        ? (project?.status === 'PENDING_MANIFEST' ? t('projects.pendingManifest', 'Awaiting Manifest') : t('projects.draft', 'Draft'))
+        : isPaused
+            ? t('projects.paused', 'Paused')
+            : isCompleted
+                ? t('projects.archived', 'Archived')
+                : t('projects.active', 'Active');
+
     return (
         <header className="mb-6">
             {/* Breadcrumb */}
@@ -68,7 +76,7 @@ export default function WorkspaceHeader({
                     </p>
                     <div className="flex items-center gap-3 mt-3 flex-wrap text-xs">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold border ${statusBadgeClass}`}>
-                            {project?.status || 'ACTIVE'}
+                            {statusDisplay}
                         </span>
                         <span className="font-mono font-medium text-sf-muted">
                             {project?.code}

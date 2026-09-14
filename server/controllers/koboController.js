@@ -225,15 +225,32 @@ exports.syncLab = async (req, res) => {
             return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
         }
 
-        const config = await prisma.koboConfig.findFirst({
-            where: { labId, isActive: true }
+        const configId = req.query?.configId || req.body?.configId;
+        const projectCode = req.query?.projectCode || req.body?.projectCode;
+
+        const whereClause = { labId, isActive: true };
+        if (configId) whereClause.id = configId;
+        if (projectCode) whereClause.projectCode = projectCode;
+
+        const configs = await prisma.koboConfig.findMany({
+            where: whereClause
         });
 
-        if (!config) {
-            return res.status(404).json({ error: 'Kobo not configured for this lab' });
+        if (configs.length === 0) {
+            return res.status(404).json({
+                error: 'NOT_FOUND',
+                message: 'No active Kobo configuration found for this laboratory matching the specified parameters'
+            });
         }
 
-        const result = await syncLabSubmissions(config, req.user?.username || 'SYSTEM');
+        if (configs.length > 1) {
+            return res.status(400).json({
+                error: 'AMBIGUOUS_CONFIG_TARGET',
+                message: 'Multiple active Kobo configurations exist for this laboratory. Explicit configId or projectCode is required.'
+            });
+        }
+
+        const result = await syncLabSubmissions(configs[0], req.user?.username || 'SYSTEM');
 
         res.json(result);
     } catch (error) {
@@ -259,9 +276,9 @@ exports.syncAll = async (req, res) => {
         for (const config of configs) {
             try {
                 const result = await syncLabSubmissions(config, 'SCHEDULER');
-                results.push({ labId: config.labId, ...result });
+                results.push({ labId: config.labId, configId: config.id, projectCode: config.projectCode, ...result });
             } catch (error) {
-                results.push({ labId: config.labId, error: error.message });
+                results.push({ labId: config.labId, configId: config.id, projectCode: config.projectCode, error: error.message });
             }
         }
 
@@ -309,15 +326,11 @@ async function syncLabSubmissions(config, performedBy) {
         name: lab?.name || config.labName || 'Unknown'
     };
 
-    // Use config.projectCode if available, else derive from lab's assigned projects in database
-    let projectCode = config.projectCode;
-    if (!projectCode && lab?.projectLabs && lab.projectLabs.length > 0) {
-        projectCode = lab.projectLabs[0].project?.code || lab.projectLabs[0].projectCode;
+    // PM-15 / A17: First-project fallback is disallowed. Explicit config.projectCode is required.
+    if (!config.projectCode) {
+        throw new Error(`[KOBO] Configuration '${config.id || config.formId}' for laboratory '${config.labId}' lacks an explicit project mapping (projectCode). First-project fallback is disallowed.`);
     }
-
-    if (!projectCode) {
-        throw new Error(`[KOBO] Laboratory '${config.labId}' has no assigned project configured. Import aborted.`);
-    }
+    const projectCode = config.projectCode;
 
     // Get project by code
     const project = await prisma.project.findUnique({ where: { code: projectCode } });
@@ -345,6 +358,7 @@ async function syncLabSubmissions(config, performedBy) {
 
     let newCount = 0;
     let skippedCount = 0;
+    const skippedReasons = [];
     let lastSubmissionId = config.lastSubmissionId;
 
     for (const submission of submissions) {
@@ -405,38 +419,60 @@ async function syncLabSubmissions(config, performedBy) {
                 attachments: processedAttachments
             };
 
-            await prisma.$transaction(async (tx) => {
-                await tx.sample.create({
-                    data: {
-                        id: sampleId,
-                        originalId: sampleData.original_id,
-                        projectCode: projectCode,
-                        projectId: project?.id || null,
-                        country: labInfo.iso,
-                        countryName: labInfo.name,
-                        labId: null,
-                        assignedLab: config.labId,
-                        status: workflow.SAMPLE_STATES.EXPECTED,
-                        metadata: JSON.stringify(compactMeta),
-                        fieldMetadata: JSON.stringify(fieldMetadata),
-                        receptionDate: null
+            try {
+                await prisma.$transaction(async (tx) => {
+                    // Commit-time verification of active project admissions and lab membership inside transaction
+                    const currentProject = await tx.project.findUnique({
+                        where: { code: projectCode },
+                        include: { projectLabs: true }
+                    });
+                    if (!currentProject || ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(currentProject.status)) {
+                        throw new Error(`ADMISSION_POLICY_BLOCKED: Project '${projectCode}' admissions are ${currentProject?.status || 'MISSING'}`);
                     }
+                    const currentMembers = [currentProject.labId, ...(currentProject.projectLabs || []).map(pl => pl.labId)].filter(Boolean);
+                    if (!currentMembers.includes(config.labId)) {
+                        throw new Error(`MEMBERSHIP_REVOKED: Laboratory '${config.labId}' is not an authorized servicing laboratory for project '${projectCode}'`);
+                    }
+
+                    await tx.sample.create({
+                        data: {
+                            id: sampleId,
+                            originalId: sampleData.original_id,
+                            projectCode: projectCode,
+                            projectId: currentProject.id,
+                            country: labInfo.iso,
+                            countryName: labInfo.name,
+                            labId: null,
+                            assignedLab: config.labId,
+                            status: workflow.SAMPLE_STATES.EXPECTED,
+                            metadata: JSON.stringify(compactMeta),
+                            fieldMetadata: JSON.stringify(fieldMetadata),
+                            receptionDate: null
+                        }
+                    });
+
+                    await tx.auditLog.create({
+                        data: {
+                            id: crypto.randomUUID(),
+                            entity: 'SAMPLE',
+                            entityId: sampleId,
+                            action: 'CREATE_KOBO_SYNC',
+                            performedBy: performedBy,
+                            timestamp: new Date()
+                        }
+                    });
                 });
 
-                await tx.auditLog.create({
-                    data: {
-                        id: crypto.randomUUID(),
-                        entity: 'SAMPLE',
-                        entityId: sampleId,
-                        action: 'CREATE_KOBO_SYNC',
-                        performedBy: performedBy,
-                        timestamp: new Date()
-                    }
-                });
-            });
-
-            newCount++;
-            existingIds.add(normalizedId);
+                newCount++;
+                existingIds.add(normalizedId);
+            } catch (err) {
+                if (err.message?.includes('ADMISSION_POLICY_BLOCKED') || err.message?.includes('MEMBERSHIP_REVOKED')) {
+                    skippedCount++;
+                    skippedReasons.push({ originalId: sampleData.original_id, reason: err.message });
+                    continue;
+                }
+                throw err;
+            }
         }
 
         // Track last submission ID
@@ -476,7 +512,12 @@ async function syncLabSubmissions(config, performedBy) {
 
     console.log(`[KOBO] Sync complete for ${config.labId}: ${newCount} new, ${skippedCount} skipped`);
 
-    return { newSamples: newCount, skipped: skippedCount, lastSubmissionId };
+    return {
+        newSamples: newCount,
+        skipped: skippedCount,
+        lastSubmissionId,
+        skippedReasons: skippedReasons.length > 0 ? skippedReasons : undefined
+    };
 }
 
 // Helper: categorize photo by Kobo question_xpath

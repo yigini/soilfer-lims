@@ -905,8 +905,11 @@
       "noSamplesYet": "Nenhuma amostra registrada neste projeto ainda",
       "noSamplesDesc": "Importe um manifesto pré-registrado ou sincronize do KoboToolbox para iniciar o recebimento.",
       "filteredNotice": "(filtrado)",
-      "fetchError": "Falha ao carregar amostras: {{error}}"
-    }
+      "fetchError": "Falha ao carregar amostras: {{error}}",
+      "accession": "Nº de laboratório: {{labId}}",
+      "searchAriaLabel": "Pesquisar amostras do projeto por ID de campo ou laboratório"
+    },
+    "draft": "Rascunho"
   },
   "users": {
     "title": "Pessoal de Laboratório e Utilizadores",

@@ -905,8 +905,11 @@
       "noSamplesYet": "Aucun échantillon enregistré pour ce projet",
       "noSamplesDesc": "Importez un manifeste ou synchronisez KoboToolbox pour commencer la réception.",
       "filteredNotice": "(filtré)",
-      "fetchError": "Échec du chargement des échantillons: {{error}}"
-    }
+      "fetchError": "Échec du chargement des échantillons: {{error}}",
+      "accession": "N° de laboratoire : {{labId}}",
+      "searchAriaLabel": "Rechercher des échantillons du projet par identifiant de terrain ou de laboratoire"
+    },
+    "draft": "Brouillon"
   },
   "users": {
     "title": "Personnel de Laboratoire et Utilisateurs",

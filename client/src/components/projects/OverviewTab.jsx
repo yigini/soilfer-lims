@@ -113,8 +113,8 @@ export default function OverviewTab({
                         </h2>
                         <p className="text-xs text-sf-muted mt-0.5">
                             {capabilities.isScopedOnly
-                                ? t('projects.overview.scopedRegisteredCount', '{{count}} registered in your laboratory · Current stages, counted once per sample', { count: totalRegistered })
-                                : t('projects.overview.wholeRegisteredCount', '{{count}} registered across this project · Current stages, counted once per sample', { count: totalRegistered })}
+                                ? t('projects.overview.scopedRegisteredCount', { count: totalRegistered }, '{{count}} registered in your laboratory · Current stages, counted once per sample')
+                                : t('projects.overview.wholeRegisteredCount', { count: totalRegistered }, '{{count}} registered across this project · Current stages, counted once per sample')}
                         </p>
                     </div>
                     <button
@@ -200,7 +200,7 @@ export default function OverviewTab({
                         </div>
                         <div className="space-y-1 flex-1">
                             <h3 className="text-sm font-bold text-sf-text">
-                                {t('projects.overview.actionExpectedTitle', 'Follow up on {{count}} expected samples', { count: counts?.awaitingArrival ?? 0 })}
+                                {t('projects.overview.actionExpectedTitle', { count: counts?.awaitingArrival ?? 0 }, 'Follow up on {{count}} expected samples')}
                             </h3>
                             <p className="text-xs text-sf-muted">
                                 {t('projects.overview.actionExpectedDesc', 'Expected samples have not arrived physically at reception; they are not workbench drying tasks.')}
