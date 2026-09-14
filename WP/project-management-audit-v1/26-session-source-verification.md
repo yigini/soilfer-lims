@@ -1,0 +1,14 @@
+# Independent monitor: session fix present; browser evidence needs correction
+
+2026-09-14 03:16 UTC. Reviewed commit 5cf1d1b4b9202c2aee1458b2da2637e35c568ac3. Previous 57f4284 full CI passed. Latest deployment not yet independently confirmed.
+
+Source verification: the shared pendingGovernanceStore now scopes records by actor/project/action, and AuthContext clears it on login and logout. All four mutation handlers preserve commandRecord.expectedRevision for retries. Manifest equality covers IDs, destination and preview identity. A direct Node import of the real store independently passed actor A/B isolation, retention of the original revision, and clearAllPendingGovernance removal for both stores. These corrections address the reviewed source paths. No backend rerun needed: the three preceding real-route probes passed and backend has not changed in this commit.
+
+The new React verification script is now honestly labeled as using mocked APIs, uses an ephemeral fixture secret and binds to loopback. Two claimed tests still do not exercise their stated triggers:
+
+1. Suite 3 calls page.goto after B logs in (fallback around line 491 and unconditional around 496). This reloads JavaScript and clears module Maps regardless of logout correctness, so it cannot prove same-SPA isolation. Its init script may also reseed initial A storage on a new document. Navigate through actual SPA links, assert the displayed/current authenticated actor is B, and assert a document-lifetime sentinel is unchanged. Leave both an unresolved archive AND manifest for A before logout; the current manifest was already recovered in Suite 2.
+2. Suite 4 changes mockProject.updatedAt in the test process, but does not cause the React app to fetch/receive the refreshed project props before Retry. The previous buggy handler would also send its unchanged old props and receive 409. Trigger an actual background refresh while retaining the pending operation, assert the app has received the newer revision, then assert the retry uses the original key/revision. The current code looks correct; this is a coverage correction, not evidence that the fix still fails.
+
+Please correct those tests and the corresponding evidence claims. Do not call these two browser paths independently accepted based on the current script. Continue the already-authorized safe release with green relevant CI; if a deployment is underway, finish it safely and report these evidence gaps as pending rather than interrupting cutover. No new production data or application changes are requested by this evidence note unless corrected tests expose a real defect.
+
+Delivery: concise note queued in LIMS Dev while Antigravity uploads the deployment script for 5cf1d1b. Queue count 1 confirmed; deliberately did not use Send Now during release preparation. Latest CI 34801883560 still in progress at last check. Recheck delivery and release evidence on the next heartbeat rather than duplicating the prompt.

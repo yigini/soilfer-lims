@@ -500,7 +500,11 @@ export default function ProjectActionsModal({
 
                             {/* Option 1: Pause / Resume */}
                             <button
-                                onClick={() => { setActionType('pause'); setReason(''); }}
+                                onClick={() => {
+                                    setActionType('pause');
+                                    const active = findActiveOp();
+                                    setReason(active?.action === 'pause' ? active.snapshot?.reason || '' : '');
+                                }}
                                 className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
                             >
                                 {isPaused ? <Play className="w-5 h-5 text-emerald-600 mt-0.5" /> : <Pause className="w-5 h-5 text-amber-600 mt-0.5" />}
@@ -516,7 +520,11 @@ export default function ProjectActionsModal({
 
                             {/* Option 2: Archive Readiness */}
                             <button
-                                onClick={() => { setActionType('archive'); setReason(''); }}
+                                onClick={() => {
+                                    setActionType('archive');
+                                    const active = findActiveOp();
+                                    setReason(active?.action === 'archive' ? active.snapshot?.reason || '' : '');
+                                }}
                                 className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
                             >
                                 <Archive className="w-5 h-5 text-sf-muted mt-0.5" />

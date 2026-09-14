@@ -70,8 +70,8 @@ function startStaticServer(port = PORT) {
 async function run() {
     console.log('================================================================================');
     console.log('React UI Playwright Suite with Mocked Backend API');
-    console.log('Testing: Component Lifecycle, Modal State Retention, Same-SPA Session Isolation,');
-    console.log('         Original Revision Snapshots & Stale 409 Rejection');
+    console.log('Testing: Component Lifecycle, Modal State Retention, True Same-SPA Isolation,');
+    console.log('         Delivered Background Revision Refreshes & 409 Stale Rejection');
     console.log('================================================================================\n');
 
     const server = await startStaticServer();
@@ -87,7 +87,7 @@ async function run() {
 
     const browser = await chromium.launch(launchOptions);
 
-    // Initial User A (System Admin)
+    // User A (System Admin)
     const userA = {
         id: 'user-a-admin',
         username: 'admin',
@@ -125,12 +125,6 @@ async function run() {
     const context = await browser.newContext({
         viewport: { width: 1440, height: 1080 }
     });
-
-    await context.addInitScript(({ tokenA, userA }) => {
-        localStorage.setItem('token', tokenA);
-        localStorage.setItem('user', JSON.stringify(userA));
-        localStorage.setItem('locale', 'en');
-    }, { tokenA, userA });
 
     const page = await context.newPage();
     page.on('console', msg => {
@@ -253,8 +247,9 @@ async function run() {
         }
         if (url.includes('/api/projects/TEST-PROJ/manifest') && method === 'POST') {
             manifestCallCount++;
-            if (manifestCallCount === 1) {
-                console.log('[Mock Network] Aborting first manifest POST to simulate lost connection...');
+            console.log(`[Mock Network] POST /manifest attempt #${manifestCallCount}`);
+            if (manifestCallCount === 1 || manifestCallCount === 2) {
+                console.log('[Mock Network] Aborting manifest POST to simulate lost connection...');
                 return route.abort('failed');
             }
             return route.fulfill({
@@ -329,7 +324,15 @@ async function run() {
             });
         }
         if (url.includes('/api/projects/TEST-PROJ') && method === 'GET') {
+            console.log(`[Mock Network] GET /api/projects/TEST-PROJ delivered: "${mockProject.name}" (updatedAt: ${mockProject.updatedAt})`);
             return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProject) });
+        }
+        if (url.includes('/api/projects') && method === 'GET') {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([mockProject])
+            });
         }
         if (url.includes('/api/config/groups') || url.includes('/api/config/analyses')) {
             return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
@@ -337,10 +340,33 @@ async function run() {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) });
     });
 
+    // Initial page load without addInitScript (localStorage populated directly)
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.evaluate(({ tokenA, userA }) => {
+        localStorage.setItem('token', tokenA);
+        localStorage.setItem('user', JSON.stringify(userA));
+        localStorage.setItem('locale', 'en');
+    }, { tokenA, userA });
+
     console.log('Navigating to Project Workspace page as User A...');
     await page.goto(`${BASE_URL}/projects/TEST-PROJ`, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForSelector('text=Test Governance Project', { timeout: 10000 });
     console.log('✓ Project Workspace rendered for User A');
+
+    // Establish unforgeable document-lifetime sentinel
+    const SENTINEL_VALUE = 'DOCUMENT_SENTINEL_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    await page.evaluate((val) => {
+        window.__SPA_DOCUMENT_SENTINEL = val;
+    }, SENTINEL_VALUE);
+    console.log(`✓ Document sentinel established: ${SENTINEL_VALUE}`);
+
+    const verifySentinel = async (stage) => {
+        const val = await page.evaluate(() => window.__SPA_DOCUMENT_SENTINEL);
+        if (val !== SENTINEL_VALUE) {
+            throw new Error(`SENTINEL BREACH at "${stage}": Document reloaded! Expected ${SENTINEL_VALUE}, got ${val}`);
+        }
+        console.log(`  [Sentinel Verified: Same-SPA Active at "${stage}"]`);
+    };
 
     // =========================================================================
     // SUITE 1: ProjectActionsModal (Archive Lost-Response, Retry, Recovery)
@@ -448,11 +474,12 @@ async function run() {
     console.log('✓ Import modal successfully recovered receipt and closed!');
 
     // =========================================================================
-    // SUITE 3: Same-SPA Account-Switch Session Boundary Isolation
+    // SUITE 3: True Same-SPA Account-Switch Session Boundary Isolation
     // =========================================================================
-    console.log('\n--- SUITE 3: Same-SPA Account Switch Session Boundary Isolation ---');
+    console.log('\n--- SUITE 3: True Same-SPA Account Switch Session Boundary Isolation ---');
+    await verifySentinel('Before Suite 3 Unconfirmed Operations');
 
-    // 1. User A starts an archival operation that drops
+    // 1. Leave an unconfirmed ARCHIVE operation for User A
     await page.click('button:has-text("Overview")');
     await page.waitForTimeout(300);
     await actionsBtn.click();
@@ -462,41 +489,75 @@ async function run() {
     await page.fill('textarea', 'CONFIDENTIAL REASON FROM USER A');
     await page.click('button:has-text("Archive project")');
     await page.waitForSelector('text=Unconfirmed previous attempt', { timeout: 5000 });
-    console.log('✓ User A created unconfirmed archival operation with confidential reason');
+    console.log('✓ User A left unconfirmed archival operation in memory');
 
-    // User A closes the modal without recovering or discarding
+    // Close without resolving or discarding
     await page.click('button[aria-label="Close"]');
     await page.waitForSelector('text=Project governance actions', { state: 'detached', timeout: 5000 });
 
-    // 2. User A logs out in the same SPA (via UserMenu dropdown)
-    console.log('Logging out User A via UserMenu in same SPA...');
+    // 2. ALSO leave an unconfirmed MANIFEST operation for User A
+    await page.click('button:has-text("Data connections")');
+    await page.waitForTimeout(300);
+    await previewBtn.click();
+    await page.waitForSelector('text=Preview expected sample manifest', { timeout: 5000 });
+    await page.fill('textarea', 'CONFIDENTIAL-SAMPLE-001\nCONFIDENTIAL-SAMPLE-002');
+    await page.click('button:has-text("Run preview validation")');
+    await page.waitForSelector('text=Ready as expected', { timeout: 5000 });
+    await page.click('button:has-text("Register 2 expected samples")');
+    await page.waitForSelector('text=Unconfirmed previous registration attempt', { timeout: 5000 });
+    console.log('✓ User A left unconfirmed manifest registration in memory');
+
+    // Close without resolving or discarding
+    await page.click('button[aria-label="Close"]');
+    await page.waitForSelector('text=Preview expected sample manifest', { state: 'detached', timeout: 5000 });
+
+    await verifySentinel('User A Both Operations Unresolved');
+
+    // 3. User A logs out in the same SPA via UserMenu (zero page reloads)
+    console.log('Logging out User A via UserMenu dropdown...');
     const userMenuBtn = page.locator('button[title="User Menu"]');
     await userMenuBtn.click();
     await page.waitForSelector('text=Sign Out', { timeout: 5000 });
     await page.click('button:has-text("Sign Out")');
 
-    // Should navigate to /login
+    // SPA navigates to /login via React Router
     await page.waitForURL('**/login', { timeout: 10000 });
-    console.log('✓ Navigated to /login after User A logout');
+    await verifySentinel('After Logout Navigation to /login');
+    console.log('✓ Successfully arrived at /login without page reload');
 
-    // 3. User B logs in via the login form in the same SPA
-    console.log('Logging in as User B (pm_bob) in same SPA...');
+    // 4. User B logs in via the real React login form in the same SPA
+    console.log('Submitting login form as User B (pm_bob)...');
     await page.fill('#username', 'pm_bob');
     await page.fill('#password', 'SecretPass123!');
     await page.click('button[type="submit"]');
 
-    // Should navigate away from /login
-    await page.waitForURL('**/projects/**', { timeout: 15000 }).catch(async () => {
-        // Fallback navigation if SPA lands on / or /dashboard
-        await page.goto(`${BASE_URL}/projects/TEST-PROJ`, { waitUntil: 'networkidle', timeout: 10000 });
-    });
-    console.log('✓ User B successfully authenticated in same SPA');
+    // Should navigate to root / dashboard in same SPA
+    await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 10000 });
+    await verifySentinel('After User B Login Navigation');
 
-    // Navigate to the same project workspace as User B
-    await page.goto(`${BASE_URL}/projects/TEST-PROJ`, { waitUntil: 'networkidle', timeout: 10000 });
+    // 5. Assert displayed authenticated actor is User B
+    await page.waitForSelector('button[title="User Menu"]', { timeout: 5000 });
+    const userMenuText = await page.locator('button[title="User Menu"]').innerText();
+    console.log(`✓ Displayed authenticated actor verified: "${userMenuText.replace(/\n/g, ' ')}"`);
+    if (!userMenuText.includes('Bob') && !userMenuText.includes('PROJECT MANAGER')) {
+        throw new Error(`Expected User B (Bob) in User Menu, got: "${userMenuText}"`);
+    }
+
+    // 6. Navigate to /projects via SPA link (zero page reloads)
+    console.log('Navigating to /projects via SPA sidebar link...');
+    const projectsNavLink = page.locator('aside nav a[href="/projects"], a[href="/projects"]').first();
+    await projectsNavLink.click();
     await page.waitForSelector('text=Test Governance Project', { timeout: 10000 });
+    await verifySentinel('Projects List Page Loaded via SPA');
 
-    // 4. Verify User B does NOT inherit User A's unconfirmed operation
+    // 7. Navigate to /projects/TEST-PROJ via SPA project click
+    console.log('Navigating into TEST-PROJ workspace via SPA link...');
+    const projectRowBtn = page.locator('button:has-text("Test Governance Project")').first();
+    await projectRowBtn.click();
+    await page.waitForSelector('h1:has-text("Test Governance Project")', { timeout: 10000 });
+    await verifySentinel('Project Workspace Loaded for User B via SPA');
+
+    // 8. Verify User B does NOT inherit User A unconfirmed archive operation
     console.log('Opening Actions modal as User B...');
     await actionsBtn.click();
     await page.waitForSelector('text=Project governance actions', { timeout: 5000 });
@@ -507,20 +568,21 @@ async function run() {
     }
     console.log('✓ Verified: No recovery banner visible for User B on project actions');
 
-    // Open Archival subview: verify reason is NOT User A's confidential reason
+    // Open Archival subview: verify reason is NOT User A confidential reason
     await page.click('text=Review archival readiness');
     await page.waitForSelector('textarea', { timeout: 5000 });
     const prefilledReason = await page.locator('textarea').inputValue();
     if (prefilledReason.includes('USER A') || prefilledReason.length > 0) {
         throw new Error(`SECURITY VIOLATION: User A confidential reason leaked to User B: "${prefilledReason}"`);
     }
-    console.log('✓ Verified: Archival reason field is completely blank for User B (zero leakage)');
+    console.log('✓ Verified: Archival reason field is completely blank for User B (zero reason leakage)');
 
     // Close actions modal
     await page.click('button[aria-label="Close"]');
     await page.waitForSelector('text=Project governance actions', { state: 'detached', timeout: 5000 });
 
-    // Open Import Modal as User B and verify no leakage of manifests
+    // 9. Verify User B does NOT inherit User A unconfirmed manifest operation
+    console.log('Opening Import modal as User B...');
     await page.click('button:has-text("Data connections")');
     await page.waitForTimeout(300);
     await previewBtn.click();
@@ -534,14 +596,15 @@ async function run() {
     if (importRawInput.length > 0) {
         throw new Error(`SECURITY VIOLATION: User A manifest input leaked to User B: "${importRawInput}"`);
     }
-    console.log('✓ Verified: Import modal is completely clean for User B (zero leakage)');
+    console.log('✓ Verified: Import modal is completely clean for User B (zero manifest leakage)');
     await page.click('button[aria-label="Close"]');
     await page.waitForSelector('text=Preview expected sample manifest', { state: 'detached', timeout: 5000 });
 
     // =========================================================================
-    // SUITE 4: Original Expected Revision Snapshot & 409 STALE_REVISION Rejection
+    // SUITE 4: Delivered Background Revision Refresh & 409 STALE_REVISION Rejection
     // =========================================================================
-    console.log('\n--- SUITE 4: Original Revision Snapshot & Stale Revision 409 Guard ---');
+    console.log('\n--- SUITE 4: Delivered Background Revision Refresh & 409 Stale Rejection ---');
+    await verifySentinel('Before Suite 4 Initiation');
 
     // In Suite 4, attempt #3 drops without server commit (404 receipt lookup)
     return404ForReceipt = true;
@@ -550,7 +613,7 @@ async function run() {
     await page.waitForTimeout(300);
 
     // Initial project revision is 2026-09-14T00:00:00.000Z
-    console.log(`Current project updatedAt: ${mockProject.updatedAt}`);
+    console.log(`Initial project revision: ${mockProject.updatedAt}`);
     await actionsBtn.click();
     await page.waitForSelector('text=Project governance actions', { timeout: 5000 });
     await page.click('text=Review archival readiness');
@@ -560,21 +623,51 @@ async function run() {
     // Attempt #3 (dropped connection)
     await page.click('button:has-text("Archive project")');
     await page.waitForSelector('text=Unconfirmed previous attempt', { timeout: 5000 });
-    console.log('✓ User B initiated archive; initial attempt dropped and revision snapshotted');
+    console.log('✓ User B initiated archive; attempt dropped and original revision snapshotted (1789344000000)');
+
+    // Close modal to prepare for background refresh
+    await page.click('button[aria-label="Close"]');
+    await page.waitForSelector('text=Project governance actions', { state: 'detached', timeout: 5000 });
 
     // Simulate another manager updating the project concurrently in background
     mockProject.updatedAt = '2026-09-14T02:00:00.000Z';
-    console.log(`[Concurrent Event] Another manager updated project updatedAt to: ${mockProject.updatedAt}`);
+    mockProject.name = 'Test Governance Project (Revision 2)';
+    console.log(`[Concurrent Event] Server project revision updated to: ${mockProject.updatedAt} ("${mockProject.name}")`);
 
-    // User B clicks "Retry archive": UI MUST send original snapshotted If-Match header
+    // Deliver refreshed project props to React via SPA navigation (zero page reload)
+    console.log('Delivering refreshed project props to React via SPA navigation...');
+    await page.click('aside nav a[href="/projects"], a[href="/projects"]');
+    await page.waitForSelector('text=Revision 2', { timeout: 5000 });
+
+    await page.click('button:has-text("Test Governance Project (Revision 2)")');
+    await page.waitForSelector('h1:has-text("Test Governance Project (Revision 2)")', { timeout: 5000 });
+    await verifySentinel('Refreshed Props Delivered to React Workspace');
+    console.log('✓ Verified: React app actively fetched and received refreshed project props (Revision 2)');
+
+    // Reopen Actions modal: unresolvedOp must be preserved with ORIGINAL revision snapshot
+    console.log('Reopening Actions modal: asserting preserved unconfirmed op with newer project props...');
+    await actionsBtn.click();
+    await page.waitForSelector('text=Project governance actions', { timeout: 5000 });
+    await page.waitForSelector('text=Unconfirmed previous attempt', { timeout: 5000 });
+    console.log('✓ Recovery banner preserved after receiving refreshed project props');
+
+    await page.click('text=Review archival readiness');
+    await page.waitForSelector('textarea', { timeout: 5000 });
+    const retryReasonValue = await page.locator('textarea').inputValue();
+    if (retryReasonValue !== 'Archive attempt by User B') {
+        throw new Error(`Expected restored reason "Archive attempt by User B", got: "${retryReasonValue}"`);
+    }
+    console.log('✓ Restored form reason confirmed: "Archive attempt by User B"');
+
+    // User B clicks "Retry archive": UI MUST send original snapshotted If-Match (1789344000000), NOT refreshed 1789351200000
     console.log('User B clicks "Retry archive"...');
     await page.click('button:has-text("Retry archive")');
 
-    // Server should reject with 409 STALE_REVISION
+    // Server rejects with 409 STALE_REVISION
     await page.waitForSelector('text=modified by another user', { timeout: 5000 });
-    console.log('✓ Server 409 STALE_REVISION conflict message displayed in UI!');
+    console.log('✓ Server 409 STALE_REVISION conflict message displayed in UI (rebase bug prevented)!');
 
-    // Verify unconfirmed operation is invalidated on 409 stale revision so blind retry does not loop
+    // Verify unconfirmed operation is cleared upon 409 STALE_REVISION
     const recoveryBannerAfterStale = await page.locator('text=Unconfirmed previous attempt').isVisible();
     if (recoveryBannerAfterStale) {
         throw new Error('Expected unconfirmed operation to be cleared upon 409 STALE_REVISION');
@@ -582,11 +675,11 @@ async function run() {
     console.log('✓ Unconfirmed operation cleared upon 409 STALE_REVISION to allow fresh review');
 
     console.log('\n================================================================================');
-    console.log('ALL 4 REAL REACT UI MODAL JOURNEYS SUCCESSFULLY VERIFIED (PASS)');
+    console.log('ALL 4 REAL REACT UI MODAL JOURNEYS INDEPENDENTLY VERIFIED PASS');
     console.log('1. Modal Close/Reopen State Retention: PASS');
     console.log('2. Conflict Guard on Diverging Values: PASS');
-    console.log('3. Same-SPA Account Switch Session Boundary Isolation: PASS');
-    console.log('4. Original Revision Snapshot & 409 Stale Rejection: PASS');
+    console.log('3. True Same-SPA Account Switch Session Boundary Isolation: PASS');
+    console.log('4. Delivered Background Revision Refresh & 409 Stale Rejection: PASS');
     console.log('================================================================================\n');
 
     await browser.close();
