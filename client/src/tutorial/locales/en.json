@@ -29,7 +29,39 @@
     "pausedTitle": "Your place is kept.",
     "pausedDesc": "The guide is paused. No automatic progress or laboratory action happens while paused. Existing pages, drafts and permissions remain intact.",
     "exitTitle": "Back to ordinary LIMS use.",
-    "exitDesc": "The tutorial overlay has been removed. All normal application pages, forms and drafts remain untouched."
+    "exitDesc": "The tutorial overlay has been removed. All normal application pages, forms and drafts remain untouched.",
+    "language": "Language",
+    "close": "Close",
+    "navigate": "Go to page →",
+    "unauthorizedRole": "This step belongs to a {role}. Continue with this practice exercise below, or sign in with the {role} account provided for this session.",
+    "signedInAs": "Signed in as",
+    "notSignedIn": "Visitor (No account)",
+    "practiceBadge": "Practice only · no LIMS writes",
+    "missingAnchor": "Target element not present on this page view. Docked guidance remains active.",
+    "capsFollowSample": "Follow the sample",
+    "capsGuidedVisit": "A guided laboratory visit",
+    "tableSampleId": "Sample ID",
+    "tableFieldId": "Field ID",
+    "tableState": "State",
+    "quickCheckTitle": "A quick check",
+    "capsWelcome": "Welcome to SoilFER",
+    "welcomeHeadline": "From field to trusted result.",
+    "welcomeLead": "A guided introduction to the people, steps and evidence behind every sample.",
+    "pathFullTitle": "Follow a sample",
+    "pathFullDesc": "The full laboratory story",
+    "pathQuickTitle": "Show me the platform",
+    "pathQuickDesc": "A short first impression",
+    "pathRoleTitle": "Learn my role",
+    "pathRoleDesc": "Start where your work happens",
+    "signInPrompt": "Sign in to your laboratory",
+    "exploreRole": "Explore a specific role",
+    "chooseRoleTrack": "Choose a role track:",
+    "startRoleTrack": "Start this role track →",
+    "roleReceptionOfficer": "Reception officer",
+    "roleLabTechnician": "Laboratory technician",
+    "roleLabManager": "Laboratory manager",
+    "roleProjectCoordinator": "Project coordinator",
+    "roleViewerAuditor": "Viewer / auditor"
   },
   "roles": {
     "visitor": "Visitor",
@@ -52,7 +84,14 @@
       "question": "A sample is “expected”. Has its container arrived?",
       "optNotNecessarily": "Not necessarily",
       "feedbackCorrect": "Correct. Expected means it is planned or registered; the lab confirms physical arrival separately.",
-      "feedbackIncorrect": "Not quite. Expected means it is planned or registered; the lab confirms physical arrival separately."
+      "feedbackIncorrect": "Not quite. Expected means it is planned or registered; the lab confirms physical arrival separately.",
+      "step1Title": "Receive & identify",
+      "step1Actor": "Reception team",
+      "step2Title": "Prepare & analyse",
+      "step2Actor": "Technician",
+      "step3Title": "Check & report",
+      "step3Actor": "Reviewer",
+      "note": "People perform the laboratory work. The platform keeps the connected records."
     },
     "f02": {
       "title": "One sample. Connected work.",
@@ -66,7 +105,20 @@
       "optOneSample": "One sample",
       "optTwoSamples": "Two samples",
       "feedbackCorrect": "Correct. One sample record can have several analyses, assigned tasks and results.",
-      "feedbackIncorrect": "Not quite. One sample record can have several analyses, assigned tasks and results."
+      "feedbackIncorrect": "Not quite. One sample record can have several analyses, assigned tasks and results.",
+      "labTitle": "Laboratory",
+      "labDesc": "The facility and team handling the work",
+      "projectTitle": "Project",
+      "projectDesc": "Related samples and work across facilities",
+      "projectNotice": "A project may involve more than one laboratory.",
+      "sampleBadge": "Example sample · TRAIN-US-001",
+      "node1Title": "Sample record",
+      "node1Desc": "Identity & progress",
+      "node2Title": "Tasks & results",
+      "node2Desc": "pH · texture",
+      "node3Title": "Report",
+      "node3Desc": "Authorized results",
+      "note": "The field identifier links to collection. The laboratory identifier helps you match the container to its record."
     },
     "f03": {
       "title": "Where should I go next?",
@@ -80,7 +132,23 @@
       "optCompleteSubmit": "I still need to complete and submit it",
       "optReviewerApprove": "The reviewer can already approve it",
       "feedbackCorrect": "Correct. A draft is still yours to complete; submission is the handover for review.",
-      "feedbackIncorrect": "Not quite. A draft is still yours to complete; submission is the handover for review."
+      "feedbackIncorrect": "Not quite. A draft is still yours to complete; submission is the handover for review.",
+      "searchPlaceholder": "Search practice samples (e.g. TRAIN-US-001)...",
+      "filterAll": "All",
+      "filterExpected": "Expected",
+      "filterReceived": "Received",
+      "sampleSelected": "Selected: {id} · {state}. Tip: In real LIMS, check the laboratory selector or clear filters before concluding a sample is missing.",
+      "nodeHomeTitle": "Home",
+      "nodeHomeDesc": "What needs attention",
+      "nodeSamplesTitle": "Samples",
+      "nodeSamplesDesc": "Find identity & history",
+      "nodeWorkbenchTitle": "Workbench",
+      "nodeWorkbenchDesc": "Record assigned work",
+      "nodeReviewTitle": "Review queue",
+      "nodeReviewDesc": "Check submitted work",
+      "nodeReportsTitle": "Reports & Help",
+      "nodeReportsDesc": "Find results & guidance",
+      "notice": "Missing a sample? Check your account/laboratory, the identifier and any filters. If it is still missing, ask the responsible person for help."
     }
   },
   "chapters": {
@@ -188,7 +256,8 @@
       "check1": "Verify the applicable drying and preparation records.",
       "check2": "Confirm prepared portions are labelled for their analyses.",
       "button": "Verify practice checklist",
-      "verifiedStatus": "Practice checklist verified. No actual preparation record was changed."
+      "verifiedStatus": "Practice checklist verified. No actual preparation record was changed.",
+      "countSelected": "{count} of 3 checks selected."
     },
     "bench": {
       "colSample": "Sample",
@@ -208,7 +277,8 @@
       "initialStatus": "This field belongs to the preview, not the real workbench.",
       "previewPrefix": "Practice preview:",
       "previewSuffix": "In LIMS, confirm the configured method and limits before recording.",
-      "error": "Enter a valid numeric reading."
+      "error": "Enter a valid numeric reading.",
+      "methodName": "pH in water"
     },
     "texture": {
       "sand": "Sand",
@@ -233,7 +303,9 @@
       "infoSample": "Sample",
       "infoFile": "File",
       "infoQuality": "Quality",
-      "ribbon": "A raw scan, a quality-checked spectrum and an approved prediction are different records."
+      "ribbon": "A raw scan, a quality-checked spectrum and an approved prediction are different records.",
+      "fileDesc": "illustrative-spectrum.csv · not an instrument export",
+      "qualityDesc": "not assessed · no predictions generated"
     },
     "review": {
       "badgeExample": "Review example",
@@ -264,6 +336,30 @@
       "sisDesc": "Review the allowed dataset and its metadata. A payload preview does not prove delivery or acknowledgement by a national SIS.",
       "langTitle": "Use your language.",
       "langDesc": "The implementation follows the platform's five language options."
+    },
+    "equipment": {
+      "title": "Equipment readiness",
+      "desc": "Check operational state and calibration before using an instrument. Viewing this page does not book or calibrate equipment.",
+      "assetName": "pH Meter Bench 02",
+      "statusLabel": "Operational Status",
+      "statusReady": "Ready for use",
+      "calibrationDue": "Calibration valid until 30 Sep 2026"
+    },
+    "inventory": {
+      "title": "Inventory lots",
+      "desc": "Check quantity, expiry, and storage conditions. Viewing stock does not consume or reserve it.",
+      "reagentName": "Buffer Solution pH 7.00",
+      "lotNumber": "LOT-2026-08",
+      "expiryLabel": "Expiry Date",
+      "expiryDate": "15 Dec 2026"
+    },
+    "finish": {
+      "step1": "01 Confirm your account, laboratory and testing role.",
+      "step2": "02 Use only the designated test samples.",
+      "step3": "03 Report one distinct problem per GitHub issue.",
+      "helpLink": "Open Help Centre ↗",
+      "reportLink": "Report an issue on GitHub ↗",
+      "summaryText": "{doneCount} lessons explored · {skippedCount} skipped"
     }
   },
   "glossary": {
@@ -280,5 +376,12 @@
     "draft": "Saved work that is not yet submitted for checking.",
     "submit": "Hand completed work to the person who checks it.",
     "auditHistory": "A record of who did what and when."
+  },
+  "aria": {
+    "chaptersNav": "Tutorial chapters navigation",
+    "coach": "First-visit guide docked coach",
+    "progress": "Tutorial progress",
+    "sampleTube": "Focus practice sample {num}",
+    "mobileToggle": "Toggle tutorial coach view"
   }
 }

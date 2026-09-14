@@ -42,7 +42,7 @@ export default function PracticeWorksheetPH({ sample, benchValue, onUpdate, onMa
                             {[1, 2, 3, 4, 5].map(n => (
                                 <tr key={n}>
                                     <td><b>TRAIN-US-00{n}</b></td>
-                                    <td>pH in water</td>
+                                    <td>{t('practice.bench.methodName', 'pH in water')}</td>
                                     <td>
                                         {n === sample ? (
                                             <input

@@ -29,7 +29,39 @@
     "pausedTitle": "Votre progression est conservée.",
     "pausedDesc": "Le guide est en pause. Aucune action automatique ou de laboratoire n'est exécutée. Vos pages, brouillons et autorisations restent intacts.",
     "exitTitle": "Retour à l'utilisation normale du LIMS.",
-    "exitDesc": "Le guide a été fermé. Toutes les pages, formulaires et brouillons habituels restent inchangés."
+    "exitDesc": "Le guide a été fermé. Toutes les pages, formulaires et brouillons habituels restent inchangés.",
+    "language": "Langue",
+    "close": "Fermer",
+    "navigate": "Aller à la page →",
+    "unauthorizedRole": "Cette étape appartient à un {role}. Poursuivez cet exercice ci-dessous ou connectez-vous avec le compte {role} fourni pour cette session.",
+    "signedInAs": "Connecté en tant que",
+    "notSignedIn": "Visiteur (Non connecté)",
+    "practiceBadge": "Pratique uniquement · aucune écriture dans LIMS",
+    "missingAnchor": "Élément non visible sur cette page. Le guide reste actif.",
+    "capsFollowSample": "Suivre l'échantillon",
+    "capsGuidedVisit": "Une visite guidée du laboratoire",
+    "tableSampleId": "ID échantillon",
+    "tableFieldId": "ID terrain",
+    "tableState": "État",
+    "quickCheckTitle": "Une vérification rapide",
+    "capsWelcome": "Bienvenue sur SoilFER",
+    "welcomeHeadline": "Du terrain au résultat fiable.",
+    "welcomeLead": "Une introduction guidée aux personnes, étapes et preuves associées à chaque échantillon.",
+    "pathFullTitle": "Suivre un échantillon",
+    "pathFullDesc": "L'histoire complète du laboratoire",
+    "pathQuickTitle": "Découvrir la plateforme",
+    "pathQuickDesc": "Un premier aperçu rapide",
+    "pathRoleTitle": "Découvrir mon rôle",
+    "pathRoleDesc": "Commencez là où votre travail s'effectue",
+    "signInPrompt": "Connectez-vous à votre laboratoire",
+    "exploreRole": "Explorer un rôle spécifique",
+    "chooseRoleTrack": "Choisir un parcours par rôle :",
+    "startRoleTrack": "Commencer ce parcours →",
+    "roleReceptionOfficer": "Agent de réception",
+    "roleLabTechnician": "Technicien de laboratoire",
+    "roleLabManager": "Responsable de laboratoire",
+    "roleProjectCoordinator": "Coordinateur de projet",
+    "roleViewerAuditor": "Observateur / auditeur"
   },
   "roles": {
     "visitor": "Visiteur",
@@ -52,7 +84,14 @@
       "question": "Un échantillon est indiqué comme «attendu». Son contenant est-il arrivé?",
       "optNotNecessarily": "Pas nécessairement",
       "feedbackCorrect": "Correct. «Attendu» signifie planifié ou enregistré; l'arrivée physique fait l'objet d'une confirmation distincte.",
-      "feedbackIncorrect": "Pas tout à fait. «Attendu» signifie planifié ou enregistré; l'arrivée physique fait l'objet d'une confirmation distincte."
+      "feedbackIncorrect": "Pas tout à fait. «Attendu» signifie planifié ou enregistré; l'arrivée physique fait l'objet d'une confirmation distincte.",
+      "step1Title": "Réceptionner et identifier",
+      "step1Actor": "Équipe de réception",
+      "step2Title": "Préparer et analyser",
+      "step2Actor": "Technicien de laboratoire",
+      "step3Title": "Vérifier et rapporter",
+      "step3Actor": "Réviseur / Responsable",
+      "note": "Le personnel effectue le travail de laboratoire. La plateforme assure le suivi des enregistrements connectés."
     },
     "f02": {
       "title": "Un échantillon. Des travaux reliés.",
@@ -66,7 +105,20 @@
       "optOneSample": "Un seul échantillon",
       "optTwoSamples": "Deux échantillons",
       "feedbackCorrect": "Correct. Une seule fiche d'échantillon regroupe plusieurs analyses, tâches assignées et résultats.",
-      "feedbackIncorrect": "Pas tout à fait. Une seule fiche d'échantillon regroupe plusieurs analyses, tâches assignées et résultats."
+      "feedbackIncorrect": "Pas tout à fait. Une seule fiche d'échantillon regroupe plusieurs analyses, tâches assignées et résultats.",
+      "labTitle": "Laboratoire",
+      "labDesc": "L'installation et l'équipe chargées des analyses",
+      "projectTitle": "Projet",
+      "projectDesc": "Échantillons et analyses associés entre établissements",
+      "projectNotice": "Un projet peut impliquer plusieurs laboratoires.",
+      "sampleBadge": "Échantillon d'exemple · TRAIN-US-001",
+      "node1Title": "Fiche échantillon",
+      "node1Desc": "Identité et progression",
+      "node2Title": "Tâches et analyses",
+      "node2Desc": "pH · texture",
+      "node3Title": "Rapport",
+      "node3Desc": "Résultats autorisés",
+      "note": "L'identifiant de terrain renvoie à la collecte. L'identifiant de laboratoire permet d'associer le contenant physique à sa fiche."
     },
     "f03": {
       "title": "Où dois-je aller ensuite?",
@@ -80,7 +132,23 @@
       "optCompleteSubmit": "Je dois encore le finaliser et le soumettre",
       "optReviewerApprove": "Le réviseur peut déjà l'approuver",
       "feedbackCorrect": "Correct. Le brouillon reste sous votre responsabilité; la soumission est la transmission pour vérification.",
-      "feedbackIncorrect": "Pas tout à fait. Le brouillon reste sous votre responsabilité; la soumission est la transmission pour vérification."
+      "feedbackIncorrect": "Pas tout à fait. Le brouillon reste sous votre responsabilité; la soumission est la transmission pour vérification.",
+      "searchPlaceholder": "Rechercher des échantillons de pratique (ex. TRAIN-US-001)...",
+      "filterAll": "Tous",
+      "filterExpected": "Attendu",
+      "filterReceived": "Reçu",
+      "sampleSelected": "Sélectionné : {id} · {state}. Conseil : Dans le vrai LIMS, vérifiez le sélecteur de laboratoire ou effacez les filtres avant de conclure qu'un échantillon est manquant.",
+      "nodeHomeTitle": "Accueil",
+      "nodeHomeDesc": "Les éléments requérant votre attention",
+      "nodeSamplesTitle": "Échantillons",
+      "nodeSamplesDesc": "Retrouver l'identité et l'historique",
+      "nodeWorkbenchTitle": "Paillasse",
+      "nodeWorkbenchDesc": "Saisir le travail assigné",
+      "nodeReviewTitle": "File de révision",
+      "nodeReviewDesc": "Vérifier le travail soumis",
+      "nodeReportsTitle": "Rapports et Aide",
+      "nodeReportsDesc": "Consulter les résultats et instructions",
+      "notice": "Un échantillon manque ? Vérifiez le laboratoire sélectionné, l'identifiant et les filtres. Si le problème persiste, demandez de l'aide."
     }
   },
   "chapters": {
@@ -188,7 +256,8 @@
       "check1": "Contrôler les fiches applicables de séchage et de préparation.",
       "check2": "Confirmer que les fractions préparées sont étiquetées pour leurs analyses.",
       "button": "Vérifier la liste de contrôle",
-      "verifiedStatus": "Liste de contrôle d'exercice validée. Aucun enregistrement réel n'a été modifié."
+      "verifiedStatus": "Liste de contrôle d'exercice validée. Aucun enregistrement réel n'a été modifié.",
+      "countSelected": "{count} sur 3 vérifications sélectionnées."
     },
     "bench": {
       "colSample": "Échantillon",
@@ -208,7 +277,8 @@
       "initialStatus": "Ce champ appartient à la démonstration, pas à la paillasse réelle.",
       "previewPrefix": "Aperçu d'exercice:",
       "previewSuffix": "Dans le LIMS, confirmez la méthode et les limites configurées avant enregistrement.",
-      "error": "Saisissez une valeur numérique valide."
+      "error": "Saisissez une valeur numérique valide.",
+      "methodName": "pH dans l'eau"
     },
     "texture": {
       "sand": "Sable",
@@ -233,7 +303,9 @@
       "infoSample": "Échantillon",
       "infoFile": "Fichier",
       "infoQuality": "Qualité",
-      "ribbon": "Un spectre brut, un spectre contrôlé et une prédiction validée sont des enregistrements distincts."
+      "ribbon": "Un spectre brut, un spectre contrôlé et une prédiction validée sont des enregistrements distincts.",
+      "fileDesc": "illustrative-spectrum.csv · pas une exportation d'instrument",
+      "qualityDesc": "non évaluée · aucune prédiction générée"
     },
     "review": {
       "badgeExample": "Exemple de révision",
@@ -264,6 +336,30 @@
       "sisDesc": "Examinez les données autorisées et leurs métadonnées. L'aperçu ne vaut pas accusé de réception par le SIS national.",
       "langTitle": "Travaillez dans votre langue.",
       "langDesc": "La plateforme propose cinq langues officielles."
+    },
+    "equipment": {
+      "title": "Préparation de l'équipement",
+      "desc": "Vérifiez l'état de fonctionnement et l'étalonnage avant d'utiliser un instrument. Consulter cette page ne réserve ni n'étalonne l'équipement.",
+      "assetName": "pH-mètre de paillasse 02",
+      "statusLabel": "État opérationnel",
+      "statusReady": "Prêt à l'emploi",
+      "calibrationDue": "Étalonnage valide jusqu'au 30 sept. 2026"
+    },
+    "inventory": {
+      "title": "Lots d'inventaire",
+      "desc": "Vérifiez quantité, péremption et stockage. Consulter le stock ne le consomme ni ne le réserve.",
+      "reagentName": "Solution tampon pH 7.00",
+      "lotNumber": "LOT-2026-08",
+      "expiryLabel": "Date d'expiration",
+      "expiryDate": "15 déc. 2026"
+    },
+    "finish": {
+      "step1": "01 Confirmez votre compte, laboratoire et rôle de test.",
+      "step2": "02 Utilisez uniquement les échantillons de test désignés.",
+      "step3": "03 Signalez un problème distinct par ticket GitHub.",
+      "helpLink": "Ouvrir le Centre d'Aide ↗",
+      "reportLink": "Signaler un problème sur GitHub ↗",
+      "summaryText": "{doneCount} leçons explorées · {skippedCount} ignorées"
     }
   },
   "glossary": {
@@ -280,5 +376,12 @@
     "draft": "Travail enregistré temporairement, pas encore transmis pour vérification.",
     "submit": "Transmettre officiellement les mesures achevées au responsable de validation.",
     "auditHistory": "Historique chronologique et horodaté de toutes les interventions effectuées."
+  },
+  "aria": {
+    "chaptersNav": "Navigation des chapitres du tutoriel",
+    "coach": "Guide de première visite",
+    "progress": "Progression du tutoriel",
+    "sampleTube": "Cibler l'échantillon de pratique {num}",
+    "mobileToggle": "Basculer la vue du guide"
   }
 }

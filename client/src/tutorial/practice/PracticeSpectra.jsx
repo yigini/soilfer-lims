@@ -57,8 +57,8 @@ export default function PracticeSpectra({ sample, spectrumLoaded, onUpdate, onMa
                 </button>
                 <div className="drawer-info">
                     <b>{t('practice.spectra.infoSample', 'Sample')}</b> TRAIN-US-00{sample}<br />
-                    <b>{t('practice.spectra.infoFile', 'File')}</b> illustrative-spectrum.csv · not an instrument export<br />
-                    <b>{t('practice.spectra.infoQuality', 'Quality')}</b> not assessed · no predictions generated
+                    <b>{t('practice.spectra.infoFile', 'File')}</b> {t('practice.spectra.fileDesc', 'illustrative-spectrum.csv · not an instrument export')}<br />
+                    <b>{t('practice.spectra.infoQuality', 'Quality')}</b> {t('practice.spectra.qualityDesc', 'not assessed · no predictions generated')}
                 </div>
             </div>
             <div className="ribbon">

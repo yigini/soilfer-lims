@@ -64,7 +64,7 @@ const TopicExplorer = React.lazy(() => import('./pages/help/TopicExplorer'));
 const AdminHelpEditor = React.lazy(() => import('./pages/help/AdminHelpEditor'));
 const ActivateAccount = React.lazy(() => import('./pages/auth/ActivateAccount'));
 const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
-const TutorialEntry = React.lazy(() => import('./tutorial/TutorialEntry'));
+import TutorialGate from './tutorial/TutorialGate';
 
 const LazyFallback = () => (
     <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -344,9 +344,7 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
 function App() {
     return (
         <>
-            <React.Suspense fallback={null}>
-                <TutorialEntry />
-            </React.Suspense>
+            <TutorialGate />
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />

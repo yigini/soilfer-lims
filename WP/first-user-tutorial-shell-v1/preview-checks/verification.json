@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-09-14T09:32:35.336Z",
+  "scope": "Standalone mockup only; not LIMS production acceptance",
+  "outcomes": [
+    "Beginner purpose, connected-record model, navigation and three comprehension checks",
+    "Local intake validation and comma decimal",
+    "Preparation prerequisite and practice-only confirmation",
+    "Texture bounds/closure interaction",
+    "Local illustrative spectrum display",
+    "Reason required and echoed in local review handover",
+    "No page overflow at 1440/1280/768/390/320 px across nine scenes",
+    "Pause/Escape/resume/exit/restart"
+  ],
+  "browserErrors": [],
+  "externalRequests": [],
+  "deviceEvidence": "Chromium emulation, not physical devices",
+  "status": "PASS"
+}

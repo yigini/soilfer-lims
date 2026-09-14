@@ -52,6 +52,12 @@ export const foundations = [
     }
 ];
 
+export const f03PracticeSamples = [
+    { id: 'TRAIN-US-001', fieldId: 'GTM-DEMO-101', state: 'Received', stateKey: 'foundation.f03.filterReceived' },
+    { id: 'TRAIN-US-002', fieldId: 'GTM-DEMO-102', state: 'Expected', stateKey: 'foundation.f03.filterExpected' },
+    { id: 'TRAIN-US-003', fieldId: 'GTM-DEMO-103', state: 'Received', stateKey: 'foundation.f03.filterReceived' }
+];
+
 export const glossaryEntriesByChapter = {
     0: [
         { term: 'LIMS', meaningKey: 'glossary.lims' },

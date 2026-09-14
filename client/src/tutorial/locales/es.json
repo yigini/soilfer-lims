@@ -29,7 +29,39 @@
     "pausedTitle": "Su progreso se ha guardado.",
     "pausedDesc": "La guía está en pausa. No se realizan avances automáticos ni acciones de laboratorio. Las páginas, borradores y permisos existentes permanecen intactos.",
     "exitTitle": "Vuelta al uso ordinario de LIMS.",
-    "exitDesc": "La superposición del tutorial se ha cerrado. Todas las páginas, formularios y borradores normales de la aplicación permanecen intactos."
+    "exitDesc": "La superposición del tutorial se ha cerrado. Todas las páginas, formularios y borradores normales de la aplicación permanecen intactos.",
+    "language": "Idioma",
+    "close": "Cerrar",
+    "navigate": "Ir a la página →",
+    "unauthorizedRole": "Este paso corresponde a un {role}. Continúe con este ejercicio práctico abajo, o inicie sesión con la cuenta de {role} facilitada para esta sesión.",
+    "signedInAs": "Sesión iniciada como",
+    "notSignedIn": "Visitante (Sin cuenta)",
+    "practiceBadge": "Solo práctica · no se escribe en LIMS",
+    "missingAnchor": "Elemento no visible en esta página. La guía permanece activa.",
+    "capsFollowSample": "Siga la muestra",
+    "capsGuidedVisit": "Una visita guiada al laboratorio",
+    "tableSampleId": "ID de muestra",
+    "tableFieldId": "ID de campo",
+    "tableState": "Estado",
+    "quickCheckTitle": "Una verificación rápida",
+    "capsWelcome": "Bienvenido a SoilFER",
+    "welcomeHeadline": "Del campo al resultado confiable.",
+    "welcomeLead": "Una introducción guiada a las personas, pasos y evidencias detrás de cada muestra.",
+    "pathFullTitle": "Seguir una muestra",
+    "pathFullDesc": "La historia completa del laboratorio",
+    "pathQuickTitle": "Mostrarme la plataforma",
+    "pathQuickDesc": "Una breve primera impresión",
+    "pathRoleTitle": "Aprender mi rol",
+    "pathRoleDesc": "Comience donde ocurre su trabajo",
+    "signInPrompt": "Inicie sesión en su laboratorio",
+    "exploreRole": "Explorar un rol específico",
+    "chooseRoleTrack": "Elija una trayectoria de rol:",
+    "startRoleTrack": "Iniciar esta trayectoria →",
+    "roleReceptionOfficer": "Oficial de recepción",
+    "roleLabTechnician": "Técnico de laboratorio",
+    "roleLabManager": "Gerente de laboratorio",
+    "roleProjectCoordinator": "Coordinador de proyecto",
+    "roleViewerAuditor": "Visualizador / auditor"
   },
   "roles": {
     "visitor": "Visitante",
@@ -52,7 +84,14 @@
       "question": "Una muestra figura como «esperada». ¿Ha llegado ya su contenedor?",
       "optNotNecessarily": "No necesariamente",
       "feedbackCorrect": "Correcto. «Esperada» significa planificada o registrada; la llegada física se confirma por separado.",
-      "feedbackIncorrect": "No exactamente. «Esperada» significa planificada o registrada; la llegada física se confirma por separado."
+      "feedbackIncorrect": "No exactamente. «Esperada» significa planificada o registrada; la llegada física se confirma por separado.",
+      "step1Title": "Recibir e identificar",
+      "step1Actor": "Equipo de recepción",
+      "step2Title": "Preparar y analizar",
+      "step2Actor": "Técnico de laboratorio",
+      "step3Title": "Revisar e informar",
+      "step3Actor": "Revisor / Responsable",
+      "note": "El personal realiza el trabajo de laboratorio. La plataforma mantiene los registros conectados."
     },
     "f02": {
       "title": "Una muestra. Trabajo conectado.",
@@ -66,7 +105,20 @@
       "optOneSample": "Una muestra",
       "optTwoSamples": "Dos muestras",
       "feedbackCorrect": "Correcto. Un solo registro de muestra puede tener varios análisis, tareas asignadas y resultados.",
-      "feedbackIncorrect": "No exactamente. Un solo registro de muestra puede tener varios análisis, tareas asignadas y resultados."
+      "feedbackIncorrect": "No exactamente. Un solo registro de muestra puede tener varios análisis, tareas asignadas y resultados.",
+      "labTitle": "Laboratorio",
+      "labDesc": "La instalación y el equipo a cargo del trabajo",
+      "projectTitle": "Proyecto",
+      "projectDesc": "Muestras y trabajos relacionados entre instalaciones",
+      "projectNotice": "Un proyecto puede involucrar a más de un laboratorio.",
+      "sampleBadge": "Muestra de ejemplo · TRAIN-US-001",
+      "node1Title": "Registro de muestra",
+      "node1Desc": "Identidad y avance",
+      "node2Title": "Tareas y determinaciones",
+      "node2Desc": "pH · textura",
+      "node3Title": "Informe",
+      "node3Desc": "Resultados autorizados",
+      "note": "El identificador de campo vincula la recolección. El identificador de laboratorio permite cotejar el contenedor con su registro digital."
     },
     "f03": {
       "title": "¿A dónde debo ir a continuación?",
@@ -80,7 +132,23 @@
       "optCompleteSubmit": "Aún debo completarlo y enviarlo",
       "optReviewerApprove": "El revisor ya puede aprobarlo",
       "feedbackCorrect": "Correcto. El borrador sigue estando bajo su responsabilidad; el envío es la entrega para su revisión.",
-      "feedbackIncorrect": "No exactamente. El borrador sigue estando bajo su responsabilidad; el envío es la entrega para su revisión."
+      "feedbackIncorrect": "No exactamente. El borrador sigue estando bajo su responsabilidad; el envío es la entrega para su revisión.",
+      "searchPlaceholder": "Buscar muestras de práctica (ej. TRAIN-US-001)...",
+      "filterAll": "Todos",
+      "filterExpected": "Esperado",
+      "filterReceived": "Recibido",
+      "sampleSelected": "Seleccionado: {id} · {state}. Consejo: En el LIMS real, compruebe el selector de laboratorio o borre filtros antes de concluir que falta una muestra.",
+      "nodeHomeTitle": "Inicio",
+      "nodeHomeDesc": "Lo que requiere atención",
+      "nodeSamplesTitle": "Muestras",
+      "nodeSamplesDesc": "Buscar identidad e historial",
+      "nodeWorkbenchTitle": "Banco de trabajo",
+      "nodeWorkbenchDesc": "Registrar el trabajo asignado",
+      "nodeReviewTitle": "Cola de revisión",
+      "nodeReviewDesc": "Comprobar trabajo presentado",
+      "nodeReportsTitle": "Informes y Ayuda",
+      "nodeReportsDesc": "Consultar resultados y guías",
+      "notice": "¿Falta una muestra? Revise el laboratorio activo, el código y los filtros aplicados. Si persiste la duda, pida asistencia al facilitador."
     }
   },
   "chapters": {
@@ -188,7 +256,8 @@
       "check1": "Comprobar los registros aplicables de secado y preparación.",
       "check2": "Confirmar que las fracciones preparadas están etiquetadas para sus análisis.",
       "button": "Verificar lista de práctica",
-      "verifiedStatus": "Lista de verificación de práctica confirmada. No se ha modificado ningún registro real."
+      "verifiedStatus": "Lista de verificación de práctica confirmada. No se ha modificado ningún registro real.",
+      "countSelected": "{count} de 3 comprobaciones seleccionadas."
     },
     "bench": {
       "colSample": "Muestra",
@@ -208,7 +277,8 @@
       "initialStatus": "Este campo pertenece a la demostración, no al banco de trabajo real.",
       "previewPrefix": "Vista previa de práctica:",
       "previewSuffix": "En LIMS, confirme el método configurado y los límites antes de registrar.",
-      "error": "Introduzca una lectura numérica válida."
+      "error": "Introduzca una lectura numérica válida.",
+      "methodName": "pH en agua"
     },
     "texture": {
       "sand": "Arena",
@@ -233,7 +303,9 @@
       "infoSample": "Muestra",
       "infoFile": "Archivo",
       "infoQuality": "Calidad",
-      "ribbon": "Un escaneo en bruto, un espectro con control de calidad y una predicción aprobada son registros independientes."
+      "ribbon": "Un escaneo en bruto, un espectro con control de calidad y una predicción aprobada son registros independientes.",
+      "fileDesc": "illustrative-spectrum.csv · no es una exportación de equipo",
+      "qualityDesc": "no evaluada · no se generan predicciones"
     },
     "review": {
       "badgeExample": "Ejemplo de revisión",
@@ -264,6 +336,30 @@
       "sisDesc": "Revise el conjunto de datos permitido y sus metadatos. La vista previa de carga útil no demuestra la entrega o acuse por el SIS nacional.",
       "langTitle": "Use su propio idioma.",
       "langDesc": "La plataforma admite cinco opciones de idioma oficial."
+    },
+    "equipment": {
+      "title": "Preparación del equipo",
+      "desc": "Compruebe el estado operativo y la calibración antes de utilizar un instrumento. Consultar esta página no reserva ni calibra equipos.",
+      "assetName": "pH-metro de banco 02",
+      "statusLabel": "Estado operativo",
+      "statusReady": "Listo para su uso",
+      "calibrationDue": "Calibración válida hasta el 30 sep 2026"
+    },
+    "inventory": {
+      "title": "Lotes de inventario",
+      "desc": "Compruebe cantidad, caducidad y condiciones de almacenamiento. Consultar existencias no las consume ni reserva.",
+      "reagentName": "Solución tampón pH 7.00",
+      "lotNumber": "LOT-2026-08",
+      "expiryLabel": "Fecha de caducidad",
+      "expiryDate": "15 dic 2026"
+    },
+    "finish": {
+      "step1": "01 Confirme su cuenta, laboratorio y rol de prueba.",
+      "step2": "02 Utilice únicamente las muestras de prueba designadas.",
+      "step3": "03 Reporte un problema diferenciado por cada issue de GitHub.",
+      "helpLink": "Abrir Centro de Ayuda ↗",
+      "reportLink": "Reportar un problema en GitHub ↗",
+      "summaryText": "{doneCount} lecciones exploradas · {skippedCount} omitidas"
     }
   },
   "glossary": {
@@ -280,5 +376,12 @@
     "draft": "Trabajo guardado que aún no se ha enviado para su revisión formal.",
     "submit": "Entregar el trabajo completado a la persona responsable de revisarlo.",
     "auditHistory": "Registro cronológico de quién realizó cada acción y en qué momento."
+  },
+  "aria": {
+    "chaptersNav": "Navegación de capítulos del tutorial",
+    "coach": "Guía de primera visita",
+    "progress": "Progreso del tutorial",
+    "sampleTube": "Enfocar muestra de práctica {num}",
+    "mobileToggle": "Alternar vista de la guía"
   }
 }

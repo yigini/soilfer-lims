@@ -53,7 +53,7 @@ export default function PracticePreparation({ checks, onUpdate, onMarkDone, t })
             <div id="prepStatus" className="status" role="status">
                 {verified
                     ? t('practice.prep.verifiedStatus', 'Practice checklist verified. No actual preparation record was changed.')
-                    : `${checkedCount} of 3 checks selected.`}
+                    : t('practice.prep.countSelected', '{count} of 3 checks selected.').replace('{count}', String(checkedCount))}
             </div>
         </div>
     );

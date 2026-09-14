@@ -2,7 +2,7 @@
 #soilfer-tutorial-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99998;
+  z-index: 8500;
   overflow-y: auto;
   box-sizing: border-box;
   --ink: #213b32;
@@ -26,3 +26,62 @@
 @media(prefers-reduced-motion:reduce){#soilfer-tutorial-overlay, #soilfer-tutorial-overlay *{scroll-behavior:auto!important;transition:none!important}}
 #soilfer-tutorial-overlay #mobileToggle{display:none}
 @media(max-width:600px){#soilfer-tutorial-overlay .stage{padding-bottom:130px}#soilfer-tutorial-overlay .coach{position:fixed;top:auto;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;z-index:30;border-color:#97ae94;box-shadow:0 4px 32px #1d392c33}#soilfer-tutorial-overlay .coach-top,#soilfer-tutorial-overlay .coach-body{display:none}#soilfer-tutorial-overlay .coach-foot{display:grid;grid-template-columns:1fr 1.2fr;padding:12px;gap:9px}#soilfer-tutorial-overlay .coach-foot .row{display:none}#soilfer-tutorial-overlay #mobileToggle{display:block;text-align:left;background:#edf3e9;color:var(--green);font-size:12px}#soilfer-tutorial-overlay .coach-foot .primary{font-size:12px;padding:10px}#soilfer-tutorial-overlay .coach.mobile-expanded .coach-body{display:block;max-height:48vh;overflow:auto;padding:18px 20px 5px}#soilfer-tutorial-overlay .coach.mobile-expanded .coach-body h2{font-size:22px}#soilfer-tutorial-overlay .coach.mobile-expanded .coach-body details{margin-bottom:8px}#soilfer-tutorial-overlay .coach.mobile-expanded .coach-body .lesson-complete{margin-bottom:8px}}
+
+/* Docked guide styles (step >= 1 over real application pages) */
+#soilfer-tutorial-overlay.docked {
+  inset: auto 24px 24px auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  width: 440px !important;
+  max-width: calc(100vw - 48px) !important;
+  max-height: 88vh !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  overflow: visible !important;
+  z-index: 8500 !important;
+}
+
+#soilfer-tutorial-overlay.docked > * {
+  pointer-events: auto;
+}
+
+#soilfer-tutorial-overlay.docked .coach {
+  position: static !important;
+  width: 100% !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 16px 36px rgba(34, 55, 42, 0.22) !important;
+}
+
+@media (max-width: 600px) {
+  #soilfer-tutorial-overlay.docked {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+/* Target element highlight on real pages */
+.sf-tutorial-target-highlight {
+  outline: 3px solid #245942 !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 8px rgba(36, 89, 66, 0.25) !important;
+  transition: outline 0.2s ease, box-shadow 0.2s ease;
+  animation: sf-tutorial-pulse 2s infinite ease-in-out;
+}
+
+@keyframes sf-tutorial-pulse {
+  0% {
+    box-shadow: 0 0 0 4px rgba(36, 89, 66, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(36, 89, 66, 0.15);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(36, 89, 66, 0.35);
+  }
+}

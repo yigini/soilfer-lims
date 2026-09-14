@@ -29,7 +29,39 @@
     "pausedTitle": "Seu progresso foi salvo.",
     "pausedDesc": "O guia está pausado. Nenhuma ação automática ou de laboratório ocorre. Suas páginas, rascunhos e permissões permanecem intactos.",
     "exitTitle": "Retorno ao uso normal do LIMS.",
-    "exitDesc": "A sobreposição do guia foi fechada. Todas as páginas, formulários e rascunhos normais continuam inalterados."
+    "exitDesc": "A sobreposição do guia foi fechada. Todas as páginas, formulários e rascunhos normais continuam inalterados.",
+    "language": "Idioma",
+    "close": "Fechar",
+    "navigate": "Ir para a página →",
+    "unauthorizedRole": "Esta etapa pertence a um {role}. Continue com este exercício abaixo ou inicie sessão com a conta de {role} fornecida para esta sessão.",
+    "signedInAs": "Conectado como",
+    "notSignedIn": "Visitante (Não conectado)",
+    "practiceBadge": "Apenas prática · nenhuma gravação no LIMS",
+    "missingAnchor": "Elemento não visível nesta página. O guia permanece ativo.",
+    "capsFollowSample": "Seguir a amostra",
+    "capsGuidedVisit": "Uma visita guiada ao laboratório",
+    "tableSampleId": "ID da amostra",
+    "tableFieldId": "ID de campo",
+    "tableState": "Estado",
+    "quickCheckTitle": "Uma verificação rápida",
+    "capsWelcome": "Bem-vindo ao SoilFER",
+    "welcomeHeadline": "Do campo ao resultado confiável.",
+    "welcomeLead": "Uma introdução guiada às pessoas, etapas e evidências por trás de cada amostra.",
+    "pathFullTitle": "Seguir uma amostra",
+    "pathFullDesc": "A história completa do laboratório",
+    "pathQuickTitle": "Mostrar a plataforma",
+    "pathQuickDesc": "Uma breve primeira impressão",
+    "pathRoleTitle": "Aprender minha função",
+    "pathRoleDesc": "Comece onde seu trabalho acontece",
+    "signInPrompt": "Entre no seu laboratório",
+    "exploreRole": "Explorar uma função específica",
+    "chooseRoleTrack": "Escolha uma trilha de função:",
+    "startRoleTrack": "Iniciar esta trilha →",
+    "roleReceptionOfficer": "Oficial de recepção",
+    "roleLabTechnician": "Técnico de laboratório",
+    "roleLabManager": "Gerente de laboratório",
+    "roleProjectCoordinator": "Coordenador de projeto",
+    "roleViewerAuditor": "Visualizador / auditor"
   },
   "roles": {
     "visitor": "Visitante",
@@ -52,7 +84,14 @@
       "question": "Uma amostra consta como «esperada». Seu recipiente já chegou?",
       "optNotNecessarily": "Não necessariamente",
       "feedbackCorrect": "Correto. «Esperada» significa planejada ou registrada; a chegada física é confirmada separadamente.",
-      "feedbackIncorrect": "Não exatamente. «Esperada» significa planejada ou registrada; a chegada física é confirmada separadamente."
+      "feedbackIncorrect": "Não exatamente. «Esperada» significa planejada ou registrada; a chegada física é confirmada separadamente.",
+      "step1Title": "Receber e identificar",
+      "step1Actor": "Equipe de recepção",
+      "step2Title": "Preparar e analisar",
+      "step2Actor": "Técnico de laboratório",
+      "step3Title": "Verificar e emitir laudo",
+      "step3Actor": "Revisor / Gerente",
+      "note": "As pessoas realizam as tarefas do laboratório. A plataforma mantém os registros interligados."
     },
     "f02": {
       "title": "Uma amostra. Trabalhos interligados.",
@@ -66,7 +105,20 @@
       "optOneSample": "Uma única amostra",
       "optTwoSamples": "Duas amostras",
       "feedbackCorrect": "Correto. Uma única amostra reúne diversas análises, tarefas atribuídas e resultados.",
-      "feedbackIncorrect": "Não exatamente. Uma única amostra reúne diversas análises, tarefas atribuídas e resultados."
+      "feedbackIncorrect": "Não exatamente. Uma única amostra reúne diversas análises, tarefas atribuídas e resultados.",
+      "labTitle": "Laboratório",
+      "labDesc": "A instalação e a equipe responsáveis pelas análises",
+      "projectTitle": "Projeto",
+      "projectDesc": "Amostras e trabalhos vinculados entre instalações",
+      "projectNotice": "Um projeto pode envolver múltiplos laboratórios.",
+      "sampleBadge": "Amostra de exemplo · TRAIN-US-001",
+      "node1Title": "Registro da amostra",
+      "node1Desc": "Identidade e progresso",
+      "node2Title": "Tarefas e análises",
+      "node2Desc": "pH · textura",
+      "node3Title": "Laudo / Relatório",
+      "node3Desc": "Resultados autorizados",
+      "note": "O identificador de campo liga a coleta. O identificador do laboratório permite conferir o frasco físico com seu registro."
     },
     "f03": {
       "title": "Para onde devo ir em seguida?",
@@ -80,7 +132,23 @@
       "optCompleteSubmit": "Eu ainda preciso concluí-lo e submetê-lo",
       "optReviewerApprove": "O revisor já pode aprová-lo",
       "feedbackCorrect": "Correto. O rascunho continua sob sua responsabilidade; a submissão é a entrega para revisão.",
-      "feedbackIncorrect": "Não exatamente. O rascunho continua sob sua responsabilidade; a submissão é a entrega para revisão."
+      "feedbackIncorrect": "Não exatamente. O rascunho continua sob sua responsabilidade; a submissão é a entrega para revisão.",
+      "searchPlaceholder": "Pesquisar amostras de prática (ex. TRAIN-US-001)...",
+      "filterAll": "Todos",
+      "filterExpected": "Esperado",
+      "filterReceived": "Recebido",
+      "sampleSelected": "Selecionado: {id} · {state}. Dica: No LIMS real, verifique o seletor de laboratório ou limpe os filtros antes de concluir que uma amostra está em falta.",
+      "nodeHomeTitle": "Início",
+      "nodeHomeDesc": "O que exige atenção imediata",
+      "nodeSamplesTitle": "Amostras",
+      "nodeSamplesDesc": "Consultar identidade e histórico",
+      "nodeWorkbenchTitle": "Bancada de trabalho",
+      "nodeWorkbenchDesc": "Registrar as análises designadas",
+      "nodeReviewTitle": "Fila de revisão",
+      "nodeReviewDesc": "Conferir o trabalho submetido",
+      "nodeReportsTitle": "Laudos e Ajuda",
+      "nodeReportsDesc": "Consultar relatórios e orientações",
+      "notice": "Não encontra uma amostra? Verifique o laboratório selecionado, o código e os filtros. Se continuar em falta, consulte o responsável."
     }
   },
   "chapters": {
@@ -188,7 +256,8 @@
       "check1": "Confirmar as fichas aplicáveis de secagem e preparação.",
       "check2": "Confirmar que as frações preparadas estão etiquetadas para suas análises.",
       "button": "Verificar lista de prática",
-      "verifiedStatus": "Lista de prática verificada. Nenhum registro real de laboratório foi alterado."
+      "verifiedStatus": "Lista de prática verificada. Nenhum registro real de laboratório foi alterado.",
+      "countSelected": "{count} de 3 verificações selecionadas."
     },
     "bench": {
       "colSample": "Amostra",
@@ -208,7 +277,8 @@
       "initialStatus": "Este campo pertence à demonstração, não à bancada real.",
       "previewPrefix": "Prévia de prática:",
       "previewSuffix": "No LIMS, confirme o método configurado e os limites antes de registrar.",
-      "error": "Informe uma leitura numérica válida."
+      "error": "Informe uma leitura numérica válida.",
+      "methodName": "pH em água"
     },
     "texture": {
       "sand": "Areia",
@@ -233,7 +303,9 @@
       "infoSample": "Amostra",
       "infoFile": "Arquivo",
       "infoQuality": "Qualidade",
-      "ribbon": "Varredura bruta, espectro avaliado e predição validada são registros independentes."
+      "ribbon": "Varredura bruta, espectro avaliado e predição validada são registros independentes.",
+      "fileDesc": "illustrative-spectrum.csv · não é exportação de instrumento",
+      "qualityDesc": "não avaliada · nenhuma predição gerada"
     },
     "review": {
       "badgeExample": "Exemplo de revisão",
@@ -264,6 +336,30 @@
       "sisDesc": "Examine os dados autorizados e seus metadados. A prévia não comprova entrega ou confirmação pelo SIS nacional.",
       "langTitle": "Trabalhe em seu idioma.",
       "langDesc": "A plataforma oferece cinco idiomas oficiais."
+    },
+    "equipment": {
+      "title": "Prontidão do equipamento",
+      "desc": "Verifique o estado operacional e a calibração antes de usar um instrumento. Visualizar esta página não reserva nem calibra equipamentos.",
+      "assetName": "Medidor de pH de bancada 02",
+      "statusLabel": "Estado operacional",
+      "statusReady": "Pronto para uso",
+      "calibrationDue": "Calibração válida até 30 set 2026"
+    },
+    "inventory": {
+      "title": "Lotes de inventário",
+      "desc": "Verifique quantidade, validade e armazenamento. Visualizar o estoque não o consome nem reserva.",
+      "reagentName": "Solução tampão pH 7.00",
+      "lotNumber": "LOT-2026-08",
+      "expiryLabel": "Data de validade",
+      "expiryDate": "15 dez 2026"
+    },
+    "finish": {
+      "step1": "01 Confirme sua conta, laboratório e função de teste.",
+      "step2": "02 Use apenas as amostras de teste designadas.",
+      "step3": "03 Relate um problema distinto por issue no GitHub.",
+      "helpLink": "Abrir Central de Ajuda ↗",
+      "reportLink": "Relatar um problema no GitHub ↗",
+      "summaryText": "{doneCount} lições exploradas · {skippedCount} ignoradas"
     }
   },
   "glossary": {
@@ -280,5 +376,12 @@
     "draft": "Trabalho salvo em andamento, ainda não encaminhado para conferência formal.",
     "submit": "Encaminhar formalmente as medições concluídas para o revisor responsável.",
     "auditHistory": "Histórico cronológico detalhando quem executou cada ação e quando."
+  },
+  "aria": {
+    "chaptersNav": "Navegação dos capítulos do tutorial",
+    "coach": "Guia de primeira visita",
+    "progress": "Progresso do tutorial",
+    "sampleTube": "Focar amostra de prática {num}",
+    "mobileToggle": "Alternar visualização do guia"
   }
 }

@@ -1,0 +1,26 @@
+{
+  "time": "2026-09-14T10:10:38.962Z",
+  "assets": [
+    "/assets/TutorialShell-D67JMqvb.js",
+    "/assets/TutorialShell-nrZJIV3y.css"
+  ],
+  "mode": "Isolated local built client with mocked APIs; no live server or database",
+  "ordinaryVisit": {
+    "tutorialAssets": [],
+    "guideCount": 0
+  },
+  "french": {
+    "rootRole": "dialog",
+    "modal": "true"
+  },
+  "keyboardEscapes": [],
+  "unflaggedNewDocument": {
+    "guideCount": 0,
+    "resumeCount": 1
+  },
+  "blockedTutorialEntryOnOrdinaryLogin": {
+    "loginInputs": 1,
+    "text": "LIMS\n\nAdvanced Laboratory Information Management System for Soil Analysis and Fertility Tracking. Dedicated to global sustainable agriculture.\n\nWITH THE FINANCIAL SUPPORT OF\n\nUnited States\nDepartment of State\nFrom the People of Japan\nMinistry of Foreign Affairs\nEN\nES\nES-419\nFR\nPT\nSign in to SoilFER LIMS\n\nLaboratory Information Management System\n\nUsername\nPassword\nForgot password?\nSign In\n\nLIMS\n· v1.4.0 · build 2026-09-14\n\nSupport: GLOSOLAN@fao.org",
+    "errors": []
+  }
+}
