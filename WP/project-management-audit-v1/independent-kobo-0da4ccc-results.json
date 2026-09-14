@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-09-14T01:30:37.681Z",
+  "baseline": "0da4cccae9c840b4845f26ef79f89581479db6c9",
+  "sourceUnchanged": true,
+  "externalCallsMocked": 0,
+  "results": [
+    {
+      "id": "K02",
+      "case": "Service manager explicit config ID must not widen own-lab configuration visibility",
+      "passed": true,
+      "own": {
+        "status": 200,
+        "body": {
+          "configured": true,
+          "koboServerUrl": "https://fixture.invalid",
+          "koboFormId": "ASSET-B",
+          "isActive": true,
+          "lastSyncAt": null,
+          "canEdit": false
+        }
+      },
+      "foreign": {
+        "status": 403,
+        "body": {
+          "error": "FORBIDDEN_CONFIG_SCOPE",
+          "message": "Requested Kobo configuration is outside your authorized laboratory scope."
+        }
+      }
+    },
+    {
+      "id": "K03",
+      "case": "No Kobo intake into inactive servicing lab even when sync actor is admin",
+      "passed": true,
+      "sync": {
+        "status": 400,
+        "body": {
+          "error": "LAB_INACTIVE",
+          "message": "Laboratory 'Fixture B' is inactive. Sample intake is disallowed for inactive laboratories."
+        }
+      },
+      "createdSampleCount": 0
+    }
+  ]
+}
