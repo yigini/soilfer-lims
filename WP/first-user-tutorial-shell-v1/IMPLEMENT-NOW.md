@@ -1,4 +1,10 @@
-# Approved implementation and monitored delivery
+# Superseded — tutorial removal authorized, 15 September 2026
+
+The user rejected the deployed tutorial and requested: “i did not like it can we rollback and remove the tutorial mode”. This replaces the implementation authorization below. Antigravity has been instructed in LIMSI / LIMS Dev to remove the tutorial in a focused forward commit and safely push/deploy it, preserving all unrelated LIMS improvements, Help Centre, records, permissions and drafts. The tutorial implementation monitor is paused. Retain this package as historical evidence, not an instruction to restore or continue implementing the guide.
+
+Remove the dedicated tutorial runtime and mount, tutorial-only anchors and enable configuration. Use the existing retirement mechanism for cached clients; old tutorial links must open the ordinary app. No whole-site historical rollback, database restore/migration or production test writes. Verify normal login, Help, mocked authenticated Workbench, old tutorial URLs, targeted cached-guide retirement, build/CI and the exact production release. Implementation and deployment are pending until evidenced; sending the handoff is not proof of removal.
+
+# Historical approved implementation and monitored delivery
 
 14 September 2026. The user reviewed the preview, clarified that visitors may know only the name LIMS, approved the revised beginner foundation, and instructed: “send this to antigravity and set timer for every 15 mins to checkin and see the progress and to ensure that all implemented propoerly.. all should be subtle without changing much in the codebase”.
 

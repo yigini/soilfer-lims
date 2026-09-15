@@ -1,0 +1,827 @@
+{
+  "time": "2026-09-15T02:14:32.188Z",
+  "scope": "Frozen local client/dist, mocked reads only. Only320px Login collapsed Exit label and row fit; no full responsive/auth/draft matrix repeated. Mouse clicks use initially visible centers without force, DOM click or scrolling.",
+  "sourceHead": "62b3c1fc1d726efd1831e33e2199133ec4ff6e61",
+  "sourceShellSha256": "9c5564913eefeaadcea5baef3a8c327b739b1a5e5ef89317e5ca0ab4af02bea5",
+  "indexSha256": "dcb2016f84e9ccb24252405b8fc659d18d8836f031c29d58c4876a7b37185194",
+  "assets": [
+    {
+      "path": "/assets/TutorialShell-BSpGr4x-.css",
+      "sha256": "d1a6cc7519e7a6cca274e74655bb7e82b6587d52b883d350f8bfb01c56bfa8ee"
+    },
+    {
+      "path": "/assets/TutorialShell-BUJMBaGd.js",
+      "sha256": "2f113c0253ee4cd0628d9ef20abb601271b4b84eeb8fcaedc15e9b9e63bcf758"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [],
+  "cases": [
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "route": "/login",
+      "locale": "en",
+      "states": [
+        {
+          "label": "before-click-collapseCoachBtn",
+          "guide": {
+            "x": 10,
+            "y": 406,
+            "width": 300,
+            "height": 284,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 406,
+            "width": 300,
+            "height": 284,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "text": "Minimize —",
+              "box": {
+                "x": 75.65625,
+                "y": 451,
+                "width": 77.9375,
+                "height": 28,
+                "right": 153.59375,
+                "bottom": 479
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "text": "Expand guide ↗",
+              "box": {
+                "x": 103.078125,
+                "y": 655,
+                "width": 96.984375,
+                "height": 28,
+                "right": 200.0625,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "text": "Pause",
+              "box": {
+                "x": 204.0625,
+                "y": 655,
+                "width": 42.859375,
+                "height": 28,
+                "right": 246.921875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Exit ✕",
+              "box": {
+                "x": 250.921875,
+                "y": 655,
+                "width": 48.078125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "before-click-exitCollapsedBtn",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Exit ✕",
+              "box": {
+                "x": 250.921875,
+                "y": 655,
+                "width": 48.078125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "collapseCoachBtn",
+        "exitCollapsedBtn"
+      ],
+      "actualLocale": "en",
+      "renderedExit": "Exit ✕",
+      "expectedShortExit": "Exit",
+      "localePass": true,
+      "exitRemoved": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "route": "/login",
+      "locale": "es",
+      "states": [
+        {
+          "label": "before-click-collapseCoachBtn",
+          "guide": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "text": "Minimizar —",
+              "box": {
+                "x": 47.875,
+                "y": 433,
+                "width": 81.90625,
+                "height": 28,
+                "right": 129.78125,
+                "bottom": 461
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "text": "Expandir guía ↗",
+              "box": {
+                "x": 99.453125,
+                "y": 655,
+                "width": 97.203125,
+                "height": 28,
+                "right": 196.65625,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "text": "Pausa",
+              "box": {
+                "x": 200.65625,
+                "y": 655,
+                "width": 42.765625,
+                "height": 28,
+                "right": 243.421875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Salir ✕",
+              "box": {
+                "x": 247.421875,
+                "y": 655,
+                "width": 51.578125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "before-click-exitCollapsedBtn",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Salir ✕",
+              "box": {
+                "x": 247.421875,
+                "y": 655,
+                "width": 51.578125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "collapseCoachBtn",
+        "exitCollapsedBtn"
+      ],
+      "actualLocale": "es",
+      "renderedExit": "Salir ✕",
+      "expectedShortExit": "Salir",
+      "localePass": true,
+      "exitRemoved": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "route": "/login",
+      "locale": "es-419",
+      "states": [
+        {
+          "label": "before-click-collapseCoachBtn",
+          "guide": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "text": "Minimizar —",
+              "box": {
+                "x": 47.875,
+                "y": 433,
+                "width": 81.90625,
+                "height": 28,
+                "right": 129.78125,
+                "bottom": 461
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "text": "Expandir guía ↗",
+              "box": {
+                "x": 99.453125,
+                "y": 655,
+                "width": 97.203125,
+                "height": 28,
+                "right": 196.65625,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "text": "Pausa",
+              "box": {
+                "x": 200.65625,
+                "y": 655,
+                "width": 42.765625,
+                "height": 28,
+                "right": 243.421875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Salir ✕",
+              "box": {
+                "x": 247.421875,
+                "y": 655,
+                "width": 51.578125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "before-click-exitCollapsedBtn",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Salir ✕",
+              "box": {
+                "x": 247.421875,
+                "y": 655,
+                "width": 51.578125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "collapseCoachBtn",
+        "exitCollapsedBtn"
+      ],
+      "actualLocale": "es-419",
+      "renderedExit": "Salir ✕",
+      "expectedShortExit": "Salir",
+      "localePass": true,
+      "exitRemoved": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "route": "/login",
+      "locale": "fr",
+      "states": [
+        {
+          "label": "before-click-collapseCoachBtn",
+          "guide": {
+            "x": 10,
+            "y": 370,
+            "width": 300,
+            "height": 320,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 370,
+            "width": 300,
+            "height": 320,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "text": "Réduire —",
+              "box": {
+                "x": 54.34375,
+                "y": 415,
+                "width": 70.15625,
+                "height": 28,
+                "right": 124.5,
+                "bottom": 443
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "text": "Agrandir le guide ↗",
+              "box": {
+                "x": 66.65625,
+                "y": 655,
+                "width": 116.0625,
+                "height": 28,
+                "right": 182.71875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "text": "Pause",
+              "box": {
+                "x": 186.71875,
+                "y": 655,
+                "width": 42.859375,
+                "height": 28,
+                "right": 229.578125,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Quitter ✕",
+              "box": {
+                "x": 233.578125,
+                "y": 655,
+                "width": 65.421875,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "before-click-exitCollapsedBtn",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Quitter ✕",
+              "box": {
+                "x": 233.578125,
+                "y": 655,
+                "width": 65.421875,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "collapseCoachBtn",
+        "exitCollapsedBtn"
+      ],
+      "actualLocale": "fr",
+      "renderedExit": "Quitter ✕",
+      "expectedShortExit": "Quitter",
+      "localePass": true,
+      "exitRemoved": true,
+      "pass": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "route": "/login",
+      "locale": "pt",
+      "states": [
+        {
+          "label": "before-click-collapseCoachBtn",
+          "guide": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 388,
+            "width": 300,
+            "height": 302,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "collapseCoachBtn",
+              "text": "Minimizar —",
+              "box": {
+                "x": 57.59375,
+                "y": 433,
+                "width": 81.90625,
+                "height": 28,
+                "right": 139.5,
+                "bottom": 461
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "collapsed",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "expandCoachBtn",
+              "text": "Expandir guia ↗",
+              "box": {
+                "x": 98.265625,
+                "y": 655,
+                "width": 97.203125,
+                "height": 28,
+                "right": 195.46875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "pauseCollapsedBtn",
+              "text": "Pausar",
+              "box": {
+                "x": 199.46875,
+                "y": 655,
+                "width": 46.828125,
+                "height": 28,
+                "right": 246.296875,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            },
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Sair ✕",
+              "box": {
+                "x": 250.296875,
+                "y": 655,
+                "width": 48.703125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        },
+        {
+          "label": "before-click-exitCollapsedBtn",
+          "guide": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coach": {
+            "x": 10,
+            "y": 648,
+            "width": 300,
+            "height": 42,
+            "right": 310,
+            "bottom": 690
+          },
+          "coachScrollLeft": 0,
+          "controls": [
+            {
+              "id": "exitCollapsedBtn",
+              "text": "Sair ✕",
+              "box": {
+                "x": 250.296875,
+                "y": 655,
+                "width": 48.703125,
+                "height": 28,
+                "right": 299,
+                "bottom": 683
+              },
+              "inViewport": true,
+              "hitTarget": true,
+              "clipped": false
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "collapseCoachBtn",
+        "exitCollapsedBtn"
+      ],
+      "actualLocale": "pt",
+      "renderedExit": "Sair ✕",
+      "expectedShortExit": "Sair",
+      "localePass": true,
+      "exitRemoved": true,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
