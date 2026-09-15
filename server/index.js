@@ -10,6 +10,12 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 wsServer.init(server);
 
+// Issue #111: Ensure Node.js keep-alive timeout exceeds reverse proxy timeout (Apache/Nginx)
+// Default Node keepAliveTimeout is 5000ms. If Apache reuses pooled sockets after 5s of inactivity,
+// Node resets the connection, causing AH01102 500 error responses on concurrent bursts.
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
+
 // SD-14: Start background escalation scheduler (MAP-19)
 startEscalationScheduler();
 

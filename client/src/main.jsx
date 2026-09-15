@@ -22,19 +22,41 @@ axios.interceptors.request.use(config => {
     return config;
 });
 
+let isHandlingSessionExpiry = false;
+
 axios.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            // Ignore 401 from login or verify-token endpoints to avoid reload loops
-            const isAuthEndpoint = error.config?.url?.includes('/api/auth/login');
-            if (!isAuthEndpoint && localStorage.getItem('token')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                clearStoredSessionOverride();
-                delete axios.defaults.headers.common['Authorization'];
-                if (window.location.pathname !== '/login') {
-                    window.location.href = '/login?expired=true';
+            const reqUrl = error.config?.url || '';
+            // Ignore 401 from login or register endpoints to avoid reload loops
+            const isAuthEndpoint = reqUrl.includes('/api/auth/login') || reqUrl.includes('/api/auth/register');
+            if (!isAuthEndpoint) {
+                // Determine token used for this specific failing request
+                const reqAuthHeader = error.config?.headers?.Authorization || error.config?.headers?.authorization;
+                const requestToken = reqAuthHeader
+                    ? (typeof reqAuthHeader === 'string' && reqAuthHeader.startsWith('Bearer ') ? reqAuthHeader.slice(7).trim() : null)
+                    : null;
+                const currentToken = localStorage.getItem('token');
+
+                // Issue #111 Guard: If user has already logged in with a newer token,
+                // do NOT allow a delayed 401 from an older request to wipe out the new active session!
+                if (requestToken && currentToken && requestToken !== currentToken) {
+                    console.warn('[AUTH] Ignored 401 from stale request with superseded token');
+                    return Promise.reject(error);
+                }
+
+                if (currentToken && !isHandlingSessionExpiry) {
+                    isHandlingSessionExpiry = true;
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    clearStoredSessionOverride();
+                    delete axios.defaults.headers.common['Authorization'];
+                    if (window.location.pathname !== '/login') {
+                        window.location.href = '/login?expired=true';
+                    } else {
+                        isHandlingSessionExpiry = false;
+                    }
                 }
             }
         }

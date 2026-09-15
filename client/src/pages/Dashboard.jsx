@@ -48,7 +48,7 @@ export default function Dashboard() {
     const reqCounter = useRef(0);
 
     // 1. Fetch available labs & projects for selector (multi-lab roles)
-    useEffect(() => {
+    const fetchScopeOptions = useCallback(async () => {
         const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
         if (!user) return;
         if (['SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
@@ -62,6 +62,10 @@ export default function Dashboard() {
                 .catch(() => setProjects([]));
         }
     }, [user, token]);
+
+    useEffect(() => {
+        fetchScopeOptions();
+    }, [fetchScopeOptions]);
 
     // 2. Fetch Home Dashboard Bundle
     const fetchDashboardHome = useCallback(async (isBackground = false) => {
@@ -259,6 +263,21 @@ export default function Dashboard() {
 
     // Loading error state on initial bundle
     if (homeError && !homeData) {
+        // Extract friendly error message, guarding against HTML error responses (e.g. proxy 500 error pages)
+        let errorMsg = homeError?.response?.data?.error || homeError?.response?.data?.message;
+        if (!errorMsg || typeof errorMsg !== 'string' || errorMsg.trim().startsWith('<')) {
+            if (homeError?.response?.status >= 500) {
+                errorMsg = t('dashboard.shell.serverTemporarilyUnavailable', 'The server is temporarily unavailable. Please click Retry in a moment.');
+            } else {
+                errorMsg = homeError?.message || t('dashboard.shell.errorLoadingData', 'An error occurred while loading dashboard data.');
+            }
+        }
+
+        const handleRetry = () => {
+            fetchDashboardHome(false);
+            fetchScopeOptions();
+        };
+
         return (
             <div className="max-w-xl mx-auto my-12 p-6 rounded-2xl bg-sf-surface border border-red-200 dark:border-red-800 shadow-sm text-center">
                 <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
@@ -266,11 +285,11 @@ export default function Dashboard() {
                     {t('dashboard.shell.unableToLoad', 'Unable to load dashboard')}
                 </h1>
                 <p className="text-sm text-sf-muted mt-2">
-                    {homeError?.response?.data?.error || homeError?.response?.data?.message || homeError?.message || 'An error occurred while loading the dashboard data.'}
+                    {errorMsg}
                 </p>
                 <button
-                    onClick={() => fetchDashboardHome(false)}
-                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleRetry}
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
                     {t('common.retry', 'Retry')}
                 </button>
