@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { Building2, FolderGit2, Globe } from 'lucide-react';
 
 /**
@@ -16,6 +17,7 @@ export default function ScopeSelector({
     onSelectLab,
     onSelectProject
 }) {
+    const { t } = useLanguage();
     const isMultiLab = userRole === 'SUPER_ADMIN' || userRole === 'MASTER_USER';
     const hasProjects = projects && projects.length > 0;
 
@@ -25,7 +27,7 @@ export default function ScopeSelector({
             {isMultiLab && labs && labs.length > 0 ? (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface border border-sf-divider shadow-sm">
                     <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                    <label htmlFor="lab-scope-select" className="sr-only">Laboratory Scope</label>
+                    <label htmlFor="lab-scope-select" className="sr-only">{t('dashboard.scope.labScope', 'Laboratory Scope')}</label>
                     <select
                         id="lab-scope-select"
                         value={selectedLabId || ''}
@@ -33,7 +35,7 @@ export default function ScopeSelector({
                         className="bg-transparent border-none text-sf-text font-semibold focus:outline-none cursor-pointer pr-2"
                     >
                         <option value="">
-                            {userRole === 'SUPER_ADMIN' ? 'All Laboratories (Global)' : 'All Permitted Laboratories'}
+                            {userRole === 'SUPER_ADMIN' ? t('dashboard.scope.allLabsGlobal', 'All Laboratories (Global)') : t('dashboard.scope.allPermittedLabs', 'All Permitted Laboratories')}
                         </option>
                         {labs.map((l) => (
                             <option key={l.id} value={l.id}>
@@ -45,7 +47,7 @@ export default function ScopeSelector({
             ) : (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300">
                     <Building2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                    <span className="font-semibold">{scope.label || 'Assigned Laboratory'}</span>
+                    <span className="font-semibold">{scope.label || t('dashboard.scope.assignedLab', 'Assigned Laboratory')}</span>
                 </div>
             )}
 
@@ -53,14 +55,14 @@ export default function ScopeSelector({
             {hasProjects && onSelectProject && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface border border-sf-divider shadow-sm">
                     <FolderGit2 className="w-3.5 h-3.5 text-gray-400" />
-                    <label htmlFor="project-scope-select" className="sr-only">Project Filter</label>
+                    <label htmlFor="project-scope-select" className="sr-only">{t('dashboard.scope.projectFilter', 'Project Filter')}</label>
                     <select
                         id="project-scope-select"
                         value={selectedProjectId || ''}
                         onChange={(e) => onSelectProject(e.target.value)}
                         className="bg-transparent border-none text-sf-text font-semibold focus:outline-none cursor-pointer pr-2"
                     >
-                        <option value="">All Projects</option>
+                        <option value="">{t('dashboard.scope.allProjects', 'All Projects')}</option>
                         {projects.map((p) => (
                             <option key={p.code || p.id} value={p.code || p.id}>
                                 {p.name || p.code}
@@ -76,7 +78,7 @@ export default function ScopeSelector({
                     <Globe className="w-3 h-3" />
                     <span>
                         {scope.timezone}
-                        {scope.isUtcFallback && ' (UTC fallback)'}
+                        {scope.isUtcFallback && ` ${t('dashboard.scope.utcFallback', '(UTC fallback)')}`}
                     </span>
                 </div>
             )}

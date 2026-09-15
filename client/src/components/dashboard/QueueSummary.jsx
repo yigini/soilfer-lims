@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * QueueSummary
@@ -10,6 +11,7 @@ export default function QueueSummary({
     activeQueue = '',
     onSelectQueue
 }) {
+    const { t } = useLanguage();
     if (!metrics || metrics.length === 0) return null;
 
     const getToneClasses = (tone, isActive) => {
@@ -32,7 +34,7 @@ export default function QueueSummary({
     };
 
     return (
-        <section aria-label="Work summaries" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
+        <section aria-label={t('dashboard.queueSummary.workSummaries', 'Work summaries')} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
             {metrics.map((metric) => {
                 const isActive = activeQueue === metric.queueKey;
                 const displayValue = metric.value !== null && metric.value !== undefined ? metric.value : '—';
@@ -70,7 +72,7 @@ export default function QueueSummary({
                             </div>
                             {metric.tone === 'problem' && displayValue > 0 && (
                                 <div className="mt-1 inline-flex items-center text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                                    Needs attention
+                                    {t('dashboard.queueSummary.needsAttention', 'Needs attention')}
                                 </div>
                             )}
                         </div>

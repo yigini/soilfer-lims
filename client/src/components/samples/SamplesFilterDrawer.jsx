@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { X, Filter, RotateCcw } from 'lucide-react';
 
 const SECTIONS = [
@@ -20,6 +21,7 @@ const SECTIONS = [
 ];
 
 const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, options = {} }) => {
+    const { t } = useLanguage();
     const [localFilters, setLocalFilters] = useState(filters);
 
     // Sync when drawer opens or filters change externallly
@@ -66,7 +68,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
             <div className="relative w-full max-w-sm bg-sf-surface border-l border-sf-divider shadow-2xl flex flex-col h-full transform transition-transform duration-300">
                 <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-canvas">
                     <h2 className="font-bold flex items-center gap-2 text-sf-text">
-                        <Filter size={18} /> Advanced Filters
+                        <Filter size={18} /> {t('samplesSection.filterDrawer.title', 'Advanced Filters')}
                     </h2>
                     <button onClick={onClose} className="p-1 text-sf-muted hover:text-sf-text hover:bg-sf-raised rounded-full transition-colors">
                         <X size={20} />
@@ -77,7 +79,7 @@ const SamplesFilterDrawer = ({ isOpen, onClose, filters, onApply, onReset, optio
                     {/* Dynamic Status/Blocker Sections */}
                     {SECTIONS.map(section => (
                         <div key={section.id}>
-                            <h3 className="font-bold text-sm text-sf-text mb-3">{section.label}</h3>
+                            <h3 className="font-bold text-sm text-sf-text mb-3">{t('samplesSection.filterDrawer.lifecycleState', section.label)}</h3>
                             <div className="space-y-2 pl-1">
                                 {section.options.map(opt => {
                                     const isChecked = (localFilters[section.id] || '').split(',').includes(opt.value);

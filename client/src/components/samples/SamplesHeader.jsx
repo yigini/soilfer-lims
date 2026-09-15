@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { RefreshCw, Download, CalendarClock, Inbox, ClipboardCheck, Beaker, ShieldCheck, History } from 'lucide-react';
 import InfoTooltip from '../common/InfoTooltip';
 
@@ -48,6 +49,7 @@ const STATUS_CONFIG = [
 ];
 
 const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadingSync, onToggleQuickFilter }) => {
+    const { t } = useLanguage();
     const lifecycleCounts = facets.lifecycle || {};
 
     return (
@@ -56,8 +58,8 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-bold tracking-tight text-sf-text flex items-center gap-2">
-                        Samples
-                        <InfoTooltip text="Active sample management dashboard. View lifecycle stages, search, and manage laboratory resources." position="bottom" />
+                        {t('samplesSection.header.title', 'Samples')}
+                        <InfoTooltip text={t('samplesSection.header.tooltip', 'Active sample management dashboard. View lifecycle stages, search, and manage laboratory resources.')} position="bottom" />
                     </h1>
 
                     {/* Action Icons next to title */}
@@ -71,7 +73,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
                             >
                                 <RefreshCw size={16} className={loadingSync ? "animate-spin" : ""} />
                             </button>
-                            <InfoTooltip text="Sync with Kobo to check for newly collected field samples." position="bottom" />
+                            <InfoTooltip text={t('samplesSection.header.syncTooltip', 'Sync with Kobo to check for newly collected field samples.')} position="bottom" />
                         </div>
 
                         {/* Export Action */}
@@ -82,7 +84,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
                             >
                                 <Download size={16} />
                             </button>
-                            <InfoTooltip text="Download currently filtered list as CSV/Excel." position="bottom" />
+                            <InfoTooltip text={t('samplesSection.header.exportTooltip', 'Download currently filtered list as CSV/Excel.')} position="bottom" />
                         </div>
 
                         {/* Pre-Delivery Historical Analysis Backfill Action */}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, BookOpen, ExternalLink } from 'lucide-react';
 import QueueSummary from './QueueSummary';
@@ -47,6 +48,7 @@ export default function DashboardShell({
     shiftNotes = null, // { title, items: [] }
     shortcuts = [] // [{ label, route, description }]
 }) {
+    const { t } = useLanguage();
     const hasSideContent = Boolean((shiftNotes && (shiftNotes.items?.length || shiftNotes.content)) || (shortcuts && shortcuts.length > 0));
     const [sideRailCollapsed, setSideRailCollapsed] = React.useState(() => {
         try {
@@ -166,10 +168,10 @@ export default function DashboardShell({
                         <section className="sf-instructions-box p-5 shadow-sm">
                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--sf-ochre)] mb-2">
                                 <BookOpen className="w-3.5 h-3.5" />
-                                <span>Shift Notes</span>
+                                <span>{t('dashboard.shell.shiftNotes', 'Shift Notes')}</span>
                             </div>
                             <h2 className="text-sm font-bold text-sf-text mb-2">
-                                {shiftNotes.title || 'Role Responsibilities'}
+                                {shiftNotes.title || t('dashboard.shell.roleResponsibilities', 'Role Responsibilities')}
                             </h2>
                             <div className="text-xs text-sf-text space-y-2 leading-relaxed">
                                 {Array.isArray(shiftNotes.items) ? (
@@ -189,7 +191,7 @@ export default function DashboardShell({
                     {shortcuts && shortcuts.length > 0 && (
                         <section className="bg-sf-surface p-5 rounded-xl border border-sf-divider shadow-sm">
                             <div className="text-xs font-bold uppercase tracking-wider text-sf-muted mb-3">
-                                Continue elsewhere
+                                {t('dashboard.shell.continueElsewhere', 'Continue elsewhere')}
                             </div>
                             <div className="space-y-2">
                                 {shortcuts.map((sc, idx) => (
@@ -220,7 +222,7 @@ export default function DashboardShell({
 
             {/* Product Footer Guarantee */}
             <footer className="pt-6 border-t border-sf-divider text-center text-xs text-sf-muted font-sans">
-                The source record is checked again when you open or act on work.
+                {t('dashboard.shell.sourceRecordChecked', 'The source record is checked again when you open or act on work.')}
             </footer>
         </div>
     );

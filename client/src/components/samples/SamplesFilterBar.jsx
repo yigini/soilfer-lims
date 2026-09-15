@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     Search, SlidersHorizontal, X,
     CalendarClock, Inbox, CheckCircle2, Clock, PackageCheck, Archive, AlertTriangle,
@@ -23,6 +24,7 @@ const SamplesFilterBar = ({
     totalResults, facets,
     page, pages, onPageChange
 }) => {
+    const { t } = useLanguage();
     const [localSearch, setLocalSearch] = useState(search);
     const [animatingId, setAnimatingId] = useState(null);
 
@@ -64,7 +66,7 @@ const SamplesFilterBar = ({
                             type="text"
                             value={localSearch}
                             onChange={(e) => setLocalSearch(e.target.value)}
-                            placeholder="Search by Lab ID or Original ID..."
+                            placeholder={t('samplesSection.filterBar.searchPlaceholder', 'Search by Lab ID or Original ID...')}
                             className="w-full pl-9 pr-4 py-2 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm font-medium"
                         />
                         {localSearch && (
@@ -129,7 +131,7 @@ const SamplesFilterBar = ({
                                 <button
                                     onClick={onReset}
                                     className="ml-0.5 p-1.5 text-sf-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
-                                    title="Clear all filters"
+                                    title={t('samplesSection.filterBar.clearAll', 'Clear all filters')}
                                 >
                                     <X size={14} />
                                 </button>
@@ -146,7 +148,7 @@ const SamplesFilterBar = ({
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-sf-text hover:bg-sf-canvas rounded-lg transition-colors whitespace-nowrap"
                     >
                         <SlidersHorizontal size={16} />
-                        <span>Filters</span>
+                        <span>{t('samplesSection.filterBar.filters', 'Filters')}</span>
                     </button>
 
                     {/* Top Pagination */}
@@ -171,7 +173,7 @@ const SamplesFilterBar = ({
                     </div>
 
                     <div className="hidden lg:block px-3 py-1 bg-sf-canvas rounded-lg text-[11px] text-sf-muted font-black uppercase tracking-widest border border-sf-divider whitespace-nowrap">
-                        {totalResults} matches
+                        {t('samplesSection.filterBar.matches', `${totalResults} matches`, { count: totalResults })}
                     </div>
                 </div>
             </div>

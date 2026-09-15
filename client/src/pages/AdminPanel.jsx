@@ -217,7 +217,7 @@ const AdminPanel = () => {
                         onClick={() => handleTabChange('audit')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'audit' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
-                        <ShieldCheck size={17} /> Audit & Security
+                        <ShieldCheck size={17} /> {t('adminSection.tabs.audit', 'Audit & Security')}
                     </button>
                 )}
                 {canManageApiKeys && (
@@ -225,7 +225,7 @@ const AdminPanel = () => {
                         onClick={() => handleTabChange('api-keys')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'api-keys' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
-                        <Key size={17} /> National SIS & Data Exchange
+                        <Key size={17} /> {t('adminSection.tabs.apiKeys', 'National SIS & Data Exchange')}
                     </button>
                 )}
                 {canManageUsers && (
@@ -233,7 +233,7 @@ const AdminPanel = () => {
                         onClick={() => handleTabChange('users')}
                         className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ml-auto ${activeTab === 'users' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                     >
-                        <Users size={17} /> Laboratory Staff
+                        <Users size={17} /> {t('adminSection.tabs.users', 'Laboratory Staff')}
                     </button>
                 )}
             </div>
@@ -246,23 +246,23 @@ const AdminPanel = () => {
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-blue-800 dark:text-blue-300 text-sm flex-1 mr-4">
-                                Manage system languages. <strong>Default</strong> language is served to visitors before login.
+                                {t('adminSection.languageNotice', 'Manage system languages. Default language is served to visitors before login.')}
                             </div>
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
                             >
-                                + Add Language
+                                {t('adminSection.addLanguage', '+ Add Language')}
                             </button>
                         </div>
 
                         <table className="w-full text-left border dark:border-gray-700 rounded-lg overflow-hidden">
                             <thead className="bg-sf-canvas border-b dark:border-gray-600">
                                 <tr>
-                                    <th className="p-3 font-semibold text-sf-muted">Code</th>
-                                    <th className="p-3 font-semibold text-sf-muted">Name</th>
-                                    <th className="p-3 font-semibold text-sf-muted">Status</th>
-                                    <th className="p-3 font-semibold text-sf-muted text-right">Actions</th>
+                                    <th className="p-3 font-semibold text-sf-muted">{t('adminSection.colCode', 'Code')}</th>
+                                    <th className="p-3 font-semibold text-sf-muted">{t('adminSection.colName', 'Name')}</th>
+                                    <th className="p-3 font-semibold text-sf-muted">{t('adminSection.colStatus', 'Status')}</th>
+                                    <th className="p-3 font-semibold text-sf-muted text-right">{t('adminSection.colActions', 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -272,13 +272,13 @@ const AdminPanel = () => {
                                         <td className="p-3 font-medium">{l.name}</td>
                                         <td className="p-3">
                                             {(labSettings?.branding?.defaultLanguage ? labSettings.branding.defaultLanguage === l.code : l.isDefault) ? (
-                                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200">Default</span>
+                                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full border border-green-200">{t('adminSection.default', 'Default')}</span>
                                             ) : (
                                                 <button
                                                     onClick={() => handleSetDefault(l.code)}
                                                     className="text-gray-400 hover:text-blue-600 text-xs border border-gray-300 px-2 py-1 rounded hover:border-blue-500"
                                                 >
-                                                    Set Default
+                                                    {t('adminSection.setDefault', 'Set Default')}
                                                 </button>
                                             )}
                                         </td>
@@ -287,14 +287,14 @@ const AdminPanel = () => {
                                                 onClick={() => { setActiveLang(l); setEditorOpen(true); }}
                                                 className="text-blue-600 hover:underline text-sm font-medium"
                                             >
-                                                Edit Translations
+                                                {t('adminSection.editTranslations', 'Edit Translations')}
                                             </button>
                                             {!l.isDefault && (
                                                 <button
                                                     onClick={() => handleDeleteLanguage(l.code)}
                                                     className="text-red-500 hover:text-red-700 text-sm"
                                                 >
-                                                    Delete
+                                                    {t('adminSection.delete', 'Delete')}
                                                 </button>
                                             )}
                                         </td>

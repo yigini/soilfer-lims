@@ -1329,8 +1329,8 @@ const Reception = () => {
                 </div>
 
                 <div className="text-center mb-6 md:mb-10">
-                    <h1 className="text-2xl md:text-4xl font-bold text-sf-text mb-2">Reception Console</h1>
-                    <p className="text-sf-muted">Select intake mode or resume a draft</p>
+                    <h1 className="text-2xl md:text-4xl font-bold text-sf-text mb-2">{t('receptionConsole.consoleTitle', 'Reception Console')}</h1>
+                    <p className="text-sf-muted">{t('receptionConsole.selectMode', 'Select intake mode or resume a draft')}</p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
@@ -1342,8 +1342,8 @@ const Reception = () => {
                             <div className="bg-blue-100 dark:bg-blue-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                                 <Layers size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-sf-text mb-1">Project Sample</h2>
-                            <p className="text-xs text-sf-muted">Scheduled samples (SoilFER campaigns)</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">{t('receptionConsole.projectSampleTitle', 'Project Sample')}</h2>
+                            <p className="text-xs text-sf-muted">{t('receptionConsole.projectSampleDesc', 'Scheduled samples (SoilFER campaigns)')}</p>
                         </div>
                     </button>
 
@@ -1361,8 +1361,8 @@ const Reception = () => {
                             <div className="bg-purple-100 dark:bg-purple-900/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                                 <User size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-sf-text mb-1">Walk-in Sample</h2>
-                            <p className="text-xs text-sf-muted">Farmers & Individual walk-in clients</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">{t('receptionConsole.walkInSampleTitle', 'Walk-in Sample')}</h2>
+                            <p className="text-xs text-sf-muted">{t('receptionConsole.walkInSampleDesc', 'Farmers & Individual walk-in clients')}</p>
                         </div>
                     </button>
 
@@ -1374,8 +1374,8 @@ const Reception = () => {
                             <div className="bg-emerald-100 dark:bg-emerald-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
                                 <PackageCheck size={28} />
                             </div>
-                            <h2 className="text-xl font-bold text-sf-text mb-1">Consignment Batch</h2>
-                            <p className="text-xs text-sf-muted">Couriers, manifests & bulk field campaigns</p>
+                            <h2 className="text-xl font-bold text-sf-text mb-1">{t('receptionConsole.consignmentBatchTitle', 'Consignment Batch')}</h2>
+                            <p className="text-xs text-sf-muted">{t('receptionConsole.consignmentBatchDesc', 'Couriers, manifests & bulk field campaigns')}</p>
                         </div>
                     </button>
                 </div>
@@ -1384,13 +1384,13 @@ const Reception = () => {
                 <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden flex-1 max-h-[400px] flex flex-col">
                     <div className="p-4 border-b border-sf-divider bg-sf-canvas flex justify-between items-center sticky top-0">
                         <h3 className="font-bold text-sf-text flex items-center gap-2">
-                            <FileText size={18} /> Incomplete Intakes (Drafts)
+                            <FileText size={18} /> {t('receptionConsole.incompleteIntakes', 'Incomplete Intakes (Drafts)')}
                         </h3>
                         <span className="text-xs font-bold bg-sf-raised text-sf-muted px-2 py-1 rounded-full border border-sf-divider">{drafts.length}</span>
                     </div>
                     <div className="overflow-y-auto flex-1 p-2 space-y-2">
                         {drafts.length === 0 ? (
-                            <div className="text-center py-10 text-sf-muted">No drafts found.</div>
+                            <div className="text-center py-10 text-sf-muted">{t('receptionConsole.noDrafts', 'No drafts found.')}</div>
                         ) : (
                             drafts.map(d => (
                                 <div key={d.id} className="flex items-center justify-between p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl border border-transparent hover:border-blue-100 dark:hover:border-blue-800 transition-colors group cursor-pointer"
@@ -1423,10 +1423,10 @@ const Reception = () => {
                                             }}
                                             className="text-sf-muted hover:text-red-600 font-bold text-sm md:opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-sf-divider hover:border-red-200 dark:hover:border-red-700 shadow-sm touch-target"
                                         >
-                                            Discard
+                                            {t('receptionConsole.discard', 'Discard')}
                                         </button>
                                         <button className="text-blue-600 dark:text-blue-400 font-bold text-sm md:opacity-0 group-hover:opacity-100 transition-opacity bg-sf-surface px-3 py-1.5 rounded border border-blue-200 dark:border-blue-800 shadow-sm touch-target">
-                                            Resume
+                                            {t('receptionConsole.resume', 'Resume')}
                                         </button>
                                     </div>
                                 </div>
@@ -1469,7 +1469,7 @@ const Reception = () => {
             <div className="p-4 md:p-10 max-w-2xl mx-auto animate-in slide-in-from-right" data-tour="reception-container">
                 <button onClick={() => setMode(null)} className="flex items-center gap-2 text-sf-muted hover:text-sf-text mb-6 font-medium"><ArrowLeft size={20} /> Back</button>
                 <div className="bg-sf-surface p-8 rounded-xl shadow-xl border border-sf-divider">
-                    <h2 className="text-2xl font-bold text-sf-text mb-6">Select Project Session</h2>
+                    <h2 className="text-2xl font-bold text-sf-text mb-6">{t('receptionConsole.selectProjectSession', 'Select Project Session')}</h2>
                     <div className="space-y-3">
                         {availableProjects.filter(p => p.status === 'ACTIVE').map(p => (
                             <button key={p.id} onClick={() => handleSelectProject(p)} className="w-full text-left p-4 border border-sf-divider bg-sf-surface rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col group">
@@ -1479,7 +1479,7 @@ const Reception = () => {
                                 </div>
                                 <div className="flex gap-3 mt-1">
                                     <div className="text-[10px] text-sf-muted font-bold uppercase tracking-widest">{p.code}</div>
-                                    <div className="text-[10px] text-sf-muted font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? 'Template' : p.projectType === 'KOBO_LINKED' ? 'Kobo Linked' : 'Open Intake'}</div>
+                                    <div className="text-[10px] text-sf-muted font-bold uppercase tracking-widest">• {p.projectType === 'TEMPLATE_PREDEFINED_IDS' ? t('receptionConsole.template', 'Template') : p.projectType === 'KOBO_LINKED' ? t('receptionConsole.koboLinked', 'Kobo Linked') : t('receptionConsole.openIntake', 'Open Intake')}</div>
                                     {p.defaultAnalysisBundle && (
                                         <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">• Auto-Bundle: {p.defaultAnalysisBundle}</div>
                                     )}
@@ -1488,8 +1488,8 @@ const Reception = () => {
                         ))}
                         {availableProjects.filter(p => p.status === 'ACTIVE').length === 0 && (
                             <div className="text-center py-10">
-                                <p className="text-sf-muted font-medium">No active project sessions found.</p>
-                                <p className="text-xs text-sf-muted mt-1">Projects must be ACTIVE to accept samples.</p>
+                                <p className="text-sf-muted font-medium">{t('receptionConsole.noActiveProjects', 'No active project sessions found.')}</p>
+                                <p className="text-xs text-sf-muted mt-1">{t('receptionConsole.activeProjectsRequired', 'Projects must be ACTIVE to accept samples.')}</p>
                             </div>
                         )}
                     </div>
@@ -1646,8 +1646,8 @@ const Reception = () => {
                     <div className="mt-3 flex items-center justify-between">
                         <div className="text-xs text-sf-muted">
                             {availableProjects.find(p => p.id === sessionProject)?.projectType === 'TEMPLATE_PREDEFINED_IDS'
-                                ? "💡 Scheduled project: Verification against manifest required."
-                                : "💡 Open intake: Register samples manually as they arrive."}
+                                ? t('receptionConsole.scheduledNotice', '💡 Scheduled project: Verification against manifest required.')
+                                : t('receptionConsole.openIntakeNotice', '💡 Open intake: Register samples manually as they arrive.')}
                         </div>
                         <button
                             onClick={() => {
@@ -1664,7 +1664,7 @@ const Reception = () => {
                             }}
                             className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-bold flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-lg transition-colors"
                         >
-                            <Plus size={14} /> New Manual ID
+                            <Plus size={14} /> {t('receptionConsole.newManualId', 'New Manual ID')}
                         </button>
                     </div>
                 )}
@@ -1678,7 +1678,7 @@ const Reception = () => {
                             <AlertTriangle className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" size={24} />
                             <div>
                                 <h4 className="font-bold text-amber-900 dark:text-amber-200 text-base flex items-center gap-2">
-                                    <span>Prior Receipt Detected for {duplicateWarning.sample.originalId}</span>
+                                    <span>{t('receptionConsole.duplicateDetected', `Prior Receipt Detected for ${duplicateWarning.sample.originalId}`, { id: duplicateWarning.sample.originalId })}</span>
                                     {duplicateWarning.sample.labId && (
                                         <span className="font-mono text-xs bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded">
                                             Lab ID: {duplicateWarning.sample.labId}
@@ -1686,13 +1686,13 @@ const Reception = () => {
                                     )}
                                 </h4>
                                 <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
-                                    This sample ID was previously received on{' '}
+                                    {t('receptionConsole.duplicatePreviouslyReceived', 'This sample ID was previously received on')}{' '}
                                     <strong>{duplicateWarning.sample.receptionDate ? new Date(duplicateWarning.sample.receptionDate).toLocaleDateString() : 'a prior date'}</strong>
                                     {' '}(Status: <span className="font-bold uppercase">{duplicateWarning.sample.status}</span>
                                     {duplicateWarning.sample.assignedLab ? ` • Lab: ${duplicateWarning.sample.assignedLab}` : ''}).
                                 </p>
                                 <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                                    If this is a physical re-submission for re-testing or supplementary analyses, confirm as a Re-submission.
+                                    {t('receptionConsole.duplicateResubmissionHint', 'If this is a physical re-submission for re-testing or supplementary analyses, confirm as a Re-submission.')}
                                 </p>
                                 <div className="mt-3 flex items-center gap-3">
                                     <button
@@ -1703,7 +1703,7 @@ const Reception = () => {
                                         }}
                                         className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
                                     >
-                                        ✓ Confirm as Re-submission
+                                        {t('receptionConsole.confirmResubmission', '✓ Confirm as Re-submission')}
                                     </button>
                                     <button
                                         type="button"
@@ -1713,7 +1713,7 @@ const Reception = () => {
                                         }}
                                         className="px-3 py-1.5 bg-sf-surface border border-sf-divider text-sf-text rounded-lg text-xs font-medium hover:bg-sf-canvas transition-colors"
                                     >
-                                        Cancel / Clear ID
+                                        {t('receptionConsole.cancelClearId', 'Cancel / Clear ID')}
                                     </button>
                                 </div>
                             </div>
@@ -1735,10 +1735,10 @@ const Reception = () => {
                     {/* MOBILE STEP NAVIGATION (Phone viewports < md) */}
                     <div className="md:hidden flex items-center justify-between gap-1 p-1 bg-sf-raised rounded-xl border border-sf-divider mb-4 sticky top-14 z-20 shadow-sm">
                         {[
-                            { id: 'identify', label: '1. ID & Field', icon: Layers },
-                            { id: 'condition', label: '2. Condition', icon: Scale },
-                            { id: 'analyses', label: '3. Analyses', icon: FileText },
-                            { id: 'receipt', label: '4. Handover', icon: ShieldCheck }
+                            { id: 'identify', label: t('receptionConsole.stepIdentify', '1. ID & Field'), icon: Layers },
+                            { id: 'condition', label: t('receptionConsole.stepCondition', '2. Condition'), icon: Scale },
+                            { id: 'analyses', label: t('receptionConsole.stepAnalyses', '3. Analyses'), icon: FileText },
+                            { id: 'receipt', label: t('receptionConsole.stepReceipt', '4. Handover'), icon: ShieldCheck }
                         ].map(step => {
                             const Icon = step.icon;
                             const isActive = mobileStep === step.id;

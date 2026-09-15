@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { RefreshCw, Radio } from 'lucide-react';
 
 /**
@@ -7,23 +8,24 @@ import { RefreshCw, Radio } from 'lucide-react';
  * Never claims 'Live' merely because the last HTTP request succeeded.
  */
 export default function UpdateStatus({
-    status = 'idle', // 'live', 'updated', 'stale', 'disconnected', 'loading'
+    status = 'idle',
     lastUpdated = null,
     onRefresh,
     isRefreshing = false
 }) {
+    const { t } = useLanguage();
     const getFreshnessLabel = () => {
-        if (isRefreshing) return 'Refreshing…';
-        if (status === 'disconnected') return 'Not connected';
-        if (status === 'stale') return 'Data may be stale';
-        if (status === 'live') return 'Live connection';
-        if (!lastUpdated) return 'Loaded';
+        if (isRefreshing) return t('dashboard.updateStatus.refreshing', 'Refreshing…');
+        if (status === 'disconnected') return t('dashboard.updateStatus.notConnected', 'Not connected');
+        if (status === 'stale') return t('dashboard.updateStatus.stale', 'Data may be stale');
+        if (status === 'live') return t('dashboard.updateStatus.live', 'Live connection');
+        if (!lastUpdated) return t('dashboard.updateStatus.loaded', 'Loaded');
 
         const seconds = Math.floor((Date.now() - new Date(lastUpdated).getTime()) / 1000);
-        if (seconds < 30) return 'Updated just now';
-        if (seconds < 120) return `Updated ${seconds}s ago`;
+        if (seconds < 30) return t('dashboard.updateStatus.updatedJustNow', 'Updated just now');
+        if (seconds < 120) return t('dashboard.updateStatus.updatedSecondsAgo', `Updated ${seconds}s ago`, { seconds });
         const minutes = Math.floor(seconds / 60);
-        return `Updated ${minutes}m ago`;
+        return t('dashboard.updateStatus.updatedMinutesAgo', `Updated ${minutes}m ago`, { minutes });
     };
 
     const getIndicatorColor = () => {
@@ -46,10 +48,10 @@ export default function UpdateStatus({
                     onClick={onRefresh}
                     disabled={isRefreshing}
                     className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:underline"
-                    aria-label="Refresh dashboard data"
+                    aria-label={t('dashboard.updateStatus.refreshAria', 'Refresh dashboard data')}
                 >
                     <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    <span>Refresh</span>
+                    <span>{t('dashboard.updateStatus.refresh', 'Refresh')}</span>
                 </button>
             )}
         </div>

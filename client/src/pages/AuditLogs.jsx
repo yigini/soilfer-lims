@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
 import {
     ShieldAlert, Clock, User, LayoutList,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 const AuditLogs = () => {
+    const { t } = useLanguage();
     const [logs, setLogs] = useState([]);
     const [meta, setMeta] = useState({ page: 1, limit: 50, total: 0, totalPages: 1 });
     const [loading, setLoading] = useState(true);
@@ -58,9 +60,9 @@ const AuditLogs = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-sf-text flex items-center gap-3">
                         <LayoutList size={32} className="text-indigo-600" />
-                        System Audit Logs
+                        {t('auditSection.title', 'System Audit Logs')}
                     </h1>
-                    <p className="text-gray-500 mt-1">Full history of system events, actions, and user activities.</p>
+                    <p className="text-gray-500 mt-1">{t('auditSection.subtitle', 'Full history of system events, actions, and user activities.')}</p>
                 </div>
 
                 <div className="flex items-center gap-4 w-full md:w-auto">
@@ -75,7 +77,7 @@ const AuditLogs = () => {
                                         : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
-                                {tab === 'ALL' ? 'All Logs' : tab.charAt(0) + tab.slice(1).toLowerCase()}
+                                {tab === 'ALL' ? t('auditSection.allLogs', 'All Logs') : tab === 'OPERATIONAL' ? t('auditSection.operational', 'Operational') : t('auditSection.system', 'System')}
                             </button>
                         ))}
                     </div>
@@ -87,7 +89,7 @@ const AuditLogs = () => {
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search logs..."
+                            placeholder={t('auditSection.searchLogs', 'Search logs...')}
                             className="outline-none text-sm w-full"
                         />
                     </div>

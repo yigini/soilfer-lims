@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight, ArrowUpRight, Loader2, PanelRightClose } from 'lucide-react';
 import EmptyState from './EmptyState';
@@ -26,6 +27,7 @@ export default function WorkQueue({
     onToggleSideRail = null,
     hasSideRail = false
 }) {
+    const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState('');
 
     // Filter rows client-side if loaded, or search can pass through
@@ -62,12 +64,12 @@ export default function WorkQueue({
     };
 
     return (
-        <section aria-label="Work queue panel" className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm overflow-hidden flex flex-col">
+        <section aria-label={t('dashboard.workQueue.panelAria', 'Work queue panel')} className="bg-sf-surface rounded-xl border border-sf-divider shadow-sm overflow-hidden flex flex-col">
             {/* Queue Header & Search */}
             <div className="p-4 sm:p-5 border-b border-sf-divider flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-lg font-bold text-sf-text">
-                        {title || 'Current Work Queue'}
+                        {title || t('dashboard.workQueue.currentWorkQueue', 'Current Work Queue')}
                     </h2>
                     {subtitle && (
                         <p className="text-xs text-sf-muted mt-0.5">
@@ -85,7 +87,7 @@ export default function WorkQueue({
                             title={sideRailCollapsed ? "Show side notes panel" : "Expand table to full width"}
                         >
                             <PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-sf-primary' : 'text-sf-muted'}`} />
-                            <span>{sideRailCollapsed ? "Show Notes" : "Full Width"}</span>
+                            <span>{sideRailCollapsed ? t('dashboard.workQueue.showNotes', 'Show Notes') : t('dashboard.workQueue.fullWidth', 'Full Width')}</span>
                         </button>
                     )}
                     <div className="relative w-full sm:w-64">
@@ -94,7 +96,7 @@ export default function WorkQueue({
                             type="search"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Filter this queue…"
+                            placeholder={t('dashboard.workQueue.filterQueue', 'Filter this queue…')}
                             className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-surface border border-sf-control rounded-lg text-sf-text placeholder:text-sf-muted focus:outline-none focus:border-sf-primary focus:ring-1 focus:ring-sf-primary"
                         />
                     </div>
@@ -136,13 +138,13 @@ export default function WorkQueue({
                 {isLoading ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-sf-muted">
                         <Loader2 className="w-8 h-8 animate-spin text-sf-primary mb-2" />
-                        <span className="text-xs font-medium">Loading queue items…</span>
+                        <span className="text-xs font-medium">{t('dashboard.workQueue.loadingItems', 'Loading queue items…')}</span>
                     </div>
                 ) : error ? (
                     <EmptyState
                         type="error"
-                        title="Failed to load queue"
-                        message={error.message || 'Records could not be loaded.'}
+                        title={t('dashboard.workQueue.failedToLoad', 'Failed to load queue')}
+                        message={error.message || t('dashboard.workQueue.recordsCouldNotBeLoaded', 'Records could not be loaded.')}
                         onRetry={onRetry}
                     />
                 ) : filteredRows.length === 0 ? (
@@ -155,8 +157,8 @@ export default function WorkQueue({
                     ) : (
                         <EmptyState
                             type="zero"
-                            title="Queue is clear"
-                            message="No pending items waiting in this view."
+                            title={t('dashboard.workQueue.queueClear', 'Queue is clear')}
+                            message={t('dashboard.workQueue.noPendingItems', 'No pending items waiting in this view.')}
                         />
                     )
                 ) : (
@@ -164,10 +166,10 @@ export default function WorkQueue({
                         <table className="min-w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr className="border-b border-sf-divider/80 text-sf-muted font-semibold">
-                                    <th className="pb-3 pr-4">Work / Item</th>
-                                    <th className="pb-3 px-3">State</th>
-                                    <th className="pb-3 px-3 text-right">Count</th>
-                                    <th className="pb-3 pl-3 text-right">Action</th>
+                                    <th className="pb-3 pr-4">{t('dashboard.workQueue.colWorkItem', 'Work / Item')}</th>
+                                    <th className="pb-3 px-3">{t('dashboard.workQueue.colState', 'State')}</th>
+                                    <th className="pb-3 px-3 text-right">{t('dashboard.workQueue.colCount', 'Count')}</th>
+                                    <th className="pb-3 pl-3 text-right">{t('dashboard.workQueue.colAction', 'Action')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
@@ -217,12 +219,12 @@ export default function WorkQueue({
                                                     to={row.route}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sf-primary bg-[var(--sf-selected)] hover:bg-sf-hover border border-sf-divider transition-colors shadow-sm"
                                                 >
-                                                    <span>{row.action || 'Open'}</span>
+                                                    <span>{row.action || t('dashboard.workQueue.open', 'Open')}</span>
                                                     <ArrowUpRight className="w-3.5 h-3.5" />
                                                 </Link>
                                             ) : (
                                                 <span className="text-sf-muted text-xs italic">
-                                                    View only
+                                                    {t('dashboard.workQueue.viewOnly', 'View only')}
                                                 </span>
                                             )}
                                         </td>
@@ -236,8 +238,7 @@ export default function WorkQueue({
                 {/* Pagination Controls */}
                 <div className="pt-4 border-t border-sf-divider flex items-center justify-between text-xs text-sf-muted mt-4">
                     <div>
-                        Showing <span className="font-semibold text-sf-muted">{filteredRows.length}</span> of{' '}
-                        <span className="font-semibold text-sf-muted">{total || filteredRows.length}</span> items
+                        {t('dashboard.workQueue.showingItems', 'Showing {count} of {total} items', { count: filteredRows.length, total: total || filteredRows.length })}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -249,10 +250,10 @@ export default function WorkQueue({
                             aria-label="Previous page"
                         >
                             <ChevronLeft className="w-3.5 h-3.5" />
-                            <span>Previous</span>
+                            <span>{t('dashboard.workQueue.previous', 'Previous')}</span>
                         </button>
 
-                        <span className="px-2 font-medium">Page {page}</span>
+                        <span className="px-2 font-medium">{t('dashboard.workQueue.page', `Page ${page}`, { page })}</span>
 
                         <button
                             type="button"
@@ -261,7 +262,7 @@ export default function WorkQueue({
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             aria-label="Next page"
                         >
-                            <span>Next</span>
+                            <span>{t('dashboard.workQueue.next', 'Next')}</span>
                             <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                     </div>

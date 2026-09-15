@@ -164,10 +164,10 @@ const ResultReports = () => {
                     <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                         <FileText size={20} className="text-white" />
                     </div>
-                    Result Reports
+                    {t('resultReports.title', 'Result Reports')}
                 </h1>
                 <span className="text-sm text-sf-muted">
-                    {pagination.total} report{pagination.total !== 1 ? 's' : ''} found
+                    {t('resultReports.reportsFound', `${pagination.total} reports found`, { count: pagination.total })}
                 </span>
             </div>
 
@@ -179,11 +179,11 @@ const ResultReports = () => {
                         type="text"
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        placeholder="Search by name, phone, project, sample ID, or lab ID..."
+                        placeholder={t('resultReports.searchPlaceholder', 'Search by name, phone, project, sample ID, or lab ID...')}
                         className="w-full pl-12 pr-4 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
                     />
                     <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sf-emerald text-white rounded-lg text-sm font-bold hover:bg-sf-emerald-hover transition-colors">
-                        Search
+                        {t('common.search', 'Search')}
                     </button>
                 </div>
             </form>
@@ -193,13 +193,13 @@ const ResultReports = () => {
                 {loading ? (
                     <div className="flex items-center justify-center py-20 text-gray-400">
                         <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mr-3" />
-                        Searching reports...
+                        {t('resultReports.searchingReports', 'Searching reports...')}
                     </div>
                 ) : reports.length === 0 ? (
                     <div className="text-center py-20 text-gray-400">
                         <FileText size={40} className="mx-auto mb-3 opacity-30" />
-                        <p className="font-bold">No reports found</p>
-                        <p className="text-sm mt-1">Try a different search term or generate new reports from the Samples page.</p>
+                        <p className="font-bold">{t('resultReports.noReportsFound', 'No reports found')}</p>
+                        <p className="text-sm mt-1">{t('resultReports.noReportsHint', 'Try a different search term or generate new reports from the Samples page.')}</p>
                     </div>
                 ) : (
                     <>
@@ -207,13 +207,13 @@ const ResultReports = () => {
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-sf-canvas/50 border-b border-sf-divider text-xs uppercase text-sf-muted tracking-wider">
                                     <tr>
-                                        <th className="px-6 py-3">Sample / Lab ID</th>
-                                        <th className="px-6 py-3">Client</th>
-                                        <th className="px-6 py-3">Project</th>
-                                        <th className="px-6 py-3">Version</th>
-                                        <th className="px-6 py-3">Generated</th>
-                                        <th className="px-6 py-3">Links</th>
-                                        <th className="px-6 py-3 text-right">Actions</th>
+                                        <th className="px-6 py-3">{t('resultReports.colSampleLabId', 'Sample / Lab ID')}</th>
+                                        <th className="px-6 py-3">{t('resultReports.colClient', 'Client')}</th>
+                                        <th className="px-6 py-3">{t('resultReports.colProject', 'Project')}</th>
+                                        <th className="px-6 py-3">{t('resultReports.colVersion', 'Version')}</th>
+                                        <th className="px-6 py-3">{t('resultReports.colGenerated', 'Generated')}</th>
+                                        <th className="px-6 py-3">{t('resultReports.colLinks', 'Links')}</th>
+                                        <th className="px-6 py-3 text-right">{t('resultReports.colActions', 'Actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">
@@ -243,10 +243,10 @@ const ResultReports = () => {
                                             <td className="px-6 py-4">
                                                 {r.shareLinks?.length > 0 ? (
                                                     <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-400 px-2 py-0.5 rounded-full">
-                                                        <LinkIcon size={11} /> {r.shareLinks.length} active
+                                                        <LinkIcon size={11} /> {t('resultReports.activeLinks', `${r.shareLinks.length} active`, { count: r.shareLinks.length })}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">No links</span>
+                                                    <span className="text-xs text-gray-400">{t('resultReports.noLinks', 'No links')}</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -343,7 +343,7 @@ const ResultReports = () => {
                     <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider overflow-hidden">
                         <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center">
                             <h3 className="font-bold text-sf-text flex items-center gap-2">
-                                <Share2 size={18} className="text-purple-600" /> Manage Share Links
+                                <Share2 size={18} className="text-purple-600" /> {t('resultReports.manageShareLinks', 'Manage Share Links')}
                             </h3>
                             <button onClick={() => setShareModal(null)} className="p-2 hover:bg-sf-raised rounded-lg">
                                 <XCircle size={20} className="text-gray-400" />
@@ -353,10 +353,10 @@ const ResultReports = () => {
                         <div className="p-6 space-y-4">
                             {/* Create new link */}
                             <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider">
-                                <h4 className="text-sm font-bold text-sf-text mb-3">Create Public Link</h4>
+                                <h4 className="text-sm font-bold text-sf-text mb-3">{t('resultReports.createPublicLink', 'Create Public Link')}</h4>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1">
-                                        <label className="text-xs text-gray-500 mb-1 block">Expires in (days)</label>
+                                        <label className="text-xs text-gray-500 mb-1 block">{t('resultReports.expiresInDays', 'Expires in (days)')}</label>
                                         <input
                                             type="number"
                                             value={expiryDays}
@@ -371,7 +371,7 @@ const ResultReports = () => {
                                         disabled={shareLoading}
                                         className="px-4 py-2 bg-sf-emerald text-white rounded-lg font-bold text-sm hover:bg-sf-emerald-hover transition-colors disabled:opacity-50 flex items-center gap-2 mt-5"
                                     >
-                                        <Plus size={14} /> Generate
+                                        <Plus size={14} /> {t('resultReports.generate', 'Generate')}
                                     </button>
                                 </div>
                             </div>

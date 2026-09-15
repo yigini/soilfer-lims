@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
     ShieldCheck, AlertTriangle, CheckCircle2,
     Clock, RefreshCw, Search, ArrowUpRight,
@@ -10,6 +11,7 @@ import {
 
 export default function QADashboard() {
     const { token } = useAuth();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('qc'); // 'qc', 'amendments', 'audit'
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
@@ -86,14 +88,14 @@ export default function QADashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sf-divider">
                 <div>
                     <div className="text-xs font-bold uppercase tracking-wider text-sf-emerald mb-1">
-                        Quality & Regulatory Compliance
+                        {t('qaSection.kicker', 'Quality & Regulatory Compliance')}
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-sf-text flex items-center gap-3">
                         <ShieldCheck className="w-8 h-8 text-sf-emerald" />
-                        <span>Quality Assurance & Audit</span>
+                        <span>{t('qaSection.title', 'Quality Assurance & Audit')}</span>
                     </h1>
                     <p className="text-sm text-sf-muted mt-1">
-                        QC batch verification, control chart monitoring, traceable specimen amendments, and immutable audit trails.
+                        {t('qaSection.subtitle', 'QC batch verification, control chart monitoring, traceable specimen amendments, and immutable audit trails.')}
                     </p>
                 </div>
 
@@ -105,13 +107,13 @@ export default function QADashboard() {
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-sf-text bg-sf-surface border border-sf-divider hover:bg-sf-raised shadow-sm transition-all"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        <span>Refresh QA</span>
+                        <span>{t('qaSection.refresh', 'Refresh QA')}</span>
                     </button>
                     <Link
                         to="/admin/audit"
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
                     >
-                        <span>Full Audit Log</span>
+                        <span>{t('qaSection.fullAuditLog', 'Full Audit Log')}</span>
                         <ArrowUpRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
@@ -120,29 +122,29 @@ export default function QADashboard() {
             {/* Metric Summary Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface shadow-sm">
-                    <div className="text-xs font-medium text-sf-muted">QC Batches Monitored</div>
+                    <div className="text-xs font-medium text-sf-muted">{t('qaSection.qcBatchesMonitored', 'QC Batches Monitored')}</div>
                     <div className="text-2xl font-bold text-sf-text mt-1">{stats.qcTotal}</div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">Active & recent analytical runs</div>
+                    <div className="text-[11px] text-gray-400 mt-0.5">{t('qaSection.qcBatchesSubtitle', 'Active & recent analytical runs')}</div>
                 </div>
 
                 <div className={`p-4 rounded-xl border shadow-sm ${stats.qcFailed > 0 ? 'border-rose-300 dark:border-rose-900 bg-rose-50/40 dark:bg-rose-950/20' : 'border-sf-divider bg-sf-surface'}`}>
-                    <div className="text-xs font-medium text-sf-muted">QC Exceptions</div>
+                    <div className="text-xs font-medium text-sf-muted">{t('qaSection.qcExceptions', 'QC Exceptions')}</div>
                     <div className={`text-2xl font-bold mt-1 ${stats.qcFailed > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {stats.qcFailed}
                     </div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">{stats.qcFailed > 0 ? 'Batches require disposition' : 'Zero active QC failures'}</div>
+                    <div className="text-[11px] text-gray-400 mt-0.5">{stats.qcFailed > 0 ? t('qaSection.qcRequiresDisposition', 'Batches require disposition') : t('qaSection.zeroQcFailures', 'Zero active QC failures')}</div>
                 </div>
 
                 <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface shadow-sm">
-                    <div className="text-xs font-medium text-sf-muted">Traceable Amendments</div>
+                    <div className="text-xs font-medium text-sf-muted">{t('qaSection.traceableAmendments', 'Traceable Amendments')}</div>
                     <div className="text-2xl font-bold text-sf-text mt-1">{stats.amendmentsTotal}</div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">Post-approval corrections</div>
+                    <div className="text-[11px] text-gray-400 mt-0.5">{t('qaSection.traceableAmendmentsSubtitle', 'Post-approval corrections')}</div>
                 </div>
 
                 <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface shadow-sm">
-                    <div className="text-xs font-medium text-sf-muted">Immutable Audit Records</div>
+                    <div className="text-xs font-medium text-sf-muted">{t('qaSection.immutableAuditRecords', 'Immutable Audit Records')}</div>
                     <div className="text-2xl font-bold text-sf-text mt-1">{stats.auditTotal}</div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">Security & operational events</div>
+                    <div className="text-[11px] text-gray-400 mt-0.5">{t('qaSection.immutableAuditRecordsSubtitle', 'Security & operational events')}</div>
                 </div>
             </div>
 
@@ -159,7 +161,7 @@ export default function QADashboard() {
                         }`}
                     >
                         <Activity className="w-3.5 h-3.5" />
-                        <span>QC Batches ({stats.qcTotal})</span>
+                        <span>{t('qaSection.tabQcBatches', `QC Batches (${stats.qcTotal})`, { count: stats.qcTotal })}</span>
                     </button>
 
                     <button
@@ -172,7 +174,7 @@ export default function QADashboard() {
                         }`}
                     >
                         <FileSpreadsheet className="w-3.5 h-3.5" />
-                        <span>Amendments ({stats.amendmentsTotal})</span>
+                        <span>{t('qaSection.tabAmendments', `Amendments (${stats.amendmentsTotal})`, { count: stats.amendmentsTotal })}</span>
                     </button>
 
                     <button
@@ -185,7 +187,7 @@ export default function QADashboard() {
                         }`}
                     >
                         <History className="w-3.5 h-3.5" />
-                        <span>Audit Stream</span>
+                        <span>{t('qaSection.tabAuditStream', 'Audit Stream')}</span>
                     </button>
                 </div>
 
@@ -195,7 +197,7 @@ export default function QADashboard() {
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search records…"
+                        placeholder={t('qaSection.searchRecords', 'Search records…')}
                         className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-canvas border border-sf-divider rounded-lg text-sf-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sf-emerald shadow-sm"
                     />
                 </div>
@@ -206,22 +208,22 @@ export default function QADashboard() {
                 {loading ? (
                     <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center">
                         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-2" />
-                        <span className="text-xs">Loading quality records…</span>
+                        <span className="text-xs">{t('qaSection.loadingRecords', 'Loading quality records…')}</span>
                     </div>
                 ) : activeTab === 'qc' ? (
                     filteredQc.length === 0 ? (
                         <div className="p-12 text-center text-sf-muted text-xs">
-                            No QC batches matching the current filter.
+                            {t('qaSection.noQcBatches', 'No QC batches matching the current filter.')}
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs">
                                 <thead className="bg-sf-canvas border-b border-sf-divider text-gray-500 font-semibold">
                                     <tr>
-                                        <th className="py-3 px-4">Batch ID / Name</th>
-                                        <th className="py-3 px-4">Analysis & Scope</th>
-                                        <th className="py-3 px-4">Status</th>
-                                        <th className="py-3 px-4 text-right">Action</th>
+                                        <th className="py-3 px-4">{t('qaSection.colBatchId', 'Batch ID / Name')}</th>
+                                        <th className="py-3 px-4">{t('qaSection.colAnalysisScope', 'Analysis & Scope')}</th>
+                                        <th className="py-3 px-4">{t('qaSection.colStatus', 'Status')}</th>
+                                        <th className="py-3 px-4 text-right">{t('qaSection.colAction', 'Action')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">

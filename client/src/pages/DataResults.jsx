@@ -5,12 +5,14 @@ import { Download, Filter, Search, FlaskConical, Table, CheckCircle, FileText, X
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import * as XLSX from 'xlsx';
 import SpectraViewer from '../components/SpectraViewer';
 import InfoTooltip from '../components/common/InfoTooltip';
 
 const DataResults = () => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { showDialog } = useDialog();
     const { subscribeToEvent } = useNotifications();
     const [data, setData] = useState([]);
@@ -297,10 +299,10 @@ const DataResults = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
-                        <Table className="text-emerald-600" /> Analytical Results Master
+                        <Table className="text-emerald-600" /> {t('dataResults.title', 'Analytical Results Master')}
                     </h1>
                     <p className="text-sf-muted text-sm">
-                        Master view of all analytical results (Approved & Pending).
+                        {t('dataResults.subtitle', 'Master view of all analytical results (Approved & Pending).')}
                     </p>
                 </div>
 
@@ -310,11 +312,11 @@ const DataResults = () => {
                             onClick={() => setShowColumnMenu(!showColumnMenu)}
                             className="bg-sf-surface text-sf-text border border-sf-divider hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
                         >
-                            <Filter size={16} /> Columns
+                            <Filter size={16} /> {t('dataResults.columns', 'Columns')}
                         </button>
                         {showColumnMenu && (
                             <div className="absolute right-0 top-12 w-48 bg-sf-surface border dark:border-gray-700 shadow-lg rounded-lg z-50 p-2">
-                                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-2">Metadata Columns</h4>
+                                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-2">{t('dataResults.metadataColumns', 'Metadata Columns')}</h4>
                                 {columns.filter(c => !c.isResult && !c.frozen && !['country', 'collectionDate', 'receptionDate'].includes(c.key)).map(col => (
                                     <label key={col.key} className="flex items-center gap-2 px-2 py-1 hover:bg-sf-raised rounded cursor-pointer text-sm">
                                         <input
@@ -330,10 +332,10 @@ const DataResults = () => {
                         )}
                     </div>
                     <button onClick={() => handleExport('csv')} className="bg-sf-surface text-sf-text border border-sf-divider hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
-                        <Download size={16} /> CSV
+                        <Download size={16} /> {t('dataResults.exportCsv', 'CSV')}
                     </button>
                     <button onClick={() => handleExport('xlsx')} className="bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
-                        <Download size={16} /> Excel
+                        <Download size={16} /> {t('dataResults.exportExcel', 'Excel')}
                     </button>
                 </div>
             </div>
@@ -341,7 +343,7 @@ const DataResults = () => {
             {/* Filters */}
             <div className="card-base p-4 rounded-lg shadow-sm border mb-4 flex flex-wrap gap-4 items-center bg-sf-surface border-sf-divider">
                 <div className="flex items-center gap-2 text-sf-muted font-medium">
-                    <Filter size={18} /> Filters:
+                    <Filter size={18} /> {t('dataResults.filters', 'Filters')}:
                 </div>
 
                 {/* Analysis Type Filter */}
@@ -350,9 +352,9 @@ const DataResults = () => {
                     onChange={e => setAnalysisType(e.target.value)}
                     className="input-base border rounded px-3 py-2 text-sm w-40 bg-white"
                 >
-                    <option value="ALL">All Data</option>
-                    <option value="SPECTRAL">Spectral Only</option>
-                    <option value="WET_CHEM">Wet Chemistry</option>
+                    <option value="ALL">{t('dataResults.allData', 'All Data')}</option>
+                    <option value="SPECTRAL">{t('dataResults.spectralOnly', 'Spectral Only')}</option>
+                    <option value="WET_CHEM">{t('dataResults.wetChemistry', 'Wet Chemistry')}</option>
                     <option disabled>--- Specific ---</option>
                     <option value="P_AVAIL">P Available</option>
                     <option value="SOC">Organic Carbon</option>
@@ -360,10 +362,10 @@ const DataResults = () => {
                     <option value="TEXTURE">Texture (Sand/Silt/Clay)</option>
                 </select>
 
-                <input type="text" placeholder="Project Code..." value={projectFilter} onChange={e => setProjectFilter(e.target.value)} className="input-base border rounded px-3 py-2 text-sm w-32 md:w-48" />
+                <input type="text" placeholder={t('dataResults.projectCodePlaceholder', 'Project Code...')} value={projectFilter} onChange={e => setProjectFilter(e.target.value)} className="input-base border rounded px-3 py-2 text-sm w-32 md:w-48" />
                 <div className="relative ml-auto">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
-                    <input type="text" placeholder="Search Lab ID..." value={search} onChange={e => setSearch(e.target.value)} className="input-base pl-9 pr-4 py-2 border rounded text-sm w-64 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    <input type="text" placeholder={t('dataResults.searchLabIdPlaceholder', 'Search Lab ID...')} value={search} onChange={e => setSearch(e.target.value)} className="input-base pl-9 pr-4 py-2 border rounded text-sm w-64 focus:ring-2 focus:ring-emerald-500 outline-none" />
                 </div>
             </div>
 
@@ -371,7 +373,7 @@ const DataResults = () => {
             <div className="card-base rounded-xl shadow border flex-1 overflow-hidden flex flex-col bg-sf-surface border-sf-divider">
                 <div className="overflow-auto flex-1 relative">
                     {loading ? (
-                        <div className="flex items-center justify-center h-full text-gray-400">Loading Master Data...</div>
+                        <div className="flex items-center justify-center h-full text-gray-400">{t('dataResults.loadingMasterData', 'Loading Master Data...')}</div>
                     ) : (
                         <table className="w-full text-left border-collapse text-sm">
                             <thead className="bg-gray-100 dark:bg-gray-750 sticky top-0 z-10 shadow-sm">
