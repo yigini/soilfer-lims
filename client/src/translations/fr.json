@@ -1404,6 +1404,30 @@
     "attention": {
       "title": "Éléments de Configuration Nécessitant une Attention"
     },
+    "settings": {
+      "title": "Configuration du Laboratoire",
+      "subtitle": "Identité de l'établissement, normalisation du fuseau horaire et cycle de vie opérationnel.",
+      "facilityProfile": "Profil de l'Établissement et Heure Locale",
+      "labName": "Nom du Laboratoire",
+      "city": "Ville",
+      "timezone": "Fuseau Horaire IANA",
+      "selectTimezone": "— Sélectionner le fuseau horaire IANA configuré —",
+      "timezoneNotConfigured": "Fuseau horaire non configuré",
+      "timezoneNotSet": "Non configuré",
+      "email": "Courriel de Contact",
+      "phone": "Téléphone",
+      "address": "Adresse Physique",
+      "capacity": "Capacité mensuelle d'échantillons (optionnel)",
+      "capacityPlaceholder": "Sans restriction (laisser vide)",
+      "capacityHelp": "Débit mensuel maximal d'échantillons prévu. Valeur de planification optionnelle ; n'impose aucune restriction si laissé vide.",
+      "capacityUnconstrained": "Sans restriction",
+      "saveProfile": "Enregistrer les Modifications",
+      "savingProfile": "Enregistrement du Profil...",
+      "saveSuccess": "Profil du laboratoire mis à jour avec succès.",
+      "savedRefreshFailed": "Profil du laboratoire mis à jour avec succès. Veuillez rafraîchir la page pour afficher le résumé à jour.",
+      "saveFailed": "Échec de la mise à jour du profil du laboratoire.",
+      "noChanges": "Aucune modification à enregistrer."
+    },
     "people": {
       "title": "Personnel et Accès",
       "subtitle": "Registre unique faisant foi pour les invitations, revues de compétences et réattributions de tâches ouvertes.",

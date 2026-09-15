@@ -86,6 +86,7 @@ export default function LabManagement() {
     const [settingsForm, setSettingsForm] = useState({
         name: '', city: '', address: '', phone: '', email: '', website: '', capacity: '', timezone: '', notes: ''
     });
+    const [initialSettings, setInitialSettings] = useState(null);
     const [savingSettings, setSavingSettings] = useState(false);
     const [settingsMsg, setSettingsMsg] = useState(null);
 
@@ -130,17 +131,22 @@ export default function LabManagement() {
             if (latestWorkspaceReqId.current !== reqId) return;
             setWorkspace(res.data);
             if (res.data?.lab) {
-                setSettingsForm({
+                const labCap = (res.data.lab.capacity !== null && res.data.lab.capacity !== undefined)
+                    ? String(res.data.lab.capacity)
+                    : '';
+                const formInit = {
                     name: res.data.lab.name || '',
                     city: res.data.lab.city || '',
                     address: res.data.lab.address || '',
                     phone: res.data.lab.phone || '',
                     email: res.data.lab.email || '',
                     website: res.data.lab.website || '',
-                    capacity: res.data.lab.capacity || '',
-                    timezone: res.data.lab.timezone || 'America/Guatemala',
+                    capacity: labCap,
+                    timezone: res.data.lab.timezone || '',
                     notes: res.data.lab.notes || ''
-                });
+                };
+                setSettingsForm(formInit);
+                setInitialSettings(formInit);
             }
         } catch (err) {
             if (latestWorkspaceReqId.current !== reqId) return;
@@ -267,14 +273,44 @@ export default function LabManagement() {
         setSavingSettings(true);
         setSettingsMsg(null);
         try {
-            await axios.patch(`/api/labs/${selectedLabId}/profile`, settingsForm);
-            setSettingsMsg({ type: 'success', text: 'Laboratory profile updated successfully.' });
-            fetchWorkspace(selectedLabId);
-            fetchLabs();
+            const patch = {};
+            const keys = ['name', 'city', 'address', 'phone', 'email', 'website', 'capacity', 'timezone', 'notes'];
+            for (const key of keys) {
+                if (!initialSettings || settingsForm[key] !== initialSettings[key]) {
+                    if (key === 'capacity') {
+                        const trimmed = typeof settingsForm.capacity === 'string' ? settingsForm.capacity.trim() : settingsForm.capacity;
+                        patch.capacity = trimmed === '' ? null : trimmed;
+                    } else if (key === 'timezone') {
+                        const trimmed = typeof settingsForm.timezone === 'string' ? settingsForm.timezone.trim() : settingsForm.timezone;
+                        patch.timezone = trimmed === '' ? null : trimmed;
+                    } else {
+                        patch[key] = settingsForm[key];
+                    }
+                }
+            }
+
+            if (Object.keys(patch).length === 0) {
+                setSettingsMsg({ type: 'success', text: t('labManagement.settings.noChanges', 'No changes to save.') });
+                setSavingSettings(false);
+                return;
+            }
+
+            await axios.patch(`/api/labs/${selectedLabId}/profile`, patch);
+            setSettingsMsg({ type: 'success', text: t('labManagement.settings.saveSuccess', 'Laboratory profile updated successfully.') });
+
+            try {
+                await Promise.all([fetchWorkspace(selectedLabId), fetchLabs()]);
+            } catch (refreshErr) {
+                console.warn('Profile saved but failed to refresh workspace:', refreshErr);
+                setSettingsMsg({
+                    type: 'success',
+                    text: t('labManagement.settings.savedRefreshFailed', 'Laboratory profile updated successfully. Please refresh the page to reload the latest summary.')
+                });
+            }
         } catch (err) {
             console.error('Failed to save settings:', err);
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            setSettingsMsg({ type: 'error', text: msg || 'Failed to update laboratory profile.' });
+            setSettingsMsg({ type: 'error', text: msg || t('labManagement.settings.saveFailed', 'Failed to update laboratory profile.') });
         } finally {
             setSavingSettings(false);
         }
@@ -386,9 +422,10 @@ export default function LabManagement() {
 
     // Local time formatting helper
     const getLocalTime = (tz) => {
+        if (!tz) return null;
         try {
             return new Intl.DateTimeFormat(language || 'en', {
-                timeZone: tz || 'UTC',
+                timeZone: tz,
                 hour: '2-digit',
                 minute: '2-digit',
                 timeZoneName: 'short'
@@ -878,7 +915,10 @@ export default function LabManagement() {
                                 </span>
                                 <span className="text-xs text-sf-muted flex items-center gap-1 font-mono">
                                     <Clock size={12} />
-                                    {lab?.city ? `${lab.city} · ` : ''}{localTimeStr || lab?.timezone || 'UTC'}
+                                    {lab?.city ? `${lab.city} · ` : ''}
+                                    {lab?.timezone
+                                        ? (localTimeStr ? `${localTimeStr} (${lab.timezone})` : lab.timezone)
+                                        : t('labManagement.settings.timezoneNotConfigured', 'Timezone not configured')}
                                 </span>
                             </div>
                         </div>
@@ -1057,7 +1097,15 @@ export default function LabManagement() {
                                 </div>
                                 <div className="flex justify-between py-1">
                                     <span className="text-sf-muted">Local Timezone</span>
-                                    <span className="font-mono text-sf-text">{lab?.timezone || 'Not set'}</span>
+                                    <span className="font-mono text-sf-text">{lab?.timezone || t('labManagement.settings.timezoneNotSet', 'Not configured')}</span>
+                                </div>
+                                <div className="flex justify-between py-1">
+                                    <span className="text-sf-muted">Monthly Capacity</span>
+                                    <span className="font-mono text-sf-text">
+                                        {lab?.capacity !== null && lab?.capacity !== undefined
+                                            ? `${lab.capacity} samples/mo`
+                                            : t('labManagement.settings.capacityUnconstrained', 'Unconstrained')}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between py-1">
                                     <span className="text-sf-muted">Operational State</span>
@@ -1610,13 +1658,16 @@ export default function LabManagement() {
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                        IANA Timezone
+                                        {t('labManagement.settings.timezone', 'IANA Timezone')}
                                     </label>
                                     <select
                                         value={settingsForm.timezone}
                                         onChange={e => setSettingsForm({ ...settingsForm, timezone: e.target.value })}
                                         className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-xl text-xs text-sf-text focus:ring-2 focus:ring-sf-primary outline-none"
                                     >
+                                        <option value="" disabled>
+                                            {t('labManagement.settings.selectTimezone', '— Select configured IANA time zone —')}
+                                        </option>
                                         {getIanaTimezones().map(tz => (
                                             <option key={tz} value={tz}>{tz}</option>
                                         ))}
@@ -1661,12 +1712,30 @@ export default function LabManagement() {
                                 />
                             </div>
 
+                            <div>
+                                <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    {t('labManagement.settings.capacity', 'Monthly Sample Capacity (optional)')}
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    placeholder={t('labManagement.settings.capacityPlaceholder', 'Unconstrained (leave blank)')}
+                                    value={settingsForm.capacity}
+                                    onChange={e => setSettingsForm({ ...settingsForm, capacity: e.target.value })}
+                                    className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none font-mono"
+                                />
+                                <p className="text-[11px] text-sf-muted mt-1">
+                                    {t('labManagement.settings.capacityHelp', 'Maximum planned sample throughput per month. Optional planning value; leaves intake unrestricted if blank.')}
+                                </p>
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={savingSettings}
                                 className="px-6 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 disabled:opacity-50"
                             >
-                                {savingSettings ? 'Saving Profile...' : 'Save Profile Changes'}
+                                {savingSettings ? t('labManagement.settings.savingProfile', 'Saving Profile...') : t('labManagement.settings.saveProfile', 'Save Profile Changes')}
                             </button>
                         </form>
 

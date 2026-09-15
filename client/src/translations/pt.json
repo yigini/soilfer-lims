@@ -1404,6 +1404,30 @@
     "attention": {
       "title": "Itens de Configuração que Exigem Atenção"
     },
+    "settings": {
+      "title": "Configuração do Laboratório",
+      "subtitle": "Identidade da instalação, normalização do fuso horário e ciclo de vida operacional.",
+      "facilityProfile": "Perfil da Instalação e Hora Local",
+      "labName": "Nome do Laboratório",
+      "city": "Cidade",
+      "timezone": "Fuso Horário IANA",
+      "selectTimezone": "— Selecionar fuso horário IANA configurado —",
+      "timezoneNotConfigured": "Fuso horário não configurado",
+      "timezoneNotSet": "Não configurado",
+      "email": "E-mail de Contato",
+      "phone": "Telefone",
+      "address": "Endereço Físico",
+      "capacity": "Capacidade mensal de amostras (opcional)",
+      "capacityPlaceholder": "Sem restrição (deixar em branco)",
+      "capacityHelp": "Volume mensal planejado máximo de amostras. Valor de planejamento opcional; não restringe o recebimento se deixado em branco.",
+      "capacityUnconstrained": "Sem restrição",
+      "saveProfile": "Salvar Alterações do Perfil",
+      "savingProfile": "Salvando Perfil...",
+      "saveSuccess": "Perfil do laboratório atualizado com sucesso.",
+      "savedRefreshFailed": "Perfil do laboratório atualizado com sucesso. Por favor, recarregue a página para ver o resumo atualizado.",
+      "saveFailed": "Falha ao atualizar o perfil do laboratório.",
+      "noChanges": "Nenhuma alteração para salvar."
+    },
     "people": {
       "title": "Pessoas e Acesso",
       "subtitle": "Quadro oficial único para convites, análises de competências e transferência de atribuições abertas.",

@@ -1404,6 +1404,30 @@
     "attention": {
       "title": "Elementos de Configuración que Requieren Atención"
     },
+    "settings": {
+      "title": "Configuración del Laboratorio",
+      "subtitle": "Identidad de la instalación, normalización de zona horaria y ciclo de vida operativo.",
+      "facilityProfile": "Perfil de la Instalación y Hora Local",
+      "labName": "Nombre del Laboratorio",
+      "city": "Ciudad",
+      "timezone": "Zona Horaria IANA",
+      "selectTimezone": "— Seleccionar zona horaria IANA configurada —",
+      "timezoneNotConfigured": "Zona horaria no configurada",
+      "timezoneNotSet": "No configurada",
+      "email": "Correo de Contacto",
+      "phone": "Teléfono",
+      "address": "Dirección Física",
+      "capacity": "Capacidad mensual de muestras (opcional)",
+      "capacityPlaceholder": "Sin restricción (dejar en blanco)",
+      "capacityHelp": "Rendimiento mensual planificado máximo. Valor de planificación opcional; no restringe la recepción si se deja en blanco.",
+      "capacityUnconstrained": "Sin restricción",
+      "saveProfile": "Guardar Cambios de Perfil",
+      "savingProfile": "Guardando Perfil...",
+      "saveSuccess": "Perfil de laboratorio actualizado con éxito.",
+      "savedRefreshFailed": "Perfil de laboratorio actualizado con éxito. Por favor recargue la página para ver el resumen actualizado.",
+      "saveFailed": "Error al actualizar el perfil del laboratorio.",
+      "noChanges": "No hay cambios para guardar."
+    },
     "people": {
       "title": "Personal y Acceso",
       "subtitle": "Registro único y autorizado para invitaciones, revisiones de capacidades y transferencia de asignaciones abiertas.",

@@ -365,8 +365,9 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
             phone: lab.phone,
             email: lab.email,
             website: lab.website,
-            capacity: lab.capacity,
-            timezone: lab.timezone || 'UTC',
+            capacity: lab.capacity !== undefined ? lab.capacity : null,
+            timezone: lab.timezone || null,
+            effectiveTimezone: lab.timezone || 'UTC',
             notes: (capabilities.canManageProfile ? lab.notes : undefined),
             isActive: lab.isActive
         },
@@ -444,10 +445,20 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
     }
 
     if (timezone !== undefined) {
-        try {
-            Intl.DateTimeFormat(undefined, { timeZone: timezone });
-            data.timezone = timezone;
-        } catch (e) {
+        if (timezone === null || (typeof timezone === 'string' && timezone.trim() === '')) {
+            data.timezone = null;
+        } else if (typeof timezone === 'string') {
+            const trimmedTz = timezone.trim();
+            try {
+                Intl.DateTimeFormat(undefined, { timeZone: trimmedTz });
+                data.timezone = trimmedTz;
+            } catch (e) {
+                const err = new Error(`Invalid IANA time zone identifier: '${timezone}'`);
+                err.statusCode = 400;
+                err.code = 'INVALID_TIMEZONE';
+                throw err;
+            }
+        } else {
             const err = new Error(`Invalid IANA time zone identifier: '${timezone}'`);
             err.statusCode = 400;
             err.code = 'INVALID_TIMEZONE';
@@ -456,14 +467,36 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
     }
 
     if (capacity !== undefined) {
-        const parsed = parseInt(capacity, 10);
-        if (isNaN(parsed) || parsed < 0) {
-            const err = new Error('Capacity must be a non-negative integer');
-            err.statusCode = 400;
-            err.code = 'INVALID_CAPACITY';
-            throw err;
+        if (capacity === null || (typeof capacity === 'string' && capacity.trim() === '')) {
+            data.capacity = null;
+        } else {
+            let num;
+            if (typeof capacity === 'number') {
+                num = capacity;
+            } else if (typeof capacity === 'string') {
+                const trimmedCap = capacity.trim();
+                if (!/^\d+$/.test(trimmedCap)) {
+                    const err = new Error('Capacity must be a non-negative whole integer or blank');
+                    err.statusCode = 400;
+                    err.code = 'INVALID_CAPACITY';
+                    throw err;
+                }
+                num = Number(trimmedCap);
+            } else {
+                const err = new Error('Capacity must be a non-negative whole integer or blank');
+                err.statusCode = 400;
+                err.code = 'INVALID_CAPACITY';
+                throw err;
+            }
+
+            if (!Number.isInteger(num) || num < 0 || !Number.isSafeInteger(num) || num > 2147483647) {
+                const err = new Error('Capacity must be a non-negative whole integer or blank');
+                err.statusCode = 400;
+                err.code = 'INVALID_CAPACITY';
+                throw err;
+            }
+            data.capacity = num;
         }
-        data.capacity = parsed;
     }
 
     if (country !== undefined) data.country = country;

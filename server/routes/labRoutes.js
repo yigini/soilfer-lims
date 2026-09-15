@@ -5,6 +5,25 @@ const prisma = require('../prisma');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 const bcrypt = require('bcryptjs');
 
+function parseOptionalCapacity(val) {
+    if (val === undefined) return undefined;
+    if (val === null || (typeof val === 'string' && val.trim() === '')) return null;
+    let num;
+    if (typeof val === 'number') {
+        num = val;
+    } else if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (!/^\d+$/.test(trimmed)) return NaN;
+        num = Number(trimmed);
+    } else {
+        return NaN;
+    }
+    if (!Number.isInteger(num) || num < 0 || !Number.isSafeInteger(num) || num > 2147483647) {
+        return NaN;
+    }
+    return num;
+}
+
 router.use(verifyToken);
 
 // ─── GET /api/labs ─── Enriched list with stats
@@ -370,11 +389,19 @@ router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
         const codeExists = await prisma.lab.findUnique({ where: { code } });
         if (codeExists) return res.status(400).json({ error: 'Lab Code already exists' });
 
+        let safeCapacity = null;
+        if (capacity !== undefined) {
+            safeCapacity = parseOptionalCapacity(capacity);
+            if (Number.isNaN(safeCapacity)) {
+                return res.status(400).json({ error: 'Capacity must be a non-negative whole integer or blank', code: 'INVALID_CAPACITY' });
+            }
+        }
+
         const newLab = await prisma.$transaction(async (tx) => {
             const lab = await tx.lab.create({
                 data: {
                     id, code, name, country, location, address, city, phone, email, website,
-                    capacity: parseInt(capacity) || null,
+                    capacity: safeCapacity,
                     timezone, notes,
                     projectCode: projectId,
                     isActive: false
@@ -450,7 +477,13 @@ router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
     if (phone !== undefined) data.phone = phone;
     if (email !== undefined) data.email = email;
     if (website !== undefined) data.website = website;
-    if (capacity !== undefined) data.capacity = capacity ? parseInt(capacity) : null;
+    if (capacity !== undefined) {
+        const safeCapacity = parseOptionalCapacity(capacity);
+        if (Number.isNaN(safeCapacity)) {
+            return res.status(400).json({ error: 'Capacity must be a non-negative whole integer or blank', code: 'INVALID_CAPACITY' });
+        }
+        data.capacity = safeCapacity;
+    }
     if (timezone !== undefined) data.timezone = timezone;
     if (notes !== undefined) data.notes = notes;
     if (projectId !== undefined) data.projectCode = projectId;
@@ -503,7 +536,7 @@ router.patch('/:id/profile', checkPermission('MANAGE_BRANDING'), async (req, res
         const updated = await labLifecycleService.updateLabProfile(req.user, req.params.id, req.body);
         res.json(updated);
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+        res.status(err.statusCode || 500).json({ error: err.message, message: err.message, code: err.code });
     }
 });
 

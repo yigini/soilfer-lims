@@ -255,6 +255,107 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
             expect(res.body.capacity).toBe(600);
         });
 
+        test('Manager updates timezone independently while omitting capacity (Refs #109)', async () => {
+            const res = await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    timezone: 'Europe/Paris'
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.timezone).toBe('Europe/Paris');
+            expect(res.body.capacity).toBe(600); // Unchanged from previous test
+        });
+
+        test('Manager unsets optional capacity by submitting explicit null or empty string (Refs #109)', async () => {
+            // Null capacity
+            const resNull = await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    timezone: 'America/Guatemala',
+                    capacity: null
+                });
+
+            expect(resNull.status).toBe(200);
+            expect(resNull.body.capacity).toBeNull();
+            expect(resNull.body.timezone).toBe('America/Guatemala');
+
+            // Empty string capacity (legacy compatibility normalization)
+            const resEmpty = await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    capacity: '   '
+                });
+
+            expect(resEmpty.status).toBe(200);
+            expect(resEmpty.body.capacity).toBeNull();
+        });
+
+        test('Manager preserves zero capacity as zero rather than null (Refs #109)', async () => {
+            const res = await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({
+                    capacity: 0
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body.capacity).toBe(0);
+        });
+
+        test('Rejects invalid capacity values (decimal, negative, alphanumeric, out-of-range) with 400 INVALID_CAPACITY (Refs #109)', async () => {
+            const invalidCases = [50.5, '50.5', -1, '-10', '100abc', 'abc', 2147483648];
+            for (const val of invalidCases) {
+                const res = await request(app)
+                    .patch(`/api/labs/${labA.id}/profile`)
+                    .set('Authorization', `Bearer ${tokenMgrA}`)
+                    .send({ capacity: val });
+
+                expect(res.status).toBe(400);
+                expect(res.body.code).toBe('INVALID_CAPACITY');
+            }
+        });
+
+        test('Workspace reflects configured timezone and clears MISSING_TIMEZONE attention warning (Refs #109)', async () => {
+            // Configure timezone
+            await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({ timezone: 'America/Guatemala' });
+
+            const wsConfigured = await request(app)
+                .get(`/api/labs/${labA.id}/workspace`)
+                .set('Authorization', `Bearer ${tokenMgrA}`);
+
+            expect(wsConfigured.status).toBe(200);
+            expect(wsConfigured.body.lab.timezone).toBe('America/Guatemala');
+            expect(wsConfigured.body.attention.some(a => a.code === 'MISSING_TIMEZONE')).toBe(false);
+
+            // Unset timezone to null
+            await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({ timezone: null });
+
+            const wsUnset = await request(app)
+                .get(`/api/labs/${labA.id}/workspace`)
+                .set('Authorization', `Bearer ${tokenMgrA}`);
+
+            expect(wsUnset.status).toBe(200);
+            expect(wsUnset.body.lab.timezone).toBeNull();
+            expect(wsUnset.body.lab.effectiveTimezone).toBe('UTC');
+            expect(wsUnset.body.attention.some(a => a.code === 'MISSING_TIMEZONE')).toBe(true);
+
+            // Re-configure to restore valid state for subsequent tests
+            await request(app)
+                .patch(`/api/labs/${labA.id}/profile`)
+                .set('Authorization', `Bearer ${tokenMgrA}`)
+                .send({ timezone: 'America/Guatemala', capacity: 500 });
+        });
+
         test('Rejects invalid IANA time zone identifier with 400 INVALID_TIMEZONE', async () => {
             const res = await request(app)
                 .patch(`/api/labs/${labA.id}/profile`)

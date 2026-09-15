@@ -1404,6 +1404,30 @@
     "attention": {
       "title": "Configuration Items Needing Attention"
     },
+    "settings": {
+      "title": "Laboratory Configuration",
+      "subtitle": "Facility identity, timezone normalization, and operational lifecycle state.",
+      "facilityProfile": "Facility Profile & Local Time",
+      "labName": "Laboratory Name",
+      "city": "City",
+      "timezone": "IANA Timezone",
+      "selectTimezone": "— Select configured IANA time zone —",
+      "timezoneNotConfigured": "Timezone not configured",
+      "timezoneNotSet": "Not configured",
+      "email": "Contact Email",
+      "phone": "Phone",
+      "address": "Physical Address",
+      "capacity": "Monthly Sample Capacity (optional)",
+      "capacityPlaceholder": "Unconstrained (leave blank)",
+      "capacityHelp": "Maximum planned sample throughput per month. Optional planning value; leaves intake unrestricted if blank.",
+      "capacityUnconstrained": "Unconstrained",
+      "saveProfile": "Save Profile Changes",
+      "savingProfile": "Saving Profile...",
+      "saveSuccess": "Laboratory profile updated successfully.",
+      "savedRefreshFailed": "Laboratory profile updated successfully. Please refresh the page to reload the latest summary.",
+      "saveFailed": "Failed to update laboratory profile.",
+      "noChanges": "No changes to save."
+    },
     "people": {
       "title": "People and Access",
       "subtitle": "Single authoritative roster for invitations, capability reviews, and open assignment handovers.",
