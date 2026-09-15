@@ -1,6 +1,6 @@
 {
   "releaseVersion": "v1.0.0",
-  "publishedAt": "2026-09-11T10:35:29.796Z",
+  "publishedAt": "2026-09-15T11:19:14.218Z",
   "provenance": "system-app-review",
   "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
   "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
@@ -81,11 +81,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "efe7f7351ec168a2229c79a805b6c9f48081500f74fd1d3459d70fa1cbf70423",
-        "es": "ee049f66fb28ad20cad7ec4a1cb4638949aecf3e3b8784dcdf8e54d4d97c9d14",
-        "es-419": "ee049f66fb28ad20cad7ec4a1cb4638949aecf3e3b8784dcdf8e54d4d97c9d14",
-        "fr": "77428edc81a7ff706acd3789080d67820283756ef6d5cc5eea8d85e4091e35a4",
-        "pt": "c720889c204af03ce5448d188d588776bb85dccec317b6ec2609fbcae28d7815"
+        "en": "a60ef6f907f0f785f267ffd1641f8dec743285397153d42b12f3e0883230a4f7",
+        "es": "60517affbe48965d7dd6cf988037984d093530af3a5fedee9d37efc718930d0a",
+        "es-419": "60517affbe48965d7dd6cf988037984d093530af3a5fedee9d37efc718930d0a",
+        "fr": "8a5e28388a0291b78ef14bd4a9f3ec09a1d438c0fd60a294f72ef9a6b73f007f",
+        "pt": "35371048e36f911bd91786e176a46dcb7f022ec9f0b886644a996fbecdc5b369"
       },
       "mappedRoutes": [
         "/",
@@ -1910,11 +1910,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "09467a7b9f740a279e761d5acac42cf8c55582e4d80a07b48c9e4c34b2360635",
-        "es": "2b266b4856b952e250b62ebe616f2912402b36f329e83af5d644adfa9f6bc9bc",
-        "es-419": "2b266b4856b952e250b62ebe616f2912402b36f329e83af5d644adfa9f6bc9bc",
-        "fr": "1572837829f2e527f221f956a1861670711443c9e663ccec8e4d1253ebecfc3e",
-        "pt": "d6d36890bf4c3fc48000f0c80f8cbf9c073f96dfda87fdc6c32e87ec27c0c4cf"
+        "en": "7da2296d763630bf4dd06ef405259c3922521b958804923f3800a2d0c950cade",
+        "es": "71937e5b831c52807e4b91cbccce1a1d293f3ea2dae0c316759880526d9517a8",
+        "es-419": "71937e5b831c52807e4b91cbccce1a1d293f3ea2dae0c316759880526d9517a8",
+        "fr": "8da3ac884c894dea0d62f45d0023c18fb2321d56ce742746f8f53f9824be948d",
+        "pt": "1c98315c5de83cb5ea6118db054041bccf488a2c84a18a17e4fcb15a1fef9585"
       },
       "mappedRoutes": [
         "/reception",

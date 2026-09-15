@@ -387,7 +387,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Your first shift at the intake desk",
-      "summary": "Match physical material to project records and finish a documented receipt.",
+      "summary": "Master the 5-step reception workflow: field registration, scanning vs syncing, physical verification, receipt confirmation, and downstream readiness.",
       "roles": [
         "ALL"
       ],
@@ -397,22 +397,36 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Perform Your first shift at the intake desk following the approved laboratory workflow.",
+      "quick": "Follow the 5-step intake workflow: locate expected samples, inspect physical material, record condition, assign Lab ID, and confirm receipt.",
       "before": [
         "Confirm you are logged in with the appropriate laboratory role.",
         "Verify the sample identifiers, assignment status and prerequisite steps."
       ],
       "sections": [
         {
-          "title": "Procedure",
+          "title": "1. Field registration and locating samples",
           "steps": [
             {
-              "action": "Open the designated screen (/reception).",
-              "expected": "The page loads with your active laboratory context."
-            },
+              "action": "Open Reception (/reception). Use the barcode scanner or search filter to locate the expected sample pre-registered from KoBo.",
+              "expected": "The sample is displayed with status EXPECTED. Scanning finds a record and syncing imports data; neither alone constitutes physical receipt."
+            }
+          ]
+        },
+        {
+          "title": "2. Physical inspection and condition check",
+          "steps": [
             {
-              "action": "Execute the task: Match physical material to project records and finish a documented receipt.",
-              "expected": "The application confirms entry and records the operation state."
+              "action": "Examine the physical container, label match, seal, soil moisture, and approximate weight. Record any damage, leakage, or insufficient quantity.",
+              "expected": "Non-conformances are documented. Severe non-conformance can be quarantined or rejected (RECEIVED_REJECTED) without entering analytical queues."
+            }
+          ]
+        },
+        {
+          "title": "3. Authoritative confirmation and downstream readiness",
+          "steps": [
+            {
+              "action": "Assign or verify the unique Laboratory ID (labId) and click Confirm Receipt.",
+              "expected": "Authoritative intake sets receptionDate to now() and transitions status to RECEIVED/ACCEPTED. Drying and preparation tasks unlock on technician workbenches (/workbench). Dashboard counters (Received Today) update strictly based on receptionDate."
             }
           ]
         }
@@ -439,9 +453,9 @@
       "nextActor": "Assigned colleague or laboratory manager",
       "problems": [
         {
-          "symptom": "An expected field sample is counted as physically received.",
-          "why": "Prerequisite steps incomplete, network offline, or insufficient role permissions.",
-          "action": "Check work item readiness details, verify network connection, and confirm assignments with your lab manager."
+          "symptom": "An expected field sample is counted in Received Today or appears on technician workbenches before arrival.",
+          "why": "Sample status remains EXPECTED with receptionDate null. LIMS dashboard counters and analytical queues strictly require confirmed receptionDate.",
+          "action": "Locate the physical soil container, inspect its condition in Reception, and complete the Confirm Receipt action."
         }
       ],
       "sources": [
@@ -450,10 +464,11 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Open the designated screen (/reception). (Expected: The page loads with your active laboratory context.)",
-        "Execute the task: Match physical material to project records and finish a documented receipt. (Expected: The application confirms entry and records the operation state.)"
+        "Open Reception (/reception). Use the barcode scanner or search filter to locate the expected sample pre-registered from KoBo. (Expected: The sample is displayed with status EXPECTED. Scanning finds a record and syncing imports data; neither alone constitutes physical receipt.)",
+        "Examine the physical container, label match, seal, soil moisture, and approximate weight. (Expected: Non-conformances are documented; severe non-conformance can be quarantined or rejected.)",
+        "Assign or verify the unique Laboratory ID (labId) and click Confirm Receipt. (Expected: Authoritative intake sets receptionDate to now() and transitions status to RECEIVED/ACCEPTED. Drying and preparation tasks unlock on technician workbenches.)"
       ],
-      "caution": "If an expected field sample is counted as physically received., stop and verify state before continuing.",
+      "caution": "Never confirm receipt without the physical specimen present. Confirmed receipt is authoritative, sets receptionDate, and triggers analytical readiness.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -6315,7 +6330,7 @@
       "category": "connect",
       "kind": "guide",
       "title": "Import and inspect KoBo field records",
-      "summary": "Trace form/submission IDs, synchronization state and source ownership.",
+      "summary": "Understand field synchronization, date distinctions, and why KoBo submissions enter LIMS as EXPECTED rather than received samples.",
       "roles": [
         "PROJECT_MANAGER",
         "MASTER_USER",
@@ -6330,22 +6345,36 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Perform Import and inspect KoBo field records following the approved laboratory workflow.",
+      "quick": "KoBo synchronization imports field collection data into LIMS with status EXPECTED and receptionDate null. Physical receipt must be confirmed in LIMS.",
       "before": [
         "Confirm you are logged in with the appropriate laboratory role.",
         "Verify the sample identifiers, assignment status and prerequisite steps."
       ],
       "sections": [
         {
-          "title": "Procedure",
+          "title": "1. Synchronization and status boundaries",
           "steps": [
             {
-              "action": "Open the designated screen (/projects).",
-              "expected": "The page loads with your active laboratory context."
-            },
+              "action": "Trigger manual sync or wait for automated sync in Projects or Settings.",
+              "expected": "New field submissions create sample records with status EXPECTED and receptionDate null. Syncing imports data; it does not confirm physical arrival."
+            }
+          ]
+        },
+        {
+          "title": "2. Distinct dates and traceability",
+          "steps": [
             {
-              "action": "Execute the task: Trace form/submission IDs, synchronization state and source ownership.",
-              "expected": "The application confirms entry and records the operation state."
+              "action": "Inspect sample dates in Field Provenance and Sample Details.",
+              "expected": "Four distinct dates are tracked: Collection Date (field sampling), Submission Time (KoBo upload), Created At (LIMS sync), and Reception Date (authoritative laboratory intake)."
+            }
+          ]
+        },
+        {
+          "title": "3. Downstream readiness and future reception forms",
+          "steps": [
+            {
+              "action": "Verify technician workbench queues for unreceived samples.",
+              "expected": "Analytical tasks remain locked until physical receipt is confirmed in LIMS. A future dedicated KoBo reception form would serve as intake evidence to pre-fill review, not an automatic bypass."
             }
           ]
         }
@@ -6372,9 +6401,9 @@
       "nextActor": "Assigned colleague or laboratory manager",
       "problems": [
         {
-          "symptom": "An imported submission is mistaken for received material.",
-          "why": "Prerequisite steps incomplete, network offline, or insufficient role permissions.",
-          "action": "Check work item readiness details, verify network connection, and confirm assignments with your lab manager."
+          "symptom": "An imported submission is mistaken for physically received material.",
+          "why": "KoBo submissions represent field consignments in transit. Physical receipt is only established when confirmed by reception staff in LIMS.",
+          "action": "Open Reception (/reception), inspect the physical package and container condition, and click Confirm Receipt."
         }
       ],
       "sources": [
@@ -6384,10 +6413,11 @@
         "docs/book/src/usage/kobotoolbox.md"
       ],
       "steps": [
-        "Open the designated screen (/projects). (Expected: The page loads with your active laboratory context.)",
-        "Execute the task: Trace form/submission IDs, synchronization state and source ownership. (Expected: The application confirms entry and records the operation state.)"
+        "Trigger manual sync or wait for automated sync in Projects or Settings. (Expected: New field submissions create sample records with status EXPECTED and receptionDate null. Syncing imports data; it does not confirm physical arrival.)",
+        "Inspect sample dates in Field Provenance and Sample Details. (Expected: Four distinct dates are tracked: Collection Date, Submission Time, Created At, and Reception Date.)",
+        "Verify technician workbench queues for unreceived samples. (Expected: Analytical tasks remain locked until physical receipt is confirmed in LIMS.)"
       ],
-      "caution": "If an imported submission is mistaken for received material., stop and verify state before continuing.",
+      "caution": "Never treat KoBo synchronization as physical receipt. Unreceived samples remain EXPECTED with receptionDate null and are blocked from analytical workflows.",
       "related": [
         "start-first-login",
         "quality-support"

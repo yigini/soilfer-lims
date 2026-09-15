@@ -386,8 +386,8 @@
       "id": "start-reception",
       "category": "start",
       "kind": "guide",
-      "title": "Your first shift at the intake desk",
-      "summary": "Match physical material to project records and finish a documented receipt.",
+      "title": "Su primer turno en la mesa de recepción",
+      "summary": "Domine el flujo de recepción en 5 pasos: registro de campo, escaneo vs sincronización, verificación física, confirmación de recepción y habilitación analítica.",
       "roles": [
         "ALL"
       ],
@@ -397,22 +397,36 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Realiza Your first shift at the intake desk siguiendo el flujo de trabajo aprobado del laboratorio.",
+      "quick": "Siga el flujo de 5 pasos: localice muestras esperadas, inspeccione el material físico, registre condición, asigne ID de laboratorio y confirme la recepción.",
       "before": [
         "Confirma que has iniciado sesión con el rol de laboratorio adecuado.",
         "Verifica los identificadores de muestra, el estado de asignación y los pasos previos."
       ],
       "sections": [
         {
-          "title": "Procedure",
+          "title": "1. Registro de campo y localización de muestras",
           "steps": [
             {
-              "action": "Open the designated screen (/reception).",
-              "expected": "The page loads with your active laboratory context."
-            },
+              "action": "Abra Recepción (/reception). Use el lector de código de barras o búsqueda para localizar la muestra pre-registrada desde KoBo.",
+              "expected": "La muestra se muestra con estado EXPECTED. Escanear localiza un registro y sincronizar importa datos; ninguno por sí solo constituye recepción física."
+            }
+          ]
+        },
+        {
+          "title": "2. Inspección física y verificación de condición",
+          "steps": [
             {
-              "action": "Execute the task: Match physical material to project records and finish a documented receipt.",
-              "expected": "The application confirms entry and records the operation state."
+              "action": "Examine el recipiente físico, coincidencia de etiqueta, sello, humedad y peso. Registre cualquier daño, derrame o cantidad insuficiente.",
+              "expected": "Las no conformidades se documentan. Las no conformidades graves se pueden poner en cuarentena o rechazar (RECEIVED_REJECTED)."
+            }
+          ]
+        },
+        {
+          "title": "3. Confirmación autoritativa y habilitación analítica",
+          "steps": [
+            {
+              "action": "Asigne o verifique el ID de laboratorio único (labId) y haga clic en Confirmar recepción.",
+              "expected": "La recepción oficial establece receptionDate con la fecha actual y avanza el estado a RECEIVED/ACCEPTED. Las tareas de secado y preparación se desbloquean en los bancos de trabajo (/workbench). Los contadores del panel (Recibidas hoy) se actualizan en base a receptionDate."
             }
           ]
         }
@@ -439,9 +453,9 @@
       "nextActor": "Compañero asignado o responsable de laboratorio",
       "problems": [
         {
-          "symptom": "An expected field sample is counted as physically received.",
-          "why": "Prerequisite steps incomplete, network offline, or insufficient role permissions.",
-          "action": "Check work item readiness details, verify network connection, and confirm assignments with your lab manager."
+          "symptom": "Una muestra de campo esperada se cuenta en Recibidas hoy o aparece en el banco de trabajo antes de llegar.",
+          "why": "El estado de la muestra sigue siendo EXPECTED con receptionDate nulo. Los contadores y listas analíticas requieren estrictamente receptionDate confirmado.",
+          "action": "Localice el recipiente físico de suelo, inspeccione su condición en Recepción y complete la acción Confirmar recepción."
         }
       ],
       "sources": [
@@ -450,10 +464,11 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Open the designated screen (/reception). (Expected: The page loads with your active laboratory context.)",
-        "Execute the task: Match physical material to project records and finish a documented receipt. (Expected: The application confirms entry and records the operation state.)"
+        "Abra Recepción (/reception). Use el lector de código de barras o búsqueda para localizar la muestra pre-registrada desde KoBo. (Esperado: La muestra se muestra con estado EXPECTED. Escanear localiza y sincronizar importa; ninguno constituye recepción física.)",
+        "Examine el recipiente físico, coincidencia de etiqueta, sello, humedad y peso. (Esperado: Las no conformidades se documentan; las graves se rechazan como RECEIVED_REJECTED.)",
+        "Asigne o verifique el ID de laboratorio único (labId) y haga clic en Confirmar recepción. (Esperado: La recepción oficial establece receptionDate y pasa a RECEIVED/ACCEPTED. Se desbloquean tareas de secado y preparación.)"
       ],
-      "caution": "Si ocurre: An expected field sample is counted as physically received., detén el trabajo y verifica el estado antes de continuar.",
+      "caution": "Nunca confirme la recepción sin tener el espécimen físico presente. La confirmación es autoritativa, establece receptionDate y activa la preparación analítica.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -6314,8 +6329,8 @@
       "id": "connect-kobo",
       "category": "connect",
       "kind": "guide",
-      "title": "Import and inspect KoBo field records",
-      "summary": "Trace form/submission IDs, synchronization state and source ownership.",
+      "title": "Importar e inspeccionar registros de campo de KoBo",
+      "summary": "Comprender la sincronización de campo, las fechas diferenciadas y por qué los envíos de KoBo ingresan al LIMS como EXPECTED y no como muestras recibidas.",
       "roles": [
         "PROJECT_MANAGER",
         "MASTER_USER",
@@ -6330,22 +6345,36 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Realiza Import and inspect KoBo field records siguiendo el flujo de trabajo aprobado del laboratorio.",
+      "quick": "La sincronización de KoBo importa datos de campo al LIMS con estado EXPECTED y receptionDate nulo. La recepción física debe confirmarse en el LIMS.",
       "before": [
         "Confirma que has iniciado sesión con el rol de laboratorio adecuado.",
         "Verifica los identificadores de muestra, el estado de asignación y los pasos previos."
       ],
       "sections": [
         {
-          "title": "Procedure",
+          "title": "1. Sincronización y límites de estado",
           "steps": [
             {
-              "action": "Open the designated screen (/projects).",
-              "expected": "The page loads with your active laboratory context."
-            },
+              "action": "Inicie la sincronización manual o espere el intervalo automático en Proyectos o Configuración.",
+              "expected": "Los nuevos envíos de campo crean registros con estado EXPECTED y receptionDate nulo. Sincronizar importa datos; no confirma la llegada física."
+            }
+          ]
+        },
+        {
+          "title": "2. Fechas diferenciadas y trazabilidad",
+          "steps": [
             {
-              "action": "Execute the task: Trace form/submission IDs, synchronization state and source ownership.",
-              "expected": "The application confirms entry and records the operation state."
+              "action": "Inspeccione las fechas de la muestra en Procedencia de campo y Detalles de muestra.",
+              "expected": "Se registran cuatro fechas distintas: Fecha de colecta (muestreo en campo), Fecha de envío (carga en KoBo), Fecha de importación (sincronización LIMS) y Fecha de recepción (ingreso oficial en laboratorio)."
+            }
+          ]
+        },
+        {
+          "title": "3. Habilitación operativa y formularios dedicados",
+          "steps": [
+            {
+              "action": "Verifique las listas de trabajo analíticas para muestras no recibidas.",
+              "expected": "Las tareas analíticas permanecen bloqueadas hasta que se confirme la recepción física en el LIMS. Un futuro formulario de recepción en KoBo actuaría como evidencia previa, no como pase automático."
             }
           ]
         }
@@ -6372,9 +6401,9 @@
       "nextActor": "Compañero asignado o responsable de laboratorio",
       "problems": [
         {
-          "symptom": "An imported submission is mistaken for received material.",
-          "why": "Prerequisite steps incomplete, network offline, or insufficient role permissions.",
-          "action": "Check work item readiness details, verify network connection, and confirm assignments with your lab manager."
+          "symptom": "Un registro importado se confunde con material recibido físicamente.",
+          "why": "Los registros de KoBo representan envíos en tránsito. La recepción física solo existe cuando el personal de recepción la confirma en el LIMS.",
+          "action": "Abra Recepción (/reception), inspeccione el contenedor físico y haga clic en Confirmar recepción."
         }
       ],
       "sources": [
@@ -6384,10 +6413,11 @@
         "docs/book/src/usage/kobotoolbox.md"
       ],
       "steps": [
-        "Open the designated screen (/projects). (Expected: The page loads with your active laboratory context.)",
-        "Execute the task: Trace form/submission IDs, synchronization state and source ownership. (Expected: The application confirms entry and records the operation state.)"
+        "Inicie la sincronización manual o espere el intervalo automático en Proyectos o Configuración. (Esperado: Los nuevos envíos crean registros con estado EXPECTED y receptionDate nulo. Sincronizar importa datos; no confirma la llegada física.)",
+        "Inspeccione las fechas de la muestra en Procedencia de campo y Detalles de muestra. (Esperado: Se registran cuatro fechas distintas: Fecha de colecta, Fecha de envío, Fecha de importación y Fecha de recepción.)",
+        "Verifique las listas de trabajo analíticas para muestras no recibidas. (Esperado: Las tareas analíticas permanecen bloqueadas hasta que se confirme la recepción física en el LIMS.)"
       ],
-      "caution": "Si ocurre: An imported submission is mistaken for received material., detén el trabajo y verifica el estado antes de continuar.",
+      "caution": "Nunca confunda la sincronización de KoBo con la recepción física. Las muestras no recibidas permanecen EXPECTED con receptionDate nulo y están bloqueadas para análisis.",
       "related": [
         "start-first-login",
         "quality-support"
