@@ -35,12 +35,25 @@ Once connected, you can link specific KoboToolbox forms to LIMS projects:
 When a sync occurs, SoilFER-LIMS:
 
 1. Contacts the KoboToolbox API
-2. Downloads any new submissions since the last sync
-3. Creates sample entries in the Reception queue
-4. Maps form fields to LIMS fields (GPS coordinates, soil depth, observations, etc.)
-5. Downloads attached photos and links them to the sample
+2. Downloads new submissions since the last sync cursor (`lastSubmissionId`)
+3. Creates sample entries in the Reception queue with status `EXPECTED` and `receptionDate: null`
+4. Maps form fields to LIMS fields (GPS coordinates, depth, collection date, surveyor, attachments)
+5. Generates audit trail entries tracking the synchronization event
 
-The synced samples appear with a **"Synced"** badge in Reception, indicating they came from KoboToolbox. Reception staff then match these entries to the physical samples when they arrive at the lab.
+The synced samples appear with a **"Synced"** badge in Reception, indicating they originated from a KoboToolbox field submission.
+
+---
+
+## Physical Receipt Authority & Operational Boundaries
+
+A KoboToolbox submission documents field sampling activities and in-transit consignments; **it does not constitute physical receipt by the laboratory**.
+
+Key operational rules:
+- **Status Gate**: All imported Kobo samples remain in `EXPECTED` status with `receptionDate: null`. They do not appear in active technician workbenches or preparation queues until physically received.
+- **Authoritative Receipt in LIMS**: Physical receipt is performed exclusively by authorized laboratory reception staff in SoilFER-LIMS (`/reception`).
+- **Intake Verification**: Staff physically inspect the sample container, verify sample identity and condition, record non-conformances (damage, insufficient volume, leakage), and assign the official Laboratory Sample ID.
+- **Audit Compliance**: Confirming receipt updates the sample status to `RECEIVED` / `ACCEPTED`, records the authoritative `receptionDate`, and writes an immutable audit log entry.
+- **ISO / GLOSOLAN Traceability**: This strict separation between field registration and physical laboratory intake guarantees chain of custody and prevents phantom samples from corrupting analytical queues.
 
 ---
 

@@ -130,7 +130,7 @@ async function getDiscrepancyReport(tx = prisma) {
         }
 
         // Check if owner labId is missing from ProjectLab
-        if (p.labId && junctionLabIds.length > 0 && !junctionLabIds.includes(p.labId)) {
+        if (p.labId && !junctionLabIds.includes(p.labId)) {
             issues.push({
                 type: 'OWNER_LAB_NOT_IN_JUNCTION',
                 ownerLabId: p.labId,

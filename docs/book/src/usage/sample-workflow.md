@@ -24,27 +24,27 @@ This is the heart of SoilFER-LIMS — how a soil sample moves through the system
 Soil samples are collected in the field by field teams. There are two ways samples enter the system:
 
 ### Automatic (via KoboToolbox)
-If your field teams use [KoboToolbox](https://www.kobotoolbox.org/) for data collection, sample information flows into LIMS automatically. When a field worker submits a form on their phone, the data appears in the LIMS Reception queue at the next sync interval.
+If your field teams use [KoboToolbox](https://www.kobotoolbox.org/) for data collection, sample information flows into LIMS automatically during synchronization. When a field worker submits a collection form, the record is created in the LIMS Reception queue with status `EXPECTED` and `receptionDate: null`. 
 
-This includes GPS coordinates, soil depth, field observations, and any photos taken.
+This record captures field identity, GPS coordinates, depth, collection date, surveyor name, and field photos. Crucially, an imported Kobo submission represents an expected field consignment—it does not by itself prove that the physical soil container has arrived at the laboratory.
 
-### Manual Entry
-If you don't use KoboToolbox, samples are entered manually when they physically arrive at the lab.
+### Manual Walk-In Entry
+If samples arrive without a prior Kobo submission, reception staff enter sample and collection details manually directly in SoilFER-LIMS.
 
 ---
 
-## Stage 2: Reception
+## Stage 2: Physical Reception & Confirmation
 
-When a physical soil sample arrives at the laboratory, the **Reception** staff:
+Physical receipt is the authoritative operational gate that transitions expected specimens into active laboratory custody. When physical soil containers arrive at the facility, authorized **Reception** staff:
 
-1. **Open the Reception page** in SoilFER-LIMS
-2. **Find the matching entry** (if it was pre-submitted via KoboToolbox) or create a new one
-3. **Verify the sample** — check the label, condition, and quantity
-4. **Assign a Laboratory ID** — a unique identifier for this sample (auto-generated or custom)
-5. **Record any observations** — damaged container, insufficient quantity, soggy soil, etc.
-6. **Submit for analysis** — moves the sample to the next stage
+1. **Open Reception** (`/reception`) in SoilFER-LIMS.
+2. **Locate the expected record** (pre-registered via KoboToolbox with status `EXPECTED`) or create a walk-in intake.
+3. **Verify the physical delivery** — inspect container integrity, moisture condition, physical sample volume, and match physical label identifiers against the digital record.
+4. **Assign the Laboratory ID** — generate or assign the official, unique laboratory accession identifier (`labId`).
+5. **Record intake non-conformances** (if any) — damaged container, leakage, insufficient volume, or label discrepancies. If non-conforming, the sample can be quarantined or rejected (`RECEIVED_REJECTED`).
+6. **Confirm physical receipt** — this authoritative action sets `receptionDate` to the current timestamp and moves the sample status to `RECEIVED` / `ACCEPTED`, generating a durable audit log record.
 
-The sample's status changes from `RECEIVED` to `IN_ANALYSIS`.
+Only confirmed physical samples can advance to downstream preparation, drying, and analytical queues. Submissions remaining in `EXPECTED` status cannot enter laboratory testing pipelines.
 
 ---
 
@@ -97,14 +97,16 @@ Once results are approved, they're available for export:
 
 At any point, you can see where a sample is in the workflow by its status:
 
-| Status | Meaning | Who Moves It Forward |
-|--------|---------|---------------------|
-| `SYNCED` | Pre-submitted from KoboToolbox, waiting for physical receipt | Reception |
-| `RECEIVED` | Physically received at the lab | Reception |
-| `IN_ANALYSIS` | Assigned to technicians, work in progress | Technician |
-| `PENDING_REVIEW` | Results submitted, waiting for manager approval | Lab Manager |
-| `APPROVED` | All results approved — final record | (Complete) |
-| `REJECTED` | Sample rejected at reception (e.g., damaged, wrong type) | Reception |
+| Status | Meaning | Operational Gate / Next Actor |
+|--------|---------|-------------------------------|
+| `EXPECTED` | Registered in field via KoboToolbox, consignment in transit; not yet physically received at lab (`receptionDate: null`) | Reception staff confirm physical delivery |
+| `RECEIVED` | Physically arrived at the laboratory; intake inspection and verification in progress | Reception staff validate and assign Lab ID |
+| `ACCEPTED` | Intake validated, official Laboratory ID assigned, ready for preparation and testing | Lab Technician (drying, prep & analytical work) |
+| `PROCESSING` | Sample preparation/drying completed; analytical testing actively in progress | Lab Technician executes tests & logs results |
+| `SUBMITTED_PARTIAL` / `SUBMITTED_FULL` | Analytical results recorded by technician, pending managerial review | Lab Manager (review & approval) |
+| `APPROVED` | All required analytical results validated and approved by Lab Manager | Ready for reporting, export & client release |
+| `RECEIVED_REJECTED` | Physical sample rejected at intake due to non-conformance (leakage, damage, insufficient volume) | Quarantined / disposed per standard operating procedure |
+| `ARCHIVED` / `DISPOSED` | Sample retained in long-term archive or safely discarded after retention window | Final lifecycle disposition |
 
 ---
 

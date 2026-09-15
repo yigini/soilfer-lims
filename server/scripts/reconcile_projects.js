@@ -58,7 +58,7 @@ async function reconcileProjects({ isApply = false, targetProjectCode = null, cl
         }
 
         const issues = [];
-        const servicingJunctions = junctions.filter(j => j.role === 'SERVICING').map(j => j.labId);
+        const servicingJunctions = junctions.filter(j => j.role !== 'OWNER').map(j => j.labId);
 
         // Check if explicit empty
         const isExplicitEmpty = Array.isArray(legacyAssignedLabIds) && legacyAssignedLabIds.length === 0 && servicingJunctions.length === 0;
