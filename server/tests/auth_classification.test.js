@@ -1,6 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
+const prisma = require('../prisma');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { JWT_SECRET } = require('../config/auth');
 
@@ -69,11 +70,27 @@ describe('Issue #111: Auth Error Classification and Protection Contracts', () =>
     });
 
     test('4. Valid token succeeds and correctly attaches sanitized user', async () => {
+        let user = await prisma.user.findFirst({ where: { isActive: true } });
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    id: 'usr-auth-test-' + Date.now(),
+                    username: 'auth_test_' + Date.now(),
+                    email: `auth_test_${Date.now()}@test.org`,
+                    name: 'Auth Test Admin',
+                    password: 'hash',
+                    role: 'SUPER_ADMIN',
+                    isActive: true,
+                    tokenVersion: 1
+                }
+            });
+        }
+
         const validToken = jwt.sign({
-            id: '1770311018064',
-            username: 'admin',
-            role: 'SUPER_ADMIN',
-            tokenVersion: 1
+            id: user.id,
+            username: user.username,
+            role: user.role,
+            tokenVersion: user.tokenVersion || 0
         }, JWT_SECRET, { expiresIn: '1h' });
 
         mockReq.headers['authorization'] = `Bearer ${validToken}`;
@@ -82,7 +99,8 @@ describe('Issue #111: Auth Error Classification and Protection Contracts', () =>
         expect(mockRes.statusCode).toBe(200);
         expect(nextFn).toHaveBeenCalled();
         expect(mockReq.user).toBeDefined();
-        expect(mockReq.user.role).toBe('SUPER_ADMIN');
+        expect(mockReq.user.id).toBe(user.id);
+        expect(mockReq.user.role).toBe(user.role);
     });
 
     test('5. Stale 401 interceptor logic preserves newer active session', () => {
