@@ -77,11 +77,13 @@ const getDefaultCenter = (countryCode) => {
     return COUNTRY_CENTERS.DEFAULT;
 };
 
+const isFiniteCoord = (val) => val !== null && val !== undefined && val !== '' && !isNaN(Number(val)) && Number.isFinite(Number(val));
+
 // Component to programmatically re-center Leaflet
 const RecenterMap = ({ center, zoom }) => {
     const map = useMap();
     useEffect(() => {
-        if (center && center[0] && center[1]) {
+        if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
             map.flyTo(center, zoom || map.getZoom());
         }
     }, [center, zoom, map]);
@@ -113,9 +115,49 @@ const LocationPicker = ({
     errors = []
 }) => {
     const defaultCenter = useMemo(() => getDefaultCenter(countryCode), [countryCode]);
-    const hasInitialCoords = Boolean(value?.lat != null && value?.lng != null && !isNaN(Number(value.lat)) && !isNaN(Number(value.lng)));
-    const [position, setPosition] = useState(hasInitialCoords ? [Number(value.lat), Number(value.lng)] : null);
-    const [zoom, setZoom] = useState(hasInitialCoords ? 13 : 7);
+
+    // Controlled coordinate input state allowing empty, partial, and negative strings
+    const [latInput, setLatInput] = useState(() => isFiniteCoord(value?.lat) ? String(value.lat) : '');
+    const [lngInput, setLngInput] = useState(() => isFiniteCoord(value?.lng) ? String(value.lng) : '');
+
+    // Synchronize inputs when value props change externally (e.g. paste, map pin click, GPS fix, form reset)
+    useEffect(() => {
+        if (isFiniteCoord(value?.lat)) {
+            if (parseFloat(latInput) !== Number(value.lat)) {
+                setLatInput(String(value.lat));
+            }
+        } else if (value?.lat === null || value?.lat === undefined || value?.lat === '') {
+            if (latInput !== '') {
+                setLatInput('');
+            }
+        }
+    }, [value?.lat]);
+
+    useEffect(() => {
+        if (isFiniteCoord(value?.lng)) {
+            if (parseFloat(lngInput) !== Number(value.lng)) {
+                setLngInput(String(value.lng));
+            }
+        } else if (value?.lng === null || value?.lng === undefined || value?.lng === '') {
+            if (lngInput !== '') {
+                setLngInput('');
+            }
+        }
+    }, [value?.lng]);
+
+    // Complete finite pair strictly requires BOTH latitude and longitude to be finite numbers within valid ranges
+    const completeCoords = useMemo(() => {
+        if (isFiniteCoord(value?.lat) && isFiniteCoord(value?.lng)) {
+            const lat = Number(value.lat);
+            const lng = Number(value.lng);
+            if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                return [lat, lng];
+            }
+        }
+        return null;
+    }, [value?.lat, value?.lng]);
+
+    const [zoom, setZoom] = useState(completeCoords ? 13 : 7);
 
     // Paste mode state
     const [pasteText, setPasteText] = useState('');
@@ -146,6 +188,11 @@ const LocationPicker = ({
         }
     };
 
+    const handleTileLoad = () => {
+        // Reset error counter on successful tile recovery
+        tileErrorCountRef.current = 0;
+    };
+
     const handleRetryMap = () => {
         tileErrorCountRef.current = 0;
         setMapUnavailable(false);
@@ -154,14 +201,6 @@ const LocationPicker = ({
 
     const hasErr = (key) => errors.some(e => e.key === key);
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
-
-    useEffect(() => {
-        if (value?.lat != null && value?.lng != null && !isNaN(Number(value.lat)) && !isNaN(Number(value.lng))) {
-            setPosition([Number(value.lat), Number(value.lng)]);
-        } else {
-            setPosition(null);
-        }
-    }, [value?.lat, value?.lng]);
 
     // Fetch offline admin units for dropdown picker
     useEffect(() => {
@@ -207,7 +246,6 @@ const LocationPicker = ({
             click(e) {
                 if (captureMethod === 'TEXT_ONLY') return;
                 const { lat, lng } = e.latlng;
-                setPosition([lat, lng]);
 
                 // Map pin uncertainty heuristic based on zoom
                 const currentZoom = map.getZoom();
@@ -226,33 +264,44 @@ const LocationPicker = ({
                     onConfidenceChange?.(computedConf);
                 }
 
-                onChange({ ...value, lat, lng, accuracy: 'EXACT' });
+                onChange?.({
+                    ...value,
+                    lat: parseFloat(lat.toFixed(6)),
+                    lng: parseFloat(lng.toFixed(6)),
+                    accuracy: 'EXACT'
+                });
                 map.flyTo(e.latlng, map.getZoom());
             },
         });
 
-        return position === null ? null : (
+        if (!completeCoords) return null;
+
+        return (
             <>
-                <Marker position={position} draggable={true} eventHandlers={{
+                <Marker position={completeCoords} draggable={true} eventHandlers={{
                     dragend: (e) => {
                         const marker = e.target;
                         const { lat, lng } = marker.getLatLng();
-                        setPosition([lat, lng]);
                         onLocationSourceChange?.('DESK_PIN');
-                        onChange({ ...value, lat, lng, accuracy: 'EXACT' });
+                        onChange?.({
+                            ...value,
+                            lat: parseFloat(lat.toFixed(6)),
+                            lng: parseFloat(lng.toFixed(6)),
+                            accuracy: 'EXACT'
+                        });
                     }
                 }}>
                     <Popup>
                         <div className="text-xs font-mono">
-                            <div><strong>Lat:</strong> {position[0].toFixed(6)}</div>
-                            <div><strong>Lng:</strong> {position[1].toFixed(6)}</div>
+                            <div><strong>Lat:</strong> {completeCoords[0].toFixed(6)}</div>
+                            <div><strong>Lng:</strong> {completeCoords[1].toFixed(6)}</div>
                             {positionalUncertaintyM && <div><strong>Uncertainty:</strong> ±{positionalUncertaintyM}m</div>}
                         </div>
                     </Popup>
                 </Marker>
                 {positionalUncertaintyM && positionalUncertaintyM > 0 && (
                     <Circle
-                        center={position}
+                        center={completeCoords}
                         radius={positionalUncertaintyM}
                         pathOptions={{
                             color: '#2563eb',
@@ -277,7 +326,6 @@ const LocationPicker = ({
         const parsed = parseCoordinates(text);
         if (parsed) {
             setPasteParseResult(parsed);
-            setPosition([parsed.lat, parsed.lng]);
             setZoom(14);
             onPositionalUncertaintyChange?.(parsed.uncertaintyM);
             onLocationSourceChange?.('DESK_PASTE');
@@ -287,7 +335,7 @@ const LocationPicker = ({
                 onConfidenceChange?.(computed);
             }
 
-            onChange({
+            onChange?.({
                 ...value,
                 lat: parsed.lat,
                 lng: parsed.lng,
@@ -314,7 +362,6 @@ const LocationPicker = ({
                 const { latitude, longitude, altitude, accuracy } = pos.coords;
                 const roundedAcc = Math.round(accuracy) || 10;
 
-                setPosition([latitude, longitude]);
                 setZoom(15);
                 onPositionalUncertaintyChange?.(roundedAcc);
                 onLocationSourceChange?.('DEVICE_GPS');
@@ -324,7 +371,7 @@ const LocationPicker = ({
                     onConfidenceChange?.(computed);
                 }
 
-                onChange({
+                onChange?.({
                     ...value,
                     lat: parseFloat(latitude.toFixed(6)),
                     lng: parseFloat(longitude.toFixed(6)),
@@ -346,7 +393,6 @@ const LocationPicker = ({
         setSelectedMun('');
         const dept = adminData?.departments?.find(d => d.name === deptName);
         if (dept && dept.center) {
-            setPosition(dept.center);
             setZoom(11);
             onDistrictChange?.(dept.name);
             onPositionalUncertaintyChange?.(15000); // 15 km uncertainty for department
@@ -356,7 +402,7 @@ const LocationPicker = ({
                 onConfidenceChange?.('LOW');
             }
 
-            onChange({
+            onChange?.({
                 ...value,
                 lat: dept.center[0],
                 lng: dept.center[1],
@@ -370,7 +416,6 @@ const LocationPicker = ({
         const dept = adminData?.departments?.find(d => d.name === selectedDept);
         const mun = dept?.municipalities?.find(m => m.name === munName);
         if (mun && mun.center) {
-            setPosition(mun.center);
             setZoom(13);
             onAreaVillageChange?.(mun.name);
             onPositionalUncertaintyChange?.(5000); // 5 km uncertainty for municipality
@@ -380,7 +425,7 @@ const LocationPicker = ({
                 onConfidenceChange?.('LOW');
             }
 
-            onChange({
+            onChange?.({
                 ...value,
                 lat: mun.center[0],
                 lng: mun.center[1],
@@ -399,7 +444,6 @@ const LocationPicker = ({
             }
             const data = JSON.parse(saved);
             if (data.lat && data.lng) {
-                setPosition([data.lat, data.lng]);
                 setZoom(14);
                 if (data.siteName) onSiteNameChange?.(data.siteName);
                 if (data.areaVillage) onAreaVillageChange?.(data.areaVillage);
@@ -626,17 +670,18 @@ const LocationPicker = ({
                                 type="number"
                                 step="0.00001"
                                 placeholder="Latitude"
-                                value={(position && position[0] !== null && position[0] !== undefined) ? position[0] : ''}
+                                value={latInput}
                                 onChange={(e) => {
-                                    const lat = parseFloat(e.target.value);
-                                    if (!isNaN(lat) && lat >= -90 && lat <= 90) {
-                                        const currentLng = (position && position[1] !== null && position[1] !== undefined) ? position[1] : (defaultCenter ? defaultCenter[1] : 0);
-                                        setPosition([lat, currentLng]);
-                                        onChange({ ...value, lat, lng: currentLng });
-                                    } else if (e.target.value === '') {
-                                        const currentLng = (position && position[1] !== null && position[1] !== undefined) ? position[1] : null;
-                                        setPosition(currentLng !== null ? [null, currentLng] : null);
-                                        onChange({ ...value, lat: null, lng: currentLng });
+                                    const raw = e.target.value;
+                                    setLatInput(raw);
+                                    const currentLng = isFiniteCoord(value?.lng) ? Number(value.lng) : null;
+                                    if (raw === '') {
+                                        onChange?.({ ...value, lat: null, lng: currentLng });
+                                    } else {
+                                        const lat = parseFloat(raw);
+                                        if (Number.isFinite(lat) && lat >= -90 && lat <= 90) {
+                                            onChange?.({ ...value, lat, lng: currentLng });
+                                        }
                                     }
                                 }}
                                 className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
@@ -645,17 +690,18 @@ const LocationPicker = ({
                                 type="number"
                                 step="0.00001"
                                 placeholder="Longitude"
-                                value={(position && position[1] !== null && position[1] !== undefined) ? position[1] : ''}
+                                value={lngInput}
                                 onChange={(e) => {
-                                    const lng = parseFloat(e.target.value);
-                                    if (!isNaN(lng) && lng >= -180 && lng <= 180) {
-                                        const currentLat = (position && position[0] !== null && position[0] !== undefined) ? position[0] : (defaultCenter ? defaultCenter[0] : 0);
-                                        setPosition([currentLat, lng]);
-                                        onChange({ ...value, lat: currentLat, lng });
-                                    } else if (e.target.value === '') {
-                                        const currentLat = (position && position[0] !== null && position[0] !== undefined) ? position[0] : null;
-                                        setPosition(currentLat !== null ? [currentLat, null] : null);
-                                        onChange({ ...value, lat: currentLat, lng: null });
+                                    const raw = e.target.value;
+                                    setLngInput(raw);
+                                    const currentLat = isFiniteCoord(value?.lat) ? Number(value.lat) : null;
+                                    if (raw === '') {
+                                        onChange?.({ ...value, lat: currentLat, lng: null });
+                                    } else {
+                                        const lng = parseFloat(raw);
+                                        if (Number.isFinite(lng) && lng >= -180 && lng <= 180) {
+                                            onChange?.({ ...value, lat: currentLat, lng });
+                                        }
                                     }
                                 }}
                                 className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
@@ -667,13 +713,18 @@ const LocationPicker = ({
                                     min="0"
                                     step="1"
                                     placeholder="Uncertainty"
-                                    value={positionalUncertaintyM || ''}
+                                    value={isFiniteCoord(positionalUncertaintyM) ? positionalUncertaintyM : ''}
                                     onChange={(e) => {
-                                        const u = parseFloat(e.target.value);
-                                        const valUncert = isNaN(u) ? null : u;
-                                        onPositionalUncertaintyChange?.(valUncert);
-                                        if (!isConfidenceOverridden && locationSource) {
-                                            onConfidenceChange?.(deriveLocationConfidence(locationSource, valUncert));
+                                        const raw = e.target.value;
+                                        if (raw === '') {
+                                            onPositionalUncertaintyChange?.(null);
+                                        } else {
+                                            const u = parseFloat(raw);
+                                            const valUncert = Number.isFinite(u) ? u : null;
+                                            onPositionalUncertaintyChange?.(valUncert);
+                                            if (!isConfidenceOverridden && locationSource) {
+                                                onConfidenceChange?.(deriveLocationConfidence(locationSource, valUncert));
+                                            }
                                         }
                                     }}
                                     className="text-xs p-1.5 pr-7 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
@@ -686,10 +737,15 @@ const LocationPicker = ({
                                     type="number"
                                     step="1"
                                     placeholder="Elev"
-                                    value={value?.elevation || ''}
+                                    value={isFiniteCoord(value?.elevation) ? value.elevation : ''}
                                     onChange={(e) => {
-                                        const el = parseFloat(e.target.value);
-                                        onChange({ ...value, elevation: isNaN(el) ? null : el });
+                                        const raw = e.target.value;
+                                        if (raw === '') {
+                                            onChange?.({ ...value, elevation: null });
+                                        } else {
+                                            const el = parseFloat(raw);
+                                            onChange?.({ ...value, elevation: Number.isFinite(el) ? Math.round(el) : null });
+                                        }
                                     }}
                                     className="text-xs p-1.5 pr-6 border rounded-lg w-20 bg-sf-surface border-sf-divider text-sf-text"
                                 />
@@ -715,19 +771,22 @@ const LocationPicker = ({
                                 </button>
                             </div>
                         )}
-                        <MapContainer center={position || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
-                            <TileLayer
-                                key={tileRetryKey}
-                                attribution={OSM_TILE_CONFIG.attribution}
-                                url={OSM_TILE_CONFIG.url}
-                                referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
-                                maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
-                                maxZoom={OSM_TILE_CONFIG.maxZoom}
-                                eventHandlers={{
-                                    tileerror: handleTileError
-                                }}
-                            />
-                            <RecenterMap center={position || defaultCenter} zoom={zoom} />
+                        <MapContainer center={completeCoords || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                            {!mapUnavailable && (
+                                <TileLayer
+                                    key={tileRetryKey}
+                                    attribution={OSM_TILE_CONFIG.attribution}
+                                    url={OSM_TILE_CONFIG.url}
+                                    referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
+                                    maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
+                                    maxZoom={OSM_TILE_CONFIG.maxZoom}
+                                    eventHandlers={{
+                                        tileerror: handleTileError,
+                                        tileload: handleTileLoad
+                                    }}
+                                />
+                            )}
+                            <RecenterMap center={completeCoords} zoom={zoom} />
                             <LocationMarker />
                         </MapContainer>
                     </div>

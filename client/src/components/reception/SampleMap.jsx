@@ -27,7 +27,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const ChangeView = ({ center }) => {
     const map = useMap();
     useEffect(() => {
-        if (center && center[0] && center[1]) {
+        if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
             map.setView(center, 13);
         }
     }, [center, map]);
@@ -45,6 +45,10 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
         if (tileErrorCountRef.current >= 2) {
             setMapUnavailable(true);
         }
+    };
+
+    const handleTileLoad = () => {
+        tileErrorCountRef.current = 0;
     };
 
     const handleRetryMap = () => {
@@ -102,17 +106,20 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
             )}
             <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
-                <TileLayer
-                    key={tileRetryKey}
-                    url={OSM_TILE_CONFIG.url}
-                    attribution={OSM_TILE_CONFIG.attribution}
-                    referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
-                    maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
-                    maxZoom={OSM_TILE_CONFIG.maxZoom}
-                    eventHandlers={{
-                        tileerror: handleTileError
-                    }}
-                />
+                {!mapUnavailable && (
+                    <TileLayer
+                        key={tileRetryKey}
+                        url={OSM_TILE_CONFIG.url}
+                        attribution={OSM_TILE_CONFIG.attribution}
+                        referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
+                        maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
+                        maxZoom={OSM_TILE_CONFIG.maxZoom}
+                        eventHandlers={{
+                            tileerror: handleTileError,
+                            tileload: handleTileLoad
+                        }}
+                    />
+                )}
                 <Marker position={position}>
                     <Popup>
                         <div className="text-xs font-mono">

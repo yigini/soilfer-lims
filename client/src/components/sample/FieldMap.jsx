@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Globe, MapPin, Maximize2, Minimize2, Map, Box, Maximize, Camera, X } from 'lucide-react';
+import { Globe, MapPin, Maximize2, Minimize2, Map, Box, Maximize, Camera, X, AlertTriangle } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
+import { useLanguage } from '../../context/LanguageContext';
 
 // Custom Leaflet marker icon (no external images needed)
 const sampleIcon = new L.DivIcon({
@@ -370,12 +371,49 @@ const CesiumView = ({ lat, lng, sample, onPinClick }) => {
 
 // ─── Leaflet 2D View ───
 const LeafletView = ({ lat, lng, sample, onPinClick }) => {
+    const { t } = useLanguage?.() || { t: (k, d) => d };
+    const [mapUnavailable, setMapUnavailable] = useState(false);
+    const [tileRetryKey, setTileRetryKey] = useState(0);
+    const tileErrorCountRef = useRef(0);
+
+    const handleTileError = () => {
+        tileErrorCountRef.current += 1;
+        if (tileErrorCountRef.current >= 2) {
+            setMapUnavailable(true);
+        }
+    };
+
+    const handleTileLoad = () => {
+        tileErrorCountRef.current = 0;
+    };
+
+    const handleRetryMap = () => {
+        tileErrorCountRef.current = 0;
+        setMapUnavailable(false);
+        setTileRetryKey(prev => prev + 1);
+    };
+
     const position = [Number(lat), Number(lng)];
     const photos = getPhotos(sample);
     const hasPhotos = photos.all.length > 0;
 
     return (
-        <div className="w-full h-full z-0">
+        <div className="w-full h-full z-0 relative">
+            {mapUnavailable && (
+                <div className="absolute top-14 left-3 right-3 z-[1000] bg-amber-500/90 dark:bg-amber-900/90 backdrop-blur-xs border border-amber-600 text-white dark:text-amber-100 px-3 py-2 rounded-lg text-xs shadow flex items-center justify-between gap-2 animate-fadeIn pointer-events-auto">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <AlertTriangle size={14} className="shrink-0 text-white dark:text-amber-200" />
+                        <span className="truncate">{t('common.mapUnavailable', 'Map temporarily unavailable. You can still enter coordinates.')}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleRetryMap}
+                        className="px-2.5 py-1 bg-white dark:bg-amber-800 text-amber-900 dark:text-white font-bold rounded-md hover:bg-amber-100 text-[11px] shrink-0 cursor-pointer shadow-xs transition-colors"
+                    >
+                        {t('common.mapRetry', 'Retry map')}
+                    </button>
+                </div>
+            )}
             <MapContainer center={position} zoom={18} style={{ height: '100%', width: '100%' }}>
                 <LayersControl position="topright">
                     <LayersControl.BaseLayer checked name="Satellite (Esri)">
@@ -384,10 +422,19 @@ const LeafletView = ({ lat, lng, sample, onPinClick }) => {
                             maxNativeZoom={19} maxZoom={21} />
                     </LayersControl.BaseLayer>
                     <LayersControl.BaseLayer name="Street (OpenStreetMap)">
-                        <TileLayer attribution={OSM_TILE_CONFIG.attribution}
-                            url={OSM_TILE_CONFIG.url}
-                            referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
-                            maxNativeZoom={19} maxZoom={21} />
+                        {!mapUnavailable && (
+                            <TileLayer
+                                key={tileRetryKey}
+                                attribution={OSM_TILE_CONFIG.attribution}
+                                url={OSM_TILE_CONFIG.url}
+                                referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
+                                maxNativeZoom={19} maxZoom={21}
+                                eventHandlers={{
+                                    tileerror: handleTileError,
+                                    tileload: handleTileLoad
+                                }}
+                            />
+                        )}
                     </LayersControl.BaseLayer>
                     <LayersControl.BaseLayer name="Google Satellite">
                         <TileLayer attribution='&copy; Google'
@@ -407,7 +454,7 @@ const LeafletView = ({ lat, lng, sample, onPinClick }) => {
                             <strong>{sample.originalId || sample.id}</strong><br />
                             {sample.projectCode && <span>{sample.projectCode}<br /></span>}
                             {sample.country && <span>{sample.country}<br /></span>}
-                            <span style={{ fontSize: '11px', color: '#888' }}>{lat.toFixed(5)}, {lng.toFixed(5)}</span>
+                            <span style={{ fontSize: '11px', color: '#888' }}>{Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}</span>
                         </Popup>
                     )}
                 </Marker>
@@ -427,18 +474,31 @@ const FieldMap = ({ sample }) => {
 
     // Parse coordinates
     let lat = null, lng = null;
-    if (sample?.coordinates) { lat = sample.coordinates.lat; lng = sample.coordinates.lng; }
-    if (!lat || !lng) {
+    const isFiniteNum = (n) => n !== null && n !== undefined && n !== '' && !isNaN(Number(n)) && Number.isFinite(Number(n));
+    if (sample?.coordinates && isFiniteNum(sample.coordinates.lat) && isFiniteNum(sample.coordinates.lng)) {
+        lat = Number(sample.coordinates.lat);
+        lng = Number(sample.coordinates.lng);
+    }
+    if (lat === null || lng === null) {
         try {
             const fm = typeof sample?.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample?.fieldMetadata;
             if (fm) {
                 const v = (obj) => obj && typeof obj === 'object' ? obj.value : obj;
-                lat = parseFloat(v(fm.latitude) || v(fm.lat) || v(fm.gps_latitude)) || null;
-                lng = parseFloat(v(fm.longitude) || v(fm.lng) || v(fm.gps_longitude) || v(fm.lon)) || null;
+                const rawLat = v(fm.latitude) ?? v(fm.lat) ?? v(fm.gps_latitude);
+                const rawLng = v(fm.longitude) ?? v(fm.lng) ?? v(fm.gps_longitude) ?? v(fm.lon);
+                if (isFiniteNum(rawLat) && isFiniteNum(rawLng)) {
+                    lat = Number(rawLat);
+                    lng = Number(rawLng);
+                }
             }
         } catch (e) { }
     }
-    if (!lat || !lng) { lat = sample?.location?.lat || null; lng = sample?.location?.lng || null; }
+    if (lat === null || lng === null) {
+        if (sample?.location && isFiniteNum(sample.location.lat) && isFiniteNum(sample.location.lng)) {
+            lat = Number(sample.location.lat);
+            lng = Number(sample.location.lng);
+        }
+    }
 
     const photos = getPhotos(sample);
 
@@ -455,7 +515,8 @@ const FieldMap = ({ sample }) => {
         return () => window.removeEventListener('keydown', handleKey);
     }, [fullscreen, showPhotoPopup, lightboxIndex]);
 
-    if (!lat || !lng) {
+    const hasValidCoords = lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    if (!hasValidCoords) {
         return (
             <div className="bg-gray-50 dark:bg-gray-800/50 border border-sf-divider rounded-xl h-[300px] flex items-center justify-center">
                 <div className="text-center p-6">
