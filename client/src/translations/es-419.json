@@ -1025,7 +1025,13 @@
     "assignedTech": "Operador Responsable",
     "logHistory": "Historial de Calibración y Mantenimiento",
     "noHistory": "No hay registros de calibración o mantenimiento",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "eventType": "Tipo de evento",
+    "typeCalibration": "Calibración",
+    "typeVerification": "Verificación",
+    "typeMaintenance": "Mantenimiento",
+    "performedDate": "Fecha de realización",
+    "logEventFailed": "Error al registrar el evento de equipo"
   },
   "inventory": {
     "title": "Reactivos e Inventario",

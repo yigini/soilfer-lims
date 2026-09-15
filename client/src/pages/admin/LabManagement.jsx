@@ -98,21 +98,24 @@ export default function LabManagement() {
     const [submittingOnboard, setSubmittingOnboard] = useState(false);
 
     // Load Labs Directory
-    const fetchLabs = useCallback(async () => {
+    const fetchLabs = useCallback(async (options = {}) => {
         setLoadingLabs(true);
         try {
             const res = await axios.get('/api/labs');
             setLabs(res.data);
+            return true;
         } catch (err) {
             console.error('Failed to load labs:', err);
+            if (options.throwOnError) throw err;
+            return false;
         } finally {
             setLoadingLabs(false);
         }
     }, []);
 
     // Load Workspace for selected lab with query-aware server-side filtering and paging
-    const fetchWorkspace = useCallback(async (id, overrideParams = {}) => {
-        if (!id) return;
+    const fetchWorkspace = useCallback(async (id, overrideParams = {}, options = {}) => {
+        if (!id) return false;
         const reqId = ++latestWorkspaceReqId.current;
         setLoadingWorkspace(true);
         setWorkspaceError(null);
@@ -128,7 +131,7 @@ export default function LabManagement() {
             const res = await axios.get(`/api/labs/${encodeURIComponent(id)}/workspace`, {
                 params: queryParams
             });
-            if (latestWorkspaceReqId.current !== reqId) return;
+            if (latestWorkspaceReqId.current !== reqId) return true;
             setWorkspace(res.data);
             if (res.data?.lab) {
                 const labCap = (res.data.lab.capacity !== null && res.data.lab.capacity !== undefined)
@@ -148,12 +151,15 @@ export default function LabManagement() {
                 setSettingsForm(formInit);
                 setInitialSettings(formInit);
             }
+            return true;
         } catch (err) {
-            if (latestWorkspaceReqId.current !== reqId) return;
+            if (latestWorkspaceReqId.current !== reqId) return false;
             console.error('Failed to load workspace:', err);
             const status = err.response?.status;
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
             setWorkspaceError({ status, message: msg || 'Failed to load laboratory workspace' });
+            if (options.throwOnError) throw err;
+            return false;
         } finally {
             if (latestWorkspaceReqId.current === reqId) {
                 setLoadingWorkspace(false);
@@ -296,10 +302,13 @@ export default function LabManagement() {
             }
 
             await axios.patch(`/api/labs/${selectedLabId}/profile`, patch);
-            setSettingsMsg({ type: 'success', text: t('labManagement.settings.saveSuccess', 'Laboratory profile updated successfully.') });
 
             try {
-                await Promise.all([fetchWorkspace(selectedLabId), fetchLabs()]);
+                await Promise.all([
+                    fetchWorkspace(selectedLabId, {}, { throwOnError: true }),
+                    fetchLabs({ throwOnError: true })
+                ]);
+                setSettingsMsg({ type: 'success', text: t('labManagement.settings.saveSuccess', 'Laboratory profile updated successfully.') });
             } catch (refreshErr) {
                 console.warn('Profile saved but failed to refresh workspace:', refreshErr);
                 setSettingsMsg({

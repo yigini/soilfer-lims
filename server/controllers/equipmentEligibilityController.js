@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
+const { getReadiness } = require('../services/equipmentQualificationService');
 
 /**
  * Get eligibility mappings for a lab
@@ -90,7 +91,12 @@ exports.getEligibleInstruments = async (req, res) => {
             });
         }
 
-        res.json(instruments);
+        const enriched = instruments.map(a => ({
+            ...a,
+            readiness: getReadiness(a)
+        })).filter(a => a.readiness !== 'BLOCKED');
+
+        res.json(enriched);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch eligible instruments' });
     }

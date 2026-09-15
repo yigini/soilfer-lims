@@ -1025,7 +1025,13 @@
     "assignedTech": "Responsible Operator",
     "logHistory": "Maintenance & Calibration History",
     "noHistory": "No calibration or maintenance logs recorded yet",
-    "actions": "Actions"
+    "actions": "Actions",
+    "eventType": "Event Type",
+    "typeCalibration": "Calibration",
+    "typeVerification": "Verification",
+    "typeMaintenance": "Maintenance",
+    "performedDate": "Date Performed",
+    "logEventFailed": "Failed to log equipment event"
   },
   "inventory": {
     "title": "Reagents & Inventory",

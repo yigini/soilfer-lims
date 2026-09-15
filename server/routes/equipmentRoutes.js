@@ -17,6 +17,9 @@ router.get('/eligibility', checkPermission('VIEW_EQUIPMENT'), equipmentEligibili
 router.post('/eligibility', checkPermission('MANAGE_EQUIPMENT'), equipmentEligibilityController.updateEligibility);
 router.get('/eligibility/:analysisCode', checkPermission('VIEW_EQUIPMENT'), equipmentEligibilityController.getEligibleInstruments);
 
+// Audit (static paths first, before /:id)
+router.get('/audit/mismatches', checkPermission('MANAGE_EQUIPMENT'), equipmentController.getAuditMismatches);
+
 // Registry (parameterized routes last)
 router.get('/', checkPermission('VIEW_EQUIPMENT'), equipmentController.getEquipment);
 router.post('/', checkPermission('MANAGE_EQUIPMENT'), equipmentController.addEquipment);

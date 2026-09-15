@@ -38,7 +38,7 @@ export async function ensureDeviceId() {
 /**
  * Downloads a scoped work pack from server and activates it in local IndexedDB
  */
-export async function downloadAndActivateWorkPack({ labId, methodCodes, sampleIds, token }) {
+export async function downloadAndActivateWorkPack({ labId, methodCodes, sampleIds, token, user }) {
     const deviceId = await ensureDeviceId();
 
     const headers = {

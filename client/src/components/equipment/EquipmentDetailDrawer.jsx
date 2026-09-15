@@ -218,49 +218,79 @@ const OverviewTab = ({ asset }) => (
     </div>
 );
 
-const MaintenanceTab = ({ asset, onAction }) => (
-    <div className="space-y-6">
-        <div className="p-5 rounded-2xl border-2 border-dashed dark:border-gray-700 flex flex-col items-center text-center gap-4">
-            <div className={`p-4 rounded-full ${READINESS_COLORS[asset.readiness]} bg-opacity-20`}>
-                {asset.readiness === 'READY' ? <CheckCircle size={32} /> : asset.readiness === 'BLOCKED' ? <ShieldAlert size={32} /> : <AlertTriangle size={32} />}
-            </div>
-            <div>
-                <h4 className="text-lg font-bold">Instrument Readiness: {asset.readiness}</h4>
-                <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {asset.qualification?.calibrationStatus.toLowerCase()} calibration.</p>
-            </div>
-        </div>
+const MaintenanceTab = ({ asset, canManage, onAction }) => {
+    const calibStatus = asset.qualification?.calibrationStatus || 'NOT_CONFIGURED';
+    const verifStatus = asset.qualification?.verificationStatus || 'NOT_CONFIGURED';
 
-        <section>
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Calibration & Verification</h4>
-            <div className="space-y-3">
-                <div className="p-4 rounded-xl border dark:border-gray-700 flex justify-between items-center">
-                    <div>
-                        <div className="text-xs text-gray-500">Last External Calibration</div>
-                        <div className="font-bold">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : 'None Recorded'}</div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-xs text-gray-500">Next Due</div>
-                        <div className={`font-bold ${asset.qualification?.calibrationStatus === 'OVERDUE' ? 'text-red-500' : 'text-blue-600'}`}>
-                            {asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'N/A'}
-                        </div>
-                    </div>
+    return (
+        <div className="space-y-6">
+            <div className="p-5 rounded-2xl border-2 border-dashed dark:border-gray-700 flex flex-col items-center text-center gap-4">
+                <div className={`p-4 rounded-full ${READINESS_COLORS[asset.readiness] || READINESS_COLORS.NOT_CONFIGURED} bg-opacity-20`}>
+                    {asset.readiness === 'READY' ? <CheckCircle size={32} /> : asset.readiness === 'BLOCKED' ? <ShieldAlert size={32} /> : <AlertTriangle size={32} />}
                 </div>
-                <div className="p-4 rounded-xl border dark:border-gray-700 flex justify-between items-center">
-                    <div>
-                        <div className="text-xs text-gray-500">Performance Verification</div>
-                        <div className="font-bold">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : 'None Recorded'}</div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-xs text-gray-500">Next Due</div>
-                        <div className={`font-bold ${asset.qualification?.verificationStatus === 'OVERDUE' ? 'text-red-500' : 'text-blue-600'}`}>
-                            {asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'N/A'}
-                        </div>
-                    </div>
+                <div>
+                    <h4 className="text-lg font-bold">Instrument Readiness: {asset.readiness}</h4>
+                    <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>
                 </div>
             </div>
-        </section>
-    </div>
-);
+
+            <section>
+                <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Calibration & Verification</h4>
+                </div>
+                <div className="space-y-3">
+                    <div className="p-4 rounded-xl border dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs text-gray-500 font-medium">Last External Calibration</span>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {calibStatus}
+                                </span>
+                            </div>
+                            <div className="font-bold text-sf-text">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : 'None Recorded'}</div>
+                            <div className="text-xs text-gray-400 mt-0.5">
+                                Next Due: <span className={calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                            </div>
+                        </div>
+                        {canManage && onAction && (
+                            <button
+                                type="button"
+                                onClick={() => onAction('CALIBRATION')}
+                                className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                            >
+                                <ClipboardCheck size={14} /> Log Calibration
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="p-4 rounded-xl border dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs text-gray-500 font-medium">Performance Verification</span>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {verifStatus}
+                                </span>
+                            </div>
+                            <div className="font-bold text-sf-text">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : 'None Recorded'}</div>
+                            <div className="text-xs text-gray-400 mt-0.5">
+                                Next Due: <span className={verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                            </div>
+                        </div>
+                        {canManage && onAction && (
+                            <button
+                                type="button"
+                                onClick={() => onAction('VERIFICATION')}
+                                className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                            >
+                                <ClipboardCheck size={14} /> Log Verification
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+};
 
 const HistoryTab = ({ events = [] }) => (
     <div className="space-y-4">

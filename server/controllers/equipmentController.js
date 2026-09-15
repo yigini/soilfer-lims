@@ -1,20 +1,6 @@
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
-
-/**
- * Helper to compute equipment readiness badge
- */
-const getReadiness = (asset) => {
-    if (asset.status === 'OUT_OF_SERVICE' || asset.status === 'DECOMMISSIONED') return 'BLOCKED';
-
-    const q = asset.qualification;
-    if (!q) return 'READY'; // Or NOT_CONFIGURED? Let's say READY if no rules set yet
-
-    if (q.calibrationStatus === 'OVERDUE' || q.verificationStatus === 'OVERDUE') return 'BLOCKED';
-    if (q.calibrationStatus === 'DUE_SOON' || q.verificationStatus === 'DUE_SOON') return 'WARNING';
-
-    return 'READY';
-};
+const { getReadiness, generateMismatchReport } = require('../services/equipmentQualificationService');
 
 /**
  * Get all equipment for the user's lab
@@ -252,9 +238,26 @@ exports.updateEquipment = async (req, res) => {
             }
         });
 
-        res.json(asset);
+        res.json(updated);
     } catch (err) {
         console.error('[Equipment] Update error:', err);
         res.status(500).json({ error: 'Failed to update equipment details' });
+    }
+};
+
+/**
+ * Read-only diagnostic: audit equipment registry for discrepancies between events and qualifications
+ */
+exports.getAuditMismatches = async (req, res) => {
+    try {
+        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(req.user.role)) {
+            return res.status(403).json({ error: 'Manager permissions required' });
+        }
+        const targetLabId = req.user.role === 'SUPER_ADMIN' ? req.query.labId || null : req.user.labId;
+        const report = await generateMismatchReport(targetLabId);
+        res.json(report);
+    } catch (err) {
+        console.error('[Equipment] Audit error:', err);
+        res.status(500).json({ error: 'Failed to generate equipment audit report' });
     }
 };

@@ -233,11 +233,16 @@ const Equipment = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="text-xs text-sf-muted">
-                                            {asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : t('common.never', 'Never')}
+                                        <div className="flex items-center gap-1.5 text-xs text-sf-muted font-medium">
+                                            <span>{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : t('common.never', 'Never')}</span>
+                                            {asset.qualification?.calibrationStatus && asset.qualification.calibrationStatus !== 'NOT_CONFIGURED' && (
+                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${asset.qualification.calibrationStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : asset.qualification.calibrationStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'}`}>
+                                                    {asset.qualification.calibrationStatus}
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="text-[10px] text-amber-600 font-medium">
-                                            {t('equipment.nextCalibration', 'Next')}: {asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : t('common.unscheduled', 'Unscheduled')}
+                                        <div className="text-[10px] text-sf-muted font-medium mt-0.5">
+                                            {t('equipment.nextCalibration', 'Next')}: <span className={asset.qualification?.calibrationStatus === 'OVERDUE' ? 'text-red-500 font-bold' : 'text-sf-muted'}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : t('common.unscheduled', 'Unscheduled')}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-right">

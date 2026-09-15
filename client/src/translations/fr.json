@@ -1025,7 +1025,13 @@
     "assignedTech": "Opérateur Responsable",
     "logHistory": "Historique de Maintenance et d'Étalonnage",
     "noHistory": "Aucun enregistrement de maintenance",
-    "actions": "Actions"
+    "actions": "Actions",
+    "eventType": "Type d'événement",
+    "typeCalibration": "Étalonnage",
+    "typeVerification": "Vérification",
+    "typeMaintenance": "Maintenance",
+    "performedDate": "Date d'exécution",
+    "logEventFailed": "Échec de l'enregistrement de l'événement d'équipement"
   },
   "inventory": {
     "title": "Réactifs et Inventaire",
