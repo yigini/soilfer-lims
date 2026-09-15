@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import { MapPinOff, AlertTriangle } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useLanguage } from '../../context/LanguageContext';
+import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
 
 // Fix for default marker icon in Leaflet + React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -33,6 +35,24 @@ const ChangeView = ({ center }) => {
 };
 
 const SampleMap = ({ coordinates, title, uncertaintyM }) => {
+    const { t } = useLanguage?.() || { t: (k, d) => d };
+    const [mapUnavailable, setMapUnavailable] = useState(false);
+    const [tileRetryKey, setTileRetryKey] = useState(0);
+    const tileErrorCountRef = useRef(0);
+
+    const handleTileError = () => {
+        tileErrorCountRef.current += 1;
+        if (tileErrorCountRef.current >= 2) {
+            setMapUnavailable(true);
+        }
+    };
+
+    const handleRetryMap = () => {
+        tileErrorCountRef.current = 0;
+        setMapUnavailable(false);
+        setTileRetryKey(prev => prev + 1);
+    };
+
     const hasCoords = Boolean(
         coordinates &&
         coordinates.lat !== null && coordinates.lat !== undefined &&
@@ -65,11 +85,33 @@ const SampleMap = ({ coordinates, title, uncertaintyM }) => {
 
     return (
         <div className="relative isolate min-h-[256px] h-64 rounded-xl overflow-hidden shadow-inner border border-sf-divider bg-sf-surface z-0">
+            {mapUnavailable && (
+                <div className="absolute top-2 left-2 right-2 z-[1000] bg-amber-500/90 dark:bg-amber-900/90 backdrop-blur-xs border border-amber-600 text-white dark:text-amber-100 px-3 py-2 rounded-lg text-xs shadow flex items-center justify-between gap-2 animate-fadeIn pointer-events-auto">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <AlertTriangle size={14} className="shrink-0 text-white dark:text-amber-200" />
+                        <span className="truncate">{t('common.mapUnavailable', 'Map temporarily unavailable. You can still enter coordinates.')}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleRetryMap}
+                        className="px-2.5 py-1 bg-white dark:bg-amber-800 text-amber-900 dark:text-white font-bold rounded-md hover:bg-amber-100 text-[11px] shrink-0 cursor-pointer shadow-xs transition-colors"
+                    >
+                        {t('common.mapRetry', 'Retry map')}
+                    </button>
+                </div>
+            )}
             <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
                 <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    key={tileRetryKey}
+                    url={OSM_TILE_CONFIG.url}
+                    attribution={OSM_TILE_CONFIG.attribution}
+                    referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
+                    maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
+                    maxZoom={OSM_TILE_CONFIG.maxZoom}
+                    eventHandlers={{
+                        tileerror: handleTileError
+                    }}
                 />
                 <Marker position={position}>
                     <Popup>

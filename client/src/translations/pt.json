@@ -47,7 +47,9 @@
     "generating": "Gerando...",
     "showingRange": "Exibindo {{from}} - {{to}} de {{total}}",
     "none": "Nenhum",
-    "inactive": "Inativo"
+    "inactive": "Inativo",
+    "mapUnavailable": "Mapa temporariamente indisponível. Você ainda pode inserir coordenadas.",
+    "mapRetry": "Tentar carregar mapa novamente"
   },
   "login": {
     "title": "Entrar no SoilFER LIMS",

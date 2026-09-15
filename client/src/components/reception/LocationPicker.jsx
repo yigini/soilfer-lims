@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from 'react-leaflet';
 import {
     Crosshair,
@@ -19,6 +19,8 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { parseCoordinates } from '../../utils/coordParser';
+import { useLanguage } from '../../context/LanguageContext';
+import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
 
 // Fix Leaflet marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -130,6 +132,25 @@ const LocationPicker = ({
 
     // Confidence override tracking
     const [isConfidenceOverridden, setIsConfidenceOverridden] = useState(false);
+
+    // Map availability and bounded retry tracking (Refs #110)
+    const { t } = useLanguage?.() || { t: (k, d) => d };
+    const [mapUnavailable, setMapUnavailable] = useState(false);
+    const [tileRetryKey, setTileRetryKey] = useState(0);
+    const tileErrorCountRef = useRef(0);
+
+    const handleTileError = () => {
+        tileErrorCountRef.current += 1;
+        if (tileErrorCountRef.current >= 2) {
+            setMapUnavailable(true);
+        }
+    };
+
+    const handleRetryMap = () => {
+        tileErrorCountRef.current = 0;
+        setMapUnavailable(false);
+        setTileRetryKey(prev => prev + 1);
+    };
 
     const hasErr = (key) => errors.some(e => e.key === key);
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
@@ -605,12 +626,17 @@ const LocationPicker = ({
                                 type="number"
                                 step="0.00001"
                                 placeholder="Latitude"
-                                value={position ? position[0] : ''}
+                                value={(position && position[0] !== null && position[0] !== undefined) ? position[0] : ''}
                                 onChange={(e) => {
                                     const lat = parseFloat(e.target.value);
                                     if (!isNaN(lat) && lat >= -90 && lat <= 90) {
-                                        setPosition([lat, position[1]]);
-                                        onChange({ ...value, lat, lng: position[1] });
+                                        const currentLng = (position && position[1] !== null && position[1] !== undefined) ? position[1] : (defaultCenter ? defaultCenter[1] : 0);
+                                        setPosition([lat, currentLng]);
+                                        onChange({ ...value, lat, lng: currentLng });
+                                    } else if (e.target.value === '') {
+                                        const currentLng = (position && position[1] !== null && position[1] !== undefined) ? position[1] : null;
+                                        setPosition(currentLng !== null ? [null, currentLng] : null);
+                                        onChange({ ...value, lat: null, lng: currentLng });
                                     }
                                 }}
                                 className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
@@ -619,12 +645,17 @@ const LocationPicker = ({
                                 type="number"
                                 step="0.00001"
                                 placeholder="Longitude"
-                                value={position ? position[1] : ''}
+                                value={(position && position[1] !== null && position[1] !== undefined) ? position[1] : ''}
                                 onChange={(e) => {
                                     const lng = parseFloat(e.target.value);
                                     if (!isNaN(lng) && lng >= -180 && lng <= 180) {
-                                        setPosition([position[0], lng]);
-                                        onChange({ ...value, lat: position[0], lng });
+                                        const currentLat = (position && position[0] !== null && position[0] !== undefined) ? position[0] : (defaultCenter ? defaultCenter[0] : 0);
+                                        setPosition([currentLat, lng]);
+                                        onChange({ ...value, lat: currentLat, lng });
+                                    } else if (e.target.value === '') {
+                                        const currentLat = (position && position[0] !== null && position[0] !== undefined) ? position[0] : null;
+                                        setPosition(currentLat !== null ? [currentLat, null] : null);
+                                        onChange({ ...value, lat: currentLat, lng: null });
                                     }
                                 }}
                                 className="text-xs p-1.5 border rounded-lg w-28 bg-sf-surface border-sf-divider text-sf-text font-mono"
@@ -669,10 +700,32 @@ const LocationPicker = ({
 
                     {/* STATIC MAP CONTAINER - PREVENTS PAGE SHIFT */}
                     <div className="h-64 w-full rounded-xl overflow-hidden border border-sf-divider relative z-0 shadow-inner bg-sf-surface">
+                        {mapUnavailable && (
+                            <div className="absolute top-2 left-2 right-2 z-[1000] bg-amber-500/90 dark:bg-amber-900/90 backdrop-blur-xs border border-amber-600 text-white dark:text-amber-100 px-3 py-2 rounded-lg text-xs shadow flex items-center justify-between gap-2 animate-fadeIn pointer-events-auto">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <AlertTriangle size={14} className="shrink-0 text-white dark:text-amber-200" />
+                                    <span className="truncate">{t('common.mapUnavailable', 'Map temporarily unavailable. You can still enter coordinates.')}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleRetryMap}
+                                    className="px-2.5 py-1 bg-white dark:bg-amber-800 text-amber-900 dark:text-white font-bold rounded-md hover:bg-amber-100 text-[11px] shrink-0 cursor-pointer shadow-xs transition-colors"
+                                >
+                                    {t('common.mapRetry', 'Retry map')}
+                                </button>
+                            </div>
+                        )}
                         <MapContainer center={position || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                             <TileLayer
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                key={tileRetryKey}
+                                attribution={OSM_TILE_CONFIG.attribution}
+                                url={OSM_TILE_CONFIG.url}
+                                referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
+                                maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
+                                maxZoom={OSM_TILE_CONFIG.maxZoom}
+                                eventHandlers={{
+                                    tileerror: handleTileError
+                                }}
                             />
                             <RecenterMap center={position || defaultCenter} zoom={zoom} />
                             <LocationMarker />

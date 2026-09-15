@@ -3,6 +3,7 @@ import { Globe, MapPin, Maximize2, Minimize2, Map, Box, Maximize, Camera, X } fr
 import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
 
 // Custom Leaflet marker icon (no external images needed)
 const sampleIcon = new L.DivIcon({
@@ -383,8 +384,9 @@ const LeafletView = ({ lat, lng, sample, onPinClick }) => {
                             maxNativeZoom={19} maxZoom={21} />
                     </LayersControl.BaseLayer>
                     <LayersControl.BaseLayer name="Street (OpenStreetMap)">
-                        <TileLayer attribution='&copy; OpenStreetMap'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        <TileLayer attribution={OSM_TILE_CONFIG.attribution}
+                            url={OSM_TILE_CONFIG.url}
+                            referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
                             maxNativeZoom={19} maxZoom={21} />
                     </LayersControl.BaseLayer>
                     <LayersControl.BaseLayer name="Google Satellite">

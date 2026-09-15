@@ -47,7 +47,9 @@
     "generating": "Generating...",
     "showingRange": "Showing {{from}} - {{to}} of {{total}}",
     "none": "None",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "mapUnavailable": "Map temporarily unavailable. You can still enter coordinates.",
+    "mapRetry": "Retry map"
   },
   "login": {
     "title": "Sign in to SoilFER LIMS",
