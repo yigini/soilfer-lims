@@ -379,6 +379,18 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     onChange={async (val) => {
                         let locationDesc = val.description || sampling.location;
 
+                        // Update coordinates immediately to avoid stale closure race conditions
+                        setSampling(prev => ({
+                            ...prev,
+                            location: locationDesc,
+                            coordinates: {
+                                lat: val.lat,
+                                lng: val.lng,
+                                accuracy: val.accuracy,
+                                elevation: val.elevation
+                            }
+                        }));
+
                         // Reverse Geocode using secure server proxy (RC-08)
                         if (val.lat && val.lng && (!locationDesc || locationDesc.startsWith('Near '))) {
                             try {
@@ -389,7 +401,11 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                 if (res.ok) {
                                     const data = await res.json();
                                     if (data.displayName || data.village || data.municipality) {
-                                        locationDesc = data.displayName || `${data.village || data.municipality}, ${data.district}`;
+                                        const resolvedDesc = data.displayName || `${data.village || data.municipality}, ${data.district}`;
+                                        setSampling(prev => ({
+                                            ...prev,
+                                            location: resolvedDesc
+                                        }));
                                         if (!sampling.areaVillage && (data.village || data.municipality)) {
                                             handleChange('sampling', 'areaVillage', data.village || data.municipality);
                                         }
@@ -402,13 +418,6 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                 console.warn("Reverse geocode failed", e);
                             }
                         }
-
-                        // Spread val into coordinates
-                        setSampling(prev => ({
-                            ...prev,
-                            location: locationDesc,
-                            coordinates: { lat: val.lat, lng: val.lng, accuracy: val.accuracy, elevation: val.elevation }
-                        }));
                     }}
                 />
             </div>
