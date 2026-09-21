@@ -35,7 +35,7 @@ function loadClientModule(filePath) {
 }
 
 const mapConfigPath = path.resolve(__dirname, '../../../client/src/utils/mapConfig.js');
-const { SATELLITE_TILE_CONFIG, OSM_TILE_CONFIG, resolveMapCenter } = loadClientModule(mapConfigPath);
+const { SATELLITE_TILE_CONFIG, OSM_TILE_CONFIG, resolveMapCenter, parseCoordinates, COUNTRY_CENTERS } = loadClientModule(mapConfigPath);
 
 describe('Map Centering, Provider & Resilience Contract (#114)', () => {
     describe('1. Centering Precedence Hierarchy', () => {
@@ -117,47 +117,90 @@ describe('Map Centering, Provider & Resilience Contract (#114)', () => {
         });
     });
 
-    describe('4. Reception Call Site & Harare Lab Viewport Contract (#114)', () => {
-        const HARARE_COORDINATES = [-17.8292, 31.0522];
+    describe('4. Reception Call Site & Sourced Laboratory Viewport Contract (#114)', () => {
+        test('parseCoordinates safely parses string, array, and object formats with strict bounds validation', () => {
+            // String format from schema Lab.location or GPS
+            expect(parseCoordinates('-17.8292, 31.0522')).toEqual([-17.8292, 31.0522]);
+            expect(parseCoordinates('[-15.4167, 28.2833]')).toEqual([-15.4167, 28.2833]);
+            expect(parseCoordinates('(14.6349, -90.5069)')).toEqual([14.6349, -90.5069]);
 
-        test('Harare lab user with blank sample coordinates: viewport centers on Harare, sample coordinates remain blank', () => {
-            // Simulated reception desk state
-            const user = { username: 'tech.harare', role: 'SAMPLE_RECEPTION', labId: 'LAB-ZWE-01' };
-            const LAB_DEFAULT_COORDINATES = {
-                'LAB-ZWE-01': HARARE_COORDINATES,
-                'LAB-GTM-01': [14.6349, -90.5069]
+            // Array format
+            expect(parseCoordinates([0.35, 32.58])).toEqual([0.35, 32.58]);
+
+            // Object format
+            expect(parseCoordinates({ lat: 9.15, lng: 40.49 })).toEqual([9.15, 40.49]);
+            expect(parseCoordinates({ latitude: -6.37, longitude: 34.89 })).toEqual([-6.37, 34.89]);
+            expect(parseCoordinates({ lat: -1.94, lon: 29.87 })).toEqual([-1.94, 29.87]);
+
+            // Bounds validation: lat [-90, 90], lng [-180, 180]
+            expect(parseCoordinates('95.0, 20.0')).toBeNull();
+            expect(parseCoordinates('-91.0, 20.0')).toBeNull();
+            expect(parseCoordinates('10.0, 185.0')).toBeNull();
+            expect(parseCoordinates('10.0, -185.0')).toBeNull();
+
+            // Malformed and empty inputs
+            expect(parseCoordinates('')).toBeNull();
+            expect(parseCoordinates(null)).toBeNull();
+            expect(parseCoordinates(undefined)).toBeNull();
+            expect(parseCoordinates('not,numbers')).toBeNull();
+        });
+
+        test('Arbitrary lab ID with configured location string: parses coordinates and preserves blank sample coordinates', () => {
+            // Arbitrary lab configuration from database schema (Lab.location string)
+            const user = {
+                username: 'tech.lusaka',
+                role: 'SAMPLE_RECEPTION',
+                labId: 'LAB-ZMB-01',
+                lab: {
+                    id: 'LAB-ZMB-01',
+                    name: 'Mount Makulu Research Lab',
+                    location: '-15.5492, 28.2514' // Real schema string
+                }
             };
-            const userLabCoords = LAB_DEFAULT_COORDINATES[user.labId];
-            expect(userLabCoords).toEqual(HARARE_COORDINATES);
+
+            const sourcedLabCoords = parseCoordinates(user.lab.location);
+            expect(sourcedLabCoords).toEqual([-15.5492, 28.2514]);
 
             // Blank sample coordinates before desk selection
             const blankSampleCoords = null;
             const defaultFallback = [0, 20];
 
             // Map center in LocationPicker:
-            const viewportCenter = resolveMapCenter(blankSampleCoords, userLabCoords, defaultFallback);
-            expect(viewportCenter).toEqual(HARARE_COORDINATES);
+            const viewportCenter = resolveMapCenter(blankSampleCoords, sourcedLabCoords, defaultFallback);
+            expect(viewportCenter).toEqual([-15.5492, 28.2514]);
 
             // Verify sampling data remains completely unpopulated (preserved blank until deliberate user action)
             const samplingData = { coordinates: blankSampleCoords, location: '' };
             expect(samplingData.coordinates).toBeNull();
         });
 
-        test('Existing sample coordinates override Harare lab location in viewport', () => {
-            const userLabCoords = HARARE_COORDINATES;
-            const sampleCoords = [-18.5123, 32.1245]; // Specific field site in Manicaland
+        test('Existing sample coordinates override sourced laboratory location in viewport', () => {
+            const sourcedLabCoords = [-15.5492, 28.2514];
+            const sampleCoords = [-12.98, 28.65]; // Specific field site in Copperbelt
 
-            const viewportCenter = resolveMapCenter(sampleCoords, userLabCoords);
-            expect(viewportCenter).toEqual([-18.5123, 32.1245]);
+            const viewportCenter = resolveMapCenter(sampleCoords, sourcedLabCoords);
+            expect(viewportCenter).toEqual([-12.98, 28.65]);
         });
 
-        test('Missing lab coordinates gracefully falls back to neutral center without crash', () => {
-            const userWithoutLab = { username: 'external.analyst', role: 'ANALYST', labId: null };
+        test('Arbitrary lab with missing or unconfigured location gracefully falls back to neutral center or country viewport hint', () => {
+            const userWithUnsetLab = {
+                username: 'analyst.generic',
+                role: 'ANALYST',
+                labId: 'LAB-NEW-99',
+                lab: { id: 'LAB-NEW-99', location: null }
+            };
             const blankSampleCoords = null;
             const fallback = [0, 20];
 
-            const viewportCenter = resolveMapCenter(blankSampleCoords, userWithoutLab.labCoordinates, fallback);
+            const parsedLabCoords = parseCoordinates(userWithUnsetLab.lab.location);
+            expect(parsedLabCoords).toBeNull();
+
+            const viewportCenter = resolveMapCenter(blankSampleCoords, parsedLabCoords, fallback);
             expect(viewportCenter).toEqual([0, 20]);
+
+            // Optional country viewport hint (explicitly documented as approximate hint, not exact lab coordinates)
+            const countryHint = COUNTRY_CENTERS['ZM'];
+            expect(countryHint).toEqual([-15.41, 28.28]);
         });
 
         test('LocationPicker source code wires labCoordinates and InvalidateMapSize to Leaflet MapContainer', () => {
@@ -188,6 +231,7 @@ describe('Map Centering, Provider & Resilience Contract (#114)', () => {
             expect(configCode).toContain('https://www.esri.com/en-us/legal/terms/full-master-agreement');
             expect(configCode).toContain('Esri Master License Agreement');
             expect(configCode).toContain('ZW: [-17.8292, 31.0522]');
+            expect(configCode).toContain('approximate country viewport');
         });
     });
 });

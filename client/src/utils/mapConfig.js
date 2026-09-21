@@ -42,54 +42,60 @@ export const SATELLITE_TILE_CONFIG = {
     maxZoom: 19
 };
 
+// Approximate national/regional viewport hints (NOT exact laboratory coordinates)
 export const COUNTRY_CENTERS = {
-    GT: [15.78, -90.23],   // Guatemala
-    RW: [-1.94, 29.87],    // Rwanda
-    KE: [-1.29, 36.82],    // Kenya
-    UG: [0.35, 32.58],     // Uganda
-    TZ: [-6.37, 34.89],    // Tanzania
-    ET: [9.15, 40.49],     // Ethiopia
-    ZM: [-15.41, 28.28],   // Zambia
-    ZW: [-17.8292, 31.0522], // Zimbabwe (Harare)
+    GT: [15.78, -90.23],   // Guatemala (approximate country viewport)
+    RW: [-1.94, 29.87],    // Rwanda (approximate country viewport)
+    KE: [-1.29, 36.82],    // Kenya (approximate country viewport)
+    UG: [0.35, 32.58],     // Uganda (approximate country viewport)
+    TZ: [-6.37, 34.89],    // Tanzania (approximate country viewport)
+    ET: [9.15, 40.49],     // Ethiopia (approximate country viewport)
+    ZM: [-15.41, 28.28],   // Zambia (approximate country viewport)
+    ZW: [-17.8292, 31.0522], // Zimbabwe / Harare (approximate country viewport)
     DEFAULT: [0, 25]       // Central Africa fallback
 };
+
+/**
+ * Validates and normalizes latitude/longitude from various formats
+ * (string, array, object) into canonical [lat, lng] array.
+ * Returns null if invalid or missing.
+ */
+export function parseCoordinates(coords) {
+    if (!coords) return null;
+    let lat, lng;
+    if (typeof coords === 'string') {
+        const parts = coords.replace(/[\[\]\(\)]/g, '').split(',').map(s => parseFloat(s.trim()));
+        if (parts.length >= 2) {
+            lat = parts[0];
+            lng = parts[1];
+        }
+    } else if (Array.isArray(coords) && coords.length >= 2) {
+        lat = parseFloat(coords[0]);
+        lng = parseFloat(coords[1]);
+    } else if (typeof coords === 'object') {
+        lat = parseFloat(coords.lat !== undefined ? coords.lat : coords.latitude);
+        lng = parseFloat(coords.lng !== undefined ? coords.lng : (coords.lon !== undefined ? coords.lon : coords.longitude));
+    }
+    if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return [lat, lng];
+    }
+    return null;
+}
 
 /**
  * Resolves map center coordinates following canonical precedence (#114):
  * 1. Sample coordinates (if valid)
  * 2. Laboratory coordinates (if valid)
- * 3. Neutral fallback center [lat, lng]
+ * 3. Neutral fallback center [lat, lng] (e.g. approximate country center or [0, 20])
  */
 export function resolveMapCenter(sampleCoords, labCoords, fallback = [0, 20]) {
-    const parseCoord = (coords) => {
-        if (!coords) return null;
-        let lat, lng;
-        if (typeof coords === 'string') {
-            const parts = coords.replace(/[\[\]\(\)]/g, '').split(',').map(s => parseFloat(s.trim()));
-            if (parts.length >= 2) {
-                lat = parts[0];
-                lng = parts[1];
-            }
-        } else if (Array.isArray(coords) && coords.length >= 2) {
-            lat = parseFloat(coords[0]);
-            lng = parseFloat(coords[1]);
-        } else if (typeof coords === 'object') {
-            lat = parseFloat(coords.lat !== undefined ? coords.lat : coords.latitude);
-            lng = parseFloat(coords.lng !== undefined ? coords.lng : (coords.lon !== undefined ? coords.lon : coords.longitude));
-        }
-        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            return [lat, lng];
-        }
-        return null;
-    };
-
-    const sample = parseCoord(sampleCoords);
+    const sample = parseCoordinates(sampleCoords);
     if (sample) return sample;
 
-    const lab = parseCoord(labCoords);
+    const lab = parseCoordinates(labCoords);
     if (lab) return lab;
 
-    const defFallback = parseCoord(fallback);
+    const defFallback = parseCoordinates(fallback);
     return defFallback || [0, 20];
 }
 

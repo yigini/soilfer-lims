@@ -151,6 +151,21 @@ router.get('/directory', async (req, res) => {
     }
 });
 
+// ─── GET /api/labs/:id ─── Authorized fetch of laboratory configuration (#114)
+router.get('/:id', async (req, res) => {
+    try {
+        const lab = await prisma.lab.findUnique({
+            where: { id: req.params.id },
+            select: { id: true, code: true, name: true, location: true, country: true, city: true, isActive: true }
+        });
+        if (!lab) return res.status(404).json({ error: 'Lab not found' });
+        res.json(lab);
+    } catch (e) {
+        console.error(`[GET /api/labs/${req.params.id}]`, e);
+        res.status(500).json({ error: 'Failed to fetch laboratory configuration' });
+    }
+});
+
 // ─── GET /api/labs/:id/staff ─── Staff roster for a specific lab
 router.get('/:id/staff', async (req, res) => {
     const isSuperAdmin = req.user.role === 'SUPER_ADMIN';

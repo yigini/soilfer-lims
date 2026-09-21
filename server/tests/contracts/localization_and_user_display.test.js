@@ -110,6 +110,40 @@ describe('Localization & Multilingual Integrity Contract (#116)', () => {
             });
         });
     });
+
+    test('7. Inventory subtotal, uncertainty, and status strings are localized across all 5 locales (#116)', () => {
+        const inventoryKeys = [
+            'subtotalBadge',
+            'usableSubtotalTitle',
+            'usableSubtotalSummary',
+            'countNeeded',
+            'countNeededTitle',
+            'lowConfirmed',
+            'lowConfirmedTitle',
+            'lowUncertain',
+            'lowUncertainTitle',
+            'missingQuantityTitle',
+            'expired'
+        ];
+
+        LOCALES.forEach(locale => {
+            const inventory = translationData[locale].inventory;
+            expect(inventory).toBeDefined();
+            inventoryKeys.forEach(key => {
+                expect(inventory[key]).toBeDefined();
+                expect(typeof inventory[key]).toBe('string');
+                expect(inventory[key].trim().length).toBeGreaterThan(0);
+            });
+        });
+
+        // Specific verified localized terms
+        expect(translationData['en'].inventory.subtotalBadge).toBe('SUBTOTAL');
+        expect(translationData['fr'].inventory.subtotalBadge).toBe('SOUS-TOTAL');
+        expect(translationData['es'].inventory.countNeeded).toBe('CONTEO REQUERIDO');
+        expect(translationData['pt'].inventory.countNeeded).toBe('CONTAGEM NECESSÁRIA');
+        expect(translationData['es'].inventory.lowUncertain).toBe('BAJO? (INCIERTO)');
+        expect(translationData['fr'].inventory.lowUncertain).toBe('BAS ? (INCERTAIN)');
+    });
 });
 
 describe('User Display Name Resolution & Audit Integrity Contract (#126)', () => {

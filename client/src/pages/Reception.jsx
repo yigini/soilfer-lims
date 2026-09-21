@@ -21,6 +21,8 @@ import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAu
 import { resolveCoordinates } from '../utils/coordinateResolver';
 import { recordSyncOperation } from '../services/offline/syncEngine';
 
+import { parseCoordinates } from '../utils/mapConfig';
+
 
 const Reception = () => {
     const getAnalysisDisplayName = useAnalysisNames();
@@ -29,38 +31,43 @@ const Reception = () => {
     const { t } = useLanguage();
     const location = useLocation();
 
-    // Configured laboratory default coordinates (#114)
-    const LAB_DEFAULT_COORDINATES = {
-        'LAB-GTM-01': [14.6349, -90.5069], // Guatemala City
-        'LAB-ZWE-01': [-17.8292, 31.0522], // Harare, Zimbabwe
-        'HARARE': [-17.8292, 31.0522],
-        'GTM': [14.6349, -90.5069]
-    };
+    // Sourced laboratory configuration (#114)
+    const [labConfig, setLabConfig] = useState(user?.lab || null);
+
+    useEffect(() => {
+        let isMounted = true;
+        if (user?.lab) {
+            setLabConfig(user.lab);
+            return;
+        }
+        if (user?.labId) {
+            axios.get(`/api/labs/${user.labId}`)
+                .then(res => {
+                    if (isMounted && res.data) {
+                        setLabConfig(res.data);
+                    }
+                })
+                .catch(err => {
+                    console.warn(`[Reception] Could not load laboratory profile for ${user.labId}:`, err.message);
+                });
+        }
+        return () => { isMounted = false; };
+    }, [user?.lab, user?.labId]);
 
     const labCoordinates = useMemo(() => {
-        if (user?.labCoordinates) return user.labCoordinates;
-        if (user?.labId && LAB_DEFAULT_COORDINATES[user.labId]) return LAB_DEFAULT_COORDINATES[user.labId];
-        if (user?.lab?.location) return user.lab.location;
+        // Source actual configured location from lab profile or user auth
+        const rawLocation = user?.lab?.location || labConfig?.location || user?.labLocation;
+        if (rawLocation) {
+            const parsed = parseCoordinates(rawLocation);
+            if (parsed) return parsed;
+        }
         return null;
-    }, [user?.labCoordinates, user?.labId, user?.lab?.location]);
+    }, [user?.lab?.location, labConfig?.location, user?.labLocation]);
 
     // --- MODE SELECTION ---
     const [mode, setMode] = useState(null); // 'PROJECT' | 'WALK_IN' | null
     const [sessionProject, setSessionProject] = useState(null);
     const [mobileStep, setMobileStep] = useState('identify'); // 'identify' | 'condition' | 'analyses' | 'receipt'
-
-    // Enforce N/A policy cleanup when switching intake mode (#113)
-    useEffect(() => {
-        if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
-            setChecklistData(prev => ({
-                ...prev,
-                items: {
-                    ...prev?.items,
-                    coc: { ...prev?.items?.coc, status: undefined }
-                }
-            }));
-        }
-    }, [mode, checklistData?.items?.coc?.status]);
 
     // --- STAGE D: HARDWARE WEDGE SCANNER & DESK ERGONOMICS (RC-16, RC-17, RC-18) ---
     const [isWedgeMode, setIsWedgeMode] = useState(() => localStorage.getItem('lims_wedge_mode') === 'true');
@@ -100,6 +107,19 @@ const Reception = () => {
 
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
+
+    // Enforce N/A policy cleanup when switching intake mode (#113)
+    useEffect(() => {
+        if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
+            setChecklistData(prev => ({
+                ...prev,
+                items: {
+                    ...prev?.items,
+                    coc: { ...prev?.items?.coc, status: undefined }
+                }
+            }));
+        }
+    }, [mode, checklistData?.items?.coc?.status]);
     const [intakeNotes, setIntakeNotes] = useState('');
     const [branding, setBranding] = useState(null);
 

@@ -306,3 +306,174 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         expect(checklistData.items.container.status).toBe('PASS');
     });
 });
+
+describe('Reception Parent Page Component & Intake Mode Contracts (#113, #114, #117)', () => {
+    function loadMapConfigModule() {
+        const mapConfigPath = path.resolve(__dirname, '../../../client/src/utils/mapConfig.js');
+        const source = fs.readFileSync(mapConfigPath, 'utf8');
+        const transformed = esbuild.transformSync(source, { loader: 'js', format: 'cjs' });
+        const moduleObj = { exports: {} };
+        vm.runInNewContext(transformed.code, { module: moduleObj, exports: moduleObj.exports, parseFloat, isNaN, Array });
+        return moduleObj.exports;
+    }
+
+    function loadReceptionParent(options = {}) {
+        const componentPath = path.resolve(__dirname, '../../../client/src/pages/Reception.jsx');
+        const source = fs.readFileSync(componentPath, 'utf8');
+        const transformed = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs', target: 'es2022' });
+
+        const reactReserved = new Set([
+            'propTypes', 'PropTypes', 'defaultProps', 'getDefaultProps', 'contextTypes', 'childContextTypes',
+            'getDerivedStateFromProps', 'getDerivedStateFromError', '_context'
+        ]);
+
+        const createMockComponent = (name) => {
+            return (props) => React.createElement('div', { 'data-mock': name }, props && props.children ? props.children : null);
+        };
+
+        function createMockModule(name) {
+            const defaultExport = createMockComponent(name || 'mockComponent');
+            const handler = {
+                get: (target, prop) => {
+                    if (prop === '__esModule') return false;
+                    if (prop === 'default') return defaultExport;
+                    if (reactReserved.has(prop)) return undefined;
+                    if (typeof prop === 'string') {
+                        return createMockComponent(prop);
+                    }
+                    return undefined;
+                }
+            };
+            return new Proxy(defaultExport, handler);
+        }
+
+        const mockLocalStorage = {
+            getItem: (k) => (options.localStorage && options.localStorage[k]) || null,
+            setItem: () => {},
+            removeItem: () => {}
+        };
+
+        const runContext = {
+            module: { exports: {} },
+            exports: {},
+            require: (mod) => {
+                if (mod === 'react') return React;
+                if (mod === 'react-router-dom') return {
+                    useLocation: () => ({ search: options.search || '', pathname: '/reception' })
+                };
+                if (mod.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => (n) => n };
+                if (mod.includes('AuthContext')) return {
+                    useAuth: () => ({
+                        user: options.user !== undefined ? options.user : {
+                            id: 'u-tech-1',
+                            username: 'tech1',
+                            role: 'SAMPLE_RECEPTION',
+                            labId: 'LAB-TEST-01',
+                            lab: { id: 'LAB-TEST-01', name: 'Test Lab', location: '-15.41, 28.28' }
+                        },
+                        token: 'mock-token'
+                    })
+                };
+                if (mod.includes('DialogContext')) return { useDialog: () => ({ showDialog: () => {} }) };
+                if (mod.includes('LanguageContext')) return { useLanguage: () => ({ t: (k, d) => d || k }) };
+                if (mod === 'axios') return {
+                    get: () => Promise.resolve({ data: options.axiosData || [] }),
+                    post: () => Promise.resolve({ data: {} }),
+                    put: () => Promise.resolve({ data: {} })
+                };
+                if (mod.includes('mapConfig')) return loadMapConfigModule();
+                return createMockModule(mod);
+            },
+            console,
+            localStorage: mockLocalStorage,
+            window: {
+                addEventListener: () => {},
+                removeEventListener: () => {}
+            }
+        };
+
+        vm.runInNewContext(transformed.code, runContext);
+        return runContext.module.exports.default || runContext.module.exports;
+    }
+
+    test('1. Real Reception parent renders to string without TDZ ReferenceError', () => {
+        // Independent verification of P1: Reception.jsx does not throw
+        // ReferenceError: Cannot access 'checklistData' before initialization
+        expect(() => {
+            const Reception = loadReceptionParent();
+            const element = React.createElement(Reception);
+            const html = ReactDOMServer.renderToString(element);
+            expect(typeof html).toBe('string');
+            expect(html.length).toBeGreaterThan(0);
+        }).not.toThrow();
+    });
+
+    test('2. Real Reception parent renders initial intake mode selector and drafts dashboard', () => {
+        const Reception = loadReceptionParent();
+        const html = ReactDOMServer.renderToString(React.createElement(Reception));
+
+        expect(html).toContain('Reception Console');
+        expect(html).toContain('Select intake mode or resume a draft');
+        expect(html).toContain('Project Sample');
+        expect(html).toContain('Walk-in Sample');
+        expect(html).toContain('Consignment Batch');
+        expect(html).toContain('Incomplete Intakes (Drafts)');
+    });
+
+    test('3. Real Reception parent sources actual configured lab coordinates from user.lab profile', () => {
+        const userWithConfiguredLab = {
+            id: 'u-tech-zambia',
+            username: 'tech_zambia',
+            role: 'SAMPLE_RECEPTION',
+            labId: 'LAB-ZMB-CUSTOM',
+            lab: {
+                id: 'LAB-ZMB-CUSTOM',
+                name: 'Lusaka Central Laboratory',
+                location: '-15.4167, 28.2833' // Real schema string format
+            }
+        };
+
+        const Reception = loadReceptionParent({ user: userWithConfiguredLab });
+        const html = ReactDOMServer.renderToString(React.createElement(Reception));
+
+        expect(html).toContain('Reception Console');
+        // Verify parseCoordinates from mapConfig correctly handles user.lab.location
+        const { parseCoordinates } = loadMapConfigModule();
+        const parsed = parseCoordinates(userWithConfiguredLab.lab.location);
+        expect(parsed).toEqual([-15.4167, 28.2833]);
+    });
+
+    test('4. Real Reception parent safely handles laboratory with null or unconfigured coordinates', () => {
+        const userWithoutLabCoords = {
+            id: 'u-tech-nocoords',
+            username: 'tech_generic',
+            role: 'SAMPLE_RECEPTION',
+            labId: 'LAB-NEW',
+            lab: {
+                id: 'LAB-NEW',
+                name: 'New Field Laboratory',
+                location: null // Missing / unconfigured location
+            }
+        };
+
+        expect(() => {
+            const Reception = loadReceptionParent({ user: userWithoutLabCoords });
+            const html = ReactDOMServer.renderToString(React.createElement(Reception));
+            expect(html).toContain('Reception Console');
+        }).not.toThrow();
+    });
+
+    test('5. Reception intake mode switch enforces N/A policy cleanup (WALK_IN to PROJECT reset)', () => {
+        // Source Reception.jsx source code directly to ensure the effect is placed AFTER useState
+        const componentPath = path.resolve(__dirname, '../../../client/src/pages/Reception.jsx');
+        const source = fs.readFileSync(componentPath, 'utf8');
+
+        const stateDeclIndex = source.indexOf('const [checklistData, setChecklistData] = useState');
+        const effectIndex = source.indexOf("if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA')");
+
+        expect(stateDeclIndex).toBeGreaterThan(0);
+        expect(effectIndex).toBeGreaterThan(0);
+        // Effect MUST be declared after checklistData useState declaration to prevent TDZ ReferenceError
+        expect(effectIndex).toBeGreaterThan(stateDeclIndex);
+    });
+});

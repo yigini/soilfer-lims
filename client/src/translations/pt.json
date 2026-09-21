@@ -1297,7 +1297,17 @@
     "inStock": "Em Stock",
     "location": "Localização / Prateleira",
     "supplier": "Fornecedor",
-    "actions": "Acções"
+    "actions": "Ações",
+    "subtotalBadge": "SUBTOTAL",
+    "usableSubtotalTitle": "Subtotal conhecido: {count} lote(s) utilizável(is) têm quantidades não registradas",
+    "usableSubtotalSummary": "{unit} subtotal utilizável ({count} lote{plural} não contado{plural})",
+    "countNeeded": "CONTAGEM NECESSÁRIA",
+    "countNeededTitle": "0 quantidade utilizável conhecida, mas contém lotes utilizáveis não contados",
+    "lowConfirmed": "BAIXO",
+    "lowConfirmedTitle": "Estoque baixo (confirmado abaixo do ponto de reabastecimento)",
+    "lowUncertain": "BAIXO? (INCERTO)",
+    "lowUncertainTitle": "O subtotal conhecido está abaixo do ponto de reabastecimento, mas existem lotes não contados",
+    "missingQuantityTitle": "Quantidade ausente em um ou mais lotes"
   },
   "labs": {
     "title": "Gestão de Laboratórios",

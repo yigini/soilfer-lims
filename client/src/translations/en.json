@@ -1297,7 +1297,17 @@
     "inStock": "In Stock",
     "location": "Storage Location / Shelf",
     "supplier": "Supplier",
-    "actions": "Actions"
+    "actions": "Actions",
+    "subtotalBadge": "SUBTOTAL",
+    "usableSubtotalTitle": "Known subtotal: {count} usable lot(s) have unrecorded quantities",
+    "usableSubtotalSummary": "{unit} usable subtotal ({count} uncounted lot{plural})",
+    "countNeeded": "COUNT NEEDED",
+    "countNeededTitle": "0 known usable quantity, but contains uncounted usable lots",
+    "lowConfirmed": "LOW",
+    "lowConfirmedTitle": "Low stock (confirmed below reorder threshold)",
+    "lowUncertain": "LOW? (UNCERTAIN)",
+    "lowUncertainTitle": "Known subtotal is below reorder point, but uncounted lots exist",
+    "missingQuantityTitle": "Missing quantity on one or more lots"
   },
   "labs": {
     "title": "Laboratory Management",
