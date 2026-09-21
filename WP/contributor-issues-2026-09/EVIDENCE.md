@@ -22,8 +22,8 @@ Status Key:
 
 | Issue / Work Item | Phase | Reported Problem | Reproduction Status | Fix Commit | Automated Tests | Release SHA | Verification Details | Residual Limitations | Closure Readiness |
 |---|---|---|---|---|---|---|---|---|---|
-| **WP-2 Country/Kobo v2** | 0 | Country project separation, Kobo explicit mapping, 0-to-0 preservation risk, client exception spoofing | Reproduced & Validated | `e2fff7e`, pending | `project_policy_v2.test.js`, `kobo_explicit_mapping.test.js`, `soilfer_country_migration.test.js`, `programme_readers_and_rollups.test.js` | Pending | Populated Result/QC/Report fixtures verified; report checksums intact; HTTP exception verification enforced. | Production migration hold remains active. | Pending Phase 0 closure |
-| **#118** | 1 | QC batch inspection link disconnect, unhandled QC disposition, failed QC bypassing release gates | Reproduced | Pending | `qc_disposition_release_gate.test.js` | Pending | Trace Inspect links to canonical batch; unresolved failed QC strictly blocks analytical release; manager-only disposition. | Historical released results remain immutable. | Pending Phase 1 |
+| **WP-2 Country/Kobo v2** | 0 | Country project separation, Kobo explicit mapping, 0-to-0 preservation risk, client exception spoofing, operation binding | Reproduced & Validated | `e2fff7e`, `5f66781`, pending | `project_policy_v2.test.js` (21/21), `kobo_explicit_mapping.test.js` (25/25), `soilfer_country_migration.test.js` (3/3), `programme_readers_and_rollups.test.js` (9/9) | Pending | Populated Result/QC/Report fixtures verified (35,197 samples, 4 results, 3 QC batches, 3 reports); report checksums intact; HTTP exception verification enforced with strict operation binding (sample, project, lab, non-empty reason). | Production migration hold remains active. | Pending Phase 0 closure |
+| **#118** | 1 | QC batch inspection link disconnect, unhandled QC disposition, failed QC bypassing release gates | Reproduced & Verified | Pending commit | `qc_disposition_release_gate.test.js` (6/6), client production build (`vite build` clean in 8.93s) | Pending | Canonical batch inspection returns actual control values, affected work items with canonical sample ID, original ID, lab ID, run profile, and notes. Unresolved failed QC strictly blocks sample approval (409) and report generation (409). Manager disposition override (PROCEED_WITH_WARNING) is atomic, audited in transaction, idempotent on retry, and clears resolved batch from pending exception counts while preserving history. | Historical released results remain immutable. | Verified locally; ready for Phase 1 commit |
 | **#119** | 1 | Confusion between canonical, lab, and original IDs; 26-task fixture truncation; derived fractions vs ordered tasks | Reproduced | Pending | `sample_assignment_identity.test.js` | Pending | Stable canonical keys; honest task pagination; explicit order vs derived work; server-side readiness enforcement. | Manual assignment requires manager authority. | Pending Phase 1 |
 | **#121** | 2 | Label print dialog issues, printable content isolation, title/filename handling | Open | Pending | `tests/contracts/label_print.test.js` | Pending | Standard and vial format isolation, readable barcodes, correct dimensions. | Browser-controlled print filename is best effort. | Open |
 | **#122** | 2 | LabMethods defaults failing or silently falling back across labs | Open | Pending | `tests/contracts/lab_method_defaults.test.js` | Pending | Scoped loading/saving for target lab; honest empty states; no cross-lab fallback. | Requires lab manager/admin scope. | Open |
@@ -46,4 +46,28 @@ Status Key:
 
 ## Detailed Acceptance Records
 
-*(Individual per-issue test outputs, SHA logs, and browser verification artifacts will be appended here as each phase completes.)*
+### Phase 0: Acceptance Reconciliation & Operation Binding
+- **Tests Executed**:
+  - `server/tests/contracts/soilfer_country_migration.test.js` (3/3 passed): 35,197 samples, 4 results, 3 QC batches, 3 reports, zero orphaned results, SHA-256 report checksum conservation.
+  - `server/tests/contracts/project_policy_v2.test.js` (21/21 passed):
+    - Client-supplied `isStoredApprovalVerified` booleans strictly stripped at HTTP trust boundary.
+    - Direct manager self-authorization verified.
+    - Stored approval verified against persisted `SampleAmendment`.
+    - Cross-sample mismatch fails closed (`APPROVAL_SAMPLE_MISMATCH`).
+    - Cross-project mismatch fails closed (`APPROVAL_PROJECT_MISMATCH`).
+    - Cross-lab mismatch fails closed (`APPROVAL_LAB_MISMATCH`).
+    - Empty reason rejected (`APPROVAL_EMPTY_REASON`).
+
+### Phase 1: Issue #118 QC Batch Inspection, Disposition & Release Gates
+- **Tests Executed**:
+  - `server/tests/contracts/qc_disposition_release_gate.test.js` (6/6 passed):
+    1. `GET /api/qc/batches/:id` returns canonical batch with actual control values, affected items, run profile, and enforces lab scope (cross-lab returns 403).
+    2. Unresolved `QC_FAIL` batch strictly blocks downstream sample approval (409) and report publication (409 with code `QC_BATCH_FAILED`).
+    3. `POST /api/qc/batches/:id/disposition` enforces manager role, scope, non-empty justification reason, logs transactional audit entry (`action: 'QC_DISPOSITION'`), and appends to batch history.
+    4. Resending identical manager disposition is idempotent and does not create duplicate audit entries.
+    5. Manager disposition override (`PROCEED_WITH_WARNING`) unblocks sample approval and report publication eligibility.
+    6. Dispositioned batch clears from actionable pending exception queues (`manager.exceptions`, `audit.qc`, `master.exceptions`) while remaining permanently in history.
+- **Client Build**:
+  - Production build via `npm run build` (`vite build`) passed in 8.93s with 0 errors.
+  - New component: `client/src/components/qc/BatchInspectionModal.jsx`.
+  - Integrated into `client/src/pages/QADashboard.jsx` and `client/src/pages/ManagerQueue.jsx` via `?batchId=` URL search param and row Inspect actions.

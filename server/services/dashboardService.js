@@ -248,10 +248,11 @@ async function getDashboardHome(user, options = {}) {
         priorityQueues = ['manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake'];
         capabilities = { openManagerQueue: true, approveResults: true, assignWork: true, manageAnalyses: true };
 
-        // 1. Exceptions (QC batches failed/pending in lab)
+        // 1. Exceptions (QC batches failed/pending in lab without disposition)
         const exceptionBatchCount = await prisma.batch.count({
             where: {
                 status: { in: ['QC_FAIL', 'FAILED'] },
+                disposition: null,
                 ...(actorScope.activeLabId ? {
                     OR: [
                         { labId: actorScope.activeLabId },
@@ -339,7 +340,7 @@ async function getDashboardHome(user, options = {}) {
         capabilities = { viewLaboratories: true, viewReports: true, chooseLaboratory: true };
 
         const [exceptionsCount, activeSamplesCount, releasedReportsCount] = await Promise.all([
-            prisma.batch.count({ where: { status: { in: ['QC_FAIL', 'FAILED'] } } }),
+            prisma.batch.count({ where: { status: { in: ['QC_FAIL', 'FAILED'] }, disposition: null } }),
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
                     status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] },
@@ -421,7 +422,7 @@ async function getDashboardHome(user, options = {}) {
                 where: scopedWhere(sampleWhere, { status: 'APPROVED', results: { none: {} } })
             }),
             prisma.batch.count({
-                where: { status: { in: ['QC_FAIL', 'FAILED', 'PENDING'] } }
+                where: { status: { in: ['QC_FAIL', 'FAILED', 'PENDING'] }, disposition: null }
             }),
             prisma.sampleAmendment.count()
         ]);
@@ -1002,6 +1003,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     if (queueKey === 'manager.exceptions') {
         const batchWhere = {
             status: { in: ['QC_FAIL', 'FAILED'] },
+            disposition: null,
             ...(actorScope.activeLabId ? {
                 OR: [
                     { labId: actorScope.activeLabId },
@@ -1029,7 +1031,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                 count: 1,
                 unit: 'exception',
                 action: 'Inspect QC',
-                route: `/manager-queue?lane=review&queue=manager.exceptions`,
+                route: `/manager-queue?lane=review&batchId=${b.id}`,
                 note: 'Review actual QC control values and disposition before accepting work.',
                 tone: 'problem'
             })),
@@ -1482,7 +1484,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                     count: b._count?.workItems || 0,
                     unit: 'samples',
                     action: 'Inspect batch',
-                    route: `/manager-queue?batchId=${b.id}`,
+                    route: `/qa?tab=qc&batchId=${b.id}`,
                     note: b.notes || (isFailed ? 'Batch failed QC thresholds; review required.' : 'Batch within acceptable tolerances.'),
                     tone: isFailed ? 'problem' : ''
                 };

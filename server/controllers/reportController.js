@@ -39,11 +39,21 @@ async function generateReport(req, res) {
             return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
-        // R1: Enforce publication authority & sample approval state
+        // S06: Query linked QC batches for QC release gate
+        const qcBatches = await prisma.batch.findMany({
+            where: {
+                workItems: {
+                    some: { sampleId: String(sampleId) }
+                }
+            }
+        });
+
+        // R1: Enforce publication authority, sample approval state, and QC release gate
         const { canPublish } = require('../services/workEligibility');
-        const publishCheck = canPublish(sample, null, req.user);
+        const publishCheck = canPublish(sample, null, req.user, { qcBatches });
         if (!publishCheck.allowed) {
-            return res.status(403).json({ error: publishCheck.reason, code: 'PUBLISH_DENIED' });
+            const statusCode = publishCheck.code === 'QC_BATCH_FAILED' ? 409 : 403;
+            return res.status(statusCode).json({ error: publishCheck.reason, code: publishCheck.code || 'PUBLISH_DENIED' });
         }
 
         // S13: Find max historical version across ALL reports for this sample to ensure strictly monotonic versioning

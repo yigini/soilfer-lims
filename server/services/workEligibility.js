@@ -211,10 +211,24 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
 
     // 7. QC Batch resolution
     const qcBatches = options.qcBatches || [];
-    const failedQc = qcBatches.find(b => b.status === 'FAILED');
-    const pendingQc = qcBatches.find(b => b.status === 'PENDING');
+    const failedQc = qcBatches.find(b => {
+        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
+        if (!isFailedStatus) return false;
+        let hasValidDisposition = false;
+        if (b.disposition) {
+            try {
+                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
+                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
+                    hasValidDisposition = true;
+                }
+            } catch (e) {}
+        }
+        return !hasValidDisposition;
+    });
+
+    const pendingQc = qcBatches.find(b => ['OPEN', 'RUNNING', 'PENDING'].includes(b.status));
     if (failedQc) {
-        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed`);
+        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed quality control and lacks an authorized manager disposition override`);
     }
     if (pendingQc) {
         blockers.push(`QC_BATCH_PENDING: Linked QC batch ${pendingQc.batchNumber || pendingQc.id} has not been evaluated`);
@@ -239,21 +253,46 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
 /**
  * Evaluates whether an official report can be released / published.
  */
-function canPublish(sample, report, user) {
+function canPublish(sample, report, user, options = {}) {
     if (!user || !['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(user.role)) {
-        return { allowed: false, reason: 'Report publication requires laboratory manager authority (AUDIT_USER is strictly read-only)' };
+        return { allowed: false, code: 'PERMISSION_DENIED', reason: 'Report publication requires laboratory manager authority (AUDIT_USER is strictly read-only)' };
     }
 
     if (!sample) {
-        return { allowed: false, reason: 'Sample record not found' };
+        return { allowed: false, code: 'NOT_FOUND', reason: 'Sample record not found' };
+    }
+
+    // QC Release Gate: unresolved failed QC strictly blocks report publication
+    const qcBatches = options.qcBatches || [];
+    const failedQc = qcBatches.find(b => {
+        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
+        if (!isFailedStatus) return false;
+        let hasValidDisposition = false;
+        if (b.disposition) {
+            try {
+                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
+                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
+                    hasValidDisposition = true;
+                }
+            } catch (e) {}
+        }
+        return !hasValidDisposition;
+    });
+
+    if (failedQc) {
+        return {
+            allowed: false,
+            code: 'QC_BATCH_FAILED',
+            reason: `Cannot publish report: Linked QC batch ${failedQc.id} failed quality control without an authorized manager disposition override.`
+        };
     }
 
     if (!['APPROVED', 'PUBLISHED', 'COMPLETED', 'SUBMITTED_FULL'].includes(sample.status)) {
-        return { allowed: false, reason: `Sample must be in approved or completed status before publishing (current: ${sample.status})` };
+        return { allowed: false, code: 'SAMPLE_NOT_APPROVED', reason: `Sample must be in approved or completed status before publishing (current: ${sample.status})` };
     }
 
     if (['DISPOSED', 'ARCHIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
-        return { allowed: false, reason: 'Sample is closed, archived or rejected' };
+        return { allowed: false, code: 'SAMPLE_CLOSED', reason: 'Sample is closed, archived or rejected' };
     }
 
     return { allowed: true, reason: null };

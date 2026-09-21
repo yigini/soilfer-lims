@@ -846,6 +846,8 @@ exports.uploadManifest = async (req, res) => {
             actor: req.user,
             project,
             labId: targetLabId,
+            sampleIds: Array.isArray(req.body.samples) ? req.body.samples.map(s => s.id || s.sampleId || s.code).filter(Boolean) : null,
+            channel: 'MANIFEST',
             prismaClient: prisma
         });
 

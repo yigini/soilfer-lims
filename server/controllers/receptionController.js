@@ -182,6 +182,8 @@ exports.processIntake = async (req, res) => {
             }
 
             const targetProjectObj = resolvedTargetProject ? resolvedTargetProject.project : null;
+            const targetSampleId = req.body.id || req.body.sampleId || req.body.originalId || null;
+            const intakeChannel = isWalkIn ? 'WALK_IN' : 'DESK';
             const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
                 rawExceptionRecord: req.body.exceptionRecord,
                 rawExceptionReason: req.body.exceptionReason,
@@ -190,6 +192,8 @@ exports.processIntake = async (req, res) => {
                 actor: user,
                 project: targetProjectObj,
                 labId: user.labId,
+                sampleId: targetSampleId,
+                channel: intakeChannel,
                 prismaClient: prisma
             });
 
@@ -1455,6 +1459,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     actor: user,
                     project: proj,
                     labId: userLab,
+                    channel: 'MANIFEST',
                     prismaClient: prisma
                 });
 
@@ -1523,6 +1528,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 actor: user,
                 project: resolvedConsignmentProject.project,
                 labId: userLab,
+                channel: 'MANIFEST',
                 prismaClient: prisma
             });
 

@@ -255,7 +255,31 @@ exports.getBatchById = async (req, res) => {
         }
 
         const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
-        res.json({ data: batch, runProfile });
+
+        let qcResults = null;
+        try {
+            qcResults = batch.qcResults ? (typeof batch.qcResults === 'string' ? JSON.parse(batch.qcResults) : batch.qcResults) : null;
+        } catch (e) {}
+
+        let disposition = null;
+        try {
+            disposition = batch.disposition ? (typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition) : null;
+        } catch (e) {}
+
+        let history = [];
+        try {
+            history = batch.history ? (typeof batch.history === 'string' ? JSON.parse(batch.history) : batch.history) : [];
+        } catch (e) {}
+
+        res.json({
+            data: {
+                ...batch,
+                qcResults,
+                disposition,
+                history
+            },
+            runProfile
+        });
     } catch (error) {
         console.error('[getBatchById] Error:', error);
         res.status(500).json({ error: 'Failed to get batch' });
@@ -728,8 +752,8 @@ exports.dispositionBatch = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!decision || !reason) {
-            return res.status(400).json({ error: 'Decision and reason are required' });
+        if (!decision || !reason || !String(reason).trim()) {
+            return res.status(400).json({ error: 'Decision and non-empty reason are required' });
         }
 
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -747,22 +771,61 @@ exports.dispositionBatch = async (req, res) => {
             return res.status(400).json({ error: 'Batch is not in QC_FAIL state' });
         }
 
+        const trimmedReason = String(reason).trim();
+
+        // Idempotency: if already dispositioned with matching decision and reason, return existing without duplicating history or audit log
+        let existingDisp = null;
+        if (batch.disposition) {
+            try {
+                existingDisp = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+            } catch (e) {}
+        }
+        if (existingDisp && existingDisp.decision === decision && existingDisp.reason === trimmedReason) {
+            return res.json({ success: true, disposition: existingDisp, idempotent: true });
+        }
+
+        const now = new Date();
         const disposition = {
             decision,
-            reason,
+            reason: trimmedReason,
             by: user.username,
-            at: new Date()
+            at: now
         };
 
-        const updatedBatch = await prisma.batch.update({
-            where: { id },
-            data: { disposition: JSON.stringify(disposition) }
+        const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
+        history.push({
+            status: batch.status,
+            disposition: decision,
+            reason: trimmedReason,
+            changedBy: user.username,
+            timestamp: now
         });
+
+        const [updatedBatch] = await prisma.$transaction([
+            prisma.batch.update({
+                where: { id },
+                data: {
+                    disposition: JSON.stringify(disposition),
+                    history: JSON.stringify(history)
+                }
+            }),
+            prisma.auditLog.create({
+                data: {
+                    id: `audit-batch-disp-${Date.now()}`,
+                    entity: 'QC_BATCH',
+                    entityId: id,
+                    action: 'QC_DISPOSITION',
+                    details: `QC batch disposition recorded: ${decision}. Reason: ${trimmedReason}`,
+                    performedBy: user.username,
+                    timestamp: now
+                }
+            })
+        ]);
 
         // WP-29: Re-evaluate Result flags based on manager disposition override
         await flagBatchResults(prisma, id, 'QC_FAIL', disposition);
 
-        res.json({ success: true, disposition: disposition });
+        res.json({ success: true, disposition });
     } catch (error) {
         console.error('[dispositionBatch] Error:', error);
         res.status(500).json({ error: 'Failed to disposition batch' });

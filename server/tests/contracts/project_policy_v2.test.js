@@ -341,5 +341,127 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
             expect(admission.allowed).toBe(false);
             expect(admission.code).toBe('EXCEPTION_NOT_AUTHORIZED');
         });
+
+        test('Stored approval: Cross-sample mismatch fails closed', async () => {
+            const receptionActor = { username: 'rec_sue', role: 'SAMPLE_RECEPTION', labId: 'GTM-LAB1', isActive: true };
+
+            // Persisted amendment is bound to SMP-001
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-SAMPLE-001',
+                sampleId: 'SMP-001',
+                status: 'APPROVED',
+                authorizedBy: 'mgr_gtm',
+                reason: 'Specific exception for SMP-001'
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'mgr_gtm',
+                role: 'LAB_MANAGER',
+                labId: 'GTM-LAB1',
+                isActive: true
+            });
+
+            // Attacker / unprivileged staff attempts to use AMD-SAMPLE-001 for SMP-999
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: { reason: 'Reused waiver from SMP-001' },
+                approvalId: 'AMD-SAMPLE-001',
+                actor: receptionActor,
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-999',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(false);
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: soilferProject,
+                channel: 'DESK',
+                actor: receptionActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(false);
+            expect(admission.code).toBe('EXCEPTION_NOT_AUTHORIZED');
+        });
+
+        test('Stored approval: Cross-project mismatch fails closed', async () => {
+            const receptionActor = { username: 'rec_sue', role: 'SAMPLE_RECEPTION', labId: 'GTM-LAB1', isActive: true };
+
+            // Persisted amendment is bound to project SOILFER-GTM
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROJ-001',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                authorizedBy: 'mgr_gtm',
+                reason: 'Exception approved strictly for GTM project'
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'mgr_gtm',
+                role: 'LAB_MANAGER',
+                labId: 'GTM-LAB1',
+                isActive: true
+            });
+
+            // Intake requested for project WATERSHED-2026
+            const otherProject = { code: 'WATERSHED-2026', projectType: 'KOBO_LINKED', status: 'ACTIVE' };
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: { reason: 'Cross-project reuse attempt' },
+                approvalId: 'AMD-PROJ-001',
+                actor: receptionActor,
+                project: otherProject,
+                labId: 'GTM-LAB1',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(false);
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: otherProject,
+                channel: 'DESK',
+                actor: receptionActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(false);
+            expect(admission.code).toBe('EXCEPTION_NOT_AUTHORIZED');
+        });
+
+        test('Stored approval: Cross-lab mismatch fails closed', async () => {
+            const receptionActor = { username: 'rec_hnd', role: 'SAMPLE_RECEPTION', labId: 'HND-LAB2', isActive: true };
+
+            // Persisted amendment is bound to lab GTM-LAB1
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-LAB-001',
+                labId: 'GTM-LAB1',
+                status: 'APPROVED',
+                authorizedBy: 'mgr_gtm',
+                reason: 'Exception approved for GTM lab only'
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'mgr_gtm',
+                role: 'LAB_MANAGER',
+                labId: 'GTM-LAB1',
+                isActive: true
+            });
+
+            // Intake requested in lab HND-LAB2
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: { reason: 'Cross-lab waiver reuse' },
+                approvalId: 'AMD-LAB-001',
+                actor: receptionActor,
+                project: soilferProject,
+                labId: 'HND-LAB2',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(false);
+        });
     });
 });

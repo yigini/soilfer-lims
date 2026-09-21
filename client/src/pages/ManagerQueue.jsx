@@ -10,6 +10,7 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
+import BatchInspectionModal from '../components/qc/BatchInspectionModal';
 
 const QUEUE_Tabs = {
     INTAKE: 'intake',
@@ -43,6 +44,28 @@ const ManagerQueue = () => {
     const initialTab = Object.values(QUEUE_Tabs).includes(laneParam) ? laneParam : QUEUE_Tabs.INTAKE;
     const [activeTab, setActiveTab] = useState(initialTab);
     const [userSelected, setUserSelected] = useState(Boolean(laneParam));
+
+    // Batch inspection modal support for ?batchId=
+    const batchIdParam = searchParams.get('batchId');
+    const [selectedBatchId, setSelectedBatchId] = useState(batchIdParam);
+    const [isInspectionOpen, setIsInspectionOpen] = useState(Boolean(batchIdParam));
+
+    useEffect(() => {
+        if (batchIdParam) {
+            setSelectedBatchId(batchIdParam);
+            setIsInspectionOpen(true);
+        }
+    }, [batchIdParam]);
+
+    const handleCloseInspection = () => {
+        setIsInspectionOpen(false);
+        setSelectedBatchId(null);
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('batchId');
+            return next;
+        }, { replace: true });
+    };
 
     // Data States
     const [data, setData] = useState([]);
@@ -347,6 +370,16 @@ const ManagerQueue = () => {
                     </div>
                 )}
             </div>
+
+            <BatchInspectionModal
+                batchId={selectedBatchId}
+                isOpen={isInspectionOpen}
+                onClose={handleCloseInspection}
+                onDispositionSuccess={() => {
+                    fetchQueueData(meta.page);
+                    refreshLive();
+                }}
+            />
         </div>
     );
 };

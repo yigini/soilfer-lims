@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,14 +8,54 @@ import {
     Clock, RefreshCw, Search, ArrowUpRight,
     FileSpreadsheet, Activity, History, Loader2
 } from 'lucide-react';
+import BatchInspectionModal from '../components/qc/BatchInspectionModal';
 
 export default function QADashboard() {
     const { token } = useAuth();
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState('qc'); // 'qc', 'amendments', 'audit'
+    const [searchParams, setSearchParams] = useSearchParams();
+    const batchIdParam = searchParams.get('batchId');
+    const tabParam = searchParams.get('tab');
+
+    const [activeTab, setActiveTab] = useState(tabParam === 'amendments' || tabParam === 'audit' ? tabParam : 'qc');
+    const [selectedBatchId, setSelectedBatchId] = useState(batchIdParam);
+    const [isInspectionOpen, setIsInspectionOpen] = useState(Boolean(batchIdParam));
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    useEffect(() => {
+        if (batchIdParam) {
+            setSelectedBatchId(batchIdParam);
+            setIsInspectionOpen(true);
+        }
+    }, [batchIdParam]);
+
+    useEffect(() => {
+        if (tabParam && ['qc', 'amendments', 'audit'].includes(tabParam)) {
+            setActiveTab(tabParam);
+        }
+    }, [tabParam]);
+
+    const handleOpenInspection = (bId) => {
+        setSelectedBatchId(bId);
+        setIsInspectionOpen(true);
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('batchId', bId);
+            return next;
+        }, { replace: true });
+    };
+
+    const handleCloseInspection = () => {
+        setIsInspectionOpen(false);
+        setSelectedBatchId(null);
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('batchId');
+            return next;
+        }, { replace: true });
+    };
 
     // Data states
     const [qcRows, setQcRows] = useState([]);
@@ -245,17 +285,14 @@ export default function QADashboard() {
                                                 </span>
                                             </td>
                                             <td className="py-3.5 px-4 text-right">
-                                                {row.route ? (
-                                                    <Link
-                                                        to={row.route}
-                                                        className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover"
-                                                    >
-                                                        <span>Inspect</span>
-                                                        <ArrowUpRight className="w-3.5 h-3.5" />
-                                                    </Link>
-                                                ) : (
-                                                    <span className="text-gray-400">View only</span>
-                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleOpenInspection(row.key)}
+                                                    className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover"
+                                                >
+                                                    <span>Inspect</span>
+                                                    <ArrowUpRight className="w-3.5 h-3.5" />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -351,6 +388,14 @@ export default function QADashboard() {
                     )
                 )}
             </div>
+            <BatchInspectionModal
+                batchId={selectedBatchId}
+                isOpen={isInspectionOpen}
+                onClose={handleCloseInspection}
+                onDispositionSuccess={() => {
+                    fetchData(true);
+                }}
+            />
         </div>
     );
 }
