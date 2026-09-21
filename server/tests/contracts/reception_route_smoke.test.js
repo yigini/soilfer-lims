@@ -38,34 +38,29 @@ describe('Reception Route Smoke & Static Asset Verification (#113, #114, #117)',
         } catch (_) {}
     });
 
-    test('1. GET /reception returns HTTP 200 and text/html SPA shell', async () => {
-        if (!hasDist) {
-            console.warn('[SMOKE] client/dist not built, skipping static route test');
-            return;
-        }
+    test('1. Release Prerequisite: client production build (client/dist) must exist', () => {
+        expect(hasDist).toBe(true);
+        expect(fs.existsSync(path.join(clientDist, 'index.html'))).toBe(true);
+    });
 
+    test('2. GET /reception returns HTTP 200 and text/html SPA shell', async () => {
+        expect(hasDist).toBe(true);
         const res = await request(app).get('/reception');
         expect(res.status).toBe(200);
         expect(res.headers['content-type']).toMatch(/text\/html/);
         expect(res.text).toContain('<div id="root">');
     });
 
-    test('2. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell', async () => {
-        if (!hasDist) {
-            return;
-        }
-
+    test('3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell', async () => {
+        expect(hasDist).toBe(true);
         const res = await request(app).get('/reception?mode=WALK_IN');
         expect(res.status).toBe(200);
         expect(res.headers['content-type']).toMatch(/text\/html/);
         expect(res.text).toContain('<div id="root">');
     });
 
-    test('3. Client dist bundle contains compiled Reception page asset', () => {
-        if (!hasDist) {
-            return;
-        }
-
+    test('4. Client dist bundle contains compiled Reception page asset', () => {
+        expect(hasDist).toBe(true);
         const assetsDir = path.join(clientDist, 'assets');
         expect(fs.existsSync(assetsDir)).toBe(true);
 
@@ -82,11 +77,8 @@ describe('Reception Route Smoke & Static Asset Verification (#113, #114, #117)',
         }).not.toThrow();
     });
 
-    test('4. Referenced entry assets in index.html are served with HTTP 200', async () => {
-        if (!hasDist) {
-            return;
-        }
-
+    test('5. Referenced entry assets in index.html are served with HTTP 200', async () => {
+        expect(hasDist).toBe(true);
         const indexHtml = fs.readFileSync(path.join(clientDist, 'index.html'), 'utf8');
         // Extract script src
         const scriptMatch = indexHtml.match(/src="([^"]+)"/);
@@ -107,7 +99,7 @@ describe('Reception Route Smoke & Static Asset Verification (#113, #114, #117)',
         }
     });
 
-    test('5. Isolated Reception parent render with WALK_IN mode completes without runtime crash', () => {
+    test('6. Isolated Reception parent render with WALK_IN mode completes without runtime crash', () => {
         const componentPath = path.resolve(__dirname, '../../../client/src/pages/Reception.jsx');
         const source = fs.readFileSync(componentPath, 'utf8');
         const transformed = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs', target: 'es2022' });

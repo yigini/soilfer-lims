@@ -64,7 +64,7 @@ const verifyToken = async (req, res, next) => {
         const user = decision.user;
 
         // Resolve lab operational status and profile without blocking basic authentication (IR-10)
-        if (user.labId && user.role !== 'SUPER_ADMIN') {
+        if (user.labId) {
             try {
                 const lab = await prisma.lab.findUnique({
                     where: { id: user.labId },

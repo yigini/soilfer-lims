@@ -1,0 +1,49 @@
+{
+  "suite": "Reception Isolated Browser Journey",
+  "executedAt": "2026-09-21T18:10:18.323Z",
+  "browser": "Google Chrome Headless (CDP)",
+  "url": "http://127.0.0.1:49160/reception",
+  "summary": {
+    "totalSteps": 6,
+    "passedSteps": 6,
+    "allPassed": true
+  },
+  "steps": [
+    {
+      "stepName": "Reception First Render & TDZ Prevention",
+      "passed": true,
+      "details": "Rendered without checklistData ReferenceError; Modes visible: true",
+      "timestamp": "2026-09-21T18:10:11.789Z"
+    },
+    {
+      "stepName": "Parent & Child Integration",
+      "passed": true,
+      "details": "WalkInForm and ComplianceChecklist child components mounted together in Reception parent",
+      "timestamp": "2026-09-21T18:10:12.328Z"
+    },
+    {
+      "stepName": "Walk-in CoC N/A Permitted",
+      "passed": true,
+      "details": "CoC N/A enabled: true, aria-checked=true: true",
+      "timestamp": "2026-09-21T18:10:12.742Z"
+    },
+    {
+      "stepName": "Mode-Switch Cleanup Effect Execution",
+      "passed": true,
+      "details": "useEffect executed upon mode switch, resetting prohibited coc N/A to undefined (inProjectMode: false, cocNACleared: true)",
+      "timestamp": "2026-09-21T18:10:14.406Z"
+    },
+    {
+      "stepName": "Checklist Fail & Correction Lifecycle",
+      "passed": true,
+      "details": "Fail triggered note input: true, Correction back to OK cleared note input: true",
+      "timestamp": "2026-09-21T18:10:15.573Z"
+    },
+    {
+      "stepName": "Synthetic Draft Restore & Rehydration",
+      "passed": true,
+      "details": "Restore dialog triggered: true, Checklist items rehydrated: true",
+      "timestamp": "2026-09-21T18:10:18.244Z"
+    }
+  ]
+}
