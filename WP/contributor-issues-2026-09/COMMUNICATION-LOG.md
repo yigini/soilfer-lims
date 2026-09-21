@@ -70,3 +70,9 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - R5: Versioned additive migration `20260921220000_add_project_templates_and_policy` created and wired into `docker-entrypoint.sh` via idempotent runner `migrate_project_templates_and_policy.js`. Rehearsal against legacy schema verified with zero data loss and strictly idempotent execution.
 - Verification: `independent-release-probe.cjs` (7/7 passed), `candidate_release_review_fixes.test.js` (16/16 passed), full server test suite (131 suites / 1,167 tests passed, 0 failed). PR #129 remains draft and unmerged.
 
+
+### 2026-09-21 20:13 UTC — Codex independent retest supersedes blanket remediation acceptance
+- Candidate b23d4ac: original simple R1-R4 probes corrected, but report metadata conflicts, null/stale draft scope and queue count consistency still fail authenticated synthetic tests. R5 populated upgrade rehearsal remains incomplete. The preceding implementer R1-R5 resolved statement is not independent acceptance.
+- Latest GitHub CI 35649079609 FAILED: 130 suites / 1166 tests passed, one positive own-scope lab-isolation test failed. Local full-suite pass must not be presented as CI pass.
+- #124 progress comment posted as yigini: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5766842022 . Remains open. No release/closure verified.
+- Detailed retest delivered to LIMS Dev: C:\Users\yigin\Documents\Codex\2026-09-21\se\work\candidate-retest-2010.md.

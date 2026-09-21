@@ -18,6 +18,7 @@
 
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
 function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
     const targetDb = dbPath || process.env.DATABASE_PATH || path.join(__dirname, '..', 'prisma', 'dev.db');
@@ -28,17 +29,21 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
         console.log('[MIGRATE-PROJECT-POLICY] DRY RUN MODE: No schema modifications will be committed.');
     }
 
-    const db = new Database(targetDb, { timeout: 10000 });
+    // Fail closed if database file does not exist on disk (never create a new blank database)
+    if (!fs.existsSync(targetDb)) {
+        throw new Error(`[MIGRATE-PROJECT-POLICY] Target database file not found: ${targetDb}`);
+    }
+
+    const db = new Database(targetDb, { fileMustExist: true, timeout: 10000 });
 
     try {
         db.pragma('busy_timeout = 10000');
         db.pragma('foreign_keys = ON');
 
-        // Verify Project table exists
+        // Verify Project table exists (fail closed if table is missing)
         const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Project'").get();
         if (!tableCheck) {
-            console.log('[MIGRATE-PROJECT-POLICY] Table "Project" does not exist in target database. Skipping.');
-            return { success: true, skipped: true, reason: 'Table Project does not exist' };
+            throw new Error(`[MIGRATE-PROJECT-POLICY] Table "Project" does not exist in target database: ${targetDb}`);
         }
 
         const existingColumns = db.prepare("PRAGMA table_info('Project')").all();
@@ -75,6 +80,12 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
         const missingColumns = requiredColumns.filter(c => !existingColNames.has(c.name));
 
         if (missingColumns.length === 0) {
+            // Ensure index exists and foreign key constraints pass in no-op state as well
+            db.exec('CREATE INDEX IF NOT EXISTS "Project_parentProjectId_idx" ON "Project"("parentProjectId")');
+            const fkIssues = db.prepare('PRAGMA foreign_key_check("Project")').all();
+            if (fkIssues.length > 0) {
+                throw new Error(`[MIGRATE-PROJECT-POLICY] Foreign key check failed in existing schema: ${JSON.stringify(fkIssues)}`);
+            }
             console.log('[MIGRATE-PROJECT-POLICY] All project template & policy columns already exist. Verification successful (no-op).');
             const totalCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
             return { success: true, applied: false, missingColumns: [], totalProjects: totalCount };
@@ -88,7 +99,7 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
 
         const beforeCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
 
-        // Apply additive ALTER TABLE statements inside transaction
+        // Apply additive ALTER TABLE statements and verify integrity INSIDE transaction for atomic rollback
         const migrationTx = db.transaction(() => {
             for (const col of missingColumns) {
                 console.log(`[MIGRATE-PROJECT-POLICY] Adding column "${col.name}" (${col.definition}) to Project table...`);
@@ -97,31 +108,33 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
 
             // Create index on parentProjectId if not already present
             db.exec('CREATE INDEX IF NOT EXISTS "Project_parentProjectId_idx" ON "Project"("parentProjectId")');
+
+            // Post-migration column presence check inside transaction
+            const postColumns = db.prepare("PRAGMA table_info('Project')").all();
+            const postColNames = new Set(postColumns.map(c => c.name));
+            for (const col of requiredColumns) {
+                if (!postColNames.has(col.name)) {
+                    throw new Error(`[MIGRATE-PROJECT-POLICY] Post-migration check failed: column "${col.name}" is still missing.`);
+                }
+            }
+
+            // Verify row count preservation inside transaction
+            const afterCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
+            if (beforeCount !== afterCount) {
+                throw new Error(`[MIGRATE-PROJECT-POLICY] Row count mismatch: before=${beforeCount}, after=${afterCount}`);
+            }
+
+            // Verify foreign key integrity inside transaction
+            const fkIssues = db.prepare('PRAGMA foreign_key_check("Project")').all();
+            if (fkIssues.length > 0) {
+                throw new Error(`[MIGRATE-PROJECT-POLICY] Foreign key check failed: ${JSON.stringify(fkIssues)}`);
+            }
         });
 
         migrationTx();
-        console.log('[MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added.');
-
-        // Post-migration integrity verification
-        const postColumns = db.prepare("PRAGMA table_info('Project')").all();
-        const postColNames = new Set(postColumns.map(c => c.name));
-        for (const col of requiredColumns) {
-            if (!postColNames.has(col.name)) {
-                throw new Error(`[MIGRATE-PROJECT-POLICY] Post-migration check failed: column "${col.name}" is still missing.`);
-            }
-        }
+        console.log('[MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.');
 
         const afterCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
-        if (beforeCount !== afterCount) {
-            throw new Error(`[MIGRATE-PROJECT-POLICY] Row count mismatch: before=${beforeCount}, after=${afterCount}`);
-        }
-
-        // Verify foreign key integrity
-        const fkIssues = db.prepare('PRAGMA foreign_key_check("Project")').all();
-        if (fkIssues.length > 0) {
-            throw new Error(`[MIGRATE-PROJECT-POLICY] Foreign key check failed: ${JSON.stringify(fkIssues)}`);
-        }
-
         console.log(`[MIGRATE-PROJECT-POLICY] Migration verified successfully. ${afterCount} Project records preserved.`);
         return {
             success: true,

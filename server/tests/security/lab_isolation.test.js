@@ -16,7 +16,15 @@ describe('WP-41: Multi-Tenancy Lab Isolation Regression Suite', () => {
         tokenHNDTech = await getAuthToken('LAB_TECHNICIAN', 'HND-LAB1', ['HND'], ['SOILFER-US']);
 
         // Find or create test samples for GTM and HND
-        let sampleGTM = await prisma.sample.findFirst({ where: { country: 'GTM' } });
+        let sampleGTM = await prisma.sample.findFirst({
+            where: {
+                country: 'GTM',
+                OR: [
+                    { assignedLab: 'GTM-LAB1' },
+                    { labId: 'GTM-LAB1' }
+                ]
+            }
+        });
         if (!sampleGTM) {
             sampleGTM = await prisma.sample.create({
                 data: {
@@ -32,7 +40,15 @@ describe('WP-41: Multi-Tenancy Lab Isolation Regression Suite', () => {
         }
         sampleGTMId = sampleGTM.id;
 
-        let sampleHND = await prisma.sample.findFirst({ where: { country: 'HND' } });
+        let sampleHND = await prisma.sample.findFirst({
+            where: {
+                country: 'HND',
+                OR: [
+                    { assignedLab: 'HND-LAB1' },
+                    { labId: 'HND-LAB1' }
+                ]
+            }
+        });
         if (!sampleHND) {
             sampleHND = await prisma.sample.create({
                 data: {

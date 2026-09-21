@@ -417,25 +417,32 @@ Status Key:
 
 ### Phase 6: Independent Candidate Release Review Remediation (Findings R1–R5)
 
-#### R1: Report Search & Detail Scoping Across Country, Project, and Lab Boundaries
-- **Problem**: `GET /api/reports/search` only filtered by `userLab` for non-admins, omitting country scoping for national roles (`MASTER_USER`, `COUNTRY_ADMIN`), project scoping for project roles (`PROJECT_MANAGER`), and leaking reports to users without a valid scope.
+#### R1: Authoritative Linked Sample Scope on Reports & Metadata Conflict Resolution
+- **Problem**: In candidate `b23d4ac`, changing `IR-REPORT-B.labId` to `IR-LAB-A` while linked sample remained in Kenya (`KEN/lab B`) allowed GTM national report search to return the report (status 200) while detail returned 403. Accidental OR expansion (`labId: countryLabIds`, `sampleLabId: countryLabIds`) authorized stale report metadata without applying authoritative sample scope. `sampleLabId` (a human sample identifier string) was treated as laboratory authority.
 - **Remediation**:
-  - Canonical scope authorization implemented in `server/controllers/reportController.js:searchReports`:
-    - National roles (`MASTER_USER`, `COUNTRY_ADMIN`) filtered to samples and labs within their assigned countries (`user.countries`).
-    - Project roles (`PROJECT_MANAGER`, `EXTERNAL_VIEWER`, `VIEWER`) filtered to assigned projects (`user.projects`) and expanded child programme codes.
-    - Lab users (`LAB_MANAGER`, `LAB_TECHNICIAN`, etc.) filtered to their laboratory scope (`labId`, `sampleLabId`, and matching sample IDs).
-    - Inactive or no-scope users fail closed immediately with zero reports (`reports: []`, `total: 0`).
-  - Single report retrieval (`getReport`) enforces scope fallback on report record even if sample record is absent.
-  - `where.status` handling preserved: `status=ALL` / `status=SUPERSEDED` discovers historical versions strictly within authorized scope.
-- **Verification**: `candidate_release_review_fixes.test.js` (R1 tests 1–5 pass); independent release probe receives only own-scope report (`IR-REPORT-A`), excluding Kenya report (`IR-REPORT-B`).
+  - Implemented shared authoritative authorization predicate `isReportAuthorized(user, report, sample)` in `server/controllers/reportController.js`:
+    - Linked sample scope is strictly authoritative when present.
+    - Report metadata is only consulted as fallback for orphaned reports (e.g. historical unlinked reports).
+    - Removed `sampleLabId` from laboratory authority evaluation.
+  - Wired `isReportAuthorized` uniformly across `getReport`, `getReportBySample`, `createShareLink`, `getReportPdf`, and `searchReports`.
+  - In `searchReports`, candidate reports are filtered through `isReportAuthorized` against accessible samples resolved via `scopeGuard.buildScopedWhere`. Total count and returned list agree with 100% consistency.
+  - Project snapshot conflicts (e.g. report claiming Project Alpha on Beta sample) are excluded from Alpha search and denied in detail.
+- **Verification**: `candidate_release_review_fixes.test.js` (R1 tests 1–7 pass, including metadata conflict and project snapshot conflict); Codex `independent-release-retest-b23d4ac.cjs` returns only own-scope report (`IR-REPORT-A`), excluding Kenya report (`IR-REPORT-B`) from search and detail (403).
 
 #### R2: Ordinary Workbench Queue & Stale Assignment Isolation
-- **Problem**: `GET /api/workbench/queue` queried only by `assignedTo: user.username`, exposing stale cross-lab assignments (e.g. following staff transfer) while deep-link denied with 403.
+- **Problem**: `GET /api/workbench/drafts` returned drafts for cross-lab tasks when `draft.labId = null`. Furthermore, setting conflicting lab IDs on work items and samples resulted in SQL counts including the item while in-memory post-filters hid it (`totalItems=1`, `myWorkCount=2`).
 - **Remediation**:
-  - `server/controllers/workbenchController.js:getQueue`: Applied canonical `labScopeCondition` to `whereClause`, multi-view count queries (`myWorkCount`, `readyToSubmitCount`, `submittedCount`, `completedCount`), and drafts lookup.
-  - Post-fetch filtering strictly verifies that both the work item (`labId`, `assignedLab`) and sample (`assignedLab`, `labId`) belong to the technician's authorized laboratory scope. Conflicting item/sample labs are excluded.
-  - `server/services/draftService.js`: `getDrafts`, `saveDraft`, and `discardDraft` enforce laboratory isolation and reject cross-lab operations.
-- **Verification**: `candidate_release_review_fixes.test.js` (R2 tests 1–3 pass); independent release probe ordinary queue returns empty array (`items: []`) for cross-lab task.
+  - Implemented `canAccessDraft(user, draft, workItem, sample)` in `server/services/draftService.js`:
+    - Validates draft's own lab, parent work item lab (`labId`, `assignedLab`), and linked sample lab (`assignedLab`, `labId`).
+    - Stale draft ownership alone is strictly denied after staff transfers.
+    - Wired across `getDrafts`, `discardDraft`, `resolveConflict`, and workbench statistics (`stats.totalDrafts`).
+    - Scope denials in `discardDraft` and `resolveConflict` return HTTP 403.
+  - Aligned `labScopeCondition` in `server/controllers/workbenchController.js` to match post-fetch scope check directly in SQL:
+    - Work item: non-conflicting lab assignments (`labId` in `[user.labId, null]`, `assignedLab` in `[user.labId, null]`, at least one matching `user.labId`).
+    - Linked sample: non-conflicting lab assignments (`assignedLab` in `[user.labId, null]`, at least one matching `user.labId`).
+    - Conflicting combinations (`labId=B, assignedLab=A` with sample `assignedLab=B, labId=A`) are filtered out at the SQL level.
+    - `myWorkCount`, `readyToSubmitCount`, `submittedCount`, `completedCount`, and visible items agree with zero divergence.
+- **Verification**: `candidate_release_review_fixes.test.js` (R2 tests 1–5 pass); Codex `independent-release-retest-b23d4ac.cjs` returns empty drafts (`{"drafts":{},"items":[]}`) and consistent queue stats (`myWorkCount: 1, totalItems: 1, totalDrafts: 0`).
 
 #### R3: QC Reanalysis Transitions Completed-Unsubmitted Work Items
 - **Problem**: `server/controllers/qcController.js` treated `COMPLETED` work items as immutable alongside `ACCEPTED` and `RELEASED`, causing `REANALYZE_BATCH` dispositions to leave completed unsubmitted determinations in a dead-end state.
@@ -446,7 +453,7 @@ Status Key:
     - Audit and history trails updated atomically with disposition reason and author.
     - Reanalysis does NOT fabricate or tamper with raw scientific determination values.
     - Idempotent repeated dispositions with matching decision/reason return `idempotent: true`; conflicting dispositions fail with 409 `DISPOSITION_CONFLICT`.
-- **Verification**: `candidate_release_review_fixes.test.js` (R3 tests 1–2 pass); `qc_disposition_release_gate.test.js` Test 15 updated and passes; independent release probe records `workStatus: "REANALYSIS_REQUIRED"`.
+- **Verification**: `candidate_release_review_fixes.test.js` (R3 tests 1–2 pass); Codex independent scripts record `workStatus: "REANALYSIS_REQUIRED"` and status 200.
 
 #### R4: Precedence of Explicit Exception Requirements over Channel Whitelist
 - **Problem**: `server/services/projectPolicyService.js:canAdmitSample` returned `{ allowed: true }` when `policy.allowedChannels.includes(channel)` before checking `requiresExceptionForDesk` or `requiresExceptionForManifest`.
@@ -456,20 +463,30 @@ Status Key:
     - If `requiresExceptionForManifest` is true, MANIFEST intake strictly requires an authorized exception record.
     - Channel whitelist validated; un-whitelisted channels fail closed with channel-specific reason codes (`KOBO_REQUIRED`, `MANIFEST_REQUIRED`, or `CHANNEL_NOT_ALLOWED`).
   - HTTP trust boundary in `server/controllers/receptionController.js:processIntake`: client-claimed boolean flags (`isStoredApprovalVerified`) are stripped and rejected (`EXCEPTION_NOT_AUTHORIZED`); stored approvals require valid database record with matching target sample, channel, and authorized manager.
-- **Verification**: `candidate_release_review_fixes.test.js` (R4 tests 1–3 pass); independent release probe returns `{ allowed: false, exceptionRequired: true, code: "EXCEPTION_REQUIRED" }`.
+- **Verification**: `candidate_release_review_fixes.test.js` (R4 tests 1–3 pass); Codex independent scripts return `{ allowed: false, exceptionRequired: true, code: "EXCEPTION_REQUIRED" }`.
 
-#### R5: Additive Schema Migration & Old Database Upgrade Compatibility
-- **Problem**: Candidate schema added `templateId`, `templateVersion`, `policyConfig`, `programmeCode`, and `parentProjectId` to `Project`, which threw Prisma `P2022` on unupgraded databases. Entrypoint only executed lab operations and appearance migrations.
+#### R5: Additive Schema Migration Runner Hardening & Populated Legacy Schema Rehearsal
+- **Problem**: Previous runner rehearsal only created a 7-column Project table without exercising application queries, populated results/QC/reports, rollback compatibility, or failing closed on invalid paths/tables.
 - **Remediation**:
-  - Created versioned additive SQL migration: `server/prisma/migrations/20260921220000_add_project_templates_and_policy/migration.sql`.
-  - Created fail-closed, idempotent migration runner: `server/scripts/migrate_project_templates_and_policy.js`.
-    - Safe `PRAGMA table_info('Project')` check.
-    - Adds missing columns with conservative defaults (`templateId` DEFAULT `'GENERIC_OPEN_INTAKE'`, `templateVersion` DEFAULT `'1.0.0'`).
-    - Creates `Project_parentProjectId_idx` index.
-    - Verifies row count preservation and `PRAGMA foreign_key_check('Project')`.
-    - Re-run on upgraded database is a complete no-op (strictly idempotent).
-  - Wired into `docker-entrypoint.sh` startup sequence.
-- **Verification**: Rehearsal against simulated legacy database in `candidate_release_review_fixes.test.js` (R5 tests 1–3 pass: dry-run detects missing columns, migration applies cleanly, second run no-ops, zero data loss). Full server test suite passes 131 suites / 1,167 tests.
+  - `server/scripts/migrate_project_templates_and_policy.js`:
+    - Fail closed on non-existent database file path (`fs.existsSync` check + `fileMustExist: true`).
+    - Fail closed on target database missing `Project` table.
+    - Enclosed additive `ALTER TABLE` statements, index creation, post-migration column checks, row count assertion, and `PRAGMA foreign_key_check("Project")` inside a single atomic `db.transaction(...)`. On any error or constraint issue, all changes roll back automatically leaving the schema unmodified.
+    - In no-op state, ensures index `Project_parentProjectId_idx` and executes `PRAGMA foreign_key_check`.
+  - Populated Legacy Schema Rehearsal:
+    - Constructed full legacy schema database populated across all operational domains: `Project` (legacy 16-column schema without the 5 additive columns), `Lab`, `User` (restricted roles), `Sample`, `Batch` (QC batch), `WorkItem` (completed and assigned), and `Report` (published and superseded versions).
+    - Executed additive migration runner: 100% row preservation verified across all tables.
+    - Instantiated Prisma Client with Better-Sqlite3 driver adapter on the migrated database: queried projects, samples with joined projects, reports, users, work items, and QC batches with **zero `P2022` (column not found) errors**.
+    - Verified conservative policy behavior with migrated open intake projects.
+    - Verified strictly idempotent rerun (`applied: false`, row counts identical).
+- **Verification**: `candidate_release_review_fixes.test.js` (R5 tests 1–7 pass: dry-run, application, idempotence, fail-closed on missing DB, fail-closed on missing table, atomic rollback on FK failure, and full populated legacy rehearsal).
+
+#### CI Isolation Fix
+- **Problem**: GitHub Actions CI Run 35649079609 failed on `tests/security/lab_isolation.test.js:95` because `sampleGTM` finder queried `findFirst({ where: { country: 'GTM' } })`, matching cross-lab test sample `SMP-R1-A` created earlier by `candidate_release_review_fixes.test.js` in clean CI.
+- **Remediation**:
+  - Hardened sample finders in `server/tests/security/lab_isolation.test.js` to strictly query `where: { country: 'GTM', OR: [{ assignedLab: 'GTM-LAB1' }, { labId: 'GTM-LAB1' }] }` (and similarly for HND).
+  - Added `afterAll` teardown hooks across describe blocks in `candidate_release_review_fixes.test.js`.
+- **Verification**: Combined sequential execution of `candidate_release_review_fixes.test.js` and `lab_isolation.test.js` passed 37/37 tests with zero cross-talk.
 
 
 

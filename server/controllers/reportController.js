@@ -17,6 +17,50 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+/**
+ * Shared Report Authorization Validator
+ * Enforces shared precedence across list, detail, and counts:
+ * 1. Global access (SUPER_ADMIN) is always allowed.
+ * 2. Inactive / unauthenticated users are always denied.
+ * 3. If a linked sample exists, the sample's scope is STRICTLY AUTHORITATIVE.
+ *    Stale/contradictory report metadata (labId, projectCode) never overrides linked sample scope.
+ * 4. If no linked sample exists (orphaned report), falls back to report metadata.
+ * 5. Avoids treating sampleLabId (human sample identifier) as a laboratory authority.
+ */
+function isReportAuthorized(user, report, sample) {
+    if (!user || user.isActive === false || user.status === 'INACTIVE') return false;
+    const scopeGuard = require('../utils/scopeGuard');
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+
+    if (sample) {
+        return scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' });
+    }
+
+    // Orphaned report fallback: evaluate against report metadata
+    return scopeGuard.canAccessEntity(user, report, { labField: 'labId', altLabField: 'assignedLab' });
+}
+
+const reportSelectFields = {
+    id: true,
+    sampleId: true,
+    sampleLabId: true,
+    labId: true,
+    version: true,
+    status: true,
+    firstName: true,
+    surname: true,
+    phone: true,
+    projectCode: true,
+    projectName: true,
+    generatedBy: true,
+    generatedAt: true,
+    publishedAt: true,
+    shareLinks: {
+        where: { isRevoked: false },
+        select: { id: true, expiresAt: true }
+    }
+};
+
 // ─── INTERNAL ENDPOINTS ──────────────────────────────────
 
 /**
@@ -143,17 +187,10 @@ async function getReport(req, res) {
             return res.status(404).json({ error: 'Report not found' });
         }
 
-        // S24: Lab Scope Check
-        const scopeGuard = require('../utils/scopeGuard');
-        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
-        if (sample) {
-            if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
-            }
-        } else if (!scopeGuard.hasGlobalAccess(req.user)) {
-            if (!scopeGuard.canAccessEntity(req.user, report, { labField: 'labId', altLabField: 'sampleLabId' })) {
-                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
-            }
+        // Shared authoritative Report Scope Check
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
         }
 
         // R1: External and general viewers can only view PUBLISHED reports
@@ -257,95 +294,6 @@ async function searchReports(req, res) {
         }
 
         const andClauses = [];
-
-        // R1: Canonical Scope Authorization across country, project, lab, and no-scope boundaries
-        if (!isGlobal) {
-            const isNationalRole = userRole === 'MASTER_USER' || userRole === 'COUNTRY_ADMIN';
-            const isProjectRole = userRole === 'PROJECT_MANAGER' || userRole === 'EXTERNAL_VIEWER' || userRole === 'VIEWER';
-
-            const authOrClauses = [];
-
-            // 1. Lab scope (for users with lab assignment)
-            if (userLab) {
-                const labSamples = await prisma.sample.findMany({
-                    where: {
-                        OR: [
-                            { labId: userLab },
-                            { assignedLab: userLab }
-                        ]
-                    },
-                    select: { id: true }
-                });
-                const labSampleIds = labSamples.map(s => s.id);
-
-                authOrClauses.push({ labId: userLab });
-                authOrClauses.push({ sampleLabId: userLab });
-                if (labSampleIds.length > 0) {
-                    authOrClauses.push({ sampleId: { in: labSampleIds } });
-                }
-            }
-
-            // 2. Country scope (for national oversight roles)
-            if (isNationalRole && Array.isArray(userCountries) && userCountries.length > 0) {
-                const countrySamples = await prisma.sample.findMany({
-                    where: {
-                        OR: [
-                            { country: { in: userCountries } },
-                            { countryName: { in: userCountries } }
-                        ]
-                    },
-                    select: { id: true }
-                });
-                const countrySampleIds = countrySamples.map(s => s.id);
-
-                const countryLabs = await prisma.lab.findMany({
-                    where: { country: { in: userCountries } },
-                    select: { id: true }
-                });
-                const countryLabIds = countryLabs.map(l => l.id);
-
-                if (countrySampleIds.length > 0) {
-                    authOrClauses.push({ sampleId: { in: countrySampleIds } });
-                }
-                if (countryLabIds.length > 0) {
-                    authOrClauses.push({ labId: { in: countryLabIds } });
-                    authOrClauses.push({ sampleLabId: { in: countryLabIds } });
-                }
-            }
-
-            // 3. Project scope (for project roles)
-            if (isProjectRole && Array.isArray(userProjects) && userProjects.length > 0) {
-                const expandedProjects = new Set(userProjects);
-                userProjects.forEach(p => {
-                    const children = projectPolicyService.getProgrammeChildProjectCodes(p);
-                    children.forEach(c => expandedProjects.add(c));
-                });
-                const projList = Array.from(expandedProjects);
-
-                const projectSamples = await prisma.sample.findMany({
-                    where: {
-                        OR: [
-                            { projectCode: { in: projList } },
-                            { projectId: { in: projList } }
-                        ]
-                    },
-                    select: { id: true }
-                });
-                const projectSampleIds = projectSamples.map(s => s.id);
-
-                authOrClauses.push({ projectCode: { in: projList } });
-                if (projectSampleIds.length > 0) {
-                    authOrClauses.push({ sampleId: { in: projectSampleIds } });
-                }
-            }
-
-            // Fail closed: If non-global user has no matching scope clauses, deny immediately
-            if (authOrClauses.length === 0) {
-                return res.json({ reports: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } });
-            }
-
-            andClauses.push({ OR: authOrClauses });
-        }
 
         if (projectId) {
             const childCodes = projectPolicyService.getProgrammeChildProjectCodes(projectId);
@@ -454,35 +402,94 @@ async function searchReports(req, res) {
             where.AND = andClauses;
         }
 
-        const [reports, total] = await Promise.all([
-            prisma.report.findMany({
-                where,
-                select: {
-                    id: true,
-                    sampleId: true,
-                    sampleLabId: true,
-                    labId: true,
-                    version: true,
-                    status: true,
-                    firstName: true,
-                    surname: true,
-                    phone: true,
-                    projectCode: true,
-                    projectName: true,
-                    generatedBy: true,
-                    generatedAt: true,
-                    publishedAt: true,
-                    shareLinks: {
-                        where: { isRevoked: false },
-                        select: { id: true, expiresAt: true }
-                    }
-                },
-                orderBy: { generatedAt: 'desc' },
-                skip,
-                take: parseInt(limit)
-            }),
-            prisma.report.count({ where })
+        // Global administrators query database directly
+        if (isGlobal) {
+            const [reports, total] = await Promise.all([
+                prisma.report.findMany({
+                    where,
+                    select: reportSelectFields,
+                    orderBy: { generatedAt: 'desc' },
+                    skip,
+                    take: parseInt(limit)
+                }),
+                prisma.report.count({ where })
+            ]);
+
+            return res.json({
+                reports,
+                pagination: {
+                    total,
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    pages: Math.ceil(total / parseInt(limit))
+                }
+            });
+        }
+
+        // Non-global users: Validate role scope presence (fail-closed if no scope assigned)
+        const isNationalRole = userRole === 'MASTER_USER' || userRole === 'COUNTRY_ADMIN';
+        const isProjectRole = userRole === 'PROJECT_MANAGER' || userRole === 'EXTERNAL_VIEWER' || userRole === 'VIEWER';
+        const hasScope = (isNationalRole && Array.isArray(userCountries) && userCountries.length > 0) ||
+                         (isProjectRole && Array.isArray(userProjects) && userProjects.length > 0) ||
+                         Boolean(userLab);
+
+        if (!hasScope) {
+            return res.json({
+                reports: [],
+                pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 }
+            });
+        }
+
+        // Fetch candidate reports matching user filters
+        const candidateReports = await prisma.report.findMany({
+            where,
+            select: {
+                id: true,
+                sampleId: true,
+                labId: true,
+                projectCode: true,
+                generatedAt: true
+            },
+            orderBy: { generatedAt: 'desc' }
+        });
+
+        const candidateSampleIds = [...new Set(candidateReports.map(r => r.sampleId).filter(Boolean))];
+
+        // Authoritative linked sample resolution: sample scope determines report access
+        const scopedSampleWhere = scopeGuard.buildScopedWhere(req.user, {
+            id: { in: candidateSampleIds }
+        }, {
+            entityType: 'Sample',
+            labField: 'labId',
+            altLabField: 'assignedLab'
+        });
+
+        const [authorizedSamples, existingSamples] = await Promise.all([
+            candidateSampleIds.length > 0 ? prisma.sample.findMany({ where: scopedSampleWhere, select: { id: true } }) : [],
+            candidateSampleIds.length > 0 ? prisma.sample.findMany({ where: { id: { in: candidateSampleIds } }, select: { id: true } }) : []
         ]);
+
+        const authorizedSampleIdSet = new Set(authorizedSamples.map(s => s.id));
+        const existingSampleIdSet = new Set(existingSamples.map(s => s.id));
+
+        // Filter: linked sample must be authorized; orphaned reports fall back to report metadata
+        const authorizedReports = candidateReports.filter(r => {
+            if (r.sampleId && existingSampleIdSet.has(r.sampleId)) {
+                return authorizedSampleIdSet.has(r.sampleId);
+            }
+            return isReportAuthorized(req.user, r, null);
+        });
+
+        const total = authorizedReports.length;
+        const pagedIds = authorizedReports.slice(skip, skip + parseInt(limit)).map(r => r.id);
+
+        const reports = pagedIds.length > 0
+            ? await prisma.report.findMany({
+                where: { id: { in: pagedIds } },
+                select: reportSelectFields,
+                orderBy: { generatedAt: 'desc' }
+            })
+            : [];
 
         res.json({
             reports,
@@ -518,6 +525,12 @@ async function createShareLink(req, res) {
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
+
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        }
+
         if (report.status !== 'PUBLISHED') {
             return res.status(400).json({ error: 'Only published reports can be shared' });
         }
@@ -768,9 +781,8 @@ async function getReportPdf(req, res) {
         }
 
         // Scope and published check
-        const scopeGuard = require('../utils/scopeGuard');
-        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
-        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
             return res.status(403).json({ error: 'Access denied: Report not in your scope' });
         }
 

@@ -155,35 +155,90 @@ async function saveDraft(user, {
 }
 
 /**
+ * Authoritative Draft Access Validator
+ * Ensures that draft reads and mutations (save, get, discard, clear, resolveConflict)
+ * strictly enforce related work item AND sample scope.
+ * 1. Global access (SUPER_ADMIN) is allowed.
+ * 2. Inactive users are denied.
+ * 3. Draft ownership alone is NEVER sufficient after staff transfers.
+ * 4. Checks draft.labId, related workItem (labId, assignedLab), and related sample (assignedLab, labId).
+ *    If any of these belong to a different laboratory, access is DENIED.
+ */
+function canAccessDraft(user, draft, workItem = null, sample = null) {
+    if (!user || user.isActive === false || user.status === 'INACTIVE') return false;
+    const scopeGuard = require('../utils/scopeGuard');
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+
+    if (!user.labId) return false;
+
+    // Check draft's own labId if set
+    if (draft.labId && draft.labId !== user.labId) {
+        return false;
+    }
+
+    const wi = workItem || draft.workItem;
+    if (wi) {
+        if (!scopeGuard.canAccessEntity(user, wi, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+            return false;
+        }
+        const itemLab = wi.labId || wi.assignedLab;
+        if (itemLab && itemLab !== user.labId) {
+            return false;
+        }
+
+        const s = sample || wi.sample;
+        if (s) {
+            if (!scopeGuard.canAccessEntity(user, s, { labField: 'assignedLab', altLabField: 'labId' })) {
+                return false;
+            }
+            const sampleLab = s.assignedLab || s.labId;
+            if (sampleLab && sampleLab !== user.labId) {
+                return false;
+            }
+        }
+    } else {
+        // If related work item cannot be found, draft has no valid scope context
+        // and cannot be authorized unless draft.labId explicitly matches user.labId
+        if (!draft.labId || draft.labId !== user.labId) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Retrieve all active drafts for a technician within authorized lab scope
  */
 async function getDrafts(user) {
-    const scopeGuard = require('../utils/scopeGuard');
-    const isGlobal = scopeGuard.hasGlobalAccess(user);
-
     if (!user || user.isActive === false || user.status === 'INACTIVE') {
         return [];
     }
 
-    const where = { userId: user.username };
-    if (!isGlobal) {
-        if (!user.labId) return [];
-        where.OR = [
-            { labId: user.labId },
-            { labId: null }
-        ];
+    const scopeGuard = require('../utils/scopeGuard');
+    const isGlobal = scopeGuard.hasGlobalAccess(user);
+
+    if (!isGlobal && !user.labId) {
+        return [];
     }
 
     const drafts = await prisma.workItemDraft.findMany({
-        where,
+        where: { userId: user.username },
+        include: {
+            workItem: {
+                include: { sample: true }
+            }
+        },
         orderBy: { updatedAt: 'desc' }
     });
 
+    const authorizedDrafts = drafts.filter(d => canAccessDraft(user, d));
+
     // Parse JSON fields
-    return drafts.map(d => ({
+    return authorizedDrafts.map(d => ({
         ...d,
-        values: d.values ? JSON.parse(d.values) : null,
-        checks: d.checks ? JSON.parse(d.checks) : null
+        values: d.values ? (typeof d.values === 'string' ? JSON.parse(d.values) : d.values) : null,
+        checks: d.checks ? (typeof d.checks === 'string' ? JSON.parse(d.checks) : d.checks) : null
     }));
 }
 
@@ -193,7 +248,11 @@ async function getDrafts(user) {
 async function discardDraft(user, workItemId) {
     const draft = await prisma.workItemDraft.findUnique({
         where: { workItemId },
-        include: { workItem: true }
+        include: {
+            workItem: {
+                include: { sample: true }
+            }
+        }
     });
 
     if (!draft) {
@@ -205,11 +264,11 @@ async function discardDraft(user, workItemId) {
         throw new Error('Access denied: You cannot discard another user’s draft');
     }
 
-    const scopeGuard = require('../utils/scopeGuard');
-    if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
-        if (draft.labId && draft.labId !== user.labId) {
-            throw new Error('Access denied: Draft is outside your laboratory scope');
-        }
+    if (!canAccessDraft(user, draft)) {
+        const err = new Error('Access denied: Draft is outside your laboratory scope');
+        err.status = 403;
+        err.statusCode = 403;
+        throw err;
     }
 
     // 1. Delete draft record
@@ -274,10 +333,21 @@ async function discardDraft(user, workItemId) {
 async function resolveConflict(user, workItemId, { resolution, reason }) {
     const draft = await prisma.workItemDraft.findUnique({
         where: { workItemId },
-        include: { workItem: true }
+        include: {
+            workItem: {
+                include: { sample: true }
+            }
+        }
     });
 
     if (!draft) throw new Error(`Draft ${workItemId} not found`);
+
+    if (!canAccessDraft(user, draft)) {
+        const err = new Error('Access denied: Draft is outside your laboratory scope');
+        err.status = 403;
+        err.statusCode = 403;
+        throw err;
+    }
 
     if (resolution === 'USE_SERVER') {
         const adoptedValue = draft.conflictValue || draft.workItem?.result || '';

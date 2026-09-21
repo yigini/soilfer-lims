@@ -223,6 +223,20 @@ exports.getQueue = async (req, res) => {
 
         const labScopeCondition = !isGlobal ? {
             AND: [
+                // 1. Work item must not be explicitly assigned to another lab
+                {
+                    OR: [
+                        { labId: user.labId },
+                        { labId: null }
+                    ]
+                },
+                {
+                    OR: [
+                        { assignedLab: user.labId },
+                        { assignedLab: null }
+                    ]
+                },
+                // 2. Work item must have local lab association
                 {
                     OR: [
                         { labId: user.labId },
@@ -230,11 +244,13 @@ exports.getQueue = async (req, res) => {
                         { AND: [{ labId: null }, { assignedLab: null }] }
                     ]
                 },
+                // 3. Linked sample must belong to this lab and must not have conflicting cross-lab assignment
                 {
                     sample: {
                         OR: [
                             { assignedLab: user.labId },
-                            { labId: user.labId }
+                            { AND: [{ assignedLab: null }, { labId: user.labId }] },
+                            { AND: [{ assignedLab: null }, { labId: null }] }
                         ]
                     }
                 }
@@ -362,25 +378,15 @@ exports.getQueue = async (req, res) => {
             }
         }
 
-        // Fetch user's active drafts within authorized lab scope
-        const userDrafts = await prisma.workItemDraft.findMany({
-            where: {
-                userId: user.username,
-                ...(!isGlobal && user.labId ? {
-                    OR: [
-                        { labId: user.labId },
-                        { labId: null }
-                    ]
-                } : {})
-            }
-        });
+        // Fetch user's active drafts within authorized lab scope via canonical draftService
+        const userDrafts = await draftService.getDrafts(user);
         const draftMap = {};
         userDrafts.forEach(d => {
             draftMap[d.workItemId] = {
                 id: d.id,
                 value: d.value,
-                values: d.values ? JSON.parse(d.values) : null,
-                checks: d.checks ? JSON.parse(d.checks) : null,
+                values: d.values,
+                checks: d.checks,
                 basis: d.basis,
                 replicateNo: d.replicateNo,
                 instrumentId: d.instrumentId,
@@ -1579,12 +1585,12 @@ exports.clearDrafts = async (req, res) => {
     const user = req.user;
 
     try {
-        const userDrafts = await prisma.workItemDraft.findMany({
-            where: {
-                userId: user.username,
-                ...(analysis && analysis !== 'all' ? { analysis } : {})
-            }
-        });
+        const allUserDrafts = await draftService.getDrafts(user);
+        const userDrafts = allUserDrafts.filter(d => (!analysis || analysis === 'all') ? true : d.analysis === analysis);
+
+        if (userDrafts.length === 0) {
+            return res.json({ success: true, message: `No authorized drafts found for ${analysis}`, count: 0 });
+        }
 
         const workItemIds = userDrafts.map(d => d.workItemId);
 
@@ -1640,7 +1646,8 @@ exports.discardDraft = async (req, res) => {
         const result = await draftService.discardDraft(user, workItemId);
         res.json(result);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        const status = err.status || err.statusCode || 400;
+        res.status(status).json({ error: err.message });
     }
 };
 
@@ -1657,7 +1664,8 @@ exports.resolveConflict = async (req, res) => {
         const result = await draftService.resolveConflict(user, workItemId, { resolution, reason });
         res.json(result);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        const status = err.status || err.statusCode || 400;
+        res.status(status).json({ error: err.message });
     }
 };
 
