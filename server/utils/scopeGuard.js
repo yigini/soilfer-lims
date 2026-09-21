@@ -24,7 +24,10 @@ const ROLES = {
  * @returns {boolean} - True if user bypasses lab isolation.
  */
 function hasGlobalAccess(user) {
-    return user && user.role === ROLES.SUPER_ADMIN;
+    if (!user || user.isActive === false || user.status === 'INACTIVE') {
+        return false;
+    }
+    return user.role === ROLES.SUPER_ADMIN;
 }
 
 /**
@@ -184,18 +187,46 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
  * Use this for POST-FETCH validation (e.g., after findUnique by ID).
  */
 function canAccessEntity(user, entity, options = {}) {
-    if (!entity) return false;
+    if (!entity || !user) return false;
+
+    // Fail closed for inactive or restricted accounts
+    if (user.isActive === false || user.status === 'INACTIVE') {
+        return false;
+    }
 
     // 0. SUPER_ADMIN - global access
     if (hasGlobalAccess(user)) {
         return true;
     }
 
+    const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
+    const isProjectRole = user.role === 'PROJECT_MANAGER' || user.role === 'EXTERNAL_VIEWER' || user.role === 'VIEWER';
+
+    // Fail closed if user requires lab scoping but has no labId
+    if (!user.labId && !isNationalRole && !isProjectRole) {
+        return false;
+    }
+
     const labScope = user.labId || null;
-    const { labField = 'labId', altLabField = 'assignedLab' } = options;
+    const { labField = 'labId', altLabField = 'assignedLab', entityType } = options;
+
+    // Strict technician assignment check:
+    // If entity is a WorkItem and user is a LAB_TECHNICIAN, they can ONLY access work items assigned to them.
+    if (entityType === 'WorkItem' && user.role === 'LAB_TECHNICIAN') {
+        const isAssigned = entity.assignedTo && (entity.assignedTo === user.username || entity.assignedTo === user.id);
+        if (!isAssigned) {
+            return false;
+        }
+    }
 
     // 1. Direct assignedTo check on entity or workItems
     if (entity.assignedTo && (entity.assignedTo === user.username || entity.assignedTo === user.id)) {
+        if (labScope) {
+            const itemLab = entity[labField] || (altLabField && entity[altLabField]);
+            if (itemLab && itemLab !== labScope) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -205,6 +236,10 @@ function canAccessEntity(user, entity, options = {}) {
 
     // 2. Primary and alternative lab match
     if (labScope) {
+        // Technicians cannot access work items solely by lab match without assignment!
+        if (entityType === 'WorkItem' && user.role === 'LAB_TECHNICIAN') {
+            return false;
+        }
         if (entity[labField] === labScope) return true;
         if (altLabField && entity[altLabField] === labScope) return true;
         if (entity.labLocation === labScope) return true;
@@ -212,6 +247,9 @@ function canAccessEntity(user, entity, options = {}) {
 
     // 3. Multi-Lab assignment field (assignedLabIds)
     if (entity.assignedLabIds) {
+        if (entityType === 'WorkItem' && user.role === 'LAB_TECHNICIAN') {
+            return false;
+        }
         try {
             const assigned = typeof entity.assignedLabIds === 'string'
                 ? JSON.parse(entity.assignedLabIds)
@@ -228,7 +266,6 @@ function canAccessEntity(user, entity, options = {}) {
     }
 
     // 4. Project matching (for project managers / project-scoped roles)
-    const isProjectRole = user.role === 'PROJECT_MANAGER' || user.role === 'EXTERNAL_VIEWER' || user.role === 'VIEWER';
     if (isProjectRole && user.projects) {
         try {
             const projects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
@@ -248,13 +285,12 @@ function canAccessEntity(user, entity, options = {}) {
     }
 
     // 5. Country matching (strictly restricted to national oversight roles: MASTER_USER or COUNTRY_ADMIN)
-    const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
     if (isNationalRole && user.countries) {
         try {
             const countries = typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries;
             if (Array.isArray(countries)) {
-                if (entity.country && countries.includes(entity.country)) return true;
-                if (entity.countryName && countries.includes(entity.countryName)) return true;
+                const targetCountry = entity.country || entity.countryName || entity.sample?.country;
+                if (targetCountry && countries.includes(targetCountry)) return true;
             }
         } catch (e) {}
     }

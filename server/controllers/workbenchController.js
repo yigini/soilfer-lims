@@ -8,6 +8,7 @@ const validationService = require('../services/workbenchValidationService');
 const readinessService = require('../services/workbenchReadinessService');
 const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
+const scopeGuard = require('../utils/scopeGuard');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -21,6 +22,7 @@ exports.getQueue = async (req, res) => {
 
     try {
         let targetScopedItem = null;
+        let canonicalSampleTarget = null;
 
         if (workItemId) {
             const target = await prisma.workItem.findUnique({
@@ -32,6 +34,7 @@ exports.getQueue = async (req, res) => {
                             originalId: true,
                             labId: true,
                             projectCode: true,
+                            country: true,
                             status: true,
                             dryingStatus: true,
                             preparationStatus: true,
@@ -48,16 +51,87 @@ exports.getQueue = async (req, res) => {
                 });
             }
 
-            // Reject contradictory identifiers when sampleId is also provided
-            if (sampleId) {
-                const s = target.sample;
-                const sid = String(sampleId).trim();
-                const matchesSample = target.sampleId === sid ||
-                    s?.id === sid ||
-                    s?.labId === sid ||
-                    s?.originalId === sid;
+            // Central Scope & Authorization MUST precede contradictory diagnostics:
+            // 1. Fail closed for inactive / restricted accounts
+            if (user.isActive === false || user.status === 'INACTIVE') {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'User account is inactive.'
+                });
+            }
 
-                if (!matchesSample) {
+            // 2. Strict technician assignment check: technician cannot access another technician's work item
+            if (user.role === 'LAB_TECHNICIAN' && target.assignedTo !== user.username) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to work item assigned to another technician.'
+                });
+            }
+
+            // 3. Central scope validation on the work item
+            if (!scopeGuard.canAccessEntity(user, target, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to work item in another laboratory.'
+                });
+            }
+
+            // 4. Central scope validation on the associated sample (including country grants for MASTER_USER)
+            if (target.sample && !scopeGuard.canAccessEntity(user, target.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to sample outside authorized scope.'
+                });
+            }
+
+            // 5. Conflicting sample/work-item laboratories check
+            const targetLab = target.labId || target.assignedLab;
+            const sampleLab = target.sample?.assignedLab || target.sample?.labId;
+            if (targetLab && sampleLab && targetLab !== sampleLab) {
+                if (!scopeGuard.hasGlobalAccess(user) && (!user.labId || (user.labId !== targetLab || user.labId !== sampleLab))) {
+                    return res.status(403).json({
+                        error: 'FORBIDDEN',
+                        message: 'Access denied: conflicting work item and sample laboratories outside authorized scope.'
+                    });
+                }
+            }
+
+            // 6. AFTER authorization, check contradictory identifiers when sampleId is also provided
+            if (sampleId) {
+                const sid = String(sampleId).trim();
+                const matchedSamples = await prisma.sample.findMany({
+                    where: {
+                        OR: [
+                            { id: sid },
+                            { labId: sid },
+                            { originalId: sid }
+                        ]
+                    }
+                });
+
+                if (matchedSamples.length === 0) {
+                    return res.status(404).json({
+                        error: 'SAMPLE_NOT_FOUND',
+                        message: `Sample '${sampleId}' not found.`
+                    });
+                }
+
+                if (matchedSamples.length > 1) {
+                    return res.status(400).json({
+                        error: 'AMBIGUOUS_SAMPLE_IDENTIFIER',
+                        message: `Identifier '${sampleId}' matches multiple samples across identifier columns.`
+                    });
+                }
+
+                const resolvedSample = matchedSamples[0];
+                if (!scopeGuard.canAccessEntity(user, resolvedSample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                    return res.status(403).json({
+                        error: 'FORBIDDEN',
+                        message: 'Access denied to sample outside authorized scope.'
+                    });
+                }
+
+                if (target.sampleId !== resolvedSample.id && target.sample?.id !== resolvedSample.id) {
                     return res.status(400).json({
                         error: 'CONTRADICTORY_IDENTIFIERS',
                         message: `Work item '${workItemId}' does not belong to sample '${sampleId}'.`
@@ -65,22 +139,10 @@ exports.getQueue = async (req, res) => {
                 }
             }
 
-            // Enforce lab/assignment scope
-            const isSuperOrMaster = ['SUPER_ADMIN', 'MASTER_USER'].includes(user.role);
-            const userLab = user.labId;
-            const itemLab = target.sample?.assignedLab || target.labId;
-
-            if (!isSuperOrMaster && userLab && itemLab && userLab !== itemLab) {
-                return res.status(403).json({
-                    error: 'FORBIDDEN',
-                    message: 'Access denied to work item in another laboratory.'
-                });
-            }
-
             targetScopedItem = target;
         } else if (sampleId) {
             const sid = String(sampleId).trim();
-            const targetSample = await prisma.sample.findFirst({
+            const matchedSamples = await prisma.sample.findMany({
                 where: {
                     OR: [
                         { id: sid },
@@ -90,23 +152,37 @@ exports.getQueue = async (req, res) => {
                 }
             });
 
-            if (!targetSample) {
+            if (matchedSamples.length === 0) {
                 return res.status(404).json({
                     error: 'SAMPLE_NOT_FOUND',
                     message: `Sample '${sampleId}' not found.`
                 });
             }
 
-            const isSuperOrMaster = ['SUPER_ADMIN', 'MASTER_USER'].includes(user.role);
-            const userLab = user.labId;
-            const sampleLab = targetSample.assignedLab || targetSample.labId;
+            if (matchedSamples.length > 1) {
+                return res.status(400).json({
+                    error: 'AMBIGUOUS_SAMPLE_IDENTIFIER',
+                    message: `Identifier '${sampleId}' matches multiple samples across identifier columns.`
+                });
+            }
 
-            if (!isSuperOrMaster && userLab && sampleLab && userLab !== sampleLab) {
+            const targetSample = matchedSamples[0];
+
+            if (user.isActive === false || user.status === 'INACTIVE') {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'User account is inactive.'
+                });
+            }
+
+            if (!scopeGuard.canAccessEntity(user, targetSample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
                 return res.status(403).json({
                     error: 'FORBIDDEN',
                     message: 'Access denied to sample in another laboratory.'
                 });
             }
+
+            canonicalSampleTarget = targetSample;
         }
 
         const searchTerm = (search || q || '').trim();
@@ -180,17 +256,12 @@ exports.getQueue = async (req, res) => {
             if (!alreadyInItems) {
                 items.unshift(targetScopedItem);
             }
-        } else if (sampleId && !workItemId) {
-            const sid = String(sampleId).trim();
+        } else if (canonicalSampleTarget && !workItemId) {
+            // Use resolved canonical sample ID and enforce same scope
             const sampleWorkItems = await prisma.workItem.findMany({
                 where: {
-                    OR: [
-                        { sampleId: sid },
-                        { sample: { id: sid } },
-                        { sample: { labId: sid } },
-                        { sample: { originalId: sid } }
-                    ],
-                    ...(!['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user.role) ? { assignedTo: user.username } : {})
+                    sampleId: canonicalSampleTarget.id,
+                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {})
                 },
                 include: {
                     sample: {
@@ -199,6 +270,7 @@ exports.getQueue = async (req, res) => {
                             originalId: true,
                             labId: true,
                             projectCode: true,
+                            country: true,
                             status: true,
                             dryingStatus: true,
                             preparationStatus: true,
@@ -208,8 +280,10 @@ exports.getQueue = async (req, res) => {
                 }
             });
             for (const swi of sampleWorkItems) {
-                if (!items.some(i => i.id === swi.id)) {
-                    items.push(swi);
+                if (scopeGuard.canAccessEntity(user, swi, { entityType: 'WorkItem' })) {
+                    if (!items.some(i => i.id === swi.id)) {
+                        items.push(swi);
+                    }
                 }
             }
         }

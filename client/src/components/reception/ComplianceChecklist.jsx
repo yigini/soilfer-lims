@@ -56,12 +56,16 @@ const ComplianceChecklist = ({
             ...value?.items,
             [key]: { ...value?.items?.[key], status }
         };
-        const newValue = { ...value, items: newItems };
+        const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
+        const newValue = {
+            ...value,
+            items: newItems,
+            nonConformance: anyFail || (status === 'FAIL' ? true : Boolean(value?.nonConformance && anyFail))
+        };
         onChange(newValue);
 
-        // Auto-flag NC if any FAIL
-        if (status === 'FAIL') {
-            onNonConformance(true);
+        if (onNonConformance) {
+            onNonConformance(newValue.nonConformance);
         }
     };
 
@@ -171,15 +175,29 @@ const ComplianceChecklist = ({
                                         }`}>
                                         {item.label}
                                     </span>
+                                    {isFail && (
+                                        <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                            <X size={10} strokeWidth={3} /> Fail
+                                        </span>
+                                    )}
+                                    {isPass && (
+                                        <span className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                            <Check size={10} strokeWidth={3} /> OK
+                                        </span>
+                                    )}
                                     <InfoTooltip text={item.tooltip} />
                                 </div>
 
                                 {/* Action buttons */}
-                                <div className="flex items-center gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 flex-shrink-0" role="radiogroup" aria-label={item.label}>
                                     <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isPass}
+                                        aria-label={`${item.label}: OK`}
                                         onClick={() => setStatus(item.key, 'PASS')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isPass
-                                            ? 'bg-emerald-600 text-white shadow-sm'
+                                            ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400'
                                             : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
                                             }`}
                                         title="Mark as Pass"
@@ -187,9 +205,13 @@ const ComplianceChecklist = ({
                                         <Check size={12} strokeWidth={3} /> OK
                                     </button>
                                     <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isFail}
+                                        aria-label={`${item.label}: Fail`}
                                         onClick={() => setStatus(item.key, 'FAIL')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isFail
-                                            ? 'bg-red-600 text-white shadow-sm'
+                                            ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-400'
                                             : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30'
                                             }`}
                                         title="Mark as Fail"
@@ -197,9 +219,13 @@ const ComplianceChecklist = ({
                                         <X size={12} strokeWidth={3} /> Fail
                                     </button>
                                     <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isNA}
+                                        aria-label={`${item.label}: N/A`}
                                         onClick={() => setStatus(item.key, 'NA')}
                                         className={`px-1.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isNA
-                                            ? 'bg-gray-500 text-white shadow-sm'
+                                            ? 'bg-gray-500 text-white shadow-sm ring-2 ring-gray-400'
                                             : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-sf-divider hover:text-sf-text'
                                             }`}
                                         title="Not Applicable"

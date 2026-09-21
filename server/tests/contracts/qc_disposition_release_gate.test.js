@@ -917,4 +917,277 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.batch.delete({ where: { id: batchWiTestId } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: batchWiTestId } }).catch(() => {});
     });
+
+    // ─── Test 16: Multi-Step Validity Provenance: Unflagged Invalid Stays Invalid Across FAIL -> PASS ───
+    test('16. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> QC_PASS remains isValid:false', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const probeBatchId = `batch-probe-${Date.now()}`;
+
+        const sample = await prisma.sample.create({
+            data: {
+                id: `smp-probe-${Date.now()}`,
+                originalId: `SMP-PRB-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Step 1: Initial row isValid: false, flags: []
+        const res = await prisma.result.create({
+            data: {
+                id: `res-probe-${Date.now()}`,
+                sampleId: sample.id,
+                param: 'PH',
+                value: '6.80',
+                unit: 'pH units',
+                batchId: probeBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify([])
+            }
+        });
+
+        // Step 2: flagBatchResults(db, batch, 'QC_FAIL')
+        await flagBatchResults(prisma, probeBatchId, 'QC_FAIL');
+        const afterFail = await prisma.result.findUnique({ where: { id: res.id } });
+        expect(afterFail.isValid).toBe(false);
+        const failFlags = JSON.parse(afterFail.flags);
+        expect(failFlags).toContain('QC_BATCH_FAILED');
+        expect(failFlags).toContain('ORIGINALLY_INVALID');
+
+        // Step 3: flagBatchResults(db, batch, 'QC_PASS')
+        await flagBatchResults(prisma, probeBatchId, 'QC_PASS');
+        const afterPass = await prisma.result.findUnique({ where: { id: res.id } });
+        // MUST REMAIN FALSE: Validity provenance preserved!
+        expect(afterPass.isValid).toBe(false);
+        const passFlags = JSON.parse(afterPass.flags);
+        expect(passFlags).not.toContain('QC_BATCH_FAILED');
+
+        // Cleanup
+        await prisma.result.delete({ where: { id: res.id } });
+        await prisma.sample.delete({ where: { id: sample.id } });
+    });
+
+    // ─── Test 17: Multi-Step Validity Provenance: Unflagged Invalid Stays Invalid Across FAIL -> PROCEED_WITH_WARNING ───
+    test('17. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> PROCEED_WITH_WARNING remains isValid:false', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const warnBatchId = `batch-warn-${Date.now()}`;
+
+        const sample = await prisma.sample.create({
+            data: {
+                id: `smp-warn-${Date.now()}`,
+                originalId: `SMP-WRN-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        const res = await prisma.result.create({
+            data: {
+                id: `res-warn-${Date.now()}`,
+                sampleId: sample.id,
+                param: 'PH',
+                value: '6.80',
+                unit: 'pH units',
+                batchId: warnBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify([])
+            }
+        });
+
+        await flagBatchResults(prisma, warnBatchId, 'QC_FAIL');
+        await flagBatchResults(prisma, warnBatchId, 'QC_FAIL', { decision: 'PROCEED_WITH_WARNING', reason: 'Override' });
+
+        const afterWarn = await prisma.result.findUnique({ where: { id: res.id } });
+        // MUST REMAIN FALSE
+        expect(afterWarn.isValid).toBe(false);
+        const warnFlags = JSON.parse(afterWarn.flags);
+        expect(warnFlags).toContain('QC_WARNING_OVERRIDDEN');
+        expect(warnFlags).not.toContain('QC_BATCH_FAILED');
+
+        // Cleanup
+        await prisma.result.delete({ where: { id: res.id } });
+        await prisma.sample.delete({ where: { id: sample.id } });
+    });
+
+    // ─── Test 18: Multi-Step Validity Provenance: Initially Valid Results Correctly Restored ───
+    test('18. Initially valid results (isValid:true, flags:[]) restore to valid upon QC_PASS and PROCEED_WITH_WARNING', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const validBatchId = `batch-valid-${Date.now()}`;
+
+        const sample = await prisma.sample.create({
+            data: {
+                id: `smp-valid-${Date.now()}`,
+                originalId: `SMP-VLD-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Initially valid result
+        const res = await prisma.result.create({
+            data: {
+                id: `res-valid-${Date.now()}`,
+                sampleId: sample.id,
+                param: 'PH',
+                value: '6.80',
+                unit: 'pH units',
+                batchId: validBatchId,
+                isValid: true,
+                isCurrent: true,
+                flags: JSON.stringify([])
+            }
+        });
+
+        // 1. QC_FAIL marks invalid
+        await flagBatchResults(prisma, validBatchId, 'QC_FAIL');
+        const afterFail = await prisma.result.findUnique({ where: { id: res.id } });
+        expect(afterFail.isValid).toBe(false);
+
+        // 2. QC_PASS restores valid
+        await flagBatchResults(prisma, validBatchId, 'QC_PASS');
+        const afterPass = await prisma.result.findUnique({ where: { id: res.id } });
+        expect(afterPass.isValid).toBe(true);
+        expect(JSON.parse(afterPass.flags)).toEqual([]);
+
+        // 3. QC_FAIL again -> PROCEED_WITH_WARNING restores valid with warning flag
+        await flagBatchResults(prisma, validBatchId, 'QC_FAIL');
+        await flagBatchResults(prisma, validBatchId, 'QC_FAIL', { decision: 'PROCEED_WITH_WARNING', reason: 'Override' });
+        const afterWarn = await prisma.result.findUnique({ where: { id: res.id } });
+        expect(afterWarn.isValid).toBe(true);
+        expect(JSON.parse(afterWarn.flags)).toContain('QC_WARNING_OVERRIDDEN');
+
+        // Cleanup
+        await prisma.result.delete({ where: { id: res.id } });
+        await prisma.sample.delete({ where: { id: sample.id } });
+    });
+
+    // ─── Test 19: Unknown and Malformed Flags Handled Safely and Remain Invalid ───
+    test('19. Results with unknown or malformed flags stay invalid across FAIL -> PASS', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const malBatchId = `batch-mal-${Date.now()}`;
+
+        const sample = await prisma.sample.create({
+            data: {
+                id: `smp-mal-${Date.now()}`,
+                originalId: `SMP-MAL-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Result with unknown flag
+        const resUnknown = await prisma.result.create({
+            data: {
+                id: `res-unknown-${Date.now()}`,
+                sampleId: sample.id,
+                param: 'PH',
+                value: '6.80',
+                unit: 'pH units',
+                batchId: malBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['CUSTOM_SENSOR_DRIFT'])
+            }
+        });
+
+        // Result with malformed JSON string flags
+        const resMalformed = await prisma.result.create({
+            data: {
+                id: `res-malformed-${Date.now()}`,
+                sampleId: sample.id,
+                param: 'EC',
+                value: '2.10',
+                unit: 'dS/m',
+                batchId: malBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: '{invalid-json-string'
+            }
+        });
+
+        await flagBatchResults(prisma, malBatchId, 'QC_FAIL');
+        await flagBatchResults(prisma, malBatchId, 'QC_PASS');
+
+        const refUnknown = await prisma.result.findUnique({ where: { id: resUnknown.id } });
+        expect(refUnknown.isValid).toBe(false);
+        expect(JSON.parse(refUnknown.flags)).toContain('CUSTOM_SENSOR_DRIFT');
+
+        const refMalformed = await prisma.result.findUnique({ where: { id: resMalformed.id } });
+        expect(refMalformed.isValid).toBe(false);
+
+        // Cleanup
+        await prisma.result.deleteMany({ where: { id: { in: [resUnknown.id, resMalformed.id] } } });
+        await prisma.sample.delete({ where: { id: sample.id } });
+    });
+
+    // ─── Test 20: History Protection Accounts for SUPERSEDED Reports and Fails Closed on DB Error ───
+    test('20. flagBatchResults protects SUPERSEDED reports and fails closed on DB error', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const histBatchId = `batch-hist-${Date.now()}`;
+
+        const histSample = await prisma.sample.create({
+            data: {
+                id: `smp-hist-${Date.now()}`,
+                originalId: `SMP-HST-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        const supersededReport = await prisma.report.create({
+            data: {
+                id: `rep-super-${Date.now()}`,
+                sampleId: histSample.id,
+                status: 'SUPERSEDED',
+                generatedBy: lab1Manager.username
+            }
+        });
+
+        const resSupersededReport = await prisma.result.create({
+            data: {
+                id: `res-hist-${Date.now()}`,
+                sampleId: histSample.id,
+                param: 'PH',
+                value: '7.00',
+                unit: 'pH units',
+                batchId: histBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // Attempting to modify results linked to a SUPERSEDED report must be skipped (protected)
+        await flagBatchResults(prisma, histBatchId, 'QC_PASS');
+
+        const refRes = await prisma.result.findUnique({ where: { id: resSupersededReport.id } });
+        expect(refRes.isValid).toBe(false);
+        expect(JSON.parse(refRes.flags)).toEqual(['QC_BATCH_FAILED']); // Untouched!
+
+        // Test fail-closed on DB error
+        const mockPrismaError = {
+            result: {
+                findMany: async () => [{ id: 'res-err-1', sampleId: 'smp-err-1' }]
+            },
+            report: {
+                findMany: async () => {
+                    throw new Error('Database connection failed');
+                }
+            }
+        };
+
+        await expect(flagBatchResults(mockPrismaError, 'batch-err', 'QC_PASS')).rejects.toThrow('Database connection failed');
+
+        // Cleanup
+        await prisma.result.delete({ where: { id: resSupersededReport.id } });
+        await prisma.report.delete({ where: { id: supersededReport.id } });
+        await prisma.sample.delete({ where: { id: histSample.id } });
+    });
 });

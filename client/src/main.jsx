@@ -4,25 +4,17 @@ import * as ReactRouterDOM from 'react-router-dom'
 const { BrowserRouter } = ReactRouterDOM
 import App from './App.jsx'
 import './index.css'
-window.React = React;
-window.ReactDOM = ReactDOM;
-window.ReactRouterDOM = ReactRouterDOM;
 import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
-window.LanguageProvider = LanguageProvider;
 import { NotificationContext } from './context/NotificationContext'
-window.NotificationContext = NotificationContext;
 import { AuthProvider } from './context/AuthContext'
-window.AuthProvider = AuthProvider;
 import { DialogProvider } from './context/DialogContext'
 import { AnalysisCatalogueProvider } from './context/AnalysisCatalogueContext'
-window.AnalysisCatalogueProvider = AnalysisCatalogueProvider;
 
 import { clearStoredSessionOverride } from './lib/appearance';
 import { AuthenticatedAppearanceBridge } from './components/AuthenticatedAppearanceBridge';
 
 import axios from 'axios';
-window.axios = axios;
 axios.defaults.baseURL = import.meta.env.DEV ? 'http://localhost:3000' : ''; // Use relative URLs in production
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');

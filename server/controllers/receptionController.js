@@ -98,6 +98,69 @@ function resolveAnalysisGroup(requestedId, analysisGroups) {
 }
 exports.resolveAnalysisGroup = resolveAnalysisGroup;
 
+/**
+ * Evaluates reception compliance checklist criteria (#117, #113).
+ * Standard criteria:
+ * - container: Container Intact / Sealed (required, N/A not allowed)
+ * - label: Label Legible & Matches ID (required, N/A not allowed)
+ * - quantity: Sample Quantity Sufficient (required, N/A not allowed)
+ * - condition: Sample Condition (required, N/A not allowed)
+ * - coc: Chain of Custody Present (allowed N/A for walk-in / ad-hoc dropoff)
+ */
+function evaluateChecklistCompliance(checklist, options = {}) {
+    const isWalkIn = Boolean(options.isWalkIn);
+    const standardKeys = ['container', 'label', 'quantity', 'condition', 'coc'];
+    const items = (checklist && typeof checklist === 'object' && checklist.items) ? checklist.items : (checklist || {});
+    
+    // Check if checklist has any items or explicitly flagged nonConformance
+    const hasItems = Object.keys(items).length > 0;
+    const isExplicitNC = Boolean(checklist && checklist.nonConformance);
+
+    if (!hasItems && !isExplicitNC) {
+        return { isProvided: false, isComplete: false, isPassed: true, failedItems: [], unansweredItems: [], invalidNAItems: [] };
+    }
+
+    const failedItems = [];
+    const unansweredItems = [];
+    const invalidNAItems = [];
+
+    for (const key of standardKeys) {
+        const item = items[key];
+        const status = item?.status;
+        if (!status) {
+            unansweredItems.push(key);
+        } else if (status === 'FAIL') {
+            failedItems.push({ key, note: item.note || '' });
+        } else if (status === 'NA') {
+            // N/A is valid only under configured rules:
+            // coc is permitted N/A (especially for walk-in or local drop-off)
+            // container, label, quantity, condition MUST NOT be N/A
+            if (key !== 'coc') {
+                invalidNAItems.push(key);
+            }
+        } else if (status !== 'PASS') {
+            unansweredItems.push(key);
+        }
+    }
+
+    if (isExplicitNC && failedItems.length === 0) {
+        failedItems.push({ key: 'general', note: checklist.reason || 'General non-conformance flagged' });
+    }
+
+    const isComplete = unansweredItems.length === 0;
+    const isPassed = isComplete && failedItems.length === 0 && invalidNAItems.length === 0;
+
+    return {
+        isProvided: true,
+        isComplete,
+        isPassed,
+        failedItems,
+        unansweredItems,
+        invalidNAItems
+    };
+}
+exports.evaluateChecklistCompliance = evaluateChecklistCompliance;
+
 exports.processIntake = async (req, res) => {
     const {
         originalId,
@@ -320,6 +383,18 @@ exports.processIntake = async (req, res) => {
                 receivingOfficerId,
                 receivingOfficerName,
                 receivingOfficerSignature,
+                receptionData: JSON.stringify({
+                    checklist,
+                    notes,
+                    ncReason: ncReason || null,
+                    rejectionReason: ncReason || null,
+                    receivedBy,
+                    labLocation: labId,
+                    at: now,
+                    coc: req.body.coc,
+                    photos: photosList,
+                    isWalkIn: isWalkIn || false
+                }),
                 metadata: JSON.stringify({
                     nonConformance: {
                         reason: ncReason,
@@ -476,6 +551,69 @@ exports.processIntake = async (req, res) => {
         }
 
         // Final Acceptance Processing
+        // RC-Compliance: Compliance Checklist Assessment & Manager Exception Gate (#117, #113)
+        const compliance = evaluateChecklistCompliance(checklist, { isWalkIn });
+        let complianceExceptionRecord = null;
+
+        if (compliance.isProvided) {
+            if (compliance.invalidNAItems.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INVALID_CHECKLIST_NA',
+                    code: 'INVALID_CHECKLIST_NA',
+                    message: `Not Applicable (N/A) is not permitted for criteria: ${compliance.invalidNAItems.join(', ')}.`,
+                    invalidItems: compliance.invalidNAItems
+                });
+            }
+
+            if (!compliance.isComplete) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    code: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    message: `Unanswered compliance checklist items: ${compliance.unansweredItems.join(', ')}. All items must be assessed before final acceptance.`,
+                    unansweredItems: compliance.unansweredItems
+                });
+            }
+
+            if (!compliance.isPassed) {
+                // Checklist has failed criteria: routine acceptance is strictly blocked.
+                // An authorized manager exception is mandatory.
+                const targetProjectObj = sample.project || (sample.projectId ? (await projectPolicyService.resolveProject(sample.projectId, prisma))?.project : null);
+                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                    rawExceptionRecord: req.body.exceptionRecord,
+                    rawExceptionReason: req.body.exceptionReason || (checklist && checklist.reason),
+                    authorizer: req.body.authorizer,
+                    approvalId: req.body.approvalId || req.body.approvalToken,
+                    actor: user,
+                    project: targetProjectObj,
+                    labId: user.labId,
+                    sampleId: sample.id,
+                    channel: isWalkIn ? 'WALK_IN' : 'PHYSICAL_RECEIPT',
+                    prismaClient: prisma
+                });
+
+                if (!hasException || !exceptionRecord?.isStoredApprovalVerified) {
+                    return res.status(403).json({
+                        success: false,
+                        error: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        code: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        message: 'Sample has failed compliance checks. Acceptance requires laboratory manager authorization.',
+                        failedChecks: compliance.failedItems,
+                        exceptionRequired: true
+                    });
+                }
+
+                complianceExceptionRecord = exceptionRecord;
+                history.push({
+                    status: 'ADMITTED_WITH_EXCEPTION',
+                    changedBy: receivedBy,
+                    timestamp: now,
+                    note: `Admitted under manager exception: ${exceptionRecord.reason || 'Manager authorized compliance exception'} (Authorized by: ${exceptionRecord.verifiedAuthorizer})`
+                });
+            }
+        }
+
         if (analysisRemovals && analysisRemovals.length > 0 && !justification) {
             return res.status(400).json({ success: false, message: 'Justification is mandatory when removing analyses.' });
         }
@@ -722,6 +860,12 @@ exports.processIntake = async (req, res) => {
             ? intakePhotos
             : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
+        const existingMetadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        const updatedMetadata = {
+            ...existingMetadata,
+            ...(complianceExceptionRecord ? { complianceException: complianceExceptionRecord } : {})
+        };
+
         const updateData = {
             status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
             labId: assignedLabId,
@@ -731,6 +875,7 @@ exports.processIntake = async (req, res) => {
             acceptedAt: assignedLabId ? now : null,
             dryingStatus: assignedLabId ? 'PENDING' : null,
             preparationStatus: assignedLabId ? 'PENDING' : null,
+            metadata: JSON.stringify(updatedMetadata),
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
             analysisGroupIds: JSON.stringify([...new Set(canonicalGroupIds)]),
             fieldMetadata: JSON.stringify(currentFieldMeta),
@@ -781,6 +926,7 @@ exports.processIntake = async (req, res) => {
                 moistureOnArrival,
                 foreignMaterial,
                 massDeficitInfo,
+                complianceException: complianceExceptionRecord || null,
                 positionalUncertaintyM: uncertaintyM,
                 locationSource: samplingDetails?.locationSource || samplingDetails?.captureMethod,
                 compositeRadiusM: compRadius,

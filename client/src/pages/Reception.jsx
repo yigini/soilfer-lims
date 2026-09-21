@@ -527,6 +527,12 @@ const Reception = () => {
     const populateDeskFacts = (targetSample) => {
         if (!targetSample) return;
         const recData = targetSample.receptionData ? (typeof targetSample.receptionData === 'string' ? JSON.parse(targetSample.receptionData) : targetSample.receptionData) : null;
+        const meta = targetSample.metadata ? (typeof targetSample.metadata === 'string' ? JSON.parse(targetSample.metadata) : targetSample.metadata) : null;
+
+        const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
+        if (savedChecklist) {
+            setChecklistData(savedChecklist);
+        }
 
         const mass = targetSample.receivedMass ?? recData?.receivedMass;
         if (mass != null) setReceivedMass(String(mass));
@@ -712,12 +718,15 @@ const Reception = () => {
                             }
                             setSampleData(found);
 
+                            const recData = found.receptionData ? (typeof found.receptionData === 'string' ? JSON.parse(found.receptionData) : found.receptionData) : null;
+                            const meta = found.metadata ? (typeof found.metadata === 'string' ? JSON.parse(found.metadata) : found.metadata) : null;
+
                             // Populate form from receptionData
-                            if (found.receptionData?.submitterDetails) setSubmitter(found.receptionData.submitterDetails);
-                            if (found.receptionData?.samplingDetails) {
+                            if (recData?.submitterDetails) setSubmitter(recData.submitterDetails);
+                            if (recData?.samplingDetails) {
                                 setSampling(prev => ({
                                     ...prev,
-                                    ...found.receptionData.samplingDetails
+                                    ...recData.samplingDetails
                                 }));
                             }
 
@@ -739,11 +748,12 @@ const Reception = () => {
                                 }));
                             }
 
-                            if (found.receptionData?.checklist) setChecklistData(found.receptionData.checklist);
-                            if (found.receptionData?.notes || found.notes) setIntakeNotes(found.receptionData?.notes || found.notes || '');
+                            const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
+                            if (savedChecklist) setChecklistData(savedChecklist);
+                            if (recData?.notes || found.notes) setIntakeNotes(recData?.notes || found.notes || '');
 
                             // Chain of Custody
-                            const coc = found.receptionData?.coc || {};
+                            const coc = recData?.coc || {};
                             if (found.custodyCarrierName || coc.deliveredBy) setCustodyCarrierName(found.custodyCarrierName || coc.deliveredBy);
                             if (found.custodyTrackingNumber || coc.trackingNumber) setCustodyTrackingNumber(found.custodyTrackingNumber || coc.trackingNumber);
                             if (found.custodySenderSignature || coc.senderSignature) setCustodySenderSignature(found.custodySenderSignature || coc.senderSignature);
@@ -754,13 +764,13 @@ const Reception = () => {
 
                             // Analysis group, additions, removals, justification
                             const grp = (Array.isArray(found.analysisGroupIds) && found.analysisGroupIds[0])
-                                || found.receptionData?.analysisGroupIds?.[0]
-                                || (Array.isArray(found.receptionData?.analysisGroupIds) && found.receptionData.analysisGroupIds[0]);
+                                || recData?.analysisGroupIds?.[0]
+                                || (Array.isArray(recData?.analysisGroupIds) && recData.analysisGroupIds[0]);
                             if (grp) setSelectedGroup(grp);
 
-                            if (Array.isArray(found.receptionData?.analysisAdditions)) setAdditions(found.receptionData.analysisAdditions);
-                            if (Array.isArray(found.receptionData?.analysisRemovals)) setRemovals(found.receptionData.analysisRemovals);
-                            if (found.receptionData?.analysisJustification) setJustification(found.receptionData.analysisJustification);
+                            if (Array.isArray(recData?.analysisAdditions)) setAdditions(recData.analysisAdditions);
+                            if (Array.isArray(recData?.analysisRemovals)) setRemovals(recData.analysisRemovals);
+                            if (recData?.analysisJustification) setJustification(recData.analysisJustification);
 
                             // Stage A Desk Facts
                             populateDeskFacts(found);
@@ -1176,6 +1186,19 @@ const Reception = () => {
     const handleSubmit = async (decision, isDraft = false) => {
         // Skip validation for drafts
         if (!isDraft) {
+            const hasFailedChecks = Object.values(checklistData?.items || {}).some(it => it?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
+            const isManager = ['SUPER_ADMIN', 'ADMIN', 'LAB_MANAGER'].includes(user?.role);
+
+            if (decision === 'ACCEPTED' && hasFailedChecks && !isManager) {
+                playErrorBuzz();
+                showDialog({
+                    type: 'error',
+                    title: 'Manager Authorization Required',
+                    message: 'Sample has failed compliance checks. Acceptance requires laboratory manager authorization. Please request manager exception or reject the sample.'
+                });
+                return;
+            }
+
             const errors = validateForm();
             if (errors.length > 0) {
                 playErrorBuzz();
@@ -1203,6 +1226,7 @@ const Reception = () => {
             checklist: checklistData,
             notes: intakeNotes,
             ncReason: checklistData.nonConformance ? checklistData.reason : null,
+            exceptionReason: checklistData.nonConformance ? checklistData.reason : null,
 
             receivedBy: user.username,
             labId: user.labId,

@@ -39,8 +39,9 @@ const AlertBanner = ({ alerts, onViewAlerts }) => {
             <div className="flex gap-4 text-sm font-medium flex-1">
                 {alerts.expired > 0 && <span className="text-red-600 dark:text-red-400">🔴 {alerts.expired} expired</span>}
                 {alerts.expiringSoon > 0 && <span className="text-amber-600 dark:text-amber-400">🟡 {alerts.expiringSoon} expiring soon</span>}
-                {alerts.lowStock > 0 && <span className="text-orange-600 dark:text-orange-400">📦 {alerts.lowStock} low stock</span>}
+                {alerts.lowStock > 0 && <span className="text-orange-600 dark:text-orange-400">📦 {alerts.lowStock} low / out of stock</span>}
                 {alerts.quarantined > 0 && <span className="text-yellow-600 dark:text-yellow-400">🔒 {alerts.quarantined} quarantined</span>}
+                {alerts.missingQuantity > 0 && <span className="text-purple-600 dark:text-purple-400">⚠️ {alerts.missingQuantity} missing quantity</span>}
             </div>
             <button onClick={onViewAlerts} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">View All</button>
         </div>
@@ -256,8 +257,12 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
     const [actionSaving, setActionSaving] = useState(false);
 
     if (!show || !item) return null;
-    const availableLots = (item.lots || []).filter(l => l.status === 'AVAILABLE');
-    const totalAvailable = availableLots.reduce((s, l) => s + l.currentQuantity, 0);
+    const isLotUsable = (l) => l.status === 'AVAILABLE' && (!l.expiryDate || new Date(l.expiryDate) > new Date());
+    const usableLots = (item.lots || []).filter(isLotUsable);
+    const hasNumericUsable = usableLots.some(l => l.currentQuantity != null && !isNaN(l.currentQuantity));
+    const totalAvailable = item.usableStock !== undefined && item.usableStock !== null
+        ? item.usableStock
+        : (usableLots.length === 0 ? 0 : (!hasNumericUsable ? null : usableLots.reduce((s, l) => (l.currentQuantity != null ? s + Number(l.currentQuantity) : s), 0)));
 
     const executeAction = async () => {
         setActionSaving(true); setActionError('');
@@ -309,8 +314,17 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 {/* Summary Cards */}
                 <div className="grid grid-cols-3 gap-3 p-6 pb-3">
                     <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-center">
-                        <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{totalAvailable.toFixed(1)}</div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400">{item.unitOfMeasure} available</div>
+                        <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                            {totalAvailable === null ? '—' : totalAvailable.toFixed(1)}
+                        </div>
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400">
+                            {totalAvailable === null ? `${item.unitOfMeasure} (missing qty)` : `${item.unitOfMeasure} usable stock`}
+                        </div>
+                        {item.expiredStock > 0 && (
+                            <div className="text-[10px] text-red-500 font-semibold mt-0.5">
+                                ({item.expiredStock.toFixed(1)} expired)
+                            </div>
+                        )}
                     </div>
                     <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
                         <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{item.lotCount || 0}</div>
@@ -354,14 +368,16 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                             </thead>
                             <tbody className="divide-y dark:divide-gray-700">
                                 {(item.lots || []).map(lot => {
-                                    const isExpired = lot.expiryDate && new Date(lot.expiryDate) < new Date();
+                                    const isExpired = lot.status === 'EXPIRED' || (lot.expiryDate && new Date(lot.expiryDate) <= new Date());
                                     return (
                                         <tr key={lot.id} className="hover:bg-sf-raised/30">
                                             <td className="px-3 py-2 font-mono text-xs">{lot.lotNumber}</td>
                                             <td className="px-3 py-2 text-center">
-                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGES[lot.status] || ''}`}>{lot.status}</span>
+                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isExpired ? STATUS_BADGES.EXPIRED : (STATUS_BADGES[lot.status] || '')}`}>{isExpired ? 'EXPIRED' : lot.status}</span>
                                             </td>
-                                            <td className="px-3 py-2 text-right font-bold">{lot.currentQuantity} <span className="text-xs font-normal text-gray-400">{lot.unitOfMeasure}</span></td>
+                                            <td className="px-3 py-2 text-right font-bold">
+                                                {lot.currentQuantity != null ? lot.currentQuantity : <span className="text-amber-500 font-medium">Missing</span>} <span className="text-xs font-normal text-gray-400">{lot.unitOfMeasure}</span>
+                                            </td>
                                             <td className={`px-3 py-2 text-xs text-center ${isExpired ? 'text-red-600 font-bold' : ''}`}>
                                                 {lot.expiryDate ? new Date(lot.expiryDate).toLocaleDateString() : '—'}
                                             </td>
@@ -681,10 +697,13 @@ const Inventory = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <span className={`font-bold ${item.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-sf-text'}`}>
-                                            {item.totalStock?.toFixed(1) || '0.0'}
+                                        <span className={`font-bold ${item.isOutOfStock ? 'text-red-600 dark:text-red-400' : item.isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-sf-text'}`}>
+                                            {item.usableStock === null ? '—' : (typeof item.usableStock === 'number' ? item.usableStock.toFixed(1) : (item.totalStock?.toFixed(1) || '0.0'))}
                                         </span>
                                         <span className="text-xs text-gray-400 ml-1">{item.unitOfMeasure}</span>
+                                        {item.hasMissingQuantity && (
+                                            <span className="ml-1 text-xs text-purple-600 dark:text-purple-400 font-semibold" title="Lot(s) with missing quantity">⚠️</span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 text-center text-xs">
                                         {item.nearestExpiry ? (
@@ -694,16 +713,18 @@ const Inventory = () => {
                                         ) : <span className="text-gray-300">—</span>}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        <div className="flex items-center justify-center gap-1">
-                                            {item.isLowStock && <span title="Low stock" className="text-red-500"><AlertTriangle size={14} /></span>}
+                                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                            {item.isOutOfStock && <span title="Out of usable stock" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">OUT OF STOCK</span>}
+                                            {item.isLowStock && !item.isOutOfStock && <span title="Low stock" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-0.5"><AlertTriangle size={10} /> LOW</span>}
+                                            {item.hasExpired && <span title={`${item.expiredStock != null ? `${item.expiredStock} ${item.unitOfMeasure}` : ''} in expired lots`} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 flex items-center gap-0.5"><XCircle size={10} /> EXPIRED</span>}
                                             {item.isExpiringSoon && <span title="Expiring soon" className="text-amber-500"><Clock size={14} /></span>}
                                             {item.hasQuarantined && <span title="Has quarantined lots" className="text-yellow-500"><ShieldAlert size={14} /></span>}
-                                            {item.hasExpired && <span title="Has expired lots" className="text-red-400"><XCircle size={14} /></span>}
+                                            {item.hasMissingQuantity && <span title="Missing quantity on one or more lots" className="text-purple-500 font-bold text-xs">?</span>}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            {canConsume && item.totalStock > 0 && (
+                                            {canConsume && ((item.usableStock > 0) || (item.usableStock === null && item.availableLotCount > 0)) && (
                                                 <button onClick={(e) => handleQuickConsume(e, item)}
                                                     className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors" title="Quick Consume (FEFO)">
                                                     <MinusCircle size={14} />
