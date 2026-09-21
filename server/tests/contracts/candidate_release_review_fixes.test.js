@@ -240,6 +240,53 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
         });
 
+        test('Technician with stale cross-lab assignment: foreign report excluded from search and denied in detail (search/detail parity)', async () => {
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.decode(techTokenA);
+            const techUsername = decoded?.username || 'test_lab_technician_labr1gtm';
+            const ts = Date.now();
+
+            const staleWorkItem = await prisma.workItem.create({
+                data: {
+                    id: `WI-STALE-CROSS-${ts}`,
+                    sampleId: sampleB.id,
+                    analysis: 'PH',
+                    status: 'ASSIGNED',
+                    assignedTo: techUsername,
+                    labId: labBId
+                }
+            });
+
+            try {
+                // Technician A in Lab A searches reports: MUST contain Report A, MUST NOT contain Report B
+                const searchRes = await request(app)
+                    .get('/api/reports/search')
+                    .set('Authorization', `Bearer ${techTokenA}`);
+
+                expect(searchRes.status).toBe(200);
+                const reportIds = searchRes.body.reports.map(r => r.id);
+                expect(reportIds).toContain(reportAPub.id);
+                expect(reportIds).not.toContain(reportBPub.id);
+
+                // Technician A accesses Report B detail: MUST return 403
+                const detailRes = await request(app)
+                    .get(`/api/reports/${reportBPub.id}`)
+                    .set('Authorization', `Bearer ${techTokenA}`);
+
+                expect(detailRes.status).toBe(403);
+                expect(detailRes.body.error).toMatch(/scope/i);
+
+                // Technician A accesses Report A detail: MUST return 200
+                const ownDetailRes = await request(app)
+                    .get(`/api/reports/${reportAPub.id}`)
+                    .set('Authorization', `Bearer ${techTokenA}`);
+
+                expect(ownDetailRes.status).toBe(200);
+            } finally {
+                await prisma.workItem.delete({ where: { id: staleWorkItem.id } }).catch(() => {});
+            }
+        });
+
         afterAll(async () => {
             const reportIds = [reportASup?.id, reportAPub?.id, reportBPub?.id].filter(Boolean);
             if (reportIds.length > 0) {
@@ -786,19 +833,103 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             try { fs.unlinkSync(tempDbPath); } catch {}
         });
 
-        test('Dry run detects 5 missing additive columns without modifying database', () => {
+        test('Dry run detects 5 missing additive columns without modifying database or sqlite_master', () => {
+            const crypto = require('crypto');
+            const getMasterHash = (file) => {
+                const d = new Database(file);
+                const rows = d.prepare("SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY type, name").all();
+                d.close();
+                return crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+            };
+
+            const hashBefore = getMasterHash(tempDbPath);
             const dryResult = migrateProjectTemplatesAndPolicy(tempDbPath, { dryRun: true });
+            const hashAfter = getMasterHash(tempDbPath);
+
             expect(dryResult.success).toBe(true);
             expect(dryResult.dryRun).toBe(true);
+            expect(dryResult.applied).toBe(false);
+            expect(dryResult.needsMigration).toBe(true);
             expect(dryResult.missingColumns).toEqual(
                 expect.arrayContaining(['templateId', 'templateVersion', 'policyConfig', 'programmeCode', 'parentProjectId'])
             );
+            expect(hashBefore).toBe(hashAfter);
 
             // Verify database table still has only 7 columns
             const db = new Database(tempDbPath);
             const cols = db.prepare("PRAGMA table_info('Project')").all();
             db.close();
             expect(cols.length).toBe(7);
+        });
+
+        test('Dry run on DB with columns present but missing index never creates index or mutates sqlite_master, and apply mode creates it atomically', () => {
+            const crypto = require('crypto');
+            const missingIndexDbPath = path.join(os.tmpdir(), `test_missing_idx_${Date.now()}.db`);
+            const d1 = new Database(missingIndexDbPath);
+            d1.exec(`
+                CREATE TABLE "Project" (
+                    "id" TEXT PRIMARY KEY,
+                    "code" TEXT UNIQUE NOT NULL,
+                    "name" TEXT NOT NULL,
+                    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+                    "projectType" TEXT DEFAULT 'OPEN_INTAKE',
+                    "templateId" TEXT DEFAULT 'GENERIC_OPEN_INTAKE',
+                    "templateVersion" TEXT DEFAULT '1.0.0',
+                    "policyConfig" TEXT,
+                    "programmeCode" TEXT,
+                    "parentProjectId" TEXT REFERENCES "Project"("id"),
+                    "createdAt" DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    "updatedAt" DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+            const getMasterHash = (d) => {
+                const rows = d.prepare("SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY type, name").all();
+                return crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+            };
+            const hashBefore = getMasterHash(d1);
+            const idxCountBefore = d1.prepare("SELECT count(*) n FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get().n;
+            d1.close();
+
+            expect(idxCountBefore).toBe(0);
+
+            try {
+                // Execute dry-run: MUST NOT mutate sqlite_master, MUST report applied: false
+                const dryResult = migrateProjectTemplatesAndPolicy(missingIndexDbPath, { dryRun: true });
+                expect(dryResult.success).toBe(true);
+                expect(dryResult.dryRun).toBe(true);
+                expect(dryResult.applied).toBe(false);
+                expect(dryResult.needsMigration).toBe(true);
+                expect(dryResult.missingColumns).toEqual([]);
+                expect(dryResult.missingIndex).toBe(true);
+
+                const d2 = new Database(missingIndexDbPath);
+                const hashAfter = getMasterHash(d2);
+                const idxCountAfter = d2.prepare("SELECT count(*) n FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get().n;
+                d2.close();
+
+                expect(idxCountAfter).toBe(0);
+                expect(hashBefore).toBe(hashAfter);
+
+                // Now execute apply mode: should atomically create index and report applied: true
+                const applyResult = migrateProjectTemplatesAndPolicy(missingIndexDbPath);
+                expect(applyResult.success).toBe(true);
+                expect(applyResult.applied).toBe(true);
+                expect(applyResult.addedColumns).toEqual([]);
+                expect(applyResult.createdIndex).toBe(true);
+
+                const d3 = new Database(missingIndexDbPath);
+                const idxCountFinal = d3.prepare("SELECT count(*) n FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get().n;
+                d3.close();
+                expect(idxCountFinal).toBe(1);
+
+                // Rerun in apply mode: idempotent no-op
+                const rerunResult = migrateProjectTemplatesAndPolicy(missingIndexDbPath);
+                expect(rerunResult.success).toBe(true);
+                expect(rerunResult.applied).toBe(false);
+                expect(rerunResult.missingIndex).toBe(false);
+            } finally {
+                try { fs.unlinkSync(missingIndexDbPath); } catch {}
+            }
         });
 
         test('Migration successfully adds all columns, index, and default values while preserving data', () => {
@@ -889,12 +1020,10 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             }
         });
 
-        test('Populated upgrade rehearsal on full legacy schema preserves 100% rows and enables zero-error Prisma querying and conservative policy checks', async () => {
-            const devDbPath = path.resolve(__dirname, '..', '..', 'prisma', 'dev.db');
-            const rehearsalDir = path.resolve(__dirname, '..', `tmp_rehearsal_full_${Date.now()}`);
-            fs.mkdirSync(rehearsalDir, { recursive: true });
-            const rehearsalDbPath = path.join(rehearsalDir, 'rehearsal_full.db');
-            fs.copyFileSync(devDbPath, rehearsalDbPath);
+        test('Populated upgrade rehearsal on full legacy schema preserves 100% rows, verifies result/report/history/share checksums, exercises migrated HTTP auth and supported-channel policy', async () => {
+            const iso = require('../../scripts/journey_db_isolation.cjs');
+            const fixture = iso.createDisposableDatabase();
+            const rehearsalDbPath = fixture.dbPath;
 
             const db = new Database(rehearsalDbPath);
             db.pragma('foreign_keys = OFF');
@@ -931,7 +1060,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 DROP INDEX IF EXISTS "Project_parentProjectId_idx";
             `);
 
-            // Populate full legacy schema across all operational domains
+            // Populate full legacy schema across all operational domains: Labs, Projects, Users, Samples, Batches, WorkItems, Results, Reports, ReportShareLinks, AuditLogs
             db.exec(`
                 INSERT INTO "Lab" ("id", "code", "name", "country", "address", "email", "isActive", "createdAt", "updatedAt")
                 VALUES ('LAB-GTM', 'GTM1', 'Guatemala Central Lab', 'GTM', 'Guatemala City', 'gtm@example.com', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -941,43 +1070,69 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 VALUES ('PRJ-GTM', 'PRJ-GTM-ALPHA', 'Guatemala Soil Project', 'ACTIVE', 'OPEN_INTAKE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
                        ('PRJ-KEN', 'PRJ-KEN-BETA', 'Kenya Agronomy Project', 'ACTIVE', 'OPEN_INTAKE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-                INSERT INTO "User" ("id", "username", "password", "email", "role", "labId", "countries", "projects", "isActive", "createdAt", "updatedAt")
-                VALUES ('USR-TECH', 'gtm_tech', 'hash', 'tech@example.com', 'LAB_TECHNICIAN', 'LAB-GTM', '["GTM"]', '[]', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-MGR', 'gtm_mgr', 'hash', 'mgr@example.com', 'LAB_MANAGER', 'LAB-GTM', '["GTM"]', '[]', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-NAT', 'gtm_nat', 'hash', 'nat@example.com', 'MASTER_USER', NULL, '["GTM"]', '[]', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-PM', 'ken_pm', 'hash', 'pm@example.com', 'PROJECT_MANAGER', NULL, '[]', '["PRJ-KEN-BETA"]', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                INSERT INTO "User" ("id", "username", "password", "email", "role", "labId", "countries", "projects", "isActive", "tokenVersion", "createdAt", "updatedAt")
+                VALUES ('USR-TECH', 'gtm_tech', 'hash', 'tech@example.com', 'LAB_TECHNICIAN', 'LAB-GTM', '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('USR-MGR', 'gtm_mgr', 'hash', 'mgr@example.com', 'LAB_MANAGER', 'LAB-GTM', '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('USR-NAT', 'gtm_nat', 'hash', 'nat@example.com', 'MASTER_USER', NULL, '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('USR-PM', 'ken_pm', 'hash', 'pm@example.com', 'PROJECT_MANAGER', NULL, '[]', '["PRJ-KEN-BETA"]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
                 INSERT INTO "Sample" ("id", "originalId", "projectId", "projectCode", "country", "assignedLab", "status", "depthTop", "depthBottom", "createdAt", "updatedAt")
                 VALUES ('SMP-001', 'FIELD-001', 'PRJ-GTM', 'PRJ-GTM-ALPHA', 'GTM', 'LAB-GTM', 'ACCEPTED', 0, 20, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
                        ('SMP-002', 'FIELD-002', 'PRJ-KEN', 'PRJ-KEN-BETA', 'KEN', 'LAB-KEN', 'ACCEPTED', 20, 50, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
                 INSERT INTO "Batch" ("id", "analysis", "labId", "status", "createdBy", "createdAt")
-                VALUES ('BATCH-001', 'PH', 'LAB-GTM', 'COMPLETED', 'gtm_mgr', CURRENT_TIMESTAMP);
+                VALUES ('BATCH-001', 'PH', 'LAB-GTM', 'COMPLETED', 'gtm_mgr', CURRENT_TIMESTAMP),
+                       ('BATCH-002', 'PH', 'LAB-KEN', 'COMPLETED', 'ken_pm', CURRENT_TIMESTAMP);
 
                 INSERT INTO "WorkItem" ("id", "sampleId", "analysis", "status", "assignedTo", "labId", "assignedLab", "batchId", "createdAt", "updatedAt")
                 VALUES ('WI-001', 'SMP-001', 'PH', 'COMPLETED', 'gtm_tech', 'LAB-GTM', 'LAB-GTM', 'BATCH-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('WI-002', 'SMP-002', 'PH', 'ASSIGNED', NULL, 'LAB-KEN', 'LAB-KEN', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                       ('WI-002', 'SMP-002', 'PH', 'ASSIGNED', NULL, 'LAB-KEN', 'LAB-KEN', 'BATCH-002', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+                INSERT INTO "Result" ("id", "sampleId", "param", "value", "numericValue", "unit", "isValid", "isCurrent", "provenance", "createdAt", "updatedAt")
+                VALUES ('RES-001', 'SMP-001', 'pH', '6.85', 6.85, 'pH', 1, 1, 'MEASURED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('RES-002', 'SMP-002', 'pH', '7.12', 7.12, 'pH', 1, 1, 'MEASURED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
                 INSERT INTO "Report" ("id", "sampleId", "labId", "status", "projectCode", "generatedBy", "content", "version", "createdAt", "updatedAt")
-                VALUES ('REP-PUB', 'SMP-001', 'LAB-GTM', 'PUBLISHED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"ok"}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('REP-SUP', 'SMP-001', 'LAB-GTM', 'SUPERSEDED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"old"}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                VALUES ('REP-PUB', 'SMP-001', 'LAB-GTM', 'PUBLISHED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"ok","ph":6.85}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('REP-SUP', 'SMP-001', 'LAB-GTM', 'SUPERSEDED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"old","ph":6.80}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                       ('REP-KEN', 'SMP-002', 'LAB-KEN', 'PUBLISHED', 'PRJ-KEN-BETA', 'ken_pm', '{"status":"ok","ph":7.12}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+                INSERT INTO "ReportShareLink" ("id", "reportId", "tokenHash", "expiresAt", "isRevoked", "createdBy", "createdAt")
+                VALUES ('RSL-001', 'REP-PUB', 'synthetic-token-hash-pub1', '2030-01-01 00:00:00', 0, 'gtm_mgr', CURRENT_TIMESTAMP);
+
+                INSERT INTO "AuditLog" ("id", "entity", "entityId", "action", "performedBy", "performedByName", "details", "timestamp")
+                VALUES ('AUD-001', 'REPORT', 'REP-PUB', 'REPORT_GENERATED', 'USR-MGR', 'gtm_mgr', 'Report published', CURRENT_TIMESTAMP),
+                       ('AUD-002', 'SAMPLE', 'SMP-001', 'SAMPLE_ACCEPTED', 'USR-TECH', 'gtm_tech', 'Sample accepted', CURRENT_TIMESTAMP);
             `);
             db.pragma('foreign_keys = ON');
 
-            // Count rows prior to migration
-            const preCounts = {
-                projects: db.prepare('SELECT count(*) as c FROM "Project"').get().c,
-                labs: db.prepare('SELECT count(*) as c FROM "Lab"').get().c,
-                users: db.prepare('SELECT count(*) as c FROM "User"').get().c,
-                samples: db.prepare('SELECT count(*) as c FROM "Sample"').get().c,
-                batches: db.prepare('SELECT count(*) as c FROM "Batch"').get().c,
-                workItems: db.prepare('SELECT count(*) as c FROM "WorkItem"').get().c,
-                reports: db.prepare('SELECT count(*) as c FROM "Report"').get().c
+            // Compute exact SHA256 checksums of raw table contents BEFORE migration
+            const crypto = require('crypto');
+            const getTableSnapshot = (table, orderCol = 'id') => {
+                const rows = db.prepare(`SELECT * FROM "${table}" ORDER BY "${orderCol}" ASC`).all();
+                const hash = crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+                return { rows, hash, count: rows.length };
+            };
+
+            const preSnapshots = {
+                results: getTableSnapshot('Result'),
+                reports: getTableSnapshot('Report'),
+                shareLinks: getTableSnapshot('ReportShareLink'),
+                auditLogs: getTableSnapshot('AuditLog'),
+                workItems: getTableSnapshot('WorkItem'),
+                samples: getTableSnapshot('Sample'),
+                batches: getTableSnapshot('Batch'),
+                labs: getTableSnapshot('Lab'),
+                users: getTableSnapshot('User'),
+                projects: getTableSnapshot('Project')
             };
             db.close();
 
-            expect(preCounts.projects).toBe(2);
-            expect(preCounts.reports).toBe(2);
+            expect(preSnapshots.results.count).toBe(2);
+            expect(preSnapshots.reports.count).toBe(3);
+            expect(preSnapshots.shareLinks.count).toBe(1);
+            expect(preSnapshots.auditLogs.count).toBe(2);
+            expect(preSnapshots.projects.count).toBe(2);
 
             // Execute additive migration runner on populated legacy DB
             const migResult = migrateProjectTemplatesAndPolicy(rehearsalDbPath);
@@ -992,47 +1147,195 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 'parentProjectId'
             ]);
 
+            // Open migrated DB and verify 100% BYTE / CHECKSUM CONSERVATION
+            const postDb = new Database(rehearsalDbPath);
+            const getPostSnapshot = (table, orderCol = 'id') => {
+                const rows = postDb.prepare(`SELECT * FROM "${table}" ORDER BY "${orderCol}" ASC`).all();
+                const hash = crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+                return { rows, hash, count: rows.length };
+            };
+
+            const postSnapshots = {
+                results: getPostSnapshot('Result'),
+                reports: getPostSnapshot('Report'),
+                shareLinks: getPostSnapshot('ReportShareLink'),
+                auditLogs: getPostSnapshot('AuditLog'),
+                workItems: getPostSnapshot('WorkItem'),
+                samples: getPostSnapshot('Sample'),
+                batches: getPostSnapshot('Batch'),
+                labs: getPostSnapshot('Lab'),
+                users: getPostSnapshot('User')
+            };
+
+            // Assert exact checksum match across all tables (0 byte mutation on historical records)
+            expect(postSnapshots.results.hash).toBe(preSnapshots.results.hash);
+            expect(postSnapshots.reports.hash).toBe(preSnapshots.reports.hash);
+            expect(postSnapshots.shareLinks.hash).toBe(preSnapshots.shareLinks.hash);
+            expect(postSnapshots.auditLogs.hash).toBe(preSnapshots.auditLogs.hash);
+            expect(postSnapshots.workItems.hash).toBe(preSnapshots.workItems.hash);
+            expect(postSnapshots.samples.hash).toBe(preSnapshots.samples.hash);
+            expect(postSnapshots.batches.hash).toBe(preSnapshots.batches.hash);
+            expect(postSnapshots.labs.hash).toBe(preSnapshots.labs.hash);
+            expect(postSnapshots.users.hash).toBe(preSnapshots.users.hash);
+
+            // Forward/Backward Compatibility: Old legacy code queries selecting existing columns still execute identically
+            const legacyQueryRows = postDb.prepare('SELECT id, code, name, status, projectType FROM "Project" ORDER BY id ASC').all();
+            expect(legacyQueryRows.length).toBe(2);
+            expect(legacyQueryRows[0].code).toBe('PRJ-GTM-ALPHA');
+            expect(legacyQueryRows[1].code).toBe('PRJ-KEN-BETA');
+
+            postDb.close();
+
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors
             const adapter = new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath, timeout: 5000 });
             const rehearsalPrisma = new PrismaClient({ adapter });
 
             try {
                 const projects = await rehearsalPrisma.project.findMany();
-                expect(projects.length).toBe(preCounts.projects);
+                expect(projects.length).toBe(2);
                 expect(projects[0].templateId).toBe('GENERIC_OPEN_INTAKE');
                 expect(projects[0].templateVersion).toBe('1.0.0');
                 expect(projects[0].policyConfig).toBeNull();
                 expect(projects[0].programmeCode).toBeNull();
                 expect(projects[0].parentProjectId).toBeNull();
 
-                const samples = await rehearsalPrisma.sample.findMany({ include: { project: true } });
-                expect(samples.length).toBe(preCounts.samples);
-                expect(samples[0].project.code).toBe('PRJ-GTM-ALPHA');
+                const results = await rehearsalPrisma.result.findMany();
+                expect(results.length).toBe(2);
+                expect(results[0].value).toBe('6.85');
+                expect(results[0].numericValue).toBe(6.85);
+                expect(results[1].value).toBe('7.12');
+                expect(results[1].numericValue).toBe(7.12);
 
-                const reports = await rehearsalPrisma.report.findMany();
-                expect(reports.length).toBe(preCounts.reports);
-                const statuses = reports.map(r => r.status);
-                expect(statuses).toContain('PUBLISHED');
-                expect(statuses).toContain('SUPERSEDED');
+                const shareLinks = await rehearsalPrisma.reportShareLink.findMany();
+                expect(shareLinks.length).toBe(1);
+                expect(shareLinks[0].tokenHash).toBe('synthetic-token-hash-pub1');
 
-                const users = await rehearsalPrisma.user.findMany();
-                expect(users.length).toBe(preCounts.users);
+                const auditLogs = await rehearsalPrisma.auditLog.findMany();
+                expect(auditLogs.length).toBe(2);
 
-                const workItems = await rehearsalPrisma.workItem.findMany();
-                expect(workItems.length).toBe(preCounts.workItems);
-
-                const batches = await rehearsalPrisma.batch.findMany();
-                expect(batches.length).toBe(preCounts.batches);
-
-                // Conservative Policy Behavior: Migrated projects default to open intake channels
-                const defaultAdmission = projectPolicyService.canAdmitSample({
+                // Supported Channel Policy Behavior on migrated projects
+                // 1. Unconfigured migrated project defaults to open intake (DESK allowed directly)
+                const openIntakeDesk = projectPolicyService.canAdmitSample({
                     project: projects[0],
-                    channel: 'DIRECT',
+                    channel: 'DESK',
                     actor: { role: 'SAMPLE_RECEPTION', labId: 'LAB-GTM', isActive: true },
                     labId: 'LAB-GTM'
                 });
-                expect(defaultAdmission.exceptionRequired).toBe(true);
-                expect(defaultAdmission.code).toBe('EXCEPTION_REQUIRED');
+                expect(openIntakeDesk.allowed).toBe(true);
+
+                // 2. Project configured with requiresExceptionForDesk: true requires exception record for DESK
+                const deskConfiguredProject = {
+                    ...projects[0],
+                    policyConfig: JSON.stringify({
+                        allowedChannels: ['DESK'],
+                        requiresExceptionForDesk: true,
+                        allowDirectRegistration: false
+                    })
+                };
+                const deskNoException = projectPolicyService.canAdmitSample({
+                    project: deskConfiguredProject,
+                    channel: 'DESK',
+                    actor: { role: 'SAMPLE_RECEPTION', labId: 'LAB-GTM', isActive: true },
+                    labId: 'LAB-GTM',
+                    hasException: false
+                });
+                expect(deskNoException.allowed).toBe(false);
+                expect(deskNoException.exceptionRequired).toBe(true);
+                expect(deskNoException.code).toBe('EXCEPTION_REQUIRED');
+
+                // 3. Channel DESK with authorized manager exception -> allowed
+                const deskWithManagerException = projectPolicyService.canAdmitSample({
+                    project: deskConfiguredProject,
+                    channel: 'DESK',
+                    actor: { role: 'LAB_MANAGER', labId: 'LAB-GTM', isActive: true, username: 'gtm_mgr' },
+                    labId: 'LAB-GTM',
+                    hasException: true,
+                    exceptionRecord: { reason: 'Authorized special intake by manager' }
+                });
+                expect(deskWithManagerException.allowed).toBe(true);
+
+                // 4. Channel MANIFEST on project allowing MANIFEST
+                const manifestAllowed = projectPolicyService.canAdmitSample({
+                    project: { ...projects[0], policyConfig: JSON.stringify({ allowedChannels: ['MANIFEST'] }) },
+                    channel: 'MANIFEST',
+                    actor: { role: 'SAMPLE_RECEPTION', labId: 'LAB-GTM', isActive: true },
+                    labId: 'LAB-GTM'
+                });
+                expect(manifestAllowed.allowed).toBe(true);
+
+                // 5. Channel KOBO when project only allows DESK
+                const koboDenied = projectPolicyService.canAdmitSample({
+                    project: deskConfiguredProject,
+                    channel: 'KOBO',
+                    actor: { role: 'SAMPLE_RECEPTION', labId: 'LAB-GTM', isActive: true },
+                    labId: 'LAB-GTM'
+                });
+                expect(koboDenied.allowed).toBe(false);
+                expect(koboDenied.exceptionRequired).toBe(true);
+
+                // Real Migrated HTTP Authorization Requests:
+                // Verify via child process running against the migrated database
+                const childScript = `
+                    const root = 'C:/Users/yigin/Documents/soilfer-lims/server';
+                    const { createRequire } = require('module');
+                    const req = createRequire(root + '/package.json');
+                    process.env.DATABASE_PATH = ${JSON.stringify(rehearsalDbPath)};
+                    process.env.DATABASE_URL = 'file:' + ${JSON.stringify(rehearsalDbPath)};
+                    process.env.NODE_ENV = 'test';
+                    process.env.DISABLE_BACKGROUND_JOBS = 'true';
+                    process.env.JWT_SECRET = 'test-secret-key-12345';
+                    const prisma = req('./prisma');
+                    const app = req('./app');
+                    const request = req('supertest');
+                    const jwt = req('jsonwebtoken');
+
+                    (async () => {
+                        const tokenTech = jwt.sign({ id: 'USR-TECH', username: 'gtm_tech', role: 'LAB_TECHNICIAN', labId: 'LAB-GTM', countries: ['GTM'], projects: [], tokenVersion: 0 }, process.env.JWT_SECRET);
+                        const tokenNat = jwt.sign({ id: 'USR-NAT', username: 'gtm_nat', role: 'MASTER_USER', labId: null, countries: ['GTM'], projects: [], tokenVersion: 0 }, process.env.JWT_SECRET);
+                        const tokenPM = jwt.sign({ id: 'USR-PM', username: 'ken_pm', role: 'PROJECT_MANAGER', labId: null, countries: [], projects: ['PRJ-KEN-BETA'], tokenVersion: 0 }, process.env.JWT_SECRET);
+
+                        // 1. Tech search reports: sees only GTM report, not Kenyan report
+                        const r1 = await request(app).get('/api/reports/search').set('Authorization', 'Bearer ' + tokenTech);
+                        // 2. Tech detail on Kenyan report: 403
+                        const r2 = await request(app).get('/api/reports/REP-KEN').set('Authorization', 'Bearer ' + tokenTech);
+                        // 3. National user search: sees only GTM report
+                        const r3 = await request(app).get('/api/reports/search').set('Authorization', 'Bearer ' + tokenNat);
+                        // 4. PM search: sees only Kenyan report
+                        const r4 = await request(app).get('/api/reports/search').set('Authorization', 'Bearer ' + tokenPM);
+
+                        const out = {
+                            techSearch: { status: r1.status, reports: r1.body.reports?.map(x => x.id) },
+                            techKenDetail: { status: r2.status, error: r2.body.error },
+                            natSearch: { status: r3.status, reports: r3.body.reports?.map(x => x.id) },
+                            pmSearch: { status: r4.status, reports: r4.body.reports?.map(x => x.id) }
+                        };
+                        console.log('HTTP_MIGRATED_RESULTS:' + JSON.stringify(out));
+                        app.stopBackgroundSchedulers();
+                        await prisma.$disconnect();
+                    })().catch(e => { console.error(e); process.exit(1); });
+                `;
+
+                const cp = require('child_process');
+                const verifyScriptPath = path.join(fixture.runnerDir, 'verify_http.js');
+                fs.writeFileSync(verifyScriptPath, childScript, 'utf8');
+                const outBuffer = cp.execSync(`node "${verifyScriptPath}"`, { cwd: path.resolve(__dirname, '..', '..') });
+                const outLine = outBuffer.toString().split('\n').find(l => l.includes('HTTP_MIGRATED_RESULTS:'));
+                expect(outLine).toBeDefined();
+                const httpResults = JSON.parse(outLine.replace('HTTP_MIGRATED_RESULTS:', '').trim());
+
+                expect(httpResults.techSearch.status).toBe(200);
+                expect(httpResults.techSearch.reports).toContain('REP-PUB');
+                expect(httpResults.techSearch.reports).not.toContain('REP-KEN');
+
+                expect(httpResults.techKenDetail.status).toBe(403);
+
+                expect(httpResults.natSearch.status).toBe(200);
+                expect(httpResults.natSearch.reports).toContain('REP-PUB');
+                expect(httpResults.natSearch.reports).not.toContain('REP-KEN');
+
+                expect(httpResults.pmSearch.status).toBe(200);
+                expect(httpResults.pmSearch.reports).toContain('REP-KEN');
+                expect(httpResults.pmSearch.reports).not.toContain('REP-PUB');
 
                 // Idempotent rerun check
                 const rerun = migrateProjectTemplatesAndPolicy(rehearsalDbPath);
@@ -1042,7 +1345,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 expect(rerun.totalProjects).toBe(2);
             } finally {
                 await rehearsalPrisma.$disconnect();
-                try { fs.rmSync(rehearsalDir, { recursive: true, force: true }); } catch {}
+                iso.cleanupDisposableDatabase(fixture.runnerDir);
             }
         });
     });

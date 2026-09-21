@@ -78,24 +78,35 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
         ];
 
         const missingColumns = requiredColumns.filter(c => !existingColNames.has(c.name));
+        const indexCheck = db.prepare("SELECT 1 FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get();
+        const missingIndex = !indexCheck;
+        const needsMigration = missingColumns.length > 0 || missingIndex;
 
-        if (missingColumns.length === 0) {
-            // Ensure index exists and foreign key constraints pass in no-op state as well
-            db.exec('CREATE INDEX IF NOT EXISTS "Project_parentProjectId_idx" ON "Project"("parentProjectId")');
+        if (isDryRun) {
+            console.log(`[MIGRATE-PROJECT-POLICY] DRY RUN: needsMigration=${needsMigration}, missingColumns=${missingColumns.map(c => c.name).join(', ')}, missingIndex=${missingIndex}`);
+            const totalCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
+            return {
+                success: true,
+                dryRun: true,
+                applied: false,
+                needsMigration,
+                missingColumns: missingColumns.map(c => c.name),
+                missingIndex,
+                totalProjects: totalCount
+            };
+        }
+
+        if (!needsMigration) {
             const fkIssues = db.prepare('PRAGMA foreign_key_check("Project")').all();
             if (fkIssues.length > 0) {
                 throw new Error(`[MIGRATE-PROJECT-POLICY] Foreign key check failed in existing schema: ${JSON.stringify(fkIssues)}`);
             }
-            console.log('[MIGRATE-PROJECT-POLICY] All project template & policy columns already exist. Verification successful (no-op).');
+            console.log('[MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).');
             const totalCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
-            return { success: true, applied: false, missingColumns: [], totalProjects: totalCount };
+            return { success: true, applied: false, missingColumns: [], missingIndex: false, totalProjects: totalCount };
         }
 
-        console.log(`[MIGRATE-PROJECT-POLICY] Found ${missingColumns.length} missing column(s): ${missingColumns.map(c => c.name).join(', ')}`);
-
-        if (isDryRun) {
-            return { success: true, dryRun: true, missingColumns: missingColumns.map(c => c.name) };
-        }
+        console.log(`[MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=${missingColumns.map(c => c.name).join(', ')}, missingIndex=${missingIndex}`);
 
         const beforeCount = db.prepare('SELECT count(*) as total FROM "Project"').get()?.total || 0;
 
@@ -106,8 +117,11 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
                 db.exec(`ALTER TABLE "Project" ADD COLUMN "${col.name}" ${col.definition}`);
             }
 
-            // Create index on parentProjectId if not already present
-            db.exec('CREATE INDEX IF NOT EXISTS "Project_parentProjectId_idx" ON "Project"("parentProjectId")');
+            // Create index on parentProjectId if missing
+            if (missingIndex) {
+                console.log('[MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...');
+                db.exec('CREATE INDEX IF NOT EXISTS "Project_parentProjectId_idx" ON "Project"("parentProjectId")');
+            }
 
             // Post-migration column presence check inside transaction
             const postColumns = db.prepare("PRAGMA table_info('Project')").all();
@@ -116,6 +130,12 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
                 if (!postColNames.has(col.name)) {
                     throw new Error(`[MIGRATE-PROJECT-POLICY] Post-migration check failed: column "${col.name}" is still missing.`);
                 }
+            }
+
+            // Post-migration index presence check inside transaction
+            const postIndexCheck = db.prepare("SELECT 1 FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get();
+            if (!postIndexCheck) {
+                throw new Error('[MIGRATE-PROJECT-POLICY] Post-migration check failed: index "Project_parentProjectId_idx" is missing.');
             }
 
             // Verify row count preservation inside transaction
@@ -140,6 +160,7 @@ function migrateProjectTemplatesAndPolicy(dbPath, options = {}) {
             success: true,
             applied: true,
             addedColumns: missingColumns.map(c => c.name),
+            createdIndex: missingIndex,
             totalProjects: afterCount
         };
     } catch (err) {

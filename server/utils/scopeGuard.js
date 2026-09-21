@@ -122,7 +122,22 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
             if (altLabField) orClauses.push({ [altLabField]: labScope });
         }
         if (user.role === 'LAB_TECHNICIAN' && user.username) {
-            orClauses.push({ workItems: { some: { assignedTo: user.username } } });
+            // Lab technicians can only access assignments within their authorized lab scope
+            if (labScope) {
+                orClauses.push({
+                    AND: [
+                        { workItems: { some: { assignedTo: user.username } } },
+                        {
+                            OR: [
+                                { [labField]: labScope },
+                                ...(altLabField ? [{ [altLabField]: labScope }] : [])
+                            ]
+                        }
+                    ]
+                });
+            } else {
+                orClauses.push({ workItems: { some: { assignedTo: user.username } } });
+            }
         }
         const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';
         if (isNationalRole && user.countries) {
@@ -230,7 +245,18 @@ function canAccessEntity(user, entity, options = {}) {
         return true;
     }
 
-    if (Array.isArray(entity.workItems) && entity.workItems.some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id)) {
+    if (Array.isArray(entity.workItems) && entity.workItems.some(wi => {
+        const isAssigned = (wi.assignedTo === user.username || wi.assignedTo === user.id);
+        if (!isAssigned) return false;
+        if (labScope) {
+            const wiLab = wi.labId || wi.assignedLab;
+            const entityLab = entity[labField] || (altLabField && entity[altLabField]);
+            if ((wiLab && wiLab !== labScope) || (entityLab && entityLab !== labScope)) {
+                return false;
+            }
+        }
+        return true;
+    })) {
         return true;
     }
 

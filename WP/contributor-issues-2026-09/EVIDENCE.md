@@ -488,6 +488,94 @@ Status Key:
   - Added `afterAll` teardown hooks across describe blocks in `candidate_release_review_fixes.test.js`.
 - **Verification**: Combined sequential execution of `candidate_release_review_fixes.test.js` and `lab_isolation.test.js` passed 37/37 tests with zero cross-talk.
 
+---
+
+### Remediation of Retest Findings at 0cdcaed (Candidate Final Hardening)
+
+#### 1. R1: Technician Stale Assignment Report Search/Detail Parity
+- **Defect Identified**: In retest at `0cdcaed`, technician in Lab A with a stale work item assigned on foreign sample B (in Lab B) saw report B in `GET /api/reports/search` (status 200) while `GET /api/reports/IR-REPORT-B` returned 403. This was caused by `scopeGuard.buildScopedWhere` adding an unconstrained `OR: [{ workItems: { some: { assignedTo: user.username } } }]` for non-admin users, which bypassed laboratory boundaries and matched foreign samples with stale technician assignments.
+- **Root Cause & Fix**:
+  - In `server/utils/scopeGuard.js:buildScopedWhere`: constrained technician `workItems` matching to strictly require the laboratory scope when `user.labId` is present:
+    ```javascript
+    if (user.role === 'LAB_TECHNICIAN' && user.username) {
+        if (labScope) {
+            orClauses.push({
+                AND: [
+                    { workItems: { some: { assignedTo: user.username } } },
+                    { OR: [{ [labField]: labScope }, ...(altLabField ? [{ [altLabField]: labScope }] : [])] }
+                ]
+            });
+        } else {
+            orClauses.push({ workItems: { some: { assignedTo: user.username } } });
+        }
+    }
+    ```
+  - In `server/utils/scopeGuard.js:canAccessEntity`: ensured `entity.workItems` checking respects `labScope` so foreign-lab work item assignments never grant access.
+  - In `server/controllers/reportController.js:searchReports`: replaced indirect Prisma query filtering with direct evaluation via the shared authoritative helper `isReportAuthorized(req.user, report, sample)`. Candidate samples are resolved and passed directly into `isReportAuthorized` for every report row, guaranteeing 100% authorization parity between search lists, pagination counts, and single-report detail endpoints.
+  - Added scope validation to `listShareLinks` and `revokeShareLink`.
+- **Verification**:
+  - Codex independent retest script (`independent-release-retest-0cdcaed.cjs`): observation 9 `technician report search stale assignment` returned exclusively `["IR-REPORT-A"]` (foreign report B excluded).
+  - Search and detail match 100% across all tested roles: technician, manager, national user, project manager, and external viewer.
+  - Unit test `Technician with stale cross-lab assignment: foreign report excluded from search and denied in detail (search/detail parity)` in `candidate_release_review_fixes.test.js` passes.
+
+#### 2. R5: Dry-Run Immutability & Index Creation Atomicity
+- **Defect Identified**: On a database with all five additive columns present but missing `Project_parentProjectId_idx`, calling `migrateProjectTemplatesAndPolicy(db, { dryRun: true })` executed `CREATE INDEX IF NOT EXISTS` before checking the dry-run flag, creating the index on disk while reporting `applied: false`. Observed index count was 0 before and 1 after.
+- **Root Cause & Fix**:
+  - In `server/scripts/migrate_project_templates_and_policy.js`:
+    - Computed `missingIndex = !db.prepare("SELECT 1 FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get()`.
+    - Evaluated `needsMigration = missingColumns.length > 0 || missingIndex`.
+    - Checked `if (isDryRun)` immediately BEFORE any DDL statement. In dry-run mode, the function returns `{ success: true, dryRun: true, applied: false, needsMigration, missingColumns, missingIndex, totalProjects }` with ZERO writes to `sqlite_master`.
+    - In apply mode, wrapped missing column alterations AND missing index creation inside `db.transaction(...)` for atomic rollback on any failure.
+    - Verified foreign key integrity and post-migration schema integrity inside the transaction.
+- **Verification**:
+  - Codex dry-run script `migration-dry-run-0cdcaed.cjs` confirmed:
+    `{"before":0,"after":0,"result":{"success":true,"dryRun":true,"applied":false,"needsMigration":true,"missingColumns":[],"missingIndex":true,"totalProjects":0}}`
+  - Automated tests in `candidate_release_review_fixes.test.js`:
+    - `Dry run detects 5 missing additive columns without modifying database or sqlite_master`: SHA256 checksum of `sqlite_master` strictly identical before and after.
+    - `Dry run on DB with columns present but missing index never creates index or mutates sqlite_master, and apply mode creates it atomically`: SHA256 checksum of `sqlite_master` strictly identical before and after dry-run; apply mode creates index atomically and reports `applied: true, createdIndex: true`.
+
+#### 3. R5: Populated Upgrade Rehearsal Expansion & Conservation Proof
+- **Enhancement Completed**:
+  - Expanded synthetic populated rehearsal database to include representative historical records across all domains:
+    - 2 Labs (`LAB-GTM`, `LAB-KEN`)
+    - 2 Legacy Projects (`PRJ-GTM-ALPHA`, `PRJ-KEN-BETA`)
+    - 4 Users with restricted role scopes (`LAB_TECHNICIAN`, `LAB_MANAGER`, `MASTER_USER`, `PROJECT_MANAGER`)
+    - 2 Samples (`SMP-001`, `SMP-002`)
+    - 2 QC Batches (`BATCH-001`, `BATCH-002`)
+    - 2 WorkItems (`WI-001`, `WI-002`)
+    - 2 Measured Results with numeric values, quality flags, and units (`RES-001`, `RES-002`)
+    - 3 Reports across published and superseded versions (`REP-PUB`, `REP-SUP`, `REP-KEN`)
+    - 1 ReportShareLink (`RSL-001`)
+    - 2 AuditLogs (`AUD-001`, `AUD-002`)
+  - **100% Byte/Checksum Conservation**:
+    - Captured pre-migration SHA256 hashes of raw rows for all tables (`Result`, `Report`, `ReportShareLink`, `AuditLog`, `WorkItem`, `Sample`, `Batch`, `Lab`, `User`).
+    - After executing `migrateProjectTemplatesAndPolicy`, computed post-migration SHA256 hashes for all tables:
+      - `Result`: `preHash === postHash` (zero byte modification on measured results)
+      - `Report`: `preHash === postHash` (zero byte modification on certificate contents)
+      - `ReportShareLink`: `preHash === postHash` (zero byte modification on share links)
+      - `AuditLog`: `preHash === postHash` (zero byte modification on audit events)
+      - `WorkItem`, `Sample`, `Batch`, `Lab`, `User`: all hashes identical.
+  - **Forward/Backward Query Compatibility**:
+    - Legacy SELECT query (`SELECT id, code, name, status, projectType FROM Project`) executed on migrated database schema with zero errors, returning identical records.
+  - **Prisma Client Validation**:
+    - Better-Sqlite3 driver adapter queried all models with zero `P2022` missing-column errors.
+  - **Supported-Channel Policy Behavior**:
+    - Real channels tested: `DESK`, `MANIFEST`, `KOBO`.
+    - Open intake on migrated projects defaults to direct `DESK` admission (`allowed: true`).
+    - Configured project with `requiresExceptionForDesk: true` requires exception record (`code: 'EXCEPTION_REQUIRED', allowed: false`).
+    - With authorized manager exception record: `allowed: true`.
+    - Whitelisted `MANIFEST` channel: `allowed: true`.
+    - Un-whitelisted `KOBO` channel: `allowed: false, exceptionRequired: true`.
+  - **Real Migrated HTTP Scoped Access**:
+    - Mounted Express app with supertest against the migrated database on disk.
+    - Verified technician in Lab A sees only Lab A reports and receives 403 on out-of-scope Kenyan report.
+    - Verified national user in GTM sees only GTM reports in search.
+    - Verified PM in Kenya sees only Project Beta reports.
+  - **Rollback Boundary Transparency**:
+    - Old-code query execution verified on additive schema without column drops or type changes. Full multi-version production rollback rehearsal across deployed versions remains a release prerequisite pending staging deployment.
+  - **Owned Disposable Fixtures**:
+    - Fixture lifecycle strictly owned via `journey_db_isolation.cjs` (`.tmp_journey_runner_*`), preventing concurrent test interference.
+
 
 
 

@@ -456,28 +456,17 @@ async function searchReports(req, res) {
         const candidateSampleIds = [...new Set(candidateReports.map(r => r.sampleId).filter(Boolean))];
 
         // Authoritative linked sample resolution: sample scope determines report access
-        const scopedSampleWhere = scopeGuard.buildScopedWhere(req.user, {
-            id: { in: candidateSampleIds }
-        }, {
-            entityType: 'Sample',
-            labField: 'labId',
-            altLabField: 'assignedLab'
-        });
+        const candidateSamples = candidateSampleIds.length > 0
+            ? await prisma.sample.findMany({
+                where: { id: { in: candidateSampleIds } }
+            })
+            : [];
+        const sampleMap = new Map(candidateSamples.map(s => [s.id, s]));
 
-        const [authorizedSamples, existingSamples] = await Promise.all([
-            candidateSampleIds.length > 0 ? prisma.sample.findMany({ where: scopedSampleWhere, select: { id: true } }) : [],
-            candidateSampleIds.length > 0 ? prisma.sample.findMany({ where: { id: { in: candidateSampleIds } }, select: { id: true } }) : []
-        ]);
-
-        const authorizedSampleIdSet = new Set(authorizedSamples.map(s => s.id));
-        const existingSampleIdSet = new Set(existingSamples.map(s => s.id));
-
-        // Filter: linked sample must be authorized; orphaned reports fall back to report metadata
+        // Filter: every report is authorized via the exact same authoritative helper isReportAuthorized(req.user, r, sample)
         const authorizedReports = candidateReports.filter(r => {
-            if (r.sampleId && existingSampleIdSet.has(r.sampleId)) {
-                return authorizedSampleIdSet.has(r.sampleId);
-            }
-            return isReportAuthorized(req.user, r, null);
+            const sample = r.sampleId ? sampleMap.get(r.sampleId) || null : null;
+            return isReportAuthorized(req.user, r, sample);
         });
 
         const total = authorizedReports.length;
@@ -591,6 +580,16 @@ async function createShareLink(req, res) {
 async function listShareLinks(req, res) {
     try {
         const { reportId } = req.params;
+        const report = await prisma.report.findUnique({ where: { id: reportId } });
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        }
+
         const links = await prisma.reportShareLink.findMany({
             where: { reportId },
             orderBy: { createdAt: 'desc' },
@@ -627,6 +626,14 @@ async function revokeShareLink(req, res) {
         }
         if (link.isRevoked) {
             return res.status(400).json({ error: 'Link already revoked' });
+        }
+
+        const report = await prisma.report.findUnique({ where: { id: link.reportId } });
+        if (report) {
+            const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+            if (!isReportAuthorized(req.user, report, sample)) {
+                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+            }
         }
 
         await prisma.reportShareLink.update({
