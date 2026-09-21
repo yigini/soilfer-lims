@@ -6,6 +6,7 @@ const prisma = require('../prisma');
 const koboController = require('../controllers/koboController');
 
 let schedulerInterval = null;
+let startupTimeout = null;
 let isSyncing = false;
 
 async function checkAndSyncKobo() {
@@ -51,9 +52,12 @@ function startScheduler(tickIntervalMs = 60000) {
     if (schedulerInterval) {
         clearInterval(schedulerInterval);
     }
+    if (startupTimeout) {
+        clearTimeout(startupTimeout);
+    }
     console.log(`[KOBO_SCHEDULER] Starting Kobo background sync scheduler (Tick: ${tickIntervalMs / 1000}s)`);
     // Run an initial check after 10s startup delay
-    setTimeout(() => {
+    startupTimeout = setTimeout(() => {
         checkAndSyncKobo().catch(err => console.error('[KOBO_SCHEDULER] Initial sync error:', err.message));
     }, 10000);
 
@@ -61,6 +65,10 @@ function startScheduler(tickIntervalMs = 60000) {
 }
 
 function stopScheduler() {
+    if (startupTimeout) {
+        clearTimeout(startupTimeout);
+        startupTimeout = null;
+    }
     if (schedulerInterval) {
         clearInterval(schedulerInterval);
         schedulerInterval = null;

@@ -25,13 +25,13 @@ describe('Reception Route Smoke & Static Asset Verification (#113, #114, #117)',
     const hasDist = fs.existsSync(clientDist) && fs.existsSync(path.join(clientDist, 'index.html'));
 
     beforeAll(() => {
-        // Ensure production mode static serving is active
-        process.env.NODE_ENV = 'production';
+        // Ensure static client serving is active without activating background schedulers
+        process.env.SERVE_CLIENT = 'true';
         app = require('../../app');
     });
 
     afterAll(async () => {
-        process.env.NODE_ENV = 'test';
+        delete process.env.SERVE_CLIENT;
         try {
             const prisma = require('../../prisma');
             await prisma.$disconnect();

@@ -265,6 +265,7 @@ Status Key:
   6. Isolated Reception parent render with WALK_IN mode completes without runtime crash.
 
 - **Isolated Headless Chrome CDP Interactive Browser Journey (`server/scripts/run_reception_browser_journey.cjs`, 6/6 passed)**:
+  - **Database Isolation & Refusal Guard**: Executed against a dedicated disposable database copy (`server/.tmp_journey_runner_<timestamp>_<rand>/disposable_journey_<nonce>.db`) pre-configured and validated before importing Prisma or Express; verified refusal guard rejects inherited working databases (`prisma/dev.db`); refusal contract test passed 8/8 (`server/tests/contracts/journey_runner_db_refusal.test.js`); CLI refusal check passed (`node server/scripts/run_reception_browser_journey.cjs --refusal-check`); automated sweep on startup and safe cleanup on exit; prior run audit privately documented under `databaseIsolation.priorRunAudit` (`server/prisma/dev.db` due to unset `DATABASE_PATH` before import).
   - Executed real compiled client bundle served by Express production server on `http://127.0.0.1:49160/reception` against local Headless Chrome via Chrome DevTools Protocol.
   - Evidence report: `artifacts/evidence-journeys/reception_browser_journey.json`
   - Evidence screenshot: `artifacts/evidence-journeys/reception_browser_journey_verified.png`
@@ -272,9 +273,9 @@ Status Key:
     1. **Reception First Render & TDZ Prevention**: Verified first render of parent Reception console; modes visible; zero `checklistData` `ReferenceError` exceptions.
     2. **Parent & Child Integration**: Clicked "Walk-in Sample"; verified `WalkInForm` parent and `ComplianceChecklist` child mounted together with CoC, Container, and Label controls.
     3. **Walk-in CoC N/A Permitted**: Selected CoC N/A; verified button allowed in walk-in mode and `aria-checked="true"`.
-    4. **Mode-Switch Interactive Cleanup**: Dispatched `Alt+1` to switch Walk-in to Project mode; verified React `useEffect` executed in live browser and reset prohibited CoC N/A to `undefined`; dispatched `Alt+2` to return to Walk-in mode and verified `aria-checked="false"`.
-    5. **Checklist Fail & Correction Lifecycle**: Selected Fail on Container Intact; verified failure note input rendered; entered note "Bag torn at seam during transport"; corrected back to OK; verified failure note input cleared and non-conformance flag resolved.
-    6. **Synthetic Draft Restore & Rehydration**: Injected synthetic draft into `limsi_intake_autosave`; re-entered Walk-in mode; handled "Restore Draft?" confirmation modal; verified rehydration of failed label criterion with note "Handwritten label smudged" and OK container criterion.
+    4. **Mode-Switch Interactive Cleanup**: Dispatched `Alt+1` to switch Walk-in to Project mode; strictly asserted `inProjectMode: true` (which renders "Select Project Session" header and active project cards); selected active project card; dispatched `Alt+2` to return to Walk-in mode; verified React `useEffect` executed in live browser and reset prohibited CoC N/A (`aria-checked="false"`).
+    5. **Checklist Fail & Correction Lifecycle**: Selected Fail on Container Intact; verified failure note input rendered; entered note "Bag torn at seam during transport" via real controlled-input property setter; asserted note in DOM before correction; corrected back to OK; verified failure note input cleared and non-conformance flag resolved.
+    6. **Real 10-Second Autosave & Reopen/Restore Lifecycle**: Entered Submitter ("Farmer Chanda") and Label Non-Conformance Note ("Handwritten label smudged by rain") via real DOM input typing; waited 11.5s for application's actual 10-second `setInterval` autosave timer to persist to `localStorage['limsi_intake_autosave']`; asserted saved draft payload; reloaded `/reception`; handled and accepted authentic application "Restore Draft?" confirmation modal; verified rehydration and DOM persistence of restored values.
 
 ---
 

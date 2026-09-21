@@ -941,8 +941,8 @@ if (!fs.existsSync(intakeUploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
-// ─── Production: Serve React client ───
-if (process.env.NODE_ENV === 'production') {
+// ─── Production / Standalone: Serve React client ───
+if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true') {
     const clientDist = path.join(__dirname, '..', 'client', 'dist');
     app.use(express.static(clientDist));
 

@@ -1,6 +1,6 @@
 {
   "suite": "Reception Isolated Browser Journey",
-  "executedAt": "2026-09-21T18:10:18.323Z",
+  "executedAt": "2026-09-21T18:59:54.001Z",
   "browser": "Google Chrome Headless (CDP)",
   "url": "http://127.0.0.1:49160/reception",
   "summary": {
@@ -8,42 +8,54 @@
     "passedSteps": 6,
     "allPassed": true
   },
+  "databaseIsolation": {
+    "priorRunAudit": {
+      "priorRunDbResolved": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+      "priorRunRiskIdentified": "Unsafe default fallback to working dev.db when DATABASE_PATH was unset",
+      "remediation": "Enforced isolated disposable database copy in runner-owned directory with validateDisposableDbPath refusal guard before importing Prisma/app"
+    },
+    "currentRun": {
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790017172649_f8zun8",
+      "isolatedDbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790017172649_f8zun8\\disposable_journey_f8zun8.db",
+      "isDisposable": true
+    }
+  },
   "steps": [
     {
       "stepName": "Reception First Render & TDZ Prevention",
       "passed": true,
       "details": "Rendered without checklistData ReferenceError; Modes visible: true",
-      "timestamp": "2026-09-21T18:10:11.789Z"
+      "timestamp": "2026-09-21T18:59:37.625Z"
     },
     {
       "stepName": "Parent & Child Integration",
       "passed": true,
       "details": "WalkInForm and ComplianceChecklist child components mounted together in Reception parent",
-      "timestamp": "2026-09-21T18:10:12.328Z"
+      "timestamp": "2026-09-21T18:59:37.946Z"
     },
     {
       "stepName": "Walk-in CoC N/A Permitted",
       "passed": true,
       "details": "CoC N/A enabled: true, aria-checked=true: true",
-      "timestamp": "2026-09-21T18:10:12.742Z"
+      "timestamp": "2026-09-21T18:59:38.358Z"
     },
     {
       "stepName": "Mode-Switch Cleanup Effect Execution",
       "passed": true,
-      "details": "useEffect executed upon mode switch, resetting prohibited coc N/A to undefined (inProjectMode: false, cocNACleared: true)",
-      "timestamp": "2026-09-21T18:10:14.406Z"
+      "details": "inProjectMode confirmed: true, useEffect executed and cleared prohibited CoC N/A (aria-checked=false): true",
+      "timestamp": "2026-09-21T18:59:40.533Z"
     },
     {
       "stepName": "Checklist Fail & Correction Lifecycle",
       "passed": true,
-      "details": "Fail triggered note input: true, Correction back to OK cleared note input: true",
-      "timestamp": "2026-09-21T18:10:15.573Z"
+      "details": "Fail and note asserted before correction: true, Correction back to OK cleared note: true",
+      "timestamp": "2026-09-21T18:59:41.701Z"
     },
     {
       "stepName": "Synthetic Draft Restore & Rehydration",
       "passed": true,
-      "details": "Restore dialog triggered: true, Checklist items rehydrated: true",
-      "timestamp": "2026-09-21T18:10:18.244Z"
+      "details": "10s autosave observed: true, Restore modal accepted: true, Persisted state restored in DOM: true",
+      "timestamp": "2026-09-21T18:59:53.907Z"
     }
   ]
 }
