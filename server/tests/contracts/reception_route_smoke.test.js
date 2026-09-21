@@ -27,11 +27,24 @@ describe('Reception Route Smoke & Static Asset Verification (#113, #114, #117)',
     beforeAll(() => {
         // Ensure static client serving is active without activating background schedulers
         process.env.SERVE_CLIENT = 'true';
+        process.env.DISABLE_BACKGROUND_JOBS = 'true';
         app = require('../../app');
+        if (app && typeof app.stopBackgroundSchedulers === 'function') {
+            app.stopBackgroundSchedulers();
+        }
     });
 
     afterAll(async () => {
         delete process.env.SERVE_CLIENT;
+        delete process.env.DISABLE_BACKGROUND_JOBS;
+        if (app && typeof app.stopBackgroundSchedulers === 'function') {
+            app.stopBackgroundSchedulers();
+        }
+        try {
+            if (esbuild && typeof esbuild.stop === 'function') {
+                esbuild.stop();
+            }
+        } catch (_) {}
         try {
             const prisma = require('../../prisma');
             await prisma.$disconnect();

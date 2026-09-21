@@ -53,6 +53,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+process.env.DISABLE_BACKGROUND_JOBS = 'true';
+process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
 
 // 2. NOW import Prisma, App, and Auth dependencies
@@ -794,6 +796,9 @@ async function runBrowserJourney() {
         if (cdp) cdp.close();
         if (chrome) chrome.kill();
         if (server) server.close();
+        if (app && typeof app.stopBackgroundSchedulers === 'function') {
+            app.stopBackgroundSchedulers();
+        }
         try {
             await prisma.$disconnect();
         } catch (_) {}

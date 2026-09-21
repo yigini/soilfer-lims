@@ -24,7 +24,7 @@ const {
 } = require('../../scripts/journey_db_isolation.cjs');
 
 describe('Browser Journey Database Isolation & Refusal Contract', () => {
-    const tempTestDir = path.resolve(__dirname, '..', '.tmp_journey_runner_test_' + Date.now());
+    const tempTestDir = path.resolve(__dirname, '../..', '.tmp_journey_runner_test_' + Date.now());
 
     beforeAll(() => {
         fs.mkdirSync(tempTestDir, { recursive: true });
@@ -65,20 +65,30 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
         expect(result).toBe(validDb);
     });
 
-    test('6. createDisposableDatabase safely creates isolated DB and validates path', () => {
+    test('6. createDisposableDatabase safely creates isolated DB, validates path, and ensures schema-only fixtures', () => {
         const { runnerDir, dbPath } = createDisposableDatabase();
         try {
             expect(fs.existsSync(runnerDir)).toBe(true);
             expect(fs.existsSync(dbPath)).toBe(true);
             expect(dbPath.startsWith(runnerDir)).toBe(true);
             expect(path.basename(dbPath)).not.toBe('dev.db');
+
+            // Verify that all copied data rows were wiped for a schema-only synthetic database
+            const Database = require('better-sqlite3');
+            const testDb = new Database(dbPath);
+            const koboCount = testDb.prepare("SELECT COUNT(*) as c FROM KoboConfig").get().c;
+            const userCount = testDb.prepare("SELECT COUNT(*) as c FROM User").get().c;
+            testDb.close();
+
+            expect(koboCount).toBe(0);
+            expect(userCount).toBe(0);
         } finally {
             cleanupDisposableDatabase(runnerDir);
             expect(fs.existsSync(runnerDir)).toBe(false);
         }
     });
 
-    test('7. cleanupDisposableDatabase refuses to delete directories without runner prefix', () => {
+    test('7. cleanupDisposableDatabase refuses to delete directories without runner prefix or outside pattern', () => {
         const sensitiveDir = path.resolve(__dirname, '../../controllers');
         expect(fs.existsSync(sensitiveDir)).toBe(true);
         // Attempting to pass sensitive directory to cleanup must be safely ignored
@@ -100,5 +110,29 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
         const devDbStatsAfter = fs.statSync(WORKING_DEV_DB);
         expect(devDbStatsAfter.size).toBe(devDbStatsBefore.size);
         expect(devDbStatsAfter.mtimeMs).toBe(devDbStatsBefore.mtimeMs);
+    });
+
+    test('9. cleanupDisposableDatabase strictly confines cleanup to exact owned root and preserves other active runs', () => {
+        const otherRunnerDir = path.resolve(__dirname, '../..', '.tmp_journey_runner_other_active_' + Date.now());
+        fs.mkdirSync(otherRunnerDir, { recursive: true });
+
+        const myRunnerDir = path.resolve(__dirname, '../..', '.tmp_journey_runner_my_active_' + Date.now());
+        fs.mkdirSync(myRunnerDir, { recursive: true });
+
+        try {
+            expect(fs.existsSync(otherRunnerDir)).toBe(true);
+            expect(fs.existsSync(myRunnerDir)).toBe(true);
+
+            // Clean up myRunnerDir only
+            cleanupDisposableDatabase(myRunnerDir);
+            expect(fs.existsSync(myRunnerDir)).toBe(false);
+
+            // otherRunnerDir must be strictly preserved
+            expect(fs.existsSync(otherRunnerDir)).toBe(true);
+        } finally {
+            if (fs.existsSync(otherRunnerDir)) {
+                fs.rmSync(otherRunnerDir, { recursive: true, force: true });
+            }
+        }
     });
 });
