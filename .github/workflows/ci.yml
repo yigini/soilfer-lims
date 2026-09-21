@@ -36,6 +36,7 @@ jobs:
         run: |
           npx prisma generate
           npx prisma db push --accept-data-loss
+          node seeds/profile.js
           node seeds/units.js
           node seeds/references.js
           node seeds/catalogue.js --confirm

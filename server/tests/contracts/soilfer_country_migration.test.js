@@ -41,6 +41,17 @@ describe('SoilFER Country Project Migration & Kobo Association (v2)', () => {
 
         // Inject populated fixtures: samples, QC batches, analytical results, and reports
         const testDb = new Database(testDbPath);
+        testDb.pragma('foreign_keys = OFF');
+
+        // Ensure prerequisite parent Project and Lab records exist if running against a fresh/empty database (e.g. CI)
+        testDb.prepare(`
+            INSERT OR IGNORE INTO "Project" (id, code, name, status, projectType, createdAt, updatedAt)
+            VALUES ('SoilFER-USA', 'SOILFER-US', 'SoilFER Global Programme', 'ACTIVE', 'OPEN_INTAKE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).run();
+        const insLab = testDb.prepare(`INSERT OR IGNORE INTO "Lab" (id, code, name, country, isActive) VALUES (?, ?, ?, ?, 1)`);
+        for (const labId of ['GTM-LAB1', 'HND-LAB1', 'GHA-LAB1', 'KEN-LAB1', 'ZMB-LAB1', 'MOZ-LAB1', 'TUN-LAB1']) {
+            insLab.run(labId, labId.split('-')[0], `${labId} Laboratory`, labId.split('-')[0]);
+        }
 
         // Edge case sample
         testDb.prepare(`
