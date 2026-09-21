@@ -222,10 +222,17 @@ async function searchReports(req, res) {
         }
 
         // R1: External and general viewers strictly view PUBLISHED reports for authorized projects
+        const projectPolicyService = require('../services/projectPolicyService');
+
         if (['EXTERNAL_VIEWER', 'VIEWER'].includes(userRole)) {
             where.status = 'PUBLISHED';
             if (userProjects.length > 0) {
-                where.projectCode = { in: userProjects };
+                const expandedProjects = new Set(userProjects);
+                userProjects.forEach(p => {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(p);
+                    children.forEach(c => expandedProjects.add(c));
+                });
+                where.projectCode = { in: Array.from(expandedProjects) };
             } else if (!userLab) {
                 return res.json({ reports: [], pagination: { total: 0, page: 1, limit: parseInt(limit), pages: 0 } });
             }
@@ -235,8 +242,28 @@ async function searchReports(req, res) {
             where.status = 'PUBLISHED'; // Default to published
         }
 
+        const andClauses = [];
+
         if (projectId) {
-            where.projectCode = String(projectId);
+            const childCodes = projectPolicyService.getProgrammeChildProjectCodes(projectId);
+            const candidateCodes = childCodes.length > 0 ? [String(projectId), ...childCodes] : [String(projectId)];
+            if (candidateCodes.length === 1) {
+                andClauses.push({
+                    OR: [
+                        { projectCode: candidateCodes[0] },
+                        { sample: { projectCode: candidateCodes[0] } },
+                        { sample: { projectId: candidateCodes[0] } }
+                    ]
+                });
+            } else {
+                andClauses.push({
+                    OR: [
+                        { projectCode: { in: candidateCodes } },
+                        { sample: { projectCode: { in: candidateCodes } } },
+                        { sample: { projectId: { in: candidateCodes } } }
+                    ]
+                });
+            }
         }
 
         // Full-text search across denormalized keys
@@ -245,7 +272,7 @@ async function searchReports(req, res) {
             // Digits-only? Search phone
             const isPhone = /^\d+$/.test(term.replace(/[+\-\s()]/g, ''));
 
-            where.OR = [
+            const qOr = [
                 { firstName: { contains: term } },
                 { surname: { contains: term } },
                 { projectCode: { contains: term } },
@@ -255,10 +282,15 @@ async function searchReports(req, res) {
             ];
 
             if (isPhone) {
-                where.OR.push({ phoneNorm: { contains: term.replace(/\D/g, '') } });
+                qOr.push({ phoneNorm: { contains: term.replace(/\D/g, '') } });
             } else {
-                where.OR.push({ phone: { contains: term } });
+                qOr.push({ phone: { contains: term } });
             }
+            andClauses.push({ OR: qOr });
+        }
+
+        if (andClauses.length > 0) {
+            where.AND = andClauses;
         }
 
         const [reports, total] = await Promise.all([

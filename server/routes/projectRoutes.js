@@ -19,6 +19,12 @@ router.get('/:id/samples', checkPermission('VIEW_SAMPLES'), projectController.ge
 router.get('/:id/activity', projectController.getProjectActivity);
 router.get('/:id/kobo-config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
 router.get('/:id/kobo/config', checkPermission('MANAGE_PROJECTS'), projectController.getProjectKoboConfig);
+router.get('/:id/kobo-connections', checkPermission('MANAGE_PROJECTS'), projectController.listProjectKoboConnections);
+router.get('/:id/kobo/connections', checkPermission('MANAGE_PROJECTS'), projectController.listProjectKoboConnections);
+router.post('/:id/kobo-connections', checkPermission('MANAGE_PROJECTS'), projectController.createProjectKoboConnection);
+router.put('/:id/kobo-connections/:configId', checkPermission('MANAGE_PROJECTS'), projectController.updateProjectKoboConnection);
+router.post('/:id/kobo-connections/:configId/toggle', checkPermission('MANAGE_PROJECTS'), projectController.toggleProjectKoboConnection);
+router.post('/:id/kobo-connections/:configId/sync', checkPermission('MANAGE_PROJECTS'), projectController.syncProjectKoboConnection);
 
 router.get('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.getProjectLabAccess);
 router.patch('/:id/lab-access', checkPermission('MANAGE_PROJECTS'), projectController.updateProjectLabAccess);

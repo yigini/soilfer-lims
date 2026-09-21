@@ -4,6 +4,7 @@
  */
 const prisma = require('../prisma');
 const koboService = require('../services/koboService');
+const projectPolicyService = require('../services/projectPolicyService');
 const workflow = require('../workflowContract');
 const crypto = require('crypto');
 
@@ -107,14 +108,35 @@ exports.upsertConfig = async (req, res) => {
         if (!allowed) {
             return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
         }
-        const { koboServerUrl, formId, apiToken, labName, fieldMapping, syncIntervalMins, isActive } = req.body;
+        const { koboServerUrl, formId, apiToken, labName, fieldMapping, syncIntervalMins, isActive, projectCode } = req.body;
 
         if (!formId || !apiToken) {
             return res.status(400).json({ error: 'Form ID and API Token are required' });
         }
 
+        if (!projectCode || !String(projectCode).trim()) {
+            return res.status(400).json({
+                error: 'PROJECT_CODE_REQUIRED',
+                message: 'Explicit projectCode is required for Kobo configuration. Null-project mappings are retired.'
+            });
+        }
+
+        const targetProjectCode = String(projectCode).trim();
+        const linkedProject = await prisma.project.findFirst({
+            where: { OR: [{ code: targetProjectCode }, { id: targetProjectCode }] }
+        });
+        if (!linkedProject) {
+            return res.status(404).json({
+                error: 'PROJECT_NOT_FOUND',
+                message: `Project '${targetProjectCode}' not found.`
+            });
+        }
+
         const existing = await prisma.koboConfig.findFirst({
-            where: { labId, projectCode: null }
+            where: {
+                labId,
+                projectCode: targetProjectCode
+            }
         });
 
         let config;
@@ -126,6 +148,7 @@ exports.upsertConfig = async (req, res) => {
                     formId,
                     apiToken,
                     labName,
+                    projectCode: targetProjectCode || existing.projectCode,
                     fieldMapping: fieldMapping ? JSON.stringify(fieldMapping) : null,
                     syncIntervalMins: syncIntervalMins || 15,
                     isActive: isActive !== false
@@ -139,6 +162,7 @@ exports.upsertConfig = async (req, res) => {
                     formId,
                     apiToken,
                     labName,
+                    projectCode: targetProjectCode,
                     fieldMapping: fieldMapping ? JSON.stringify(fieldMapping) : null,
                     syncIntervalMins: syncIntervalMins || 15,
                     isActive: isActive !== false
@@ -357,13 +381,18 @@ async function syncLabSubmissions(config, performedBy) {
         throw new Error(`MEMBERSHIP_NOT_AUTHORIZED: Laboratory '${currentConfig.labId}' is not an authorized servicing laboratory for project '${projectCode}'.`);
     }
 
-    // Admissions policy check: skip intake if admissions are paused or closed
-    if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
-        console.warn(`[KOBO] Admissions ${project.status.toLowerCase()} for project '${projectCode}'. Skipping new sample intake.`);
+    // Admissions policy check: skip intake if admissions are paused, closed, or project inactive
+    const preAdmission = projectPolicyService.canAdmitSample({
+        project,
+        channel: 'KOBO',
+        labId: currentConfig.labId
+    });
+    if (!preAdmission.allowed) {
+        console.warn(`[KOBO] Admission blocked for project '${projectCode}': ${preAdmission.reason}`);
         return {
             newSamples: 0,
             skipped: 0,
-            message: `Project admissions ${project.status.toLowerCase()}`,
+            message: preAdmission.reason,
             lastSubmissionId: currentConfig.lastSubmissionId
         };
     }
@@ -460,8 +489,16 @@ async function syncLabSubmissions(config, performedBy) {
                     where: { code: projectCode },
                     include: { projectLabs: true }
                 });
-                if (!currentProject || ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(currentProject.status)) {
-                    throw new Error(`ADMISSION_POLICY_BLOCKED: Project '${projectCode}' admissions are ${currentProject?.status || 'MISSING'}`);
+                if (!currentProject) {
+                    throw new Error(`PROJECT_NOT_FOUND: Project '${projectCode}' does not exist`);
+                }
+                const admission = projectPolicyService.canAdmitSample({
+                    project: currentProject,
+                    channel: 'KOBO',
+                    labId: currentConfig.labId
+                });
+                if (!admission.allowed) {
+                    throw new Error(`ADMISSION_POLICY_BLOCKED: Project '${projectCode}' admissions are ${currentProject?.status || 'BLOCKED'}: ${admission.reason}`);
                 }
                 const currentMembers = [currentProject.labId, ...(currentProject.projectLabs || []).map(pl => pl.labId)].filter(Boolean);
                 if (!currentMembers.includes(currentConfig.labId)) {
@@ -655,14 +692,52 @@ exports.syncSample = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // 2. Find the Kobo config for this lab
+        // Actor authorization check (F09)
+        const scopeGuard = require('../utils/scopeGuard');
+        try {
+            scopeGuard.ensureScope(req.user, sample, { altLabField: 'assignedLab' });
+        } catch (authErr) {
+            return res.status(403).json({ error: 'FORBIDDEN_SCOPE', message: authErr.message });
+        }
+
+        // Protected / released record check (F09)
+        if (['RELEASED', 'APPROVED', 'ARCHIVED'].includes(sample.status)) {
+            return res.status(409).json({
+                error: 'SAMPLE_RELEASED',
+                message: `Sample ${sample.id} is in status '${sample.status}'. Field metadata cannot be overwritten without an authorized amendment.`
+            });
+        }
+
+        // 2. Find the Kobo config scoped strictly to project and lab (F09 & Finding 2)
         const labId = sample.assignedLab || sample.labId || req.user?.labId;
         if (!labId) return res.status(400).json({ error: 'Cannot determine lab for this sample' });
 
+        const projectIdentifier = sample.projectCode || sample.projectId;
+        if (!projectIdentifier) {
+            return res.status(400).json({
+                error: 'UNASSIGNED_PROJECT',
+                message: `Sample ${sample.originalId || sampleId} has no assigned project. Kobo resync requires an explicit project connection.`
+            });
+        }
+
         const config = await prisma.koboConfig.findFirst({
-            where: { labId, isActive: true }
+            where: {
+                labId,
+                isActive: true,
+                OR: [
+                    { projectCode: projectIdentifier },
+                    { projectCode: sample.projectCode || '' },
+                    { projectCode: sample.projectId || '' }
+                ]
+            }
         });
-        if (!config) return res.status(404).json({ error: `No active Kobo config for lab ${labId}` });
+
+        if (!config) {
+            return res.status(404).json({
+                error: 'NO_CONFIG_MATCH',
+                message: `No active Kobo configuration matches laboratory '${labId}' and project '${projectIdentifier}'. Arbitrary laboratory form fallback is prohibited.`
+            });
+        }
 
         // 3. Fetch ALL submissions from Kobo
         console.log(`[KOBO] Force sync sample ${sample.originalId} from ${config.labId}...`);
@@ -782,8 +857,8 @@ exports.syncSample = async (req, res) => {
         };
 
         const now = new Date().toISOString();
-        const fm = (value) => ({ value, source: 'KOBO', lastUpdatedAt: now, lastUpdatedBy: 'FORCE_SYNC' });
-        const fieldMetadata = {
+        const fm = (value) => ({ value, source: 'KOBO', lastUpdatedAt: now, lastUpdatedBy: req.user?.username || 'FORCE_SYNC' });
+        const freshFieldMetadata = {
             site_id: fm(matchedSampleData.site_id),
             depth: fm(matchedSampleData.depth),
             latitude: fm(matchedSampleData.lat),
@@ -796,12 +871,63 @@ exports.syncSample = async (req, res) => {
             attachments: fm(attachments)
         };
 
-        await prisma.sample.update({
-            where: { id: sampleId },
-            data: {
-                metadata: JSON.stringify(compactMeta),
-                fieldMetadata: JSON.stringify(fieldMetadata)
+        const parseJson = (val, fallback = {}) => {
+            if (!val) return fallback;
+            if (typeof val === 'object') return val;
+            try { return JSON.parse(val); } catch { return fallback; }
+        };
+
+        const existingFieldMeta = parseJson(sample.fieldMetadata, {});
+        const existingCompactMeta = parseJson(sample.metadata, {});
+
+        // Merge field metadata while strictly preserving manual overrides (Finding 2)
+        const mergedFieldMeta = { ...existingFieldMeta };
+        for (const [key, freshEntry] of Object.entries(freshFieldMetadata)) {
+            const existingEntry = existingFieldMeta[key];
+            if (existingEntry && (existingEntry.source === 'MANUAL' || existingEntry.isManualOverride || existingEntry.manuallyOverridden)) {
+                // Preserve manual override
+                continue;
             }
+            mergedFieldMeta[key] = freshEntry;
+        }
+
+        const mergedMeta = { ...existingCompactMeta, ...compactMeta };
+
+        // Atomic transaction: commit sample update and audit log together (Finding 2)
+        await prisma.$transaction(async (tx) => {
+            const currentSample = await tx.sample.findUnique({ where: { id: sampleId } });
+            if (!currentSample) {
+                throw new Error(`SAMPLE_NOT_FOUND: Sample '${sampleId}' was removed.`);
+            }
+
+            if (currentSample.projectId || currentSample.projectCode) {
+                const curProject = await tx.project.findFirst({
+                    where: { OR: [{ id: currentSample.projectId || '' }, { code: currentSample.projectCode || '' }] }
+                });
+                if (curProject && ['PAUSED', 'CLOSED', 'ARCHIVED', 'DELETED'].includes(curProject.status)) {
+                    throw new Error(`PROJECT_${curProject.status}: Cannot resync sample; project admissions are ${curProject.status.toLowerCase()}.`);
+                }
+            }
+
+            await tx.sample.update({
+                where: { id: sampleId },
+                data: {
+                    metadata: JSON.stringify(mergedMeta),
+                    fieldMetadata: JSON.stringify(mergedFieldMeta)
+                }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    id: `audit-kobo-resync-${Date.now()}`,
+                    entity: 'SAMPLE',
+                    entityId: sample.id,
+                    action: 'KOBO_SAMPLE_RESYNC',
+                    details: `Resynced field metadata from Kobo form ${config.formId} for sample ${sample.originalId}`,
+                    performedBy: req.user?.username || 'SYSTEM',
+                    timestamp: new Date()
+                }
+            });
         });
 
         console.log(`[KOBO] ✅ Force synced ${sample.originalId} (matched ${matchedSampleData.original_id}): ${attachments.length} attachments`);

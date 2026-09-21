@@ -452,9 +452,8 @@ exports.updateStatus = async (req, res) => {
             updates.labId = await idGenerator.generateLabId(sample.projectCode || 'GEN');
 
             // --- AUTOMATION: Enforce SoilFER Bundle ---
-            const SOILFER_COUNTRIES = ['GTM', 'HND', 'GHA', 'KEN', 'ZMB', 'TUN', 'MOZ', 'AFG', 'PER', 'UGA'];
-            const isSoilFer = SOILFER_COUNTRIES.includes(sample.projectCode) ||
-                (sample.projectId && sample.projectId.includes('SoilFER'));
+            const projectPolicyService = require('../services/projectPolicyService');
+            const isSoilFer = projectPolicyService.isSoilFerTemplate(sample.projectCode || sample.projectId);
 
             if (isSoilFer) {
                 // Load analysis groups from database
@@ -766,7 +765,7 @@ exports.receiveSample = async (req, res) => {
             });
         }
 
-        // Validate project admission policy
+        // Validate project admission policy via centralized service (Finding 1)
         if (sample.projectId || sample.projectCode) {
             const project = await prisma.project.findFirst({
                 where: {
@@ -776,11 +775,20 @@ exports.receiveSample = async (req, res) => {
                     ]
                 }
             });
-            if (project && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(project.status)) {
-                return res.status(422).json({
-                    error: 'PROJECT_ADMISSIONS_PAUSED',
-                    message: `Cannot receive sample: Admissions for project ${project.code} are ${project.status.toLowerCase()}. New sample intake is currently paused or closed.`
+            if (project) {
+                const projectPolicyService = require('../services/projectPolicyService');
+                const admission = projectPolicyService.canAdmitSample({
+                    project,
+                    channel: 'PHYSICAL_RECEIPT',
+                    actor: user,
+                    labId: user.labId
                 });
+                if (!admission.allowed) {
+                    return res.status(422).json({
+                        error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                        message: admission.reason || `Cannot receive sample: Admissions for project ${project.code} are blocked.`
+                    });
+                }
             }
         }
 
@@ -1176,9 +1184,16 @@ exports.getSampleDetail = async (req, res) => {
                 }
             } catch (e) { }
 
-            if (!isDraft) {
+            if (!isDraft && (sample.projectCode || sample.projectId)) {
                 const koboConfig = await prisma.koboConfig.findFirst({
-                    where: { labId: sample.assignedLab, isActive: true },
+                    where: {
+                        labId: sample.assignedLab,
+                        isActive: true,
+                        OR: [
+                            { projectCode: sample.projectCode || '' },
+                            { projectCode: sample.projectId || '' }
+                        ]
+                    },
                     select: { id: true }
                 });
                 hasKoboConnection = !!koboConfig;
@@ -1417,7 +1432,7 @@ exports.deleteSample = async (req, res) => {
 
         const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
         if (metadata._uuid || metadata['Country']) {
-            return res.status(403).json({ error: 'Cannot delete SoilFER (Google Sheet) samples.' });
+            return res.status(403).json({ error: 'Cannot delete protected SoilFER project samples.' });
         }
 
         // Canonical provenance evaluation: only genuine unattached desk walk-ins may be hard deleted
@@ -1622,7 +1637,7 @@ exports.batchDeleteSamples = async (req, res) => {
 
         if (protectedSamples.length > 0) {
             return res.status(403).json({
-                error: `Action blocked: ${protectedSamples.length} samples in your selection are protected (SoilFER/Google Sheet). Please deselect them.`
+                error: `Action blocked: ${protectedSamples.length} samples in your selection are protected SoilFER project records. Please deselect them.`
             });
         }
 

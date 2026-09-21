@@ -14,7 +14,7 @@ export default function LabsAndPeopleTab({
     const { t } = useLanguage();
 
     const memberLabs = labAccess?.memberLabs || [];
-    const isOwnerManager = capabilities.canManage || ['SUPER_ADMIN', 'ADMIN'].includes(userRole);
+    const canManageAccess = Boolean(capabilities.canManageAccess);
 
     return (
         <div className="space-y-6">
@@ -37,7 +37,7 @@ export default function LabsAndPeopleTab({
                         </p>
                     </div>
 
-                    {isOwnerManager && onOpenManageLabs && (
+                    {canManageAccess && onOpenManageLabs && (
                         <button
                             onClick={onOpenManageLabs}
                             className="text-xs font-semibold px-3 py-2 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-text transition-colors self-start sm:self-auto"

@@ -7,6 +7,7 @@ const adminBoundaries = require('../data/adminBoundaries.json');
 const crypto = require('crypto');
 const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
+const projectPolicyService = require('../services/projectPolicyService');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -139,27 +140,35 @@ exports.processIntake = async (req, res) => {
             // Authoritative: Existing sample's persisted project governs admission policy
             const persistedProjectId = sample.projectId || sample.projectCode;
             if (persistedProjectId) {
-                const existingProject = await prisma.project.findFirst({
-                    where: {
-                        OR: [
-                            { id: String(persistedProjectId) },
-                            { code: String(persistedProjectId) }
-                        ]
-                    }
-                });
-                if (existingProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(existingProject.status)) {
-                    return res.status(422).json({
-                        error: 'PROJECT_ADMISSIONS_PAUSED',
-                        message: `Cannot receive sample: Admissions for project ${existingProject.code || existingProject.id} are ${existingProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                const existingResolved = await projectPolicyService.resolveProject(persistedProjectId, prisma);
+                const existingProject = existingResolved?.project;
+                if (existingProject) {
+                    const admission = projectPolicyService.canAdmitSample({
+                        project: existingProject,
+                        channel: 'DESK',
+                        actor: user,
+                        labId: user.labId,
+                        hasException: true // sample is already registered; this is physical reception
                     });
+                    if (!admission.allowed) {
+                        return res.status(422).json({
+                            error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                            message: admission.reason
+                        });
+                    }
                 }
 
                 // Check for contradictory request projectId override
-                if (projectId && String(projectId) !== String(sample.projectId) && String(projectId) !== String(sample.projectCode)) {
-                    return res.status(400).json({
-                        error: 'CROSS_PROJECT_CONFLICT',
-                        message: `Sample ${originalId} is already registered to project ${sample.projectId || sample.projectCode}. Direct project reassignment via intake is not permitted.`
-                    });
+                if (projectId) {
+                    const reqResolved = await projectPolicyService.resolveProject(projectId, prisma);
+                    const reqCode = reqResolved?.code || String(projectId);
+                    const reqId = reqResolved?.id || String(projectId);
+                    if (reqCode !== sample.projectCode && reqId !== sample.projectId) {
+                        return res.status(400).json({
+                            error: 'CROSS_PROJECT_CONFLICT',
+                            message: `Sample ${originalId} is already registered to project ${sample.projectCode || sample.projectId}. Direct project reassignment via intake is not permitted.`
+                        });
+                    }
                 }
             }
         } else {
@@ -167,75 +176,80 @@ exports.processIntake = async (req, res) => {
             isNewlyCreatedDeskSample = true;
             const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
 
+            let resolvedTargetProject = null;
             if (candidateProjectId) {
-                const targetProject = await prisma.project.findFirst({
-                    where: {
-                        OR: [
-                            { id: String(candidateProjectId) },
-                            { code: String(candidateProjectId) }
-                        ]
-                    }
+                resolvedTargetProject = await projectPolicyService.resolveProject(candidateProjectId, prisma);
+            }
+
+            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
+            let exceptionRecord = null;
+            if (req.body.exceptionRecord) {
+                exceptionRecord = req.body.exceptionRecord;
+            } else if (req.body.exceptionReason) {
+                exceptionRecord = {
+                    reason: req.body.exceptionReason,
+                    claimedAuthorizer: req.body.authorizer || null,
+                    approvalToken: req.body.approvalToken || null
+                };
+            }
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: resolvedTargetProject ? resolvedTargetProject.project : null,
+                channel: isWalkIn ? 'WALK_IN' : 'DESK',
+                actor: user,
+                labId: user.labId,
+                hasException,
+                exceptionRecord
+            });
+
+            if (!admission.allowed) {
+                return res.status(422).json({
+                    error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                    message: admission.reason,
+                    exceptionRequired: Boolean(admission.exceptionRequired)
                 });
-                if (targetProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
-                    return res.status(422).json({
-                        error: 'PROJECT_ADMISSIONS_PAUSED',
-                        message: `Cannot receive sample: Admissions for project ${targetProject.code || targetProject.id} are ${targetProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
-                    });
-                }
             }
         }
 
         if (!sample) {
-            let finalProjectId = null;
-            let idPrefix = 'W';
+            const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
+            const resolvedTargetProject = candidateProjectId ? await projectPolicyService.resolveProject(candidateProjectId, prisma) : null;
 
-            if (projectId) {
-                finalProjectId = projectId;
-                // Use first letter of project ID/code
-                idPrefix = String(projectId).charAt(0).toUpperCase();
-            } else if (isWalkIn) {
-                finalProjectId = null;
-                // Use submitter initials as prefix if available
-                if (submitterDetails && submitterDetails.name) {
-                    const initials = submitterDetails.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 3);
-                    if (initials) idPrefix = initials;
-                }
-            } else if (user.projects && user.projects.length > 0) {
-                const userProjects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
-                finalProjectId = userProjects[0];
-                idPrefix = String(finalProjectId).charAt(0).toUpperCase();
+            let idPrefix = 'W';
+            if (resolvedTargetProject) {
+                idPrefix = resolvedTargetProject.code.charAt(0).toUpperCase();
+            } else if (isWalkIn && submitterDetails && submitterDetails.name) {
+                const initials = submitterDetails.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 3);
+                if (initials) idPrefix = initials;
             }
 
             // Generate a professional Original ID if the current one is temporary
             let finalOriginalId = String(originalId);
             if (finalOriginalId.startsWith('EXT-') || finalOriginalId.startsWith('S-') || !finalOriginalId) {
                 const prefix = samplingDetails?.sampleType === 'PT' ? 'P' : 'W'; // Default W, unless PT
-                finalOriginalId = await idGenerator.generateWalkInOriginalId(projectId ? idPrefix : prefix);
+                finalOriginalId = await idGenerator.generateWalkInOriginalId(resolvedTargetProject ? idPrefix : prefix);
             }
 
-            // For Manual Entry (Walk-in or New Project Sample), we use the short ID as the primary DB ID too
             const sampleId = finalOriginalId;
-            console.log(`[INTAKE] Creating new sample: ${sampleId} linked to Project: ${finalProjectId}`);
+            console.log(`[INTAKE] Creating new sample: ${sampleId} linked to Project: ${resolvedTargetProject?.code || 'WALK-IN'}`);
 
-            // Validate projectId FK before create
-            if (finalProjectId) {
-                const projExists = await prisma.project.findFirst({ where: { id: finalProjectId } });
-                if (!projExists) {
-                    console.warn(`[INTAKE] projectId '${finalProjectId}' not found in Project table, clearing FK.`);
-                    finalProjectId = null;
-                }
-            }
+            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
+            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? { reason: req.body.exceptionReason, authorizer: user.username, authorizedAt: new Date().toISOString() } : null);
 
-            const isWalkInDeskSample = !finalProjectId && isWalkIn;
+            const isWalkInDeskSample = !resolvedTargetProject && isWalkIn;
+            const initialMetadata = isWalkInDeskSample
+                ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN }
+                : (hasException ? { exceptionRecord, origin: 'DESK_EXCEPTION' } : {});
+
             sample = await prisma.sample.create({
                 data: {
                     id: sampleId,
                     originalId: finalOriginalId,
                     status: 'EXPECTED',
-                    projectCode: finalProjectId || null,
-                    projectId: finalProjectId || null,
+                    projectCode: resolvedTargetProject ? resolvedTargetProject.code : null,
+                    projectId: resolvedTargetProject ? resolvedTargetProject.id : null,
                     assignedLab: user.labId,
-                    metadata: JSON.stringify(isWalkInDeskSample ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN } : {}),
+                    metadata: JSON.stringify(initialMetadata),
                     history: JSON.stringify([])
                 }
             });
@@ -1423,21 +1437,37 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         }
 
         if (projectRefs.size > 0) {
-            const blockedProjects = await prisma.project.findMany({
+            const allReferencedProjects = await prisma.project.findMany({
                 where: {
                     OR: [
                         { id: { in: Array.from(projectRefs) } },
                         { code: { in: Array.from(projectRefs) } }
-                    ],
-                    status: { in: ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'] }
+                    ]
                 }
             });
-            if (blockedProjects.length > 0) {
-                const bp = blockedProjects[0];
-                return res.status(422).json({
-                    error: 'PROJECT_ADMISSIONS_PAUSED',
-                    message: `Cannot receive consignment: Admissions for project ${bp.code || bp.id} are ${bp.status.toLowerCase()}. New sample intake is currently paused or closed.`
+
+            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
+            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? {
+                reason: req.body.exceptionReason,
+                approvalToken: req.body.approvalToken || null
+            } : null);
+
+            for (const proj of allReferencedProjects) {
+                const admission = projectPolicyService.canAdmitSample({
+                    project: proj,
+                    channel: 'MANIFEST',
+                    actor: user,
+                    labId: userLab,
+                    hasException,
+                    exceptionRecord
                 });
+                if (!admission.allowed) {
+                    return res.status(422).json({
+                        error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                        message: `Cannot receive consignment: ${admission.reason}`,
+                        exceptionRequired: Boolean(admission.exceptionRequired)
+                    });
+                }
             }
         }
 
@@ -1472,6 +1502,38 @@ exports.processBatchConsignmentIntake = async (req, res) => {
             if (!selected.valid) return res.status(400).json({ error: selected.error, message: selected.error, row: index + 1, issues: selected.issues });
         }
 
+        // Canonical project resolution (F11)
+        const candidateConsignmentProject = csgInput.projectCode || csgInput.projectId;
+        const resolvedConsignmentProject = candidateConsignmentProject
+            ? await projectPolicyService.resolveProject(candidateConsignmentProject, prisma)
+            : null;
+
+        // Gate consignment intake through centralized admission policy
+        if (resolvedConsignmentProject) {
+            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
+            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? {
+                reason: req.body.exceptionReason,
+                approvalToken: req.body.approvalToken || null
+            } : null);
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: resolvedConsignmentProject.project,
+                channel: 'MANIFEST',
+                actor: user,
+                labId: userLab,
+                hasException,
+                exceptionRecord
+            });
+
+            if (!admission.allowed) {
+                return res.status(422).json({
+                    error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                    message: admission.reason,
+                    exceptionRequired: Boolean(admission.exceptionRequired)
+                });
+            }
+        }
+
         // 4. Atomic transaction across consignment and all samples
         const result = await prisma.$transaction(async (tx) => {
             // A. Create Consignment Record (RC-12)
@@ -1480,7 +1542,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     id: crypto.randomUUID(),
                     code: consignmentCode,
                     labId: userLab,
-                    projectCode: csgInput.projectCode || null,
+                    projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (csgInput.projectCode || null),
                     submitterName: csgInput.submitterName || csgInput.submitter?.name || null,
                     submitterOrg: csgInput.submitterOrg || csgInput.submitter?.organization || null,
                     submitterPhone: csgInput.submitterPhone || csgInput.submitter?.phone || null,
@@ -1581,8 +1643,8 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     labId,
                     status,
                     assignedLab: userLab,
-                    projectCode: consignment.projectCode || (existing?.projectCode || null),
-                    projectId: consignment.projectCode || (existing?.projectId || null),
+                    projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (consignment.projectCode || (existing?.projectCode || null)),
+                    projectId: resolvedConsignmentProject ? resolvedConsignmentProject.id : (existing?.projectId || null),
                     receptionDate: now,
                     receivedBy,
                     acceptedBy: isRejected ? null : receivedBy,

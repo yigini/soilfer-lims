@@ -241,6 +241,356 @@ function buildProjectSampleScope(actor, project, { authorizedLabIds = null } = {
     return { id: '__DENIED__' };
 }
 
+const PROJECT_TEMPLATES = {
+    SOILFER_V1: 'SOILFER_V1',
+    GENERIC_KOBO: 'GENERIC_KOBO',
+    GENERIC_OPEN_INTAKE: 'GENERIC_OPEN_INTAKE',
+    GENERIC_MANIFEST: 'GENERIC_MANIFEST',
+    WALK_IN: 'WALK_IN'
+};
+
+const TEMPLATE_DEFINITIONS = {
+    [PROJECT_TEMPLATES.SOILFER_V1]: {
+        id: PROJECT_TEMPLATES.SOILFER_V1,
+        version: '1.0.0',
+        allowedChannels: ['KOBO'],
+        requiresExceptionForDesk: true,
+        requiresExceptionForManifest: true,
+        allowDirectRegistration: false
+    },
+    [PROJECT_TEMPLATES.GENERIC_KOBO]: {
+        id: PROJECT_TEMPLATES.GENERIC_KOBO,
+        version: '1.0.0',
+        allowedChannels: ['KOBO'],
+        requiresExceptionForDesk: true,
+        requiresExceptionForManifest: false,
+        allowDirectRegistration: false
+    },
+    [PROJECT_TEMPLATES.GENERIC_MANIFEST]: {
+        id: PROJECT_TEMPLATES.GENERIC_MANIFEST,
+        version: '1.0.0',
+        allowedChannels: ['MANIFEST'],
+        requiresExceptionForDesk: true,
+        requiresExceptionForManifest: false,
+        allowDirectRegistration: false
+    },
+    [PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE]: {
+        id: PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE,
+        version: '1.0.0',
+        allowedChannels: ['DESK', 'WALK_IN', 'MANIFEST', 'KOBO'],
+        requiresExceptionForDesk: false,
+        requiresExceptionForManifest: false,
+        allowDirectRegistration: true
+    },
+    [PROJECT_TEMPLATES.WALK_IN]: {
+        id: PROJECT_TEMPLATES.WALK_IN,
+        version: '1.0.0',
+        allowedChannels: ['WALK_IN', 'DESK'],
+        requiresExceptionForDesk: false,
+        requiresExceptionForManifest: false,
+        allowDirectRegistration: true
+    }
+};
+
+const PROGRAMME_CHILD_PROJECTS = {
+    'SOILFER-US': ['SOILFER-GTM', 'SOILFER-HND', 'SOILFER-GHA', 'SOILFER-KEN', 'SOILFER-ZMB'],
+    'SOILFER-USA': ['SOILFER-GTM', 'SOILFER-HND', 'SOILFER-GHA', 'SOILFER-KEN', 'SOILFER-ZMB'],
+    'SOILFER-JPN': ['SOILFER-MOZ', 'SOILFER-TUN']
+};
+
+function getProgrammeChildProjectCodes(programmeCode) {
+    if (!programmeCode) return [];
+    const codeUpper = String(programmeCode).trim().toUpperCase();
+    return PROGRAMME_CHILD_PROJECTS[codeUpper] || [];
+}
+
+/**
+ * Returns the effective policy configuration for a project.
+ */
+function getEffectivePolicy(projectOrCode) {
+    const templateId = getEffectiveTemplate(projectOrCode);
+    const base = TEMPLATE_DEFINITIONS[templateId] || TEMPLATE_DEFINITIONS.GENERIC_OPEN_INTAKE;
+    let custom = {};
+    if (projectOrCode && typeof projectOrCode === 'object' && projectOrCode.policyConfig) {
+        try {
+            custom = typeof projectOrCode.policyConfig === 'string'
+                ? JSON.parse(projectOrCode.policyConfig)
+                : projectOrCode.policyConfig;
+        } catch {
+            custom = {};
+        }
+    }
+    return {
+        templateId,
+        templateVersion: (projectOrCode && projectOrCode.templateVersion) || base.version,
+        allowedChannels: Array.isArray(custom.allowedChannels) ? custom.allowedChannels : base.allowedChannels,
+        requiresExceptionForDesk: custom.requiresExceptionForDesk !== undefined ? custom.requiresExceptionForDesk : base.requiresExceptionForDesk,
+        requiresExceptionForManifest: custom.requiresExceptionForManifest !== undefined ? custom.requiresExceptionForManifest : base.requiresExceptionForManifest,
+        allowDirectRegistration: custom.allowDirectRegistration !== undefined ? custom.allowDirectRegistration : base.allowDirectRegistration
+    };
+}
+
+/**
+ * Returns the effective template ID for a project record or code.
+ */
+function getEffectiveTemplate(projectOrCode) {
+    if (!projectOrCode) return PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE;
+
+    const canonicalSoilFerCodes = [
+        'SOILFER-US', 'SOILFER-USA', 'SOILFER-JPN',
+        'SOILFER-GTM', 'SOILFER-HND', 'SOILFER-GHA', 'SOILFER-KEN',
+        'SOILFER-ZMB', 'SOILFER-MOZ', 'SOILFER-TUN'
+    ];
+
+    if (typeof projectOrCode === 'string') {
+        const codeUpper = projectOrCode.toUpperCase().trim();
+        if (canonicalSoilFerCodes.includes(codeUpper)) {
+            return PROJECT_TEMPLATES.SOILFER_V1;
+        }
+        return PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE;
+    }
+
+    const explicitTemplate = projectOrCode.templateId || projectOrCode.template;
+    if (explicitTemplate && Object.values(PROJECT_TEMPLATES).includes(explicitTemplate)) {
+        return explicitTemplate;
+    }
+
+    const type = (projectOrCode.projectType || '').toUpperCase().trim();
+    if (type === 'SOILFER_V1' || type === 'SOILFER') return PROJECT_TEMPLATES.SOILFER_V1;
+    if (type === 'KOBO_LINKED' || type === 'GENERIC_KOBO') return PROJECT_TEMPLATES.GENERIC_KOBO;
+    if (type === 'TEMPLATE_PREDEFINED_IDS' || type === 'PREDEFINED_MANIFEST' || type === 'GENERIC_MANIFEST') return PROJECT_TEMPLATES.GENERIC_MANIFEST;
+    if (type === 'WALK_IN') return PROJECT_TEMPLATES.WALK_IN;
+    if (type === 'OPEN_INTAKE' || type === 'GENERIC_OPEN_INTAKE') return PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE;
+
+    // Only if projectType is completely absent / empty, check canonical legacy codes
+    const code = (projectOrCode.code || projectOrCode.id || '').toUpperCase().trim();
+    if (canonicalSoilFerCodes.includes(code)) {
+        return PROJECT_TEMPLATES.SOILFER_V1;
+    }
+
+    return PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE;
+}
+
+/**
+ * Checks whether a project uses the SoilFER template.
+ */
+function isSoilFerTemplate(projectOrCode) {
+    return getEffectiveTemplate(projectOrCode) === PROJECT_TEMPLATES.SOILFER_V1;
+}
+
+/**
+ * Resolves a project identifier (id or code) to canonical id, code, and project record.
+ */
+async function resolveProject(idOrCode, tx = null) {
+    if (!idOrCode) return null;
+    const client = tx || require('../prisma');
+    const str = String(idOrCode).trim();
+    const proj = await client.project.findFirst({
+        where: {
+            OR: [
+                { id: str },
+                { code: str },
+                { code: str.toUpperCase() }
+            ]
+        }
+    });
+    if (!proj) return null;
+    return {
+        id: proj.id,
+        code: proj.code,
+        project: proj
+    };
+}
+
+/**
+ * Checks whether an actor can authorize an admission exception.
+ */
+function canAuthorizeException(actor, project = null, labId = null) {
+    if (!actor || actor.isActive === false) return false;
+    const role = actor.role ? actor.role.trim() : '';
+    if (role === 'SUPER_ADMIN' || role === 'ADMIN') return true;
+    if (role === 'LAB_MANAGER') {
+        const targetLab = labId || (project ? project.labId : null) || actor.labId;
+        return Boolean(actor.labId && (actor.labId === targetLab || actor.labId === labId));
+    }
+    return false;
+}
+
+/**
+ * Validates whether an exception is genuinely authorized by an authenticated authority
+ * or a stored, validated approval bound to the operation. A client-supplied string alone is rejected.
+ */
+function validateExceptionAuthorization(actor, project, labId, exceptionRecord) {
+    if (!actor || actor.isActive === false) {
+        return { authorized: false, reason: 'Inactive or unauthenticated actor cannot submit exceptions.' };
+    }
+
+    // 1. Authenticated actor has direct exception authority
+    if (canAuthorizeException(actor, project, labId)) {
+        return {
+            authorized: true,
+            authorizedBy: actor.username || actor.id,
+            authorizerRole: actor.role,
+            mode: 'ACTOR_AUTHORIZED'
+        };
+    }
+
+    // 2. Stored / validated approval bound to the operation
+    if (exceptionRecord && exceptionRecord.isStoredApprovalVerified === true && exceptionRecord.verifiedAuthorizer) {
+        return {
+            authorized: true,
+            authorizedBy: exceptionRecord.verifiedAuthorizer,
+            mode: 'STORED_APPROVAL'
+        };
+    }
+
+    // Client-supplied string or unverified claimed authorizer is strictly rejected
+    return {
+        authorized: false,
+        code: 'EXCEPTION_NOT_AUTHORIZED',
+        reason: `Actor '${actor.username || actor.role}' is not authorized to grant admission exceptions, and no validated stored approval was provided.`
+    };
+}
+
+/**
+ * Evaluates whether a sample can be admitted to a project through the requested channel.
+ *
+ * @param {object} params
+ * @param {object} params.project - Project record
+ * @param {string} params.channel - Channel: 'KOBO', 'DESK', 'MANUAL', 'CSV', 'MANIFEST', 'WALK_IN', 'PHYSICAL_RECEIPT'
+ * @param {object} params.actor - Authenticated user
+ * @param {string} [params.labId] - Target laboratory ID
+ * @param {boolean} [params.hasException] - Whether an exception was claimed
+ * @param {object} [params.exceptionRecord] - Exception details { reason, authorizer, approvedAt }
+ * @returns {{ allowed: boolean, reason?: string, code?: string, exceptionRequired?: boolean }}
+ */
+function canAdmitSample({ project, channel = 'DESK', actor, labId = null, hasException = false, exceptionRecord = null }) {
+    // Projectless walk-in work is always permitted in an authorized lab
+    if (!project) {
+        return { allowed: true };
+    }
+
+    const status = (project.status || 'ACTIVE').toUpperCase().trim();
+
+    // 1. Lifecycle checks
+    if (['CLOSED', 'ARCHIVED', 'CANCELLED', 'DELETED', 'COMPLETED'].includes(status)) {
+        return {
+            allowed: false,
+            code: 'PROJECT_CLOSED',
+            reason: `Admissions for project ${project.code || project.id} are ${status.toLowerCase()}. Sample admission blocked.`
+        };
+    }
+
+    if (status === 'PAUSED') {
+        return {
+            allowed: false,
+            code: 'PROJECT_PAUSED',
+            reason: `Admissions for project ${project.code || project.id} are temporarily paused.`
+        };
+    }
+
+    if (['DRAFT', 'PENDING_MANIFEST'].includes(status)) {
+        if (channel === 'MANIFEST') {
+            return { allowed: true }; // Manifest upload allowed for draft staging
+        }
+        return {
+            allowed: false,
+            code: 'PROJECT_INACTIVE',
+            reason: `Project ${project.code || project.id} is in ${status.toLowerCase()} status. Activate project before sample intake or physical receipt.`
+        };
+    }
+
+    // 2. Physical receipt of an already-registered sample (lifecycle check passed)
+    if (channel === 'PHYSICAL_RECEIPT') {
+        return { allowed: true };
+    }
+
+    // 3. Channel policy checks based on effective policy
+    const policy = getEffectivePolicy(project);
+
+    if (policy.allowedChannels.includes(channel)) {
+        return { allowed: true };
+    }
+
+    const requiresException = (channel === 'DESK' && policy.requiresExceptionForDesk) ||
+                              (channel === 'MANIFEST' && policy.requiresExceptionForManifest) ||
+                              (!policy.allowedChannels.includes(channel));
+
+    if (requiresException) {
+        if (hasException) {
+            const reason = exceptionRecord && (typeof exceptionRecord === 'string' ? exceptionRecord : exceptionRecord.reason);
+            if (!reason || !String(reason).trim()) {
+                return {
+                    allowed: false,
+                    exceptionRequired: true,
+                    code: 'EXCEPTION_REASON_REQUIRED',
+                    reason: `An explicit justification reason is required for ${channel} exception intake on project '${project.code}'.`
+                };
+            }
+
+            const authCheck = validateExceptionAuthorization(actor, project, labId, exceptionRecord);
+            if (!authCheck.authorized) {
+                return {
+                    allowed: false,
+                    exceptionRequired: true,
+                    code: authCheck.code || 'EXCEPTION_NOT_AUTHORIZED',
+                    reason: authCheck.reason
+                };
+            }
+
+            return { allowed: true, isException: true, authorizedBy: authCheck.authorizedBy };
+        }
+
+        const errCode = policy.templateId === PROJECT_TEMPLATES.GENERIC_KOBO
+            ? 'KOBO_REQUIRED'
+            : (policy.templateId === PROJECT_TEMPLATES.GENERIC_MANIFEST ? 'MANIFEST_REQUIRED' : 'EXCEPTION_REQUIRED');
+
+        return {
+            allowed: false,
+            exceptionRequired: true,
+            code: errCode,
+            reason: `Project '${project.code}' requires ${policy.allowedChannels.join(' or ')} registration. ${channel} registration requires an authorized exception record.`
+        };
+    }
+
+    return { allowed: true };
+}
+
+/**
+ * Returns exact capabilities object for an actor on a project.
+ */
+function getProjectCapabilities(actor, project, { memberLabIds = null, labCountries = {} } = {}) {
+    if (!actor || actor.isActive === false || !project) {
+        return {
+            canRead: false,
+            canEditPlan: false,
+            canManageAccess: false,
+            canManageConnections: false,
+            canTransition: false,
+            canImport: false,
+            canAuthorizeException: false
+        };
+    }
+
+    const role = actor.role ? actor.role.trim() : '';
+    const isAdmin = role === 'SUPER_ADMIN' || role === 'ADMIN';
+    const isOwnerManager = role === 'LAB_MANAGER' && Boolean(actor.labId && project.labId === actor.labId);
+    const isServicingManager = role === 'LAB_MANAGER' && Boolean(actor.labId && (
+        (Array.isArray(memberLabIds) && memberLabIds.includes(actor.labId)) ||
+        parseArray(project.assignedLabIds).includes(actor.labId)
+    ));
+
+    return {
+        canRead: canReadProject(actor, project, { memberLabIds, labCountries }),
+        canEditPlan: canEditProjectPlan(actor, project),
+        canManageAccess: canManageProjectAccess(actor, project),
+        canManageConnections: isAdmin || isOwnerManager || isServicingManager,
+        canTransition: canTransitionProject(actor, project),
+        canImport: canImportProjectSamples(actor, project),
+        canAuthorizeException: canAuthorizeException(actor, project)
+    };
+}
+
 module.exports = {
     parseArray,
     canReadProject,
@@ -250,5 +600,15 @@ module.exports = {
     canManageProjectAccess,
     canTransitionProject,
     canImportProjectSamples,
-    buildProjectSampleScope
+    buildProjectSampleScope,
+    PROJECT_TEMPLATES,
+    TEMPLATE_DEFINITIONS,
+    getEffectivePolicy,
+    getEffectiveTemplate,
+    isSoilFerTemplate,
+    getProgrammeChildProjectCodes,
+    resolveProject,
+    canAuthorizeException,
+    canAdmitSample,
+    getProjectCapabilities
 };

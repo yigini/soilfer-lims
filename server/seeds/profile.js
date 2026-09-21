@@ -62,28 +62,45 @@ async function seedProfile(profileName = 'soilfer', prismaClient = prisma) {
         const projects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
         for (const proj of projects) {
             const assignedLabIdsJson = Array.isArray(proj.assignedLabs) ? JSON.stringify(proj.assignedLabs) : (proj.assignedLabIds || null);
-            const created = await prismaClient.project.upsert({
-                where: { code: proj.code },
-                update: {
-                    name: proj.name,
-                    status: proj.status || 'ACTIVE',
-                    projectType: proj.projectType || 'OPEN_INTAKE',
-                    expectedSampleCount: proj.expectedSampleCount || 0,
-                    assignedLabIds: assignedLabIdsJson
-                },
-                create: {
-                    id: proj.id || proj.code,
-                    code: proj.code,
-                    name: proj.name,
-                    status: proj.status || 'ACTIVE',
-                    projectType: proj.projectType || 'OPEN_INTAKE',
-                    expectedSampleCount: proj.expectedSampleCount || 0,
-                    assignedLabIds: assignedLabIdsJson
-                }
-            });
+            const existing = await prismaClient.project.findUnique({ where: { code: proj.code } });
+            let created;
+            if (existing) {
+                // F01 FIX: Preserve operational status, custom projectType, and target counts
+                created = await prismaClient.project.update({
+                    where: { code: proj.code },
+                    data: {
+                        name: proj.name,
+                        status: existing.status || proj.status || 'ACTIVE',
+                        projectType: existing.projectType || proj.projectType || 'OPEN_INTAKE',
+                        expectedSampleCount: (existing.expectedSampleCount !== null && existing.expectedSampleCount !== undefined)
+                            ? existing.expectedSampleCount
+                            : (proj.expectedSampleCount !== undefined ? proj.expectedSampleCount : 0),
+                        labId: existing.labId || proj.labId || null,
+                        countries: existing.countries || proj.countries || null,
+                        assignedLabIds: (existing.assignedLabIds !== null && existing.assignedLabIds !== undefined)
+                            ? existing.assignedLabIds
+                            : assignedLabIdsJson
+                    }
+                });
+            } else {
+                created = await prismaClient.project.create({
+                    data: {
+                        id: proj.id || proj.code,
+                        code: proj.code,
+                        name: proj.name,
+                        status: proj.status || 'ACTIVE',
+                        projectType: proj.projectType || 'OPEN_INTAKE',
+                        expectedSampleCount: proj.expectedSampleCount !== undefined ? proj.expectedSampleCount : 0,
+                        labId: proj.labId || null,
+                        countries: proj.countries || null,
+                        assignedLabIds: assignedLabIdsJson
+                    }
+                });
+            }
 
-            // Assign labs via ProjectLab junction if provided
-            if (Array.isArray(proj.assignedLabs)) {
+            // Assign labs via ProjectLab junction ONLY on initial project creation (!existing)
+            // This prevents seed reruns from re-adding an intentionally removed laboratory membership
+            if (!existing && Array.isArray(proj.assignedLabs)) {
                 for (const labId of proj.assignedLabs) {
                     await prismaClient.projectLab.upsert({
                         where: {

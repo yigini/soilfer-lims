@@ -835,15 +835,29 @@ const Reception = () => {
             } else {
                 if (currentMode === 'PROJECT') {
                     // Check if project allows open intake
-                    const proj = availableProjects.find(p => p.id === currentProject);
-                    if (proj && proj.projectType !== 'TEMPLATE_PREDEFINED_IDS') {
-                        // Bypass manifest check for Open Intake projects
+                    const proj = availableProjects.find(p => p.id === currentProject || p.code === currentProject);
+                    const isSoilFer = (proj?.projectType === 'SOILFER_V1') || (proj?.code && (proj.code.startsWith('SOILFER-') || proj.code === 'SOILFER'));
+                    const isKoboLinked = proj?.projectType === 'KOBO_LINKED';
+                    const isOpenIntake = proj?.projectType === 'OPEN_INTAKE' || (!isSoilFer && !isKoboLinked && proj?.projectType !== 'TEMPLATE_PREDEFINED_IDS');
+
+                    if (proj && isOpenIntake) {
+                        // Bypass manifest check only for genuine Open Intake projects
                         playSuccessChime();
                         setSampleData({
                             originalId: trimmedCode,
                             isNew: true,
                             projectId: proj.id,
                             projectCode: proj.code
+                        });
+                        return;
+                    }
+
+                    if (proj && (isSoilFer || isKoboLinked)) {
+                        playErrorBuzz();
+                        showDialog({
+                            type: 'error',
+                            title: 'Sample Not Found',
+                            message: `Sample ${trimmedCode} is not registered in project ${proj.code}. SoilFER country projects require Kobo synchronization or an authorized reception exception record.`
                         });
                         return;
                     }

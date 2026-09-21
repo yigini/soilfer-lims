@@ -1072,7 +1072,7 @@
       "destinationProject": "Destination project",
       "destinationLab": "Destination lab",
       "koboForm": "Form / asset ID",
-      "koboSecurityNotice": "API authentication credentials and secrets are encrypted server-side and never displayed in the browser.",
+      "koboSecurityNotice": "Les identifiants d'authentification API sont protégés par des contrôles d'accès côté serveur et strictement masqués dans les réponses aux clients.",
       "sisTitle": "SIS & released data exchange",
       "sisSubtitle": "Project provenance and analytical release integrity remain permanent.",
       "sisGoverned": "Governed API",

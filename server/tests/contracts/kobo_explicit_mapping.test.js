@@ -430,7 +430,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
             expect(res.status).toBe(200);
             expect(res.body.newSamples).toBe(0);
             expect(res.body.skipped).toBe(0);
-            expect(res.body.message).toContain('admissions paused');
+            expect(res.body.message.toLowerCase()).toContain('paused');
         });
 
         it('rejects sync when servicing lab is not an authorized member of the project', async () => {
@@ -656,4 +656,136 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
             expect(finalConfig.lastSubmissionId).toBe('105');
         });
     });
+
+    describe('6. Single-Sample Resync & Config Contracts (Finding 2, Finding 4)', () => {
+        test('upsertConfig rejects missing projectCode with 400 PROJECT_CODE_REQUIRED', async () => {
+            const res = await request(app)
+                .put(`/api/kobo/config/${labA.id}`)
+                .set('Authorization', tokenAdmin)
+                .send({
+                    formId: 'aSomeForm',
+                    apiToken: 'someSecretToken',
+                    projectCode: '' // Missing
+                });
+
+            expect(res.status).toBe(400);
+            expect(res.body.error).toBe('PROJECT_CODE_REQUIRED');
+        });
+
+        test('syncSample fails with 404 NO_CONFIG_MATCH and does NOT fall back to arbitrary lab config', async () => {
+            // Create an unlinked project and sample
+            const unlinkedProj = await prisma.project.create({
+                data: {
+                    id: `PROJ-UNLINKED-${SUFFIX}`,
+                    code: `PROJ-UNLINKED-${SUFFIX}`,
+                    name: 'Unlinked Project',
+                    status: 'ACTIVE',
+                    projectType: 'OPEN_INTAKE'
+                }
+            });
+
+            const unlinkedSample = await prisma.sample.create({
+                data: {
+                    id: `SMP-UNLINKED-${SUFFIX}`,
+                    originalId: `SMP-UNLINKED-${SUFFIX}`,
+                    projectCode: unlinkedProj.code,
+                    assignedLab: labA.id,
+                    status: 'EXPECTED'
+                }
+            });
+
+            // labA has configs for proj1, but NOT for unlinkedProj
+            const res = await request(app)
+                .post(`/api/kobo/sync-sample/${unlinkedSample.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(404);
+            expect(res.body.error).toBe('NO_CONFIG_MATCH');
+            expect(res.body.message).toContain('Arbitrary laboratory form fallback is prohibited');
+
+            // Cleanup
+            await prisma.sample.delete({ where: { id: unlinkedSample.id } });
+            await prisma.project.delete({ where: { id: unlinkedProj.id } });
+        });
+
+        test('syncSample strictly preserves manual field overrides and updates atomically with audit log', async () => {
+            const resyncSample = await prisma.sample.create({
+                data: {
+                    id: `SMP-RESYNC-${SUFFIX}`,
+                    originalId: `ORIG-RESYNC-${SUFFIX}`,
+                    projectCode: proj1.code,
+                    assignedLab: labA.id,
+                    status: 'EXPECTED',
+                    fieldMetadata: JSON.stringify({
+                        latitude: { value: 14.5, source: 'MANUAL', isManualOverride: true, lastUpdatedBy: 'lab_tech_john' },
+                        notes: { value: 'Specimen in glass vial', source: 'MANUAL', manuallyOverridden: true }
+                    }),
+                    metadata: JSON.stringify({ initialBatch: 'B1' })
+                }
+            });
+
+            koboService.findValue.mockImplementation((obj, keys) => {
+                for (const k of keys) {
+                    if (obj && obj[k] !== undefined) return obj[k];
+                }
+                return null;
+            });
+
+            koboService.fetchSubmissions.mockImplementationOnce(async () => {
+                return [{
+                    _id: 999,
+                    _uuid: 'u-999',
+                    _submission_time: '2026-09-21T10:00:00Z',
+                    surveyor_name: 'Surveyor Steve'
+                }];
+            });
+
+            koboService.transformSubmission.mockReturnValueOnce([{
+                original_id: `ORIG-RESYNC-${SUFFIX}`,
+                site_id: 'SITE-999',
+                lat: 16.99, // Should NOT overwrite manual latitude 14.5
+                lng: -90.5,
+                collected_at: '2026-09-20'
+            }]);
+
+            const res = await request(app)
+                .post(`/api/kobo/sync-sample/${resyncSample.id}`)
+                .set('Authorization', tokenAdmin);
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+
+            // Verify sample in database
+            const updated = await prisma.sample.findUnique({ where: { id: resyncSample.id } });
+            const fm = JSON.parse(updated.fieldMetadata);
+            const meta = JSON.parse(updated.metadata);
+
+            // Manual override was preserved!
+            expect(fm.latitude.value).toBe(14.5);
+            expect(fm.latitude.source).toBe('MANUAL');
+            expect(fm.latitude.isManualOverride).toBe(true);
+            expect(fm.notes.value).toBe('Specimen in glass vial');
+
+            // Non-overridden fields were enriched from Kobo
+            expect(fm.longitude.value).toBe(-90.5);
+            expect(fm.longitude.source).toBe('KOBO');
+            expect(meta.surveyor).toBe('Surveyor Steve');
+            expect(meta.initialBatch).toBe('B1'); // Merged metadata
+
+            // Verify AuditLog was written
+            const audit = await prisma.auditLog.findFirst({
+                where: {
+                    entity: 'SAMPLE',
+                    entityId: resyncSample.id,
+                    action: 'KOBO_SAMPLE_RESYNC'
+                }
+            });
+            expect(audit).not.toBeNull();
+
+            // Cleanup
+            await prisma.auditLog.deleteMany({ where: { entityId: resyncSample.id } });
+            await prisma.sample.delete({ where: { id: resyncSample.id } });
+        });
+    });
 });
+

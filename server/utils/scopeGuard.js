@@ -130,6 +130,24 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
                 }
             } catch (e) {}
         }
+
+        const isProjectRole = user.role === 'PROJECT_MANAGER' || user.role === 'EXTERNAL_VIEWER' || user.role === 'VIEWER';
+        if (isProjectRole && user.projects) {
+            try {
+                const projects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
+                if (Array.isArray(projects) && projects.length > 0) {
+                    const projectPolicyService = require('../services/projectPolicyService');
+                    const expanded = new Set(projects);
+                    projects.forEach(p => {
+                        const children = projectPolicyService.getProgrammeChildProjectCodes(p);
+                        children.forEach(c => expanded.add(c));
+                    });
+                    const projList = Array.from(expanded);
+                    orClauses.push({ projectCode: { in: projList } });
+                    orClauses.push({ projectId: { in: projList } });
+                }
+            } catch (e) {}
+        }
     } else if (entityType === 'Spectral') {
         // Spectral fields: labId
         if (labScope) {
@@ -215,10 +233,16 @@ function canAccessEntity(user, entity, options = {}) {
         try {
             const projects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
             if (Array.isArray(projects) && projects.length > 0) {
+                const projectPolicyService = require('../services/projectPolicyService');
+                const expanded = new Set(projects);
+                projects.forEach(p => {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(p);
+                    children.forEach(c => expanded.add(c));
+                });
                 const entityProject = entity.projectCode || entity.projectId || entity.project || null;
-                if (entityProject && projects.includes(entityProject)) return true;
-                if (entity.code && projects.includes(entity.code)) return true;
-                if (entity.id && projects.includes(entity.id)) return true;
+                if (entityProject && expanded.has(entityProject)) return true;
+                if (entity.code && expanded.has(entity.code)) return true;
+                if (entity.id && expanded.has(entity.id)) return true;
             }
         } catch (e) {}
     }

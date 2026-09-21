@@ -1,18 +1,90 @@
 [
   {
+    "id": "SOILFER-GTM",
+    "code": "SOILFER-GTM",
+    "name": "SoilFER Guatemala",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 9883,
+    "labId": "GTM-LAB1",
+    "assignedLabs": ["GTM-LAB1"],
+    "countries": "[\"GTM\"]"
+  },
+  {
+    "id": "SOILFER-HND",
+    "code": "SOILFER-HND",
+    "name": "SoilFER Honduras",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 3933,
+    "labId": "HND-LAB1",
+    "assignedLabs": ["HND-LAB1"],
+    "countries": "[\"HND\"]"
+  },
+  {
+    "id": "SOILFER-GHA",
+    "code": "SOILFER-GHA",
+    "name": "SoilFER Ghana",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 0,
+    "labId": "GHA-LAB1",
+    "assignedLabs": ["GHA-LAB1"],
+    "countries": "[\"GHA\"]"
+  },
+  {
+    "id": "SOILFER-KEN",
+    "code": "SOILFER-KEN",
+    "name": "SoilFER Kenya",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 3960,
+    "labId": "KEN-LAB1",
+    "assignedLabs": ["KEN-LAB1"],
+    "countries": "[\"KEN\"]"
+  },
+  {
+    "id": "SOILFER-ZMB",
+    "code": "SOILFER-ZMB",
+    "name": "SoilFER Zambia",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 8843,
+    "labId": "ZMB-LAB1",
+    "assignedLabs": ["ZMB-LAB1"],
+    "countries": "[\"ZMB\"]"
+  },
+  {
+    "id": "SOILFER-MOZ",
+    "code": "SOILFER-MOZ",
+    "name": "SoilFER Mozambique",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 5422,
+    "labId": "MOZ-LAB1",
+    "assignedLabs": ["MOZ-LAB1"],
+    "countries": "[\"MOZ\"]"
+  },
+  {
+    "id": "SOILFER-TUN",
+    "code": "SOILFER-TUN",
+    "name": "SoilFER Tunisia",
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 4815,
+    "labId": "TUN-LAB1",
+    "assignedLabs": ["TUN-LAB1"],
+    "countries": "[\"TUN\"]"
+  },
+  {
     "id": "SoilFER-USA",
     "code": "SOILFER-US",
     "name": "SoilFER USA Program",
-    "projectType": "OPEN_INTAKE",
-    "expectedSampleCount": 33672,
-    "assignedLabs": ["GTM-LAB1", "HND-LAB1", "GHA-LAB1", "KEN-LAB1", "ZMB-LAB1"]
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 26619,
+    "assignedLabs": ["GTM-LAB1", "HND-LAB1", "GHA-LAB1", "KEN-LAB1", "ZMB-LAB1"],
+    "countries": "[\"GTM\", \"HND\", \"GHA\", \"KEN\", \"ZMB\"]"
   },
   {
     "id": "SoilFER-JPN",
     "code": "SOILFER-JPN",
     "name": "SoilFER Japan Program",
-    "projectType": "OPEN_INTAKE",
-    "expectedSampleCount": 6858,
-    "assignedLabs": ["MOZ-LAB1", "TUN-LAB1"]
+    "projectType": "SOILFER_V1",
+    "expectedSampleCount": 10237,
+    "assignedLabs": ["MOZ-LAB1", "TUN-LAB1"],
+    "countries": "[\"MOZ\", \"TUN\"]"
   }
 ]

@@ -1072,7 +1072,7 @@
       "destinationProject": "Proyecto de destino",
       "destinationLab": "Laboratorio de destino",
       "koboForm": "ID de formulario / activo",
-      "koboSecurityNotice": "Las credenciales y claves API se cifran en el servidor y nunca se exponen en el navegador.",
+      "koboSecurityNotice": "Las credenciales y claves API están protegidas mediante controles de acceso en el servidor y se ocultan estrictamente en las respuestas al cliente.",
       "sisTitle": "Intercambio de datos liberados y SIS",
       "sisSubtitle": "La procedencia del proyecto y la integridad de resultados permanecen inalterables.",
       "sisGoverned": "API gobernada",
