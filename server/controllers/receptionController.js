@@ -181,20 +181,20 @@ exports.processIntake = async (req, res) => {
                 resolvedTargetProject = await projectPolicyService.resolveProject(candidateProjectId, prisma);
             }
 
-            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
-            let exceptionRecord = null;
-            if (req.body.exceptionRecord) {
-                exceptionRecord = req.body.exceptionRecord;
-            } else if (req.body.exceptionReason) {
-                exceptionRecord = {
-                    reason: req.body.exceptionReason,
-                    claimedAuthorizer: req.body.authorizer || null,
-                    approvalToken: req.body.approvalToken || null
-                };
-            }
+            const targetProjectObj = resolvedTargetProject ? resolvedTargetProject.project : null;
+            const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: req.body.exceptionRecord,
+                rawExceptionReason: req.body.exceptionReason,
+                authorizer: req.body.authorizer,
+                approvalId: req.body.approvalId || req.body.approvalToken,
+                actor: user,
+                project: targetProjectObj,
+                labId: user.labId,
+                prismaClient: prisma
+            });
 
             const admission = projectPolicyService.canAdmitSample({
-                project: resolvedTargetProject ? resolvedTargetProject.project : null,
+                project: targetProjectObj,
                 channel: isWalkIn ? 'WALK_IN' : 'DESK',
                 actor: user,
                 labId: user.labId,
@@ -1446,13 +1446,18 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 }
             });
 
-            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
-            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? {
-                reason: req.body.exceptionReason,
-                approvalToken: req.body.approvalToken || null
-            } : null);
-
             for (const proj of allReferencedProjects) {
+                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                    rawExceptionRecord: req.body.exceptionRecord,
+                    rawExceptionReason: req.body.exceptionReason,
+                    authorizer: req.body.authorizer,
+                    approvalId: req.body.approvalId || req.body.approvalToken,
+                    actor: user,
+                    project: proj,
+                    labId: userLab,
+                    prismaClient: prisma
+                });
+
                 const admission = projectPolicyService.canAdmitSample({
                     project: proj,
                     channel: 'MANIFEST',
@@ -1510,11 +1515,16 @@ exports.processBatchConsignmentIntake = async (req, res) => {
 
         // Gate consignment intake through centralized admission policy
         if (resolvedConsignmentProject) {
-            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
-            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? {
-                reason: req.body.exceptionReason,
-                approvalToken: req.body.approvalToken || null
-            } : null);
+            const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: req.body.exceptionRecord,
+                rawExceptionReason: req.body.exceptionReason,
+                authorizer: req.body.authorizer,
+                approvalId: req.body.approvalId || req.body.approvalToken,
+                actor: user,
+                project: resolvedConsignmentProject.project,
+                labId: userLab,
+                prismaClient: prisma
+            });
 
             const admission = projectPolicyService.canAdmitSample({
                 project: resolvedConsignmentProject.project,

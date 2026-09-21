@@ -178,4 +178,168 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
             expect(caps.canAuthorizeException).toBe(false);
         });
     });
+
+    describe('HTTP Trust Boundary Exception Verification (resolveAndVerifyExceptionRecord)', () => {
+        const soilferProject = {
+            id: 'SOILFER-GTM',
+            code: 'SOILFER-GTM',
+            labId: 'GTM-LAB1',
+            status: 'ACTIVE',
+            projectType: 'SOILFER_V1'
+        };
+
+        const mockPrisma = {
+            sampleAmendment: {
+                findUnique: jest.fn()
+            },
+            auditLog: {
+                findFirst: jest.fn()
+            },
+            user: {
+                findUnique: jest.fn()
+            }
+        };
+
+        test('Client-supplied isStoredApprovalVerified boolean is strictly stripped and rejected when actor is unprivileged', async () => {
+            const technicianActor = { username: 'tech_bob', role: 'LAB_TECHNICIAN', labId: 'GTM-LAB1', isActive: true };
+            const maliciousClientPayload = {
+                reason: 'Spoofed emergency exception',
+                isStoredApprovalVerified: true,
+                verifiedAuthorizer: 'super_admin'
+            };
+
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: maliciousClientPayload,
+                actor: technicianActor,
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(false);
+            expect(resolved.exceptionRecord.mode).toBe('UNVERIFIED');
+
+            // Admission must fail closed
+            const admission = projectPolicyService.canAdmitSample({
+                project: soilferProject,
+                channel: 'DESK',
+                actor: technicianActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(false);
+            expect(admission.code).toBe('EXCEPTION_NOT_AUTHORIZED');
+        });
+
+        test('Direct authority: Lab manager self-authorizes exception', async () => {
+            const managerActor = { username: 'mgr_gtm', role: 'LAB_MANAGER', labId: 'GTM-LAB1', isActive: true };
+            const clientPayload = { reason: 'Field power outage' };
+
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: clientPayload,
+                actor: managerActor,
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(true);
+            expect(resolved.exceptionRecord.verifiedAuthorizer).toBe('mgr_gtm');
+            expect(resolved.exceptionRecord.mode).toBe('ACTOR_AUTHORIZED');
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: soilferProject,
+                channel: 'DESK',
+                actor: managerActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(true);
+            expect(admission.isException).toBe(true);
+        });
+
+        test('Stored approval: Unprivileged reception staff with valid persisted SampleAmendment is allowed', async () => {
+            const receptionActor = { username: 'rec_sue', role: 'SAMPLE_RECEPTION', labId: 'GTM-LAB1', isActive: true };
+            
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-VALID-001',
+                status: 'APPROVED',
+                authorizedBy: 'mgr_gtm',
+                reason: 'Formal waiver for cracked vial container'
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'mgr_gtm',
+                role: 'LAB_MANAGER',
+                labId: 'GTM-LAB1',
+                isActive: true
+            });
+
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: { reason: 'Formal waiver for cracked vial container' },
+                approvalId: 'AMD-VALID-001',
+                actor: receptionActor,
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(true);
+            expect(resolved.exceptionRecord.verifiedAuthorizer).toBe('mgr_gtm');
+            expect(resolved.exceptionRecord.mode).toBe('STORED_APPROVAL');
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: soilferProject,
+                channel: 'DESK',
+                actor: receptionActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(true);
+            expect(admission.isException).toBe(true);
+        });
+
+        test('Stored approval: Invalid or unapproved record fails closed', async () => {
+            const receptionActor = { username: 'rec_sue', role: 'SAMPLE_RECEPTION', labId: 'GTM-LAB1', isActive: true };
+
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PENDING-001',
+                status: 'PENDING', // Not yet approved!
+                authorizedBy: null
+            });
+            mockPrisma.auditLog.findFirst.mockResolvedValueOnce(null);
+
+            const resolved = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: { reason: 'Pending approval test' },
+                approvalId: 'AMD-PENDING-001',
+                actor: receptionActor,
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                prismaClient: mockPrisma
+            });
+
+            expect(resolved.hasException).toBe(true);
+            expect(resolved.exceptionRecord.isStoredApprovalVerified).toBe(false);
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: soilferProject,
+                channel: 'DESK',
+                actor: receptionActor,
+                labId: 'GTM-LAB1',
+                hasException: resolved.hasException,
+                exceptionRecord: resolved.exceptionRecord
+            });
+
+            expect(admission.allowed).toBe(false);
+            expect(admission.code).toBe('EXCEPTION_NOT_AUTHORIZED');
+        });
+    });
 });

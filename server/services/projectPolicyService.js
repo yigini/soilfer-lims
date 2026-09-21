@@ -453,6 +453,142 @@ function validateExceptionAuthorization(actor, project, labId, exceptionRecord) 
 }
 
 /**
+ * Verifies a stored exception approval record from the database.
+ * Never trusts client verification flags.
+ *
+ * @param {object} params
+ * @param {string} params.approvalId - Stored approval ID or amendment ID
+ * @param {object} [params.project] - Target Project record
+ * @param {string} [params.labId] - Target Lab ID
+ * @param {object} [params.prismaClient] - Prisma client or transaction
+ * @returns {Promise<{ isStoredApprovalVerified: boolean, verifiedAuthorizer?: string, reason?: string, approvalRecord?: object }>}
+ */
+async function verifyStoredExceptionApproval({ approvalId, project = null, labId = null, prismaClient = null }) {
+    if (!approvalId) {
+        return { isStoredApprovalVerified: false, reason: 'No approval ID provided.' };
+    }
+    const client = prismaClient || require('../prisma');
+    const idStr = String(approvalId).trim();
+
+    // 1. Check SampleAmendment table
+    try {
+        if (client.sampleAmendment && typeof client.sampleAmendment.findUnique === 'function') {
+            const amendment = await client.sampleAmendment.findUnique({
+                where: { id: idStr }
+            });
+            if (amendment && amendment.status === 'APPROVED' && amendment.authorizedBy) {
+                // Verify authorizer user's role and lab scope
+                const authorizerUser = await client.user.findUnique({
+                    where: { username: amendment.authorizedBy }
+                });
+                if (authorizerUser && canAuthorizeException(authorizerUser, project, labId)) {
+                    return {
+                        isStoredApprovalVerified: true,
+                        verifiedAuthorizer: amendment.authorizedBy,
+                        reason: amendment.reason || 'Verified sample amendment exception',
+                        approvalRecord: amendment
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        // Fall through
+    }
+
+    // 2. Check AuditLog table for persisted exception approval events
+    try {
+        if (client.auditLog && typeof client.auditLog.findFirst === 'function') {
+            const audit = await client.auditLog.findFirst({
+                where: {
+                    entityId: idStr,
+                    action: { in: ['EXCEPTION_APPROVED', 'ADMISSION_EXCEPTION_APPROVED'] }
+                }
+            });
+            if (audit && audit.performedBy) {
+                const authorizerUser = await client.user.findUnique({
+                    where: { username: audit.performedBy }
+                });
+                if (authorizerUser && canAuthorizeException(authorizerUser, project, labId)) {
+                    return {
+                        isStoredApprovalVerified: true,
+                        verifiedAuthorizer: audit.performedBy,
+                        reason: audit.details || 'Verified audit log exception approval',
+                        approvalRecord: audit
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        // Fall through
+    }
+
+    return {
+        isStoredApprovalVerified: false,
+        reason: `Stored approval '${idStr}' not found, not in APPROVED status, or authorizer lacks manager/admin authority.`
+    };
+}
+
+/**
+ * Resolves and sanitizes exception records at the HTTP trust boundary.
+ * Client-supplied boolean flags (such as isStoredApprovalVerified) are strictly stripped.
+ */
+async function resolveAndVerifyExceptionRecord({ rawExceptionRecord, rawExceptionReason, authorizer, approvalId, actor, project, labId, prismaClient }) {
+    const hasExceptionClaim = Boolean(rawExceptionRecord || rawExceptionReason || approvalId);
+    if (!hasExceptionClaim) {
+        return { hasException: false, exceptionRecord: null };
+    }
+
+    const reason = (rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || 'Admission exception requested';
+    const effectiveApprovalId = (rawExceptionRecord && (rawExceptionRecord.approvalId || rawExceptionRecord.amendmentId || rawExceptionRecord.id)) || approvalId || null;
+
+    // 1. Direct authority: actor is manager or admin
+    if (canAuthorizeException(actor, project, labId)) {
+        return {
+            hasException: true,
+            exceptionRecord: {
+                reason,
+                isStoredApprovalVerified: true,
+                verifiedAuthorizer: actor.username || actor.id,
+                mode: 'ACTOR_AUTHORIZED'
+            }
+        };
+    }
+
+    // 2. Stored approval: verify against persisted DB record
+    if (effectiveApprovalId) {
+        const verification = await verifyStoredExceptionApproval({
+            approvalId: effectiveApprovalId,
+            project,
+            labId,
+            prismaClient
+        });
+        if (verification.isStoredApprovalVerified) {
+            return {
+                hasException: true,
+                exceptionRecord: {
+                    reason: verification.reason || reason,
+                    isStoredApprovalVerified: true,
+                    verifiedAuthorizer: verification.verifiedAuthorizer,
+                    approvalId: effectiveApprovalId,
+                    mode: 'STORED_APPROVAL'
+                }
+            };
+        }
+    }
+
+    // 3. Client supplied isStoredApprovalVerified or authorizer without database verification: STRIP and mark unverified!
+    return {
+        hasException: true,
+        exceptionRecord: {
+            reason,
+            isStoredApprovalVerified: false,
+            claimedAuthorizer: authorizer || (rawExceptionRecord && (rawExceptionRecord.verifiedAuthorizer || rawExceptionRecord.claimedAuthorizer)) || null,
+            mode: 'UNVERIFIED'
+        }
+    };
+}
+
+/**
  * Evaluates whether a sample can be admitted to a project through the requested channel.
  *
  * @param {object} params
@@ -609,6 +745,8 @@ module.exports = {
     getProgrammeChildProjectCodes,
     resolveProject,
     canAuthorizeException,
+    verifyStoredExceptionApproval,
+    resolveAndVerifyExceptionRecord,
     canAdmitSample,
     getProjectCapabilities
 };

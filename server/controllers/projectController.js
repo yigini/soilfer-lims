@@ -838,11 +838,16 @@ exports.uploadManifest = async (req, res) => {
         }
 
         // Admissions status check (F08: Centralized lifecycle admission check)
-        const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
-        const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? {
-            reason: req.body.exceptionReason,
-            approvalToken: req.body.approvalToken || null
-        } : null);
+        const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+            rawExceptionRecord: req.body.exceptionRecord,
+            rawExceptionReason: req.body.exceptionReason,
+            authorizer: req.body.authorizer,
+            approvalId: req.body.approvalId || req.body.approvalToken,
+            actor: req.user,
+            project,
+            labId: targetLabId,
+            prismaClient: prisma
+        });
 
         const admission = projectPolicyService.canAdmitSample({
             project,
