@@ -19,8 +19,8 @@
 - **Running Production Runtime Inspection & Access Boundary**:
   - Probed live production host read-only via HTTP (`https://lims.yigini.net/api/health`): Process reports `status: "ok"`, `uptime: ~543352s` (~6.28 days continuous uptime, booted ~2026-09-15 15:10 UTC behind Apache/2 reverse proxy).
   - Client bundle inspection: Built production client script is `index-Y9YXWdSC.js`. String analysis indicates presence of commit `ec0bff1` code (token desync classification `[AUTH] Ignored 401 from stale request with superseded token`) and absence of candidate additions. However, **public asset bundle strings are only an operational clue, not definitive proof of an exact running commit or image digest**.
-  - Deployment Access & Exact Blocker: Non-interactive SSH probe to `lims.yigini.net:22` (`46.19.33.37`) establishes TCP connection but fails authentication (`Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password)`). Local Windows host has no active Docker engine (`//./pipe/dockerDesktopLinuxEngine` absent) and no VPS root/container access. Therefore, direct read-only identification of the running container image digest (`docker inspect`) cannot be performed from this workspace.
-  - Operational Gate: Identifying and preserving the exact running rollback artifact on the production host is an operational prerequisite to be performed by server administrators during the authorized deployment window, without restarting the live server solely to prove identity.
+  - Deployment Access & Recorded Blocker: Non-interactive SSH probe to `lims.yigini.net:22` (`46.19.33.37`) establishes TCP connection but fails authentication (`Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password)`). Local Windows host has no active Docker engine (`//./pipe/dockerDesktopLinuxEngine` absent) and no VPS root/container access. Per operational constraints, this blocker is recorded; do NOT retry guesses or change credentials.
+  - Operational Gate: The required operational gate on production is **read-only identification and preservation of the actual running rollback artifact** (verifying running container image digest/commit on the VPS and preserving it as the exact rollback target). **Live production must NOT be restarted merely for evidence collection**. This gate must be executed read-only by authorized operators during the scheduled maintenance window prior to applying any migration.
 
 ---
 
@@ -29,10 +29,10 @@
 The full rehearsal script was executed at [`release_rollback_rehearsal.cjs`](release_rollback_rehearsal.cjs). Raw captured output is preserved in [`rehearsal_output.log`](rehearsal_output.log).
 
 ### 2.1 Rehearsal Environment & Runtime Prerequisites
-- **Node.js Runtime**: v20.x or v24.x (rehearsal verified on Node.js v24.13.0).
-- **Prisma Schema Engine**: Uses local `@prisma/engines` schema engine binary from `server/node_modules`.
+- **Node.js Runtime**: v20.x or v24.x (rehearsal verified on Node.js v24.13.0, arm64, `C:\Program Files\nodejs\node.exe`).
+- **Prisma Schema Engine**: Uses local `@prisma/engines/schema-engine-windows.exe` (`schema-engine-cli ab56fe763f921d033a6c195e7ddeb3e255bdbb57`) from `server/node_modules`.
+- **Environment & Engine Robustness**: Executes with explicit `process.execPath`, sanitized `RUST_LOG: 'info'` (preventing Prisma 7 CLI line-slicing engine response parse error), pre-created SQLite file, and isolated ephemeral subdirectory (`server/.tmp_rehearsal_*`), fully eliminating path and environment collisions.
 - **Isolated Baseline Worktree**: Must exist at `../soilfer-lims-baseline` checked out to `762c46e` with generated baseline Prisma client (`server/prisma_client`). Fails closed immediately if missing or if `git rev-parse HEAD` does not match `762c46e`.
-- **Environment & Path Isolation**: Executes in a dedicated ephemeral subdirectory (`server/.tmp_rehearsal_*`) using forward-slash SQLite URLs (`file:...`) and isolated environment variables, eliminating root `prisma.config.ts` adapter path collisions.
 
 ### 2.2 Pre-Migration Checksums & Genuine Baseline Schema
 The synthetic legacy database was initialized using the genuine baseline `762c46e` schema (extracted directly from `git show 762c46e:server/prisma/schema.prisma` in an isolated ephemeral directory, **not** simulated by column deletion). Baseline schema state was verified to contain zero additive Project columns and zero additive indices.
@@ -41,15 +41,15 @@ Pre-migration SHA256 hashes of populated table contents across all 9 domains:
 
 ```json
 {
-  "Lab": "a58f4613dbc300fbd8db0bd43d33ebb04e54f8f903208cc04971e09c3b9a8e62",
-  "Project": "482e4c9f5cca1ff1e1cd3c1f1e10bb40fbf1ca315c421459e28dd228751c5b8b",
-  "User": "179f724dfaf0674cc5aed3d36e9b114349fd10f75cd83d5bb4f8e441c5bd4b7f",
-  "Sample": "71e8ccc91258f6861d32cd4a854a7f691621c28f9692b00e0acd5cdee441b935",
-  "WorkItem": "289e5a86c4431c5a22aab1f11828299cf1a57fbcae10ee508a3146416c05d591",
-  "Result": "8e0a35ce323d8966fb768f8c0015d75d3d50fbce897432453db943d676adccde",
-  "Report": "923cdf4792d16d7301f121df973934d70c603a8b7e8276517dc8b3eecef5e3f9",
-  "ReportShareLink": "1c29dbcd4242b5f22e9f80eb81bef6d79b22a9e46096375ad6e0dbf27f31f59f",
-  "AuditLog": "23a9209a861e9efdc2714f7e1cf3c672048efd1e8d1c7390f0f1478377fa2a6c"
+  "Lab": "008645bd472d2a37bec84bb9596935b71c9402560b163c96988609f715ba7ea9",
+  "Project": "437a50b5135134e7ef5eaca809af895c03e62df06d532a1a27249c3252767729",
+  "User": "3eda80092c3e75ad313923df90b31361ece32c32f82441ef6c0ac133297e686a",
+  "Sample": "398308983bbbfe7db8f8811894fb8de61cefb675a318642d08f7b68febe5fa1c",
+  "WorkItem": "6577cdc2ae5bc73515dacad76f834c4cb01b759fec6cde7657515a349c32b4b1",
+  "Result": "b2104ca8c492d53e8f06496110e5471a975024161da025ce96cdb64d83b8d5f9",
+  "Report": "611ff77fd67541f7ae3efbdc2f68192305c48cc5e352f2eccf11e80bd5c29955",
+  "ReportShareLink": "93c30b9fa37fc8edb9d3a78c2cbb440d3850b9b296700bb00a2de86f2697445e",
+  "AuditLog": "695043d101270919b059d3b0315a58d60fb80050d4a2f4e56a9e5f8ae26b28f5"
 }
 ```
 
@@ -223,10 +223,15 @@ The following three tracks remain open governance/field gates and do NOT block c
 
 ---
 
-## 7. Concrete Release Recommendation
+## 7. Concrete Release Recommendation & Operational Gate
 
 > [!IMPORTANT]
-> **Production Release Readiness Boundary**: Technical release criteria for candidate code `fe02e7589205bb6a8d085b93be573982f13ec45d` are fully satisfied and rehearsed in an isolated worktree environment (including dual-artifact baseline `762c46e` startup and candidate `fe02e75` startup with strict record assertions). However, **mandatory operational release readiness is NOT complete while baseline application startup on the actual production host environment remains UNVERIFIED**. Direct host container image verification on the production VPS and staging dry-run validation remain external deployment prerequisites.
+> **Production Release Readiness Boundary**: Technical release criteria for candidate code `fe02e7589205bb6a8d085b93be573982f13ec45d` are fully satisfied and rehearsed in an isolated worktree environment (including dual-artifact baseline `762c46e` startup and candidate `fe02e75` startup with strict record assertions).
+>
+> **Operational Gate Definition**: The mandatory operational gate on production is **read-only identification and preservation of the actual running rollback artifact** (confirming the exact running container image digest/commit on the production VPS and preserving it prior to migration).
+> - **Live production must NOT be restarted merely for evidence collection**.
+> - The SSH access blocker (`lims.yigini.net:22` rejects non-interactive publickey authentication) is recorded; no credential guessing or modifications are permitted.
+> - Identification and preservation of the running rollback artifact must be performed read-only by authorized operators at the beginning of the scheduled deployment window before any migration actions take place.
 
 - **Tested Candidate Code Commit**: `fe02e7589205bb6a8d085b93be573982f13ec45d` (PR #129 code base).
 - **Draft PR Status**: PR [#129](https://github.com/yigini/soilfer-lims/pull/129) remains held in **draft** status and must NOT be merged without an approved deployment maintenance window.

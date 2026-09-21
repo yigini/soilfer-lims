@@ -35,6 +35,25 @@ const { migrateProjectTemplatesAndPolicy } = reqCandidate('./scripts/migrate_pro
 const baselineRepoDir = path.resolve(__dirname, '..', '..', '..', 'soilfer-lims-baseline');
 const baselineServerDir = path.join(baselineRepoDir, 'server');
 
+function runSubprocess(command, args, options = {}) {
+    const res = cp.spawnSync(command, args, {
+        ...options,
+        encoding: 'utf8',
+        maxBuffer: 50 * 1024 * 1024
+    });
+    if (res.error) {
+        throw res.error;
+    }
+    if (res.status !== 0) {
+        const err = new Error(`Command failed with exit code ${res.status}: ${command} ${args.join(' ')}\nSTDOUT:\n${res.stdout || ''}\nSTDERR:\n${res.stderr || ''}`);
+        err.status = res.status;
+        err.stdout = res.stdout;
+        err.stderr = res.stderr;
+        throw err;
+    }
+    return res.stdout;
+}
+
 async function runRehearsal() {
     console.log('=== RELEASE UPGRADE, DUAL-ARTIFACT BOOT & ROLLBACK REHEARSAL ===');
 
@@ -53,7 +72,21 @@ async function runRehearsal() {
     if (!baselineHead.startsWith('762c46e')) {
         throw new Error(`BASELINE SHA MISMATCH (FAIL CLOSED): Found ${baselineHead}, expected baseline 762c46e.`);
     }
+
+    const prismaCliPath = path.join(candidateServerDir, 'node_modules', 'prisma', 'build', 'index.js');
+    const schemaEnginePath = path.join(candidateServerDir, 'node_modules', '@prisma', 'engines', 'schema-engine-windows.exe');
+    let engineVersion = 'unknown';
+    try {
+        if (fs.existsSync(schemaEnginePath)) {
+            const verRes = cp.spawnSync(schemaEnginePath, ['--version'], { encoding: 'utf8' });
+            if (verRes.stdout) engineVersion = verRes.stdout.trim();
+        }
+    } catch (_) {}
+
     console.log(`[INIT] Verified baseline worktree at ${baselineRepoDir} (SHA: ${baselineHead})`);
+    console.log(`[INIT] Runtime Node.js: ${process.execPath} (${process.version}, ${process.arch}, ${process.platform})`);
+    console.log(`[INIT] Prisma CLI: ${prismaCliPath}`);
+    console.log(`[INIT] Prisma Schema Engine: ${schemaEnginePath} (${engineVersion})`);
 
     const runnerDir = path.resolve(candidateServerDir, `.tmp_rehearsal_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
     fs.mkdirSync(runnerDir, { recursive: true });
@@ -74,18 +107,35 @@ async function runRehearsal() {
         }
         fs.writeFileSync(baselinePrismaSchemaPath, baselineSchemaContent, 'utf8');
 
-        // Execute prisma db push inside runnerDir with explicit forward-slash URL to prevent schema engine path/adapter collisions
+        // Pre-create SQLite database file so that SQLite can connect immediately.
+        // This avoids Prisma schema-engine "database does not exist" branch and prevents
+        // any schema-engine output line-slicing parse issues across different parent RUST_LOG settings.
+        const preInitDb = new Database(liveDbPath);
+        preInitDb.close();
+
+        // Execute prisma db push inside runnerDir with explicit forward-slash URL, explicit process.execPath,
+        // and sanitized RUST_LOG='info' to ensure clean schema-engine JSON log stream parsing.
         const forwardUrl = 'file:' + liveDbPath.replace(/\\/g, '/');
-        const prismaCliPath = path.join(candidateServerDir, 'node_modules', 'prisma', 'build', 'index.js');
-        cp.execSync(`node "${prismaCliPath}" db push --schema="${baselinePrismaSchemaPath}" --url="${forwardUrl}" --accept-data-loss`, {
+        runSubprocess(process.execPath, [
+            prismaCliPath,
+            'db',
+            'push',
+            `--schema=${baselinePrismaSchemaPath}`,
+            `--url=${forwardUrl}`,
+            '--accept-data-loss'
+        ], {
             cwd: runnerDir,
             env: {
                 ...process.env,
                 DATABASE_URL: forwardUrl,
                 DATABASE_PATH: liveDbPath,
-                NODE_ENV: 'test'
-            },
-            stdio: 'pipe'
+                NODE_ENV: 'test',
+                RUST_LOG: 'info',
+                RUST_BACKTRACE: '1',
+                CHECKPOINT_DISABLE: '1',
+                PRISMA_TELEMETRY_INFORMATION: '',
+                PRISMA_SCHEMA_ENGINE_BINARY: schemaEnginePath
+            }
         });
 
         const db = new Database(liveDbPath);
@@ -222,50 +272,60 @@ async function runRehearsal() {
         
         // Strict assertions on upgraded records
         if (upgradedBootResult.healthStatus !== 200 || upgradedBootResult.projectsStatus !== 200 || upgradedBootResult.reportsStatus !== 200) {
-            throw new Error(`Upgraded app returned error status: ${JSON.stringify(upgradedBootResult)}`);
+            throw new Error(`Upgraded candidate returned unexpected status: ${JSON.stringify(upgradedBootResult)}`);
         }
-        if (upgradedBootResult.projectsCount !== 1 || upgradedBootResult.firstProjectCode !== 'GTM-ALPHA' || upgradedBootResult.firstProjectTemplateId !== 'GENERIC_OPEN_INTAKE') {
-            throw new Error(`Upgraded projects assertion failed: expected 1 project GTM-ALPHA with templateId GENERIC_OPEN_INTAKE, got ${JSON.stringify(upgradedBootResult)}`);
+        if (upgradedBootResult.projectsCount !== 1 || upgradedBootResult.firstProjectCode !== 'GTM-ALPHA') {
+            throw new Error(`Upgraded projects assertion failed: expected 1 project GTM-ALPHA, got ${JSON.stringify(upgradedBootResult)}`);
+        }
+        if (upgradedBootResult.firstProjectTemplateId !== 'GENERIC_OPEN_INTAKE') {
+            throw new Error(`Upgraded project template assertion failed: expected GENERIC_OPEN_INTAKE, got ${upgradedBootResult.firstProjectTemplateId}`);
         }
         if (upgradedBootResult.reportsCount !== 1 || upgradedBootResult.firstReportId !== 'REP-001') {
             throw new Error(`Upgraded reports assertion failed: expected 1 report REP-001, got ${JSON.stringify(upgradedBootResult)}`);
         }
         console.log('  Upgraded record assertions PASSED: GTM-ALPHA migrated with templateId=GENERIC_OPEN_INTAKE; report REP-001 served.');
 
-        // Step 6: Rollback Rehearsal with Tested WAL/Sidecar-Safe File Replacement
+        // Step 6: Rollback Procedure (Restore from Pre-Migration Backup with WAL/Sidecar cleanup)
         console.log('\n[6/8] Simulating operational rollback via backup restore (with WAL/sidecar cleanup)...');
-        // Cleanly remove any sidecar files to prevent stale WAL replay
-        const walPath = `${liveDbPath}-wal`;
-        const shmPath = `${liveDbPath}-shm`;
+        
+        // Clean removal of active DB and any WAL/SHM sidecars
+        const walPath = liveDbPath + '-wal';
+        const shmPath = liveDbPath + '-shm';
+        if (fs.existsSync(liveDbPath)) fs.unlinkSync(liveDbPath);
         if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
         if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath);
 
-        // Copy verified backup over live DB
+        // Copy backup to live location
         fs.copyFileSync(backupDbPath, liveDbPath);
 
         const restoredDb = new Database(liveDbPath);
-        const restoredColumns = restoredDb.prepare("PRAGMA table_info('Project')").all().map(c => c.name);
+        restoredDb.pragma('journal_mode = WAL');
+
+        // Confirm restored DB has returned to clean baseline schema
+        const restoredProjectCols = restoredDb.prepare("PRAGMA table_info('Project')").all().map(c => c.name);
         for (const col of additiveCols) {
-            if (restoredColumns.includes(col)) throw new Error(`Column ${col} still present after rollback!`);
+            if (restoredProjectCols.includes(col)) {
+                throw new Error(`Restored DB still contains additive column ${col}! Rollback incomplete.`);
+            }
         }
         const restoredIndex = restoredDb.prepare("SELECT 1 FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get();
-        if (restoredIndex) throw new Error('Project_parentProjectId_idx still present after rollback!');
+        if (restoredIndex) throw new Error('Restored DB still contains Project_parentProjectId_idx!');
 
-        // Verify checksums match pre-migration 100%
+        // Confirm 100% hash restoration across all tables
         for (const table of Object.keys(preMigrationChecksums)) {
             const restoredHash = computeTableHash(restoredDb, table);
             if (restoredHash !== preMigrationChecksums[table]) {
-                throw new Error(`Restored table ${table} hash mismatch!`);
+                throw new Error(`Restored hash mismatch on ${table}! Expected: ${preMigrationChecksums[table]} vs Restored: ${restoredHash}`);
             }
         }
         console.log('  Rollback verified: Target DB restored to clean baseline schema with 100% data integrity.');
         restoredDb.close();
 
-        // Step 7: Boot Baseline Application Artifact (762c46e) Against Restored Baseline DB
+        // Step 7: Post-Rollback Baseline Application Startup (762c46e) on Restored DB
         console.log('\n[7/8] Booting baseline application artifact (762c46e) in isolated worktree against restored DB...');
         const baselinePostRollbackResult = runArtifactHttpVerification(baselineServerDir, liveDbPath, 'BASELINE_POST_ROLLBACK');
         console.log('  Baseline Application HTTP Startup (Post-Rollback) result:', baselinePostRollbackResult);
-        
+
         // Strict assertions on post-rollback baseline records
         if (baselinePostRollbackResult.healthStatus !== 200 || baselinePostRollbackResult.projectsStatus !== 200 || baselinePostRollbackResult.reportsStatus !== 200) {
             throw new Error(`Baseline application post-rollback returned unexpected status: ${JSON.stringify(baselinePostRollbackResult)}`);
@@ -300,7 +360,7 @@ async function runRehearsal() {
         };
     } finally {
         try {
-            fs.rmSync(runnerDir, { recursive: true, force: true });
+            fs.rmSync(runnerDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
         } catch (_) {}
     }
 }
@@ -362,10 +422,14 @@ function runArtifactHttpVerification(targetServerDir, dbPath, stageLabel) {
     const tmpScriptPath = path.join(targetServerDir, `.tmp_artifact_verify_${Date.now()}.js`);
     try {
         fs.writeFileSync(tmpScriptPath, runnerScript, 'utf8');
-        const stdout = cp.execSync(`node "${tmpScriptPath}"`, { cwd: targetServerDir, timeout: 30000 }).toString();
+        const stdout = runSubprocess(process.execPath, [tmpScriptPath], {
+            cwd: targetServerDir,
+            timeout: 30000,
+            env: { ...process.env, NODE_ENV: 'test' }
+        });
         const marker = `${stageLabel}_OUTPUT:`;
         const line = stdout.split('\n').find(l => l.includes(marker));
-        if (!line) throw new Error(`Artifact verify runner did not output marker: ${marker}. Stdout: ${stdout}`);
+        if (!line) throw new Error(`Artifact verify runner did not output marker: ${marker}. Stdout:\n${stdout}`);
         return JSON.parse(line.replace(marker, '').trim());
     } finally {
         try { fs.unlinkSync(tmpScriptPath); } catch (_) {}
@@ -379,7 +443,10 @@ function computeTableHash(db, tableName) {
 
 if (require.main === module) {
     runRehearsal().catch(err => {
-        console.error('Rehearsal failed:', err);
+        console.error('Rehearsal failed:');
+        if (err.stdout) console.error('Subprocess stdout:\n', typeof err.stdout === 'string' ? err.stdout : err.stdout.toString());
+        if (err.stderr) console.error('Subprocess stderr:\n', typeof err.stderr === 'string' ? err.stderr : err.stderr.toString());
+        console.error(err.stack || err.message || err);
         process.exit(1);
     });
 }
