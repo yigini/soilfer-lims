@@ -463,6 +463,13 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                 <div className="text-[10px] text-gray-400 font-mono flex items-center gap-1.5 mt-0.5">
                                                     <span>• TASK: {String(item.id).split('-').pop()}</span>
                                                 </div>
+                                                {(item.isDerived || item.derivedFrom || ['SAND', 'SILT', 'CLAY'].includes(item.analysis)) && (
+                                                    <div className="mt-1">
+                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-medium border border-blue-200 dark:border-blue-800">
+                                                            Derived ({item.derivedFrom || 'TEXTURE'})
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 {!isPrepComplete && !isOpsGate && !isPostAnalytical && !isCompleted && !isSealed ? (
                                                     <div 
                                                         title="Sample preparation has not been completed. This analysis can be pre-assigned, but the technician cannot start work or enter results until preparation is complete."

@@ -9,6 +9,15 @@
 
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
 const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
+const TEXTURE_ALIASES = new Set([
+    'TEXTURE',
+    'SOIL_PSD_TEXTURE',
+    'SOIL_TEXTURE',
+    'PSA',
+    'pSA',
+    'Particle Size Analysis'
+]);
+const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 
 /**
  * Evaluates whether a work item is ready for result/checklist entry by the technician.
@@ -179,6 +188,20 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         blockers.push('ALREADY_APPROVED: Sample is already approved');
     }
 
+    // 2b. Operational gate prerequisites
+    const gateWorkItems = workItems.filter(w => GATE_ANALYSES.includes(w.analysis));
+    const hasGateItems = gateWorkItems.length > 0;
+    if (hasGateItems || (sample.dryingStatus && sample.dryingStatus !== 'SKIPPED') || (sample.preparationStatus && sample.preparationStatus !== 'SKIPPED')) {
+        const dryingDone = sample.dryingStatus === 'DONE' || gateWorkItems.some(w => w.analysis === 'DRYING' && ['COMPLETED', 'ACCEPTED'].includes(w.status));
+        const prepDone = sample.preparationStatus === 'DONE' || gateWorkItems.some(w => w.analysis === 'PREPARATION' && ['COMPLETED', 'ACCEPTED'].includes(w.status));
+        if (!dryingDone) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Drying gate has not been completed');
+        }
+        if (!prepDone) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Sample Preparation gate has not been completed');
+        }
+    }
+
     // 3. Analytical items check (must have ordered analytical work; gate-only work does NOT qualify)
     const analyticalItems = workItems.filter(w => !NON_ANALYTICAL.includes(w.analysis));
     if (analyticalItems.length === 0) {
@@ -198,13 +221,44 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         blockers.push('ALL_WORK_OMITTED: All ordered analyses were omitted/cancelled; requires formal administrative closure, not analytical approval');
     }
 
-    // 6. Active order lines parity
+    // 6. Active order lines parity / required analyses completeness
+    let requiredAnalysesToCheck = [];
     if (Array.isArray(orderLines) && orderLines.length > 0) {
-        const activeLines = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false);
-        for (const line of activeLines) {
-            const linked = analyticalItems.find(w => w.analysis === line.analysis);
-            if (!linked || linked.status !== 'ACCEPTED') {
-                blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${line.analysis} is not accepted`);
+        requiredAnalysesToCheck = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false).map(l => l.analysis);
+    } else if (sample.requiredAnalyses) {
+        try {
+            const parsed = typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses;
+            if (Array.isArray(parsed)) {
+                requiredAnalysesToCheck = parsed.filter(code => !GATE_ANALYSES.includes(code));
+            }
+        } catch (e) {}
+    }
+
+    if (requiredAnalysesToCheck.length > 0) {
+        for (const reqCode of requiredAnalysesToCheck) {
+            // Check direct match
+            const linked = analyticalItems.find(w => w.analysis === reqCode);
+            if (linked) {
+                if (!['ACCEPTED', 'WAIVED'].includes(linked.status)) {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} is not accepted (status: ${linked.status})`);
+                }
+            } else if (TEXTURE_ALIASES.has(reqCode)) {
+                // If TEXTURE was required, check if TEXTURE or all 3 fractions (SAND, SILT, CLAY) are accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied
+                } else {
+                    const fractionItems = analyticalItems.filter(w => DERIVED_TEXTURE_FRACTIONS.includes(w.analysis));
+                    const allFractionsAccepted = DERIVED_TEXTURE_FRACTIONS.every(frac => {
+                        const fi = fractionItems.find(w => w.analysis === frac);
+                        return fi && ['ACCEPTED', 'WAIVED'].includes(fi.status);
+                    });
+                    if (!allFractionsAccepted) {
+                        blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or derived texture fractions) is not accepted`);
+                    }
+                }
+            } else {
+                blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} has no corresponding laboratory work item`);
             }
         }
     }

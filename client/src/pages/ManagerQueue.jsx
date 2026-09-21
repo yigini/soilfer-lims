@@ -44,6 +44,7 @@ const ManagerQueue = () => {
     const initialTab = Object.values(QUEUE_Tabs).includes(laneParam) ? laneParam : QUEUE_Tabs.INTAKE;
     const [activeTab, setActiveTab] = useState(initialTab);
     const [userSelected, setUserSelected] = useState(Boolean(laneParam));
+    const selectedAnalysis = searchParams.get('analysis') || '';
 
     // Batch inspection modal support for ?batchId=
     const batchIdParam = searchParams.get('batchId');
@@ -82,7 +83,19 @@ const ManagerQueue = () => {
     const handleTabChange = (newTab) => {
         setActiveTab(newTab);
         setUserSelected(true);
-        setSearchParams({ lane: newTab }, { replace: true });
+        const next = { lane: newTab };
+        if (newTab === QUEUE_Tabs.ASSIGN && selectedAnalysis) {
+            next.analysis = selectedAnalysis;
+        }
+        setSearchParams(next, { replace: true });
+    };
+
+    const handleClearAnalysisFilter = () => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('analysis');
+            return next;
+        }, { replace: true });
     };
 
     // If unparameterized, prioritize highest actionable lane once live data arrives
@@ -121,6 +134,10 @@ const ManagerQueue = () => {
                 case QUEUE_Tabs.ASSIGN:
                     endpoint = '/api/work';
                     params.status = 'NOT_ASSIGNED';
+                    params.limit = 100;
+                    if (selectedAnalysis) {
+                        params.analysis = selectedAnalysis;
+                    }
                     break;
                 case QUEUE_Tabs.REVIEW:
                     endpoint = '/api/submissions';
@@ -138,8 +155,10 @@ const ManagerQueue = () => {
                 setData(res.data.rows.map(r => ({
                     id: r.sampleId || r.key,
                     sampleId: r.sampleId || r.key,
-                    labId: r.title,
-                    originalId: r.key,
+                    labId: r.labId || null,
+                    originalId: r.originalId || null,
+                    sampleDisplayId: r.sampleDisplayId || r.title,
+                    projectCode: r.projectCode || null,
                     analysis: r.context,
                     status: r.status,
                     createdAt: new Date().toISOString()
@@ -168,6 +187,11 @@ const ManagerQueue = () => {
                     if (!groups[sId]) {
                         groups[sId] = {
                             ...sub,
+                            id: sId,
+                            sampleId: sId,
+                            labId: sub.sampleLabId || null,
+                            originalId: sub.originalId || null,
+                            projectCode: sub.projectCode || null,
                             submissionIds: [sub.id],
                             taskCount: sub.workItemCount || 0,
                             isAggregated: true,
@@ -194,18 +218,24 @@ const ManagerQueue = () => {
             if (activeTab === QUEUE_Tabs.ASSIGN) {
                 const groups = {};
                 finalData.forEach(item => {
-                    if (!groups[item.sampleId]) {
-                        groups[item.sampleId] = {
+                    const sId = item.sampleId;
+                    if (!groups[sId]) {
+                        groups[sId] = {
                             ...item,
+                            id: sId,
+                            sampleId: sId,
+                            labId: item.sampleLabId || item.sample?.labId || null,
+                            originalId: item.originalId || item.sample?.originalId || null,
+                            projectCode: item.projectCode || item.sample?.projectCode || null,
                             analyses: [item.analysis],
                             itemIds: [item.id],
                             count: 1,
                             isAggregated: true
                         };
                     } else {
-                        groups[item.sampleId].analyses.push(item.analysis);
-                        groups[item.sampleId].itemIds.push(item.id);
-                        groups[item.sampleId].count++;
+                        groups[sId].analyses.push(item.analysis);
+                        groups[sId].itemIds.push(item.id);
+                        groups[sId].count++;
                     }
                 });
                 finalData = Object.values(groups);
@@ -228,7 +258,7 @@ const ManagerQueue = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab]);
+    }, [activeTab, selectedAnalysis]);
 
     useEffect(() => {
         fetchQueueData(1);
@@ -266,7 +296,7 @@ const ManagerQueue = () => {
         intake: liveData?.kpis?.pendingIntakes || 0,
         assign: liveData?.kpis?.unassignedTasks || 0,
         review: liveData?.kpis?.awaitingReview || 0,
-        approve: 0, // we don't track this in live endpoint currently
+        approve: liveData?.kpis?.pendingApproval || 0,
     };
 
     const TabButton = ({ id, icon: Icon, label }) => {
@@ -331,6 +361,21 @@ const ManagerQueue = () => {
                         </div>
                     )}
 
+                    {selectedAnalysis && activeTab === QUEUE_Tabs.ASSIGN && (
+                        <div className="mb-4 flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold border border-indigo-200 dark:border-indigo-800">
+                            <div className="flex items-center gap-2">
+                                <Microscope size={16} />
+                                <span>Filtered by method: <strong>{selectedAnalysis}</strong></span>
+                            </div>
+                            <button
+                                onClick={handleClearAnalysisFilter}
+                                className="px-2 py-1 hover:bg-indigo-200 dark:hover:bg-indigo-900 rounded-lg transition-colors"
+                            >
+                                Clear filter
+                            </button>
+                        </div>
+                    )}
+
                     {!loading && data.length === 0 && (
                         <div className="h-64 flex flex-col items-center justify-center text-sf-muted italic">
                             <CheckCircle size={48} className="mb-4 text-sf-muted/40" />
@@ -340,7 +385,7 @@ const ManagerQueue = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.map(item => (
-                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} t={t} />
+                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} t={t} selectedAnalysis={selectedAnalysis} />
                         ))}
                     </div>
                 </div>
@@ -385,7 +430,7 @@ const ManagerQueue = () => {
 };
 
 // Internal Component for Card Rendering
-const QueueCard = ({ item, type, navigate, t }) => {
+const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
     const getAnalysisDisplayName = useAnalysisNames();
     const config = {
         intake: {
@@ -421,8 +466,8 @@ const QueueCard = ({ item, type, navigate, t }) => {
     const Icon = config.icon;
 
     const title = (type === 'assign' || type === 'review')
-        ? `Sample ${item.sampleId || item.id}`
-        : (item.labId || (String(item.originalId) || item.type));
+        ? (item.labId || item.originalId || `Sample ${item.sampleId || item.id}`)
+        : (item.labId || item.originalId || item.sampleId || item.id);
     const subtitle = type === 'assign'
         ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
         : (type === 'review' && item.isAggregated)
@@ -431,9 +476,10 @@ const QueueCard = ({ item, type, navigate, t }) => {
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
+    const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
     const targetUrl = type === 'review'
-        ? `/samples/${item.sampleId || item.id}?tab=review`
-        : `/samples/${item.sampleId || item.id}`;
+        ? `/samples/${item.sampleId || item.id}?tab=review&returnTo=${encodeURIComponent(returnUrl)}`
+        : `/samples/${item.sampleId || item.id}?returnTo=${encodeURIComponent(returnUrl)}`;
 
     return (
         <button
@@ -457,11 +503,33 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
                 <div className="mb-4">
                     <h3 className="font-bold text-sf-text text-lg truncate leading-tight" title={title}>{title}</h3>
-                    {(item.originalId || item.sampleId) && (
-                        <div className="text-[10px] text-sf-muted font-mono mt-0.5 uppercase tracking-tighter">
-                            ID: {item.originalId || item.sampleId}
+                    
+                    {/* Explicit disambiguated identifiers */}
+                    <div className="space-y-0.5 text-[11px] font-mono mt-1.5 text-sf-muted">
+                        {item.labId && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-sf-muted/80">Lab ID:</span>
+                                <span className="font-semibold text-sf-text">{item.labId}</span>
+                            </div>
+                        )}
+                        {item.originalId && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-sf-muted/80">Field ID:</span>
+                                <span className="font-semibold text-sf-text">{item.originalId}</span>
+                            </div>
+                        )}
+                        {item.projectCode && (
+                            <div className="flex items-center gap-1.5 text-[10px] text-sf-muted">
+                                <span className="uppercase font-bold">Project:</span>
+                                <span>{item.projectCode}</span>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-1.5 text-[10px] text-sf-muted/60">
+                            <span className="uppercase font-bold">UUID:</span>
+                            <span className="truncate max-w-[170px]" title={item.sampleId || item.id}>{item.sampleId || item.id}</span>
                         </div>
-                    )}
+                    </div>
+
                     <div className="text-[11px] text-sf-muted font-bold mt-2 min-h-[1.5rem] line-clamp-2">
                         {subtitle}
                     </div>

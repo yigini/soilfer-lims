@@ -2,6 +2,16 @@ const prisma = require('../prisma');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
 
+const TEXTURE_ALIASES = new Set([
+    'TEXTURE',
+    'SOIL_PSD_TEXTURE',
+    'SOIL_TEXTURE',
+    'PSA',
+    'pSA',
+    'Particle Size Analysis'
+]);
+const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
+
 /**
  * Sample Workspace Projection Service
  * Provides the unified read model for the 5-tab Sample Workspace:
@@ -21,6 +31,10 @@ class SampleWorkspaceService {
      * @returns {Promise<object>} Unified workspace view
      */
     static async getWorkspaceData(sampleId, user) {
+        return this.getWorkspace(sampleId, user);
+    }
+
+    static async getSampleWorkspace(sampleId, user) {
         return this.getWorkspace(sampleId, user);
     }
 
@@ -227,6 +241,8 @@ class SampleWorkspaceService {
                 updatedAt: item.draft.updatedAt
             } : null;
 
+            const isDerived = DERIVED_TEXTURE_FRACTIONS.includes(item.analysis);
+
             enrichedWorkItems.push({
                 id: item.id,
                 sampleId: item.sampleId,
@@ -234,6 +250,8 @@ class SampleWorkspaceService {
                 analysisName: analysisMeta.name,
                 category: analysisMeta.category,
                 isGate,
+                isDerived,
+                derivedFrom: isDerived ? 'TEXTURE' : null,
                 status: item.status,
                 priority: item.priority || sample.priority || 'NORMAL',
                 assignedTo: item.assignedTo,
@@ -327,8 +345,21 @@ class SampleWorkspaceService {
                 .map(w => w.analysis)
                 .sort();
 
-            const hasMismatch = orderAnalyses.length !== analyticalTasks.length ||
-                orderAnalyses.some((a, i) => a !== analyticalTasks[i]);
+            // When comparing, account for texture equivalence:
+            // If TEXTURE is in orderAnalyses, and analyticalTasks has fractions [SAND, SILT, CLAY]
+            const hasTextureOrder = orderAnalyses.some(a => TEXTURE_ALIASES.has(a));
+            const hasFractionTasks = analyticalTasks.some(a => DERIVED_TEXTURE_FRACTIONS.includes(a));
+            
+            const normalizedOrder = orderAnalyses.map(a => TEXTURE_ALIASES.has(a) ? 'TEXTURE' : a);
+            const normalizedTasks = analyticalTasks.filter(a => !(hasTextureOrder && DERIVED_TEXTURE_FRACTIONS.includes(a)));
+            if (hasTextureOrder && hasFractionTasks && !normalizedTasks.includes('TEXTURE')) {
+                normalizedTasks.push('TEXTURE');
+            }
+            normalizedOrder.sort();
+            normalizedTasks.sort();
+
+            const hasMismatch = normalizedOrder.length !== normalizedTasks.length ||
+                normalizedOrder.some((a, i) => a !== normalizedTasks[i]);
 
             if (hasMismatch && !orderIntegrityWarning) {
                 orderIntegrityWarning = {
@@ -370,6 +401,8 @@ class SampleWorkspaceService {
         // 9. Derive Canonical Counters (Parallel Facts per Section 16.5)
         const activeOrderLines = orderLines.filter(l => l.status === 'ACTIVE');
         const analyticalItems = enrichedWorkItems.filter(w => !w.isGate);
+        const derivedItems = enrichedWorkItems.filter(w => w.isDerived);
+        const gateItems = enrichedWorkItems.filter(w => w.isGate);
         
         const orderedCount = activeOrderLines.length;
         const recordedCount = analyticalItems.filter(w => ['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(w.status)).length;
@@ -377,6 +410,7 @@ class SampleWorkspaceService {
         const acceptedCount = analyticalItems.filter(w => w.status === 'ACCEPTED' && !w.isHistoricalGap).length;
         const omittedCount = orderLines.filter(l => l.status === 'OMITTED' || l.status === 'CANCELLED').length + analyticalItems.filter(w => w.status === 'WAIVED').length;
         const blockedCount = analyticalItems.filter(w => w.blockers.length > 0).length;
+        const unassignedCount = analyticalItems.filter(w => !w.assignedTo && ['NOT_ASSIGNED', 'PENDING'].includes(w.status)).length;
 
         // 10. Operational Gates
         const gates = {
@@ -464,6 +498,15 @@ class SampleWorkspaceService {
         const isTechnician = ['LAB_TECHNICIAN', 'LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(userRole);
         const isReception = ['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(userRole);
 
+        const { canFinalApprove: evaluateFinalApproval } = require('./workEligibility');
+        const finalApprovalEval = evaluateFinalApproval(
+            sample,
+            sample.workItems,
+            activeRevision?.lines || orderLines || [],
+            user,
+            { hasHistoricalGap }
+        );
+
         const capabilities = {
             canReceive: {
                 allowed: isReception && sample.status === 'EXPECTED',
@@ -488,6 +531,11 @@ class SampleWorkspaceService {
             canReview: {
                 allowed: isManagerOrAdmin && submittedCount > 0,
                 reason: submittedCount === 0 ? 'No work items currently submitted for review' : (isManagerOrAdmin ? null : 'Requires reviewer authority')
+            },
+            canFinalApprove: {
+                allowed: isManagerOrAdmin && finalApprovalEval.allowed,
+                blockers: finalApprovalEval.blockers,
+                reason: finalApprovalEval.reason
             },
             canReleaseReport: {
                 allowed: isManagerOrAdmin && !isDisposed && acceptedCount > 0 && submittedCount === 0 && !hasHistoricalGap,
@@ -517,12 +565,16 @@ class SampleWorkspaceService {
             nextAction = { action: 'RECEIVE', label: 'Receive physical sample', role: 'SAMPLE_RECEPTION' };
         } else if (sample.status === 'RECEIVED') {
             nextAction = { action: 'ACCEPT_INTAKE', label: 'Accept intake & generate work', role: 'SAMPLE_RECEPTION' };
+        } else if (unassignedCount > 0 && isManagerOrAdmin) {
+            nextAction = { action: 'ASSIGN', label: `Assign ${unassignedCount} unassigned task(s) to technician`, role: 'LAB_MANAGER' };
         } else if (!gates.allGatesPassed && analyticalItems.length > 0) {
             nextAction = { action: 'PREPARATION', label: 'Complete Drying and Preparation gates', role: 'LAB_TECHNICIAN' };
         } else if (submittedCount > 0) {
             nextAction = { action: 'REVIEW', label: `Review ${submittedCount} submitted result(s)`, role: 'LAB_MANAGER' };
         } else if (recordedCount > 0 && submittedCount === 0 && acceptedCount < orderedCount) {
             nextAction = { action: 'SUBMIT', label: 'Submit recorded results for review', role: 'LAB_TECHNICIAN' };
+        } else if (finalApprovalEval.allowed && sample.status !== 'APPROVED') {
+            nextAction = { action: 'APPROVE', label: 'Perform final managerial approval', role: 'LAB_MANAGER' };
         } else if (acceptedCount > 0 && acceptedCount >= orderedCount && !currentReleasedReport) {
             nextAction = { action: 'RELEASE_REPORT', label: 'Authorize & release analytical report', role: 'LAB_MANAGER' };
         } else if (currentReleasedReport) {
@@ -607,7 +659,11 @@ class SampleWorkspaceService {
                 submitted: submittedCount,
                 accepted: acceptedCount,
                 omitted: omittedCount,
-                blocked: blockedCount
+                blocked: blockedCount,
+                unassigned: unassignedCount,
+                derived: derivedItems.length,
+                gates: gateItems.length,
+                totalTasks: enrichedWorkItems.length
             },
             integrity: {
                 hasHistoricalGap,

@@ -411,12 +411,14 @@ const SampleDetail = () => {
     };
 
     const counters = workspace?.counters || {
-        ordered: workItems.length,
+        ordered: workItems.filter(w => !w.isGate && w.category !== 'Operational Gates').length,
         recorded: workItems.filter(w => ['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(w.status)).length,
         submitted: workItems.filter(w => w.status === 'SUBMITTED').length,
         accepted: workItems.filter(w => w.status === 'ACCEPTED').length,
         omitted: workItems.filter(w => w.status === 'WAIVED').length,
-        blocked: 0
+        blocked: 0,
+        derived: 0,
+        unassigned: 0
     };
 
     const materialCustody = workspace?.materialCustody || {
@@ -456,10 +458,14 @@ const SampleDetail = () => {
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-sf-muted">
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => navigate('/samples')}
+                            onClick={() => {
+                                const returnTo = new URLSearchParams(location.search).get('returnTo');
+                                if (returnTo) navigate(returnTo);
+                                else navigate('/samples');
+                            }}
                             className="inline-flex items-center gap-1 font-bold text-sf-muted hover:text-sf-primary transition-colors"
                         >
-                            <ArrowLeft size={14} /> Back to samples
+                            <ArrowLeft size={14} /> {new URLSearchParams(location.search).get('returnTo')?.includes('manager-queue') ? 'Back to queue' : 'Back to samples'}
                         </button>
                         <span>/</span>
                         <span>Sample workspace</span>
@@ -502,13 +508,40 @@ const SampleDetail = () => {
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-xs text-sf-muted pt-0.5">
-                                    Field ID: <strong className="text-sf-text font-mono">{identity.fieldId}</strong>
-                                </div>
+                                <p className="text-xs text-sf-muted font-mono">
+                                    Canonical UUID: <span className="text-sf-text">{identity.id}</span>
+                                    {identity.fieldId && identity.fieldId !== identity.labSampleCode && (
+                                        <span className="ml-3">Field ID: <strong className="text-sf-text">{identity.fieldId}</strong></span>
+                                    )}
+                                </p>
                             </div>
 
-                            {/* Retained Header Actions (Section 15) */}
-                            <div className="flex flex-wrap items-center gap-2">
+                            {/* Prominent Action Bar (Top Right) */}
+                            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+                                {/* Primary Next Action Button */}
+                                {nextAction?.action !== 'VIEW' && nextAction?.action !== 'VIEW_REPORT' && (
+                                    <button
+                                        onClick={() => {
+                                            if (nextAction.action === 'RECEIVE') setReceiveModalOpen(true);
+                                            else if (nextAction.action === 'ACCEPT_INTAKE') setAcceptIntakeModalOpen(true);
+                                            else if (nextAction.action === 'ASSIGN') {
+                                                navigate(`/manager-queue?lane=assign`);
+                                            }
+                                            else if (nextAction.action === 'REVIEW') {
+                                                setActiveTab('review');
+                                                navigate({ search: `?tab=review` });
+                                            }
+                                            else if (nextAction.action === 'APPROVE') handleApproveSample();
+                                            else if (nextAction.action === 'RELEASE_REPORT') setReportModalOpen(true);
+                                            else if (nextAction.action === 'PREPARATION') setActiveTab('work');
+                                        }}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--sf-primary)] hover:brightness-95 text-[var(--sf-on-primary)] flex items-center gap-2 shadow-sm transition-all animate-pulse"
+                                    >
+                                        <ArrowRight size={14} />
+                                        {nextAction.label}
+                                    </button>
+                                )}
+
                                 {/* Manage Analyses */}
                                 {capabilities.canManageAnalyses?.allowed && (
                                     <button
@@ -559,16 +592,26 @@ const SampleDetail = () => {
                                 </button>
 
                                 {/* Final Approve Sample Button */}
-                                {isManager && identity.status !== 'APPROVED' && (
-                                    <button
-                                        onClick={handleApproveSample}
-                                        data-testid="final-approve-sample-btn"
-                                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sf-primary hover:brightness-95 text-sf-on-primary flex items-center gap-1.5 transition-colors shadow-sm"
-                                    >
-                                        <ShieldCheck size={14} />
-                                        Final approve sample
-                                    </button>
-                                )}
+                                {isManager && identity.status !== 'APPROVED' && (() => {
+                                    const isFinalApprovalAllowed = capabilities?.canFinalApprove ? capabilities.canFinalApprove.allowed : false;
+                                    const blockReason = capabilities?.canFinalApprove?.reason || (capabilities?.canFinalApprove?.blockers && capabilities.canFinalApprove.blockers[0]) || '';
+                                    return (
+                                        <button
+                                            onClick={handleApproveSample}
+                                            data-testid="final-approve-sample-btn"
+                                            disabled={!isFinalApprovalAllowed}
+                                            title={!isFinalApprovalAllowed ? `Approval blocked: ${blockReason}` : 'Authorize final completion for this sample'}
+                                            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm ${
+                                                !isFinalApprovalAllowed
+                                                    ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-sf-divider opacity-70'
+                                                    : 'bg-sf-primary hover:brightness-95 text-sf-on-primary'
+                                            }`}
+                                        >
+                                            <ShieldCheck size={14} />
+                                            Final approve sample
+                                        </button>
+                                    );
+                                })()}
 
                                 {/* More Actions Dropdown */}
                                 <div className="relative" ref={moreActionsRef}>
@@ -661,6 +704,12 @@ const SampleDetail = () => {
                             <span className="font-semibold text-sf-text">{getStatusLabel(identity.status, t)}</span>
                             <span>·</span>
                             <span><strong>{counters.ordered}</strong> ordered analyses</span>
+                            {counters.derived > 0 && (
+                                <>
+                                    <span>·</span>
+                                    <span className="text-sf-muted"><strong>{counters.derived}</strong> derived fractions</span>
+                                </>
+                            )}
                             <span>·</span>
                             <span><strong>{counters.accepted}</strong> verified results</span>
                             {counters.submitted > 0 && (
@@ -905,8 +954,13 @@ const SampleDetail = () => {
                         {/* Ordered Analyses Table */}
                         <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
                             <div className="p-4 border-b border-sf-divider flex flex-wrap items-center justify-between gap-3">
-                                <h3 className="font-bold text-sf-text text-sm">
-                                    Ordered Analyses ({workItems.filter(w => !w.isGate && w.category !== 'Operational Gates').length})
+                                <h3 className="font-bold text-sf-text text-sm flex items-center gap-2">
+                                    <span>Ordered Analyses ({counters.ordered ?? workItems.filter(w => !w.isGate && w.category !== 'Operational Gates').length})</span>
+                                    {counters.derived > 0 && (
+                                        <span className="text-xs font-normal text-sf-muted">
+                                            (+{counters.derived} derived fraction{counters.derived > 1 ? 's' : ''})
+                                        </span>
+                                    )}
                                 </h3>
                                 <div className="text-xs text-sf-muted">
                                     {isTech ? 'Showing all analyses (assigned highlighted)' : 'All analytical tasks visible'}
