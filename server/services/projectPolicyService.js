@@ -427,6 +427,14 @@ function validateExceptionAuthorization(actor, project, labId, exceptionRecord) 
 
     // 1. Authenticated actor has direct exception authority
     if (canAuthorizeException(actor, project, labId)) {
+        const reason = exceptionRecord && (typeof exceptionRecord === 'string' ? exceptionRecord : exceptionRecord.reason);
+        if (!reason || String(reason).trim().length < 5) {
+            return {
+                authorized: false,
+                code: 'APPROVAL_EMPTY_REASON',
+                reason: 'Direct exception authorization requires an explicit justification reason (minimum 5 characters).'
+            };
+        }
         return {
             authorized: true,
             authorizedBy: actor.username || actor.id,
@@ -477,6 +485,23 @@ function validateExceptionAuthorization(actor, project, labId, exceptionRecord) 
  * @param {string} [params.labId] - Target Lab ID
  * @param {string} [params.sampleId] - Target single sample ID
  * @param {string[]} [params.sampleIds] - Target batch sample IDs
+/**
+ * Verifies a persisted exception approval from the database.
+ * Stored approval is strictly bound to the requested operation:
+ * - Target sample identity (sampleId / sampleIds) - mandatory, never inferred from untrusted client input
+ * - Target channel & purpose (amendment.type must authorize the specific admission channel; routine amendments like CLERICAL, ORDER, REPORT are rejected)
+ * - Target project (bound via sample.projectId / projectCode)
+ * - Target laboratory (bound via sample.assignedLab / labId)
+ * - Explicit non-empty justification reason (minimum 5 characters)
+ * - Authorizer role and scope on the target project/lab
+ * - Bare historical audit events are rejected as admission authorizations
+ *
+ * @param {object} params
+ * @param {string} params.approvalId - Stored approval ID or amendment ID
+ * @param {object} [params.project] - Target Project record
+ * @param {string} [params.labId] - Target Lab ID
+ * @param {string} [params.sampleId] - Target single sample ID
+ * @param {string[]} [params.sampleIds] - Target batch sample IDs
  * @param {string} [params.channel] - Admission channel ('DESK', 'MANIFEST', etc.)
  * @param {object} [params.prismaClient] - Prisma client or transaction
  * @returns {Promise<{ isStoredApprovalVerified: boolean, verifiedAuthorizer?: string, reason?: string, approvalRecord?: object, code?: string }>}
@@ -491,19 +516,152 @@ async function verifyStoredExceptionApproval({
     prismaClient = null
 }) {
     if (!approvalId) {
-        return { isStoredApprovalVerified: false, reason: 'No approval ID provided.' };
+        return { isStoredApprovalVerified: false, code: 'MISSING_APPROVAL_ID', reason: 'No approval ID provided.' };
     }
     const client = prismaClient || require('../prisma');
     const idStr = String(approvalId).trim();
 
-    // 1. Check SampleAmendment table
+    // 1. Mandatory Target Sample Binding: Caller MUST specify authoritative target sample identity
+    const hasTargetSample = Boolean(sampleId || (Array.isArray(sampleIds) && sampleIds.length > 0));
+    if (!hasTargetSample) {
+        return {
+            isStoredApprovalVerified: false,
+            code: 'TARGET_SAMPLE_REQUIRED',
+            reason: 'Stored exception approval verification requires explicit authoritative target sample identity.'
+        };
+    }
+
+    // 2. Mandatory Channel Binding
+    if (!channel) {
+        return {
+            isStoredApprovalVerified: false,
+            code: 'CHANNEL_REQUIRED',
+            reason: 'Stored exception approval verification requires an explicit admission channel.'
+        };
+    }
+
+    // Check SampleAmendment table
     try {
         if (client.sampleAmendment && typeof client.sampleAmendment.findUnique === 'function') {
             const amendment = await client.sampleAmendment.findUnique({
-                where: { id: idStr }
+                where: { id: idStr },
+                include: { sample: true }
             });
+
             if (amendment && amendment.status === 'APPROVED' && amendment.authorizedBy) {
-                // Operation binding 1: Verify authorizer user's role and lab scope
+                // Operation binding: Purpose / Channel Check
+                const amdType = String(amendment.type || '').toUpperCase().trim();
+                const routineTypes = ['CLERICAL', 'SCIENTIFIC', 'ORDER', 'REPORT'];
+                if (routineTypes.includes(amdType)) {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_TYPE_MISMATCH',
+                        reason: `Stored approval '${idStr}' is a routine '${amdType}' amendment and cannot authorize ${channel} admission exceptions.`
+                    };
+                }
+
+                // Check channel compatibility
+                const validDeskTypes = ['DESK_ADMISSION_EXCEPTION', 'SAMPLE_ADMISSION_EXCEPTION', 'ADMISSION_EXCEPTION', 'DESK'];
+                const validManifestTypes = ['MANIFEST_ADMISSION_EXCEPTION', 'SAMPLE_ADMISSION_EXCEPTION', 'ADMISSION_EXCEPTION', 'MANIFEST'];
+                if (channel === 'DESK' && !validDeskTypes.includes(amdType) && !amdType.includes('DESK') && !amdType.includes('ADMISSION')) {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_CHANNEL_MISMATCH',
+                        reason: `Stored approval '${idStr}' type '${amdType}' does not authorize DESK admission exceptions.`
+                    };
+                }
+                if (channel === 'MANIFEST' && !validManifestTypes.includes(amdType) && !amdType.includes('MANIFEST') && !amdType.includes('ADMISSION')) {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_CHANNEL_MISMATCH',
+                        reason: `Stored approval '${idStr}' type '${amdType}' does not authorize MANIFEST admission exceptions.`
+                    };
+                }
+
+                // Operation binding: Resolve Sample Relation
+                let linkedSample = amendment.sample;
+                if (!linkedSample && amendment.sampleId && client.sample && typeof client.sample.findUnique === 'function') {
+                    linkedSample = await client.sample.findUnique({
+                        where: { id: amendment.sampleId }
+                    });
+                }
+
+                // Operation binding: Target Sample Binding
+                if (sampleId && amendment.sampleId !== sampleId) {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_SAMPLE_MISMATCH',
+                        reason: `Stored approval '${idStr}' is bound to sample '${amendment.sampleId}', not requested sample '${sampleId}'.`
+                    };
+                }
+                if (Array.isArray(sampleIds) && sampleIds.length > 0) {
+                    // Every batch member must be authorized
+                    const isAllMatching = sampleIds.every(sId => sId === amendment.sampleId);
+                    if (!isAllMatching) {
+                        return {
+                            isStoredApprovalVerified: false,
+                            code: 'APPROVAL_BATCH_NOT_COVERED',
+                            reason: `Stored approval '${idStr}' only covers sample '${amendment.sampleId}'. Every member in requested batch must have verified authorization.`
+                        };
+                    }
+                }
+
+                // Resolve bound project & lab from the actual linked sample
+                const boundProjectId = linkedSample?.projectId || linkedSample?.projectCode || amendment.projectId || amendment.projectCode || null;
+                const boundProjectCode = linkedSample?.projectCode || linkedSample?.projectId || amendment.projectCode || amendment.projectId || null;
+                const boundLabId = linkedSample?.assignedLab || linkedSample?.labId || amendment.labId || null;
+
+                // Operation binding: Target Project Binding
+                if (project && (project.id || project.code)) {
+                    const targetProjId = project.id || project.code;
+                    const targetProjCode = project.code || project.id;
+                    if (!boundProjectId && !boundProjectCode) {
+                        return {
+                            isStoredApprovalVerified: false,
+                            code: 'APPROVAL_PROJECT_MISMATCH',
+                            reason: `Stored approval '${idStr}' sample is not associated with project '${targetProjCode}'.`
+                        };
+                    }
+                    const isProjectMatch = (boundProjectId === targetProjId || boundProjectId === targetProjCode ||
+                                            boundProjectCode === targetProjCode || boundProjectCode === targetProjId);
+                    if (!isProjectMatch) {
+                        return {
+                            isStoredApprovalVerified: false,
+                            code: 'APPROVAL_PROJECT_MISMATCH',
+                            reason: `Stored approval '${idStr}' is bound to project '${boundProjectCode || boundProjectId}', not requested project '${targetProjCode}'.`
+                        };
+                    }
+                }
+
+                // Operation binding: Target Lab Binding
+                if (labId) {
+                    if (!boundLabId) {
+                        return {
+                            isStoredApprovalVerified: false,
+                            code: 'APPROVAL_LAB_MISMATCH',
+                            reason: `Stored approval '${idStr}' sample is not associated with lab '${labId}'.`
+                        };
+                    }
+                    if (boundLabId !== labId) {
+                        return {
+                            isStoredApprovalVerified: false,
+                            code: 'APPROVAL_LAB_MISMATCH',
+                            reason: `Stored approval '${idStr}' is bound to lab '${boundLabId}', not requested lab '${labId}'.`
+                        };
+                    }
+                }
+
+                // Operation binding: Explicit documented reason
+                const effectiveReason = String(amendment.reason || '').trim();
+                if (!effectiveReason || effectiveReason.length < 5) {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_EMPTY_REASON',
+                        reason: `Stored approval '${idStr}' lacks an explicit documented reason (minimum 5 characters required).`
+                    };
+                }
+
+                // Operation binding: Verify authorizer user's role and lab scope
                 const authorizerUser = await client.user.findUnique({
                     where: { username: amendment.authorizedBy }
                 });
@@ -512,58 +670,6 @@ async function verifyStoredExceptionApproval({
                         isStoredApprovalVerified: false,
                         code: 'AUTHORIZER_UNAUTHORIZED',
                         reason: `Authorizer '${amendment.authorizedBy}' lacks manager/admin authority on target project/lab.`
-                    };
-                }
-
-                // Operation binding 2: Target Sample Binding
-                if (amendment.sampleId) {
-                    if (sampleId && amendment.sampleId !== sampleId) {
-                        return {
-                            isStoredApprovalVerified: false,
-                            code: 'APPROVAL_SAMPLE_MISMATCH',
-                            reason: `Stored approval '${idStr}' is bound to sample '${amendment.sampleId}', not requested sample '${sampleId}'.`
-                        };
-                    }
-                    if (Array.isArray(sampleIds) && sampleIds.length > 0 && !sampleIds.includes(amendment.sampleId)) {
-                        return {
-                            isStoredApprovalVerified: false,
-                            code: 'APPROVAL_SAMPLE_MISMATCH',
-                            reason: `Stored approval '${idStr}' is bound to sample '${amendment.sampleId}', which is not in the requested sample set.`
-                        };
-                    }
-                }
-
-                // Operation binding 3: Target Project Binding
-                if (amendment.projectId && project && project.id && amendment.projectId !== project.id) {
-                    return {
-                        isStoredApprovalVerified: false,
-                        code: 'APPROVAL_PROJECT_MISMATCH',
-                        reason: `Stored approval '${idStr}' is bound to project '${amendment.projectId}', not requested project '${project.id}'.`
-                    };
-                }
-                if (amendment.projectCode && project && project.code && amendment.projectCode !== project.code) {
-                    return {
-                        isStoredApprovalVerified: false,
-                        code: 'APPROVAL_PROJECT_MISMATCH',
-                        reason: `Stored approval '${idStr}' is bound to project '${amendment.projectCode}', not requested project '${project.code}'.`
-                    };
-                }
-
-                // Operation binding 4: Target Lab Binding
-                if (amendment.labId && labId && amendment.labId !== labId) {
-                    return {
-                        isStoredApprovalVerified: false,
-                        code: 'APPROVAL_LAB_MISMATCH',
-                        reason: `Stored approval '${idStr}' is bound to lab '${amendment.labId}', not requested lab '${labId}'.`
-                    };
-                }
-
-                const effectiveReason = String(amendment.reason || '').trim();
-                if (!effectiveReason) {
-                    return {
-                        isStoredApprovalVerified: false,
-                        code: 'APPROVAL_EMPTY_REASON',
-                        reason: `Stored approval '${idStr}' lacks an explicit documented reason.`
                     };
                 }
 
@@ -579,68 +685,17 @@ async function verifyStoredExceptionApproval({
         // Fall through
     }
 
-    // 2. Check AuditLog table for persisted exception approval events
-    try {
-        if (client.auditLog && typeof client.auditLog.findFirst === 'function') {
-            const audit = await client.auditLog.findFirst({
-                where: {
-                    entityId: idStr,
-                    action: { in: ['EXCEPTION_APPROVED', 'ADMISSION_EXCEPTION_APPROVED'] }
-                }
-            });
-            if (audit && audit.performedBy) {
-                const authorizerUser = await client.user.findUnique({
-                    where: { username: audit.performedBy }
-                });
-                if (authorizerUser && canAuthorizeException(authorizerUser, project, labId)) {
-                    // Entity binding: if audit entity is SAMPLE, verify sampleId matches
-                    if (audit.entity === 'SAMPLE' && sampleId && audit.entityId !== sampleId) {
-                        return {
-                            isStoredApprovalVerified: false,
-                            code: 'APPROVAL_SAMPLE_MISMATCH',
-                            reason: `Stored approval event '${idStr}' is for sample '${audit.entityId}', not '${sampleId}'.`
-                        };
-                    }
-                    // Entity binding: if audit entity is PROJECT, verify project matches
-                    if (audit.entity === 'PROJECT' && project && audit.entityId !== project.id && audit.entityId !== project.code) {
-                        return {
-                            isStoredApprovalVerified: false,
-                            code: 'APPROVAL_PROJECT_MISMATCH',
-                            reason: `Stored approval event '${idStr}' is for project '${audit.entityId}', not '${project.code || project.id}'.`
-                        };
-                    }
-
-                    const effectiveReason = String(audit.details || '').trim();
-                    if (!effectiveReason) {
-                        return {
-                            isStoredApprovalVerified: false,
-                            code: 'APPROVAL_EMPTY_REASON',
-                            reason: `Audit log approval event '${idStr}' lacks a documented justification.`
-                        };
-                    }
-
-                    return {
-                        isStoredApprovalVerified: true,
-                        verifiedAuthorizer: audit.performedBy,
-                        reason: effectiveReason,
-                        approvalRecord: audit
-                    };
-                }
-            }
-        }
-    } catch (e) {
-        // Fall through
-    }
-
     return {
         isStoredApprovalVerified: false,
-        reason: `Stored approval '${idStr}' not found, not in APPROVED status, or authorizer lacks manager/admin authority.`
+        code: 'APPROVAL_NOT_FOUND',
+        reason: `Stored approval '${idStr}' not found, not in APPROVED status, or does not match requested operation.`
     };
 }
 
 /**
  * Resolves and sanitizes exception records at the HTTP trust boundary.
  * Client-supplied boolean flags (such as isStoredApprovalVerified) are strictly stripped.
+ * Never infers consent from an empty exception object or client-supplied sampleId.
  */
 async function resolveAndVerifyExceptionRecord({
     rawExceptionRecord,
@@ -660,15 +715,24 @@ async function resolveAndVerifyExceptionRecord({
         return { hasException: false, exceptionRecord: null };
     }
 
-    const reason = (rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || 'Admission exception requested';
-    const effectiveApprovalId = (rawExceptionRecord && (rawExceptionRecord.approvalId || rawExceptionRecord.amendmentId || rawExceptionRecord.id)) || approvalId || null;
-
-    // 1. Direct authority: actor is manager or admin
+    // 1. Direct authority: actor is manager or admin (requires explicit non-empty reason)
     if (canAuthorizeException(actor, project, labId)) {
+        const directReason = String((rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '').trim();
+        if (!directReason || directReason.length < 5) {
+            return {
+                hasException: true,
+                exceptionRecord: {
+                    reason: directReason,
+                    isStoredApprovalVerified: false,
+                    code: 'APPROVAL_EMPTY_REASON',
+                    mode: 'REJECTED_EMPTY_REASON'
+                }
+            };
+        }
         return {
             hasException: true,
             exceptionRecord: {
-                reason,
+                reason: directReason,
                 isStoredApprovalVerified: true,
                 verifiedAuthorizer: actor.username || actor.id,
                 mode: 'ACTOR_AUTHORIZED'
@@ -677,13 +741,15 @@ async function resolveAndVerifyExceptionRecord({
     }
 
     // 2. Stored approval: verify against persisted DB record with strict operation binding
+    const effectiveApprovalId = (rawExceptionRecord && (rawExceptionRecord.approvalId || rawExceptionRecord.amendmentId)) || approvalId || null;
     if (effectiveApprovalId) {
+        // Authoritative target sample binding: NEVER fall back to rawExceptionRecord.sampleId!
         const verification = await verifyStoredExceptionApproval({
             approvalId: effectiveApprovalId,
             project,
             labId,
-            sampleId: sampleId || (rawExceptionRecord && rawExceptionRecord.sampleId) || null,
-            sampleIds,
+            sampleId: sampleId || null,
+            sampleIds: sampleIds || null,
             channel,
             prismaClient
         });
@@ -691,7 +757,7 @@ async function resolveAndVerifyExceptionRecord({
             return {
                 hasException: true,
                 exceptionRecord: {
-                    reason: verification.reason || reason,
+                    reason: verification.reason,
                     isStoredApprovalVerified: true,
                     verifiedAuthorizer: verification.verifiedAuthorizer,
                     approvalId: effectiveApprovalId,
@@ -699,14 +765,26 @@ async function resolveAndVerifyExceptionRecord({
                 }
             };
         }
+
+        return {
+            hasException: true,
+            exceptionRecord: {
+                reason: verification.reason || (rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '',
+                isStoredApprovalVerified: false,
+                code: verification.code || 'APPROVAL_NOT_VERIFIED',
+                mode: 'UNVERIFIED'
+            }
+        };
     }
 
     // 3. Client supplied isStoredApprovalVerified or authorizer without database verification: STRIP and mark unverified!
+    const fallbackReason = String((rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '').trim();
     return {
         hasException: true,
         exceptionRecord: {
-            reason,
+            reason: fallbackReason,
             isStoredApprovalVerified: false,
+            code: 'UNVERIFIED_CLAIM',
             claimedAuthorizer: authorizer || (rawExceptionRecord && (rawExceptionRecord.verifiedAuthorizer || rawExceptionRecord.claimedAuthorizer)) || null,
             mode: 'UNVERIFIED'
         }
@@ -780,12 +858,13 @@ function canAdmitSample({ project, channel = 'DESK', actor, labId = null, hasExc
     if (requiresException) {
         if (hasException) {
             const reason = exceptionRecord && (typeof exceptionRecord === 'string' ? exceptionRecord : exceptionRecord.reason);
-            if (!reason || !String(reason).trim()) {
+            const trimmedReason = String(reason || '').trim();
+            if (!trimmedReason || trimmedReason.length < 5) {
                 return {
                     allowed: false,
                     exceptionRequired: true,
                     code: 'EXCEPTION_REASON_REQUIRED',
-                    reason: `An explicit justification reason is required for ${channel} exception intake on project '${project.code}'.`
+                    reason: `An explicit justification reason (minimum 5 characters) is required for ${channel} exception intake on project '${project.code}'.`
                 };
             }
 

@@ -242,15 +242,26 @@ const ManagerQueue = () => {
             }
 
             setData(finalData);
-            // Recalculate meta from filtered/grouped data for accurate pagination
-            const correctedTotal = finalData.length;
-            const correctedTotalPages = Math.max(1, Math.ceil(correctedTotal / 20));
-            setMeta({
-                ...(result.meta || { page, limit: 20 }),
-                page,
-                total: correctedTotal,
-                totalPages: correctedTotalPages
-            });
+            // Preserve authoritative server pagination / honest units
+            if (result.meta && (activeTab === QUEUE_Tabs.ASSIGN || activeTab === QUEUE_Tabs.REVIEW)) {
+                setMeta({
+                    page: result.meta.page || page,
+                    limit: result.meta.limit || 20,
+                    total: result.meta.total ?? finalData.length,
+                    totalPages: result.meta.totalPages ?? Math.max(1, Math.ceil((result.meta.total || finalData.length) / (result.meta.limit || 20))),
+                    cardCount: finalData.length
+                });
+            } else if (result.meta) {
+                setMeta(result.meta);
+            } else {
+                const total = finalData.length;
+                setMeta({
+                    page,
+                    limit: 20,
+                    total,
+                    totalPages: Math.max(1, Math.ceil(total / 20))
+                });
+            }
 
         } catch (e) {
             console.error("Queue fetch failed", e);
@@ -394,7 +405,7 @@ const ManagerQueue = () => {
                 {meta && meta.totalPages > 1 && (
                     <div className="px-6 py-4 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
                         <span className="text-sm text-gray-500">
-                            Page {meta.page} of {meta.totalPages} ({meta.total} items)
+                            Page {meta.page} of {meta.totalPages} ({meta.total} {activeTab === QUEUE_Tabs.ASSIGN ? t('queue.tasks', 'tasks') : (activeTab === QUEUE_Tabs.REVIEW ? t('queue.submissions', 'submissions') : t('queue.items', 'items'))}{meta.cardCount && meta.cardCount !== meta.total ? ` across ${meta.cardCount} samples` : ''})
                         </span>
                         <div className="flex gap-2">
                             <button
@@ -477,9 +488,10 @@ const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
     const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
-    const targetUrl = type === 'review'
-        ? `/samples/${item.sampleId || item.id}?tab=review&returnTo=${encodeURIComponent(returnUrl)}`
-        : `/samples/${item.sampleId || item.id}?returnTo=${encodeURIComponent(returnUrl)}`;
+    let tabParam = '';
+    if (type === 'assign') tabParam = 'tab=work&';
+    else if (type === 'review') tabParam = 'tab=review&';
+    const targetUrl = `/samples/${item.sampleId || item.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
 
     return (
         <button

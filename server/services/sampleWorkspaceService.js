@@ -345,21 +345,32 @@ class SampleWorkspaceService {
                 .map(w => w.analysis)
                 .sort();
 
-            // When comparing, account for texture equivalence:
-            // If TEXTURE is in orderAnalyses, and analyticalTasks has fractions [SAND, SILT, CLAY]
-            const hasTextureOrder = orderAnalyses.some(a => TEXTURE_ALIASES.has(a));
-            const hasFractionTasks = analyticalTasks.some(a => DERIVED_TEXTURE_FRACTIONS.includes(a));
-            
-            const normalizedOrder = orderAnalyses.map(a => TEXTURE_ALIASES.has(a) ? 'TEXTURE' : a);
-            const normalizedTasks = analyticalTasks.filter(a => !(hasTextureOrder && DERIVED_TEXTURE_FRACTIONS.includes(a)));
-            if (hasTextureOrder && hasFractionTasks && !normalizedTasks.includes('TEXTURE')) {
-                normalizedTasks.push('TEXTURE');
-            }
-            normalizedOrder.sort();
-            normalizedTasks.sort();
+            // When comparing, account for bidirectional texture equivalence:
+            // 1. Map any alias to 'TEXTURE'
+            let normOrder = orderAnalyses.map(a => TEXTURE_ALIASES.has(a) ? 'TEXTURE' : a);
+            let normTasks = analyticalTasks.map(a => TEXTURE_ALIASES.has(a) ? 'TEXTURE' : a);
 
-            const hasMismatch = normalizedOrder.length !== normalizedTasks.length ||
-                normalizedOrder.some((a, i) => a !== normalizedTasks[i]);
+            // 2. If order has 'TEXTURE' and tasks have all 3 fractions (SAND, SILT, CLAY), fold tasks fractions to 'TEXTURE'
+            const orderHasTexture = normOrder.includes('TEXTURE');
+            const tasksHaveAllFractions = DERIVED_TEXTURE_FRACTIONS.every(f => normTasks.includes(f));
+            if (orderHasTexture && tasksHaveAllFractions) {
+                normTasks = normTasks.filter(a => !DERIVED_TEXTURE_FRACTIONS.includes(a));
+                if (!normTasks.includes('TEXTURE')) normTasks.push('TEXTURE');
+            }
+
+            // 3. If tasks have 'TEXTURE' and order has all 3 fractions (SAND, SILT, CLAY), fold order fractions to 'TEXTURE'
+            const tasksHaveTexture = normTasks.includes('TEXTURE');
+            const orderHasAllFractions = DERIVED_TEXTURE_FRACTIONS.every(f => normOrder.includes(f));
+            if (tasksHaveTexture && orderHasAllFractions) {
+                normOrder = normOrder.filter(a => !DERIVED_TEXTURE_FRACTIONS.includes(a));
+                if (!normOrder.includes('TEXTURE')) normOrder.push('TEXTURE');
+            }
+
+            normOrder.sort();
+            normTasks.sort();
+
+            const hasMismatch = normOrder.length !== normTasks.length ||
+                normOrder.some((a, i) => a !== normTasks[i]);
 
             if (hasMismatch && !orderIntegrityWarning) {
                 orderIntegrityWarning = {
@@ -410,7 +421,7 @@ class SampleWorkspaceService {
         const acceptedCount = analyticalItems.filter(w => w.status === 'ACCEPTED' && !w.isHistoricalGap).length;
         const omittedCount = orderLines.filter(l => l.status === 'OMITTED' || l.status === 'CANCELLED').length + analyticalItems.filter(w => w.status === 'WAIVED').length;
         const blockedCount = analyticalItems.filter(w => w.blockers.length > 0).length;
-        const unassignedCount = analyticalItems.filter(w => !w.assignedTo && ['NOT_ASSIGNED', 'PENDING'].includes(w.status)).length;
+        const unassignedCount = enrichedWorkItems.filter(w => !w.assignedTo && ['NOT_ASSIGNED', 'PENDING', 'UNASSIGNED'].includes(w.status)).length;
 
         // 10. Operational Gates
         const gates = {
@@ -499,12 +510,13 @@ class SampleWorkspaceService {
         const isReception = ['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(userRole);
 
         const { canFinalApprove: evaluateFinalApproval } = require('./workEligibility');
+        const linkedBatches = (sample.workItems || []).map(w => w.batch).filter(Boolean);
         const finalApprovalEval = evaluateFinalApproval(
             sample,
             sample.workItems,
             activeRevision?.lines || orderLines || [],
             user,
-            { hasHistoricalGap }
+            { qcBatches: linkedBatches, hasHistoricalGap }
         );
 
         const capabilities = {

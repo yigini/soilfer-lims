@@ -746,6 +746,8 @@ exports.checkItemBatchStatus = async (workItemId) => {
     }
 };
 
+const PERMITTED_DISPOSITIONS = ['PROCEED_WITH_WARNING', 'REANALYZE_BATCH', 'REJECT_BATCH'];
+
 exports.dispositionBatch = async (req, res) => {
     const { id } = req.params;
     const { decision, reason } = req.body;
@@ -754,6 +756,13 @@ exports.dispositionBatch = async (req, res) => {
     try {
         if (!decision || !reason || !String(reason).trim()) {
             return res.status(400).json({ error: 'Decision and non-empty reason are required' });
+        }
+
+        if (!PERMITTED_DISPOSITIONS.includes(decision)) {
+            return res.status(400).json({
+                error: 'INVALID_DISPOSITION_DECISION',
+                message: `Decision must be one of: ${PERMITTED_DISPOSITIONS.join(', ')}`
+            });
         }
 
         if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -772,6 +781,9 @@ exports.dispositionBatch = async (req, res) => {
         }
 
         const trimmedReason = String(reason).trim();
+        if (trimmedReason.length < 5) {
+            return res.status(400).json({ error: 'A meaningful reason (minimum 5 characters) is required' });
+        }
 
         // Idempotency: if already dispositioned with matching decision and reason, return existing without duplicating history or audit log
         let existingDisp = null;
@@ -801,15 +813,38 @@ exports.dispositionBatch = async (req, res) => {
             timestamp: now
         });
 
-        const [updatedBatch] = await prisma.$transaction([
-            prisma.batch.update({
+        // Atomic transaction: batch + work items + audit log + result flags
+        await prisma.$transaction(async (tx) => {
+            // 1. Update Batch disposition and history
+            await tx.batch.update({
                 where: { id },
                 data: {
                     disposition: JSON.stringify(disposition),
                     history: JSON.stringify(history)
                 }
-            }),
-            prisma.auditLog.create({
+            });
+
+            // 2. Link reanalysis/rejection task workflow to associated WorkItems
+            if (decision === 'REANALYZE_BATCH') {
+                await tx.workItem.updateMany({
+                    where: { batchId: id },
+                    data: {
+                        status: 'REANALYSIS_REQUIRED',
+                        reanalysisReason: trimmedReason,
+                        reanalysisRequestedBy: user.username
+                    }
+                });
+            } else if (decision === 'REJECT_BATCH') {
+                await tx.workItem.updateMany({
+                    where: { batchId: id },
+                    data: {
+                        status: 'REJECTED'
+                    }
+                });
+            }
+
+            // 3. Audit log
+            await tx.auditLog.create({
                 data: {
                     id: `audit-batch-disp-${Date.now()}`,
                     entity: 'QC_BATCH',
@@ -819,11 +854,11 @@ exports.dispositionBatch = async (req, res) => {
                     performedBy: user.username,
                     timestamp: now
                 }
-            })
-        ]);
+            });
 
-        // WP-29: Re-evaluate Result flags based on manager disposition override
-        await flagBatchResults(prisma, id, 'QC_FAIL', disposition);
+            // 4. Update Result flags atomically inside the same transaction
+            await flagBatchResults(tx, id, 'QC_FAIL', disposition);
+        });
 
         res.json({ success: true, disposition });
     } catch (error) {

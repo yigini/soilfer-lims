@@ -1480,7 +1480,8 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             prisma.batch.count({
                 where: {
                     ...batchWhere,
-                    status: { in: ['QC_FAIL', 'FAILED'] }
+                    status: { in: ['QC_FAIL', 'FAILED'] },
+                    disposition: null
                 }
             }),
             prisma.batch.findMany({

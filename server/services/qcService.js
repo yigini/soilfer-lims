@@ -299,11 +299,30 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         try { parsedDisp = JSON.parse(parsedDisp); } catch (e) { parsedDisp = null; }
     }
 
-    const isOverridden = parsedDisp && parsedDisp.decision === 'PROCEED_WITH_WARNING';
-    const results = await prismaClient.result.findMany({ where: { batchId } });
+    const decision = parsedDisp?.decision || null;
+    const isProceedWarning = decision === 'PROCEED_WITH_WARNING';
+    const isReanalyze = decision === 'REANALYZE_BATCH';
+    const isReject = decision === 'REJECT_BATCH';
+
+    const results = await prismaClient.result.findMany({
+        where: { batchId },
+        include: { sample: { select: { id: true, status: true } } }
+    });
     let count = 0;
 
+    const NON_QC_INVALID_FLAGS = [
+        'MANUAL_INVALID', 'INVALID', 'OUT_OF_RANGE', 'CALIBRATION_FAILED',
+        'CONTAMINATED', 'SUSPECT', 'METHOD_INVALID', 'DILUTION_ERROR'
+    ];
+
     for (const res of results) {
+        // Protection for released and superseded records: immutable history
+        const isSampleReleased = res.sample && ['RELEASED', 'APPROVED'].includes(res.sample.status);
+        const isSuperseded = res.isCurrent === false || Boolean(res.supersededBy);
+        if (isSampleReleased || isSuperseded) {
+            continue;
+        }
+
         let flags = [];
         try {
             flags = typeof res.flags === 'string' ? JSON.parse(res.flags) : (res.flags || []);
@@ -312,12 +331,34 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         }
 
         if (status === 'QC_FAIL') {
-            if (isOverridden) {
-                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+            if (isProceedWarning) {
+                // Strip QC_BATCH_FAILED
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_BATCH_REJECTED' && f !== 'QC_BATCH_REANALYZE_REQUESTED');
                 if (!flags.includes('QC_WARNING_OVERRIDDEN')) flags.push('QC_WARNING_OVERRIDDEN');
+
+                // Preserve scientific validity: only set isValid: true if no other invalidity flag exists!
+                const hasOtherInvalidFlags = flags.some(f =>
+                    NON_QC_INVALID_FLAGS.includes(f) || (f.endsWith('_INVALID') && f !== 'QC_BATCH_FAILED')
+                );
+                const isValid = !hasOtherInvalidFlags;
+
                 await prismaClient.result.update({
                     where: { id: res.id },
-                    data: { isValid: true, flags: JSON.stringify(flags) }
+                    data: { isValid, flags: JSON.stringify(flags) }
+                });
+            } else if (isReanalyze) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_WARNING_OVERRIDDEN');
+                if (!flags.includes('QC_BATCH_REANALYZE_REQUESTED')) flags.push('QC_BATCH_REANALYZE_REQUESTED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: false, flags: JSON.stringify(flags) }
+                });
+            } else if (isReject) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_WARNING_OVERRIDDEN');
+                if (!flags.includes('QC_BATCH_REJECTED')) flags.push('QC_BATCH_REJECTED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: false, flags: JSON.stringify(flags) }
                 });
             } else {
                 if (!flags.includes('QC_BATCH_FAILED')) flags.push('QC_BATCH_FAILED');
@@ -328,14 +369,16 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
             }
             count++;
         } else if (status === 'QC_PASS') {
-            if (flags.includes('QC_BATCH_FAILED')) {
-                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
-                await prismaClient.result.update({
-                    where: { id: res.id },
-                    data: { isValid: true, flags: JSON.stringify(flags) }
-                });
-                count++;
-            }
+            flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+            const hasOtherInvalidFlags = flags.some(f =>
+                NON_QC_INVALID_FLAGS.includes(f) || (f.endsWith('_INVALID') && f !== 'QC_BATCH_FAILED')
+            );
+            const isValid = !hasOtherInvalidFlags;
+            await prismaClient.result.update({
+                where: { id: res.id },
+                data: { isValid, flags: JSON.stringify(flags) }
+            });
+            count++;
         }
     }
 

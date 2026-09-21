@@ -160,7 +160,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         expect(workspace.counters.gates).toBe(2);
         expect(workspace.counters.derived).toBe(3);
         expect(workspace.counters.ordered).toBe(22);
-        expect(workspace.counters.unassigned).toBe(24);
+        expect(workspace.counters.unassigned).toBe(26);
     });
 
     test('2. Disambiguates canonical ID, lab ID, and field original ID across dashboard queues and submissions', async () => {
@@ -262,6 +262,19 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             { role: 'LAB_MANAGER', labId: 'LAB-GTM' }
         );
         expect(completeEval.allowed).toBe(true);
+
+        // Bidirectional equivalence: When SAND is required, composite TEXTURE satisfies it
+        const sandReqEval = canFinalApprove(
+            { id: 'TEST-SAND-REQ', status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(['SAND']) },
+            [
+                { analysis: 'DRYING', status: 'COMPLETED' },
+                { analysis: 'PREPARATION', status: 'COMPLETED' },
+                { analysis: 'TEXTURE', status: 'ACCEPTED' }
+            ],
+            [],
+            { role: 'LAB_MANAGER', labId: 'LAB-GTM' }
+        );
+        expect(sandReqEval.allowed).toBe(true);
     });
 
     test('4. Final approval readiness independently enforced on server: rejects premature approval with 409 and blockers', async () => {
@@ -397,5 +410,82 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         const ws26 = await sampleWorkspaceService.getSampleWorkspace(sample26Id, { role: 'LAB_MANAGER', labId: 'LAB-GTM' });
         expect(ws26.capabilities.canFinalApprove.allowed).toBe(false);
         expect(ws26.nextAction.action).toBe('ASSIGN');
+    });
+
+    test('7. Operational gates evaluated independently and respect SKIPPED/WAIVED states', () => {
+        // Drying SKIPPED, Preparation DONE -> Allowed without PREREQUISITE_GATE_INCOMPLETE
+        const skippedDryingEval = canFinalApprove(
+            { id: 'TEST-SKIP-DRY', status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'SKIPPED', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(['PH_H2O']) },
+            [
+                { analysis: 'PREPARATION', status: 'COMPLETED' },
+                { analysis: 'PH_H2O', status: 'ACCEPTED' }
+            ],
+            [],
+            { role: 'LAB_MANAGER', labId: 'LAB-GTM' }
+        );
+        expect(skippedDryingEval.allowed).toBe(true);
+
+        // Drying DONE, Preparation PENDING -> Blocker identifies PREPARATION only, NOT Drying
+        const pendingPrepEval = canFinalApprove(
+            { id: 'TEST-PEND-PREP', status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'PENDING', requiredAnalyses: JSON.stringify(['PH_H2O']) },
+            [
+                { analysis: 'DRYING', status: 'COMPLETED' },
+                { analysis: 'PH_H2O', status: 'ACCEPTED' }
+            ],
+            [],
+            { role: 'LAB_MANAGER', labId: 'LAB-GTM' }
+        );
+        expect(pendingPrepEval.allowed).toBe(false);
+        expect(pendingPrepEval.blockers).toHaveLength(1);
+        expect(pendingPrepEval.blockers[0]).toContain('Preparation gate');
+    });
+
+    test('8. Workspace projection extracts linked QC batches and blocks final approval on QC failure', async () => {
+        const qcBatchSampleId = `SMP-QC-GATE-${Date.now()}`;
+        const qcBatchId = `BATCH-QC-GATE-${Date.now()}`;
+
+        await prisma.sample.create({
+            data: {
+                id: qcBatchSampleId,
+                originalId: `FIELD-QC-GATE-${Date.now()}`,
+                labId: 'LAB-GTM',
+                assignedLab: 'LAB-GTM',
+                status: 'PROCESSING',
+                receptionDate: new Date(),
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                requiredAnalyses: JSON.stringify(['PH_H2O'])
+            }
+        });
+
+        await prisma.batch.create({
+            data: {
+                id: qcBatchId,
+                analysis: 'PH_H2O',
+                status: 'QC_FAIL',
+                labId: 'LAB-GTM',
+                createdBy: 'tech_gtm'
+            }
+        });
+
+        await prisma.workItem.create({
+            data: {
+                id: `WI-QC-GATE-${Date.now()}`,
+                sampleId: qcBatchSampleId,
+                analysis: 'PH_H2O',
+                status: 'ACCEPTED',
+                labId: 'LAB-GTM',
+                batchId: qcBatchId
+            }
+        });
+
+        const ws = await sampleWorkspaceService.getSampleWorkspace(qcBatchSampleId, { role: 'LAB_MANAGER', labId: 'LAB-GTM' });
+        expect(ws.capabilities.canFinalApprove.allowed).toBe(false);
+        expect(ws.capabilities.canFinalApprove.blockers.some(b => b.includes('QC_BATCH_FAILED'))).toBe(true);
+
+        // Cleanup
+        await prisma.workItem.deleteMany({ where: { sampleId: qcBatchSampleId } });
+        await prisma.batch.delete({ where: { id: qcBatchId } });
+        await prisma.sample.delete({ where: { id: qcBatchSampleId } });
     });
 });

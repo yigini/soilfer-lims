@@ -145,10 +145,9 @@ exports.processIntake = async (req, res) => {
                 if (existingProject) {
                     const admission = projectPolicyService.canAdmitSample({
                         project: existingProject,
-                        channel: 'DESK',
+                        channel: 'PHYSICAL_RECEIPT',
                         actor: user,
-                        labId: user.labId,
-                        hasException: true // sample is already registered; this is physical reception
+                        labId: user.labId
                     });
                     if (!admission.allowed) {
                         return res.status(422).json({

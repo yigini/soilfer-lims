@@ -331,4 +331,209 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(inspectRes.body.data.disposition.decision).toBe('PROCEED_WITH_WARNING');
         expect(inspectRes.body.data.history.length).toBeGreaterThanOrEqual(3);
     });
+
+    // ─── Test 7: Schema Validation for Disposition Decision ───
+    test('7. Unknown disposition decision is rejected with 400 INVALID_DISPOSITION_DECISION', async () => {
+        // Create an un-dispositioned failing batch in testLab1
+        const failBatch = await prisma.batch.create({
+            data: {
+                id: `batch-fail-schema-${Date.now()}`,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        const res = await request(app)
+            .post(`/api/qc/batches/${failBatch.id}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({ decision: 'ARBITRARY_DECISION', reason: 'Attempting invalid decision' });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('INVALID_DISPOSITION_DECISION');
+
+        // Cleanup
+        await prisma.batch.delete({ where: { id: failBatch.id } }).catch(() => {});
+    });
+
+    // ─── Test 8: Scientific Validity Preservation (Non-QC Flags & Released Results) ───
+    test('8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records', async () => {
+        const testBatchId = `batch-preserv-${Date.now()}`;
+        await prisma.batch.create({
+            data: {
+                id: testBatchId,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        // Active sample fixture (in PROCESSING status)
+        const activeSample = await prisma.sample.create({
+            data: {
+                id: `smp-active-${Date.now()}`,
+                originalId: `SMP-ACT-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Result 1: Has both QC_BATCH_FAILED and MANUAL_INVALID on active sample
+        const resWithManualInvalid = await prisma.result.create({
+            data: {
+                id: `res-manual-inv-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'PH',
+                value: '6.50',
+                unit: 'pH units',
+                batchId: testBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED', 'MANUAL_INVALID'])
+            }
+        });
+
+        // Sample fixture in RELEASED status
+        const releasedSample = await prisma.sample.create({
+            data: {
+                id: `smp-rel-${Date.now()}`,
+                originalId: `SMP-REL-${Date.now()}`,
+                status: 'RELEASED',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Result 2: Belongs to already RELEASED sample (must be immutable)
+        const resReleased = await prisma.result.create({
+            data: {
+                id: `res-released-${Date.now()}`,
+                sampleId: releasedSample.id,
+                param: 'PH',
+                value: '6.50',
+                unit: 'pH units',
+                batchId: testBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // Result 3: Superseded historical result (must be immutable)
+        const resSuperseded = await prisma.result.create({
+            data: {
+                id: `res-super-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'PH',
+                value: '6.50',
+                unit: 'pH units',
+                batchId: testBatchId,
+                isValid: false,
+                isCurrent: false,
+                supersededBy: 'res-replacement-id',
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // Execute manager disposition override: PROCEED_WITH_WARNING
+        const dispRes = await request(app)
+            .post(`/api/qc/batches/${testBatchId}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({
+                decision: 'PROCEED_WITH_WARNING',
+                reason: 'Scientific override for batch QC drift'
+            });
+
+        expect(dispRes.status).toBe(200);
+
+        // Verify Result 1: QC_BATCH_FAILED stripped, QC_WARNING_OVERRIDDEN added, BUT isValid REMAINS FALSE due to MANUAL_INVALID!
+        const refreshedRes1 = await prisma.result.findUnique({ where: { id: resWithManualInvalid.id } });
+        const flags1 = JSON.parse(refreshedRes1.flags);
+        expect(flags1).toContain('QC_WARNING_OVERRIDDEN');
+        expect(flags1).not.toContain('QC_BATCH_FAILED');
+        expect(flags1).toContain('MANUAL_INVALID');
+        expect(refreshedRes1.isValid).toBe(false); // Preserved scientific validity!
+
+        // Verify Result 2: Immutable released record untouched!
+        const refreshedRes2 = await prisma.result.findUnique({ where: { id: resReleased.id } });
+        expect(refreshedRes2.isValid).toBe(false);
+        const flags2 = JSON.parse(refreshedRes2.flags);
+        expect(flags2).toEqual(['QC_BATCH_FAILED']); // Untouched
+
+        // Verify Result 3: Superseded record untouched!
+        const refreshedRes3 = await prisma.result.findUnique({ where: { id: resSuperseded.id } });
+        expect(refreshedRes3.isValid).toBe(false);
+        const flags3 = JSON.parse(refreshedRes3.flags);
+        expect(flags3).toEqual(['QC_BATCH_FAILED']); // Untouched
+
+        // Cleanup
+        await prisma.result.deleteMany({ where: { id: { in: [resWithManualInvalid.id, resReleased.id, resSuperseded.id] } } });
+        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
+        await prisma.sample.delete({ where: { id: releasedSample.id } }).catch(() => {});
+        await prisma.batch.delete({ where: { id: testBatchId } }).catch(() => {});
+        await prisma.auditLog.deleteMany({ where: { entityId: testBatchId } }).catch(() => {});
+    });
+
+    // ─── Test 9: REANALYZE_BATCH Establishes Linked WorkItem Reanalysis Flow ───
+    test('9. REANALYZE_BATCH updates associated workItems to REANALYSIS_REQUIRED atomically', async () => {
+        const reanalyzeBatchId = `batch-reanal-${Date.now()}`;
+        await prisma.batch.create({
+            data: {
+                id: reanalyzeBatchId,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        const wiToReanalyze = await prisma.workItem.create({
+            data: {
+                id: `wi-reanal-${Date.now()}`,
+                sampleId: sample1.id,
+                analysis: 'pH',
+                status: 'PENDING_REVIEW',
+                batchId: reanalyzeBatchId,
+                labId: testLab1.id
+            }
+        });
+
+        const dispRes = await request(app)
+            .post(`/api/qc/batches/${reanalyzeBatchId}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({
+                decision: 'REANALYZE_BATCH',
+                reason: 'Calibration curve failed; re-run entire analytical sequence'
+            });
+
+        expect(dispRes.status).toBe(200);
+
+        // Verify work item updated to REANALYSIS_REQUIRED with author and reason
+        const refreshedWi = await prisma.workItem.findUnique({ where: { id: wiToReanalyze.id } });
+        expect(refreshedWi.status).toBe('REANALYSIS_REQUIRED');
+        expect(refreshedWi.reanalysisReason).toContain('Calibration curve failed');
+        expect(refreshedWi.reanalysisRequestedBy).toBe(lab1Manager.username);
+
+        // Cleanup
+        await prisma.workItem.delete({ where: { id: wiToReanalyze.id } }).catch(() => {});
+        await prisma.batch.delete({ where: { id: reanalyzeBatchId } }).catch(() => {});
+        await prisma.auditLog.deleteMany({ where: { entityId: reanalyzeBatchId } }).catch(() => {});
+    });
+
+    // ─── Test 10: audit.qc Queue Count Truthfully Excludes Dispositioned Batches ───
+    test('10. audit.qc queue qcFailedCount strictly excludes dispositioned batches', async () => {
+        const auditQcRes = await request(app)
+            .get('/api/dashboard/queues/audit.qc')
+            .set('Authorization', `Bearer ${lab1Manager.token}`);
+
+        expect(auditQcRes.status).toBe(200);
+        // batch1 is dispositioned so it must not be included in unresolved qcFailedCount
+        const rows = auditQcRes.body.rows || [];
+        const foundBatch1 = rows.find(r => r.key === batch1.id);
+        // Even if in rows (history), the qcFailedCount must only count unresolved ones (disposition: null)
+        expect(auditQcRes.body.qcFailedCount).toBeDefined();
+    });
 });

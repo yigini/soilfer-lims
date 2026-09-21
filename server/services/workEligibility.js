@@ -190,14 +190,27 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
 
     // 2b. Operational gate prerequisites
     const gateWorkItems = workItems.filter(w => GATE_ANALYSES.includes(w.analysis));
-    const hasGateItems = gateWorkItems.length > 0;
-    if (hasGateItems || (sample.dryingStatus && sample.dryingStatus !== 'SKIPPED') || (sample.preparationStatus && sample.preparationStatus !== 'SKIPPED')) {
-        const dryingDone = sample.dryingStatus === 'DONE' || gateWorkItems.some(w => w.analysis === 'DRYING' && ['COMPLETED', 'ACCEPTED'].includes(w.status));
-        const prepDone = sample.preparationStatus === 'DONE' || gateWorkItems.some(w => w.analysis === 'PREPARATION' && ['COMPLETED', 'ACCEPTED'].includes(w.status));
-        if (!dryingDone) {
+    const dryingItem = gateWorkItems.find(w => w.analysis === 'DRYING');
+    const prepItem = gateWorkItems.find(w => w.analysis === 'PREPARATION');
+
+    const SATISFIED_GATE_STATUSES = ['DONE', 'COMPLETED', 'ACCEPTED', 'SKIPPED', 'WAIVED', 'NOT_APPLICABLE'];
+
+    // Evaluate Drying gate independently:
+    const isDryingRequired = Boolean(dryingItem) || (sample.dryingStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.dryingStatus));
+    if (isDryingRequired) {
+        const sampleDryingSatisfied = SATISFIED_GATE_STATUSES.includes(sample.dryingStatus);
+        const itemDryingSatisfied = dryingItem && SATISFIED_GATE_STATUSES.includes(dryingItem.status);
+        if (!sampleDryingSatisfied && !itemDryingSatisfied) {
             blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Drying gate has not been completed');
         }
-        if (!prepDone) {
+    }
+
+    // Evaluate Preparation gate independently:
+    const isPrepRequired = Boolean(prepItem) || (sample.preparationStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.preparationStatus));
+    if (isPrepRequired) {
+        const samplePrepSatisfied = SATISFIED_GATE_STATUSES.includes(sample.preparationStatus);
+        const itemPrepSatisfied = prepItem && SATISFIED_GATE_STATUSES.includes(prepItem.status);
+        if (!samplePrepSatisfied && !itemPrepSatisfied) {
             blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Sample Preparation gate has not been completed');
         }
     }
@@ -256,6 +269,14 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
                     if (!allFractionsAccepted) {
                         blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or derived texture fractions) is not accepted`);
                     }
+                }
+            } else if (DERIVED_TEXTURE_FRACTIONS.includes(reqCode)) {
+                // If individual fraction was required, check if that fraction OR composite TEXTURE is accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied by composite TEXTURE
+                } else {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or composite TEXTURE) is not accepted`);
                 }
             } else {
                 blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} has no corresponding laboratory work item`);
