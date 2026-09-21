@@ -351,7 +351,7 @@ function getEffectiveTemplate(projectOrCode) {
     }
 
     const explicitTemplate = projectOrCode.templateId || projectOrCode.template;
-    if (explicitTemplate && Object.values(PROJECT_TEMPLATES).includes(explicitTemplate)) {
+    if (explicitTemplate && explicitTemplate !== PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE && Object.values(PROJECT_TEMPLATES).includes(explicitTemplate)) {
         return explicitTemplate;
     }
 
@@ -361,6 +361,10 @@ function getEffectiveTemplate(projectOrCode) {
     if (type === 'TEMPLATE_PREDEFINED_IDS' || type === 'PREDEFINED_MANIFEST' || type === 'GENERIC_MANIFEST') return PROJECT_TEMPLATES.GENERIC_MANIFEST;
     if (type === 'WALK_IN') return PROJECT_TEMPLATES.WALK_IN;
     if (type === 'OPEN_INTAKE' || type === 'GENERIC_OPEN_INTAKE') return PROJECT_TEMPLATES.GENERIC_OPEN_INTAKE;
+
+    if (explicitTemplate && Object.values(PROJECT_TEMPLATES).includes(explicitTemplate)) {
+        return explicitTemplate;
+    }
 
     // Only if projectType is completely absent / empty, check canonical legacy codes
     const code = (projectOrCode.code || projectOrCode.id || '').toUpperCase().trim();
@@ -398,16 +402,25 @@ async function resolveProject(idOrCode, tx = null) {
     return {
         id: proj.id,
         code: proj.code,
-        project: proj
+        name: proj.name,
+        status: proj.status,
+        templateId: proj.templateId,
+        projectType: proj.projectType,
+        policyConfig: proj.policyConfig,
+        labId: proj.labId,
+        assignedLabIds: proj.assignedLabIds,
+        project: proj,
+        rawProject: proj
     };
 }
 
 /**
- * Checks whether an actor can authorize an admission exception.
+ * Checks whether an actor has authority to authorize an admission exception.
  */
 function canAuthorizeException(actor, project = null, labId = null) {
     if (!actor || actor.isActive === false) return false;
     const role = actor.role ? actor.role.trim() : '';
+
     if (role === 'SUPER_ADMIN' || role === 'ADMIN') return true;
     if (role === 'LAB_MANAGER') {
         const targetLab = labId || (project ? project.labId : null) || actor.labId;
@@ -422,10 +435,20 @@ function canAuthorizeException(actor, project = null, labId = null) {
  */
 function validateExceptionAuthorization(actor, project, labId, exceptionRecord) {
     if (!actor || actor.isActive === false) {
-        return { authorized: false, reason: 'Inactive or unauthenticated actor cannot submit exceptions.' };
+        return { authorized: false, code: 'EXCEPTION_NOT_AUTHORIZED', reason: 'Inactive or unauthenticated actor cannot submit exceptions.' };
     }
 
-    // 1. Authenticated actor has direct exception authority
+    // If an explicit stored approval was evaluated and failed, fail closed
+    if (exceptionRecord && exceptionRecord.isStoredApprovalVerified === false) {
+        return {
+            authorized: false,
+            code: 'EXCEPTION_NOT_AUTHORIZED',
+            subCode: exceptionRecord.code || 'APPROVAL_NOT_VERIFIED',
+            reason: exceptionRecord.reason || 'Stored exception approval is not verified.'
+        };
+    }
+
+    // 1. Direct authority: actor is manager or admin (requires explicit non-empty reason)
     if (canAuthorizeException(actor, project, labId)) {
         const reason = exceptionRecord && (typeof exceptionRecord === 'string' ? exceptionRecord : exceptionRecord.reason);
         if (!reason || String(reason).trim().length < 5) {
@@ -549,6 +572,33 @@ async function verifyStoredExceptionApproval({
             });
 
             if (amendment && amendment.status === 'APPROVED' && amendment.authorizedBy) {
+                // Replay / Consumption check: resolved or consumed approvals cannot be replayed
+                if (amendment.resolution === 'CONSUMED' || amendment.status === 'RESOLVED') {
+                    return {
+                        isStoredApprovalVerified: false,
+                        code: 'APPROVAL_ALREADY_CONSUMED',
+                        reason: `Stored approval '${idStr}' has already been consumed and cannot be replayed.`
+                    };
+                }
+
+                // Expiry check: check if impactAssessment contains an expiration timestamp
+                if (amendment.impactAssessment) {
+                    try {
+                        const assessment = typeof amendment.impactAssessment === 'string'
+                            ? JSON.parse(amendment.impactAssessment)
+                            : amendment.impactAssessment;
+                        if (assessment?.expiresAt && new Date(assessment.expiresAt).getTime() < Date.now()) {
+                            return {
+                                isStoredApprovalVerified: false,
+                                code: 'APPROVAL_EXPIRED',
+                                reason: `Stored approval '${idStr}' expired at ${assessment.expiresAt}.`
+                            };
+                        }
+                    } catch {
+                        // Non-JSON impactAssessment
+                    }
+                }
+
                 // Operation binding: Purpose / Channel Check
                 const amdType = String(amendment.type || '').toUpperCase().trim();
                 const routineTypes = ['CLERICAL', 'SCIENTIFIC', 'ORDER', 'REPORT'];
@@ -560,21 +610,38 @@ async function verifyStoredExceptionApproval({
                     };
                 }
 
-                // Check channel compatibility
-                const validDeskTypes = ['DESK_ADMISSION_EXCEPTION', 'SAMPLE_ADMISSION_EXCEPTION', 'ADMISSION_EXCEPTION', 'DESK'];
-                const validManifestTypes = ['MANIFEST_ADMISSION_EXCEPTION', 'SAMPLE_ADMISSION_EXCEPTION', 'ADMISSION_EXCEPTION', 'MANIFEST'];
-                if (channel === 'DESK' && !validDeskTypes.includes(amdType) && !amdType.includes('DESK') && !amdType.includes('ADMISSION')) {
-                    return {
-                        isStoredApprovalVerified: false,
-                        code: 'APPROVAL_CHANNEL_MISMATCH',
-                        reason: `Stored approval '${idStr}' type '${amdType}' does not authorize DESK admission exceptions.`
-                    };
+                // Explicit persisted allowed operation/channel mapping (no substring matching)
+                const CHANNEL_ALLOWED_TYPES = {
+                    'DESK': ['DESK_ADMISSION_EXCEPTION', 'DIRECT_DESK_ADMISSION', 'DESK_ADMISSION', 'DESK'],
+                    'MANIFEST': ['MANIFEST_ADMISSION_EXCEPTION', 'PREDEFINED_MANIFEST_EXCEPTION', 'MANIFEST_INTAKE_EXCEPTION', 'MANIFEST_ADMISSION', 'MANIFEST'],
+                    'PHYSICAL_RECEIPT': ['PHYSICAL_RECEIPT_EXCEPTION', 'RECEIPT_ADMISSION_EXCEPTION', 'PHYSICAL_RECEIPT_ADMISSION', 'PHYSICAL_RECEIPT'],
+                    'WALK_IN': ['WALK_IN_ADMISSION_EXCEPTION', 'WALK_IN_EXCEPTION', 'WALK_IN_ADMISSION', 'WALK_IN']
+                };
+
+                const allowedTypes = CHANNEL_ALLOWED_TYPES[channel] || [];
+                let isChannelMatch = allowedTypes.includes(amdType);
+
+                // If impactAssessment contains structured channel/operation scope, enforce it strictly
+                if (amendment.impactAssessment) {
+                    try {
+                        const assessment = typeof amendment.impactAssessment === 'string'
+                            ? JSON.parse(amendment.impactAssessment)
+                            : amendment.impactAssessment;
+                        if (assessment?.allowedChannel) {
+                            isChannelMatch = assessment.allowedChannel === channel;
+                        } else if (Array.isArray(assessment?.allowedChannels)) {
+                            isChannelMatch = assessment.allowedChannels.includes(channel);
+                        }
+                    } catch {
+                        // Non-JSON
+                    }
                 }
-                if (channel === 'MANIFEST' && !validManifestTypes.includes(amdType) && !amdType.includes('MANIFEST') && !amdType.includes('ADMISSION')) {
+
+                if (!isChannelMatch) {
                     return {
                         isStoredApprovalVerified: false,
                         code: 'APPROVAL_CHANNEL_MISMATCH',
-                        reason: `Stored approval '${idStr}' type '${amdType}' does not authorize MANIFEST admission exceptions.`
+                        reason: `Stored approval '${idStr}' type '${amdType}' does not authorize ${channel} admission exceptions.`
                     };
                 }
 
@@ -715,32 +782,7 @@ async function resolveAndVerifyExceptionRecord({
         return { hasException: false, exceptionRecord: null };
     }
 
-    // 1. Direct authority: actor is manager or admin (requires explicit non-empty reason)
-    if (canAuthorizeException(actor, project, labId)) {
-        const directReason = String((rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '').trim();
-        if (!directReason || directReason.length < 5) {
-            return {
-                hasException: true,
-                exceptionRecord: {
-                    reason: directReason,
-                    isStoredApprovalVerified: false,
-                    code: 'APPROVAL_EMPTY_REASON',
-                    mode: 'REJECTED_EMPTY_REASON'
-                }
-            };
-        }
-        return {
-            hasException: true,
-            exceptionRecord: {
-                reason: directReason,
-                isStoredApprovalVerified: true,
-                verifiedAuthorizer: actor.username || actor.id,
-                mode: 'ACTOR_AUTHORIZED'
-            }
-        };
-    }
-
-    // 2. Stored approval: verify against persisted DB record with strict operation binding
+    // 1. Stored approval: verify against persisted DB record with strict operation binding
     const effectiveApprovalId = (rawExceptionRecord && (rawExceptionRecord.approvalId || rawExceptionRecord.amendmentId)) || approvalId || null;
     if (effectiveApprovalId) {
         // Authoritative target sample binding: NEVER fall back to rawExceptionRecord.sampleId!
@@ -761,7 +803,8 @@ async function resolveAndVerifyExceptionRecord({
                     isStoredApprovalVerified: true,
                     verifiedAuthorizer: verification.verifiedAuthorizer,
                     approvalId: effectiveApprovalId,
-                    mode: 'STORED_APPROVAL'
+                    mode: 'STORED_APPROVAL',
+                    approvalRecord: verification.approvalRecord
                 }
             };
         }
@@ -772,7 +815,32 @@ async function resolveAndVerifyExceptionRecord({
                 reason: verification.reason || (rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '',
                 isStoredApprovalVerified: false,
                 code: verification.code || 'APPROVAL_NOT_VERIFIED',
-                mode: 'UNVERIFIED'
+                mode: 'REJECTED_STORED_APPROVAL'
+            }
+        };
+    }
+
+    // 2. Direct authority: actor is manager or admin (requires explicit non-empty reason)
+    if (canAuthorizeException(actor, project, labId)) {
+        const directReason = String((rawExceptionRecord && rawExceptionRecord.reason) || rawExceptionReason || '').trim();
+        if (!directReason || directReason.length < 5) {
+            return {
+                hasException: true,
+                exceptionRecord: {
+                    reason: directReason,
+                    isStoredApprovalVerified: false,
+                    code: 'APPROVAL_EMPTY_REASON',
+                    mode: 'REJECTED_EMPTY_REASON'
+                }
+            };
+        }
+        return {
+            hasException: true,
+            exceptionRecord: {
+                reason: directReason,
+                isStoredApprovalVerified: true,
+                verifiedAuthorizer: actor.username || actor.id,
+                mode: 'ACTOR_AUTHORIZED'
             }
         };
     }

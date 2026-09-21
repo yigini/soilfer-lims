@@ -25,11 +25,11 @@ Status Key:
 | **WP-2 Country/Kobo v2** | 0 | Country project separation, Kobo explicit mapping, 0-to-0 preservation risk, client exception spoofing, operation binding | Reproduced & Verified | Current | `project_policy_v2.test.js` (26/26), `kobo_explicit_mapping.test.js` (25/25), `soilfer_country_migration.test.js` (3/3), `programme_readers_and_rollups.test.js` (9/9) | Pending | Populated Result/QC/Report fixtures verified (35,197 samples, 4 results, 3 QC batches, 3 reports); report checksums intact; HTTP exception verification enforced with strict operation binding (sample, project, lab, channel, non-empty reason) passing all 5 Monitor probes. | Production migration hold remains active. | Ready for Phase 0 closure |
 | **#118** | 1 | QC batch inspection link disconnect, unhandled QC disposition, failed QC bypassing release gates | Reproduced & Verified | Current | `qc_disposition_release_gate.test.js` (10/10), client production build (`vite build` clean in 15.78s) | Pending | Canonical batch inspection returns actual control values, affected work items with canonical sample ID, original ID, lab ID, run profile, and notes. Unresolved failed QC strictly blocks sample approval (409) and report generation (409). Permitted disposition schema enforced; manager disposition override is atomic inside transaction, updates result flags while preserving non-QC invalidity flags (`MANUAL_INVALID`) and immutable released/superseded records; REANALYZE_BATCH updates work items to REANALYSIS_REQUIRED; audit.qc queue counts only unresolved batches. | Historical released results remain immutable. | Verified locally; ready for release verification |
 | **#119** | 1 | Confusion between canonical, lab, and original IDs; 26-task fixture truncation; derived fractions vs ordered tasks | Reproduced & Verified | Current | `sample_assignment_identity.test.js` (8/8), client production build (`vite build` clean in 15.78s) | Pending | Disambiguated canonical UUID (`sampleId`), sample lab ID (`labId`), and field ID (`originalId`); honest task pagination (26-task fixture exposes all 26 tasks with honest pagination metadata); bidirectional texture equivalence (`TEXTURE` satisfied by 3 fractions `SAND, SILT, CLAY`, and composite `TEXTURE` satisfies fractions); independent gate evaluation respecting SKIPPED/WAIVED; sampleWorkspace extracts linked QC batches to gate final approval; unassignedCount calculated across all work items; ManagerQueue routes assign to `?tab=work` and review to `?tab=review`. | Manual assignment requires manager authority. | Verified locally; ready for release verification |
-| **#121** | 2 | Label print dialog issues, printable content isolation, title/filename handling | Reproduced & Verified | Current | `label_print.test.js` (5/5), client production build (`vite build` clean in 15.78s) | Pending | Dual standard (101x54mm) and compact (50x25mm) thermal label formats; 100% offline QR code generation via `qrcode`; portal to `#label-print-portal` at `document.body` with print CSS isolation hiding all standard web UI; dynamic `document.title = Label-${sanitizedSampleId}` with `afterprint` restoration; autoPrint trigger support; intake rejection gate (`canPrintLabel: false`). | Browser-controlled print filename is best effort. | Verified locally; ready for release verification |
-| **#122** | 2 | LabMethods defaults failing or silently falling back across labs | Open | Pending | `tests/contracts/lab_method_defaults.test.js` (Planned) | Pending | Scoped loading/saving for target lab; honest empty states; no cross-lab fallback. | Requires lab manager/admin scope. | Open |
-| **#128** | 2 | Workbench deep links broken for specific workItemId and sampleId | Open | Pending | `tests/contracts/workbench_deep_link.test.js` (Planned) | Pending | Resolves exact work item and sample; retains queue context; handles unresolved country records without guessing. | Forbidden items return 403. | Open |
-| **#123** | 2 | Workbench search input and pagination issues | Open | Pending | `tests/contracts/workbench_search.test.js` (Planned) | Pending | Multi-page search across field ID, lab ID, canonical ID, method display names. | Authoritative server pagination. | Open |
-| **#124** | 2 | Result reports search failing across client, project, sample queries | Open | Pending | `tests/contracts/report_search.test.js` (Planned) | Pending | Aligned queries with country/programme rollup support; discoverable superseded versions; no cross-lab leak. | Scoped to authorized projects/labs. | Open |
+| **#121** | 2 | Label print dialog issues, printable content isolation, title/filename handling | Reproduced & Verified | Current | `label_print.test.js` (5/5), local browser CDP evidence (`run_browser_evidence.cjs` exit code 0), client build (`vite build` clean in 8.15s) | Pending | Dual standard (101x54mm) and compact (50x25mm) thermal label formats; 100% offline QR code generation via `qrcode`; portal to `#label-print-portal` at `document.body` with print CSS isolation hiding all standard web UI; dynamic `document.title = Label-${sanitizedSampleId}` with `afterprint` restoration; autoPrint trigger support; intake rejection gate (`canPrintLabel: false`). Verified in local headless Chrome with standard (75,034 bytes) and compact (46,046 bytes) PDFs. | Browser-controlled print filename is best effort. Physical printer checks pending. | Verified locally; ready for release verification |
+| **#122** | 2 | LabMethods defaults failing or silently falling back across labs | Reproduced & Verified | Current | `lab_method_defaults.test.js` (6/6), client build (`vite build` clean in 8.15s) | Pending | Scoped loading/saving for target lab; honest empty states without cross-lab leakage; cross-lab modification and viewing rejected with 403; unauthorized roles without MANAGE_ANALYSES rejected with 403; unavailable or mismatched methodologies rejected with 400. Work item generation reflects per-lab override. | Requires lab manager or global admin role. | Verified locally; ready for release verification |
+| **#128** | 2 | Workbench deep links broken for specific workItemId and sampleId | Reproduced & Verified | Current | `workbench_deep_link.test.js` (6/6), client build (`vite build` clean in 8.15s) | Pending | Resolves exact work item and sample; outside-default-page status resolution (COMPLETED); rejects contradictory identifiers with 400 CONTRADICTORY_IDENTIFIERS (`workItemId` does not belong to `sampleId`); cross-lab access rejected with 403 without leaking details; non-existent items/samples return 404; `WorksheetArea` highlights selected work item. | Forbidden items return 403 without leaking other labs' data. | Verified locally; ready for release verification |
+| **#123** | 2 | Workbench search input and pagination issues | Reproduced & Verified | Current | `workbench_search.test.js` (8/8), client build (`vite build` clean in 8.15s) | Pending | Multi-field search across canonical UUID, sample lab ID, original field ID, analysis code, and analysis display name (e.g. "Soil Organic Carbon" -> SOC); truthful no-match state; clearing search restores full authorized queue; cross-lab search isolation strictly excludes other labs' items. | Server/client dual search filters. | Verified locally; ready for release verification |
+| **#124** | 2 | Result reports search failing across client, project, sample queries | Reproduced & Verified | Current | `report_search.test.js` (7/7), client build (`vite build` clean in 8.15s) | Pending | Fixed Prisma schema relation crash on `projectId` search; multi-field search across client first/surname, project code/name, and sample identifiers (canonical UUID, lab ID, and field original ID); discoverable superseded report versions with `status=SUPERSEDED` and `status=ALL` while defaulting to `PUBLISHED`; UI status filter pills with distinct superseded badge; cross-lab access isolation. | Scoped to authorized projects/labs. | Verified locally; ready for release verification |
 | **#125** | 3 | Inventory aggregation anomalies, expired lots vs usable stock confusion | Open | Pending | `tests/contracts/inventory_aggregation.test.js` (Planned) | Pending | Distinct usable stock, expired lots, reorder thresholds; missing values treated distinctly from zero. | Display/aggregation fix; no silent stock adjustments. | Open |
 | **#117** | 3 | Failed reception criterion not persisting or reflecting in UI | Open | Pending | `tests/contracts/reception_nonconformance.test.js` (Planned) | Pending | Authoritative saved state reflects OK/N/A/Fail; non-conformance linked; cancellation handled cleanly. | Non-conformance requires explanation. | Open |
 | **#113** | 3 | Reception compliance checklist and redundant/unauthorized dispositions | Open | Pending | `tests/contracts/reception_compliance.test.js` (Planned) | Pending | Clear checklist-derived outcomes; routine passing avoids redundant gate; exceptions require authorized actor. | Staff cannot self-authorize exceptions. | Open |
@@ -105,6 +105,13 @@ Status Key:
     3. Pre-arrival `EXPECTED` sample allows printing with `'Pending'` permanent lab identifier and original field ID in QR.
     4. Label format specifications match thermal printer physical dimensions (Standard: 101×54mm, Compact: 50×25mm).
     5. Sanitizes sample identifier for `document.title` print naming isolation (`Label-${sanitizedSampleId}`).
+- **Local Browser CDP Evidence (`server/scripts/run_browser_evidence.cjs`)**:
+  - Execution exit code: 0 (verified in headless Chrome via bounded 8s CDP automation).
+  - Standard Label PDF generated: `artifacts/evidence-journeys/standard_label_101x54mm.pdf` (75,034 bytes, `%PDF-` header verified, dimensions 101x54mm).
+  - Compact Label PDF generated: `artifacts/evidence-journeys/compact_label_50x25mm.pdf` (46,046 bytes, `%PDF-` header verified, dimensions 50x25mm).
+  - React hook order integrity verified across modal close and re-open (zero hook ordering crashes).
+  - 105 unassigned tasks pagination verified: Page 1 ("Page 1 of 2 (105 tasks across 34 samples)") -> Page 2 ("Page 2 of 2 (105 tasks across 2 samples)").
+  - Skipped drying gate approval card verified visible with badge `DRY: SKIPPED`.
 - **Client Implementation**:
   - `client/src/components/common/LabelPrintDialog.jsx`:
     - Portal rendering to `#label-print-portal` at `document.body` outside modal tree with `@media print` CSS isolation hiding all standard web UI.
@@ -113,3 +120,55 @@ Status Key:
     - Batch checklist with "Accepted Only" filter and individual checkboxes.
     - Dynamic print title management (`Label-${sanitizedSampleId}` or `Labels-Batch-${count}`) restored on `afterprint`.
     - Auto-print trigger support.
+
+### Phase 2: Issue #122 Lab Methodology Defaults & Isolation
+- **Tests Executed**:
+  - `server/tests/contracts/lab_method_defaults.test.js` (6/6 passed):
+    1. Setting Lab A default to Dumas updates Lab A defaults API without affecting Lab B (which falls back to Walkley-Black).
+    2. New work items in Lab A receive Dumas combustion while Lab B receives Walkley-Black.
+    3. Cross-lab access denial: Lab A manager cannot view or modify Lab B defaults (HTTP 403 `FORBIDDEN`).
+    4. Unauthorized role without `MANAGE_ANALYSES` cannot modify lab defaults (HTTP 403 `FORBIDDEN`).
+    5. Supplying an unavailable or mismatched methodology ID is rejected (HTTP 400).
+    6. Fresh lab with no overrides exhibits honest empty state without cross-lab leakage.
+
+### Phase 2: Issue #128 Workbench Deep Link & Contradictory Identifiers
+- **Tests Executed**:
+  - `server/tests/contracts/workbench_deep_link.test.js` (6/6 passed):
+    1. Valid deep link with `workItemId` and matching `sampleId` resolves and includes target work item in queue.
+    2. Valid deep link for an item with `COMPLETED` status outside default `'my_work'` view resolves successfully.
+    3. Contradictory identifiers: `workItemId` not belonging to `sampleId` rejected with HTTP 400 `CONTRADICTORY_IDENTIFIERS`.
+    4. Cross-lab access denial: Lab A technician requesting Lab B work item rejected with HTTP 403 `FORBIDDEN` without leaking other labs' data.
+    5. Non-existent `workItemId` returns HTTP 404 `WORK_ITEM_NOT_FOUND`.
+    6. Non-existent `sampleId` returns HTTP 404 `SAMPLE_NOT_FOUND`.
+- **Client Implementation**:
+  - `client/src/components/workbench/WorkbenchShell.jsx`: passes `workItemId` and `sampleId` to `/api/workbench/queue`; handles 400, 403, 404 error responses with toast explanations and fallback to general queue.
+  - `client/src/components/workbench/WorksheetArea.jsx`: accepts `initialWorkItemId` prop and prioritizes it in `selectedItemId` so deep-linked tasks are immediately selected and highlighted in the worksheet.
+
+### Phase 2: Issue #123 Workbench Multi-Field Search & Honest Empty State
+- **Tests Executed**:
+  - `server/tests/contracts/workbench_search.test.js` (8/8 passed):
+    1. Search by canonical sample UUID returns matching item in queue.
+    2. Search by sample `labId` returns matching work item.
+    3. Search by field `originalId` returns matching work item.
+    4. Search by analysis code (e.g. `PH`) filters work items to that method.
+    5. Search by analysis display name (e.g. `"Soil Organic Carbon"`) resolves to SOC work items.
+    6. Non-matching search returns empty array with honest state.
+    7. Clearing search (empty search param) restores full authorized queue.
+    8. Cross-lab search isolation: searching for a shared project/method term strictly excludes work items from other laboratories.
+- **Client Implementation**:
+  - `client/src/components/workbench/WorkbenchShell.jsx`: wired `queueSearchQuery` state with `WorkbenchQueue`.
+  - `client/src/components/workbench/WorkbenchQueue.jsx`: multi-field filtering across sampleDisplayId, labId, canonical sampleId, field originalId, workItemId, projectCode, and analysis name; truthful empty state rendering `No work items match "{searchQuery}".` when search is active.
+
+### Phase 2: Issue #124 Result Reports Search & Discoverable Superseded Versions
+- **Tests Executed**:
+  - `server/tests/contracts/report_search.test.js` (7/7 passed):
+    1. Default search returns only `PUBLISHED` reports in authorized lab.
+    2. Searching with `status=SUPERSEDED` discovers historical superseded report versions.
+    3. Searching with `status=ALL` discovers all report versions (both published and superseded).
+    4. Searching by client name filters accurately across first name and surname.
+    5. Searching by project code (`projectId`) filters to that project without Prisma relation crashes (fixed missing relation bug on `Report`).
+    6. Searching by original field ID (`originalId`) finds the corresponding report.
+    7. Cross-lab isolation: Lab A manager searching shared client name does not disclose Lab B reports.
+- **Client Implementation**:
+  - `client/src/pages/ResultReports.jsx`: added status filter pills (`Published`, `Superseded`, `All Versions`); bound status to search form and pagination controls; distinct `SUPERSEDED` badge rendered in table rows.
+

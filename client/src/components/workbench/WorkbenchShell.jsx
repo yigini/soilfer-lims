@@ -68,6 +68,7 @@ export default function WorkbenchShell({
     const [activeAnalysis, setActiveAnalysis] = useState(initialAnalysis);
     const [activeSampleId, setActiveSampleId] = useState(initialSampleId);
     const [isLoading, setIsLoading] = useState(true);
+    const [queueSearchQuery, setQueueSearchQuery] = useState('');
 
     // Save & sync state
     const [syncStatus, setSyncStatus] = useState('saved'); // saving | saved | conflict | offline
@@ -83,15 +84,20 @@ export default function WorkbenchShell({
 
     const debounceTimers = useRef({});
     const hasResolvedDeepLink = useRef(false);
+    const deepLinkAttempted = useRef(false);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Queue & Draft Fetching
     // ─────────────────────────────────────────────────────────────────────────
-    const fetchQueue = useCallback(async (viewToFetch = queueView) => {
+    const fetchQueue = useCallback(async (viewToFetch = queueView, bypassDeepLink = false) => {
         try {
-            const res = await axios.get('/api/workbench/queue', {
-                params: { view: viewToFetch }
-            });
+            const params = { view: viewToFetch };
+            if (!bypassDeepLink && !deepLinkAttempted.current) {
+                if (initialWorkItemId) params.workItemId = initialWorkItemId;
+                if (initialSampleId) params.sampleId = initialSampleId;
+                deepLinkAttempted.current = true;
+            }
+            const res = await axios.get('/api/workbench/queue', { params });
             const fetchedGroups = res.data.groups || [];
 
             // Rehydrate with durable offline local drafts if present
@@ -146,11 +152,33 @@ export default function WorkbenchShell({
             }
         } catch (err) {
             console.error('[workbench] Failed to fetch queue:', err);
-            setSyncStatus('offline');
+            const status = err.response?.status;
+            const errData = err.response?.data;
+            if (status === 400 && errData?.error === 'CONTRADICTORY_IDENTIFIERS') {
+                addToast(errData.message || `Contradictory identifiers: work item '${initialWorkItemId}' does not belong to sample '${initialSampleId}'`, 'error');
+                hasResolvedDeepLink.current = true;
+                setSyncStatus('saved');
+                fetchQueue(viewToFetch, true);
+                return;
+            } else if (status === 403) {
+                addToast(errData?.message || 'Access denied: requested item belongs to another laboratory.', 'error');
+                hasResolvedDeepLink.current = true;
+                setSyncStatus('saved');
+                fetchQueue(viewToFetch, true);
+                return;
+            } else if (status === 404) {
+                addToast(errData?.message || `Requested item '${initialWorkItemId || initialSampleId}' was not found.`, 'error');
+                hasResolvedDeepLink.current = true;
+                setSyncStatus('saved');
+                fetchQueue(viewToFetch, true);
+                return;
+            } else {
+                setSyncStatus('offline');
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [activeAnalysis, queueView]);
+    }, [activeAnalysis, addToast, initialSampleId, initialWorkItemId, queueView, user?.id]);
 
     const fetchReceipts = useCallback(async () => {
         try {
@@ -681,8 +709,8 @@ export default function WorkbenchShell({
                             setSelectedSpectralItem(item);
                             setIsSpectralModalOpen(true);
                         }}
-                        searchQuery=""
-                        onSearchChange={() => {}}
+                        searchQuery={queueSearchQuery}
+                        onSearchChange={setQueueSearchQuery}
                     />
                 )}
 
@@ -691,6 +719,7 @@ export default function WorkbenchShell({
                         activeGroup={currentGroup}
                         allGroups={groups}
                         initialSampleId={activeSampleId || initialSampleId}
+                        initialWorkItemId={initialWorkItemId}
                         onSelectGroup={(analysis) => setActiveAnalysis(analysis)}
                         onDraftChange={handleDraftChange}
                         onUpdateItemMeta={handleUpdateItemMeta}

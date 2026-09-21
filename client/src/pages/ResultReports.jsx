@@ -23,6 +23,7 @@ const ResultReports = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState(paramStatus || 'PUBLISHED');
     const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1, limit: 25 });
     const [selectedReport, setSelectedReport] = useState(null);
     const [shareModal, setShareModal] = useState(null); // reportId for share dialog
@@ -47,7 +48,7 @@ const ResultReports = () => {
 
     // ─── Search & Fetch ──────────────────────────────────
 
-    const fetchReports = useCallback(async (page = 1, search = query) => {
+    const fetchReports = useCallback(async (page = 1, search = query, currentStatus = statusFilter) => {
         setLoading(true);
         try {
             const params = {
@@ -56,7 +57,7 @@ const ResultReports = () => {
                 limit: pagination.limit
             };
             if (paramProjectId) params.projectId = paramProjectId;
-            if (paramStatus) params.status = paramStatus;
+            if (currentStatus) params.status = currentStatus;
 
             const res = await axios.get('/api/reports/search', { params });
             setReports(res.data.reports || []);
@@ -66,11 +67,11 @@ const ResultReports = () => {
         } finally {
             setLoading(false);
         }
-    }, [query, pagination.limit, paramProjectId, paramStatus]);
+    }, [query, pagination.limit, paramProjectId, statusFilter]);
 
     useEffect(() => {
-        fetchReports(1, '');
-    }, [fetchReports]);
+        fetchReports(1, '', statusFilter);
+    }, [fetchReports, statusFilter]);
 
     // Load exact report if reportId is passed in URL
     useEffect(() => {
@@ -85,7 +86,7 @@ const ResultReports = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        fetchReports(1, query);
+        fetchReports(1, query, statusFilter);
     };
 
     // ─── Share Link Management ───────────────────────────
@@ -171,22 +172,49 @@ const ResultReports = () => {
                 </span>
             </div>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="mb-6">
-                <div className="relative max-w-2xl">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        placeholder={t('resultReports.searchPlaceholder', 'Search by name, phone, project, sample ID, or lab ID...')}
-                        className="w-full pl-12 pr-4 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
-                    />
-                    <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sf-emerald text-white rounded-lg text-sm font-bold hover:bg-sf-emerald-hover transition-colors">
-                        {t('common.search', 'Search')}
-                    </button>
+            {/* Status Filter & Search Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+                    <div className="relative">
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            placeholder={t('resultReports.searchPlaceholder', 'Search by name, phone, project, sample ID, or lab ID...')}
+                            className="w-full pl-12 pr-4 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
+                        />
+                        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sf-emerald text-white rounded-lg text-sm font-bold hover:bg-sf-emerald-hover transition-colors">
+                            {t('common.search', 'Search')}
+                        </button>
+                    </div>
+                </form>
+
+                {/* Status Filter Pills */}
+                <div className="flex items-center gap-1.5">
+                    {[
+                        { id: 'PUBLISHED', label: t('resultReports.filterPublished', 'Published') },
+                        { id: 'SUPERSEDED', label: t('resultReports.filterSuperseded', 'Superseded') },
+                        { id: 'ALL', label: t('resultReports.filterAll', 'All Versions') }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => {
+                                setStatusFilter(tab.id);
+                                fetchReports(1, query, tab.id);
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors border ${
+                                statusFilter === tab.id
+                                    ? 'bg-sf-emerald text-white border-sf-emerald shadow-sm'
+                                    : 'bg-sf-surface text-sf-muted hover:bg-sf-hover border-sf-divider'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
-            </form>
+            </div>
 
             {/* Results Table */}
             <div className="bg-sf-surface rounded-2xl shadow-xl border border-sf-divider overflow-hidden">
@@ -232,8 +260,12 @@ const ResultReports = () => {
                                                 <div className="text-sf-text">{r.projectName || r.projectCode || '—'}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-sf-raised text-sf-muted">
-                                                    v{r.version}
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                                                    r.status === 'SUPERSEDED'
+                                                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                                                        : 'bg-sf-raised text-sf-muted'
+                                                }`}>
+                                                    v{r.version} {r.status === 'SUPERSEDED' && '· Superseded'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sf-muted text-sm">
@@ -283,14 +315,14 @@ const ResultReports = () => {
                                 </span>
                                 <div className="flex gap-1">
                                     <button
-                                        onClick={() => fetchReports(pagination.page - 1)}
+                                        onClick={() => fetchReports(pagination.page - 1, query, statusFilter)}
                                         disabled={pagination.page <= 1}
                                         className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >
                                         <ChevronLeft size={16} />
                                     </button>
                                     <button
-                                        onClick={() => fetchReports(pagination.page + 1)}
+                                        onClick={() => fetchReports(pagination.page + 1, query, statusFilter)}
                                         disabled={pagination.page >= pagination.pages}
                                         className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >

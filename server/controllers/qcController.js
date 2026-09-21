@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 const { evaluateBatchQc, checkBatchDisposition, flagBatchResults } = require('../services/qcService');
 const scopeGuard = require('../utils/scopeGuard');
@@ -765,56 +766,72 @@ exports.dispositionBatch = async (req, res) => {
             });
         }
 
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-            return res.status(403).json({ error: 'Manager only' });
-        }
-
-        const batch = await prisma.batch.findUnique({ where: { id } });
-        if (!batch) return res.status(404).json({ error: 'Batch not found' });
-
-        if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
-            return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
-        }
-
-        if (batch.status !== 'QC_FAIL') {
-            return res.status(400).json({ error: 'Batch is not in QC_FAIL state' });
-        }
-
         const trimmedReason = String(reason).trim();
         if (trimmedReason.length < 5) {
             return res.status(400).json({ error: 'A meaningful reason (minimum 5 characters) is required' });
         }
 
-        // Idempotency: if already dispositioned with matching decision and reason, return existing without duplicating history or audit log
-        let existingDisp = null;
-        if (batch.disposition) {
-            try {
-                existingDisp = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
-            } catch (e) {}
-        }
-        if (existingDisp && existingDisp.decision === decision && existingDisp.reason === trimmedReason) {
-            return res.json({ success: true, disposition: existingDisp, idempotent: true });
+        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+            return res.status(403).json({ error: 'Manager only' });
         }
 
-        const now = new Date();
-        const disposition = {
-            decision,
-            reason: trimmedReason,
-            by: user.username,
-            at: now
-        };
+        // Transactional read, CAS conflict check, and atomic write
+        const txResult = await prisma.$transaction(async (tx) => {
+            const batch = await tx.batch.findUnique({ where: { id } });
+            if (!batch) {
+                const err = new Error('Batch not found');
+                err.statusCode = 404;
+                throw err;
+            }
 
-        const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
-        history.push({
-            status: batch.status,
-            disposition: decision,
-            reason: trimmedReason,
-            changedBy: user.username,
-            timestamp: now
-        });
+            if (!scopeGuard.canAccessEntity(user, batch, { labField: 'labId' })) {
+                const err = new Error('Access denied: Batch outside your laboratory scope');
+                err.statusCode = 403;
+                throw err;
+            }
 
-        // Atomic transaction: batch + work items + audit log + result flags
-        await prisma.$transaction(async (tx) => {
+            if (batch.status !== 'QC_FAIL') {
+                const err = new Error('Batch is not in QC_FAIL state');
+                err.statusCode = 400;
+                throw err;
+            }
+
+            // Idempotency vs Conflicting Decision Check inside transaction
+            let existingDisp = null;
+            if (batch.disposition) {
+                try {
+                    existingDisp = typeof batch.disposition === 'string' ? JSON.parse(batch.disposition) : batch.disposition;
+                } catch (e) {}
+            }
+
+            if (existingDisp && existingDisp.decision) {
+                if (existingDisp.decision === decision && existingDisp.reason === trimmedReason) {
+                    return { success: true, disposition: existingDisp, idempotent: true };
+                }
+                // Conflicting disposition detected!
+                const conflictErr = new Error(`Batch '${id}' has already been dispositioned with decision '${existingDisp.decision}'. Conflicting disposition rejected.`);
+                conflictErr.statusCode = 409;
+                conflictErr.code = 'DISPOSITION_CONFLICT';
+                throw conflictErr;
+            }
+
+            const now = new Date();
+            const disposition = {
+                decision,
+                reason: trimmedReason,
+                by: user.username,
+                at: now
+            };
+
+            const history = typeof batch.history === 'string' ? JSON.parse(batch.history) : (batch.history || []);
+            history.push({
+                status: batch.status,
+                disposition: decision,
+                reason: trimmedReason,
+                changedBy: user.username,
+                timestamp: now
+            });
+
             // 1. Update Batch disposition and history
             await tx.batch.update({
                 where: { id },
@@ -824,29 +841,45 @@ exports.dispositionBatch = async (req, res) => {
                 }
             });
 
-            // 2. Link reanalysis/rejection task workflow to associated WorkItems
-            if (decision === 'REANALYZE_BATCH') {
-                await tx.workItem.updateMany({
-                    where: { batchId: id },
-                    data: {
-                        status: 'REANALYSIS_REQUIRED',
-                        reanalysisReason: trimmedReason,
-                        reanalysisRequestedBy: user.username
-                    }
-                });
-            } else if (decision === 'REJECT_BATCH') {
-                await tx.workItem.updateMany({
-                    where: { batchId: id },
-                    data: {
-                        status: 'REJECTED'
-                    }
-                });
+            // 2. Link reanalysis/rejection task workflow to associated active WorkItems (protecting historical accepted work and released sample histories)
+            const allBatchWorkItems = await tx.workItem.findMany({
+                where: { batchId: id },
+                include: { sample: { select: { id: true, status: true } } }
+            });
+
+            const activeWorkItemIds = allBatchWorkItems
+                .filter(wi => {
+                    const isWiAcceptedOrReleased = ['ACCEPTED', 'COMPLETED', 'RELEASED'].includes(wi.status);
+                    const isSampleReleased = wi.sample && ['RELEASED', 'ARCHIVED', 'DISPOSED'].includes(wi.sample.status);
+                    return !isWiAcceptedOrReleased && !isSampleReleased;
+                })
+                .map(wi => wi.id);
+
+            if (activeWorkItemIds.length > 0) {
+                if (decision === 'REANALYZE_BATCH') {
+                    await tx.workItem.updateMany({
+                        where: { id: { in: activeWorkItemIds } },
+                        data: {
+                            status: 'REANALYSIS_REQUIRED',
+                            reanalysisReason: trimmedReason,
+                            reanalysisRequestedBy: user.username
+                        }
+                    });
+                } else if (decision === 'REJECT_BATCH') {
+                    await tx.workItem.updateMany({
+                        where: { id: { in: activeWorkItemIds } },
+                        data: {
+                            status: 'REJECTED'
+                        }
+                    });
+                }
             }
 
-            // 3. Audit log
+            // 3. Audit log with unique UUID
+            const auditId = `audit-batch-disp-${crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).substring(2, 9))}`;
             await tx.auditLog.create({
                 data: {
-                    id: `audit-batch-disp-${Date.now()}`,
+                    id: auditId,
                     entity: 'QC_BATCH',
                     entityId: id,
                     action: 'QC_DISPOSITION',
@@ -858,11 +891,19 @@ exports.dispositionBatch = async (req, res) => {
 
             // 4. Update Result flags atomically inside the same transaction
             await flagBatchResults(tx, id, 'QC_FAIL', disposition);
+
+            return { success: true, disposition };
         });
 
-        res.json({ success: true, disposition });
+        res.json(txResult);
     } catch (error) {
         console.error('[dispositionBatch] Error:', error);
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({
+                error: error.code || error.message,
+                message: error.message
+            });
+        }
         res.status(500).json({ error: 'Failed to disposition batch' });
     }
 };

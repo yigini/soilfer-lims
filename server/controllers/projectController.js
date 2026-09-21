@@ -846,7 +846,7 @@ exports.uploadManifest = async (req, res) => {
             actor: req.user,
             project,
             labId: targetLabId,
-            sampleIds: Array.isArray(req.body.samples) ? req.body.samples.map(s => s.id || s.sampleId || s.code).filter(Boolean) : null,
+            sampleIds: req.body.sampleIds || (Array.isArray(req.body.samples) ? req.body.samples.map(s => s.id || s.sampleId || s.code).filter(Boolean) : null),
             channel: 'MANIFEST',
             prismaClient: prisma
         });
@@ -1001,6 +1001,18 @@ exports.uploadManifest = async (req, res) => {
                 await prisma.auditLog.create({ data: auditData });
             } else {
                 await tx.auditLog.create({ data: auditData });
+            }
+
+            const effectiveApprovalId = (req.body.exceptionRecord && (req.body.exceptionRecord.approvalId || req.body.exceptionRecord.amendmentId)) || req.body.approvalId || req.body.approvalToken;
+            if (effectiveApprovalId) {
+                try {
+                    await tx.sampleAmendment.update({
+                        where: { id: String(effectiveApprovalId) },
+                        data: { resolution: 'CONSUMED' }
+                    });
+                } catch (e) {
+                    // Stored approval might be mock/not present
+                }
             }
 
             if (idempotencyKey) {

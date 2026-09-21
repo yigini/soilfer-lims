@@ -153,6 +153,7 @@ const ManagerQueue = () => {
                 const total = res.data.total || res.data.rows.length;
                 const limit = params.limit || 20;
                 setData(res.data.rows.map(r => ({
+                    ...r,
                     id: r.sampleId || r.key,
                     sampleId: r.sampleId || r.key,
                     labId: r.labId || null,
@@ -161,7 +162,10 @@ const ManagerQueue = () => {
                     projectCode: r.projectCode || null,
                     analysis: r.context,
                     status: r.status,
-                    createdAt: new Date().toISOString()
+                    dryingStatus: r.dryingStatus,
+                    preparationStatus: r.preparationStatus,
+                    isEligibleForFinalApproval: r.isEligibleForFinalApproval,
+                    createdAt: r.createdAt || new Date().toISOString()
                 })));
                 setMeta({
                     page,
@@ -174,9 +178,14 @@ const ManagerQueue = () => {
 
             const result = res.data.data ? res.data : { data: res.data, meta: { page: 1, limit: 100, total: res.data.length, totalPages: 1 } };
 
-            // Client-side filtering logic
+            // Client-side filtering logic: use server eligibility and allow skipped/waived operational gates
             if (activeTab === QUEUE_Tabs.APPROVE) {
-                result.data = result.data.filter(s => s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE');
+                const isGatePassed = (status) => !status || ['DONE', 'SKIPPED', 'WAIVED', 'NOT_APPLICABLE', 'N/A', 'COMPLETED', 'PASSED'].includes(status);
+                result.data = result.data.filter(s => {
+                    if (s.isEligibleForFinalApproval !== undefined) return s.isEligibleForFinalApproval;
+                    if (s.status === 'Ready for final check') return true;
+                    return isGatePassed(s.dryingStatus) && isGatePassed(s.preparationStatus);
+                });
             }
             if (activeTab === QUEUE_Tabs.REVIEW) {
                 result.data = result.data.filter(s => s.status === 'PENDING_REVIEW');
@@ -554,8 +563,12 @@ const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
 
                 {type === 'approve' && (
                     <div className="flex gap-2 mb-4">
-                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">DRY: OK</span>
-                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">PREP: OK</span>
+                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">
+                            DRY: {item.dryingStatus ? (item.dryingStatus === 'DONE' ? 'OK' : item.dryingStatus) : 'OK'}
+                        </span>
+                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">
+                            PREP: {item.preparationStatus ? (item.preparationStatus === 'DONE' ? 'OK' : item.preparationStatus) : 'OK'}
+                        </span>
                     </div>
                 )}
 

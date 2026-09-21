@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import QRCode from 'qrcode';
-import { Printer, X, Tag, CheckSquare, Square, Check, SlidersHorizontal, Eye } from 'lucide-react';
+import { Printer, X } from 'lucide-react';
+
+const CANONICAL_ACCEPTED_STATES = ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED', 'ARCHIVED'];
 
 /**
  * LabelPrintDialog (RC-17)
@@ -15,6 +17,7 @@ import { Printer, X, Tag, CheckSquare, Square, Check, SlidersHorizontal, Eye } f
  * - Auto-print trigger support
  */
 const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false }) => {
+    // 1. Keydown listener
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && onClose) onClose();
@@ -23,13 +26,14 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
+    // 2. States
     const [branding, setBranding] = useState(null);
     const [format, setFormat] = useState('STANDARD'); // 'STANDARD' (101x54mm) | 'COMPACT' (50x25mm)
     const [qrDataUrls, setQrDataUrls] = useState({});
     const [selectedIds, setSelectedIds] = useState(new Set());
-    const [filterStatus, setFilterStatus] = useState('ACCEPTED'); // 'ALL' | 'ACCEPTED'
+    const hasAutoPrintedRef = useRef(false);
 
-    // Normalize samples array
+    // 3. Normalize samples array
     const sampleList = useMemo(() => {
         if (Array.isArray(samples) && samples.length > 0) {
             return samples;
@@ -40,9 +44,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         return [];
     }, [sample, samples]);
 
-    const CANONICAL_ACCEPTED_STATES = ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED', 'ARCHIVED'];
-
-    // Initialize selection when dialog opens or samples change
+    // 4. Initialize selection when dialog opens or samples change
     useEffect(() => {
         if (isOpen && sampleList.length > 0) {
             fetchBranding();
@@ -54,7 +56,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         }
     }, [isOpen, sampleList]);
 
-    // Generate offline QR data URLs for all samples
+    // 5. Generate offline QR data URLs for all samples
     useEffect(() => {
         if (!isOpen || sampleList.length === 0) return;
 
@@ -63,7 +65,6 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
             const urls = {};
             for (const s of sampleList) {
                 const isExpected = s.status === 'EXPECTED';
-                const labId = isExpected ? 'Pending' : (s.labId && s.labId !== 'Not assigned' ? s.labId : (s.originalId || s.id));
                 const originalId = s.originalId || s.id || 'N/A';
                 const qrText = isExpected ? originalId : (s.labId || originalId);
                 const key = s.id || s.labId || s.originalId;
@@ -100,7 +101,9 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                 setBranding(res.data.branding);
                 return;
             }
-        } catch {}
+        } catch {
+            // Fall back to admin settings
+        }
 
         try {
             const res = await axios.get('/api/admin/settings');
@@ -112,13 +115,20 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         }
     };
 
-    if (!isOpen || sampleList.length === 0) return null;
-
     // Filter samples for printable list
-    const printableSamples = sampleList.filter(s => {
-        const key = s.id || s.labId || s.originalId;
-        return selectedIds.has(key);
-    });
+    const printableSamples = useMemo(() => {
+        return sampleList.filter(s => {
+            const key = s.id || s.labId || s.originalId;
+            return selectedIds.has(key);
+        });
+    }, [sampleList, selectedIds]);
+
+    const allQrsReady = useMemo(() => {
+        return printableSamples.length > 0 && printableSamples.every(s => {
+            const key = s.id || s.labId || s.originalId;
+            return Boolean(qrDataUrls[key]);
+        });
+    }, [printableSamples, qrDataUrls]);
 
     const toggleSampleSelect = (key) => {
         setSelectedIds(prev => {
@@ -143,7 +153,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
     };
 
     const handlePrint = useCallback(() => {
-        if (typeof document === 'undefined') return;
+        if (typeof document === 'undefined' || printableSamples.length === 0 || !allQrsReady) return;
         const originalTitle = document.title;
         const firstSample = printableSamples[0];
         const rawId = firstSample?.labId || firstSample?.originalId || firstSample?.id || 'sample';
@@ -157,23 +167,25 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
         window.addEventListener('afterprint', cleanup);
 
         window.print();
-    }, [printableSamples]);
+    }, [printableSamples, allQrsReady]);
 
-    // Auto-print trigger support once QR codes are ready
+    // Auto-print trigger support once QR codes are ready (fires once per opening)
     useEffect(() => {
-        if (autoPrint && isOpen && printableSamples.length > 0) {
-            const allQRsReady = printableSamples.every(s => {
-                const key = s.id || s.labId || s.originalId;
-                return Boolean(qrDataUrls[key]);
-            });
-            if (allQRsReady) {
-                const timer = setTimeout(() => {
-                    handlePrint();
-                }, 300);
-                return () => clearTimeout(timer);
-            }
+        if (!isOpen) {
+            hasAutoPrintedRef.current = false;
+            return;
         }
-    }, [autoPrint, isOpen, printableSamples, qrDataUrls, handlePrint]);
+        if (autoPrint && allQrsReady && !hasAutoPrintedRef.current) {
+            hasAutoPrintedRef.current = true;
+            const timer = setTimeout(() => {
+                handlePrint();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [autoPrint, isOpen, allQrsReady, handlePrint]);
+
+    // Unconditional hook executions completed — now safe to conditionally render
+    if (!isOpen || sampleList.length === 0) return null;
 
     const isBatch = sampleList.length > 1;
     const previewSample = printableSamples[0] || sampleList[0];
@@ -220,7 +232,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                                         : 'text-sf-muted hover:text-gray-900'
                                 }`}
                             >
-                                Standard (101×54mm / 4"×2")
+                                {'Standard (101×54mm / 4"×2")'}
                             </button>
                             <button
                                 type="button"
@@ -267,7 +279,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                 {/* Batch Checklist (Collapsible / Scrollable if batch) */}
                 {isBatch && (
                     <div className="px-6 py-3 max-h-36 overflow-y-auto border-b border-sf-divider bg-sf-surface divide-y dark:divide-gray-700 text-xs">
-                        {sampleList.map((s, idx) => {
+                        {sampleList.map((s) => {
                             const key = s.id || s.labId || s.originalId;
                             const isSelected = selectedIds.has(key);
                             const isRejected = s.status === 'REJECTED';
@@ -342,6 +354,8 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                     <div className="text-xs text-sf-muted">
                         {printableSamples.length === 0 ? (
                             <span className="text-rose-600 font-semibold">Please select at least 1 label to print.</span>
+                        ) : !allQrsReady ? (
+                            <span className="text-amber-600 font-semibold">Generating QR codes...</span>
                         ) : (
                             <span>Ready to print <strong>{printableSamples.length}</strong> {printableSamples.length === 1 ? 'label' : 'labels'}.</span>
                         )}
@@ -358,11 +372,11 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                         <button
                             type="button"
                             onClick={handlePrint}
-                            disabled={printableSamples.length === 0}
+                            disabled={printableSamples.length === 0 || !allQrsReady}
                             className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center gap-2 text-xs"
                         >
                             <Printer size={16} />
-                            Print {printableSamples.length > 1 ? `${printableSamples.length} Labels` : 'Label'}
+                            {!allQrsReady ? 'Generating...' : `Print ${printableSamples.length > 1 ? `${printableSamples.length} Labels` : 'Label'}`}
                         </button>
                     </div>
                 </div>
@@ -405,7 +419,7 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                         }
                     ` }} />
 
-                    {printableSamples.map((s, idx) => {
+                    {printableSamples.map((s) => {
                         const key = s.id || s.labId || s.originalId;
                         const qrUrl = qrDataUrls[key];
                         return (

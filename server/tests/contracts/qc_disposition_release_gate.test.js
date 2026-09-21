@@ -536,4 +536,385 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Even if in rows (history), the qcFailedCount must only count unresolved ones (disposition: null)
         expect(auditQcRes.body.qcFailedCount).toBeDefined();
     });
+
+    // ─── Test 11: flagBatchResults Preserves Independent Scientific Validity on QC_PASS ───
+    test('11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const passBatchId = `batch-pass-val-${Date.now()}`;
+
+        // Create an active non-terminal sample for validity evaluation
+        const activeSample = await prisma.sample.create({
+            data: {
+                id: `smp-val-${Date.now()}`,
+                originalId: `SMP-VAL-${Date.now()}`,
+                status: 'PROCESSING',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+
+        // Unflagged invalid result (isValid: false, flags: [])
+        const resUnflagged = await prisma.result.create({
+            data: {
+                id: `res-unflagged-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'PH',
+                value: '7.10',
+                unit: 'pH units',
+                batchId: passBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify([])
+            }
+        });
+
+        // Result with unknown / non-QC flag (isValid: false, flags: ['SENSOR_FAILURE'])
+        const resSensorFailure = await prisma.result.create({
+            data: {
+                id: `res-sensor-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'EC',
+                value: '1.20',
+                unit: 'dS/m',
+                batchId: passBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['SENSOR_FAILURE'])
+            }
+        });
+
+        // Result with prior rejection (isValid: false, flags: ['QC_BATCH_REJECTED'])
+        const resPriorReject = await prisma.result.create({
+            data: {
+                id: `res-reject-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'OC',
+                value: '2.50',
+                unit: '%',
+                batchId: passBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_REJECTED'])
+            }
+        });
+
+        // Result whose ONLY reason for invalidity was QC_BATCH_FAILED
+        const resQcOnly = await prisma.result.create({
+            data: {
+                id: `res-qconly-${Date.now()}`,
+                sampleId: activeSample.id,
+                param: 'TN',
+                value: '0.15',
+                unit: '%',
+                batchId: passBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // Execute flagBatchResults for QC_PASS
+        await flagBatchResults(prisma, passBatchId, 'QC_PASS');
+
+        // Verification:
+        // 1. Unflagged invalid stays invalid!
+        const refUnflagged = await prisma.result.findUnique({ where: { id: resUnflagged.id } });
+        expect(refUnflagged.isValid).toBe(false);
+
+        // 2. SENSOR_FAILURE invalid stays invalid and keeps flag!
+        const refSensor = await prisma.result.findUnique({ where: { id: resSensorFailure.id } });
+        expect(refSensor.isValid).toBe(false);
+        expect(JSON.parse(refSensor.flags)).toContain('SENSOR_FAILURE');
+
+        // 3. QC_BATCH_REJECTED invalid stays invalid!
+        const refReject = await prisma.result.findUnique({ where: { id: resPriorReject.id } });
+        expect(refReject.isValid).toBe(false);
+
+        // 4. Solely QC_BATCH_FAILED result becomes valid when QC passes!
+        const refQcOnly = await prisma.result.findUnique({ where: { id: resQcOnly.id } });
+        expect(refQcOnly.isValid).toBe(true);
+        expect(JSON.parse(refQcOnly.flags)).not.toContain('QC_BATCH_FAILED');
+
+        // Cleanup
+        await prisma.result.deleteMany({
+            where: { id: { in: [resUnflagged.id, resSensorFailure.id, resPriorReject.id, resQcOnly.id] } }
+        });
+        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
+    });
+
+    // ─── Test 12: flagBatchResults Strictly Preserves Immutability for Published Reports & Terminal Samples ───
+    test('12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED)', async () => {
+        const { flagBatchResults } = require('../../services/qcService');
+        const immBatchId = `batch-imm-${Date.now()}`;
+
+        // 1. Terminal ARCHIVED sample
+        const archivedSample = await prisma.sample.create({
+            data: {
+                id: `smp-arch-${Date.now()}`,
+                originalId: `SMP-ARCH-${Date.now()}`,
+                status: 'ARCHIVED',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+        const resArchived = await prisma.result.create({
+            data: {
+                id: `res-arch-${Date.now()}`,
+                sampleId: archivedSample.id,
+                param: 'PH',
+                value: '7.00',
+                unit: 'pH units',
+                batchId: immBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // 2. Terminal DISPOSED sample
+        const disposedSample = await prisma.sample.create({
+            data: {
+                id: `smp-disp-${Date.now()}`,
+                originalId: `SMP-DISP-${Date.now()}`,
+                status: 'DISPOSED',
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+        const resDisposed = await prisma.result.create({
+            data: {
+                id: `res-disp-${Date.now()}`,
+                sampleId: disposedSample.id,
+                param: 'PH',
+                value: '7.00',
+                unit: 'pH units',
+                batchId: immBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // 3. Sample with PUBLISHED report
+        const pubSample = await prisma.sample.create({
+            data: {
+                id: `smp-pub-${Date.now()}`,
+                originalId: `SMP-PUB-${Date.now()}`,
+                status: 'PROCESSING', // Even if reopened to PROCESSING!
+                projectCode: 'SoilFER-P1',
+                assignedLab: testLab1.id
+            }
+        });
+        const pubReport = await prisma.report.create({
+            data: {
+                id: `rep-pub-${Date.now()}`,
+                sampleId: pubSample.id,
+                status: 'PUBLISHED',
+                generatedBy: lab1Manager.username
+            }
+        });
+        const resPublished = await prisma.result.create({
+            data: {
+                id: `res-pub-${Date.now()}`,
+                sampleId: pubSample.id,
+                param: 'PH',
+                value: '7.00',
+                unit: 'pH units',
+                batchId: immBatchId,
+                isValid: false,
+                isCurrent: true,
+                flags: JSON.stringify(['QC_BATCH_FAILED'])
+            }
+        });
+
+        // Execute flagBatchResults for QC_FAIL / PROCEED_WITH_WARNING
+        await flagBatchResults(prisma, immBatchId, 'QC_FAIL', { decision: 'PROCEED_WITH_WARNING' });
+
+        // Verify ARCHIVED sample result was untouched
+        const refArch = await prisma.result.findUnique({ where: { id: resArchived.id } });
+        expect(JSON.parse(refArch.flags)).toEqual(['QC_BATCH_FAILED']);
+
+        // Verify DISPOSED sample result was untouched
+        const refDisp = await prisma.result.findUnique({ where: { id: resDisposed.id } });
+        expect(JSON.parse(refDisp.flags)).toEqual(['QC_BATCH_FAILED']);
+
+        // Verify PUBLISHED report sample result was untouched
+        const refPub = await prisma.result.findUnique({ where: { id: resPublished.id } });
+        expect(JSON.parse(refPub.flags)).toEqual(['QC_BATCH_FAILED']);
+
+        // Cleanup
+        await prisma.result.deleteMany({
+            where: { id: { in: [resArchived.id, resDisposed.id, resPublished.id] } }
+        });
+        await prisma.report.delete({ where: { id: pubReport.id } }).catch(() => {});
+        await prisma.sample.deleteMany({
+            where: { id: { in: [archivedSample.id, disposedSample.id, pubSample.id] } }
+        });
+    });
+
+    // ─── Test 13: Conflicting Disposition Rejected with 409 DISPOSITION_CONFLICT ───
+    test('13. Conflicting disposition decision is rejected with 409 DISPOSITION_CONFLICT', async () => {
+        const conflictBatchId = `batch-conflict-${Date.now()}`;
+        await prisma.batch.create({
+            data: {
+                id: conflictBatchId,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        // 1. Initial disposition: PROCEED_WITH_WARNING
+        const firstRes = await request(app)
+            .post(`/api/qc/batches/${conflictBatchId}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({
+                decision: 'PROCEED_WITH_WARNING',
+                reason: 'Initial disposition override'
+            });
+        expect(firstRes.status).toBe(200);
+
+        // 2. Conflicting disposition: REJECT_BATCH
+        const conflictRes = await request(app)
+            .post(`/api/qc/batches/${conflictBatchId}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({
+                decision: 'REJECT_BATCH',
+                reason: 'Conflicting second disposition decision'
+            });
+
+        expect(conflictRes.status).toBe(409);
+        expect(conflictRes.body.error).toBe('DISPOSITION_CONFLICT');
+
+        // Cleanup
+        await prisma.batch.delete({ where: { id: conflictBatchId } }).catch(() => {});
+        await prisma.auditLog.deleteMany({ where: { entityId: conflictBatchId } }).catch(() => {});
+    });
+
+    // ─── Test 14: Concurrent Disposition Execution & CAS Integrity ───
+    test('14. Concurrent identical dispositions resolve idempotently; conflicting concurrent decisions fail with 409', async () => {
+        const concurrentBatchId = `batch-conc-${Date.now()}`;
+        await prisma.batch.create({
+            data: {
+                id: concurrentBatchId,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        // Fire two identical disposition requests concurrently
+        const [resA, resB] = await Promise.all([
+            request(app)
+                .post(`/api/qc/batches/${concurrentBatchId}/disposition`)
+                .set('Authorization', `Bearer ${lab1Manager.token}`)
+                .send({
+                    decision: 'PROCEED_WITH_WARNING',
+                    reason: 'Concurrent identical execution verification'
+                }),
+            request(app)
+                .post(`/api/qc/batches/${concurrentBatchId}/disposition`)
+                .set('Authorization', `Bearer ${lab1Manager.token}`)
+                .send({
+                    decision: 'PROCEED_WITH_WARNING',
+                    reason: 'Concurrent identical execution verification'
+                })
+        ]);
+
+        // Both should succeed (one creates, one is idempotent or both resolve)
+        expect(resA.status).toBe(200);
+        expect(resB.status).toBe(200);
+
+        // Verify batch history has exactly 1 disposition record (no duplicates)
+        const batch = await prisma.batch.findUnique({ where: { id: concurrentBatchId } });
+        const history = JSON.parse(batch.history || '[]');
+        const dispEntries = history.filter(h => h.disposition === 'PROCEED_WITH_WARNING');
+        expect(dispEntries.length).toBe(1);
+
+        // Cleanup
+        await prisma.batch.delete({ where: { id: concurrentBatchId } }).catch(() => {});
+        await prisma.auditLog.deleteMany({ where: { entityId: concurrentBatchId } }).catch(() => {});
+    });
+
+    // ─── Test 15: REANALYZE_BATCH Protects Historical Accepted / Released Work Items ───
+    test('15. REANALYZE_BATCH updates only active work items, preserving historical ACCEPTED and COMPLETED work items', async () => {
+        const batchWiTestId = `batch-wi-guard-${Date.now()}`;
+        await prisma.batch.create({
+            data: {
+                id: batchWiTestId,
+                analysis: 'pH',
+                status: 'QC_FAIL',
+                labId: testLab1.id,
+                createdBy: lab1Tech.username
+            }
+        });
+
+        // Active work item (PENDING_REVIEW)
+        const wiActive = await prisma.workItem.create({
+            data: {
+                id: `wi-act-${Date.now()}`,
+                sampleId: sample1.id,
+                analysis: 'pH',
+                status: 'PENDING_REVIEW',
+                batchId: batchWiTestId,
+                labId: testLab1.id
+            }
+        });
+
+        // Historical ACCEPTED work item
+        const wiAccepted = await prisma.workItem.create({
+            data: {
+                id: `wi-acc-${Date.now()}`,
+                sampleId: sample1.id,
+                analysis: 'pH',
+                status: 'ACCEPTED',
+                batchId: batchWiTestId,
+                labId: testLab1.id
+            }
+        });
+
+        // Historical COMPLETED work item
+        const wiCompleted = await prisma.workItem.create({
+            data: {
+                id: `wi-comp-${Date.now()}`,
+                sampleId: sample1.id,
+                analysis: 'pH',
+                status: 'COMPLETED',
+                batchId: batchWiTestId,
+                labId: testLab1.id
+            }
+        });
+
+        // Trigger REANALYZE_BATCH
+        const dispRes = await request(app)
+            .post(`/api/qc/batches/${batchWiTestId}/disposition`)
+            .set('Authorization', `Bearer ${lab1Manager.token}`)
+            .send({
+                decision: 'REANALYZE_BATCH',
+                reason: 'Reanalyze active items only'
+            });
+
+        expect(dispRes.status).toBe(200);
+
+        // Verify: Active work item was updated to REANALYSIS_REQUIRED
+        const refActive = await prisma.workItem.findUnique({ where: { id: wiActive.id } });
+        expect(refActive.status).toBe('REANALYSIS_REQUIRED');
+
+        // Verify: Historical ACCEPTED work item was NOT overwritten
+        const refAccepted = await prisma.workItem.findUnique({ where: { id: wiAccepted.id } });
+        expect(refAccepted.status).toBe('ACCEPTED');
+
+        // Verify: Historical COMPLETED work item was NOT overwritten
+        const refCompleted = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
+        expect(refCompleted.status).toBe('COMPLETED');
+
+        // Cleanup
+        await prisma.workItem.deleteMany({
+            where: { id: { in: [wiActive.id, wiAccepted.id, wiCompleted.id] } }
+        });
+        await prisma.batch.delete({ where: { id: batchWiTestId } }).catch(() => {});
+        await prisma.auditLog.deleteMany({ where: { entityId: batchWiTestId } }).catch(() => {});
+    });
 });

@@ -52,8 +52,10 @@ export default function WorkbenchQueue({
                 const matchLabId = item.labId?.toLowerCase().includes(q);
                 const matchId = item.sampleId?.toLowerCase().includes(q);
                 const matchOrig = item.originalId?.toLowerCase().includes(q);
+                const matchWorkItemId = item.workItemId?.toLowerCase().includes(q) || item.id?.toLowerCase().includes(q);
+                const matchProject = item.projectCode?.toLowerCase().includes(q);
                 const matchParam = item.analysis?.toLowerCase().includes(q) || getAnalysisDisplayName(item.analysis, item.analysisName).toLowerCase().includes(q);
-                if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam) return false;
+                if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam && !matchWorkItemId && !matchProject) return false;
             }
 
             return true;
@@ -278,7 +280,7 @@ export default function WorkbenchQueue({
                         {filteredItems.length === 0 && (
                             <tr>
                                 <td colSpan={7} className="py-8 text-center text-sf-muted">
-                                    No work items match the selected filter.
+                                    {searchQuery ? `No work items match "${searchQuery}".` : 'No work items match the selected filter.'}
                                 </td>
                             </tr>
                         )}

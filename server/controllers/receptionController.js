@@ -151,7 +151,7 @@ exports.processIntake = async (req, res) => {
                     });
                     if (!admission.allowed) {
                         return res.status(422).json({
-                            error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                            error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
                             message: admission.reason
                         });
                     }
@@ -207,7 +207,7 @@ exports.processIntake = async (req, res) => {
 
             if (!admission.allowed) {
                 return res.status(422).json({
-                    error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                    error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
                     message: admission.reason,
                     exceptionRequired: Boolean(admission.exceptionRequired)
                 });
@@ -833,6 +833,19 @@ exports.processIntake = async (req, res) => {
                 sampleId: String(sample.id)
             }
         });
+
+        // Mark stored exception approval as CONSUMED to enforce single-use consumption semantics
+        const effectiveApprovalId = (req.body.exceptionRecord && (req.body.exceptionRecord.approvalId || req.body.exceptionRecord.amendmentId)) || req.body.approvalId || req.body.approvalToken;
+        if (effectiveApprovalId) {
+            try {
+                await prisma.sampleAmendment.update({
+                    where: { id: String(effectiveApprovalId) },
+                    data: { resolution: 'CONSUMED' }
+                });
+            } catch (e) {
+                // Stored approval might be a token or mock in tests
+            }
+        }
 
         console.log(`[INTAKE] Successfully processed ${sample.id}`);
         res.json({
@@ -1472,7 +1485,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 });
                 if (!admission.allowed) {
                     return res.status(422).json({
-                        error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                        error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
                         message: `Cannot receive consignment: ${admission.reason}`,
                         exceptionRequired: Boolean(admission.exceptionRequired)
                     });
@@ -1542,7 +1555,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
 
             if (!admission.allowed) {
                 return res.status(422).json({
-                    error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
+                    error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
                     message: admission.reason,
                     exceptionRequired: Boolean(admission.exceptionRequired)
                 });

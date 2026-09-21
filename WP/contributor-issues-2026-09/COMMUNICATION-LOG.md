@@ -39,3 +39,7 @@ Local QC checkpoint 74f87f3 reviewed; no release verified. Published progress an
 ## 2026-09-21 12:31 UTC — #119 review
 Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance comment: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5760534596 . Issue remains open. Existing queued AGY review delivered once at phase transition, with new findings appended in its referenced Codex review file. No duplicate #118 comment or closure.
 
+
+### 21 September 2026 — 13:07 UTC checkpoint / #121 review
+- #121 local progress plus independent hook-order blocker, browser verification still outstanding: https://github.com/yigini/soilfer-lims/issues/121#issuecomment-5761023685 (posted/read back as yigini; remains OPEN).
+- Reviewed b5fedb9. No issues closed; no release verified. Full independent review stored outside application code at C:\Users\yigin\Documents\Codex\2026-09-21\se\work\checkpoint-review-1307.md and delivered once to existing LIMS Dev. Existing #118/#119 comments not repeated.

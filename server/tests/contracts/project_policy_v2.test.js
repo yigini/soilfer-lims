@@ -1,5 +1,10 @@
 'use strict';
 
+const request = require('supertest');
+const app = require('../../app');
+const prisma = require('../../prisma');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../../config/auth');
 const projectPolicyService = require('../../services/projectPolicyService');
 
 describe('projectPolicyService - Templates, Admission & Capabilities', () => {
@@ -640,6 +645,309 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
             });
             expect(admission.allowed).toBe(false);
             expect(admission.code).toBe('EXCEPTION_REASON_REQUIRED');
+        });
+
+        test('Monitor Probe 6: Stored APPROVED DESK_ADMISSION_EXCEPTION rejected for MANIFEST channel', async () => {
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROBE-006',
+                sampleId: 'SMP-001',
+                type: 'DESK_ADMISSION_EXCEPTION',
+                status: 'APPROVED',
+                authorizedBy: 'super_admin',
+                reason: 'Authorized for desk intake only',
+                sample: { id: 'SMP-001', projectId: 'SOILFER-GTM', projectCode: 'SOILFER-GTM', assignedLab: 'GTM-LAB1', labId: 'GTM-LAB1' }
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'super_admin',
+                role: 'ADMIN',
+                isActive: true
+            });
+
+            const verification = await projectPolicyService.verifyStoredExceptionApproval({
+                approvalId: 'AMD-PROBE-006',
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-001',
+                channel: 'MANIFEST', // Incompatible channel!
+                prismaClient: mockPrisma
+            });
+
+            expect(verification.isStoredApprovalVerified).toBe(false);
+            expect(verification.code).toBe('APPROVAL_CHANNEL_MISMATCH');
+            expect(verification.reason).toContain('does not authorize MANIFEST admission exceptions');
+        });
+
+        test('Monitor Probe 7: Stored approval with resolution CONSUMED fails closed against replay', async () => {
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROBE-007',
+                sampleId: 'SMP-001',
+                type: 'DESK_ADMISSION_EXCEPTION',
+                status: 'APPROVED',
+                resolution: 'CONSUMED',
+                authorizedBy: 'super_admin',
+                reason: 'Already used approval',
+                sample: { id: 'SMP-001', projectId: 'SOILFER-GTM', projectCode: 'SOILFER-GTM', assignedLab: 'GTM-LAB1', labId: 'GTM-LAB1' }
+            });
+
+            const verification = await projectPolicyService.verifyStoredExceptionApproval({
+                approvalId: 'AMD-PROBE-007',
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-001',
+                channel: 'DESK',
+                prismaClient: mockPrisma
+            });
+
+            expect(verification.isStoredApprovalVerified).toBe(false);
+            expect(verification.code).toBe('APPROVAL_ALREADY_CONSUMED');
+            expect(verification.reason).toContain('has already been consumed and cannot be replayed');
+        });
+
+        test('Monitor Probe 8: Stored approval with expired expiresAt fails closed', async () => {
+            const pastDate = new Date(Date.now() - 3600000).toISOString();
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROBE-008',
+                sampleId: 'SMP-001',
+                type: 'DESK_ADMISSION_EXCEPTION',
+                status: 'APPROVED',
+                impactAssessment: JSON.stringify({ expiresAt: pastDate }),
+                authorizedBy: 'super_admin',
+                reason: 'Temporary approval that has expired',
+                sample: { id: 'SMP-001', projectId: 'SOILFER-GTM', projectCode: 'SOILFER-GTM', assignedLab: 'GTM-LAB1', labId: 'GTM-LAB1' }
+            });
+
+            const verification = await projectPolicyService.verifyStoredExceptionApproval({
+                approvalId: 'AMD-PROBE-008',
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-001',
+                channel: 'DESK',
+                prismaClient: mockPrisma
+            });
+
+            expect(verification.isStoredApprovalVerified).toBe(false);
+            expect(verification.code).toBe('APPROVAL_EXPIRED');
+            expect(verification.reason).toContain('expired at');
+        });
+
+        test('Monitor Probe 9: Exact channel binding for PHYSICAL_RECEIPT and WALK_IN', async () => {
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROBE-009',
+                sampleId: 'SMP-001',
+                type: 'WALK_IN_ADMISSION_EXCEPTION',
+                status: 'APPROVED',
+                authorizedBy: 'super_admin',
+                reason: 'Approved for walk in reception',
+                sample: { id: 'SMP-001', projectId: 'SOILFER-GTM', projectCode: 'SOILFER-GTM', assignedLab: 'GTM-LAB1', labId: 'GTM-LAB1' }
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'super_admin',
+                role: 'ADMIN',
+                isActive: true
+            });
+
+            // Trying to use WALK_IN approval for PHYSICAL_RECEIPT channel fails
+            const failedVerif = await projectPolicyService.verifyStoredExceptionApproval({
+                approvalId: 'AMD-PROBE-009',
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-001',
+                channel: 'PHYSICAL_RECEIPT',
+                prismaClient: mockPrisma
+            });
+            expect(failedVerif.isStoredApprovalVerified).toBe(false);
+            expect(failedVerif.code).toBe('APPROVAL_CHANNEL_MISMATCH');
+
+            // Trying with matching WALK_IN channel succeeds
+            mockPrisma.sampleAmendment.findUnique.mockResolvedValueOnce({
+                id: 'AMD-PROBE-009',
+                sampleId: 'SMP-001',
+                type: 'WALK_IN_ADMISSION_EXCEPTION',
+                status: 'APPROVED',
+                authorizedBy: 'super_admin',
+                reason: 'Approved for walk in reception',
+                sample: { id: 'SMP-001', projectId: 'SOILFER-GTM', projectCode: 'SOILFER-GTM', assignedLab: 'GTM-LAB1', labId: 'GTM-LAB1' }
+            });
+            mockPrisma.user.findUnique.mockResolvedValueOnce({
+                username: 'super_admin',
+                role: 'ADMIN',
+                isActive: true
+            });
+
+            const okVerif = await projectPolicyService.verifyStoredExceptionApproval({
+                approvalId: 'AMD-PROBE-009',
+                project: soilferProject,
+                labId: 'GTM-LAB1',
+                sampleId: 'SMP-001',
+                channel: 'WALK_IN',
+                prismaClient: mockPrisma
+            });
+            expect(okVerif.isStoredApprovalVerified).toBe(true);
+        });
+    });
+
+    describe('HTTP Routed Request Verification (Supertest & Schema Persisted Approvals)', () => {
+        let httpLab, httpAdmin, httpReception, httpProject, httpAdminToken, httpReceptionToken;
+
+        beforeAll(async () => {
+            const timestamp = Date.now();
+            httpLab = await prisma.lab.create({
+                data: {
+                    id: `LAB-POL-${timestamp}`,
+                    code: `LPOL-${timestamp}`,
+                    name: 'Policy Test Lab',
+                    country: 'Guatemala',
+                    isActive: true
+                }
+            });
+
+            httpAdmin = await prisma.user.create({
+                data: {
+                    id: `usr-admin-${timestamp}`,
+                    username: `admin_pol_${timestamp}`,
+                    email: `admin_pol_${timestamp}@test.org`,
+                    password: 'hash',
+                    role: 'SUPER_ADMIN',
+                    isActive: true
+                }
+            });
+            httpAdminToken = jwt.sign({ id: httpAdmin.id, username: httpAdmin.username, role: httpAdmin.role }, JWT_SECRET, { expiresIn: '1h' });
+
+            httpManager = await prisma.user.create({
+                data: {
+                    id: `usr-mgr-${timestamp}`,
+                    username: `mgr_pol_${timestamp}`,
+                    email: `mgr_pol_${timestamp}@test.org`,
+                    password: 'hash',
+                    role: 'LAB_MANAGER',
+                    labId: httpLab.id,
+                    isActive: true
+                }
+            });
+            httpManagerToken = jwt.sign({ id: httpManager.id, username: httpManager.username, role: httpManager.role, labId: httpLab.id }, JWT_SECRET, { expiresIn: '1h' });
+
+            httpProject = await prisma.project.create({
+                data: {
+                    id: `PROJ-POL-${timestamp}`,
+                    code: `SOILFER-POL-${timestamp}`,
+                    name: 'SoilFER Policy Project',
+                    status: 'ACTIVE',
+                    projectType: 'SOILFER_V1',
+                    templateId: 'SOILFER_V1',
+                    labId: httpLab.id
+                }
+            });
+
+            await prisma.projectLab.create({
+                data: {
+                    id: `PL-POL-${timestamp}`,
+                    projectCode: httpProject.code,
+                    labId: httpLab.id
+                }
+            });
+        });
+
+        afterAll(async () => {
+            await prisma.sampleAmendment.deleteMany({ where: { sample: { projectId: httpProject?.id } } }).catch(() => {});
+            await prisma.sample.deleteMany({ where: { projectId: httpProject?.id } }).catch(() => {});
+            await prisma.projectLab.deleteMany({ where: { projectCode: httpProject?.code } }).catch(() => {});
+            await prisma.project.delete({ where: { id: httpProject?.id } }).catch(() => {});
+            await prisma.user.deleteMany({ where: { id: { in: [httpAdmin?.id, httpManager?.id] } } }).catch(() => {});
+            await prisma.lab.delete({ where: { id: httpLab?.id } }).catch(() => {});
+        });
+
+        test('HTTP 1: Manifest upload with DESK_ADMISSION_EXCEPTION fails closed with 422 channel mismatch', async () => {
+            const sampleId = `SMP-HTTP-M1-${Date.now()}`;
+            // Create target sample in DB
+            await prisma.sample.create({
+                data: {
+                    id: sampleId,
+                    originalId: sampleId,
+                    projectId: httpProject.id,
+                    projectCode: httpProject.code,
+                    assignedLab: httpLab.id,
+                    status: 'EXPECTED'
+                }
+            });
+
+            // Create stored DESK exception approval
+            const deskAmd = await prisma.sampleAmendment.create({
+                data: {
+                    id: `AMD-DESK-${Date.now()}`,
+                    sampleId,
+                    type: 'DESK_ADMISSION_EXCEPTION',
+                    status: 'APPROVED',
+                    authorizedBy: httpAdmin.username,
+                    reason: 'Desk reception exception only',
+                    createdBy: httpAdmin.username
+                }
+            });
+
+            const res = await request(app)
+                .post(`/api/projects/${httpProject.id}/manifest`)
+                .set('Authorization', `Bearer ${httpManagerToken}`)
+                .send({
+                    sampleIds: [sampleId],
+                    targetLabId: httpLab.id,
+                    approvalId: deskAmd.id
+                });
+
+            expect(res.status).toBe(422);
+            expect(res.body.exceptionRequired).toBe(true);
+        });
+
+        test('HTTP 2: Manifest upload with valid MANIFEST_ADMISSION_EXCEPTION succeeds and consumes approval', async () => {
+            const sampleId = `SMP-HTTP-M2-${Date.now()}`;
+            await prisma.sample.create({
+                data: {
+                    id: sampleId,
+                    originalId: sampleId,
+                    projectId: httpProject.id,
+                    projectCode: httpProject.code,
+                    assignedLab: httpLab.id,
+                    status: 'EXPECTED'
+                }
+            });
+
+            const manifestAmd = await prisma.sampleAmendment.create({
+                data: {
+                    id: `AMD-MAN-${Date.now()}`,
+                    sampleId,
+                    type: 'MANIFEST_ADMISSION_EXCEPTION',
+                    status: 'APPROVED',
+                    authorizedBy: httpAdmin.username,
+                    reason: 'Authorized manifest upload exception',
+                    createdBy: httpAdmin.username
+                }
+            });
+
+            const res = await request(app)
+                .post(`/api/projects/${httpProject.id}/manifest`)
+                .set('Authorization', `Bearer ${httpManagerToken}`)
+                .send({
+                    sampleIds: [sampleId],
+                    targetLabId: httpLab.id,
+                    approvalId: manifestAmd.id
+                });
+
+            expect(res.status).toBe(200);
+
+            // Verify approval is marked CONSUMED in database
+            const refreshedAmd = await prisma.sampleAmendment.findUnique({ where: { id: manifestAmd.id } });
+            expect(refreshedAmd.resolution).toBe('CONSUMED');
+
+            // Attempting to reuse the consumed approval in another manifest upload fails closed
+            const replayRes = await request(app)
+                .post(`/api/projects/${httpProject.id}/manifest`)
+                .set('Authorization', `Bearer ${httpManagerToken}`)
+                .send({
+                    sampleIds: [sampleId],
+                    targetLabId: httpLab.id,
+                    approvalId: manifestAmd.id
+                });
+
+            expect(replayRes.status).toBe(422);
+            expect(replayRes.body.exceptionRequired).toBe(true);
         });
     });
 });

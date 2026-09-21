@@ -217,7 +217,7 @@ async function getReportBySample(req, res) {
  */
 async function searchReports(req, res) {
     try {
-        const { q, status, page = 1, limit = 25, projectId } = req.query;
+        const { q, status, page = 1, limit = 25, projectId, sampleId, client } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const where = {};
@@ -247,7 +247,12 @@ async function searchReports(req, res) {
                 return res.json({ reports: [], pagination: { total: 0, page: 1, limit: parseInt(limit), pages: 0 } });
             }
         } else if (status) {
-            where.status = status;
+            if (status === 'ALL' || status === '*') {
+                // Discover all report versions (PUBLISHED, SUPERSEDED, DRAFT, etc.)
+                delete where.status;
+            } else {
+                where.status = status;
+            }
         } else {
             where.status = 'PUBLISHED'; // Default to published
         }
@@ -257,30 +262,87 @@ async function searchReports(req, res) {
         if (projectId) {
             const childCodes = projectPolicyService.getProgrammeChildProjectCodes(projectId);
             const candidateCodes = childCodes.length > 0 ? [String(projectId), ...childCodes] : [String(projectId)];
-            if (candidateCodes.length === 1) {
-                andClauses.push({
+
+            // Resolve matching project codes/IDs without invalid relation references on Report
+            const matchingProjects = await prisma.project.findMany({
+                where: {
                     OR: [
-                        { projectCode: candidateCodes[0] },
-                        { sample: { projectCode: candidateCodes[0] } },
-                        { sample: { projectId: candidateCodes[0] } }
+                        { id: { in: candidateCodes } },
+                        { code: { in: candidateCodes } }
                     ]
-                });
-            } else {
-                andClauses.push({
+                },
+                select: { id: true, code: true }
+            });
+
+            const allCodes = new Set(candidateCodes);
+            matchingProjects.forEach(p => {
+                if (p.code) allCodes.add(p.code);
+                if (p.id) allCodes.add(p.id);
+            });
+            const codesList = Array.from(allCodes);
+
+            const matchingSamples = await prisma.sample.findMany({
+                where: {
                     OR: [
-                        { projectCode: { in: candidateCodes } },
-                        { sample: { projectCode: { in: candidateCodes } } },
-                        { sample: { projectId: { in: candidateCodes } } }
+                        { projectCode: { in: codesList } },
+                        { projectId: { in: codesList } }
                     ]
-                });
-            }
+                },
+                select: { id: true }
+            });
+            const matchingSampleIds = matchingSamples.map(s => s.id);
+
+            andClauses.push({
+                OR: [
+                    { projectCode: { in: codesList } },
+                    ...(matchingSampleIds.length > 0 ? [{ sampleId: { in: matchingSampleIds } }] : [])
+                ]
+            });
         }
 
-        // Full-text search across denormalized keys
+        if (sampleId) {
+            const sid = String(sampleId).trim();
+            const matchingSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: sid },
+                        { labId: sid },
+                        { originalId: sid }
+                    ]
+                },
+                select: { id: true, labId: true }
+            });
+            const sids = [sid, ...matchingSamples.map(s => s.id)];
+            const labIds = [sid, ...matchingSamples.map(s => s.labId).filter(Boolean)];
+            andClauses.push({
+                OR: [
+                    { sampleId: { in: sids } },
+                    { sampleLabId: { in: labIds } }
+                ]
+            });
+        }
+
+        if (client && client.trim()) {
+            const cTerm = client.trim();
+            andClauses.push({
+                OR: [
+                    { firstName: { contains: cTerm } },
+                    { surname: { contains: cTerm } }
+                ]
+            });
+        }
+
+        // Full-text search across denormalized keys and sample originalId
         if (q && q.trim()) {
             const term = q.trim();
-            // Digits-only? Search phone
             const isPhone = /^\d+$/.test(term.replace(/[+\-\s()]/g, ''));
+
+            // Check if term matches any original field ID on sample
+            const origSamples = await prisma.sample.findMany({
+                where: { originalId: { contains: term } },
+                select: { id: true }
+            });
+            const origSampleIds = origSamples.map(s => s.id);
 
             const qOr = [
                 { firstName: { contains: term } },
@@ -288,7 +350,8 @@ async function searchReports(req, res) {
                 { projectCode: { contains: term } },
                 { projectName: { contains: term } },
                 { sampleLabId: { contains: term } },
-                { sampleId: { contains: term } }
+                { sampleId: { contains: term } },
+                ...(origSampleIds.length > 0 ? [{ sampleId: { in: origSampleIds } }] : [])
             ];
 
             if (isPhone) {

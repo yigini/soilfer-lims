@@ -17,9 +17,113 @@ const { broadcastToLab } = require('../wsServer');
 // ─────────────────────────────────────────────────────────────────────────────
 exports.getQueue = async (req, res) => {
     const user = req.user;
-    const { view } = req.query || {}; // 'my_work' | 'ready_to_submit' | 'submitted' | 'completed'
+    const { view, workItemId, sampleId, search, q } = req.query || {}; // 'my_work' | 'ready_to_submit' | 'submitted' | 'completed'
 
     try {
+        let targetScopedItem = null;
+
+        if (workItemId) {
+            const target = await prisma.workItem.findUnique({
+                where: { id: String(workItemId) },
+                include: {
+                    sample: {
+                        select: {
+                            id: true,
+                            originalId: true,
+                            labId: true,
+                            projectCode: true,
+                            status: true,
+                            dryingStatus: true,
+                            preparationStatus: true,
+                            assignedLab: true
+                        }
+                    }
+                }
+            });
+
+            if (!target) {
+                return res.status(404).json({
+                    error: 'WORK_ITEM_NOT_FOUND',
+                    message: `Work item '${workItemId}' not found.`
+                });
+            }
+
+            // Reject contradictory identifiers when sampleId is also provided
+            if (sampleId) {
+                const s = target.sample;
+                const sid = String(sampleId).trim();
+                const matchesSample = target.sampleId === sid ||
+                    s?.id === sid ||
+                    s?.labId === sid ||
+                    s?.originalId === sid;
+
+                if (!matchesSample) {
+                    return res.status(400).json({
+                        error: 'CONTRADICTORY_IDENTIFIERS',
+                        message: `Work item '${workItemId}' does not belong to sample '${sampleId}'.`
+                    });
+                }
+            }
+
+            // Enforce lab/assignment scope
+            const isSuperOrMaster = ['SUPER_ADMIN', 'MASTER_USER'].includes(user.role);
+            const userLab = user.labId;
+            const itemLab = target.sample?.assignedLab || target.labId;
+
+            if (!isSuperOrMaster && userLab && itemLab && userLab !== itemLab) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to work item in another laboratory.'
+                });
+            }
+
+            targetScopedItem = target;
+        } else if (sampleId) {
+            const sid = String(sampleId).trim();
+            const targetSample = await prisma.sample.findFirst({
+                where: {
+                    OR: [
+                        { id: sid },
+                        { labId: sid },
+                        { originalId: sid }
+                    ]
+                }
+            });
+
+            if (!targetSample) {
+                return res.status(404).json({
+                    error: 'SAMPLE_NOT_FOUND',
+                    message: `Sample '${sampleId}' not found.`
+                });
+            }
+
+            const isSuperOrMaster = ['SUPER_ADMIN', 'MASTER_USER'].includes(user.role);
+            const userLab = user.labId;
+            const sampleLab = targetSample.assignedLab || targetSample.labId;
+
+            if (!isSuperOrMaster && userLab && sampleLab && userLab !== sampleLab) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to sample in another laboratory.'
+                });
+            }
+        }
+
+        const searchTerm = (search || q || '').trim();
+        let matchingAnalyses = [];
+        if (searchTerm) {
+            const matched = await prisma.analysis.findMany({
+                where: {
+                    OR: [
+                        { code: { contains: searchTerm } },
+                        { name: { contains: searchTerm } }
+                    ]
+                },
+                select: { code: true }
+            });
+            matchingAnalyses = matched.map(m => m.code);
+        }
+
         let whereClause = {
             assignedTo: user.username
         };
@@ -35,6 +139,18 @@ exports.getQueue = async (req, res) => {
         } else {
             // Default: 'my_work'
             whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] };
+        }
+
+        if (searchTerm) {
+            whereClause.OR = [
+                { id: { contains: searchTerm } },
+                { analysis: { contains: searchTerm } },
+                ...(matchingAnalyses.length > 0 ? [{ analysis: { in: matchingAnalyses } }] : []),
+                { sample: { labId: { contains: searchTerm } } },
+                { sample: { originalId: { contains: searchTerm } } },
+                { sample: { id: { contains: searchTerm } } },
+                { sample: { projectCode: { contains: searchTerm } } }
+            ];
         }
 
         const items = await prisma.workItem.findMany({
@@ -58,6 +174,45 @@ exports.getQueue = async (req, res) => {
                 { createdAt: 'asc' }
             ]
         });
+
+        if (targetScopedItem) {
+            const alreadyInItems = items.some(i => i.id === targetScopedItem.id);
+            if (!alreadyInItems) {
+                items.unshift(targetScopedItem);
+            }
+        } else if (sampleId && !workItemId) {
+            const sid = String(sampleId).trim();
+            const sampleWorkItems = await prisma.workItem.findMany({
+                where: {
+                    OR: [
+                        { sampleId: sid },
+                        { sample: { id: sid } },
+                        { sample: { labId: sid } },
+                        { sample: { originalId: sid } }
+                    ],
+                    ...(!['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user.role) ? { assignedTo: user.username } : {})
+                },
+                include: {
+                    sample: {
+                        select: {
+                            id: true,
+                            originalId: true,
+                            labId: true,
+                            projectCode: true,
+                            status: true,
+                            dryingStatus: true,
+                            preparationStatus: true,
+                            assignedLab: true
+                        }
+                    }
+                }
+            });
+            for (const swi of sampleWorkItems) {
+                if (!items.some(i => i.id === swi.id)) {
+                    items.push(swi);
+                }
+            }
+        }
 
         // Fetch user's active drafts
         const userDrafts = await prisma.workItemDraft.findMany({
@@ -311,7 +466,7 @@ exports.getQueue = async (req, res) => {
             completedCount
         };
 
-        res.json({ groups, stats });
+        res.json({ groups, stats, targetScopedItem: targetScopedItem?.id || null });
     } catch (error) {
         console.error('[workbench.getQueue] Error:', error);
         res.status(500).json({ error: 'Failed to fetch workbench queue' });

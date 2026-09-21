@@ -33,7 +33,7 @@ describe('WP-36: Declarative Deployment Profiles Contract', () => {
         ]));
 
         const projects = JSON.parse(fs.readFileSync(path.join(profilesRoot, 'soilfer', 'projects.json'), 'utf8'));
-        expect(projects.length).toBe(2);
+        expect(projects.length).toBe(9);
         const pCodes = projects.map(p => p.code);
         expect(pCodes).toContain('SOILFER-US');
         expect(pCodes).toContain('SOILFER-JPN');
@@ -48,7 +48,7 @@ describe('WP-36: Declarative Deployment Profiles Contract', () => {
     test('4. Programmatic profile execution seeds target system cleanly', async () => {
         const soilferResult = await seedProfile('soilfer', prisma);
         expect(soilferResult.seededLabs).toBe(7);
-        expect(soilferResult.seededProjects).toBe(2);
+        expect(soilferResult.seededProjects).toBe(9);
 
         const defaultResult = await seedProfile('default', prisma);
         expect(defaultResult.seededLabs).toBe(1);
