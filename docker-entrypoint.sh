@@ -33,6 +33,10 @@ node scripts/migrate_lab_operations_v3.js --apply
 echo "📦 Applying appearance preference migration..."
 node scripts/migrate_appearance_preference.js
 
+# Project Templates and Policy Additive Migration (Fail-Closed, Idempotent)
+echo "📦 Applying project templates and policy migration..."
+node scripts/migrate_project_templates_and_policy.js
+
 # Guarded: Only run prisma db push if explicitly requested (e.g. brand new dev setup)
 if [ "$ALLOW_PRISMA_DB_PUSH" = "true" ]; then
     echo "⚠ ALLOW_PRISMA_DB_PUSH=true detected: pushing database schema..."

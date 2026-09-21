@@ -915,15 +915,48 @@ function canAdmitSample({ project, channel = 'DESK', actor, labId = null, hasExc
     // 3. Channel policy checks based on effective policy
     const policy = getEffectivePolicy(project);
 
-    if (policy.allowedChannels.includes(channel)) {
-        return { allowed: true };
+    // Channel whitelist check
+    const channelWhitelisted = Array.isArray(policy.allowedChannels) && policy.allowedChannels.includes(channel);
+
+    // Explicit exception precedence & direct registration configuration (R4)
+    let channelRequiresException = false;
+    let exceptionReasonCode = 'EXCEPTION_REQUIRED';
+
+    if (!channelWhitelisted) {
+        channelRequiresException = true;
+        exceptionReasonCode = policy.templateId === PROJECT_TEMPLATES.GENERIC_KOBO
+            ? 'KOBO_REQUIRED'
+            : (policy.templateId === PROJECT_TEMPLATES.GENERIC_MANIFEST ? 'MANIFEST_REQUIRED' : 'EXCEPTION_REQUIRED');
     }
 
-    const requiresException = (channel === 'DESK' && policy.requiresExceptionForDesk) ||
-                              (channel === 'MANIFEST' && policy.requiresExceptionForManifest) ||
-                              (!policy.allowedChannels.includes(channel));
+    if (channel === 'DESK') {
+        if (policy.requiresExceptionForDesk === true || policy.allowDirectRegistration === false) {
+            channelRequiresException = true;
+            if (policy.templateId === PROJECT_TEMPLATES.GENERIC_KOBO) {
+                exceptionReasonCode = 'KOBO_REQUIRED';
+            } else if (policy.templateId === PROJECT_TEMPLATES.GENERIC_MANIFEST) {
+                exceptionReasonCode = 'MANIFEST_REQUIRED';
+            } else {
+                exceptionReasonCode = 'EXCEPTION_REQUIRED';
+            }
+        }
+    } else if (channel === 'MANIFEST') {
+        if (policy.requiresExceptionForManifest === true) {
+            channelRequiresException = true;
+            if (policy.templateId === PROJECT_TEMPLATES.GENERIC_KOBO) {
+                exceptionReasonCode = 'KOBO_REQUIRED';
+            } else {
+                exceptionReasonCode = 'EXCEPTION_REQUIRED';
+            }
+        }
+    } else if (channel === 'WALK_IN') {
+        if (policy.allowDirectRegistration === false || !channelWhitelisted) {
+            channelRequiresException = true;
+            exceptionReasonCode = 'EXCEPTION_REQUIRED';
+        }
+    }
 
-    if (requiresException) {
+    if (channelRequiresException) {
         if (hasException) {
             const reason = exceptionRecord && (typeof exceptionRecord === 'string' ? exceptionRecord : exceptionRecord.reason);
             const trimmedReason = String(reason || '').trim();
@@ -932,7 +965,7 @@ function canAdmitSample({ project, channel = 'DESK', actor, labId = null, hasExc
                     allowed: false,
                     exceptionRequired: true,
                     code: 'EXCEPTION_REASON_REQUIRED',
-                    reason: `An explicit justification reason (minimum 5 characters) is required for ${channel} exception intake on project '${project.code}'.`
+                    reason: `An explicit justification reason (minimum 5 characters) is required for ${channel} exception intake on project '${project.code || project.id}'.`
                 };
             }
 
@@ -949,19 +982,23 @@ function canAdmitSample({ project, channel = 'DESK', actor, labId = null, hasExc
             return { allowed: true, isException: true, authorizedBy: authCheck.authorizedBy };
         }
 
-        const errCode = policy.templateId === PROJECT_TEMPLATES.GENERIC_KOBO
-            ? 'KOBO_REQUIRED'
-            : (policy.templateId === PROJECT_TEMPLATES.GENERIC_MANIFEST ? 'MANIFEST_REQUIRED' : 'EXCEPTION_REQUIRED');
-
         return {
             allowed: false,
             exceptionRequired: true,
-            code: errCode,
-            reason: `Project '${project.code}' requires ${policy.allowedChannels.join(' or ')} registration. ${channel} registration requires an authorized exception record.`
+            code: exceptionReasonCode,
+            reason: `Project '${project.code || project.id}' requires ${policy.allowedChannels.join(' or ')} registration. ${channel} registration requires an authorized exception record.`
         };
     }
 
-    return { allowed: true };
+    if (channelWhitelisted) {
+        return { allowed: true };
+    }
+
+    return {
+        allowed: false,
+        code: 'CHANNEL_NOT_ALLOWED',
+        reason: `Channel '${channel}' is not permitted for project '${project.code || project.id}'.`
+    };
 }
 
 /**

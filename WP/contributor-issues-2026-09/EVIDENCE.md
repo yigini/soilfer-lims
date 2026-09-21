@@ -413,5 +413,64 @@ Status Key:
   - LIMS core will not perform synthetic backfill or fabricate intake dates.
 - **Status**: Open (External Coordination Pending; Preparation Framework Documented).
 
+---
+
+### Phase 6: Independent Candidate Release Review Remediation (Findings R1–R5)
+
+#### R1: Report Search & Detail Scoping Across Country, Project, and Lab Boundaries
+- **Problem**: `GET /api/reports/search` only filtered by `userLab` for non-admins, omitting country scoping for national roles (`MASTER_USER`, `COUNTRY_ADMIN`), project scoping for project roles (`PROJECT_MANAGER`), and leaking reports to users without a valid scope.
+- **Remediation**:
+  - Canonical scope authorization implemented in `server/controllers/reportController.js:searchReports`:
+    - National roles (`MASTER_USER`, `COUNTRY_ADMIN`) filtered to samples and labs within their assigned countries (`user.countries`).
+    - Project roles (`PROJECT_MANAGER`, `EXTERNAL_VIEWER`, `VIEWER`) filtered to assigned projects (`user.projects`) and expanded child programme codes.
+    - Lab users (`LAB_MANAGER`, `LAB_TECHNICIAN`, etc.) filtered to their laboratory scope (`labId`, `sampleLabId`, and matching sample IDs).
+    - Inactive or no-scope users fail closed immediately with zero reports (`reports: []`, `total: 0`).
+  - Single report retrieval (`getReport`) enforces scope fallback on report record even if sample record is absent.
+  - `where.status` handling preserved: `status=ALL` / `status=SUPERSEDED` discovers historical versions strictly within authorized scope.
+- **Verification**: `candidate_release_review_fixes.test.js` (R1 tests 1–5 pass); independent release probe receives only own-scope report (`IR-REPORT-A`), excluding Kenya report (`IR-REPORT-B`).
+
+#### R2: Ordinary Workbench Queue & Stale Assignment Isolation
+- **Problem**: `GET /api/workbench/queue` queried only by `assignedTo: user.username`, exposing stale cross-lab assignments (e.g. following staff transfer) while deep-link denied with 403.
+- **Remediation**:
+  - `server/controllers/workbenchController.js:getQueue`: Applied canonical `labScopeCondition` to `whereClause`, multi-view count queries (`myWorkCount`, `readyToSubmitCount`, `submittedCount`, `completedCount`), and drafts lookup.
+  - Post-fetch filtering strictly verifies that both the work item (`labId`, `assignedLab`) and sample (`assignedLab`, `labId`) belong to the technician's authorized laboratory scope. Conflicting item/sample labs are excluded.
+  - `server/services/draftService.js`: `getDrafts`, `saveDraft`, and `discardDraft` enforce laboratory isolation and reject cross-lab operations.
+- **Verification**: `candidate_release_review_fixes.test.js` (R2 tests 1–3 pass); independent release probe ordinary queue returns empty array (`items: []`) for cross-lab task.
+
+#### R3: QC Reanalysis Transitions Completed-Unsubmitted Work Items
+- **Problem**: `server/controllers/qcController.js` treated `COMPLETED` work items as immutable alongside `ACCEPTED` and `RELEASED`, causing `REANALYZE_BATCH` dispositions to leave completed unsubmitted determinations in a dead-end state.
+- **Remediation**:
+  - Distinguished recorded completion from immutable scientific history:
+    - Immutable: `ACCEPTED` and `RELEASED` work items, and work items on `RELEASED`, `ARCHIVED`, or `DISPOSED` samples remain strictly untouched.
+    - Eligible: `COMPLETED`, `SUBMITTED`, `IN_PROGRESS`, and `ASSIGNED` work items in the failed QC batch transition to `REANALYSIS_REQUIRED` upon `REANALYZE_BATCH` (or `REJECTED` upon `REJECT_BATCH`).
+    - Audit and history trails updated atomically with disposition reason and author.
+    - Reanalysis does NOT fabricate or tamper with raw scientific determination values.
+    - Idempotent repeated dispositions with matching decision/reason return `idempotent: true`; conflicting dispositions fail with 409 `DISPOSITION_CONFLICT`.
+- **Verification**: `candidate_release_review_fixes.test.js` (R3 tests 1–2 pass); `qc_disposition_release_gate.test.js` Test 15 updated and passes; independent release probe records `workStatus: "REANALYSIS_REQUIRED"`.
+
+#### R4: Precedence of Explicit Exception Requirements over Channel Whitelist
+- **Problem**: `server/services/projectPolicyService.js:canAdmitSample` returned `{ allowed: true }` when `policy.allowedChannels.includes(channel)` before checking `requiresExceptionForDesk` or `requiresExceptionForManifest`.
+- **Remediation**:
+  - Enforced explicit configuration precedence:
+    - If `requiresExceptionForDesk` is true or `allowDirectRegistration` is false, DESK intake strictly requires an authorized exception record, even if DESK is listed in `allowedChannels`.
+    - If `requiresExceptionForManifest` is true, MANIFEST intake strictly requires an authorized exception record.
+    - Channel whitelist validated; un-whitelisted channels fail closed with channel-specific reason codes (`KOBO_REQUIRED`, `MANIFEST_REQUIRED`, or `CHANNEL_NOT_ALLOWED`).
+  - HTTP trust boundary in `server/controllers/receptionController.js:processIntake`: client-claimed boolean flags (`isStoredApprovalVerified`) are stripped and rejected (`EXCEPTION_NOT_AUTHORIZED`); stored approvals require valid database record with matching target sample, channel, and authorized manager.
+- **Verification**: `candidate_release_review_fixes.test.js` (R4 tests 1–3 pass); independent release probe returns `{ allowed: false, exceptionRequired: true, code: "EXCEPTION_REQUIRED" }`.
+
+#### R5: Additive Schema Migration & Old Database Upgrade Compatibility
+- **Problem**: Candidate schema added `templateId`, `templateVersion`, `policyConfig`, `programmeCode`, and `parentProjectId` to `Project`, which threw Prisma `P2022` on unupgraded databases. Entrypoint only executed lab operations and appearance migrations.
+- **Remediation**:
+  - Created versioned additive SQL migration: `server/prisma/migrations/20260921220000_add_project_templates_and_policy/migration.sql`.
+  - Created fail-closed, idempotent migration runner: `server/scripts/migrate_project_templates_and_policy.js`.
+    - Safe `PRAGMA table_info('Project')` check.
+    - Adds missing columns with conservative defaults (`templateId` DEFAULT `'GENERIC_OPEN_INTAKE'`, `templateVersion` DEFAULT `'1.0.0'`).
+    - Creates `Project_parentProjectId_idx` index.
+    - Verifies row count preservation and `PRAGMA foreign_key_check('Project')`.
+    - Re-run on upgraded database is a complete no-op (strictly idempotent).
+  - Wired into `docker-entrypoint.sh` startup sequence.
+- **Verification**: Rehearsal against simulated legacy database in `candidate_release_review_fixes.test.js` (R5 tests 1–3 pass: dry-run detects missing columns, migration applies cleanly, second run no-ops, zero data loss). Full server test suite passes 131 suites / 1,167 tests.
+
+
 
 

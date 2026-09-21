@@ -44,8 +44,21 @@ async function saveDraft(user, {
     }
 
     const scopeGuard = require('../utils/scopeGuard');
+    if (!scopeGuard.canAccessEntity(user, workItem, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+        throw new Error('Access denied: Work item is outside your laboratory scope');
+    }
     if (workItem.sample && !scopeGuard.canAccessEntity(user, workItem.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
         throw new Error('Access denied: Work item is outside your laboratory scope');
+    }
+    if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
+        const itemLab = workItem.labId || workItem.assignedLab;
+        const sampleLab = workItem.sample?.assignedLab || workItem.sample?.labId;
+        if (itemLab && itemLab !== user.labId) {
+            throw new Error('Access denied: Work item is in another laboratory');
+        }
+        if (sampleLab && sampleLab !== user.labId) {
+            throw new Error('Access denied: Sample is in another laboratory');
+        }
     }
 
     const sId = sampleId || workItem.sampleId;
@@ -142,11 +155,27 @@ async function saveDraft(user, {
 }
 
 /**
- * Retrieve all active drafts for a technician
+ * Retrieve all active drafts for a technician within authorized lab scope
  */
 async function getDrafts(user) {
+    const scopeGuard = require('../utils/scopeGuard');
+    const isGlobal = scopeGuard.hasGlobalAccess(user);
+
+    if (!user || user.isActive === false || user.status === 'INACTIVE') {
+        return [];
+    }
+
+    const where = { userId: user.username };
+    if (!isGlobal) {
+        if (!user.labId) return [];
+        where.OR = [
+            { labId: user.labId },
+            { labId: null }
+        ];
+    }
+
     const drafts = await prisma.workItemDraft.findMany({
-        where: { userId: user.username },
+        where,
         orderBy: { updatedAt: 'desc' }
     });
 
@@ -174,6 +203,13 @@ async function discardDraft(user, workItemId) {
     // Verify ownership
     if (draft.userId !== user.username && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
         throw new Error('Access denied: You cannot discard another user’s draft');
+    }
+
+    const scopeGuard = require('../utils/scopeGuard');
+    if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
+        if (draft.labId && draft.labId !== user.labId) {
+            throw new Error('Access denied: Draft is outside your laboratory scope');
+        }
     }
 
     // 1. Delete draft record

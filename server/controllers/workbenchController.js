@@ -200,9 +200,54 @@ exports.getQueue = async (req, res) => {
             matchingAnalyses = matched.map(m => m.code);
         }
 
+        const isGlobal = scopeGuard.hasGlobalAccess(user);
+
+        if (!isGlobal && !user.labId) {
+            return res.json({
+                groups: [],
+                stats: {
+                    totalPending: 0,
+                    totalInProgress: 0,
+                    totalReanalysis: 0,
+                    totalDrafts: 0,
+                    totalGroups: 0,
+                    totalItems: 0,
+                    myWorkCount: 0,
+                    readyToSubmitCount: 0,
+                    submittedCount: 0,
+                    completedCount: 0
+                },
+                targetScopedItem: null
+            });
+        }
+
+        const labScopeCondition = !isGlobal ? {
+            AND: [
+                {
+                    OR: [
+                        { labId: user.labId },
+                        { assignedLab: user.labId },
+                        { AND: [{ labId: null }, { assignedLab: null }] }
+                    ]
+                },
+                {
+                    sample: {
+                        OR: [
+                            { assignedLab: user.labId },
+                            { labId: user.labId }
+                        ]
+                    }
+                }
+            ]
+        } : null;
+
         let whereClause = {
             assignedTo: user.username
         };
+
+        if (labScopeCondition) {
+            whereClause.AND = [labScopeCondition];
+        }
 
         if (view === 'ready_to_submit') {
             whereClause.status = 'COMPLETED';
@@ -229,7 +274,7 @@ exports.getQueue = async (req, res) => {
             ];
         }
 
-        const items = await prisma.workItem.findMany({
+        let items = await prisma.workItem.findMany({
             where: whereClause,
             include: {
                 sample: {
@@ -238,6 +283,7 @@ exports.getQueue = async (req, res) => {
                         originalId: true,
                         labId: true,
                         projectCode: true,
+                        country: true,
                         status: true,
                         dryingStatus: true,
                         preparationStatus: true,
@@ -251,6 +297,29 @@ exports.getQueue = async (req, res) => {
             ]
         });
 
+        // Filter out stale cross-lab assignments and ensure full scope compliance (R2)
+        items = items.filter(item => {
+            if (user.role === 'LAB_TECHNICIAN') {
+                if (item.assignedTo !== user.username && item.assignedTo !== user.id) {
+                    return false;
+                }
+            }
+            if (isGlobal) return true;
+
+            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+                return false;
+            }
+            if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                return false;
+            }
+            const itemLab = item.labId || item.assignedLab;
+            const sampleLab = item.sample?.assignedLab || item.sample?.labId;
+            if (itemLab && itemLab !== user.labId) return false;
+            if (sampleLab && sampleLab !== user.labId) return false;
+
+            return true;
+        });
+
         if (targetScopedItem) {
             const alreadyInItems = items.some(i => i.id === targetScopedItem.id);
             if (!alreadyInItems) {
@@ -261,7 +330,8 @@ exports.getQueue = async (req, res) => {
             const sampleWorkItems = await prisma.workItem.findMany({
                 where: {
                     sampleId: canonicalSampleTarget.id,
-                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {})
+                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {}),
+                    ...(labScopeCondition ? labScopeCondition : {})
                 },
                 include: {
                     sample: {
@@ -281,16 +351,28 @@ exports.getQueue = async (req, res) => {
             });
             for (const swi of sampleWorkItems) {
                 if (scopeGuard.canAccessEntity(user, swi, { entityType: 'WorkItem' })) {
-                    if (!items.some(i => i.id === swi.id)) {
-                        items.push(swi);
+                    const swiLab = swi.labId || swi.assignedLab;
+                    const swiSampleLab = swi.sample?.assignedLab || swi.sample?.labId;
+                    if (isGlobal || ((!swiLab || swiLab === user.labId) && (!swiSampleLab || swiSampleLab === user.labId))) {
+                        if (!items.some(i => i.id === swi.id)) {
+                            items.push(swi);
+                        }
                     }
                 }
             }
         }
 
-        // Fetch user's active drafts
+        // Fetch user's active drafts within authorized lab scope
         const userDrafts = await prisma.workItemDraft.findMany({
-            where: { userId: user.username }
+            where: {
+                userId: user.username,
+                ...(!isGlobal && user.labId ? {
+                    OR: [
+                        { labId: user.labId },
+                        { labId: null }
+                    ]
+                } : {})
+            }
         });
         const draftMap = {};
         userDrafts.forEach(d => {
@@ -518,12 +600,17 @@ exports.getQueue = async (req, res) => {
             return a.analysisName.localeCompare(b.analysisName);
         });
 
-        // Compute multi-view counts for tabs
+        // Compute multi-view counts for tabs with matching lab scope
+        const baseCountWhere = { assignedTo: user.username };
+        if (labScopeCondition) {
+            baseCountWhere.AND = [labScopeCondition];
+        }
+
         const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
-            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: 'SUBMITTED' } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'SUBMITTED' } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
         ]);
 
         // Stats

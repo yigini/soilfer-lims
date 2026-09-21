@@ -847,31 +847,62 @@ exports.dispositionBatch = async (req, res) => {
                 include: { sample: { select: { id: true, status: true } } }
             });
 
-            const activeWorkItemIds = allBatchWorkItems
-                .filter(wi => {
-                    const isWiAcceptedOrReleased = ['ACCEPTED', 'COMPLETED', 'RELEASED'].includes(wi.status);
-                    const isSampleReleased = wi.sample && ['RELEASED', 'ARCHIVED', 'DISPOSED'].includes(wi.sample.status);
-                    return !isWiAcceptedOrReleased && !isSampleReleased;
-                })
-                .map(wi => wi.id);
+            // Distinguish recorded completion from immutable accepted/released scientific history (R3):
+            // Work items that are ACCEPTED or RELEASED, or belong to RELEASED/ARCHIVED/DISPOSED samples,
+            // are immutable scientific history and MUST be preserved.
+            // Work items in COMPLETED, SUBMITTED, IN_PROGRESS, or ASSIGNED in the failed batch
+            // MUST transition to REANALYSIS_REQUIRED (or REJECTED).
+            const eligibleWorkItems = allBatchWorkItems.filter(wi => {
+                const isWiImmutable = ['ACCEPTED', 'RELEASED'].includes(wi.status);
+                const isSampleImmutable = wi.sample && ['RELEASED', 'ARCHIVED', 'DISPOSED'].includes(wi.sample.status);
+                return !isWiImmutable && !isSampleImmutable;
+            });
 
-            if (activeWorkItemIds.length > 0) {
-                if (decision === 'REANALYZE_BATCH') {
-                    await tx.workItem.updateMany({
-                        where: { id: { in: activeWorkItemIds } },
-                        data: {
+            if (eligibleWorkItems.length > 0) {
+                for (const wi of eligibleWorkItems) {
+                    const history = typeof wi.history === 'string'
+                        ? JSON.parse(wi.history)
+                        : (Array.isArray(wi.history) ? wi.history : []);
+
+                    if (decision === 'REANALYZE_BATCH') {
+                        history.push({
                             status: 'REANALYSIS_REQUIRED',
-                            reanalysisReason: trimmedReason,
-                            reanalysisRequestedBy: user.username
-                        }
-                    });
-                } else if (decision === 'REJECT_BATCH') {
-                    await tx.workItem.updateMany({
-                        where: { id: { in: activeWorkItemIds } },
-                        data: {
-                            status: 'REJECTED'
-                        }
-                    });
+                            previousStatus: wi.status,
+                            changedBy: user.username,
+                            timestamp: now.toISOString(),
+                            action: 'REANALYZE_BATCH',
+                            reason: trimmedReason
+                        });
+
+                        await tx.workItem.update({
+                            where: { id: wi.id },
+                            data: {
+                                status: 'REANALYSIS_REQUIRED',
+                                reanalysisReason: trimmedReason,
+                                reanalysisRequestedBy: user.username,
+                                history: JSON.stringify(history),
+                                updatedAt: now
+                            }
+                        });
+                    } else if (decision === 'REJECT_BATCH') {
+                        history.push({
+                            status: 'REJECTED',
+                            previousStatus: wi.status,
+                            changedBy: user.username,
+                            timestamp: now.toISOString(),
+                            action: 'REJECT_BATCH',
+                            reason: trimmedReason
+                        });
+
+                        await tx.workItem.update({
+                            where: { id: wi.id },
+                            data: {
+                                status: 'REJECTED',
+                                history: JSON.stringify(history),
+                                updatedAt: now
+                            }
+                        });
+                    }
                 }
             }
 

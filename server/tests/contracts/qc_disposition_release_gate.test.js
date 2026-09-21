@@ -902,13 +902,14 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const refActive = await prisma.workItem.findUnique({ where: { id: wiActive.id } });
         expect(refActive.status).toBe('REANALYSIS_REQUIRED');
 
-        // Verify: Historical ACCEPTED work item was NOT overwritten
+        // Verify: Historical ACCEPTED work item was NOT overwritten (scientific immutability)
         const refAccepted = await prisma.workItem.findUnique({ where: { id: wiAccepted.id } });
         expect(refAccepted.status).toBe('ACCEPTED');
 
-        // Verify: Historical COMPLETED work item was NOT overwritten
+        // Verify: Completed-unsubmitted work item transitions to REANALYSIS_REQUIRED (R3 operational repeat)
         const refCompleted = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
-        expect(refCompleted.status).toBe('COMPLETED');
+        expect(refCompleted.status).toBe('REANALYSIS_REQUIRED');
+        expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
 
         // Cleanup
         await prisma.workItem.deleteMany({

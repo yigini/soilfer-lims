@@ -58,3 +58,15 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - Comment posted/read back as yigini: https://github.com/yigini/soilfer-lims/issues/117#issuecomment-5764422690 . Remains open.
 - Local 1ed46ef actual-component event-handler probe reproduces lost OK/Fail answer with current parent callbacks; not a production browser test.
 - Detailed review checkpoint-review-1704.md delivered once to AGY; fresh UI confirms reading and active corrective work. No release or closure accepted.
+
+- 2026-09-21 19:31 UTC: #117 progress as yigini: draft PR #129 / candidate 2aed558, local browser evidence and bounded independent checks, GitHub CI 130 suites / 1,151 tests; explicitly not released, remains open. https://github.com/yigini/soilfer-lims/issues/117#issuecomment-5766315184
+
+### 2026-09-21 20:10 UTC — Candidate Release Review R1–R5 Remediation
+- Independent review findings R1–R5 resolved on branch `review/wp-contributor-issues-candidate`.
+- R1: Canonical scope authorization applied to `GET /api/reports/search` and `GET /api/reports/:id` across country, project, and lab boundaries. Out-of-scope reports excluded; no-scope users receive 0 reports.
+- R2: Laboratory isolation condition enforced on ordinary `GET /api/workbench/queue`, multi-view counts, and drafts. Stale cross-lab assignments and transfers excluded.
+- R3: `REANALYZE_BATCH` disposition transitions completed-unsubmitted work to `REANALYSIS_REQUIRED` with documented reason and audit trail, preventing operational dead-ends while strictly preserving accepted/released scientific history.
+- R4: Precedence of explicit exception requirements (`requiresExceptionForDesk`, `requiresExceptionForManifest`) over channel whitelist enforced at service and HTTP trust boundaries.
+- R5: Versioned additive migration `20260921220000_add_project_templates_and_policy` created and wired into `docker-entrypoint.sh` via idempotent runner `migrate_project_templates_and_policy.js`. Rehearsal against legacy schema verified with zero data loss and strictly idempotent execution.
+- Verification: `independent-release-probe.cjs` (7/7 passed), `candidate_release_review_fixes.test.js` (16/16 passed), full server test suite (131 suites / 1,167 tests passed, 0 failed). PR #129 remains draft and unmerged.
+

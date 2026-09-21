@@ -146,8 +146,14 @@ async function getReport(req, res) {
         // S24: Lab Scope Check
         const scopeGuard = require('../utils/scopeGuard');
         const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
-        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        if (sample) {
+            if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+            }
+        } else if (!scopeGuard.hasGlobalAccess(req.user)) {
+            if (!scopeGuard.canAccessEntity(req.user, report, { labField: 'labId', altLabField: 'sampleLabId' })) {
+                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+            }
         }
 
         // R1: External and general viewers can only view PUBLISHED reports
@@ -222,30 +228,23 @@ async function searchReports(req, res) {
 
         const where = {};
 
-        // R-9 & R1: Scoping — non-admin users only see reports in their authorized scope
-        const userRole = req.user?.role;
-        const userLab = req.user?.labId;
-        const userProjects = req.user?.projects ? (typeof req.user.projects === 'string' ? JSON.parse(req.user.projects) : req.user.projects) : [];
+        const scopeGuard = require('../utils/scopeGuard');
+        const projectPolicyService = require('../services/projectPolicyService');
+        const isGlobal = scopeGuard.hasGlobalAccess(req.user);
 
-        if (userLab && !['SUPER_ADMIN', 'MASTER_USER'].includes(userRole)) {
-            where.labId = userLab;
+        // Fail-closed for inactive or missing user
+        if (!req.user || req.user.isActive === false || req.user.status === 'INACTIVE') {
+            return res.json({ reports: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } });
         }
 
-        // R1: External and general viewers strictly view PUBLISHED reports for authorized projects
-        const projectPolicyService = require('../services/projectPolicyService');
+        const userRole = req.user.role;
+        const userLab = req.user.labId;
+        const userProjects = req.user.projects ? (typeof req.user.projects === 'string' ? JSON.parse(req.user.projects) : req.user.projects) : [];
+        const userCountries = req.user.countries ? (typeof req.user.countries === 'string' ? JSON.parse(req.user.countries) : req.user.countries) : [];
 
+        // Status filter: External viewers are locked to PUBLISHED reports
         if (['EXTERNAL_VIEWER', 'VIEWER'].includes(userRole)) {
             where.status = 'PUBLISHED';
-            if (userProjects.length > 0) {
-                const expandedProjects = new Set(userProjects);
-                userProjects.forEach(p => {
-                    const children = projectPolicyService.getProgrammeChildProjectCodes(p);
-                    children.forEach(c => expandedProjects.add(c));
-                });
-                where.projectCode = { in: Array.from(expandedProjects) };
-            } else if (!userLab) {
-                return res.json({ reports: [], pagination: { total: 0, page: 1, limit: parseInt(limit), pages: 0 } });
-            }
         } else if (status) {
             if (status === 'ALL' || status === '*') {
                 // Discover all report versions (PUBLISHED, SUPERSEDED, DRAFT, etc.)
@@ -258,6 +257,95 @@ async function searchReports(req, res) {
         }
 
         const andClauses = [];
+
+        // R1: Canonical Scope Authorization across country, project, lab, and no-scope boundaries
+        if (!isGlobal) {
+            const isNationalRole = userRole === 'MASTER_USER' || userRole === 'COUNTRY_ADMIN';
+            const isProjectRole = userRole === 'PROJECT_MANAGER' || userRole === 'EXTERNAL_VIEWER' || userRole === 'VIEWER';
+
+            const authOrClauses = [];
+
+            // 1. Lab scope (for users with lab assignment)
+            if (userLab) {
+                const labSamples = await prisma.sample.findMany({
+                    where: {
+                        OR: [
+                            { labId: userLab },
+                            { assignedLab: userLab }
+                        ]
+                    },
+                    select: { id: true }
+                });
+                const labSampleIds = labSamples.map(s => s.id);
+
+                authOrClauses.push({ labId: userLab });
+                authOrClauses.push({ sampleLabId: userLab });
+                if (labSampleIds.length > 0) {
+                    authOrClauses.push({ sampleId: { in: labSampleIds } });
+                }
+            }
+
+            // 2. Country scope (for national oversight roles)
+            if (isNationalRole && Array.isArray(userCountries) && userCountries.length > 0) {
+                const countrySamples = await prisma.sample.findMany({
+                    where: {
+                        OR: [
+                            { country: { in: userCountries } },
+                            { countryName: { in: userCountries } }
+                        ]
+                    },
+                    select: { id: true }
+                });
+                const countrySampleIds = countrySamples.map(s => s.id);
+
+                const countryLabs = await prisma.lab.findMany({
+                    where: { country: { in: userCountries } },
+                    select: { id: true }
+                });
+                const countryLabIds = countryLabs.map(l => l.id);
+
+                if (countrySampleIds.length > 0) {
+                    authOrClauses.push({ sampleId: { in: countrySampleIds } });
+                }
+                if (countryLabIds.length > 0) {
+                    authOrClauses.push({ labId: { in: countryLabIds } });
+                    authOrClauses.push({ sampleLabId: { in: countryLabIds } });
+                }
+            }
+
+            // 3. Project scope (for project roles)
+            if (isProjectRole && Array.isArray(userProjects) && userProjects.length > 0) {
+                const expandedProjects = new Set(userProjects);
+                userProjects.forEach(p => {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(p);
+                    children.forEach(c => expandedProjects.add(c));
+                });
+                const projList = Array.from(expandedProjects);
+
+                const projectSamples = await prisma.sample.findMany({
+                    where: {
+                        OR: [
+                            { projectCode: { in: projList } },
+                            { projectId: { in: projList } }
+                        ]
+                    },
+                    select: { id: true }
+                });
+                const projectSampleIds = projectSamples.map(s => s.id);
+
+                authOrClauses.push({ projectCode: { in: projList } });
+                if (projectSampleIds.length > 0) {
+                    authOrClauses.push({ sampleId: { in: projectSampleIds } });
+                }
+            }
+
+            // Fail closed: If non-global user has no matching scope clauses, deny immediately
+            if (authOrClauses.length === 0) {
+                return res.json({ reports: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } });
+            }
+
+            andClauses.push({ OR: authOrClauses });
+        }
 
         if (projectId) {
             const childCodes = projectPolicyService.getProgrammeChildProjectCodes(projectId);
