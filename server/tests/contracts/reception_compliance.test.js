@@ -455,11 +455,24 @@ describe('Reception Compliance Checklist & Manager Exception Contracts (#117, #1
             nonConformance: false
         };
 
+        const testProject = await prisma.project.create({
+            data: {
+                id: 'PROJ-SHIPMENT-' + SUFFIX,
+                code: 'PROJ-SHIP-' + SUFFIX,
+                name: 'Shipment Project ' + SUFFIX,
+                projectType: 'OPEN_INTAKE',
+                status: 'ACTIVE',
+                labId: testLab
+            }
+        });
+        trackedProjectIds.add(testProject.id);
+
         const res = await request(app)
             .post('/api/reception/intake')
             .set('Authorization', authReception)
             .send({
                 originalId: sampleId,
+                projectId: testProject.id,
                 isWalkIn: false,
                 decision: 'ACCEPTED',
                 receivedMass: 300.0,
