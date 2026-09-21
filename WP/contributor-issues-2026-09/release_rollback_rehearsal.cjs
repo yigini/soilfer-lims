@@ -5,13 +5,18 @@
  * 1. Populated synthetic baseline database initialization from genuine 762c46e baseline schema
  *    (extracted directly from git commit 762c46e:server/prisma/schema.prisma, NOT simulated by column subtraction).
  * 2. Baseline application artifact (762c46e) HTTP boot & authenticated route verification before migration
- *    (executed via isolated git worktree/container).
+ *    (executed via isolated git worktree with strict baseline SHA assertion and record checks; fails closed if missing).
  * 3. SQLite online backup with WAL checkpointing (TRUNCATE) and integrity verification.
  * 4. Additive DDL migration (migrateProjectTemplatesAndPolicy) with 100% table row checksum conservation.
- * 5. Upgraded candidate application artifact (fe02e75) HTTP boot & authenticated route verification.
+ * 5. Upgraded candidate application artifact (fe02e75) HTTP boot & authenticated route verification with record assertions.
  * 6. Rollback restore with WAL/sidecar safety (.db-wal and .db-shm clean removal) and 100% hash restoration.
- * 7. Post-rollback baseline application artifact (762c46e) HTTP boot & authenticated route verification.
- * 8. Post-deploy read-only route verification against Express router definitions.
+ * 7. Post-rollback baseline application artifact (762c46e) HTTP boot & authenticated route verification with record assertions.
+ * 8. Proposed post-deploy read-only route verification checklist (validated against router definitions).
+ *
+ * Runtime / Environment Prerequisites:
+ * - Node.js: v20.x or v24.x (tested on Node.js v24.13.0).
+ * - Isolated Baseline Worktree: must exist at `../soilfer-lims-baseline` checked out to 762c46e with generated Prisma client.
+ * - Local dependencies: server/node_modules must be installed.
  */
 
 const path = require('path');
@@ -26,12 +31,30 @@ const reqCandidate = createRequire(candidatePkgPath);
 const Database = reqCandidate('better-sqlite3');
 const { migrateProjectTemplatesAndPolicy } = reqCandidate('./scripts/migrate_project_templates_and_policy.js');
 
-// Baseline worktree path (optional isolated checkout for booting 762c46e artifact)
+// Baseline worktree path (isolated checkout for booting 762c46e artifact)
 const baselineRepoDir = path.resolve(__dirname, '..', '..', '..', 'soilfer-lims-baseline');
 const baselineServerDir = path.join(baselineRepoDir, 'server');
 
 async function runRehearsal() {
     console.log('=== RELEASE UPGRADE, DUAL-ARTIFACT BOOT & ROLLBACK REHEARSAL ===');
+
+    // Fail-closed check: baseline artifact worktree must exist
+    if (!fs.existsSync(baselineRepoDir) || !fs.existsSync(path.join(baselineServerDir, 'app.js'))) {
+        throw new Error(`BASELINE ARTIFACT MISSING (FAIL CLOSED): Isolated baseline worktree not found at ${baselineRepoDir}. Prerequisite: git worktree add ../soilfer-lims-baseline 762c46e`);
+    }
+
+    // Assert baseline HEAD SHA
+    let baselineHead;
+    try {
+        baselineHead = cp.execSync('git rev-parse HEAD', { cwd: baselineRepoDir }).toString().trim();
+    } catch (e) {
+        throw new Error(`Failed to resolve baseline git HEAD: ${e.message}`);
+    }
+    if (!baselineHead.startsWith('762c46e')) {
+        throw new Error(`BASELINE SHA MISMATCH (FAIL CLOSED): Found ${baselineHead}, expected baseline 762c46e.`);
+    }
+    console.log(`[INIT] Verified baseline worktree at ${baselineRepoDir} (SHA: ${baselineHead})`);
+
     const runnerDir = path.resolve(candidateServerDir, `.tmp_rehearsal_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
     fs.mkdirSync(runnerDir, { recursive: true });
     const liveDbPath = path.join(runnerDir, 'soilfer_prod_sim.db');
@@ -51,10 +74,17 @@ async function runRehearsal() {
         }
         fs.writeFileSync(baselinePrismaSchemaPath, baselineSchemaContent, 'utf8');
 
-        // Push baseline schema to liveDbPath using Prisma CLI
+        // Execute prisma db push inside runnerDir with explicit forward-slash URL to prevent schema engine path/adapter collisions
+        const forwardUrl = 'file:' + liveDbPath.replace(/\\/g, '/');
         const prismaCliPath = path.join(candidateServerDir, 'node_modules', 'prisma', 'build', 'index.js');
-        cp.execSync(`node "${prismaCliPath}" db push --schema="${baselinePrismaSchemaPath}" --url="file:${liveDbPath}" --accept-data-loss`, {
-            cwd: candidateServerDir,
+        cp.execSync(`node "${prismaCliPath}" db push --schema="${baselinePrismaSchemaPath}" --url="${forwardUrl}" --accept-data-loss`, {
+            cwd: runnerDir,
+            env: {
+                ...process.env,
+                DATABASE_URL: forwardUrl,
+                DATABASE_PATH: liveDbPath,
+                NODE_ENV: 'test'
+            },
             stdio: 'pipe'
         });
 
@@ -118,17 +148,20 @@ async function runRehearsal() {
 
         // Step 2: Boot Baseline Application Artifact (762c46e) Against Synthetic Baseline DB
         console.log('\n[2/8] Booting baseline application artifact (762c46e) in isolated worktree against baseline DB...');
-        let baselineBootResult = null;
-        if (fs.existsSync(path.join(baselineServerDir, 'app.js'))) {
-            baselineBootResult = runArtifactHttpVerification(baselineServerDir, liveDbPath, 'BASELINE_PRE_MIGRATION');
-            console.log('  Baseline Application HTTP Startup (Pre-Migration) PASSED:', baselineBootResult);
-            if (baselineBootResult.healthStatus !== 200 || baselineBootResult.projectsStatus !== 200 || baselineBootResult.reportsStatus !== 200) {
-                throw new Error(`Baseline application returned unexpected status: ${JSON.stringify(baselineBootResult)}`);
-            }
-        } else {
-            console.log('  [NOTICE] Baseline worktree not found at', baselineRepoDir);
-            console.log('  Exact prerequisite: Requires isolated checkout of 762c46e (`git worktree add ../soilfer-lims-baseline 762c46e`)');
+        const baselineBootResult = runArtifactHttpVerification(baselineServerDir, liveDbPath, 'BASELINE_PRE_MIGRATION');
+        console.log('  Baseline Application HTTP Startup (Pre-Migration) result:', baselineBootResult);
+        
+        // Strict assertions on returned records
+        if (baselineBootResult.healthStatus !== 200 || baselineBootResult.projectsStatus !== 200 || baselineBootResult.reportsStatus !== 200) {
+            throw new Error(`Baseline application returned unexpected status: ${JSON.stringify(baselineBootResult)}`);
         }
+        if (baselineBootResult.projectsCount !== 1 || baselineBootResult.firstProjectCode !== 'GTM-ALPHA') {
+            throw new Error(`Baseline projects assertion failed: expected 1 project with code GTM-ALPHA, got ${JSON.stringify(baselineBootResult)}`);
+        }
+        if (baselineBootResult.reportsCount !== 1 || baselineBootResult.firstReportId !== 'REP-001') {
+            throw new Error(`Baseline reports assertion failed: expected 1 report REP-001, got ${JSON.stringify(baselineBootResult)}`);
+        }
+        console.log('  Baseline record assertions PASSED: 1 project (GTM-ALPHA) and 1 report (REP-001) verified.');
 
         // Step 3: Production Backup Procedure with WAL Checkpoint
         console.log('\n[3/8] Executing SQLite WAL checkpoint & online backup procedure...');
@@ -185,10 +218,19 @@ async function runRehearsal() {
         // Step 5: Upgraded Candidate Application Startup (fe02e75) on Upgraded DB
         console.log('\n[5/8] Starting candidate application artifact (fe02e75) against upgraded database...');
         const upgradedBootResult = runArtifactHttpVerification(candidateServerDir, liveDbPath, 'UPGRADED_CANDIDATE');
-        console.log('  Upgraded Application HTTP Startup PASSED:', upgradedBootResult);
+        console.log('  Upgraded Application HTTP Startup result:', upgradedBootResult);
+        
+        // Strict assertions on upgraded records
         if (upgradedBootResult.healthStatus !== 200 || upgradedBootResult.projectsStatus !== 200 || upgradedBootResult.reportsStatus !== 200) {
             throw new Error(`Upgraded app returned error status: ${JSON.stringify(upgradedBootResult)}`);
         }
+        if (upgradedBootResult.projectsCount !== 1 || upgradedBootResult.firstProjectCode !== 'GTM-ALPHA' || upgradedBootResult.firstProjectTemplateId !== 'GENERIC_OPEN_INTAKE') {
+            throw new Error(`Upgraded projects assertion failed: expected 1 project GTM-ALPHA with templateId GENERIC_OPEN_INTAKE, got ${JSON.stringify(upgradedBootResult)}`);
+        }
+        if (upgradedBootResult.reportsCount !== 1 || upgradedBootResult.firstReportId !== 'REP-001') {
+            throw new Error(`Upgraded reports assertion failed: expected 1 report REP-001, got ${JSON.stringify(upgradedBootResult)}`);
+        }
+        console.log('  Upgraded record assertions PASSED: GTM-ALPHA migrated with templateId=GENERIC_OPEN_INTAKE; report REP-001 served.');
 
         // Step 6: Rollback Rehearsal with Tested WAL/Sidecar-Safe File Replacement
         console.log('\n[6/8] Simulating operational rollback via backup restore (with WAL/sidecar cleanup)...');
@@ -221,20 +263,24 @@ async function runRehearsal() {
 
         // Step 7: Boot Baseline Application Artifact (762c46e) Against Restored Baseline DB
         console.log('\n[7/8] Booting baseline application artifact (762c46e) in isolated worktree against restored DB...');
-        let baselinePostRollbackResult = null;
-        if (fs.existsSync(path.join(baselineServerDir, 'app.js'))) {
-            baselinePostRollbackResult = runArtifactHttpVerification(baselineServerDir, liveDbPath, 'BASELINE_POST_ROLLBACK');
-            console.log('  Baseline Application HTTP Startup (Post-Rollback) PASSED:', baselinePostRollbackResult);
-            if (baselinePostRollbackResult.healthStatus !== 200 || baselinePostRollbackResult.projectsStatus !== 200 || baselinePostRollbackResult.reportsStatus !== 200) {
-                throw new Error(`Baseline application post-rollback returned unexpected status: ${JSON.stringify(baselinePostRollbackResult)}`);
-            }
-        } else {
-            console.log('  [NOTICE] Baseline worktree not found at', baselineRepoDir);
-            console.log('  Exact prerequisite: Requires isolated checkout of 762c46e (`git worktree add ../soilfer-lims-baseline 762c46e`)');
+        const baselinePostRollbackResult = runArtifactHttpVerification(baselineServerDir, liveDbPath, 'BASELINE_POST_ROLLBACK');
+        console.log('  Baseline Application HTTP Startup (Post-Rollback) result:', baselinePostRollbackResult);
+        
+        // Strict assertions on post-rollback baseline records
+        if (baselinePostRollbackResult.healthStatus !== 200 || baselinePostRollbackResult.projectsStatus !== 200 || baselinePostRollbackResult.reportsStatus !== 200) {
+            throw new Error(`Baseline application post-rollback returned unexpected status: ${JSON.stringify(baselinePostRollbackResult)}`);
         }
+        if (baselinePostRollbackResult.projectsCount !== 1 || baselinePostRollbackResult.firstProjectCode !== 'GTM-ALPHA') {
+            throw new Error(`Baseline post-rollback projects assertion failed: expected 1 project GTM-ALPHA, got ${JSON.stringify(baselinePostRollbackResult)}`);
+        }
+        if (baselinePostRollbackResult.reportsCount !== 1 || baselinePostRollbackResult.firstReportId !== 'REP-001') {
+            throw new Error(`Baseline post-rollback reports assertion failed: expected 1 report REP-001, got ${JSON.stringify(baselinePostRollbackResult)}`);
+        }
+        console.log('  Baseline post-rollback record assertions PASSED: 1 project (GTM-ALPHA) and 1 report (REP-001) verified.');
 
-        // Step 8: Post-Deploy Read-Only Route Verification Protocol Checklist
-        console.log('\n[8/8] Verified Post-Deploy Read-Only Routes (Validated against actual Express routers):');
+        // Step 8: Proposed Post-Deploy Read-Only Verification Route Protocol (Checklist)
+        console.log('\n[8/8] Proposed Post-Deploy Read-Only Verification Route Protocol:');
+        console.log('  (Checklist for production verification; endpoints are validated against router declarations, not executed on live environment in this rehearsal)');
         console.log('  - SUPER_ADMIN: GET /api/users (200), GET /api/labs (200)');
         console.log('  - LAB_MANAGER: GET /api/dashboard/live (200), GET /api/dashboard/queues/manager.exceptions (200), GET /api/qc/batches (200), GET /api/submissions (200)');
         console.log('  - LAB_TECHNICIAN: GET /api/work (200), GET /api/workbench/queue (200), GET /api/reports/search (200)');
@@ -246,6 +292,7 @@ async function runRehearsal() {
         console.log('\n=== DUAL-ARTIFACT & ROLLBACK REHEARSAL COMPLETE: ALL PHASES SUCCESS ===');
         return {
             success: true,
+            baselineHead,
             baselineBootResult,
             upgradedBootResult,
             baselinePostRollbackResult,
@@ -265,7 +312,7 @@ function runArtifactHttpVerification(targetServerDir, dbPath, stageLabel) {
         const { createRequire } = require('module');
         const req = createRequire(${JSON.stringify(pkgPath)});
         process.env.DATABASE_PATH = ${JSON.stringify(dbPath)};
-        process.env.DATABASE_URL = 'file:' + ${JSON.stringify(dbPath)};
+        process.env.DATABASE_URL = 'file:' + ${JSON.stringify(dbPath.replace(/\\\\/g, '/'))};
         process.env.NODE_ENV = 'test';
         process.env.DISABLE_BACKGROUND_JOBS = 'true';
         process.env.JWT_SECRET = 'test-secret-key-12345';
@@ -290,15 +337,18 @@ function runArtifactHttpVerification(targetServerDir, dbPath, stageLabel) {
             const resProjects = await request(app).get('/api/projects').set('Authorization', 'Bearer ' + tokenMgr);
             const resReports = await request(app).get('/api/reports/search').set('Authorization', 'Bearer ' + tokenMgr);
 
-            const projectsCount = Array.isArray(resProjects.body) ? resProjects.body.length : (resProjects.body?.projects?.length || 0);
-            const reportsCount = resReports.body?.reports?.length || 0;
+            const projectsList = Array.isArray(resProjects.body) ? resProjects.body : (resProjects.body?.projects || []);
+            const reportsList = resReports.body?.reports || [];
 
             console.log('${stageLabel}_OUTPUT:' + JSON.stringify({
                 healthStatus: resHealth.status,
                 projectsStatus: resProjects.status,
-                projectsCount,
+                projectsCount: projectsList.length,
+                firstProjectCode: projectsList[0]?.code || null,
+                firstProjectTemplateId: projectsList[0]?.templateId || null,
                 reportsStatus: resReports.status,
-                reportsCount
+                reportsCount: reportsList.length,
+                firstReportId: reportsList[0]?.id || null
             }));
 
             if (app.stopBackgroundSchedulers) app.stopBackgroundSchedulers();

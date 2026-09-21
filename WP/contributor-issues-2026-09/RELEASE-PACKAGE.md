@@ -13,13 +13,14 @@
 
 ## 1. Executive Summary & Production Status
 
-- **Status**: Code-complete, independently accepted across R1–R5, clean CI green, dual-artifact rehearsal verified in isolated worktree.
+- **Status**: Code-complete, independently accepted across R1–R5, clean CI green, dual-artifact rehearsal verified with strict record assertions.
 - **Production Safety Guarantee**: Zero writes, migrations, or role reassociations have been applied to live or development databases (`server/prisma/dev.db`).
 - **PR Status**: PR [#129](https://github.com/yigini/soilfer-lims/pull/129) remains in **draft** status and will NOT be merged without explicit release authorization.
-- **Running Production Runtime Inspection**:
+- **Running Production Runtime Inspection & Access Boundary**:
   - Probed live production host read-only via HTTP (`https://lims.yigini.net/api/health`): Process reports `status: "ok"`, `uptime: ~543352s` (~6.28 days continuous uptime, booted ~2026-09-15 15:10 UTC behind Apache/2 reverse proxy).
-  - Client bundle inspection: Built production client script is `index-Y9YXWdSC.js`. Analysis confirms it contains commit `ec0bff1` code (token desync classification `[AUTH] Ignored 401 from stale request with superseded token`) and strictly lacks candidate `fe02e75` additions (no `BatchInspectionModal`, no `navigationConfig.js`).
-  - Runtime Host Boundary: Windows development host has no active Docker engine daemon (`open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`) and no local Node services listening on web ports. The running production instance is hosted remotely on a Linux VPS. Without direct remote VPS SSH / Docker socket credentials in this workspace, the exact container image digest of the running production container cannot be inspected locally. Remote `main` (`762c46e`) is the intended baseline git branch, but direct container image verification on the production host remains an operations gate.
+  - Client bundle inspection: Built production client script is `index-Y9YXWdSC.js`. String analysis indicates presence of commit `ec0bff1` code (token desync classification `[AUTH] Ignored 401 from stale request with superseded token`) and absence of candidate additions. However, **public asset bundle strings are only an operational clue, not definitive proof of an exact running commit or image digest**.
+  - Deployment Access & Exact Blocker: Non-interactive SSH probe to `lims.yigini.net:22` (`46.19.33.37`) establishes TCP connection but fails authentication (`Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password)`). Local Windows host has no active Docker engine (`//./pipe/dockerDesktopLinuxEngine` absent) and no VPS root/container access. Therefore, direct read-only identification of the running container image digest (`docker inspect`) cannot be performed from this workspace.
+  - Operational Gate: Identifying and preserving the exact running rollback artifact on the production host is an operational prerequisite to be performed by server administrators during the authorized deployment window, without restarting the live server solely to prove identity.
 
 ---
 
@@ -27,70 +28,73 @@
 
 The full rehearsal script was executed at [`release_rollback_rehearsal.cjs`](release_rollback_rehearsal.cjs). Raw captured output is preserved in [`rehearsal_output.log`](rehearsal_output.log).
 
-### 2.1 Pre-Migration Checksums & Genuine Baseline Schema
-The synthetic legacy database was initialized using the genuine baseline `762c46e` schema (derived directly from `schema.prisma` in an isolated git worktree, **not** simulated by column deletion). Baseline schema state was verified to contain zero additive Project columns and zero additive indices.
+### 2.1 Rehearsal Environment & Runtime Prerequisites
+- **Node.js Runtime**: v20.x or v24.x (rehearsal verified on Node.js v24.13.0).
+- **Prisma Schema Engine**: Uses local `@prisma/engines` schema engine binary from `server/node_modules`.
+- **Isolated Baseline Worktree**: Must exist at `../soilfer-lims-baseline` checked out to `762c46e` with generated baseline Prisma client (`server/prisma_client`). Fails closed immediately if missing or if `git rev-parse HEAD` does not match `762c46e`.
+- **Environment & Path Isolation**: Executes in a dedicated ephemeral subdirectory (`server/.tmp_rehearsal_*`) using forward-slash SQLite URLs (`file:...`) and isolated environment variables, eliminating root `prisma.config.ts` adapter path collisions.
+
+### 2.2 Pre-Migration Checksums & Genuine Baseline Schema
+The synthetic legacy database was initialized using the genuine baseline `762c46e` schema (extracted directly from `git show 762c46e:server/prisma/schema.prisma` in an isolated ephemeral directory, **not** simulated by column deletion). Baseline schema state was verified to contain zero additive Project columns and zero additive indices.
 
 Pre-migration SHA256 hashes of populated table contents across all 9 domains:
 
 ```json
 {
-  "Lab": "e85e08c538b629b45827a66cda4b37765cffcc0e07165beab0eb0ae93ce767aa",
-  "Project": "68973e1299a3dffc5eadb0821bbb9c79526661023540296cfa95f22e79754373",
-  "User": "b03850744583cdf25b900fd34bd0ddd81a6c05300bc5a2228a3e798689e8235d",
-  "Sample": "6082a115a2589e4643cab9ec16e3fb52429e37b50b25102632060cfeaf2c3edb",
-  "WorkItem": "0380bff83a737ab5c1977191c9ec425b40a8ed2f8ab392220d48716ab7c3841c",
-  "Result": "afdff3841d5c74c92003656e767e89a814dea80a81942235201e7d7b8221a7c1",
-  "Report": "9379456f6687350b032958f7b376d519fc23b8de110abae488132dcdde78cd44",
-  "ReportShareLink": "701b8cd757fb8fd0a52e27ef6f74e0b524af8926f3b4ad41869bf4a725faf797",
-  "AuditLog": "48074ce8ac65057ad88ed6a5082355245c5b3bdf5843ea2946c2b95b0496c5c1"
+  "Lab": "a58f4613dbc300fbd8db0bd43d33ebb04e54f8f903208cc04971e09c3b9a8e62",
+  "Project": "482e4c9f5cca1ff1e1cd3c1f1e10bb40fbf1ca315c421459e28dd228751c5b8b",
+  "User": "179f724dfaf0674cc5aed3d36e9b114349fd10f75cd83d5bb4f8e441c5bd4b7f",
+  "Sample": "71e8ccc91258f6861d32cd4a854a7f691621c28f9692b00e0acd5cdee441b935",
+  "WorkItem": "289e5a86c4431c5a22aab1f11828299cf1a57fbcae10ee508a3146416c05d591",
+  "Result": "8e0a35ce323d8966fb768f8c0015d75d3d50fbce897432453db943d676adccde",
+  "Report": "923cdf4792d16d7301f121df973934d70c603a8b7e8276517dc8b3eecef5e3f9",
+  "ReportShareLink": "1c29dbcd4242b5f22e9f80eb81bef6d79b22a9e46096375ad6e0dbf27f31f59f",
+  "AuditLog": "23a9209a861e9efdc2714f7e1cf3c672048efd1e8d1c7390f0f1478377fa2a6c"
 }
 ```
 
-### 2.2 Baseline Application Artifact HTTP Startup (Pre-Migration)
-- Booted baseline application artifact (`762c46e`) in an isolated child process using its own baseline Prisma client against the baseline database.
+### 2.3 Baseline Application Artifact HTTP Startup (Pre-Migration)
+- Verified baseline worktree HEAD commit strictly matches `762c46e` (fails closed if missing or mismatched).
+- Booted baseline Express app (`762c46e`) in an isolated child process using its own baseline Prisma client against the baseline database.
 - Executed real authenticated HTTP requests:
   - `GET /api/health` -> HTTP 200 (`{ status: "ok" }`)
-  - `GET /api/projects` -> HTTP 200 (returns 1 authorized project)
-  - `GET /api/reports/search` -> HTTP 200 (returns 1 authorized report)
-- Result: `BASELINE_PRE_MIGRATION_STARTUP_OK: {"healthStatus":200,"projectsStatus":200,"projectsCount":1,"reportsStatus":200,"reportsCount":1}`.
+  - `GET /api/projects` -> HTTP 200
+  - `GET /api/reports/search` -> HTTP 200
+- **Record Assertions PASSED**: Verified exactly 1 project returned with code `GTM-ALPHA` (additive `templateId` is null/absent); verified exactly 1 published report returned (`REP-001`).
 
-### 2.3 SQLite Online Backup & WAL Checkpoint
+### 2.4 SQLite Online Backup & WAL Checkpoint
 - Checkpointed WAL to base file (`PRAGMA wal_checkpoint(TRUNCATE)`).
 - Took SQLite online backup via `db.backup()`.
 - Verified backup integrity: `PRAGMA integrity_check` returned `ok`, `PRAGMA foreign_key_check` returned 0 violations. Backup size: 909,312 bytes.
 
-### 2.4 Additive DDL Application & 100% Byte Conservation
+### 2.5 Additive DDL Application & 100% Byte Conservation
 - Executed `migrateProjectTemplatesAndPolicy(liveDbPath, { dryRun: false })`.
 - Result: `success: true, applied: true, addedColumns: ['templateId', 'templateVersion', 'policyConfig', 'programmeCode', 'parentProjectId'], createdIndex: true, totalProjects: 2`.
 - Post-migration SHA256 hashes of all non-Project tables (`Lab`, `User`, `Sample`, `WorkItem`, `Result`, `Report`, `ReportShareLink`, `AuditLog`) matched pre-migration hashes byte-for-byte (100% conservation).
 - Legacy SELECT query (`SELECT id, code, name, status, projectType FROM Project`) succeeded with 2 projects returned and zero errors.
 
-### 2.5 Upgraded Application Artifact HTTP Startup (fe02e75)
+### 2.6 Upgraded Application Artifact HTTP Startup (fe02e75)
 - Booted upgraded Express app in an isolated child process against the upgraded database.
 - Executed real authenticated HTTP requests:
   - `GET /api/health` -> HTTP 200
-  - `GET /api/projects` -> HTTP 200 (returns 1 authorized project with new schema)
-  - `GET /api/reports/search` -> HTTP 200 (returns 1 authorized report)
-- Result: `UPGRADED_CANDIDATE_OUTPUT: {"healthStatus":200,"projectsStatus":200,"projectsCount":1,"reportsStatus":200,"reportsCount":1}`.
+  - `GET /api/projects` -> HTTP 200
+  - `GET /api/reports/search` -> HTTP 200
+- **Record Assertions PASSED**: Verified 1 project returned with code `GTM-ALPHA` and migrated `templateId: "GENERIC_OPEN_INTAKE"`; verified 1 published report returned (`REP-001`).
 
-### 2.6 Rollback Restore & WAL Sidecar Cleanup
+### 2.7 Rollback Restore & WAL Sidecar Cleanup
 - Cleanly deleted sidecar files (`soilfer_prod_sim.db-wal` and `soilfer_prod_sim.db-shm`) prior to file replacement to eliminate stale WAL replay corruption.
 - Target database file was overwritten with the verified pre-migration backup snapshot.
 - Post-restore verification:
   - Additive columns (`templateId`, `templateVersion`, `policyConfig`, `programmeCode`, `parentProjectId`) and index `Project_parentProjectId_idx` were confirmed absent.
   - SHA256 checksums across all 9 tables matched initial pre-migration checksums 100%.
 
-### 2.7 Baseline Application Artifact HTTP Startup (Post-Rollback)
-- Booted baseline application artifact (`762c46e`) in an isolated child process against the rolled-back database.
+### 2.8 Baseline Application Artifact HTTP Startup (Post-Rollback)
+- Booted baseline Express app (`762c46e`) in an isolated child process against the rolled-back database.
 - Executed real authenticated HTTP requests:
   - `GET /api/health` -> HTTP 200
-  - `GET /api/projects` -> HTTP 200 (returns 1 authorized project)
-  - `GET /api/reports/search` -> HTTP 200 (returns 1 authorized report)
-- Result: `BASELINE_POST_ROLLBACK_OUTPUT: {"healthStatus":200,"projectsStatus":200,"projectsCount":1,"reportsStatus":200,"reportsCount":1}`.
-
-### 2.8 Verification Boundary & Operational Constraints
-- **Dual-Artifact Startup**: **VERIFIED** in isolated checkout worktree (`soilfer-lims-baseline` at `762c46e` and candidate workspace at `fe02e75`) against genuine baseline and upgraded schemas.
-- **Production Host Runtime**: **UNVERIFIED from host environment**. The running production instance on `lims.yigini.net` is external/remote. While external HTTP probes confirm an uptime of ~6.28 days and asset parity with `ec0bff1` / `762c46e`, direct container image digest verification requires SSH/Docker access to the production host.
+  - `GET /api/projects` -> HTTP 200
+  - `GET /api/reports/search` -> HTTP 200
+- **Record Assertions PASSED**: Verified 1 project returned with code `GTM-ALPHA` (additive `templateId` confirmed absent/null); verified 1 published report returned (`REP-001`).
 
 ---
 
@@ -146,9 +150,10 @@ If postflight verification fails prior to reopening public writes:
 
 ---
 
-## 4. Post-Deploy Read-Only Verification Route Protocol
+## 4. Proposed Post-Deploy Read-Only Verification Route Protocol (Checklist)
 
-All endpoints below have been verified against the actual route declarations in `server/routes/*.js` and `server/app.js`:
+> [!NOTE]
+> The endpoints below represent the proposed post-deployment read-only verification checklist. All routes have been validated against actual Express router declarations in `server/routes/*.js` and `server/app.js`. This checklist is **not** executed against the live production environment during rehearsals.
 
 | Role | Validated Endpoint | Router File | Expected Result |
 |---|---|---|---|
@@ -221,7 +226,7 @@ The following three tracks remain open governance/field gates and do NOT block c
 ## 7. Concrete Release Recommendation
 
 > [!IMPORTANT]
-> **Production Release Readiness Boundary**: Technical release criteria for candidate code `fe02e7589205bb6a8d085b93be573982f13ec45d` are fully satisfied and rehearsed in an isolated worktree environment (including dual-artifact baseline `762c46e` startup and candidate `fe02e75` startup). However, **mandatory operational release readiness is NOT complete while baseline application startup on the actual production host environment remains UNVERIFIED**. Direct host container image verification on the production VPS and staging dry-run validation remain external deployment prerequisites.
+> **Production Release Readiness Boundary**: Technical release criteria for candidate code `fe02e7589205bb6a8d085b93be573982f13ec45d` are fully satisfied and rehearsed in an isolated worktree environment (including dual-artifact baseline `762c46e` startup and candidate `fe02e75` startup with strict record assertions). However, **mandatory operational release readiness is NOT complete while baseline application startup on the actual production host environment remains UNVERIFIED**. Direct host container image verification on the production VPS and staging dry-run validation remain external deployment prerequisites.
 
 - **Tested Candidate Code Commit**: `fe02e7589205bb6a8d085b93be573982f13ec45d` (PR #129 code base).
 - **Draft PR Status**: PR [#129](https://github.com/yigini/soilfer-lims/pull/129) remains held in **draft** status and must NOT be merged without an approved deployment maintenance window.
