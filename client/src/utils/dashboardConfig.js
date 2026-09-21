@@ -84,7 +84,7 @@ export function getRoleConfig(role, t = (k, d) => d) {
             title: t('dashboard.roles.labManager.title', 'Laboratory overview'),
             subtitle: t('dashboard.roles.labManager.subtitle', 'Intake approval, analytical assignment, submission review, and final result authorization.'),
             primaryAction: {
-                label: t('dashboard.roles.labManager.primaryAction', 'Open manager queue'),
+                label: t('dashboard.roles.labManager.primaryAction', 'Open manager task list'),
                 route: '/manager-queue'
             },
             shiftNotes: {
@@ -97,7 +97,7 @@ export function getRoleConfig(role, t = (k, d) => d) {
             },
             shortcuts: [
                 {
-                    label: t('dashboard.roles.labManager.shortcut1Label', 'Manager decision queue'),
+                    label: t('dashboard.roles.labManager.shortcut1Label', 'Manager task list'),
                     route: '/manager-queue',
                     description: t('dashboard.roles.labManager.shortcut1Desc', 'Review and approve pending work items')
                 },

@@ -106,6 +106,7 @@ function computeItemStockAggregation(item, now = new Date()) {
     let hasMissingQuantity = false;
     let missingQuantityLotCount = 0;
     let usableNumericLots = 0;
+    let usableMissingQuantityLotCount = 0;
     let usableSum = 0;
 
     for (const lot of lots) {
@@ -119,6 +120,8 @@ function computeItemStockAggregation(item, now = new Date()) {
         if (lot.currentQuantity !== null && lot.currentQuantity !== undefined && !isNaN(lot.currentQuantity)) {
             usableSum += Number(lot.currentQuantity);
             usableNumericLots++;
+        } else {
+            usableMissingQuantityLotCount++;
         }
     }
 
@@ -132,13 +135,17 @@ function computeItemStockAggregation(item, now = new Date()) {
     // Usable stock:
     // If there are no usable lots: 0
     // If there are usable lots but NONE have a numeric quantity: null (unknown/missing, NOT zero)
-    // If at least one usable lot has numeric quantity: usableSum
+    // If at least one usable lot has numeric quantity: usableSum (known subtotal if other usable lots are missing)
     let usableStock = 0;
+    let isUsableStockSubtotal = false;
     if (usableLots.length > 0) {
         if (usableNumericLots === 0) {
             usableStock = null;
         } else {
             usableStock = usableSum;
+            if (usableMissingQuantityLotCount > 0) {
+                isUsableStockSubtotal = true;
+            }
         }
     }
 
@@ -155,7 +162,9 @@ function computeItemStockAggregation(item, now = new Date()) {
     const hasExpired = expiredLots.length > 0;
     const hasExpiredLots = hasExpired;
 
-    const isOutOfStock = usableLots.length === 0 || usableStock === 0;
+    // Out of stock can only be asserted if there are zero usable lots OR
+    // all usable lots have known quantities and sum to zero without any missing quantities
+    const isOutOfStock = usableLots.length === 0 || (usableStock === 0 && usableMissingQuantityLotCount === 0);
     const reorderPoint = Number(item.reorderPoint) || 0;
     const isLowStock = usableStock !== null && usableStock > 0 && reorderPoint > 0 && usableStock <= reorderPoint;
 
@@ -170,6 +179,9 @@ function computeItemStockAggregation(item, now = new Date()) {
         quarantinedLotCount: quarantinedLots.length,
         hasMissingQuantity,
         missingQuantityLotCount,
+        usableMissingQuantityLotCount,
+        hasMissingQuantityInUsableLots: usableMissingQuantityLotCount > 0,
+        isUsableStockSubtotal,
         nearestExpiry,
         isOutOfStock,
         isLowStock,

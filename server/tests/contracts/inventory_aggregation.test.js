@@ -198,6 +198,40 @@ describe('Inventory Stock Aggregation & Lifecycle Contracts (#125)', () => {
             expect(agg.availableLotCount).toBe(1);
             expect(agg.expiredLotCount).toBe(1);
         });
+
+        test('7b. Mixed known and unknown usable lots: 0 + null does not assert isOutOfStock', () => {
+            const item = {
+                id: 'item-mixed-unknown',
+                name: 'Buffer Solution pH 7.0',
+                unitOfMeasure: 'bottle',
+                reorderPoint: 5,
+                lots: [
+                    {
+                        id: 'lot-zero',
+                        lotNumber: 'L-ZERO',
+                        currentQuantity: 0,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    },
+                    {
+                        id: 'lot-uncounted',
+                        lotNumber: 'L-UNCOUNTED',
+                        currentQuantity: null,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    }
+                ]
+            };
+
+            const agg = computeItemStockAggregation(item, fixedNow);
+            // 0 is a known subtotal, but because one usable lot is uncounted (null),
+            // total is unknown; we must NOT declare the item OUT OF STOCK.
+            expect(agg.usableStock).toBe(0);
+            expect(agg.isUsableStockSubtotal).toBe(true);
+            expect(agg.hasMissingQuantity).toBe(true);
+            expect(agg.hasMissingQuantityInUsableLots).toBe(true);
+            expect(agg.isOutOfStock).toBe(false);
+        });
     });
 
     describe('HTTP Endpoints & Zero Side-Effects Contracts', () => {

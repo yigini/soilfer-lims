@@ -110,36 +110,126 @@ exports.resolveAnalysisGroup = resolveAnalysisGroup;
 function evaluateChecklistCompliance(checklist, options = {}) {
     const isWalkIn = Boolean(options.isWalkIn);
     const standardKeys = ['container', 'label', 'quantity', 'condition', 'coc'];
-    const items = (checklist && typeof checklist === 'object' && checklist.items) ? checklist.items : (checklist || {});
-    
-    // Check if checklist has any items or explicitly flagged nonConformance
-    const hasItems = Object.keys(items).length > 0;
-    const isExplicitNC = Boolean(checklist && checklist.nonConformance);
 
-    if (!hasItems && !isExplicitNC) {
-        return { isProvided: false, isComplete: false, isPassed: true, failedItems: [], unansweredItems: [], invalidNAItems: [] };
+    if (!checklist || typeof checklist !== 'object') {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
     }
 
+    const items = checklist.items !== undefined ? checklist.items : checklist;
+    if (!items || typeof items !== 'object') {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
+    }
+
+    const itemKeys = Object.keys(items);
+    const isExplicitNC = Boolean(checklist.nonConformance);
+
+    if (itemKeys.length === 0 && !isExplicitNC) {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
+    }
+
+    // Recognized aliases per criterion
+    const ALIAS_MAP = {
+        container: ['container', 'containerIntact', 'bagIntact'],
+        label: ['label', 'labelLegible'],
+        quantity: ['quantity', 'quantitySufficient', 'massAdequate'],
+        condition: ['condition', 'conditionGood', 'noLeakage'],
+        coc: ['coc', 'cocPresent']
+    };
+
+    const allRecognizedAliases = new Set([
+        ...Object.values(ALIAS_MAP).flat(),
+        'reason', 'nonConformance', 'notes', 'photos'
+    ]);
+
+    const unknownItems = itemKeys.filter(k => !allRecognizedAliases.has(k));
+
+    const resolvedItems = {};
     const failedItems = [];
     const unansweredItems = [];
     const invalidNAItems = [];
 
     for (const key of standardKeys) {
-        const item = items[key];
-        const status = item?.status;
-        if (!status) {
-            unansweredItems.push(key);
-        } else if (status === 'FAIL') {
-            failedItems.push({ key, note: item.note || '' });
-        } else if (status === 'NA') {
-            // N/A is valid only under configured rules:
-            // coc is permitted N/A (especially for walk-in or local drop-off)
-            // container, label, quantity, condition MUST NOT be N/A
-            if (key !== 'coc') {
-                invalidNAItems.push(key);
+        const aliases = ALIAS_MAP[key];
+        const evaluatedStatuses = [];
+        let note = '';
+
+        for (const alias of aliases) {
+            const val = items[alias];
+            if (val === undefined || val === null) continue;
+
+            if (typeof val === 'boolean') {
+                evaluatedStatuses.push(val ? 'PASS' : 'FAIL');
+            } else if (typeof val === 'string') {
+                const s = val.trim().toUpperCase();
+                if (s === 'PASS' || s === 'OK') evaluatedStatuses.push('PASS');
+                else if (s === 'FAIL') evaluatedStatuses.push('FAIL');
+                else if (s === 'NA' || s === 'N/A') evaluatedStatuses.push('NA');
+            } else if (typeof val === 'object') {
+                if (val.status) {
+                    const s = String(val.status).trim().toUpperCase();
+                    if (s === 'PASS' || s === 'OK') evaluatedStatuses.push('PASS');
+                    else if (s === 'FAIL') evaluatedStatuses.push('FAIL');
+                    else if (s === 'NA' || s === 'N/A') evaluatedStatuses.push('NA');
+                }
+                if (val.note) note = String(val.note);
             }
-        } else if (status !== 'PASS') {
+        }
+
+        if (evaluatedStatuses.length === 0) {
             unansweredItems.push(key);
+            resolvedItems[key] = { status: undefined };
+        } else {
+            // If any alias failed, fail closed!
+            let finalStatus;
+            if (evaluatedStatuses.includes('FAIL')) {
+                finalStatus = 'FAIL';
+            } else if (evaluatedStatuses.includes('NA')) {
+                finalStatus = 'NA';
+            } else if (evaluatedStatuses.every(s => s === 'PASS')) {
+                finalStatus = 'PASS';
+            } else {
+                finalStatus = 'FAIL';
+            }
+
+            resolvedItems[key] = { status: finalStatus, note };
+
+            if (finalStatus === 'FAIL') {
+                failedItems.push({ key, note });
+            } else if (finalStatus === 'NA') {
+                // N/A policy:
+                // coc is permitted N/A ONLY if isWalkIn === true
+                if (key === 'coc') {
+                    if (!isWalkIn) {
+                        invalidNAItems.push('coc');
+                    }
+                } else {
+                    invalidNAItems.push(key);
+                }
+            }
         }
     }
 
@@ -147,7 +237,7 @@ function evaluateChecklistCompliance(checklist, options = {}) {
         failedItems.push({ key: 'general', note: checklist.reason || 'General non-conformance flagged' });
     }
 
-    const isComplete = unansweredItems.length === 0;
+    const isComplete = unansweredItems.length === 0 && unknownItems.length === 0;
     const isPassed = isComplete && failedItems.length === 0 && invalidNAItems.length === 0;
 
     return {
@@ -156,7 +246,9 @@ function evaluateChecklistCompliance(checklist, options = {}) {
         isPassed,
         failedItems,
         unansweredItems,
-        invalidNAItems
+        invalidNAItems,
+        unknownItems,
+        resolvedItems
     };
 }
 exports.evaluateChecklistCompliance = evaluateChecklistCompliance;
@@ -274,6 +366,70 @@ exports.processIntake = async (req, res) => {
                     message: admission.reason,
                     exceptionRequired: Boolean(admission.exceptionRequired)
                 });
+            }
+        }
+
+        const isReject = decision === 'REJECTED' || decision === 'REJECT';
+        const isDraft = Boolean(req.body.isDraft);
+        const isFinalAcceptance = !isReject && !isDraft;
+
+        let compliance = null;
+        let complianceExceptionRecord = null;
+
+        if (isFinalAcceptance) {
+            compliance = evaluateChecklistCompliance(checklist, { isWalkIn: Boolean(isWalkIn) });
+
+            if (compliance.invalidNAItems.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INVALID_CHECKLIST_NA',
+                    code: 'INVALID_CHECKLIST_NA',
+                    message: `Not Applicable (N/A) is not permitted for criteria: ${compliance.invalidNAItems.join(', ')}.`,
+                    invalidItems: compliance.invalidNAItems
+                });
+            }
+
+            if (!compliance.isComplete) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    code: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    message: `Unanswered compliance checklist items: ${compliance.unansweredItems.join(', ')}. All items must be assessed before final acceptance.`,
+                    unansweredItems: compliance.unansweredItems
+                });
+            }
+
+            if (!compliance.isPassed) {
+                // Checklist has failed criteria: routine acceptance is strictly blocked.
+                // An authorized manager exception is mandatory.
+                const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
+                const targetProjectObj = sample ? (sample.project || (sample.projectId ? (await projectPolicyService.resolveProject(sample.projectId, prisma))?.project : null)) : (candidateProjectId ? (await projectPolicyService.resolveProject(candidateProjectId, prisma))?.project : null);
+
+                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                    rawExceptionRecord: req.body.exceptionRecord,
+                    rawExceptionReason: req.body.exceptionReason || (checklist && checklist.reason),
+                    authorizer: req.body.authorizer,
+                    approvalId: req.body.approvalId || req.body.approvalToken,
+                    actor: user,
+                    project: targetProjectObj,
+                    labId: user.labId,
+                    sampleId: sample ? sample.id : (originalId || null),
+                    channel: isWalkIn ? 'WALK_IN' : 'PHYSICAL_RECEIPT',
+                    prismaClient: prisma
+                });
+
+                if (!hasException || !exceptionRecord?.isStoredApprovalVerified) {
+                    return res.status(403).json({
+                        success: false,
+                        error: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        code: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        message: 'Sample has failed compliance checks. Acceptance requires laboratory manager authorization.',
+                        failedChecks: compliance.failedItems,
+                        exceptionRequired: true
+                    });
+                }
+
+                complianceExceptionRecord = exceptionRecord;
             }
         }
 
@@ -551,67 +707,13 @@ exports.processIntake = async (req, res) => {
         }
 
         // Final Acceptance Processing
-        // RC-Compliance: Compliance Checklist Assessment & Manager Exception Gate (#117, #113)
-        const compliance = evaluateChecklistCompliance(checklist, { isWalkIn });
-        let complianceExceptionRecord = null;
-
-        if (compliance.isProvided) {
-            if (compliance.invalidNAItems.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'INVALID_CHECKLIST_NA',
-                    code: 'INVALID_CHECKLIST_NA',
-                    message: `Not Applicable (N/A) is not permitted for criteria: ${compliance.invalidNAItems.join(', ')}.`,
-                    invalidItems: compliance.invalidNAItems
-                });
-            }
-
-            if (!compliance.isComplete) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
-                    code: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
-                    message: `Unanswered compliance checklist items: ${compliance.unansweredItems.join(', ')}. All items must be assessed before final acceptance.`,
-                    unansweredItems: compliance.unansweredItems
-                });
-            }
-
-            if (!compliance.isPassed) {
-                // Checklist has failed criteria: routine acceptance is strictly blocked.
-                // An authorized manager exception is mandatory.
-                const targetProjectObj = sample.project || (sample.projectId ? (await projectPolicyService.resolveProject(sample.projectId, prisma))?.project : null);
-                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
-                    rawExceptionRecord: req.body.exceptionRecord,
-                    rawExceptionReason: req.body.exceptionReason || (checklist && checklist.reason),
-                    authorizer: req.body.authorizer,
-                    approvalId: req.body.approvalId || req.body.approvalToken,
-                    actor: user,
-                    project: targetProjectObj,
-                    labId: user.labId,
-                    sampleId: sample.id,
-                    channel: isWalkIn ? 'WALK_IN' : 'PHYSICAL_RECEIPT',
-                    prismaClient: prisma
-                });
-
-                if (!hasException || !exceptionRecord?.isStoredApprovalVerified) {
-                    return res.status(403).json({
-                        success: false,
-                        error: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
-                        code: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
-                        message: 'Sample has failed compliance checks. Acceptance requires laboratory manager authorization.',
-                        failedChecks: compliance.failedItems,
-                        exceptionRequired: true
-                    });
-                }
-
-                complianceExceptionRecord = exceptionRecord;
-                history.push({
-                    status: 'ADMITTED_WITH_EXCEPTION',
-                    changedBy: receivedBy,
-                    timestamp: now,
-                    note: `Admitted under manager exception: ${exceptionRecord.reason || 'Manager authorized compliance exception'} (Authorized by: ${exceptionRecord.verifiedAuthorizer})`
-                });
-            }
+        if (complianceExceptionRecord) {
+            history.push({
+                status: 'ADMITTED_WITH_EXCEPTION',
+                changedBy: receivedBy,
+                timestamp: now,
+                note: `Admitted under manager exception: ${complianceExceptionRecord.reason || 'Manager authorized compliance exception'} (Authorized by: ${complianceExceptionRecord.verifiedAuthorizer})`
+            });
         }
 
         if (analysisRemovals && analysisRemovals.length > 0 && !justification) {

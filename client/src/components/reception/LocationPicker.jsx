@@ -14,13 +14,16 @@ import {
     ShieldQuestion,
     AlertTriangle,
     CheckCircle2,
-    Loader2
+    Loader2,
+    Maximize2,
+    Minimize2,
+    Layers
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { parseCoordinates } from '../../utils/coordParser';
 import { useLanguage } from '../../context/LanguageContext';
-import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
+import { OSM_TILE_CONFIG, SATELLITE_TILE_CONFIG } from '../../utils/mapConfig';
 
 // Fix Leaflet marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -175,14 +178,23 @@ const LocationPicker = ({
     // Confidence override tracking
     const [isConfidenceOverridden, setIsConfidenceOverridden] = useState(false);
 
-    // Map availability and bounded retry tracking (Refs #110)
+    // Map availability and bounded retry tracking (Refs #110, #114)
     const { t } = useLanguage?.() || { t: (k, d) => d };
     const [mapUnavailable, setMapUnavailable] = useState(false);
+    const [layer, setLayer] = useState('osm'); // 'osm' | 'satellite'
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const [tileRetryKey, setTileRetryKey] = useState(0);
+    const mapContainerRef = useRef(null);
     const tileErrorCountRef = useRef(0);
 
     const handleTileError = () => {
         tileErrorCountRef.current += 1;
+        if (layer === 'satellite') {
+            console.warn('Satellite tiles unavailable, falling back to standard map');
+            setLayer('osm');
+            tileErrorCountRef.current = 0;
+            return;
+        }
         if (tileErrorCountRef.current >= 2) {
             setMapUnavailable(true);
         }
@@ -198,6 +210,27 @@ const LocationPicker = ({
         setMapUnavailable(false);
         setTileRetryKey(prev => prev + 1);
     };
+
+    const toggleFullscreen = () => {
+        if (!mapContainerRef.current) return;
+        if (!document.fullscreenElement) {
+            mapContainerRef.current.requestFullscreen?.().catch(err => {
+                console.warn('Fullscreen request failed', err);
+            });
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen?.().catch(err => console.warn(err));
+            setIsFullscreen(false);
+        }
+    };
+
+    useEffect(() => {
+        const handleFsChange = () => {
+            setIsFullscreen(Boolean(document.fullscreenElement));
+        };
+        document.addEventListener('fullscreenchange', handleFsChange);
+        return () => document.removeEventListener('fullscreenchange', handleFsChange);
+    }, []);
 
     const hasErr = (key) => errors.some(e => e.key === key);
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
@@ -755,9 +788,41 @@ const LocationPicker = ({
                     </div>
 
                     {/* STATIC MAP CONTAINER - PREVENTS PAGE SHIFT */}
-                    <div className="h-64 w-full rounded-xl overflow-hidden border border-sf-divider relative z-0 shadow-inner bg-sf-surface">
+                    <div
+                        ref={mapContainerRef}
+                        className={`w-full rounded-xl overflow-hidden border border-sf-divider relative z-0 shadow-inner bg-sf-surface ${
+                            isFullscreen ? 'fixed inset-0 z-[9999] h-screen w-screen rounded-none' : 'h-64'
+                        }`}
+                    >
+                        {/* Map Controls: Layer Switcher & Fullscreen Button */}
+                        <div className="absolute top-2 right-2 z-[1000] flex items-center gap-1.5 pointer-events-auto bg-sf-surface/90 dark:bg-sf-surface/90 backdrop-blur-xs p-1 rounded-lg border border-sf-divider shadow-sm">
+                            <button
+                                type="button"
+                                onClick={() => setLayer(prev => prev === 'osm' ? 'satellite' : 'osm')}
+                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition-colors ${
+                                    layer === 'satellite'
+                                        ? 'bg-indigo-600 text-white shadow-xs'
+                                        : 'text-sf-muted hover:text-sf-text hover:bg-sf-raised'
+                                }`}
+                                title={layer === 'satellite' ? t('map.switchToStandard', 'Switch to Standard Map') : t('map.switchToSatellite', 'Switch to Satellite Imagery')}
+                                aria-label="Toggle map layer"
+                            >
+                                <Layers size={13} />
+                                <span>{layer === 'satellite' ? t('map.satellite', 'Satellite') : t('map.standard', 'Standard')}</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={toggleFullscreen}
+                                className="p-1.5 rounded text-sf-muted hover:text-sf-text hover:bg-sf-raised transition-colors"
+                                title={isFullscreen ? t('map.exitFullscreen', 'Exit Fullscreen') : t('map.fullscreen', 'Toggle Fullscreen')}
+                                aria-label="Toggle fullscreen"
+                            >
+                                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                            </button>
+                        </div>
+
                         {mapUnavailable && (
-                            <div className="absolute top-2 left-2 right-2 z-[1000] bg-amber-500/90 dark:bg-amber-900/90 backdrop-blur-xs border border-amber-600 text-white dark:text-amber-100 px-3 py-2 rounded-lg text-xs shadow flex items-center justify-between gap-2 animate-fadeIn pointer-events-auto">
+                            <div className="absolute top-2 left-2 right-28 z-[1000] bg-amber-500/90 dark:bg-amber-900/90 backdrop-blur-xs border border-amber-600 text-white dark:text-amber-100 px-3 py-2 rounded-lg text-xs shadow flex items-center justify-between gap-2 animate-fadeIn pointer-events-auto">
                                 <div className="flex items-center gap-2 min-w-0">
                                     <AlertTriangle size={14} className="shrink-0 text-white dark:text-amber-200" />
                                     <span className="truncate">{t('common.mapUnavailable', 'Map temporarily unavailable. You can still enter coordinates.')}</span>
@@ -774,12 +839,12 @@ const LocationPicker = ({
                         <MapContainer center={completeCoords || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                             {!mapUnavailable && (
                                 <TileLayer
-                                    key={tileRetryKey}
-                                    attribution={OSM_TILE_CONFIG.attribution}
-                                    url={OSM_TILE_CONFIG.url}
-                                    referrerPolicy={OSM_TILE_CONFIG.referrerPolicy}
-                                    maxNativeZoom={OSM_TILE_CONFIG.maxNativeZoom}
-                                    maxZoom={OSM_TILE_CONFIG.maxZoom}
+                                    key={`${layer}-${tileRetryKey}`}
+                                    attribution={(layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG).attribution}
+                                    url={(layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG).url}
+                                    referrerPolicy={(layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG).referrerPolicy}
+                                    maxNativeZoom={(layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG).maxNativeZoom}
+                                    maxZoom={(layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG).maxZoom}
                                     eventHandlers={{
                                         tileerror: handleTileError,
                                         tileload: handleTileLoad

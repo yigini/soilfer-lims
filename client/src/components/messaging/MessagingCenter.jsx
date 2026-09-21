@@ -102,7 +102,7 @@ const MessagingCenter = ({ initialMessageId }) => {
         setComposeData({
             toUserId: activeFolder === 'SENT' ? msg.recipientId : msg.senderId,
             subject: msg.subject.startsWith('Re:') ? msg.subject : `Re: ${msg.subject}`,
-            body: `\n\n\n--------------------------------\nOn ${new Date(msg.createdAt).toLocaleString()}, ${msg.senderName} wrote:\n> ${msg.body.replace(/\n/g, '\n> ')}`
+            body: `\n\n\n--------------------------------\nOn ${new Date(msg.createdAt).toLocaleString()}, ${msg.senderName || msg.sender?.name || msg.sender?.username || 'Unknown'} wrote:\n> ${msg.body.replace(/\n/g, '\n> ')}`
         });
         setIsComposing(true);
         setSelectedMessage(null);
@@ -219,7 +219,9 @@ const MessagingCenter = ({ initialMessageId }) => {
     // ── Render Message List Item ──────────────────────────────────
     const renderMessageItem = (msg) => {
         const isSelected = selectedMessage?.id === msg.id;
-        const otherUser = activeFolder === 'SENT' || activeFolder === 'DRAFT' ? msg.recipientName : msg.senderName;
+        const otherUser = (activeFolder === 'SENT' || activeFolder === 'DRAFT')
+            ? (msg.recipientName || msg.recipient?.name || msg.recipient?.username || 'Unknown')
+            : (msg.senderName || msg.sender?.name || msg.sender?.username || 'Unknown');
 
         return (
             <div
@@ -637,7 +639,9 @@ const MessagingCenter = ({ initialMessageId }) => {
                                         <div className="space-y-1">
                                             <div className="font-medium text-gray-900 dark:text-gray-200 flex items-center gap-2">
                                                 <User size={16} className="text-gray-500" />
-                                                {activeFolder === 'SENT' ? `To: ${selectedMessage.recipientName}` : `From: ${selectedMessage.senderName}`}
+                                                {activeFolder === 'SENT'
+                                                    ? `To: ${selectedMessage.recipientName || selectedMessage.recipient?.name || selectedMessage.recipient?.username || 'Unknown'}`
+                                                    : `From: ${selectedMessage.senderName || selectedMessage.sender?.name || selectedMessage.sender?.username || 'Unknown'}`}
                                             </div>
                                             <div className="text-gray-500 flex items-center gap-2">
                                                 <Clock size={14} />

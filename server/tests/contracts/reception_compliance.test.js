@@ -390,4 +390,163 @@ describe('Reception Compliance Checklist & Manager Exception Contracts (#117, #1
         expect(recData.checklist.items.container.status).toBe('FAIL');
         expect(recData.checklist.items.label.status).toBe('PASS');
     });
+
+    // 10. Omitted checklist on final acceptance rejected with 400 with ZERO database mutations
+    it('rejects intake with 400 when checklist is omitted, asserting zero sample/history mutations', async () => {
+        const sampleId = 'SMP-OMIT-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+
+        const res = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', authReception)
+            .send({
+                originalId: sampleId,
+                isWalkIn: true,
+                decision: 'ACCEPTED',
+                receivedMass: 250.0
+                // checklist omitted entirely
+            });
+
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe('INCOMPLETE_COMPLIANCE_CHECKLIST');
+        expect(res.body.unansweredItems).toEqual(expect.arrayContaining(['container', 'label', 'quantity', 'condition', 'coc']));
+
+        // Assert ZERO database mutations
+        const sampleInDb = await prisma.sample.findFirst({ where: { originalId: sampleId } });
+        expect(sampleInDb).toBeNull();
+    });
+
+    // 11. Empty checklist items object rejected with 400 with ZERO database mutations
+    it('rejects intake with 400 when checklist items are empty object, asserting zero sample mutations', async () => {
+        const sampleId = 'SMP-EMPTY-ITEMS-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+
+        const res = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', authReception)
+            .send({
+                originalId: sampleId,
+                isWalkIn: true,
+                decision: 'ACCEPTED',
+                receivedMass: 250.0,
+                checklist: { items: {} }
+            });
+
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe('INCOMPLETE_COMPLIANCE_CHECKLIST');
+
+        const sampleInDb = await prisma.sample.findFirst({ where: { originalId: sampleId } });
+        expect(sampleInDb).toBeNull();
+    });
+
+    // 12. Prohibits CoC N/A when isWalkIn is false
+    it('rejects intake with 400 INVALID_CHECKLIST_NA when Chain of Custody is marked N/A on formal shipment (isWalkIn: false)', async () => {
+        const sampleId = 'SMP-NONWALKIN-COC-NA-' + SUFFIX;
+        trackedSampleIds.add(sampleId);
+
+        const checklist = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'NA', note: 'Courier drop-off marked NA' }
+            },
+            nonConformance: false
+        };
+
+        const res = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', authReception)
+            .send({
+                originalId: sampleId,
+                isWalkIn: false,
+                decision: 'ACCEPTED',
+                receivedMass: 300.0,
+                checklist
+            });
+
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe('INVALID_CHECKLIST_NA');
+        expect(res.body.invalidItems).toContain('coc');
+
+        // Zero mutation
+        const sampleInDb = await prisma.sample.findFirst({ where: { originalId: sampleId } });
+        expect(sampleInDb).toBeNull();
+    });
+
+    // 13. Pure function normalization and validation probes (#113 Review Probes)
+    describe('Pure Function evaluateChecklistCompliance Probes', () => {
+        const { evaluateChecklistCompliance } = require('../../controllers/receptionController');
+
+        test('Probe A: { items: { label: "FAIL" } } returns isComplete: false, isPassed: false, failedItems includes label', () => {
+            const res = evaluateChecklistCompliance({ items: { label: 'FAIL' } });
+            expect(res.isProvided).toBe(true);
+            expect(res.isComplete).toBe(false);
+            expect(res.isPassed).toBe(false);
+            expect(res.failedItems).toEqual(expect.arrayContaining([expect.objectContaining({ key: 'label' })]));
+            expect(res.unansweredItems).toEqual(expect.arrayContaining(['container', 'quantity', 'condition', 'coc']));
+        });
+
+        test('Probe B: { items: { labelLegible: true } } returns isComplete: false, isPassed: false, 4 unanswered', () => {
+            const res = evaluateChecklistCompliance({ items: { labelLegible: true } });
+            expect(res.isProvided).toBe(true);
+            expect(res.isComplete).toBe(false);
+            expect(res.isPassed).toBe(false);
+            expect(res.resolvedItems.label.status).toBe('PASS');
+            expect(res.unansweredItems).toEqual(expect.arrayContaining(['container', 'quantity', 'condition', 'coc']));
+        });
+
+        test('Probe C: { items: { unknown: true } } returns isComplete: false, isPassed: false, 5 unanswered, unknown tracked', () => {
+            const res = evaluateChecklistCompliance({ items: { unknown: true } });
+            expect(res.isComplete).toBe(false);
+            expect(res.isPassed).toBe(false);
+            expect(res.unknownItems).toContain('unknown');
+            expect(res.unansweredItems).toHaveLength(5);
+        });
+
+        test('Probe D: Fully assessed legacy boolean payload resolves to complete and passed', () => {
+            const res = evaluateChecklistCompliance({
+                items: {
+                    containerIntact: true,
+                    labelLegible: true,
+                    massAdequate: true,
+                    conditionGood: true,
+                    cocPresent: true
+                }
+            });
+            expect(res.isComplete).toBe(true);
+            expect(res.isPassed).toBe(true);
+            expect(res.failedItems).toHaveLength(0);
+            expect(res.unansweredItems).toHaveLength(0);
+        });
+
+        test('Probe E: Conflicting aliases fail closed (e.g. containerIntact: true but bagIntact: false)', () => {
+            const res = evaluateChecklistCompliance({
+                items: {
+                    containerIntact: true,
+                    bagIntact: false,
+                    labelLegible: true,
+                    massAdequate: true,
+                    conditionGood: true,
+                    cocPresent: true
+                }
+            });
+            expect(res.isComplete).toBe(true);
+            expect(res.isPassed).toBe(false);
+            expect(res.failedItems).toEqual(expect.arrayContaining([expect.objectContaining({ key: 'container' })]));
+        });
+
+        test('Probe F: Omitted / null / empty returns isProvided: false, isComplete: false, isPassed: false', () => {
+            const resNull = evaluateChecklistCompliance(null);
+            expect(resNull.isProvided).toBe(false);
+            expect(resNull.isComplete).toBe(false);
+            expect(resNull.isPassed).toBe(false);
+
+            const resEmpty = evaluateChecklistCompliance({ items: {} });
+            expect(resEmpty.isProvided).toBe(false);
+            expect(resEmpty.isComplete).toBe(false);
+            expect(resEmpty.isPassed).toBe(false);
+        });
+    });
 });

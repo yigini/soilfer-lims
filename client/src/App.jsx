@@ -114,52 +114,51 @@ const Layout = ({ children }) => {
         });
     };
 
+    // CANONICAL LABORATORY JOURNEY ORDER (#115)
     const navItems = [
         { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/' },
-        { icon: TestTube2, label: t('nav.samples'), path: '/samples' },
     ];
 
-    // ROLE-BASED NAVIGATION
+    // 1. Reception / Intake (Physical receipt and check-in)
+    if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
+        navItems.push({ icon: Package, label: t('nav.reception'), path: '/reception' });
+    }
 
-    // 1. TECHNICIAN
+    // 2. Samples Registry
+    navItems.push({ icon: TestTube2, label: t('nav.samples'), path: '/samples' });
+
+    // 3. Technician Work & Workbench
     if (user?.role === 'LAB_TECHNICIAN') {
         navItems.push({ icon: ClipboardList, label: t('nav.myWork', 'My Work'), path: '/my-work' });
         navItems.push({ icon: Beaker, label: t('nav.workbench', 'Workbench'), path: '/workbench' });
     }
 
-    // 2. MANAGER
+    // 4. Manager Task List (#116, #120)
     if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ icon: ShieldAlert, label: t('nav.managerQueue', 'Manager Queue'), path: '/manager-queue' });
+        navItems.push({ icon: ShieldAlert, label: t('nav.managerQueue', 'Manager Task List'), path: '/manager-queue' });
     }
 
-    // 3. INTAKE
-    if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ icon: Package, label: t('nav.reception'), path: '/reception' });
-    }
-
-    // GENERAL
-    if (user?.role !== 'SAMPLE_RECEPTION') {
-        navItems.push({ icon: Activity, label: t('nav.spectral'), path: '/spectral-library' });
-    }
-    navItems.push({ icon: FileText, label: t('nav.reports', 'Result Reports'), path: '/result-reports' });
-
-    if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ icon: User, label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
-    }
-
-    // Equipment — visible to technicians, managers, reception, and audit users
-    if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'AUDIT_USER'].includes(user?.role)) {
-        navItems.push({ icon: Monitor, label: t('nav.equipment'), path: '/equipment' });
-    }
-
-    // QA & Audit view
+    // 5. Quality Assurance & Audit view
     if (['AUDIT_USER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: ShieldAlert, label: t('nav.qa', 'Quality Assurance'), path: '/qa' });
+    }
+
+    // 6. Result Reports
+    navItems.push({ icon: FileText, label: t('nav.reports', 'Result Reports'), path: '/result-reports' });
+
+    // 7. Supporting Modules (Spectral, Inventory, Equipment, Projects, Management)
+    if (user?.role !== 'SAMPLE_RECEPTION') {
+        navItems.push({ icon: Activity, label: t('nav.spectral'), path: '/spectral-library' });
     }
 
     // Inventory — visible to technicians (view-only) + managers + admin
     if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'MASTER_USER'].includes(user?.role)) {
         navItems.push({ icon: Package, label: t('nav.inventory'), path: '/inventory' });
+    }
+
+    // Equipment — visible to technicians, managers, reception, and audit users
+    if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'AUDIT_USER'].includes(user?.role)) {
+        navItems.push({ icon: Monitor, label: t('nav.equipment'), path: '/equipment' });
     }
 
     if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'AUDIT_USER'].includes(user?.role)) {
@@ -168,6 +167,10 @@ const Layout = ({ children }) => {
 
     if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
         navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
+    }
+
+    if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({ icon: User, label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
     }
 
     if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role)) {

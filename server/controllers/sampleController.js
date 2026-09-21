@@ -110,7 +110,8 @@ exports.getSamples = async (req, res) => {
     const {
         page = 1, limit = 50, sort = 'attention', order = 'desc', search: qSearch,
         status: qStatus, projects: qProjects, countries: qCountries,
-        assignedLab: qAssignedLab, labs: qLabs, originalId: qOriginalId
+        assignedLab: qAssignedLab, labs: qLabs, originalId: qOriginalId,
+        view: qView
     } = req.query;
 
     try {
@@ -119,50 +120,45 @@ exports.getSamples = async (req, res) => {
         const limitNum = Math.min(parseInt(limit), 100); // Cap at 100
         const skip = (pageNum - 1) * limitNum;
 
-        // --- 1. BUILD WHERE CLAUSE ---
+        // --- 1. BUILD BASE WHERE CLAUSE ---
         const scopeGuard = require('../utils/scopeGuard');
 
         // Base lab-scoped query
-        let where = scopeGuard.buildScopedWhere(user, {}, {
+        let baseWhere = scopeGuard.buildScopedWhere(user, {}, {
             entityType: 'Sample',
             labField: 'labId',
             altLabField: 'assignedLab'
         });
 
-        // Status filter (most common)
-        if (qStatus) {
-            where.status = { in: qStatus.split(',').map(s => s.trim()) };
-        }
-
         // Lab filter - explicit override
         if (qLabs) {
             const list = qLabs.split(',').map(s => s.trim());
-            where.assignedLab = { in: list };
+            baseWhere.assignedLab = { in: list };
         }
 
         // Project filter
         if (qProjects) {
             const list = qProjects.split(',').map(s => s.trim());
-            where.projectCode = { in: list };
+            baseWhere.projectCode = { in: list };
         }
 
         // Country filter
         if (qCountries) {
             const list = qCountries.split(',').map(s => s.trim());
-            where.country = { in: list };
+            baseWhere.country = { in: list };
         }
 
         // Original ID exact match
         if (qOriginalId) {
-            where.originalId = qOriginalId;
+            baseWhere.originalId = qOriginalId;
         }
 
         // Search by originalId OR labId
         // SECURITY FIX: Wrap in AND to preserve scope guard OR conditions
         if (qSearch && qSearch.trim()) {
             const term = qSearch.trim();
-            if (!where.AND) where.AND = [];
-            where.AND.push({
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
                 OR: [
                     { originalId: { contains: term } },
                     { labId: { contains: term } }
@@ -170,10 +166,31 @@ exports.getSamples = async (req, res) => {
             });
         }
 
-        // Auto-hide uncollected EXPECTED samples (never sampled in field)
-        // Only applies when user hasn't explicitly filtered by status
-        // Hides any EXPECTED sample with no fieldMetadata and no metadata
-        if (!qStatus) {
+        let where = { ...baseWhere };
+
+        // Operational Views vs Status Separation (#120)
+        // Canonical operational views:
+        // - 'daily': Physically received & active lab samples (RECEIVED, ACCEPTED, PROCESSING, etc.)
+        // - 'expected': Field records awaiting reception (EXPECTED)
+        // - 'registry': Full field registry across all lifecycle stages
+        // Explicit status filter overrides view.
+        const ACTIVE_LAB_STATUSES = [
+            'RECEIVED', 'COLLECTED', 'ACCEPTED', 'PROCESSING',
+            'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED',
+            'RECEIVED_REJECTED', 'REJECTED'
+        ];
+
+        if (qStatus) {
+            where.status = { in: qStatus.split(',').map(s => s.trim()) };
+        } else if (qView === 'daily') {
+            where.status = { in: ACTIVE_LAB_STATUSES };
+        } else if (qView === 'expected') {
+            where.status = 'EXPECTED';
+        } else if (qView === 'registry') {
+            // Full registry: expose all statuses without filtering
+        } else {
+            // Default when neither status nor view is specified:
+            // Auto-hide uncollected EXPECTED samples (never sampled in field)
             where.NOT = {
                 AND: [
                     { status: 'EXPECTED' },
@@ -191,7 +208,7 @@ exports.getSamples = async (req, res) => {
         // For attention sort, we need work item statuses to compute rank
         const needsAttentionSort = safeSort === 'attention';
 
-        const [total, samples, statusCounts, projectCounts, countryCounts, labCounts] = await Promise.all([
+        const [total, samples, baseStatusCounts, projectCounts, countryCounts, labCounts] = await Promise.all([
             prisma.sample.count({ where }),
             // --- Phase 1: Lightweight ranking query (ALL matching rows, minimal fields) ---
             prisma.sample.findMany({
@@ -201,37 +218,54 @@ exports.getSamples = async (req, res) => {
             }),
             prisma.sample.groupBy({
                 by: ['status'],
-                where,
+                where: baseWhere,
                 _count: true
             }),
             // P1: Facets for project/country/lab
             prisma.sample.groupBy({
                 by: ['projectCode'],
-                where,
+                where: baseWhere,
                 _count: true
             }),
             prisma.sample.groupBy({
                 by: ['country'],
-                where,
+                where: baseWhere,
                 _count: true
             }),
             prisma.sample.groupBy({
                 by: ['assignedLab'],
-                where,
+                where: baseWhere,
                 _count: true
             })
         ]);
 
-        // --- 3. BUILD FACETS ---
+        // --- 3. BUILD FACETS & VIEW COUNTS ---
         const lifecycle = { EXPECTED: 0, RECEIVED: 0, ACCEPTED: 0, ONGOING: 0, COMPLETED: 0, HISTORY: 0, REJECTED: 0 };
-        statusCounts.forEach(sc => {
-            if (sc.status === 'EXPECTED') lifecycle.EXPECTED = sc._count;
-            else if (sc.status === 'RECEIVED') lifecycle.RECEIVED = sc._count;
-            else if (sc.status === 'ACCEPTED') lifecycle.ACCEPTED = sc._count;
-            else if (sc.status === 'RECEIVED_REJECTED' || sc.status === 'REJECTED') lifecycle.REJECTED = (lifecycle.REJECTED || 0) + sc._count;
-            else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sc.status)) lifecycle.ONGOING += sc._count;
-            else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) lifecycle.COMPLETED += sc._count;
-            else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) lifecycle.HISTORY += sc._count;
+        const views = { daily: 0, expected: 0, registry: 0 };
+
+        baseStatusCounts.forEach(sc => {
+            views.registry += sc._count;
+            if (sc.status === 'EXPECTED') {
+                lifecycle.EXPECTED = sc._count;
+                views.expected += sc._count;
+            } else if (sc.status === 'RECEIVED') {
+                lifecycle.RECEIVED = sc._count;
+                views.daily += sc._count;
+            } else if (sc.status === 'ACCEPTED') {
+                lifecycle.ACCEPTED = sc._count;
+                views.daily += sc._count;
+            } else if (sc.status === 'RECEIVED_REJECTED' || sc.status === 'REJECTED') {
+                lifecycle.REJECTED = (lifecycle.REJECTED || 0) + sc._count;
+                views.daily += sc._count;
+            } else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sc.status)) {
+                lifecycle.ONGOING += sc._count;
+                views.daily += sc._count;
+            } else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) {
+                lifecycle.COMPLETED += sc._count;
+                views.daily += sc._count;
+            } else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) {
+                lifecycle.HISTORY += sc._count;
+            }
         });
 
         // P1: Project/Country/Lab facets for advanced filters
@@ -372,7 +406,8 @@ exports.getSamples = async (req, res) => {
         res.json({
             data: enriched,
             meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
-            facets: { lifecycle, projects, countries, labs }
+            views,
+            facets: { lifecycle, projects, countries, labs, views }
         });
     } catch (err) {
         console.error("[getSamples] ERROR:", err);

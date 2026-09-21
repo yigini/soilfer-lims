@@ -32,6 +32,7 @@ const Samples = () => {
     if (searchParams.get('labId')) initialFilters.labId = searchParams.get('labId');
     if (searchParams.get('country')) initialFilters.country = searchParams.get('country');
 
+    const [view, setView] = useState(() => searchParams.get('view') || 'daily');
     const [search, setSearch] = useState(searchParams.get('search') || searchParams.get('q') || '');
     const [filters, setFilters] = useState(initialFilters);
     const [sort, setSort] = useState('attention');
@@ -73,6 +74,7 @@ const Samples = () => {
                 sort,
                 order,
                 search,
+                view,
                 ...filters
             };
             Object.keys(params).forEach(key => !params[key] && delete params[key]);
@@ -90,7 +92,18 @@ const Samples = () => {
         } finally {
             setLoading(false);
         }
-    }, [token, meta.page, meta.limit, sort, order, search, filters]);
+    }, [token, meta.page, meta.limit, sort, order, search, view, filters]);
+
+    const handleViewChange = (newView) => {
+        setView(newView);
+        // Clear quick status filter when changing views so the selected view takes effect
+        setFilters(prev => {
+            const next = { ...prev };
+            delete next.status;
+            return next;
+        });
+        setMeta(prev => ({ ...prev, page: 1 }));
+    };
 
     useEffect(() => {
         if (deletingIds.length === 0) return;
@@ -334,6 +347,9 @@ const Samples = () => {
                 page={meta.page}
                 pages={meta.pages}
                 onPageChange={handlePageChange}
+                view={view}
+                onViewChange={handleViewChange}
+                views={facets.views}
             />
 
             <SamplesTable

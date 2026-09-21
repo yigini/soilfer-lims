@@ -122,7 +122,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                     originalId: testOriginalId,
                     decision: 'ACCEPT',
                     receivedMass: 500,
-                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true },
+                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },
                     analysisGroupIds: ['pkg-test-ab']
                 });
 
@@ -144,7 +144,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                     originalId: testOriginalId,
                     decision: 'ACCEPT',
                     receivedMass: 500,
-                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true },
+                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },
                     analysisGroupIds: [12345]
                 });
 
@@ -160,7 +160,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                     originalId: testOriginalId,
                     decision: 'ACCEPT',
                     receivedMass: 500,
-                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true },
+                    checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },
                     analysisGroupIds: ['totally-unknown-pack-999']
                 });
 

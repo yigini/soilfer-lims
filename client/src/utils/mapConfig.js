@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Shared Map Provider Configurations
  *
  * OpenStreetMap Tile Usage Policy (https://operations.osmfoundation.org/policies/tiles/)
@@ -21,3 +21,45 @@ export const OSM_TILE_CONFIG = {
     maxNativeZoom: 19,
     maxZoom: 19
 };
+
+export const SATELLITE_TILE_CONFIG = {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    referrerPolicy: 'strict-origin',
+    maxNativeZoom: 19,
+    maxZoom: 19
+};
+
+/**
+ * Resolves map center coordinates following canonical precedence (#114):
+ * 1. Sample coordinates (if valid)
+ * 2. Laboratory coordinates (if valid)
+ * 3. Neutral fallback center [lat, lng]
+ */
+export function resolveMapCenter(sampleCoords, labCoords, fallback = [0, 20]) {
+    const parseCoord = (coords) => {
+        if (!coords) return null;
+        let lat, lng;
+        if (Array.isArray(coords) && coords.length >= 2) {
+            lat = parseFloat(coords[0]);
+            lng = parseFloat(coords[1]);
+        } else if (typeof coords === 'object') {
+            lat = parseFloat(coords.lat !== undefined ? coords.lat : coords.latitude);
+            lng = parseFloat(coords.lng !== undefined ? coords.lng : (coords.lon !== undefined ? coords.lon : coords.longitude));
+        }
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            return [lat, lng];
+        }
+        return null;
+    };
+
+    const sample = parseCoord(sampleCoords);
+    if (sample) return sample;
+
+    const lab = parseCoord(labCoords);
+    if (lab) return lab;
+
+    const defFallback = parseCoord(fallback);
+    return defFallback || [0, 20];
+}
+

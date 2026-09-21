@@ -13,6 +13,7 @@ import { useNotifications } from '../context/NotificationContext';
 import BatchInspectionModal from '../components/qc/BatchInspectionModal';
 
 const QUEUE_Tabs = {
+    EXCEPTIONS: 'exceptions',
     INTAKE: 'intake',
     ASSIGN: 'assign',
     REVIEW: 'review',
@@ -102,7 +103,11 @@ const ManagerQueue = () => {
     useEffect(() => {
         if (!laneParam && !userSelected && liveData?.kpis) {
             const { awaitingReview, unassignedTasks, pendingIntakes, pendingApproval } = liveData.kpis;
-            if (pendingApproval > 0) {
+            const exceptions = liveData?.kpis?.exceptionsCount || liveData?.kpis?.exceptionBatchCount || liveData?.metrics?.find(m => m.key === 'manager.exceptions')?.value || 0;
+            if (exceptions > 0) {
+                setActiveTab(QUEUE_Tabs.EXCEPTIONS);
+                setUserSelected(true);
+            } else if (pendingApproval > 0) {
                 setActiveTab(QUEUE_Tabs.APPROVE);
                 setUserSelected(true);
             } else if (awaitingReview > 0) {
@@ -127,6 +132,9 @@ const ManagerQueue = () => {
             let params = { page, limit: 20 };
 
             switch (activeTab) {
+                case QUEUE_Tabs.EXCEPTIONS:
+                    endpoint = '/api/dashboard/queues/manager.exceptions';
+                    break;
                 case QUEUE_Tabs.INTAKE:
                     endpoint = '/api/samples';
                     params.status = 'RECEIVED,COLLECTED';
@@ -149,22 +157,24 @@ const ManagerQueue = () => {
 
             const res = await axios.get(endpoint, { params });
 
-            if (res.data.rows && activeTab === QUEUE_Tabs.APPROVE) {
+            if (res.data.rows && (activeTab === QUEUE_Tabs.APPROVE || activeTab === QUEUE_Tabs.EXCEPTIONS)) {
                 const total = res.data.total || res.data.rows.length;
                 const limit = params.limit || 20;
                 setData(res.data.rows.map(r => ({
                     ...r,
-                    id: r.sampleId || r.key,
+                    id: r.id || r.batchId || r.key,
+                    batchId: r.batchId || r.id,
                     sampleId: r.sampleId || r.key,
                     labId: r.labId || null,
                     originalId: r.originalId || null,
                     sampleDisplayId: r.sampleDisplayId || r.title,
                     projectCode: r.projectCode || null,
-                    analysis: r.context,
+                    analysis: r.context || r.analysis,
                     status: r.status,
                     dryingStatus: r.dryingStatus,
                     preparationStatus: r.preparationStatus,
                     isEligibleForFinalApproval: r.isEligibleForFinalApproval,
+                    notes: r.notes || r.reason,
                     createdAt: r.createdAt || new Date().toISOString()
                 })));
                 setMeta({
@@ -313,6 +323,7 @@ const ManagerQueue = () => {
 
     // Tab badge counts from live data
     const tabCounts = {
+        exceptions: liveData?.kpis?.exceptionsCount || liveData?.kpis?.exceptionBatchCount || liveData?.metrics?.find(m => m.key === 'manager.exceptions')?.value || 0,
         intake: liveData?.kpis?.pendingIntakes || 0,
         assign: liveData?.kpis?.unassignedTasks || 0,
         review: liveData?.kpis?.awaitingReview || 0,
@@ -347,8 +358,8 @@ const ManagerQueue = () => {
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8" data-tour="manager-queue-container">
             <header className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Queue')}</h1>
-                    <p className="text-gray-500">{t('queue.subtitle', 'Operational Dashboard')}</p>
+                    <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Task List')}</h1>
+                    <p className="text-gray-500">{t('queue.subtitle', 'Pending Actionable Items & QC Exceptions')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
@@ -361,6 +372,7 @@ const ManagerQueue = () => {
             <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden min-h-[600px] flex flex-col">
                 {/* TABS */}
                 <div className="flex border-b border-sf-divider overflow-x-auto">
+                    <TabButton id={QUEUE_Tabs.EXCEPTIONS} icon={AlertTriangle} label={t('queue.tabExceptions', 'QC Exceptions')} />
                     <TabButton id={QUEUE_Tabs.INTAKE} icon={AlertOctagon} label={t('queue.tabIntake', 'New (Intake)')} />
                     <TabButton id={QUEUE_Tabs.ASSIGN} icon={UserPlus} label={t('queue.tabAssign', 'Assign Work')} />
                     <TabButton id={QUEUE_Tabs.REVIEW} icon={FileText} label={t('queue.tabReview', 'Review Submissions')} />
@@ -385,13 +397,13 @@ const ManagerQueue = () => {
                         <div className="mb-4 flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold border border-indigo-200 dark:border-indigo-800">
                             <div className="flex items-center gap-2">
                                 <Microscope size={16} />
-                                <span>Filtered by method: <strong>{selectedAnalysis}</strong></span>
+                                <span>{t('queue.filteredByMethod', 'Filtered by method: {method}', { method: selectedAnalysis })}</span>
                             </div>
                             <button
                                 onClick={handleClearAnalysisFilter}
-                                className="px-2 py-1 hover:bg-indigo-200 dark:hover:bg-indigo-900 rounded-lg transition-colors"
+                                className="px-2 py-1 hover:bg-indigo-200 dark:hover:bg-indigo-900 rounded-lg transition-colors cursor-pointer"
                             >
-                                Clear filter
+                                {t('queue.clearFilter', 'Clear filter')}
                             </button>
                         </div>
                     )}
@@ -405,7 +417,18 @@ const ManagerQueue = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.map(item => (
-                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} t={t} selectedAnalysis={selectedAnalysis} />
+                            <QueueCard
+                                key={item.id}
+                                item={item}
+                                type={activeTab}
+                                navigate={navigate}
+                                t={t}
+                                selectedAnalysis={selectedAnalysis}
+                                onInspectBatch={(batchId) => {
+                                    setSelectedBatchId(batchId);
+                                    setIsInspectionOpen(true);
+                                }}
+                            />
                         ))}
                     </div>
                 </div>
@@ -414,7 +437,7 @@ const ManagerQueue = () => {
                 {meta && meta.totalPages > 1 && (
                     <div className="px-6 py-4 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
                         <span className="text-sm text-gray-500">
-                            Page {meta.page} of {meta.totalPages} ({meta.total} {activeTab === QUEUE_Tabs.ASSIGN ? t('queue.tasks', 'tasks') : (activeTab === QUEUE_Tabs.REVIEW ? t('queue.submissions', 'submissions') : t('queue.items', 'items'))}{meta.cardCount && meta.cardCount !== meta.total ? ` across ${meta.cardCount} samples` : ''})
+                            {t('common.pagination', 'Page {page} of {totalPages}', { page: meta.page, totalPages: meta.totalPages })} ({meta.total} {activeTab === QUEUE_Tabs.EXCEPTIONS ? t('queue.batches', 'QC batches') : (activeTab === QUEUE_Tabs.ASSIGN ? t('queue.tasks', 'tasks') : (activeTab === QUEUE_Tabs.REVIEW ? t('queue.submissions', 'submissions') : t('queue.samples', 'samples')))}{meta.cardCount && meta.cardCount !== meta.total ? ` ${t('queue.acrossSamples', 'across {count} samples', { count: meta.cardCount })}` : ''})
                         </span>
                         <div className="flex gap-2">
                             <button
@@ -450,9 +473,16 @@ const ManagerQueue = () => {
 };
 
 // Internal Component for Card Rendering
-const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
+const QueueCard = ({ item, type, navigate, t, selectedAnalysis, onInspectBatch }) => {
     const getAnalysisDisplayName = useAnalysisNames();
     const config = {
+        exceptions: {
+            icon: AlertTriangle,
+            color: 'text-amber-600',
+            bg: 'bg-amber-100 dark:bg-amber-900/40',
+            label: t('queue.cardQcException', 'QC Exception'),
+            action: t('queue.cardInspectBatch', 'Inspect Batch')
+        },
         intake: {
             icon: FlaskConical,
             color: 'text-blue-600',
@@ -481,18 +511,29 @@ const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
             label: t('queue.cardFinalApproval', 'Final Approval'),
             action: t('queue.cardApprove', 'Approve')
         }
-    }[type];
+    }[type] || {
+        icon: AlertTriangle,
+        color: 'text-gray-600',
+        bg: 'bg-gray-100',
+        label: 'Item',
+        action: 'View'
+    };
 
     const Icon = config.icon;
 
-    const title = (type === 'assign' || type === 'review')
-        ? (item.labId || item.originalId || `Sample ${item.sampleId || item.id}`)
-        : (item.labId || item.originalId || item.sampleId || item.id);
-    const subtitle = type === 'assign'
-        ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
-        : (type === 'review' && item.isAggregated)
-            ? `${item.types?.map(t => getAnalysisDisplayName(t)).join('/') || ''} ${t('queue.cardReview', 'Review')}`
-            : (item.clientName || (item.analysis ? getAnalysisDisplayName(item.analysis) : t('queue.unknownClient', 'Unknown Client')));
+    const title = type === 'exceptions'
+        ? (item.sampleDisplayId || item.batchId || item.id || `QC Batch`)
+        : (type === 'assign' || type === 'review')
+            ? (item.labId || item.originalId || `Sample ${item.sampleId || item.id}`)
+            : (item.labId || item.originalId || item.sampleId || item.id);
+
+    const subtitle = type === 'exceptions'
+        ? (item.analysis ? getAnalysisDisplayName(item.analysis) : (item.notes || 'Unresolved QC Batch Exception'))
+        : type === 'assign'
+            ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
+            : (type === 'review' && item.isAggregated)
+                ? `${item.types?.map(t => getAnalysisDisplayName(t)).join('/') || ''} ${t('queue.cardReview', 'Review')}`
+                : (item.clientName || (item.analysis ? getAnalysisDisplayName(item.analysis) : t('queue.unknownClient', 'Unknown Client')));
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
@@ -502,9 +543,17 @@ const QueueCard = ({ item, type, navigate, t, selectedAnalysis }) => {
     else if (type === 'review') tabParam = 'tab=review&';
     const targetUrl = `/samples/${item.sampleId || item.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
 
+    const handleCardClick = () => {
+        if (type === 'exceptions') {
+            onInspectBatch?.(item.batchId || item.id);
+            return;
+        }
+        navigate(targetUrl);
+    };
+
     return (
         <button
-            onClick={() => navigate(targetUrl)}
+            onClick={handleCardClick}
             className="group bg-sf-surface rounded-xl border border-sf-divider shadow-sm hover:shadow-md hover:border-sf-emerald transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-sf-emerald"
             aria-label={`${config.label}: ${title}`}
         >

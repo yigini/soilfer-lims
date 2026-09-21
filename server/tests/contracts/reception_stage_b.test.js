@@ -160,7 +160,13 @@ describe('Stage B: Location, Provenance & Depth Contract (RC-05 - RC-11)', () =>
             isWalkIn: true,
             receivedMass: 250,
             moistureOnArrival: 'DRY',
-            checklist: { bagIntact: true },
+            checklist: {
+                containerIntact: true,
+                labelLegible: true,
+                quantitySufficient: true,
+                conditionGood: true,
+                cocPresent: true
+            },
             samplingDetails: {
                 siteName: 'Hacienda San Jerónimo',
                 district: 'Baja Verapaz',

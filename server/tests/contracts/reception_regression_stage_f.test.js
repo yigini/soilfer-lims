@@ -102,6 +102,16 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
             expect(res.body.totalRequiredMass).toBe(150.0);
         });
 
+        const validChecklist = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            }
+        };
+
         it('rejects under-mass sample without explicit acknowledgement', async () => {
             const sampleId = `REG-MASS-FAIL-${Date.now()}`;
             trackedSampleIds.add(sampleId);
@@ -117,7 +127,8 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     requiredAnalyses: ['REG_TEST_PH'],
                     decision: 'ACCEPT',
                     labId: testLab,
-                    isWalkIn: true
+                    isWalkIn: true,
+                    checklist: validChecklist
                 });
 
             expect(res.status).toBe(400);
@@ -141,7 +152,8 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     requiredAnalyses: ['REG_TEST_PH'],
                     decision: 'ACCEPT',
                     labId: testLab,
-                    isWalkIn: true
+                    isWalkIn: true,
+                    checklist: validChecklist
                 });
 
             expect(res.status).toBe(200);
@@ -227,6 +239,15 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     labId: testLab,
                     isWalkIn: true,
                     receivedMass: 250,
+                    checklist: {
+                        items: {
+                            container: { status: 'PASS' },
+                            label: { status: 'PASS' },
+                            quantity: { status: 'PASS' },
+                            condition: { status: 'PASS' },
+                            coc: { status: 'PASS' }
+                        }
+                    },
                     samplingDetails: {
                         captureMethod: 'DEVICE_GPS',
                         coordinates: { lat: 14.6349, lng: -90.5069, accuracy: 8.4 },
@@ -280,6 +301,15 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     labId: testLab,
                     isWalkIn: true,
                     receivedMass: 200,
+                    checklist: {
+                        items: {
+                            container: { status: 'PASS' },
+                            label: { status: 'PASS' },
+                            quantity: { status: 'PASS' },
+                            condition: { status: 'PASS' },
+                            coc: { status: 'PASS' }
+                        }
+                    },
                     samplingDetails: {
                         captureMethod: 'DESK_PASTE',
                         locationConfidence: 'HIGH', // Unevidenced claim!
@@ -526,6 +556,15 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     labId: testLab,
                     isWalkIn: true,
                     receivedMass: 300,
+                    checklist: {
+                        items: {
+                            container: { status: 'PASS' },
+                            label: { status: 'PASS' },
+                            quantity: { status: 'PASS' },
+                            condition: { status: 'PASS' },
+                            coc: { status: 'PASS' }
+                        }
+                    },
                     custodyHandoverAt: handoverTime.toISOString(),
                     custodyCarrierName: 'AeroFlash Cargo Express Driver Ortiz',
                     custodyTrackingNumber: 'AF-WB-90901',

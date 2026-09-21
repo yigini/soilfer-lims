@@ -47,3 +47,9 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 ### 21 September 2026 — 15:06 UTC checkpoint / #128 review
 - #128 local aceaf02 progress and independent authorization/navigation gaps: https://github.com/yigini/soilfer-lims/issues/128#issuecomment-5762745526 (posted/read back as yigini; remains OPEN).
 - No issue closures or new release verified. Independent review at C:\Users\yigin\Documents\Codex\2026-09-21\se\work\checkpoint-review-1506.md delivered to LIMS Dev; label hook-order lint now passes, broader acceptance remains open.
+
+### 2026-09-21 16:29 UTC — #113 independent review progress
+- Issue: #113 reception compliance; remains open.
+- Comment: https://github.com/yigini/soilfer-lims/issues/113#issuecomment-5763954296 (posted/read back as yigini).
+- Evidence: committed 2053377 omitted/empty checklist bypass and N/A policy mismatch; active legacy mapper needs missing/failed evidence preserved. Isolated actual-function synthetic probes, no production verification.
+- Correction queued once for AGY next safe checkpoint; review: C:\Users\yigin\Documents\Codex\2026-09-21\se\work\checkpoint-review-1629.md. No closure or deployment acceptance.

@@ -274,7 +274,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                             className="text-xs p-1.5 rounded border border-sf-divider dark:bg-gray-800 shadow-sm"
                         >
                             <option value="">Assign to...</option>
-                            {technicians.map(t => <option key={t.id} value={t.username}>{t.name}</option>)}
+                            {technicians.map(t => <option key={t.id} value={t.username}>{t.name || t.username}</option>)}
                         </select>
                         <button
                             onClick={handleBulkAssign}
@@ -508,7 +508,7 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                                                         >
                                                             <option value="">Unassigned</option>
                                                             {technicians.map(t => (
-                                                                <option key={t.id} value={t.username}>{t.name}</option>
+                                                                <option key={t.id} value={t.username}>{t.name || t.username}</option>
                                                             ))}
                                                         </select>
                                                         {assigning === item.id && <div className="absolute right-0 w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />}
