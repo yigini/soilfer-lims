@@ -1275,10 +1275,11 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
                 // Real Migrated HTTP Authorization Requests:
                 // Verify via child process running against the migrated database
+                const serverDir = path.resolve(__dirname, '..', '..');
+                const serverPkgPath = path.join(serverDir, 'package.json');
                 const childScript = `
-                    const root = 'C:/Users/yigin/Documents/soilfer-lims/server';
                     const { createRequire } = require('module');
-                    const req = createRequire(root + '/package.json');
+                    const req = createRequire(${JSON.stringify(serverPkgPath)});
                     process.env.DATABASE_PATH = ${JSON.stringify(rehearsalDbPath)};
                     process.env.DATABASE_URL = 'file:' + ${JSON.stringify(rehearsalDbPath)};
                     process.env.NODE_ENV = 'test';
