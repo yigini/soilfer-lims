@@ -230,6 +230,72 @@ describe('Inventory Stock Aggregation & Lifecycle Contracts (#125)', () => {
             expect(agg.isUsableStockSubtotal).toBe(true);
             expect(agg.hasMissingQuantity).toBe(true);
             expect(agg.hasMissingQuantityInUsableLots).toBe(true);
+            expect(agg.usableMissingQuantityLotCount).toBe(1);
+            expect(agg.isOutOfStock).toBe(false);
+        });
+
+        test('7c. Positive known stock below threshold with uncounted lots: isUsableStockSubtotal=true and isLowStock=true (uncertain low stock)', () => {
+            const item = {
+                id: 'item-pos-unknown-low',
+                name: 'Ethanol 96%',
+                unitOfMeasure: 'L',
+                reorderPoint: 20,
+                lots: [
+                    {
+                        id: 'lot-pos',
+                        lotNumber: 'L-POS',
+                        currentQuantity: 15,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    },
+                    {
+                        id: 'lot-uncounted-2',
+                        lotNumber: 'L-UNCOUNTED-2',
+                        currentQuantity: null,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    }
+                ]
+            };
+
+            const agg = computeItemStockAggregation(item, fixedNow);
+            // 15 is known, which is <= reorderPoint (20), but uncounted lot could potentially put it over.
+            expect(agg.usableStock).toBe(15);
+            expect(agg.isUsableStockSubtotal).toBe(true);
+            expect(agg.hasMissingQuantityInUsableLots).toBe(true);
+            expect(agg.isLowStock).toBe(true);
+            expect(agg.isOutOfStock).toBe(false);
+        });
+
+        test('7d. Positive known stock above threshold with uncounted lots: isLowStock=false (known stock alone is sufficient)', () => {
+            const item = {
+                id: 'item-pos-unknown-high',
+                name: 'Hydrochloric Acid 37%',
+                unitOfMeasure: 'L',
+                reorderPoint: 20,
+                lots: [
+                    {
+                        id: 'lot-high',
+                        lotNumber: 'L-HIGH',
+                        currentQuantity: 25,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    },
+                    {
+                        id: 'lot-uncounted-3',
+                        lotNumber: 'L-UNCOUNTED-3',
+                        currentQuantity: null,
+                        status: 'AVAILABLE',
+                        expiryDate: '2027-12-31T00:00:00.000Z'
+                    }
+                ]
+            };
+
+            const agg = computeItemStockAggregation(item, fixedNow);
+            expect(agg.usableStock).toBe(25);
+            expect(agg.isUsableStockSubtotal).toBe(true);
+            expect(agg.hasMissingQuantityInUsableLots).toBe(true);
+            expect(agg.isLowStock).toBe(false);
             expect(agg.isOutOfStock).toBe(false);
         });
     });

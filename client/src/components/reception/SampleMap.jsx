@@ -34,6 +34,18 @@ const ChangeView = ({ center }) => {
     return null;
 };
 
+// Component to invalidate Leaflet size on fullscreen toggle (#114)
+const InvalidateMapSize = ({ isFullscreen }) => {
+    const map = useMap();
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [isFullscreen, map]);
+    return null;
+};
+
 const SampleMap = ({ coordinates, title, uncertaintyM, labCoordinates, countryCode }) => {
     const { t } = useLanguage?.() || { t: (k, d) => d };
     const [mapUnavailable, setMapUnavailable] = useState(false);
@@ -68,14 +80,20 @@ const SampleMap = ({ coordinates, title, uncertaintyM, labCoordinates, countryCo
 
     const toggleFullscreen = () => {
         if (!containerRef.current) return;
+        if (!document.fullscreenEnabled) {
+            console.warn('Fullscreen is not supported or not enabled in this environment');
+            return;
+        }
         if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen?.().catch(err => {
-                console.warn('Fullscreen request failed', err);
+            containerRef.current.requestFullscreen?.().then(() => {
+                setIsFullscreen(true);
+            }).catch(err => {
+                console.warn('Fullscreen request failed or was denied', err);
             });
-            setIsFullscreen(true);
         } else {
-            document.exitFullscreen?.().catch(err => console.warn(err));
-            setIsFullscreen(false);
+            document.exitFullscreen?.().then(() => {
+                setIsFullscreen(false);
+            }).catch(err => console.warn(err));
         }
     };
 
@@ -170,6 +188,7 @@ const SampleMap = ({ coordinates, title, uncertaintyM, labCoordinates, countryCo
             )}
             <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                 <ChangeView center={position} />
+                <InvalidateMapSize isFullscreen={isFullscreen} />
                 {!mapUnavailable && (
                     <TileLayer
                         key={`${layer}-${tileRetryKey}`}

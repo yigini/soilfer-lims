@@ -53,3 +53,8 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - Comment: https://github.com/yigini/soilfer-lims/issues/113#issuecomment-5763954296 (posted/read back as yigini).
 - Evidence: committed 2053377 omitted/empty checklist bypass and N/A policy mismatch; active legacy mapper needs missing/failed evidence preserved. Isolated actual-function synthetic probes, no production verification.
 - Correction queued once for AGY next safe checkpoint; review: C:\Users\yigin\Documents\Codex\2026-09-21\se\work\checkpoint-review-1629.md. No closure or deployment acceptance.
+
+### 2026-09-21 17:04 UTC — #117 independent wiring review
+- Comment posted/read back as yigini: https://github.com/yigini/soilfer-lims/issues/117#issuecomment-5764422690 . Remains open.
+- Local 1ed46ef actual-component event-handler probe reproduces lost OK/Fail answer with current parent callbacks; not a production browser test.
+- Detailed review checkpoint-review-1704.md delivered once to AGY; fresh UI confirms reading and active corrective work. No release or closure accepted.

@@ -315,10 +315,14 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 <div className="grid grid-cols-3 gap-3 p-6 pb-3">
                     <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-center">
                         <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                            {totalAvailable === null ? '—' : totalAvailable.toFixed(1)}
+                            {totalAvailable === null ? '—' : `${item.isUsableStockSubtotal ? '≥ ' : ''}${totalAvailable.toFixed(1)}`}
                         </div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400">
-                            {totalAvailable === null ? `${item.unitOfMeasure} (missing qty)` : `${item.unitOfMeasure} usable stock`}
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            {totalAvailable === null
+                                ? `${item.unitOfMeasure} (missing qty)`
+                                : item.isUsableStockSubtotal
+                                    ? `${item.unitOfMeasure} usable subtotal (${item.usableMissingQuantityLotCount || 1} uncounted lot${(item.usableMissingQuantityLotCount || 1) > 1 ? 's' : ''})`
+                                    : `${item.unitOfMeasure} usable stock`}
                         </div>
                         {item.expiredStock > 0 && (
                             <div className="text-[10px] text-red-500 font-semibold mt-0.5">
@@ -697,11 +701,16 @@ const Inventory = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <span className={`font-bold ${item.isOutOfStock ? 'text-red-600 dark:text-red-400' : item.isLowStock ? 'text-amber-600 dark:text-amber-400' : 'text-sf-text'}`}>
-                                            {item.usableStock === null ? '—' : (typeof item.usableStock === 'number' ? item.usableStock.toFixed(1) : (item.totalStock?.toFixed(1) || '0.0'))}
+                                        <span className={`font-bold ${item.isOutOfStock ? 'text-red-600 dark:text-red-400' : (item.isLowStock && !item.hasMissingQuantityInUsableLots) ? 'text-amber-600 dark:text-amber-400' : 'text-sf-text'}`}>
+                                            {item.usableStock === null ? '—' : (typeof item.usableStock === 'number' ? `${item.isUsableStockSubtotal ? '≥ ' : ''}${item.usableStock.toFixed(1)}` : (item.totalStock?.toFixed(1) || '0.0'))}
                                         </span>
                                         <span className="text-xs text-gray-400 ml-1">{item.unitOfMeasure}</span>
-                                        {item.hasMissingQuantity && (
+                                        {item.isUsableStockSubtotal && (
+                                            <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" title={`Known subtotal: ${item.usableMissingQuantityLotCount || 1} usable lot(s) have unrecorded quantities`}>
+                                                SUBTOTAL
+                                            </span>
+                                        )}
+                                        {item.hasMissingQuantity && !item.isUsableStockSubtotal && (
                                             <span className="ml-1 text-xs text-purple-600 dark:text-purple-400 font-semibold" title="Lot(s) with missing quantity">⚠️</span>
                                         )}
                                     </td>
@@ -714,12 +723,27 @@ const Inventory = () => {
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                                            {item.isOutOfStock && <span title="Out of usable stock" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">OUT OF STOCK</span>}
-                                            {item.isLowStock && !item.isOutOfStock && <span title="Low stock" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-0.5"><AlertTriangle size={10} /> LOW</span>}
+                                            {item.isOutOfStock && <span title="Out of usable stock (confirmed)" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">OUT OF STOCK</span>}
+                                            {item.usableStock === 0 && item.hasMissingQuantityInUsableLots && (
+                                                <span title="0 known usable quantity, but contains uncounted usable lots" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-0.5">
+                                                    <AlertTriangle size={10} /> COUNT NEEDED
+                                                </span>
+                                            )}
+                                            {item.isLowStock && !item.isOutOfStock && (
+                                                item.hasMissingQuantityInUsableLots ? (
+                                                    <span title="Known subtotal is below reorder point, but uncounted lots exist" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100/80 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 flex items-center gap-0.5">
+                                                        <AlertTriangle size={10} /> LOW? (UNCERTAIN)
+                                                    </span>
+                                                ) : (
+                                                    <span title="Low stock (confirmed below reorder threshold)" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-0.5">
+                                                        <AlertTriangle size={10} /> LOW
+                                                    </span>
+                                                )
+                                            )}
                                             {item.hasExpired && <span title={`${item.expiredStock != null ? `${item.expiredStock} ${item.unitOfMeasure}` : ''} in expired lots`} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 flex items-center gap-0.5"><XCircle size={10} /> EXPIRED</span>}
                                             {item.isExpiringSoon && <span title="Expiring soon" className="text-amber-500"><Clock size={14} /></span>}
                                             {item.hasQuarantined && <span title="Has quarantined lots" className="text-yellow-500"><ShieldAlert size={14} /></span>}
-                                            {item.hasMissingQuantity && <span title="Missing quantity on one or more lots" className="text-purple-500 font-bold text-xs">?</span>}
+                                            {item.hasMissingQuantity && !item.isUsableStockSubtotal && <span title="Missing quantity on one or more lots" className="text-purple-500 font-bold text-xs">?</span>}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-right">

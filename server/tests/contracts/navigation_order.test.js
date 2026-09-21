@@ -10,93 +10,49 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
-function extractNavItemsForRole(user, t = (k, d) => d) {
-    // Mirror of App.jsx navItems generation logic
-    const navItems = [
-        { label: t('nav.dashboard', 'Dashboard'), path: '/' },
-    ];
+function loadClientModule(filePath) {
+    let code = fs.readFileSync(filePath, 'utf8');
+    code = code.replace(/export\s+const\s+([a-zA-Z0-9_$]+)\s*=/g, 'const $1 = exports.$1 =');
+    code = code.replace(/export\s+function\s+([a-zA-Z0-9_$]+)/g, 'exports.$1 = $1; function $1');
+    const exportsObj = {};
+    const context = {
+        exports: exportsObj,
+        module: { exports: exportsObj },
+        console,
+        Array,
+        Object,
+        String,
+        Boolean
+    };
+    vm.runInNewContext(code, context);
+    return context.exports;
+}
 
-    // 1. Reception / Intake
-    if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ label: t('nav.reception', 'Sample Reception'), path: '/reception' });
-    }
+const navConfigPath = path.resolve(__dirname, '../../../client/src/navigationConfig.js');
+const { buildNavItems } = loadClientModule(navConfigPath);
 
-    // 2. Samples Registry
-    navItems.push({ label: t('nav.samples', 'Samples'), path: '/samples' });
-
-    // 3. Technician Work & Workbench
-    if (user?.role === 'LAB_TECHNICIAN') {
-        navItems.push({ label: t('nav.myWork', 'My Work'), path: '/my-work' });
-        navItems.push({ label: t('nav.workbench', 'Workbench'), path: '/workbench' });
-    }
-
-    // 4. Manager Task List (#116, #120)
-    if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ label: t('nav.managerQueue', 'Manager Task List'), path: '/manager-queue' });
-    }
-
-    // 5. Quality Assurance
-    if (['AUDIT_USER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
-        navItems.push({ label: t('nav.qa', 'Quality Assurance'), path: '/qa' });
-    }
-
-    // 6. Result Reports
-    navItems.push({ label: t('nav.reports', 'Result Reports'), path: '/result-reports' });
-
-    // 7. Supporting Modules
-    if (user?.role !== 'SAMPLE_RECEPTION') {
-        navItems.push({ label: t('nav.spectral', 'Spectral Library'), path: '/spectral-library' });
-    }
-
-    if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'MASTER_USER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.inventory', 'Inventory'), path: '/inventory' });
-    }
-
-    if (['SUPER_ADMIN', 'LAB_MANAGER', 'LAB_TECHNICIAN', 'SAMPLE_RECEPTION', 'AUDIT_USER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.equipment', 'Equipment'), path: '/equipment' });
-    }
-
-    if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'AUDIT_USER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.projects', 'Projects'), path: '/projects' });
-    }
-
-    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
-    }
-
-    if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.labStaff', 'Laboratory Staff'), path: '/users' });
-    }
-
-    if (['SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({
-            label: user?.role === 'LAB_MANAGER' ? t('nav.myLab', 'My Laboratory') : t('nav.labs', 'Laboratories'),
-            path: user?.role === 'LAB_MANAGER' && user?.labId ? `/admin/labs?labId=${user.labId}` : '/admin/labs'
-        });
-    }
-
-    if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ label: t('nav.admin', 'Admin Panel'), path: '/admin' });
-    }
-
-    navItems.push({ label: t('nav.about', 'About SoilFER'), path: '/about' });
-
-    return navItems;
+function extractNavItemsForRole(user, t) {
+    // Direct production caller execution of buildNavItems from client/src/navigationConfig (#115)
+    return buildNavItems(user, t);
 }
 
 describe('Navigation Order & Laboratory Journey Contract (#115)', () => {
-    test('1. App.jsx source reflects the canonical journey sequence order', () => {
+    test('1. navigationConfig.js and App.jsx reflect the canonical journey sequence order', () => {
         const appPath = path.resolve(__dirname, '../../../client/src/App.jsx');
-        const code = fs.readFileSync(appPath, 'utf8');
+        const appCode = fs.readFileSync(appPath, 'utf8');
+        expect(appCode).toContain("import { buildNavItems } from './navigationConfig';");
+        expect(appCode).toContain("buildNavItems(user, t");
 
+        const configCode = fs.readFileSync(navConfigPath, 'utf8');
         // Check relative order of navigation additions in code
-        const receptionIdx = code.indexOf("path: '/reception'");
-        const samplesIdx = code.indexOf("path: '/samples'");
-        const workbenchIdx = code.indexOf("path: '/workbench'");
-        const managerQueueIdx = code.indexOf("path: '/manager-queue'");
-        const qaIdx = code.indexOf("path: '/qa'");
-        const reportsIdx = code.indexOf("path: '/result-reports'");
+        const receptionIdx = configCode.indexOf("path: '/reception'");
+        const samplesIdx = configCode.indexOf("path: '/samples'");
+        const workbenchIdx = configCode.indexOf("path: '/workbench'");
+        const managerQueueIdx = configCode.indexOf("path: '/manager-queue'");
+        const qaIdx = configCode.indexOf("path: '/qa'");
+        const reportsIdx = configCode.indexOf("path: '/result-reports'");
 
         expect(receptionIdx).toBeGreaterThan(0);
         expect(samplesIdx).toBeGreaterThan(receptionIdx);

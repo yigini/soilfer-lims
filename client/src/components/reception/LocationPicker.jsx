@@ -23,7 +23,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { parseCoordinates } from '../../utils/coordParser';
 import { useLanguage } from '../../context/LanguageContext';
-import { OSM_TILE_CONFIG, SATELLITE_TILE_CONFIG } from '../../utils/mapConfig';
+import { OSM_TILE_CONFIG, SATELLITE_TILE_CONFIG, COUNTRY_CENTERS, resolveMapCenter } from '../../utils/mapConfig';
 
 // Fix Leaflet marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -32,18 +32,6 @@ L.Icon.Default.mergeOptions({
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
-
-// Country fallback centers
-const COUNTRY_CENTERS = {
-    GT: [15.78, -90.23],   // Guatemala
-    RW: [-1.94, 29.87],    // Rwanda
-    KE: [-1.29, 36.82],    // Kenya
-    UG: [0.35, 32.58],     // Uganda
-    TZ: [-6.37, 34.89],    // Tanzania
-    ET: [9.15, 40.49],     // Ethiopia
-    ZM: [-15.41, 28.28],   // Zambia
-    DEFAULT: [0, 25]       // Central Africa fallback
-};
 
 export const CAPTURE_METHODS = [
     { id: 'MAP_PIN', label: 'Map Pin', icon: MousePointer, color: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', desc: 'Click map' },
@@ -93,6 +81,18 @@ const RecenterMap = ({ center, zoom }) => {
     return null;
 };
 
+// Component to invalidate Leaflet size on container resize or fullscreen toggle (#114)
+const InvalidateMapSize = ({ isFullscreen }) => {
+    const map = useMap();
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [isFullscreen, map]);
+    return null;
+};
+
 const LocationPicker = ({
     value,
     onChange,
@@ -105,6 +105,7 @@ const LocationPicker = ({
     locationSource,
     onLocationSourceChange,
     countryCode = 'GT',
+    labCoordinates = null,
     siteName,
     onSiteNameChange,
     areaVillage,
@@ -160,6 +161,14 @@ const LocationPicker = ({
         return null;
     }, [value?.lat, value?.lng]);
 
+    // Viewport map center resolves via canonical precedence (#114):
+    // 1. Valid sample coordinates
+    // 2. Authenticated lab coordinates (e.g. Harare)
+    // 3. Country / regional fallback center
+    const mapCenter = useMemo(() => {
+        return resolveMapCenter(completeCoords, labCoordinates, defaultCenter);
+    }, [completeCoords, labCoordinates, defaultCenter]);
+
     const [zoom, setZoom] = useState(completeCoords ? 13 : 7);
 
     // Paste mode state
@@ -213,14 +222,20 @@ const LocationPicker = ({
 
     const toggleFullscreen = () => {
         if (!mapContainerRef.current) return;
+        if (!document.fullscreenEnabled) {
+            console.warn('Fullscreen is not supported or not enabled in this environment');
+            return;
+        }
         if (!document.fullscreenElement) {
-            mapContainerRef.current.requestFullscreen?.().catch(err => {
-                console.warn('Fullscreen request failed', err);
+            mapContainerRef.current.requestFullscreen?.().then(() => {
+                setIsFullscreen(true);
+            }).catch(err => {
+                console.warn('Fullscreen request failed or was denied', err);
             });
-            setIsFullscreen(true);
         } else {
-            document.exitFullscreen?.().catch(err => console.warn(err));
-            setIsFullscreen(false);
+            document.exitFullscreen?.().then(() => {
+                setIsFullscreen(false);
+            }).catch(err => console.warn(err));
         }
     };
 
@@ -836,7 +851,7 @@ const LocationPicker = ({
                                 </button>
                             </div>
                         )}
-                        <MapContainer center={completeCoords || defaultCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                        <MapContainer center={mapCenter} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
                             {!mapUnavailable && (
                                 <TileLayer
                                     key={`${layer}-${tileRetryKey}`}
@@ -852,6 +867,7 @@ const LocationPicker = ({
                                 />
                             )}
                             <RecenterMap center={completeCoords} zoom={zoom} />
+                            <InvalidateMapSize isFullscreen={isFullscreen} />
                             <LocationMarker />
                         </MapContainer>
                     </div>

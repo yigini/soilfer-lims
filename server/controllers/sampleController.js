@@ -171,21 +171,22 @@ exports.getSamples = async (req, res) => {
         // Operational Views vs Status Separation (#120)
         // Canonical operational views:
         // - 'daily': Physically received & active lab samples (RECEIVED, ACCEPTED, PROCESSING, etc.)
-        // - 'expected': Field records awaiting reception (EXPECTED)
+        // - 'expected': Field records awaiting reception (EXPECTED, COLLECTED)
         // - 'registry': Full field registry across all lifecycle stages
         // Explicit status filter overrides view.
         const ACTIVE_LAB_STATUSES = [
-            'RECEIVED', 'COLLECTED', 'ACCEPTED', 'PROCESSING',
+            'RECEIVED', 'ACCEPTED', 'PROCESSING',
             'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED',
             'RECEIVED_REJECTED', 'REJECTED'
         ];
+        const EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED'];
 
         if (qStatus) {
             where.status = { in: qStatus.split(',').map(s => s.trim()) };
         } else if (qView === 'daily') {
             where.status = { in: ACTIVE_LAB_STATUSES };
         } else if (qView === 'expected') {
-            where.status = 'EXPECTED';
+            where.status = { in: EXPECTED_STATUSES };
         } else if (qView === 'registry') {
             // Full registry: expose all statuses without filtering
         } else {
@@ -245,8 +246,8 @@ exports.getSamples = async (req, res) => {
 
         baseStatusCounts.forEach(sc => {
             views.registry += sc._count;
-            if (sc.status === 'EXPECTED') {
-                lifecycle.EXPECTED = sc._count;
+            if (sc.status === 'EXPECTED' || sc.status === 'COLLECTED') {
+                lifecycle.EXPECTED = (lifecycle.EXPECTED || 0) + sc._count;
                 views.expected += sc._count;
             } else if (sc.status === 'RECEIVED') {
                 lifecycle.RECEIVED = sc._count;

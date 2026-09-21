@@ -5,7 +5,7 @@ const prisma = require('../../prisma');
 
 describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () => {
     let tokenManagerA, tokenManagerB, labAId, labBId;
-    let sampleActiveA, sampleExpectedA, sampleBatchQCA, sampleResolvedQCA;
+    let sampleActiveA, sampleExpectedA, sampleCollectedA, sampleBatchQCA, sampleResolvedQCA;
 
     beforeAll(async () => {
         labAId = `LAB-VIEW-A-${Date.now()}`;
@@ -49,6 +49,20 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
             }
         });
 
+        // 2b. COLLECTED field sample without laboratory physical intake (#120)
+        sampleCollectedA = await prisma.sample.create({
+            data: {
+                id: `SMP-COL-${Date.now()}`,
+                originalId: `ORIG-COL-${Date.now()}`,
+                assignedLab: labAId,
+                labId: labAId,
+                country: 'GTM',
+                projectCode: 'PROJECT-A',
+                status: 'COLLECTED',
+                fieldMetadata: JSON.stringify({ surveyor: 'Field Tech 2', collected_at: new Date().toISOString() })
+            }
+        });
+
         // 3. Unresolved QC exception batch in Lab A
         sampleBatchQCA = await prisma.batch.create({
             data: {
@@ -88,9 +102,14 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         expect(data.some(s => s.id === sampleActiveA.id)).toBe(true);
         // Expected field registration must be excluded from daily lab queue
         expect(data.some(s => s.id === sampleExpectedA.id)).toBe(false);
+        // Pre-arrival COLLECTED sample must also be excluded from daily physical receipt (#120)
+        expect(data.some(s => s.id === sampleCollectedA.id)).toBe(false);
+
+        // Daily returned row count must match views.daily aggregation exactly
+        expect(data.length).toBe(res.body.views.daily);
     });
 
-    test('2. GET /api/samples?view=expected returns field arrivals awaiting intake', async () => {
+    test('2. GET /api/samples?view=expected returns field arrivals awaiting intake (including COLLECTED)', async () => {
         const res = await request(app)
             .get('/api/samples?view=expected')
             .set('Authorization', `Bearer ${tokenManagerA}`);
@@ -99,12 +118,18 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         const data = res.body.data;
         // Expected field registration must be present
         expect(data.some(s => s.id === sampleExpectedA.id)).toBe(true);
+        // Pre-arrival COLLECTED sample must be present in expected arrivals (#120)
+        expect(data.some(s => s.id === sampleCollectedA.id)).toBe(true);
         // Active received sample must be excluded
         expect(data.some(s => s.id === sampleActiveA.id)).toBe(false);
-        // All samples must have status EXPECTED
+
+        // All samples must have pre-arrival statuses
         for (const s of data) {
-            expect(s.status).toBe('EXPECTED');
+            expect(['EXPECTED', 'COLLECTED']).toContain(s.status);
         }
+
+        // Expected returned row count must match views.expected aggregation exactly
+        expect(data.length).toBe(res.body.views.expected);
     });
 
     test('3. GET /api/samples?view=registry returns the full field registry without omitting records', async () => {
@@ -114,9 +139,14 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
 
         expect(res.status).toBe(200);
         const data = res.body.data;
-        // Both active and expected records are present in full field registry
+        // Active, expected, and collected records are all present in full field registry
         expect(data.some(s => s.id === sampleActiveA.id)).toBe(true);
         expect(data.some(s => s.id === sampleExpectedA.id)).toBe(true);
+        expect(data.some(s => s.id === sampleCollectedA.id)).toBe(true);
+
+        // Verified that COLLECTED record does not fabricate a physical reception date
+        const colSample = data.find(s => s.id === sampleCollectedA.id);
+        expect(colSample.receptionDate).toBeFalsy();
     });
 
     test('4. Response provides reconciled view counts in views and facets.views', async () => {
@@ -130,7 +160,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
 
         const { daily, expected, registry } = res.body.views;
         expect(daily).toBeGreaterThanOrEqual(1);
-        expect(expected).toBeGreaterThanOrEqual(1);
+        expect(expected).toBeGreaterThanOrEqual(2); // sampleExpectedA + sampleCollectedA
         expect(registry).toBeGreaterThanOrEqual(daily + expected);
     });
 

@@ -29,10 +29,38 @@ const Reception = () => {
     const { t } = useLanguage();
     const location = useLocation();
 
+    // Configured laboratory default coordinates (#114)
+    const LAB_DEFAULT_COORDINATES = {
+        'LAB-GTM-01': [14.6349, -90.5069], // Guatemala City
+        'LAB-ZWE-01': [-17.8292, 31.0522], // Harare, Zimbabwe
+        'HARARE': [-17.8292, 31.0522],
+        'GTM': [14.6349, -90.5069]
+    };
+
+    const labCoordinates = useMemo(() => {
+        if (user?.labCoordinates) return user.labCoordinates;
+        if (user?.labId && LAB_DEFAULT_COORDINATES[user.labId]) return LAB_DEFAULT_COORDINATES[user.labId];
+        if (user?.lab?.location) return user.lab.location;
+        return null;
+    }, [user?.labCoordinates, user?.labId, user?.lab?.location]);
+
     // --- MODE SELECTION ---
     const [mode, setMode] = useState(null); // 'PROJECT' | 'WALK_IN' | null
     const [sessionProject, setSessionProject] = useState(null);
     const [mobileStep, setMobileStep] = useState('identify'); // 'identify' | 'condition' | 'analyses' | 'receipt'
+
+    // Enforce N/A policy cleanup when switching intake mode (#113)
+    useEffect(() => {
+        if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
+            setChecklistData(prev => ({
+                ...prev,
+                items: {
+                    ...prev?.items,
+                    coc: { ...prev?.items?.coc, status: undefined }
+                }
+            }));
+        }
+    }, [mode, checklistData?.items?.coc?.status]);
 
     // --- STAGE D: HARDWARE WEDGE SCANNER & DESK ERGONOMICS (RC-16, RC-17, RC-18) ---
     const [isWedgeMode, setIsWedgeMode] = useState(() => localStorage.getItem('lims_wedge_mode') === 'true');
@@ -1844,6 +1872,7 @@ const Reception = () => {
                                         groups={groups}
                                         onPurposeSelect={handlePurposeSelect}
                                         errors={validationErrors}
+                                        labCoordinates={labCoordinates}
                                     />
                                 ) : (
                                     <FieldProvenanceCard
@@ -2193,7 +2222,8 @@ const Reception = () => {
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
-                                onNonConformance={(checked) => setChecklistData({ ...checklistData, nonConformance: checked })}
+                                onNonConformance={(checked) => setChecklistData(prev => ({ ...prev, nonConformance: checked }))}
+                                isWalkIn={mode === 'WALK_IN'}
                                 showIncomplete={validationErrors.some(e => e.key === 'compliance')}
                                 photos={intakePhotos}
                                 onUploadPhoto={handlePhotoUpload}

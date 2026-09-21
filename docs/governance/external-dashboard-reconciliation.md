@@ -2,53 +2,75 @@
 
 **Work Package**: `WP/contributor-issues-2026-09`  
 **Issue**: [#104 Separate Laboratory Dashboard sample count discrepancy](https://github.com/yigini/soilfer-lims/issues/104)  
-**Lead**: Antigravity (Evidence & Boundary Analysis) / Codex (Reporter Coordination & Communication)  
+**Lead**: Antigravity (Evidence & Architectural Boundaries) / Codex (Reporter Coordination & Governance)  
 **Reporter**: Luis (Guatemala National Team)  
-**Scope**: Separate external reporting dashboard vs. SoilFER LIMS core platform
+**Scope Boundary**: Separate external reporting dashboard vs. SoilFER LIMS core analytical platform  
+**Status**: **Investigation Protocol & Preparation Framework (Reconciliation Pending)**
+
+> [!IMPORTANT]
+> **Protocol Document Status: Preparation, Not Completed Reconciliation**
+> This document establishes the investigative protocol and reconciliation methodology. It does **not** represent a concluded reconciliation or resolved count.
+> **Reporter Snapshot vs. Verified Facts**: The figure of 3,580 samples is a point-in-time metric **reported by the external reporter (Luis) on 15 September 2026**, not an independently verified LIMS database fact or verified ETL export count.
+> **Unknown External Architecture**: The underlying architecture, data source, query filters, hosting infrastructure, and synchronization frequency of the external dashboard are currently **UNKNOWN** to the SoilFER LIMS core engineering team. No architectural assumptions or undocumented sync mechanisms may be asserted as fact.
 
 ---
 
-## 1. Context & Problem Statement
-- **Reported Issue**: Discrepancy observed between sample numbers displayed in the separate external Laboratory Dashboard and the central LIMS database.
-- **Historical Fact**: As of 15 September 2026, the GTM reception form was verified operational and 3,580 unique samples were visible in the Guatemala reception pipeline.
-- **Critical Architectural Boundary**:
-  - The external dashboard is a **separate downstream application / reporting pipeline**.
-  - SoilFER LIMS core (`soilfer-lims`) is the authoritative analytical LIMS and registry of physical laboratory intake and analytical measurements.
-  - A release of `soilfer-lims` does not automatically modify or release the external dashboard codebase.
-  - **No Automatic Backfill**: Historical count mismatches must not be solved by arbitrary synthetic backfill into LIMS or by fabricating physical reception timestamps for samples that have only been registered in field Kobo forms.
+## 1. Problem Statement & System Boundaries
+
+### The Reported Observation
+- In September 2026, national team member Luis reported a discrepancy between the sample count shown on an external Laboratory Dashboard and the active count in the core SoilFER LIMS application.
+- On 15 September 2026, Luis reported that approximately 3,580 samples were expected or visible within the Guatemala reception pipeline according to the external reporting dashboard view.
+- Independent verification within LIMS core showed 35,197 total baseline field registry records across all projects, with Guatemala samples cleanly segmented by project and status.
+
+### Authoritative System Boundaries
+1. **Authoritative LIMS Boundary**: SoilFER LIMS (`soilfer-lims`) is the authoritative system of record for:
+   - Physical intake verification (`receptionDate`, `receivedMass`, physical checklist).
+   - Analytical testing, laboratory worksheets, QC results, and minted reports.
+2. **External Dashboard Separation**:
+   - The external dashboard is an independent downstream application or BI/reporting layer.
+   - Changes, deployments, or releases to SoilFER LIMS do not automatically alter, update, or redeploy the external reporting dashboard.
+3. **No Synthetic Backfill Rule**:
+   - Historical count mismatches must **never** be resolved by inserting synthetic intake timestamps or marking field-registered samples as physically received when physical custody has not occurred.
+   - Physical receipt is an empirical laboratory event that requires physical custody handover.
 
 ---
 
-## 2. Reconciled Definition of Sample Metrics
+## 2. Metric Taxonomies: Core LIMS vs. Potential External Conceptions
 
-| Metric Term | Definition in SoilFER LIMS | Definition in External Dashboard | Reconciliation Rule |
+To prepare for technical coordination with the external dashboard maintainers, the following metric definitions clarify where count divergences typically occur:
+
+| Metric Category | SoilFER LIMS Core Contract (`server/controllers/sampleController.js`) | External Dashboard Possible Conception (Unknown / Unverified) | Reconciliation Rule & Boundary |
 |---|---|---|---|
-| **Field Registry** (`view=registry`) | All registered Kobo and imported field specimens across all stages (35,197 total baseline). | Often includes raw Kobo submission rows, including duplicates and draft test forms. | Deduplicate by `sampleId` / `originalId`; exclude unvalidated test submissions. |
-| **Expected Arrivals** (`view=expected`) | Field records synced from Kobo where physical custody has not yet been delivered to the laboratory. | Often counted as "in the laboratory" by external observers. | **Must not be counted as active laboratory work** until physical check-in at reception desk. |
-| **Active Lab Work** (`view=daily`) | Physically received specimens (`RECEIVED`, `ACCEPTED`, `PROCESSING`, `SUBMITTED`) currently inside the analytical queue. | Frequently misaligned if reception non-conformance or quarantine holds are excluded. | Must reflect physical custody timestamp (`receivedAt !== null`). |
-| **Archived / Completed** | Specimens where all ordered determinations are accepted and report released, or archived. | May be moved to separate historical data marts. | Query across full lifecycle when auditing total cumulative throughput. |
+| **Full Registry** (`qView === 'registry'`) | All registered records across the entire dataset (e.g. baseline 35,197), regardless of status. | May query raw intake forms, including duplicate drafts, cancelled entries, or unvalidated surveys. | Verify exact filter predicates: verify if drafts or test submissions are excluded in external queries. |
+| **Expected Arrivals** (`qView === 'expected'`) | Registered specimens awaiting physical receipt: `EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED']`. Physical intake has not occurred (`receivedAt === null`). | External observers often classify "expected" or "collected in field" samples as already "in the lab". | **Must not be counted as active laboratory work**. LIMS strictly holds these in pre-intake queue. |
+| **Active Laboratory Queue** (`qView === 'daily'`) | Specimens physically received and currently in workflow: `ACTIVE_LAB_STATUSES = ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED']`. | Frequently excludes quarantine holds, non-conforming samples, or samples pending manager approval. | `views.daily` counts and returned sample rows must agree identically. Reflects physical laboratory custody. |
+| **Completed / Archived** | Samples where all analytical orders are finalized, reported, or archived. | May be moved to a cold warehouse data mart, reducing active dashboard counters. | Audit cumulative throughput across active + completed lifecycle states. |
 
 ---
 
-## 3. Investigation & Coordination Checklist
-1. [x] **Core LIMS Operational Views Verification**:
-   - Issue #120 implementation verified that LIMS explicitly distinguishes:
-     - `view=daily` (active lab specimens)
-     - `view=expected` (field registrations awaiting intake)
-     - `view=registry` (full field registry)
-   - Zero sample records are deleted or suppressed; counts are reconciled in API response (`views.daily`, `views.expected`, `views.registry`).
-2. [ ] **External Pipeline Coordination with Luis**:
-   - Request confirmation from Luis regarding:
-     a. Exact external dashboard URL / repository identifier.
-     b. Exact date range or filter criteria applied in the external view.
-     c. One non-sensitive example sample identifier missing from the external view.
-3. [ ] **Pipeline Ingestion Health Check**:
-   - Verify webhook / ETL scheduler that synchronizes LIMS export data to the external dashboard.
-   - Confirm whether sync latency or failed ETL job batches caused the snapshot discrepancy.
+## 3. Preparation & Coordination Roadmap (Pending Reporter Engagement)
+
+1. **Phase A: Core LIMS Operational Truth (Completed in #120 / #114)**:
+   - Verified that `server/controllers/sampleController.js` returns mutually consistent counts and rows for all views (`views.daily`, `views.expected`, `views.registry`).
+   - Standardized `EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED']` so `COLLECTED` pre-arrival records are accounted for consistently across daily and expected views without count drift.
+   - Added automated contract tests (`server/tests/contracts/dashboard_manager_views.test.js`) enforcing count-to-row agreement.
+
+2. **Phase B: Information Gathering on External Architecture (Pending Codex / Luis Coordination)**:
+   - [ ] Identify external dashboard hosting location, codebase repository, and maintainer team.
+   - [ ] Ascertain the data ingestion pathway (direct database read, scheduled ETL batch, REST API client, or manual spreadsheet import).
+   - [ ] Obtain the exact query, date filters, and status filters used by the external dashboard.
+   - [ ] Request one non-sensitive sample ID that appears in the external dashboard count of 3,580 but was reported missing or misclassified.
+
+3. **Phase C: Independent Verification & Closure**:
+   - [ ] Once external pipeline details are known, document the root cause of the reporting delta.
+   - [ ] Confirm alignment in a non-production staging environment.
+   - [ ] Obtain formal written concurrence from reporter (Luis) or national coordinator.
 
 ---
 
-## 4. Closure Criteria
-- Issue #104 will be closed **only** when:
-  1. Reporter (Luis) or country coordinator confirms in writing that the target external view accurately reflects the intended sample dataset; OR
-  2. The external pipeline repository is identified, updated, and independently verified to consume the reconciled LIMS v2 API without count drift.
+## 4. Closure Gates
+
+This issue (#104) remains **OPEN** under active investigation preparation. It will not be closed until:
+1. The external dashboard's data architecture is documented and verified.
+2. The cause of the count divergence (e.g. status filter mismatch, ETL latency, or pre-intake classification) is formally demonstrated.
+3. Independent review by Codex verifies resolution and the national team confirms count alignment.
