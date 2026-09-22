@@ -185,7 +185,7 @@ async function run() {
             }
         });
 
-        // Seed Project
+        // Seed Projects
         await prisma.project.upsert({
             where: { code: 'GTM-SOIL-2026' },
             update: { name: 'National Soil Fertility Assessment', status: 'ACTIVE' },
@@ -196,11 +196,22 @@ async function run() {
                 status: 'ACTIVE'
             }
         });
+        await prisma.project.upsert({
+            where: { code: 'GTM-PILOT-2026' },
+            update: { name: 'Guatemala Pilot Soil Programme', status: 'ACTIVE' },
+            create: {
+                id: 'PRJ-GTM-PILOT-2026',
+                code: 'GTM-PILOT-2026',
+                name: 'Guatemala Pilot Soil Programme',
+                status: 'ACTIVE'
+            }
+        });
 
         // Clean up previous test sample & report records
-        const sampleIds = ['SMP-GTM26-0001', 'SMP-GTM26-0002', 'SMP-GTM26-0003'];
+        const sampleIds = ['SMP-GTM26-0001', 'SMP-GTM26-0002', 'SMP-GTM26-0003', 'SMP-GTM26-0004'];
         await prisma.report.deleteMany({ where: { sampleId: { in: sampleIds } } });
         await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } });
+
 
         // 1. Sample GTM26-0001 (Julio Morales): 2 versions (v1 SUPERSEDED, v2 PUBLISHED)
         await prisma.sample.create({
@@ -313,6 +324,34 @@ async function run() {
             }
         });
 
+        // 4. Sample GTM26-0004 (Marco Alvarez) in GTM-PILOT-2026: 1 report (v1 PUBLISHED)
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM26-0004',
+                labId: 'GTM26-0004',
+                originalId: 'FIELD-GTM26-0004',
+                assignedLab: 'LAB-GTM',
+                projectId: 'PRJ-GTM-PILOT-2026',
+                projectCode: 'GTM-PILOT-2026',
+                status: 'APPROVED'
+            }
+        });
+        await prisma.report.create({
+            data: {
+                id: 'RPT-GTM26-0004-V1',
+                sampleId: 'SMP-GTM26-0004',
+                labId: 'LAB-GTM',
+                version: 1,
+                status: 'PUBLISHED',
+                firstName: 'Marco',
+                surname: 'Alvarez',
+                projectCode: 'GTM-PILOT-2026',
+                projectName: 'Guatemala Pilot Soil Programme',
+                sampleLabId: 'GTM26-0004',
+                generatedBy: 'test_manager'
+            }
+        });
+
         // Generate Auth Token
         const token = jwt.sign(
             { id: 'usr-super-admin-journey-rpt', username: 'super_admin', role: 'SUPER_ADMIN' },
@@ -376,10 +415,11 @@ async function run() {
             `
         });
 
-        // ─── STEP 1: Navigate to /result-reports ───
-        console.log('[4/7] Navigating to /result-reports...');
-        await pageCdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/result-reports` });
+        // ─── STEP 1: Navigate to /result-reports with Project Scope ───
+        console.log('[4/8] Navigating to /result-reports?projectId=PRJ-GTM-SOIL-2026...');
+        await pageCdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/result-reports?projectId=PRJ-GTM-SOIL-2026` });
         await sleep(2500);
+
 
         const evalStep1 = await pageCdp.send('Runtime.evaluate', {
             expression: `
@@ -638,8 +678,111 @@ async function run() {
         }
         console.log('[PASS] Step 6: Search cleared, input reset to empty, and all 5 reports restored');
 
-        // ─── STEP 7: Save Evidence JSON ───
-        console.log('[7/7] Generating structured evidence report...');
+        // ─── STEP 7: Same-Instance Project Scope Synchronization in Live Browser ───
+        console.log('[7/8] Testing same-instance project scope synchronization via route update...');
+        // 1. Navigate dynamically to GTM-PILOT-2026 on the same mounted page instance
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    window.history.pushState(null, '', '/result-reports?projectId=PRJ-GTM-PILOT-2026');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                })()
+            `
+        });
+        await sleep(1500);
+
+        const evalStep7a = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const rows = Array.from(document.querySelectorAll('table tbody tr'));
+                    const rowTexts = rows.map(r => r.innerText);
+                    return {
+                        rowCount: rows.length,
+                        has0004: rowTexts.some(t => t.includes('GTM26-0004')),
+                        has0001: rowTexts.some(t => t.includes('GTM26-0001')),
+                        has0002: rowTexts.some(t => t.includes('GTM26-0002'))
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        const step7aData = evalStep7a.result.value;
+        console.log('Step 7a Project Scope Change Result:', step7aData);
+        if (step7aData.rowCount !== 1 || !step7aData.has0004 || step7aData.has0001 || step7aData.has0002) {
+            throw new Error(`[STEP7A_FAILED] Expected exactly 1 report (GTM26-0004) for GTM-PILOT-2026, got: ${JSON.stringify(step7aData)}`);
+        }
+        console.log('[PASS] Step 7a: Dynamic route update to GTM-PILOT-2026 correctly updated reports to GTM26-0004');
+
+        // 2. Apply a search for 'GTM26-0004'
+        console.log('Applying search for "GTM26-0004"...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const input = document.querySelector('input[type="text"]');
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                    nativeInputValueSetter.call(input, 'GTM26-0004');
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    const form = document.querySelector('form');
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) submitBtn.click();
+                    else if (form.requestSubmit) form.requestSubmit();
+                    else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                })()
+            `
+        });
+        await sleep(1500);
+
+        // 3. Switch project scope back to PRJ-GTM-SOIL-2026 while 'GTM26-0004' remains applied
+        console.log('Switching project scope back to GTM-SOIL-2026 while search "GTM26-0004" is applied...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    window.history.pushState(null, '', '/result-reports?projectId=PRJ-GTM-SOIL-2026');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                })()
+            `
+        });
+        await sleep(1500);
+
+        const evalStep7b = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const input = document.querySelector('input[type="text"]');
+                    const rows = Array.from(document.querySelectorAll('table tbody tr'));
+                    const bodyText = document.body.innerText;
+                    return {
+                        inputValue: input ? input.value : '',
+                        rowCount: rows.length,
+                        noReportsFound: bodyText.includes('No reports found')
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        const step7bData = evalStep7b.result.value;
+        console.log('Step 7b Project Switch with Applied Query Result:', step7bData);
+        if (step7bData.inputValue !== 'GTM26-0004') {
+            throw new Error(`[STEP7B_FAILED] Expected search input to retain 'GTM26-0004', was '${step7bData.inputValue}'`);
+        }
+        if (step7bData.rowCount !== 0 || !step7bData.noReportsFound) {
+            throw new Error(`[STEP7B_FAILED] Expected 0 reports / "No reports found" in GTM-SOIL-2026 for GTM26-0004, got: ${JSON.stringify(step7bData)}`);
+        }
+        console.log('[PASS] Step 7b: Project scope switch strictly preserved applied search "GTM26-0004" and rendered truthful empty state');
+
+        // 4. Clear search to restore GTM-SOIL-2026 reports
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const clearBtn = document.querySelector('button[aria-label="Clear search"]');
+                    if (clearBtn) clearBtn.click();
+                })()
+            `
+        });
+        await sleep(1500);
+
+        // ─── STEP 8: Save Evidence JSON ───
+        console.log('[8/8] Generating structured evidence report...');
         const evidencePayload = {
             timestamp: new Date().toISOString(),
             status: 'PASS',
@@ -683,6 +826,12 @@ async function run() {
                     inputResetEmpty: step6Data.inputValue === '',
                     totalCountRestored: step6Data.rowCount,
                     status: 'PASS'
+                },
+                step7_sameInstanceProjectScopeSynchronization: {
+                    switchedToPilotProject: step7aData.has0004 && step7aData.rowCount === 1,
+                    preservedSearchAcrossScopeSwitch: step7bData.inputValue === 'GTM26-0004',
+                    renderedTruthfulNoMatchWithoutLeak: step7bData.rowCount === 0 && step7bData.noReportsFound,
+                    status: 'PASS'
                 }
             }
         };
@@ -693,6 +842,7 @@ async function run() {
 
         exitCode = 0;
     } catch (err) {
+
         console.error('\n[BROWSER_JOURNEY_FAILED]', err);
     } finally {
         if (cdp) cdp.close();

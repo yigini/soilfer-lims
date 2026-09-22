@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T10:22:15.067Z",
+  "timestamp": "2026-09-22T10:41:32.668Z",
   "status": "PASS",
   "issue": "#124 Residual Fix",
   "environment": {
@@ -40,6 +40,12 @@
     "step6_clearSearchRestoration": {
       "inputResetEmpty": true,
       "totalCountRestored": 5,
+      "status": "PASS"
+    },
+    "step7_sameInstanceProjectScopeSynchronization": {
+      "switchedToPilotProject": true,
+      "preservedSearchAcrossScopeSwitch": true,
+      "renderedTruthfulNoMatchWithoutLeak": true,
       "status": "PASS"
     }
   }

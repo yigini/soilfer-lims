@@ -111,21 +111,17 @@ const ResultReports = ({
                 setLoading(false);
             }
         }
-    }, [pagination.limit, paramProjectId]);
+    }, [paramProjectId]);
 
-    // Initial mount fetch
-    const hasMountedRef = useRef(false);
+    // Initial mount and project scope synchronization effect
     useEffect(() => {
-        if (!hasMountedRef.current) {
-            hasMountedRef.current = true;
-            if (!initialReports) {
-                fetchReports(1, defaultQuery, defaultStatus);
-            }
+        if (!initialReports) {
+            fetchReports(1, appliedQueryRef.current, statusFilterRef.current);
         }
         return () => {
             abortControllerRef.current?.abort();
         };
-    }, []);
+    }, [fetchReports, initialReports]);
 
     // Load exact report if reportId is passed in URL
     useEffect(() => {

@@ -49,7 +49,7 @@ const React = require(path.resolve(__dirname, '../../../client/node_modules/reac
 const ReactDOMServer = require(path.resolve(__dirname, '../../../client/node_modules/react-dom/server'));
 
 // ─── COMPONENT SSR & HARNESS LOADER ───
-function loadResultReportsModule(customAxios = null, customReact = null) {
+function loadResultReportsModule(customAxios = null, customReact = null, customRouter = null) {
     const componentPath = path.resolve(__dirname, '../../../client/src/pages/ResultReports.jsx');
     const source = fs.readFileSync(componentPath, 'utf8');
     const transformed = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' });
@@ -94,7 +94,7 @@ function loadResultReportsModule(customAxios = null, customReact = null) {
             if (mod.includes('LanguageContext')) return mockLanguage;
             if (mod.includes('AuthContext')) return mockAuth;
             if (mod.includes('DialogContext')) return mockDialog;
-            if (mod === 'react-router-dom') return mockRouter;
+            if (mod === 'react-router-dom') return customRouter || mockRouter;
             if (mod === 'axios') return customAxios || {
                 get: jest.fn().mockResolvedValue({ data: { reports: [], pagination: { total: 0 } } }),
                 post: jest.fn().mockResolvedValue({ data: {} }),
@@ -108,6 +108,7 @@ function loadResultReportsModule(customAxios = null, customReact = null) {
     vm.runInNewContext(transformed.code, runContext);
     return runContext.module.exports.default;
 }
+
 
 // ─── TREE SEARCH HELPERS ───
 function findElement(node, predicate) {
@@ -309,16 +310,19 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
         });
     });
 
-    // ─── 2. MOUNTED COMPONENT QUERY/FILTER LIFECYCLE ───
-    describe('2. Mounted Component Query/Filter Lifecycle & State Transitions', () => {
-        function setupInteractiveHarness() {
+    // ─── 2. SYNTHETIC HOOK HARNESS: QUERY/FILTER LIFECYCLE, STRICTMODE & ROUTE SCOPE ───
+    describe('2. Synthetic Hook Harness: Component Query/Filter Lifecycle, StrictMode Replay & Scope Transitions', () => {
+        function setupInteractiveHarness(options = {}) {
             let hooks = [];
             let hookIndex = 0;
             let effects = [];
+            let searchParams = options.searchParams || new URLSearchParams();
             const axiosCalls = [];
             const abortSignals = [];
 
-            const mockAxios = {
+            const same = (a, b) => a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
+
+            const mockAxios = options.customAxios || {
                 get: jest.fn(async (url, config) => {
                     abortSignals.push(config?.signal);
                     axiosCalls.push({ url, params: { ...config?.params }, signal: config?.signal });
@@ -334,26 +338,31 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
 
             const mockReact = {
                 useState: (initial) => {
-                    const idx = hookIndex++;
-                    if (hooks[idx] === undefined) {
-                        hooks[idx] = typeof initial === 'function' ? initial() : initial;
-                    }
-                    const setState = (newVal) => {
-                        hooks[idx] = typeof newVal === 'function' ? newVal(hooks[idx]) : newVal;
-                    };
-                    return [hooks[idx], setState];
+                    const k = hookIndex++;
+                    hooks[k] ??= { value: typeof initial === 'function' ? initial() : initial };
+                    return [hooks[k].value, (newVal) => {
+                        hooks[k].value = typeof newVal === 'function' ? newVal(hooks[k].value) : newVal;
+                    }];
                 },
                 useRef: (initial) => {
-                    const idx = hookIndex++;
-                    if (hooks[idx] === undefined) {
-                        hooks[idx] = { current: initial };
-                    }
-                    return hooks[idx];
+                    const k = hookIndex++;
+                    hooks[k] ??= { current: initial };
+                    return hooks[k];
                 },
-                useCallback: (fn) => fn,
-                useEffect: (fn) => {
-                    hookIndex++;
-                    effects.push(fn);
+                useCallback: (fn, deps) => {
+                    const k = hookIndex++;
+                    if (!hooks[k] || !same(hooks[k].deps, deps)) {
+                        hooks[k] = { fn, deps };
+                    }
+                    return hooks[k].fn;
+                },
+                useEffect: (fn, deps) => {
+                    const k = hookIndex++;
+                    if (!hooks[k] || !same(hooks[k].deps, deps)) {
+                        const old = hooks[k];
+                        hooks[k] = { fn, deps, cleanup: old?.cleanup };
+                        effects.push(k);
+                    }
                 },
                 createElement: (type, props, ...children) => ({
                     type,
@@ -361,17 +370,53 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
                 })
             };
 
-            const Component = loadResultReportsModule(mockAxios, mockReact);
+            const customRouter = {
+                useSearchParams: () => [searchParams, (next) => {
+                    searchParams = typeof next === 'function' ? next(searchParams) : new URLSearchParams(next);
+                }],
+                useNavigate: () => jest.fn(),
+                useLocation: () => ({ pathname: '/result-reports', search: searchParams.toString() })
+            };
+
+            const Component = loadResultReportsModule(mockAxios, mockReact, customRouter);
 
             function render(props = {}) {
                 hookIndex = 0;
                 effects = [];
                 const vdom = Component(props);
-                for (const eff of effects) eff();
+                for (const k of effects) {
+                    hooks[k].cleanup?.();
+                    hooks[k].cleanup = hooks[k].fn();
+                }
                 return vdom;
             }
 
-            return { render, axiosCalls, mockAxios, abortSignals, getHooks: () => hooks };
+            function replayStrictMode() {
+                for (const h of hooks) {
+                    if (h && h.fn && 'cleanup' in h) {
+                        h.cleanup?.();
+                    }
+                }
+                for (const h of hooks) {
+                    if (h && h.fn && 'cleanup' in h) {
+                        h.cleanup = h.fn();
+                    }
+                }
+            }
+
+            function setProjectId(id) {
+                searchParams = new URLSearchParams(id ? `projectId=${id}` : '');
+            }
+
+            return {
+                render,
+                replayStrictMode,
+                setProjectId,
+                axiosCalls,
+                mockAxios,
+                abortSignals,
+                getHooks: () => hooks
+            };
         }
 
         test('Initial mount executes exactly 1 query with default PUBLISHED and empty search', () => {
@@ -385,6 +430,62 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
                 limit: 25,
                 status: 'PUBLISHED'
             });
+        });
+
+        test('React StrictMode setup-cleanup-setup re-executes mount effect and maintains active surviving request', () => {
+            const h = setupInteractiveHarness();
+            h.render();
+
+            // Initial mount setup fired Request 1
+            expect(h.axiosCalls.length).toBe(1);
+            expect(h.axiosCalls[0].signal.aborted).toBe(false);
+
+            // Simulate React 18 StrictMode setup-cleanup-setup cycle
+            h.replayStrictMode();
+
+            // Exactly 2 requests dispatched in total; Request 1 was aborted by cleanup; Request 2 is actively alive
+            expect(h.axiosCalls.length).toBe(2);
+            expect(h.axiosCalls[0].signal.aborted).toBe(true);
+            expect(h.axiosCalls[1].signal.aborted).toBe(false);
+
+            const activeRequests = h.axiosCalls.filter(c => !c.signal.aborted);
+            expect(activeRequests.length).toBe(1);
+        });
+
+        test('Same-instance projectId URL change cancels previous request, dispatches new request with new projectId, and preserves appliedQuery', async () => {
+            const h = setupInteractiveHarness({ searchParams: new URLSearchParams('projectId=PROJECT-A') });
+            let tree = h.render();
+
+            // Mount fired request for PROJECT-A with empty search
+            expect(h.axiosCalls.length).toBe(1);
+            expect(h.axiosCalls[0].params.projectId).toBe('PROJECT-A');
+            expect(h.axiosCalls[0].params.q).toBe('');
+
+            // User applies a search for 'GTM26-0002'
+            const input = findElement(tree, el => el.type === 'input' && el.props?.placeholder?.includes('Search'));
+            input.props.onChange({ target: { value: 'GTM26-0002' } });
+            tree = h.render();
+            const form = findElement(tree, el => el.type === 'form');
+            form.props.onSubmit({ preventDefault: () => {} });
+            await new Promise(r => setTimeout(r, 10));
+            tree = h.render();
+
+            expect(h.axiosCalls.length).toBe(2);
+            expect(h.axiosCalls[1].params.projectId).toBe('PROJECT-A');
+            expect(h.axiosCalls[1].params.q).toBe('GTM26-0002');
+
+            // Route URL changes to PROJECT-B on the same mounted instance
+            h.setProjectId('PROJECT-B');
+            tree = h.render();
+
+            // Mount effect detected projectId change, aborted PROJECT-A request, and launched PROJECT-B request
+            expect(h.axiosCalls.length).toBe(3);
+            expect(h.axiosCalls[1].signal.aborted).toBe(true);
+            expect(h.axiosCalls[2].signal.aborted).toBe(false);
+            expect(h.axiosCalls[2].params.projectId).toBe('PROJECT-B');
+            // Applied query 'GTM26-0002' is strictly preserved!
+            expect(h.axiosCalls[2].params.q).toBe('GTM26-0002');
+            expect(h.axiosCalls[2].params.status).toBe('PUBLISHED');
         });
 
         test('Typing in search input updates draft query WITHOUT dispatching requests or resetting table', () => {
@@ -533,7 +634,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
             await new Promise(r => setTimeout(r, 10));
 
             // Mock multi-page response to show pagination controls
-            h.getHooks()[5] = { total: 50, page: 1, pages: 2, limit: 25 }; // pagination state
+            h.getHooks()[5].value = { total: 50, page: 1, pages: 2, limit: 25 }; // pagination state
             tree = h.render();
 
             // Find next page button
@@ -553,16 +654,19 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
                 status: 'PUBLISHED'
             });
         });
+
     });
 
-    // ─── 3. STALE RESPONSE DISCARD & ORDERING RACES ───
-    describe('3. Stale Response Discard & Reversed Response Ordering', () => {
+    // ─── 3. SYNTHETIC HOOK HARNESS: STALE RESPONSE DISCARD & ORDERING RACES ───
+    describe('3. Synthetic Hook Harness: Stale Response Discard & Reversed Response Ordering', () => {
         test('Aborts in-flight request and drops delayed stale response arriving out of order', async () => {
             let hooks = [];
             let hookIndex = 0;
             let effects = [];
             const abortSignals = [];
             const resolvers = [];
+
+            const same = (a, b) => a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
 
             const mockAxios = {
                 get: jest.fn((url, config) => {
@@ -579,26 +683,31 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
 
             const mockReact = {
                 useState: (initial) => {
-                    const idx = hookIndex++;
-                    if (hooks[idx] === undefined) {
-                        hooks[idx] = typeof initial === 'function' ? initial() : initial;
-                    }
-                    const setState = (newVal) => {
-                        hooks[idx] = typeof newVal === 'function' ? newVal(hooks[idx]) : newVal;
-                    };
-                    return [hooks[idx], setState];
+                    const k = hookIndex++;
+                    hooks[k] ??= { value: typeof initial === 'function' ? initial() : initial };
+                    return [hooks[k].value, (newVal) => {
+                        hooks[k].value = typeof newVal === 'function' ? newVal(hooks[k].value) : newVal;
+                    }];
                 },
                 useRef: (initial) => {
-                    const idx = hookIndex++;
-                    if (hooks[idx] === undefined) {
-                        hooks[idx] = { current: initial };
-                    }
-                    return hooks[idx];
+                    const k = hookIndex++;
+                    hooks[k] ??= { current: initial };
+                    return hooks[k];
                 },
-                useCallback: (fn) => fn,
-                useEffect: (fn) => {
-                    hookIndex++;
-                    effects.push(fn);
+                useCallback: (fn, deps) => {
+                    const k = hookIndex++;
+                    if (!hooks[k] || !same(hooks[k].deps, deps)) {
+                        hooks[k] = { fn, deps };
+                    }
+                    return hooks[k].fn;
+                },
+                useEffect: (fn, deps) => {
+                    const k = hookIndex++;
+                    if (!hooks[k] || !same(hooks[k].deps, deps)) {
+                        const old = hooks[k];
+                        hooks[k] = { fn, deps, cleanup: old?.cleanup };
+                        effects.push(k);
+                    }
                 },
                 createElement: (type, props, ...children) => ({
                     type,
@@ -612,7 +721,10 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
                 hookIndex = 0;
                 effects = [];
                 const vdom = Component();
-                for (const eff of effects) eff();
+                for (const k of effects) {
+                    hooks[k].cleanup?.();
+                    hooks[k].cleanup = hooks[k].fn();
+                }
                 return vdom;
             }
 
@@ -644,7 +756,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
             await new Promise(r => setTimeout(r, 10));
             tree = render();
 
-            let reportsState = hooks[0];
+            let reportsState = hooks[0].value;
             expect(reportsState.length).toBe(2);
             expect(reportsState[0].id).toBe('R-ALL-1');
 
@@ -657,11 +769,12 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
             tree = render();
 
             // State must NOT be overwritten by stale Request 1
-            reportsState = hooks[0];
+            reportsState = hooks[0].value;
             expect(reportsState.length).toBe(2);
             expect(reportsState[0].id).toBe('R-ALL-1');
         });
     });
+
 
     // ─── 4. BACKEND SEARCH CONTRACT FOR GTM26-0002 / GTM26-0003 ───
     describe('4. Backend /api/reports/search Scope & Disambiguation Contract', () => {
