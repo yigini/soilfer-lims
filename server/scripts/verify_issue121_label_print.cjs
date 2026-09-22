@@ -29,18 +29,21 @@
  *      - Verifies compact card rendered in #label-print-portal.
  *      - Compact format print stream (50x25mm): exact 1 page (0 blank 2nd page).
  *      - Verifies portal unmounts cleanly on close.
- *   3. Mounted Batch Label Print Lifecycle (3 Samples, Standard & Compact):
- *      - Mounts batch dialog with 3 real sample fixtures.
- *      - Verifies batch header ('Print Batch Labels (3 of 3)').
- *      - Verifies document.title swap to 'Labels-Batch-3'.
+ *   3. Authentic Mounted Batch Consignment Intake & Dialog Lifecycle (3 Samples, Standard & Compact):
+ *      - Navigates to /reception and switches to Consignment Batch mode.
+ *      - Enters 3 samples into consignment table and submits consignment intake.
+ *      - Clicks "Print Sample Labels" from success screen to mount authentic React portal (#label-print-portal).
+ *      - Verifies dynamic document.title swap to 'Labels-Batch-3'.
  *      - Standard format print stream: exact 3 pages (0 blank 4th page).
  *      - Compact format print stream: exact 3 pages (0 blank 4th page).
- *      - Verifies document.title restoration after afterprint event.
- *   4. Mounted Reception Route (/reception) Immediate Print Lifecycle:
- *      - Performs intake via POST /api/reception/intake with recorded custodyHandoverAt.
- *      - Verifies Reception caller projection from actual API response.
- *      - Verifies receptionDate bound from response, not from createdAt or render clock.
- *      - Verifies standard and compact print streams: exact 1 page.
+ *      - Verifies document.title restoration after afterprint event and clean portal unmount on close.
+ *   4. Authentic Mounted Reception Route (/reception) Immediate Print Lifecycle:
+ *      - Looks up pre-arrival EXPECTED sample in Project Sample intake mode.
+ *      - Completes intake through authentic UI form submission.
+ *      - Real React portal (#label-print-portal) mounts via Reception caller projection.
+ *      - Verifies truthful dates: collectionDate, receptionDate, and no clock fabrication.
+ *      - Verifies document.title dynamic swap to 'Label-S008' and standard/compact measured print streams (1 page each).
+ *      - Verifies document.title restoration after afterprint event and clean portal unmount on close.
  *   5. Provenance Truthfulness on Creation-Only & Custody Records:
  *      - Verifies DRAFT sample (createdAt only) renders '—' (no createdAt promotion).
  *      - Verifies custodyHandoverAt record renders '2026-09-01' when receptionDate is absent.
@@ -129,6 +132,10 @@ class CDPClient {
                 } else if (msg.method) {
                     const handlers = this.events.get(msg.method) || [];
                     handlers.forEach(h => h(msg.params, msg.sessionId));
+                }
+                if (msg.method === 'Page.javascriptDialogOpening') {
+                    console.log('  [CDP] Intercepted JS dialog:', msg.params?.message);
+                    this.send('Page.handleJavaScriptDialog', { accept: true }).catch(() => {});
                 }
             });
         });
@@ -356,9 +363,63 @@ async function main() {
         create: { id: TEST_LAB_ID, code: 'LAB-GTM', name: 'Laboratorio Guatemala', country: 'Guatemala', isActive: true }
     });
 
+    await prisma.analysisCategory.upsert({
+        where: { id: 'chemical_properties' },
+        update: {},
+        create: { id: 'chemical_properties', name: 'Chemical Properties' }
+    });
+
+    await prisma.analysis.upsert({
+        where: { code: 'PH_H2O' },
+        update: { status: 'active', isGlobal: true },
+        create: {
+            code: 'PH_H2O',
+            name: 'Soil pH (1:2.5 Water)',
+            categoryId: 'chemical_properties',
+            status: 'active',
+            sampleMassRequired: 10,
+            isGlobal: true,
+            version: 1
+        }
+    });
+
+    await prisma.methodology.upsert({
+        where: { id: 'meth-ph-h2o' },
+        update: { isDefault: true },
+        create: {
+            id: 'meth-ph-h2o',
+            analysisCode: 'PH_H2O',
+            name: 'pH in Water (1:2.5)',
+            isDefault: true
+        }
+    });
+
+    await prisma.operationalGate.upsert({
+        where: { id: 'gate-drying' },
+        update: { isActive: true },
+        create: { id: 'gate-drying', code: 'DRYING', name: 'Drying', isActive: true, sortOrder: 1 }
+    });
+
+    await prisma.operationalGate.upsert({
+        where: { id: 'gate-prep' },
+        update: { isActive: true },
+        create: { id: 'gate-prep', code: 'PREPARATION', name: 'Preparation', isActive: true, sortOrder: 2 }
+    });
+
+    await prisma.analysisGroup.upsert({
+        where: { id: 'std-soil' },
+        update: { analyses: JSON.stringify(['PH_H2O']) },
+        create: {
+            id: 'std-soil',
+            name: 'Basic Soil Fertility Package',
+            analyses: JSON.stringify(['PH_H2O']),
+            labId: null
+        }
+    });
+
     await prisma.project.upsert({
         where: { code: TEST_PROJECT_CODE },
-        update: { status: 'ACTIVE' },
+        update: { status: 'ACTIVE', defaultAnalysisBundle: 'std-soil' },
         create: {
             id: `PRJ-${RUN_SUFFIX}`,
             code: TEST_PROJECT_CODE,
@@ -366,7 +427,8 @@ async function main() {
             status: 'ACTIVE',
             projectType: 'OPEN_INTAKE',
             labId: TEST_LAB_ID,
-            countries: 'Guatemala'
+            countries: 'Guatemala',
+            defaultAnalysisBundle: 'std-soil'
         }
     });
 
@@ -514,6 +576,22 @@ async function main() {
         JWT_SECRET,
         { expiresIn: '2h' }
     );
+
+    await pageCdp.send('Page.addScriptToEvaluateOnNewDocument', {
+        source: `
+            window.__printCalls = 0;
+            window.print = () => { window.__printCalls++; };
+            window.alert = (msg) => { console.warn('ALERT:', msg); window.__lastAlert = msg; };
+            window.confirm = () => true;
+            localStorage.setItem('token', '${authToken}');
+            localStorage.setItem('user', JSON.stringify(${JSON.stringify({
+                id: techUser.id,
+                username: techUser.username,
+                role: techUser.role,
+                labId: techUser.labId
+            })}));
+        `
+    });
 
     const testResults = [];
 
@@ -924,76 +1002,124 @@ async function main() {
         console.log(`  - Overall: ${journey22Pass ? '✓ PASSED' : '✗ FAILED'}\n`);
 
         // ──────────────────────────────────────────────────────────
-        // Journey 2.3: Mounted Batch Dialog (3 Samples: Standard & Compact)
+        // Journey 2.3: Authentic Mounted Batch Consignment Intake & Dialog Lifecycle
         // ──────────────────────────────────────────────────────────
-        console.log('[Mounted Journey 2.3] Testing Mounted Batch Label Dialog Lifecycle (3 Samples)...');
-        const batchSamplesFixture = [
-            { id: 'SMP-S001-GTM', labId: 'S001', originalId: 'FIELD-S001', assignedLab: 'LAB-GTM', projectCode: 'SOILFER-US', status: 'ACCEPTED', receptionDate: '2026-09-01T10:00:00.000Z', collectionDate: '2026-08-25' },
-            { id: 'SMP-S002-GTM', labId: 'S002', originalId: 'FIELD-S002', assignedLab: 'LAB-GTM', projectCode: 'SOILFER-US', status: 'ACCEPTED', receptionDate: '2026-09-02T11:00:00.000Z', collectionDate: '2026-08-26' },
-            { id: 'SMP-S003-GTM', labId: 'S003', originalId: 'FIELD-S003', assignedLab: 'LAB-GTM', projectCode: 'SOILFER-US', status: 'ACCEPTED', receptionDate: '2026-09-03T12:00:00.000Z', collectionDate: '2026-08-27' }
-        ];
+        console.log('[Mounted Journey 2.3] Testing Authentic Batch Consignment Intake & Dialog Lifecycle...');
+        await pageCdp.send('Page.navigate', { url: `${serverOrigin}/reception` });
+        await sleep(1500);
 
-        // Mount real LabelPrintDialog component with batch samples via React in page
-        await pageCdp.send('Runtime.evaluate', {
+        const initialBatchRouteTitle = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
+
+        // Click "Consignment Batch"
+        const clickConsignment = await pageCdp.send('Runtime.evaluate', {
             expression: `
                 (() => {
-                    window.__mountTestLabelDialog = (samples, format = 'STANDARD') => {
-                        const portalContainer = document.getElementById('label-print-portal') || document.createElement('div');
-                        portalContainer.id = 'label-print-portal';
-                        portalContainer.className = 'print-only';
-                        if (!document.body.contains(portalContainer)) document.body.appendChild(portalContainer);
-
-                        const width = format === 'STANDARD' ? '101mm' : '50mm';
-                        const height = format === 'STANDARD' ? '54mm' : '25mm';
-
-                        let styleEl = document.getElementById('test-print-css');
-                        if (!styleEl) {
-                            styleEl = document.createElement('style');
-                            styleEl.id = 'test-print-css';
-                            document.head.appendChild(styleEl);
-                        }
-                        styleEl.textContent = \`
-                            @media print {
-                                @page { margin: 0; size: \${width} \${height}; }
-                                html, body { margin: 0 !important; padding: 0 !important; background: white !important; height: auto !important; min-height: 0 !important; }
-                                #root, #app, .no-print { display: none !important; }
-                                #label-print-portal, .print-only { display: block !important; visibility: visible !important; margin: 0 !important; padding: 0 !important; border: none !important; }
-                                .sample-label-page {
-                                    width: \${width} !important; height: \${height} !important;
-                                    max-width: \${width} !important; max-height: \${height} !important;
-                                    page-break-inside: avoid !important; break-inside: avoid !important;
-                                    overflow: hidden !important; display: flex !important;
-                                    align-items: center !important; justify-content: center !important;
-                                    box-sizing: border-box !important; margin: 0 !important; padding: 0 !important;
-                                }
-                                .sample-label-page:not(:last-child) { page-break-after: always !important; break-after: page !important; }
-                                .sample-label-page:last-child, .sample-label-page:last-of-type { page-break-after: auto !important; break-after: auto !important; }
-                            }
-                        \`;
-
-                        portalContainer.innerHTML = samples.map(s => \`
-                            <div class="sample-label-page">
-                                <div style="width: \${width}; height: \${height}; box-sizing: border-box; padding: 8px; font-family: sans-serif;">
-                                    <div style="font-weight: 900;">\${s.labId}</div>
-                                    <div>\${s.originalId}</div>
-                                    <div>Rec: \${s.receptionDate.slice(0, 10)}</div>
-                                </div>
-                            </div>
-                        \`).join('');
-
-                        const originalTitle = document.title;
-                        document.title = samples.length > 1 ? \`Labels-Batch-\${samples.length}\` : \`Label-\${samples[0].labId}\`;
-                        const cleanup = () => {
-                            document.title = originalTitle;
-                            window.removeEventListener('afterprint', cleanup);
-                        };
-                        window.addEventListener('afterprint', cleanup);
-                    };
-                    window.__mountTestLabelDialog(${JSON.stringify(batchSamplesFixture)}, 'STANDARD');
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const btn = buttons.find(b => b.innerText && b.innerText.includes('Consignment Batch'));
+                    if (!btn) return false;
+                    btn.click();
+                    return true;
                 })()
             `
         });
-        await sleep(300);
+        console.log('  - Clicked Consignment Batch:', clickConsignment.result.value);
+        await sleep(1000);
+
+        // Add 3 samples in batch intake UI
+        for (let i = 1; i <= 3; i++) {
+            await pageCdp.send('Runtime.evaluate', {
+                expression: `
+                    (() => {
+                        const scanInput = document.querySelector('input[placeholder*="Scan or type Sample Barcode"]');
+                        const buttons = Array.from(document.querySelectorAll('button'));
+                        const addBtn = buttons.find(b => b.innerText && b.innerText.includes('Add Sample'));
+                        if (!scanInput || !addBtn) return { success: false, reason: 'Inputs not found' };
+
+                        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                        setter.call(scanInput, 'SMP-CSG-BATCH-${RUN_SUFFIX}-' + ${i});
+                        scanInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        scanInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                        addBtn.click();
+                        return { success: true };
+                    })()
+                `,
+                returnByValue: true
+            });
+            await sleep(400);
+        }
+
+        const batchCount = (await pageCdp.send('Runtime.evaluate', {
+            expression: `document.querySelectorAll('table tbody tr').length`
+        })).result.value;
+        console.log(`  - Added ${batchCount} samples to consignment table`);
+
+        // Submit Consignment
+        const submitBatch = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const submitBtn = buttons.find(b => b.innerText && b.innerText.includes('Submit Consignment'));
+                    if (!submitBtn) return false;
+                    submitBtn.click();
+                    return true;
+                })()
+            `
+        });
+        console.log('  - Clicked Submit Consignment:', submitBatch.result.value);
+        await sleep(2500);
+
+        // Click "Print Sample Labels" on Consignment success screen
+        const printBatchLabelsClick = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const printBtn = buttons.find(b => b.innerText && b.innerText.includes('Print Sample Labels'));
+                    if (!printBtn) return { clicked: false, buttons: buttons.map(b => b.innerText).filter(Boolean) };
+                    printBtn.click();
+                    return { clicked: true };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Clicked Print Sample Labels on success screen:', printBatchLabelsClick.result.value);
+        await sleep(1500);
+
+        // Check if Batch Label Dialog is open via portal
+        const batchDialogCheck = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const portal = document.querySelector('#label-print-portal');
+                    const pages = portal ? portal.querySelectorAll('.sample-label-page').length : 0;
+                    return {
+                        hasPortal: Boolean(portal),
+                        pageCountInPortal: pages,
+                        portalText: portal ? portal.innerText.slice(0, 200) : null
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Batch dialog portal check:', batchDialogCheck.result.value);
+
+        if (!batchDialogCheck.result.value.hasPortal) {
+            throw new Error('Batch LabelPrintDialog did not open');
+        }
+
+        // Wait for all QR codes to finish generating
+        await sleep(1000);
+
+        // Trigger batch print
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const printBtn = buttons.find(b => b.innerText && (b.innerText.includes('Print 3 Labels') || b.innerText.includes('Print Standard') || b.innerText.includes('Print Batch')));
+                    if (printBtn) printBtn.click();
+                })()
+            `
+        });
+        await sleep(200);
 
         const batchTitle = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
         const batchTitlePass = batchTitle === 'Labels-Batch-3';
@@ -1013,14 +1139,20 @@ async function main() {
         await pageCdp.send('Runtime.evaluate', { expression: `window.dispatchEvent(new Event('afterprint'));` });
         await sleep(100);
         const batchRestoredTitle = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
-        const batchTitleRestorePass = batchRestoredTitle === initialSampleDetailTitle;
+        const batchTitleRestorePass = batchRestoredTitle === initialBatchRouteTitle;
         console.log(`  - Title restored after batch print: '${batchRestoredTitle}' -> ${batchTitleRestorePass ? 'PASS' : 'FAIL'}`);
 
         // Toggle Batch to Compact
         await pageCdp.send('Runtime.evaluate', {
-            expression: `window.__mountTestLabelDialog(${JSON.stringify(batchSamplesFixture)}, 'COMPACT');`
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const compactBtn = buttons.find(b => b.innerText && b.innerText.includes('Compact'));
+                    if (compactBtn) compactBtn.click();
+                })()
+            `
         });
-        await sleep(300);
+        await sleep(500);
 
         const pdfBatchCompact = await pageCdp.send('Page.printToPDF', {
             preferCSSPageSize: true,
@@ -1031,10 +1163,26 @@ async function main() {
         const batchCompactPass = batchCompactPages === 3;
         console.log(`  - Batch Compact Print Stream: ${batchCompactPages} pages (Expected: 3, 0 blank 4th page) -> ${batchCompactPass ? 'PASS' : 'FAIL'}`);
 
-        const journey23Pass = batchTitlePass && batchStandardPass && batchTitleRestorePass && batchCompactPass;
+        // Close dialog
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const closeBtn = document.querySelector('button[title="Close"]') || Array.from(document.querySelectorAll('button')).find(b => b.innerText === 'Cancel');
+                    if (closeBtn) closeBtn.click();
+                })()
+            `
+        });
+        await sleep(200);
+
+        const batchPortalUnmounted = (await pageCdp.send('Runtime.evaluate', {
+            expression: `document.querySelector('#label-print-portal') === null`
+        })).result.value;
+        console.log(`  - Batch portal unmounts cleanly on close: ${batchPortalUnmounted ? 'PASS' : 'FAIL'}`);
+
+        const journey23Pass = batchTitlePass && batchStandardPass && batchTitleRestorePass && batchCompactPass && batchPortalUnmounted;
         testResults.push({
             category: 'Mounted Route Dialog Journey',
-            testName: 'Journey 2.3: Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)',
+            testName: 'Journey 2.3: Authentic Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)',
             expectedPages: 3,
             actualPages: batchStandardPages,
             pagePass: batchStandardPass,
@@ -1045,91 +1193,250 @@ async function main() {
         console.log(`  - Overall: ${journey23Pass ? '✓ PASSED' : '✗ FAILED'}\n`);
 
         // ──────────────────────────────────────────────────────────
-        // Journey 2.4: Reception Route Immediate Print Lifecycle
+        // Journey 2.4: Authentic Reception Route Immediate Print Lifecycle
         // ──────────────────────────────────────────────────────────
-        console.log('[Mounted Journey 2.4] Testing Reception Route Immediate Print Lifecycle...');
+        console.log('[Mounted Journey 2.4] Testing Authentic Reception Route Immediate Print Lifecycle...');
         await pageCdp.send('Page.navigate', { url: `${serverOrigin}/reception` });
         await sleep(1500);
 
-        // Perform intake via POST /api/reception/intake with custodyHandoverAt
-        const intakeApiResult = await new Promise((resolve, reject) => {
-            const reqData = JSON.stringify({
-                originalId: expectedOriginalId,
-                decision: 'ACCEPTED',
-                receivedMass: 500,
-                custodyHandoverAt: '2026-09-20T10:00:00.000Z',
-                checklist: {
-                    container: 'PASS',
-                    label: 'PASS',
-                    quantity: 'PASS',
-                    condition: 'PASS',
-                    coc: 'PASS'
-                }
-            });
-            const req = http.request(`${serverOrigin}/api/reception/intake`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                }
-            }, (res) => {
-                let body = '';
-                res.on('data', c => body += c);
-                res.on('end', () => resolve(JSON.parse(body)));
-            });
-            req.on('error', reject);
-            req.write(reqData);
-            req.end();
-        });
+        const initialReceptionRouteTitle = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
 
-        console.log(`  - Intake API response: success=${intakeApiResult.success}, labId=${intakeApiResult.labId}`);
-        console.log(`  - Returned receptionDate: ${intakeApiResult.receptionDate}`);
-        console.log(`  - Returned custodyHandoverAt: ${intakeApiResult.custodyHandoverAt}`);
-        console.log(`  - Returned collectionDate: ${intakeApiResult.collectionDate}`);
-
-        const apiDatesValid = Boolean(intakeApiResult.receptionDate) &&
-                              intakeApiResult.custodyHandoverAt === '2026-09-20T10:00:00.000Z' &&
-                              intakeApiResult.collectionDate === '2026-09-18';
-        console.log(`  - Persisted dates returned in response without clock fabrication: ${apiDatesValid ? 'PASS' : 'FAIL'}`);
-
-        // Verify Reception caller projection into LabelPrintDialog sample prop
-        const receptionProjectionPass = await pageCdp.send('Runtime.evaluate', {
+        // Click "Project Sample"
+        const clickProjectMode = await pageCdp.send('Runtime.evaluate', {
             expression: `
                 (() => {
-                    const result = ${JSON.stringify(intakeApiResult)};
-                    // Exact Reception.jsx:2630-2641 projection logic
-                    const sampleProp = result?.success ? {
-                        id: result.id,
-                        labId: result.labId,
-                        originalId: result.originalId,
-                        assignedLab: result.assignedLab || 'LAB-GTM',
-                        projectCode: result.projectCode || 'SOILFER-US',
-                        status: result.status || 'ACCEPTED',
-                        receptionDate: result.receptionDate || result.sample?.receptionDate || result.custodyHandoverAt || result.sample?.custodyHandoverAt || null,
-                        custodyHandoverAt: result.custodyHandoverAt || result.sample?.custodyHandoverAt || null,
-                        collectionDate: result.collectionDate || result.sample?.collectionDate || null
-                    } : null;
-
-                    // Verify no createdAt fallback and truthful dates
-                    return (
-                        sampleProp !== null &&
-                        sampleProp.receptionDate === result.receptionDate &&
-                        sampleProp.custodyHandoverAt === '2026-09-20T10:00:00.000Z' &&
-                        sampleProp.collectionDate === '2026-09-18' &&
-                        sampleProp.createdAt === undefined
-                    );
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const btn = buttons.find(b => b.innerText && b.innerText.includes('Project Sample'));
+                    if (!btn) return false;
+                    btn.click();
+                    return true;
                 })()
             `
         });
-        console.log(`  - Reception caller projection preserves persisted dates & excludes createdAt: ${receptionProjectionPass.result.value ? 'PASS' : 'FAIL'}`);
+        console.log('  - Clicked Project Sample button:', clickProjectMode.result.value);
+        await sleep(800);
 
-        const journey24Pass = apiDatesValid && receptionProjectionPass.result.value;
+        // Select Project Session (SoilFER / SOILFER-US)
+        const clickProjectSession = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const btn = buttons.find(b => b.innerText && (b.innerText.includes('SoilFER') || b.innerText.includes('SOILFER-US')));
+                    if (!btn) return { clicked: false, buttons: buttons.map(b => b.innerText).filter(Boolean) };
+                    btn.click();
+                    return { clicked: true };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Selected Project Session:', clickProjectSession.result.value);
+        await sleep(800);
+
+        // Enter Expected Sample ID and click Look Up
+        const scanSample = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const input = document.querySelector('input[placeholder*="Scan or Enter"]') || document.querySelector('input[placeholder*="Sample ID"]');
+                    if (!input) return { success: false, reason: 'Scan input not found' };
+
+                    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                    setter.call(input, '${expectedOriginalId}');
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const lookupBtn = buttons.find(b => b.innerText && b.innerText.includes('Look Up'));
+                    if (lookupBtn) {
+                        lookupBtn.click();
+                        return { success: true, clickedLookup: true };
+                    }
+                    return { success: true, clickedLookup: false };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Looked up expected sample:', scanSample.result.value);
+        await sleep(1500);
+
+        // Fill Reception Intake Form
+        const fillForm = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (async () => {
+                    const setNativeValue = (el, val) => {
+                        const proto = el.tagName === 'INPUT' ? window.HTMLInputElement.prototype : (el.tagName === 'SELECT' ? window.HTMLSelectElement.prototype : window.HTMLTextAreaElement.prototype);
+                        const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+                        setter.call(el, val);
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    };
+
+                    const result = { steps: [] };
+
+                    // Select Analysis Bundle if dropdown exists
+                    const selects = Array.from(document.querySelectorAll('select'));
+                    const bundleSelect = selects.find(s => Array.from(s.options).some(o => o.value === 'std-soil'));
+                    if (bundleSelect) {
+                        setNativeValue(bundleSelect, 'std-soil');
+                        result.steps.push('Selected std-soil bundle');
+                    }
+
+                    // Received mass
+                    const massInput = document.querySelector('input[data-field-key="receivedMass"]');
+                    if (massInput) {
+                        setNativeValue(massInput, '500');
+                        result.steps.push('Set mass to 500');
+                    }
+
+                    // Custody handover time
+                    const custodyInput = document.querySelector('input[type="datetime-local"]');
+                    if (custodyInput) {
+                        setNativeValue(custodyInput, '2026-09-20T10:00');
+                        result.steps.push('Set custody to 2026-09-20T10:00');
+                    }
+
+                    // Checklist OK buttons - CLICK SEQUENTIALLY
+                    const passButtons = Array.from(document.querySelectorAll('button[title="Mark as Pass"]'));
+                    for (const btn of passButtons) {
+                        btn.click();
+                        await new Promise(r => setTimeout(r, 60));
+                    }
+                    result.steps.push('Clicked ' + passButtons.length + ' pass buttons sequentially');
+
+                    return result;
+                })()
+            `,
+            awaitPromise: true,
+            returnByValue: true
+        });
+        console.log('  - Filled intake form:', fillForm.result.value);
+        await sleep(500);
+
+        // Click "Complete Intake"
+        const submitIntake = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const completeBtn = buttons.find(b => b.innerText && b.innerText.includes('Complete Intake'));
+                    if (!completeBtn) return { clicked: false, buttons: buttons.map(b => b.innerText).filter(Boolean) };
+                    completeBtn.click();
+                    return { clicked: true };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Clicked Complete Intake:', submitIntake.result.value);
+        await sleep(2000);
+
+        // Check if LabelPrintDialog opened via React Portal
+        const intakeDialogCheck = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const portal = document.querySelector('#label-print-portal');
+                    return {
+                        hasPortal: Boolean(portal),
+                        portalText: portal ? portal.innerText : null,
+                        title: document.title
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('  - Reception dialog portal check:', intakeDialogCheck.result.value);
+
+        if (!intakeDialogCheck.result.value.hasPortal) {
+            throw new Error('Reception LabelPrintDialog did not open after intake completion');
+        }
+
+        // Wait for QR code to be ready
+        await sleep(500);
+
+        // Assert Truthful Date Binding in Reception Label
+        const recPortalText = intakeDialogCheck.result.value.portalText || '';
+        const hasPermanentLabId = recPortalText.includes('PERMANENT LAB ID');
+        const hasOriginalId = recPortalText.includes(expectedOriginalId);
+        const collDatePass = recPortalText.includes('Coll: 2026-09-18');
+        const todayDateIso = new Date().toISOString().slice(0, 10);
+        const recDatePass = recPortalText.includes(todayDateIso);
+        console.log(`  - Bound Expected Collection Date (2026-09-18): ${collDatePass ? 'PASS' : 'FAIL'}`);
+        console.log(`  - Bound Truthful Reception Date (${todayDateIso}): ${recDatePass ? 'PASS' : 'FAIL'}`);
+
+        // Click Print Label in Dialog
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const printBtn = buttons.find(b => b.innerText && (b.innerText.includes('Print Label') || b.innerText.includes('Print Standard')));
+                    if (printBtn) printBtn.click();
+                })()
+            `
+        });
+        await sleep(200);
+
+        const recTitleDuringPrint = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
+        const recTitleSwapPass = recTitleDuringPrint.startsWith('Label-');
+        console.log(`  - Title swap during print: '${recTitleDuringPrint}' -> ${recTitleSwapPass ? 'PASS' : 'FAIL'}`);
+
+        // Standard PDF page measurement
+        const pdfStandard = await pageCdp.send('Page.printToPDF', {
+            preferCSSPageSize: true, printBackground: true,
+            marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0
+        });
+        const recStandardPages = countPdfPages(Buffer.from(pdfStandard.data, 'base64'));
+        const recStandardPass = recStandardPages === 1;
+        console.log(`  - Standard 101x54mm Print Stream: ${recStandardPages} page(s) (Expected: 1) -> ${recStandardPass ? 'PASS' : 'FAIL'}`);
+
+        // afterprint title restoration
+        await pageCdp.send('Runtime.evaluate', { expression: `window.dispatchEvent(new Event('afterprint'));` });
+        await sleep(100);
+        const recRestoredTitle = (await pageCdp.send('Runtime.evaluate', { expression: 'document.title' })).result.value;
+        const recTitleRestorePass = recRestoredTitle === initialReceptionRouteTitle;
+        console.log(`  - Title restored after print: '${recRestoredTitle}' -> ${recTitleRestorePass ? 'PASS' : 'FAIL'}`);
+
+        // Toggle to Compact
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const compactBtn = buttons.find(b => b.innerText && b.innerText.includes('Compact'));
+                    if (compactBtn) compactBtn.click();
+                })()
+            `
+        });
+        await sleep(300);
+
+        const pdfCompact = await pageCdp.send('Page.printToPDF', {
+            preferCSSPageSize: true, printBackground: true,
+            marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0
+        });
+        const recCompactPages = countPdfPages(Buffer.from(pdfCompact.data, 'base64'));
+        const recCompactPass = recCompactPages === 1;
+        console.log(`  - Compact 50x25mm Print Stream: ${recCompactPages} page(s) (Expected: 1) -> ${recCompactPass ? 'PASS' : 'FAIL'}`);
+
+        // Close dialog
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const closeBtn = document.querySelector('button[title="Close"]') || Array.from(document.querySelectorAll('button')).find(b => b.innerText === 'Cancel');
+                    if (closeBtn) closeBtn.click();
+                })()
+            `
+        });
+        await sleep(200);
+
+        const recPortalUnmounted = (await pageCdp.send('Runtime.evaluate', {
+            expression: `document.querySelector('#label-print-portal') === null`
+        })).result.value;
+        console.log(`  - Reception portal unmounts cleanly on close: ${recPortalUnmounted ? 'PASS' : 'FAIL'}`);
+
+        const journey24Pass = hasPermanentLabId && hasOriginalId && collDatePass && recDatePass && recTitleSwapPass && recStandardPass && recTitleRestorePass && recCompactPass && recPortalUnmounted;
         testResults.push({
             category: 'Mounted Route Dialog Journey',
-            testName: 'Journey 2.4: Reception Route Immediate Print API & Caller Projection Lifecycle',
+            testName: 'Journey 2.4: Authentic Reception Route Immediate Print Lifecycle (Standard & Compact)',
             expectedPages: 1,
-            actualPages: 1,
-            pagePass: true,
+            actualPages: recStandardPages,
+            pagePass: recStandardPass,
+            titleSwapPass: recTitleSwapPass,
+            titleRestorePass: recTitleRestorePass,
             passed: journey24Pass
         });
         console.log(`  - Overall: ${journey24Pass ? '✓ PASSED' : '✗ FAILED'}\n`);
@@ -1192,11 +1499,12 @@ async function main() {
         });
         console.log(`  - Overall: ${journey25Pass ? '✓ PASSED' : '✗ FAILED'}\n`);
 
-        pageCdp.close();
-        cdp.close();
     } finally {
-        chrome.kill();
-        server.close();
+        if (typeof pageCdp !== 'undefined' && pageCdp) pageCdp.close();
+        if (typeof cdp !== 'undefined' && cdp) cdp.close();
+        if (typeof chrome !== 'undefined' && chrome) chrome.kill();
+        if (typeof server !== 'undefined' && server) server.close();
+        try { await prisma.$disconnect(); } catch {}
         cleanupDisposableDatabase(runnerDir);
     }
 

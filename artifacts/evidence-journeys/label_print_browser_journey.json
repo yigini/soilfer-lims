@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T18:08:03.009Z",
+  "timestamp": "2026-09-22T19:13:27.462Z",
   "suite": "Issue #121 Headless Chrome CDP Print & Date Verification",
   "browser": "Google Chrome Headless (Windows)",
   "totalChecks": 11,
@@ -108,7 +108,7 @@
       },
       {
         "category": "Mounted Route Dialog Journey",
-        "testName": "Journey 2.3: Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)",
+        "testName": "Journey 2.3: Authentic Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)",
         "expectedPages": 3,
         "actualPages": 3,
         "pagePass": true,
@@ -118,10 +118,12 @@
       },
       {
         "category": "Mounted Route Dialog Journey",
-        "testName": "Journey 2.4: Reception Route Immediate Print API & Caller Projection Lifecycle",
+        "testName": "Journey 2.4: Authentic Reception Route Immediate Print Lifecycle (Standard & Compact)",
         "expectedPages": 1,
         "actualPages": 1,
         "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
         "passed": true
       },
       {
