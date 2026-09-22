@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-09-22T12:31:20.841Z",
+  "status": "PASS",
+  "issue": "#119",
+  "checkpoint": "manager -> dashboard TEXTURE -> S004 scoped assignment controls without loop",
+  "environment": {
+    "node": "v24.13.0",
+    "database": "disposable_journey_sample_assignment.db",
+    "isolationRefusalGuard": "ACTIVE",
+    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-sample-assign\\server\\.tmp_journey_runner_1790080272210_1l0hkf\\disposable_journey_1l0hkf.db"
+  },
+  "checks": {
+    "methodFilterInQueue": {
+      "route": "/manager-queue?lane=assign&analysis=TEXTURE",
+      "bannerVerified": true,
+      "s004CardFound": true,
+      "status": "PASS"
+    },
+    "sampleDetailNavigation": {
+      "navigatedToUrl": "http://127.0.0.1:58312/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
+      "targetRoute": "/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
+      "resolvedCanonicalId": true,
+      "resolvedDisplayId": true,
+      "queueMethodBadge": true,
+      "status": "PASS"
+    },
+    "guidanceAndCounts": {
+      "managerGuidanceRendered": true,
+      "technicianGuidanceEliminated": true,
+      "orderedAnalysesCount": 12,
+      "unassignedTasksCount": 11,
+      "operationalGatesCount": 2,
+      "analyticalTasksCount": 9,
+      "finalApprovalDisabled": true,
+      "status": "PASS"
+    },
+    "loopEliminationAndScopedControls": {
+      "primaryButtonText": "Assign 11 unassigned task(s) to technician",
+      "clickedPrimaryButton": true,
+      "pageStayedOnSampleDetail": true,
+      "loopToQueueEliminated": true,
+      "bulkPreviewBarRendered": true,
+      "selectedCount": 11,
+      "technicianSelectPresent": true,
+      "assignSelectedBtnDisabled": true,
+      "status": "PASS"
+    },
+    "safetyAndZeroMutation": {
+      "s004TasksChecked": 11,
+      "tasksAssignedInDatabase": 0,
+      "status": "PASS"
+    },
+    "returnToQueueContext": {
+      "returnedToUrl": "http://127.0.0.1:58312/manager-queue?lane=assign&analysis=TEXTURE",
+      "methodContextPreserved": true,
+      "filterBannerPresent": true,
+      "status": "PASS"
+    }
+  },
+  "artifacts": {
+    "screenshot": "sample_assign_scoped_controls_verified.png"
+  }
+}

@@ -10,7 +10,18 @@ import { useAuth } from '../../context/AuthContext';
 import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
 
-const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssignmentSuccess, onReview, onReviewBulk }) => {
+const WorkItemsTable = ({
+    workItems,
+    onUpdateStatus,
+    loading,
+    isGateOpen,
+    onAssignmentSuccess,
+    onReview,
+    onReviewBulk,
+    selectedWorkItemIds,
+    onSelectionChange,
+    methodContext
+}) => {
     const navigate = useNavigate();
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
@@ -26,12 +37,19 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
     // Fetch technicians for assignment dropdown
     useEffect(() => {
         if (isManager) {
-            axios.get('/api/users/directory')
+            axios.get('/api/users/directory?purpose=assignment')
                 .then(res => {
                     const allUsers = Array.isArray(res.data) ? res.data : (res.data.data || []);
-                    setTechnicians(allUsers.filter(u => u.role === 'LAB_TECHNICIAN'));
+                    setTechnicians(allUsers.filter(u => u.role === 'LAB_TECHNICIAN' || u.role === 'LAB_MANAGER'));
                 })
-                .catch(err => console.error('Failed to fetch technicians', err));
+                .catch(() => {
+                    axios.get('/api/users/directory')
+                        .then(res => {
+                            const allUsers = Array.isArray(res.data) ? res.data : (res.data.data || []);
+                            setTechnicians(allUsers.filter(u => u.role === 'LAB_TECHNICIAN' || u.role === 'LAB_MANAGER'));
+                        })
+                        .catch(err => console.error('Failed to fetch technicians', err));
+                });
         }
     }, [isManager]);
 
@@ -75,7 +93,19 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
     };
 
     // --- BATCH ASSIGNMENT LOGIC ---
-    const [selection, setSelection] = useState([]);
+    const [internalSelection, setInternalSelection] = useState([]);
+    const selection = selectedWorkItemIds !== undefined ? selectedWorkItemIds : internalSelection;
+    const setSelection = (newVal) => {
+        if (onSelectionChange) {
+            if (typeof newVal === 'function') {
+                onSelectionChange(newVal(selection));
+            } else {
+                onSelectionChange(newVal);
+            }
+        } else {
+            setInternalSelection(newVal);
+        }
+    };
     const [selectedTech, setSelectedTech] = useState('');
 
     // Workflow Calculations
@@ -244,6 +274,12 @@ const WorkItemsTable = ({ workItems, onUpdateStatus, loading, isGateOpen, onAssi
                     <h3 className="font-bold text-sf-muted uppercase text-xs tracking-wider">
                         Analytical Results ({filteredWorkItems.length})
                     </h3>
+
+                    {methodContext && (
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                            Method: {getAnalysisDisplayName(methodContext)}
+                        </span>
+                    )}
 
                     {/* Technician Filter Toggle */}
                     {isTech && (

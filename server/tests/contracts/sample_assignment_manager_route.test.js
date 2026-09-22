@@ -31,7 +31,7 @@ const { getAuthToken } = require('../setup');
 const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
 
 // ─── 1. COMPONENT SSR HELPER ───
-function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign') {
+function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign', options = {}) {
     const esbuild = require(path.resolve(__dirname, '../../../client/node_modules/esbuild'));
     const React = require(path.resolve(__dirname, '../../../client/node_modules/react'));
     const componentPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
@@ -64,15 +64,18 @@ function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanage
         workItemEvidenceText: () => ''
     };
 
+    const mockNavigate = options.navigate || jest.fn();
+    const sampleId = options.sampleId || 'GTM-LAB1';
+
     const mockRouter = {
-        useParams: () => ({ id: 'GTM-LAB1' }),
-        useNavigate: () => jest.fn(),
-        useLocation: () => ({ pathname: '/samples/GTM-LAB1', search: initialSearch })
+        useParams: () => ({ id: sampleId }),
+        useNavigate: () => mockNavigate,
+        useLocation: () => ({ pathname: `/samples/${sampleId}`, search: initialSearch })
     };
 
     const mockAuth = {
         useAuth: () => ({
-            user: { username: 'super_admin', role: 'SUPER_ADMIN', labId: 'LAB-GTM' },
+            user: options.user || { username: 'super_admin', role: 'SUPER_ADMIN', labId: 'LAB-GTM' },
             token: 'mock-token'
         })
     };
@@ -583,7 +586,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             const selectedAnalysis = null;
             const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
             const tabParam = 'tab=work&';
-            const targetUrl = `/samples/${s005CardItem.sampleId || s005CardItem.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
+            const targetUrl = `/samples/${s005CardItem.sampleId || s005CardItem.id}?${tabParam}${selectedAnalysis ? `analysis=${encodeURIComponent(selectedAnalysis)}&` : ''}returnTo=${encodeURIComponent(returnUrl)}`;
 
             expect(targetUrl).toBe('/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign');
 
@@ -591,6 +594,175 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             const urlObj = new URL(`http://localhost${targetUrl}`);
             expect(urlObj.searchParams.get('tab')).toBe('work');
             expect(urlObj.searchParams.get('returnTo')).toBe('/manager-queue?lane=assign');
+        });
+
+        test('Target URL forwards selectedAnalysis directly and retains method context in returnTo (#119)', () => {
+            const s004CardItem = {
+                id: sampleS004CanonicalId,
+                sampleId: sampleS004CanonicalId,
+                sampleLabId: sampleS004DisplayLabId,
+                originalId: sampleS004FieldId,
+                count: 11
+            };
+
+            const type = 'assign';
+            const selectedAnalysis = 'TEXTURE';
+            const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
+            const tabParam = 'tab=work&';
+            const targetUrl = `/samples/${s004CardItem.sampleId || s004CardItem.id}?${tabParam}${selectedAnalysis ? `analysis=${encodeURIComponent(selectedAnalysis)}&` : ''}returnTo=${encodeURIComponent(returnUrl)}`;
+
+            expect(targetUrl).toBe('/samples/SMP-S004-GTM-ROUTE?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE');
+
+            const urlObj = new URL(`http://localhost${targetUrl}`);
+            expect(urlObj.searchParams.get('tab')).toBe('work');
+            expect(urlObj.searchParams.get('analysis')).toBe('TEXTURE');
+            expect(urlObj.searchParams.get('returnTo')).toBe('/manager-queue?lane=assign&analysis=TEXTURE');
+        });
+    });
+
+    describe('5. Component Render Regression: Manager Guidance & Scoped Assignment Controls (#119)', () => {
+        test('SampleDetail renders Manager guidance text instead of Technician guidance when tasks are unassigned', () => {
+            const SampleDetail = loadSampleDetailComponent(
+                '?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE',
+                { sampleId: sampleS004CanonicalId }
+            );
+            const React = require(path.resolve(__dirname, '../../../client/node_modules/react'));
+            const ReactDOMServer = require(path.resolve(__dirname, '../../../client/node_modules/react-dom/server'));
+
+            const mockWorkspace = {
+                sample: {
+                    id: sampleS004CanonicalId,
+                    labId: sampleS004DisplayLabId,
+                    originalId: sampleS004FieldId,
+                    status: 'PROCESSING'
+                },
+                workItems: [
+                    { id: 'WI-S004-1', analysis: 'DRYING', status: 'NOT_ASSIGNED', category: 'Operational Gates', isGate: true },
+                    { id: 'WI-S004-2', analysis: 'PREPARATION', status: 'NOT_ASSIGNED', category: 'Operational Gates', isGate: true },
+                    { id: 'WI-S004-3', analysis: 'PH_H2O', status: 'NOT_ASSIGNED', category: 'Wet Chemistry' }
+                ],
+                counters: {
+                    ordered: 11,
+                    recorded: 0,
+                    submitted: 0,
+                    accepted: 0,
+                    omitted: 0,
+                    blocked: 0,
+                    derived: 0,
+                    unassigned: 11
+                },
+                capabilities: {
+                    canManageAnalyses: { allowed: true },
+                    canFinalApprove: { allowed: false, blockers: ['Tasks not completed'] },
+                    canArchive: { allowed: false },
+                    canDispose: { allowed: false }
+                },
+                nextAction: {
+                    action: 'ASSIGN',
+                    label: 'Assign 11 unassigned task(s) to technician',
+                    role: 'LAB_MANAGER'
+                }
+            };
+
+            const markup = ReactDOMServer.renderToStaticMarkup(
+                React.createElement(SampleDetail, {
+                    initialWorkspace: mockWorkspace,
+                    initialSample: mockWorkspace.sample
+                })
+            );
+
+            // 1. Manager guidance text present in Recommended Next Action banner
+            expect(markup).toContain('Manager · Assign unassigned analytical tasks to laboratory technicians for testing.');
+            // 2. Erroneous technician guidance MUST NOT be present under manager next action
+            expect(markup).not.toContain('Technician · Record laboratory results and submit package for managerial review.');
+            // 3. Recommended Next Action button displays "Assign to technician"
+            expect(markup).toContain('Assign to technician');
+            // 4. Primary next action top button displays "Assign 11 unassigned task(s) to technician"
+            expect(markup).toContain('Assign 11 unassigned task(s) to technician');
+            // 5. Method context badge displayed in breadcrumb bar
+            expect(markup).toContain('Queue Method:');
+            expect(markup).toContain('TEXTURE');
+            // 6. Ordered analyses table container has id="ordered-analyses-table"
+            expect(markup).toContain('id="ordered-analyses-table"');
+            // 7. Unassigned badge displayed in table header
+            expect(markup).toContain('11 unassigned');
+        });
+
+        test('SampleDetail ASSIGN action handler invokes handleFocusAssignment and eliminates loop to manager-queue', () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+
+            // Regression check: Line 530 ASSIGN handler must call handleFocusAssignment() and NOT navigate to manager-queue
+            expect(source).not.toMatch(/else\s+if\s*\(\s*nextAction\.action\s*===\s*'ASSIGN'\s*\)\s*\{\s*navigate\(`\/manager-queue\?lane=assign`\);/);
+            expect(source).toMatch(/else\s+if\s*\(\s*nextAction\.action\s*===\s*'ASSIGN'\s*\)\s*\{\s*handleFocusAssignment\(\);/);
+
+            // Confirms handleFocusAssignment maintains tab=work and selects unassigned items
+            expect(source).toContain('handleFocusAssignment');
+            expect(source).toContain('currentParams.set(\'tab\', \'work\')');
+            expect(source).toContain('setSelectedWorkItemIds');
+            expect(source).toContain('ordered-analyses-table');
+        });
+    });
+
+    describe('6. 12 Ordered / 9 Analytical + 2 Gates / Derived Texture Relationship (#119)', () => {
+        test('S004 workspace maintains truthful parallel facts: 2 gates + 9 analytical = 11 tasks', async () => {
+            const ws = await sampleWorkspaceService.getSampleWorkspace(sampleS004CanonicalId, {
+                role: 'LAB_MANAGER',
+                labId: 'LAB-GTM'
+            });
+
+            expect(ws).toBeDefined();
+            expect(ws.workItems).toHaveLength(11);
+
+            const gateItems = ws.workItems.filter(w => w.isGate || w.category === 'Operational Gates');
+            const analyticalItems = ws.workItems.filter(w => !w.isGate && w.category !== 'Operational Gates');
+
+            expect(gateItems).toHaveLength(2);
+            expect(gateItems.map(g => g.analysis).sort()).toEqual(['DRYING', 'PREPARATION']);
+            expect(analyticalItems).toHaveLength(9);
+
+            // All 11 are unassigned
+            expect(ws.counters.unassigned).toBe(11);
+            expect(ws.nextAction.action).toBe('ASSIGN');
+            expect(ws.nextAction.label).toBe('Assign 11 unassigned task(s) to technician');
+
+            // Final approval must be disabled
+            expect(ws.capabilities.canFinalApprove.allowed).toBe(false);
+        });
+
+        test('Aggregated queue across lab maintains 26 = 15 (S005) + 11 (S004) unassigned tasks', async () => {
+            const res = await request(app)
+                .get('/api/work?status=NOT_ASSIGNED&limit=100')
+                .set('Authorization', `Bearer ${mgrGtmToken}`);
+
+            expect(res.status).toBe(200);
+            const items = res.body.data;
+
+            const labGtmItems = items.filter(item =>
+                [sampleS005CanonicalId, sampleS004CanonicalId].includes(item.sampleId)
+            );
+
+            expect(labGtmItems).toHaveLength(26);
+            const s005Count = labGtmItems.filter(i => i.sampleId === sampleS005CanonicalId).length;
+            const s004Count = labGtmItems.filter(i => i.sampleId === sampleS004CanonicalId).length;
+
+            expect(s005Count).toBe(15);
+            expect(s004Count).toBe(11);
+            expect(s005Count + s004Count).toBe(26);
+        });
+    });
+
+    describe('7. Safety & Immutability: Zero Live Task Assignment (#119)', () => {
+        test('All work items remain strictly in NOT_ASSIGNED state with assignedTo null', async () => {
+            const allItems = await prisma.workItem.findMany({
+                where: { sampleId: { in: [sampleS005CanonicalId, sampleS004CanonicalId] } }
+            });
+
+            expect(allItems).toHaveLength(26);
+            for (const item of allItems) {
+                expect(item.status).toBe('NOT_ASSIGNED');
+                expect(item.assignedTo).toBeNull();
+            }
         });
     });
 });

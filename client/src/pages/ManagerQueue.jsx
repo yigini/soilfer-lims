@@ -541,7 +541,7 @@ const QueueCard = ({ item, type, navigate, t, selectedAnalysis, onInspectBatch }
     let tabParam = '';
     if (type === 'assign') tabParam = 'tab=work&';
     else if (type === 'review') tabParam = 'tab=review&';
-    const targetUrl = `/samples/${item.sampleId || item.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
+    const targetUrl = `/samples/${item.sampleId || item.id}?${tabParam}${selectedAnalysis ? `analysis=${encodeURIComponent(selectedAnalysis)}&` : ''}returnTo=${encodeURIComponent(returnUrl)}`;
 
     const handleCardClick = () => {
         if (type === 'exceptions') {
