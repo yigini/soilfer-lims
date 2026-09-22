@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -6,14 +7,41 @@ import {
     RefreshCw, Filter, ShieldCheck, Sparkles, Building2
 } from 'lucide-react';
 
+const getUrlLabId = (searchString) => {
+    let search = searchString;
+    if (search === undefined && typeof window !== 'undefined' && window.location) {
+        search = window.location.search;
+    }
+    if (!search) return null;
+    try {
+        const params = new URLSearchParams(search);
+        return params.get('labId') || null;
+    } catch {
+        return null;
+    }
+};
+
 const LabMethods = () => {
     const { user } = useAuth();
     const { t } = useLanguage();
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
+
+    // Reactive URL lab scope from router searchParams / location, with fallback to window.location
+    const routerSearch = location?.search || (typeof window !== 'undefined' && window.location?.search) || '';
+    const currentUrlLabId = searchParams?.get('labId') || getUrlLabId(routerSearch);
+
     const [labs, setLabs] = useState([]);
-    const [selectedLabId, setSelectedLabId] = useState(user?.labId || 'LAB-DEFAULT');
+    const [selectedLabId, setSelectedLabId] = useState(() => {
+        if (currentUrlLabId) return currentUrlLabId;
+        if (user?.labId) return user.labId;
+        return '';
+    });
     const [defaults, setDefaults] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loadedLabId, setLoadedLabId] = useState(null);
+    const [loadError, setLoadError] = useState(false);
+    const [loading, setLoading] = useState(() => Boolean(currentUrlLabId || user?.labId));
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
     const [filterMatrix, setFilterMatrix] = useState('ALL');
@@ -21,8 +49,45 @@ const LabMethods = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isWizardOpen, setIsWizardOpen] = useState(false);
 
+    const activeRequestIdRef = useRef(0);
+    const selectedLabIdRef = useRef(selectedLabId);
+    useEffect(() => {
+        selectedLabIdRef.current = selectedLabId;
+    }, [selectedLabId]);
+
+    // Synchronize incoming reactive URL navigation on same mounted instance
+    const prevUrlLabIdRef = useRef(currentUrlLabId);
+    if (prevUrlLabIdRef.current !== currentUrlLabId) {
+        prevUrlLabIdRef.current = currentUrlLabId;
+        const targetId = currentUrlLabId || user?.labId || (labs.length > 0 ? labs[0].id : 'LAB-DEFAULT');
+        if (targetId && targetId !== selectedLabId) {
+            setSelectedLabId(targetId);
+        }
+    }
+
+    // Handle lab dropdown change with reactive router params and preserved history state
+    const handleLabChange = (newLabId) => {
+        prevUrlLabIdRef.current = newLabId;
+        setSelectedLabId(newLabId);
+
+        const nextParams = new URLSearchParams(searchParams);
+        if (newLabId && newLabId !== 'LAB-DEFAULT') {
+            nextParams.set('labId', newLabId);
+        } else {
+            nextParams.delete('labId');
+        }
+
+        if (typeof setSearchParams === 'function') {
+            setSearchParams(nextParams, {
+                replace: true,
+                state: location?.state
+            });
+        }
+    };
+
     // Fetch labs list if user has access to multiple labs
     useEffect(() => {
+        let isCancelled = false;
         const fetchLabs = async () => {
             try {
                 const token = localStorage.getItem('token');
@@ -31,41 +96,93 @@ const LabMethods = () => {
                 });
                 if (res.ok) {
                     const data = await res.json();
+                    if (isCancelled) return;
                     setLabs(data);
-                    if (!user?.labId && data.length > 0) {
-                        setSelectedLabId(data[0].id);
-                    }
+                    setSelectedLabId(current => {
+                        // Honor existing selection (from URL scope, user.labId, or user interaction)
+                        if (current) return current;
+                        if (data && data.length > 0) {
+                            return data[0].id;
+                        }
+                        return 'LAB-DEFAULT';
+                    });
                 }
             } catch (err) {
+                if (isCancelled) return;
                 console.error('Failed to load labs list:', err);
+                setSelectedLabId(current => current || 'LAB-DEFAULT');
             }
         };
         fetchLabs();
+        return () => { isCancelled = true; };
     }, [user]);
 
     // Fetch lab defaults
     const loadLabDefaults = async (labId) => {
-        if (!labId) return;
+        if (!labId) {
+            setDefaults([]);
+            setLoadedLabId(null);
+            setLoadError(false);
+            setLoading(false);
+            return;
+        }
+
+        const requestId = ++activeRequestIdRef.current;
         setLoading(true);
+        // Clear previous state immediately to prevent cross-lab stale data
+        setDefaults([]);
+        setLoadedLabId(null);
+        setLoadError(false);
+        setIsWizardOpen(false);
+        setMessage(null);
+
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`/api/config/lab-defaults/${labId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
+            // Guard against out-of-order race conditions (headers arrival)
+            if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                return;
+            }
+
             if (res.ok) {
                 const data = await res.json();
+
+                // Revalidate generation and current target after body resolution and before state commits
+                if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                    return;
+                }
+
                 setDefaults(data);
+                setLoadedLabId(labId);
+                setLoadError(false);
                 // Check if any overrides exist — if none, trigger setup wizard prompt
                 const hasOverrides = data.some(d => d.isOverridden);
                 if (!hasOverrides && data.length > 0) {
                     setIsWizardOpen(true);
+                } else {
+                    setIsWizardOpen(false);
                 }
-            } else { throw new Error('Configuration could not be loaded.'); }
+            } else {
+                throw new Error('Configuration could not be loaded.');
+            }
         } catch (err) {
+            // Guard against out-of-order error handling
+            if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                return;
+            }
             console.error('Failed to load defaults:', err);
+            setDefaults([]);
+            setLoadedLabId(null);
+            setLoadError(true);
+            setIsWizardOpen(false);
             setMessage({ type: 'error', text: 'Failed to load laboratory methodology defaults.' });
         } finally {
-            setLoading(false);
+            if (activeRequestIdRef.current === requestId && selectedLabIdRef.current === labId) {
+                setLoading(false);
+            }
         }
     };
 
@@ -73,6 +190,10 @@ const LabMethods = () => {
         if (selectedLabId) {
             loadLabDefaults(selectedLabId);
         }
+        return () => {
+            // Invalidate obsolete in-flight requests on target change or unmount
+            activeRequestIdRef.current += 1;
+        };
     }, [selectedLabId]);
 
     const handleMethodChange = (analysisCode, methodologyId) => {
@@ -89,9 +210,15 @@ const LabMethods = () => {
         }));
     };
 
+    const canSave = !saving && !loading && !loadError && Boolean(selectedLabId) && loadedLabId === selectedLabId && defaults.length > 0;
+
     const handleSave = async () => {
+        if (!canSave) return;
+
         setSaving(true);
         setMessage(null);
+        const targetLabId = selectedLabId;
+
         try {
             const token = localStorage.getItem('token');
             const payload = defaults
@@ -101,7 +228,7 @@ const LabMethods = () => {
                     methodologyId: d.chosenMethodologyId
                 }));
 
-            const res = await fetch(`/api/config/lab-defaults/${selectedLabId}`, {
+            const res = await fetch(`/api/config/lab-defaults/${targetLabId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,9 +240,11 @@ const LabMethods = () => {
             if (res.ok) {
                 setMessage({ type: 'success', text: 'Laboratory methodology defaults successfully saved.' });
                 setIsWizardOpen(false);
-                await loadLabDefaults(selectedLabId);
+                if (selectedLabIdRef.current === targetLabId) {
+                    await loadLabDefaults(targetLabId);
+                }
             } else {
-                const errData = await res.json();
+                const errData = await res.json().catch(() => ({}));
                 setMessage({ type: 'error', text: errData.error || 'Failed to save defaults.' });
             }
         } catch (err) {
@@ -160,9 +289,12 @@ const LabMethods = () => {
                             <Building2 className="w-4 h-4 text-gray-400" />
                             <select
                                 value={selectedLabId}
-                                onChange={(e) => setSelectedLabId(e.target.value)}
+                                onChange={(e) => handleLabChange(e.target.value)}
                                 className="px-3 py-2 bg-sf-canvas border border-sf-divider rounded-lg text-sm font-medium text-sf-text focus:ring-2 focus:ring-emerald-500"
                             >
+                                {selectedLabId && !labs.some(l => l.id === selectedLabId) && (
+                                    <option key={selectedLabId} value={selectedLabId}>{selectedLabId}</option>
+                                )}
                                 {labs.map(l => (
                                     <option key={l.id} value={l.id}>{l.name || l.id} ({l.code || l.id})</option>
                                 ))}
@@ -172,7 +304,7 @@ const LabMethods = () => {
 
                     <button
                         onClick={handleSave}
-                        disabled={saving || loading}
+                        disabled={!canSave}
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors shadow-sm disabled:opacity-50"
                     >
                         {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -264,6 +396,10 @@ const LabMethods = () => {
                     <div className="p-12 text-center text-gray-500 flex flex-col items-center gap-3">
                         <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
                         <span>Loading methodology defaults...</span>
+                    </div>
+                ) : loadError ? (
+                    <div className="p-12 text-center text-amber-700 dark:text-amber-400">
+                        Failed to load laboratory methodology defaults for the selected laboratory.
                     </div>
                 ) : filteredDefaults.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">
