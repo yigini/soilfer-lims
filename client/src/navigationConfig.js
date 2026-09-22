@@ -33,34 +33,44 @@ export function buildNavItems(user, t = (k, d) => d, icons = {}) {
         { icon: LayoutDashboard, label: t('nav.dashboard', 'Dashboard'), path: '/' },
     ];
 
-    // 1. Reception / Intake (Physical receipt and check-in)
+    // 1. Projects (placed second after Dashboard for management and oversight roles — #115)
+    if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'AUDIT_USER'].includes(user?.role)) {
+        navItems.push({ icon: FileSpreadsheet, label: t('nav.projects', 'Projects'), path: '/projects' });
+    }
+
+    // 2. Reception / Intake (Physical receipt and check-in)
     if (['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: Package, label: t('nav.reception', 'Sample Reception'), path: '/reception' });
     }
 
-    // 2. Samples Registry
+    // 3. Samples Registry
     navItems.push({ icon: TestTube2, label: t('nav.samples', 'Samples'), path: '/samples' });
 
-    // 3. Technician Work & Workbench
+    // 4. Technician Work & Workbench
     if (user?.role === 'LAB_TECHNICIAN') {
         navItems.push({ icon: ClipboardList, label: t('nav.myWork', 'My Work'), path: '/my-work' });
         navItems.push({ icon: Beaker, label: t('nav.workbench', 'Workbench'), path: '/workbench' });
     }
 
-    // 4. Manager Task List (#116, #120)
+    // 5. Manager Task List (#116, #120)
     if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: ShieldAlert, label: t('nav.managerQueue', 'Manager Task List'), path: '/manager-queue' });
     }
 
-    // 5. Quality Assurance & Audit view
+    // 6. Quality Assurance & Audit view
     if (['AUDIT_USER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role)) {
         navItems.push({ icon: ShieldAlert, label: t('nav.qa', 'Quality Assurance'), path: '/qa' });
     }
 
-    // 6. Result Reports
+    // 7. Data Results (between QA and Result Reports for authorized roles — #115)
+    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
+        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
+    }
+
+    // 8. Result Reports
     navItems.push({ icon: FileText, label: t('nav.reports', 'Result Reports'), path: '/result-reports' });
 
-    // 7. Supporting Modules (Spectral, Inventory, Equipment, Projects, Management)
+    // 9. Supporting Modules (Spectral, Inventory, Equipment, Projects for remaining roles, Management)
     if (user?.role !== 'SAMPLE_RECEPTION') {
         navItems.push({ icon: Activity, label: t('nav.spectral', 'Spectral Library'), path: '/spectral-library' });
     }
@@ -75,12 +85,9 @@ export function buildNavItems(user, t = (k, d) => d, icons = {}) {
         navItems.push({ icon: Monitor, label: t('nav.equipment', 'Equipment'), path: '/equipment' });
     }
 
-    if (['SUPER_ADMIN', 'MASTER_USER', 'PROJECT_MANAGER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN', 'AUDIT_USER'].includes(user?.role)) {
+    // Projects for roles where it is not placed second (#115)
+    if (['SAMPLE_RECEPTION', 'LAB_TECHNICIAN'].includes(user?.role)) {
         navItems.push({ icon: FileSpreadsheet, label: t('nav.projects', 'Projects'), path: '/projects' });
-    }
-
-    if (['SUPER_ADMIN', 'PROJECT_MANAGER', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ icon: Table, label: t('nav.dataResults', 'Data Results'), path: '/data-results' });
     }
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {

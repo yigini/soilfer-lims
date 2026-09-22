@@ -314,15 +314,23 @@ export default function Dashboard() {
         .filter(m => m.queueKey)
         .map(m => ({
             key: m.queueKey,
-            label: m.label,
+            label: m.labelKey ? t(m.labelKey, m.label) : (m.key ? t('dashboard.metrics.' + m.key, m.label) : m.label),
+            labelKey: m.labelKey,
             count: m.value
         }));
 
     // Find current active queue metric for header title
     const currentMetric = (homeData?.metrics || []).find(m => m.queueKey === activeQueue);
-    const queueTitle = currentMetric ? currentMetric.label : t('dashboard.shell.activeWorkQueue', 'Active Work Queue');
+    const metricLabel = currentMetric
+        ? (currentMetric.labelKey ? t(currentMetric.labelKey, currentMetric.label) : (currentMetric.key ? t('dashboard.metrics.' + currentMetric.key, currentMetric.label) : currentMetric.label))
+        : null;
+    const metricUnit = currentMetric
+        ? (currentMetric.unitKey ? t(currentMetric.unitKey, { count: currentMetric.value ?? 0 }, currentMetric.unit) : (currentMetric.unit ? t('dashboard.units.' + currentMetric.unit, { count: currentMetric.value ?? 0 }, currentMetric.unit) : 'items'))
+        : '';
+
+    const queueTitle = metricLabel || t('dashboard.shell.activeWorkQueue', 'Active Work Queue');
     const queueSubtitle = currentMetric
-        ? t('dashboard.shell.trackingItems', `Tracking ${currentMetric.value ?? 0} ${currentMetric.unit || 'items'} in current authorized scope`, { count: currentMetric.value ?? 0, unit: currentMetric.unit || 'items' })
+        ? t('dashboard.shell.trackingItems', `Tracking ${currentMetric.value ?? 0} ${metricUnit} in current authorized scope`, { count: currentMetric.value ?? 0, unit: metricUnit })
         : t('dashboard.shell.liveRecords', 'Live records in authorized laboratory scope');
 
     return (

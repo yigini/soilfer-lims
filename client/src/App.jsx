@@ -186,9 +186,9 @@ const Layout = ({ children }) => {
                     <button
                         onClick={toggleCollapse}
                         className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[var(--sf-side-muted)] hover:text-[var(--sf-side-text)] hover:bg-[var(--sf-side-active)]/50 transition-all text-xs font-semibold"
-                        title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        title={sidebarCollapsed ? t('nav.expandSidebar', 'Expand sidebar') : t('nav.collapseSidebar', 'Collapse sidebar')}
                     >
-                        {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <><PanelLeftClose size={18} /><span>Collapse</span></>}
+                        {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <><PanelLeftClose size={18} /><span>{t('nav.collapse', 'Collapse')}</span></>}
                     </button>
                 </div>
                 {/* Decorative Soil-Band Branding (Signature Identity) */}

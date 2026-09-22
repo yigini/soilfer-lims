@@ -273,7 +273,7 @@ export default function QADashboard() {
                                                 {row.title}
                                             </td>
                                             <td className="py-3.5 px-4 text-sf-muted">
-                                                {row.context}
+                                                {row.contextKey ? t(row.contextKey, row.contextParams || {}, row.context) : row.context}
                                             </td>
                                             <td className="py-3.5 px-4">
                                                 <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
@@ -281,7 +281,7 @@ export default function QADashboard() {
                                                         ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
                                                         : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
                                                 }`}>
-                                                    {row.status}
+                                                    {row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : row.status)}
                                                 </span>
                                             </td>
                                             <td className="py-3.5 px-4 text-right">
@@ -290,7 +290,7 @@ export default function QADashboard() {
                                                     onClick={() => handleOpenInspection(row.key)}
                                                     className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover"
                                                 >
-                                                    <span>Inspect</span>
+                                                    <span>{row.actionKey ? t(row.actionKey, 'Inspect') : t('qaSection.inspect', 'Inspect')}</span>
                                                     <ArrowUpRight className="w-3.5 h-3.5" />
                                                 </button>
                                             </td>
@@ -303,17 +303,17 @@ export default function QADashboard() {
                 ) : activeTab === 'amendments' ? (
                     filteredAmendments.length === 0 ? (
                         <div className="p-12 text-center text-sf-muted text-xs">
-                            No recorded amendments in authorized scope.
+                            {t('qaSection.noAmendments', 'No amendment records matching the current filter.')}
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs">
                                 <thead className="bg-sf-canvas border-b border-sf-divider text-gray-500 font-semibold">
                                     <tr>
-                                        <th className="py-3 px-4">Sample / Amendment</th>
-                                        <th className="py-3 px-4">Reason & Justification</th>
-                                        <th className="py-3 px-4">Type</th>
-                                        <th className="py-3 px-4 text-right">Action</th>
+                                        <th className="py-3 px-4">{t('qaSection.colSampleId', 'Sample ID / Type')}</th>
+                                        <th className="py-3 px-4">{t('qaSection.colReasonAuditor', 'Reason & Auditor')}</th>
+                                        <th className="py-3 px-4">{t('qaSection.colStatus', 'Status')}</th>
+                                        <th className="py-3 px-4 text-right">{t('qaSection.colAction', 'Action')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">
@@ -323,11 +323,11 @@ export default function QADashboard() {
                                                 {row.title}
                                             </td>
                                             <td className="py-3.5 px-4 text-sf-muted">
-                                                {row.context}
+                                                {row.contextKey ? t(row.contextKey, row.contextParams || {}, row.context) : row.context}
                                             </td>
                                             <td className="py-3.5 px-4">
                                                 <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-sf-raised text-sf-muted">
-                                                    {row.status || 'RECORDED'}
+                                                    {row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : (row.status || 'RECORDED'))}
                                                 </span>
                                             </td>
                                             <td className="py-3.5 px-4 text-right">
@@ -336,11 +336,11 @@ export default function QADashboard() {
                                                         to={row.route}
                                                         className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover"
                                                     >
-                                                        <span>Dossier</span>
+                                                        <span>{t('qaSection.dossier', 'Dossier')}</span>
                                                         <ArrowUpRight className="w-3.5 h-3.5" />
                                                     </Link>
                                                 ) : (
-                                                    <span className="text-gray-400">Locked</span>
+                                                    <span className="text-gray-400">{t('qaSection.locked', 'Locked')}</span>
                                                 )}
                                             </td>
                                         </tr>

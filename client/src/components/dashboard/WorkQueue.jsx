@@ -43,22 +43,21 @@ export default function WorkQueue({
         })
         : rows;
 
-    const getStatusBadge = (status) => {
-        if (!status) return null;
-        const s = status.toLowerCase();
+    const getStatusBadge = (displayStatus, rawStatus, tone) => {
+        const s = String(rawStatus || displayStatus || '').toLowerCase();
 
         let badgeClass = 'bg-sf-inset text-sf-muted border-sf-divider';
-        if (s.includes('ready') || s.includes('accepted') || s.includes('passed') || s.includes('done') || s.includes('published') || s.includes('operational')) {
-            badgeClass = 'bg-[var(--sf-success-bg)] text-[var(--sf-success)] border-[var(--sf-success)]/20';
-        } else if (s.includes('fail') || s.includes('problem') || s.includes('rejected') || s.includes('conflict') || s.includes('missing') || s.includes('unconfigured')) {
+        if (tone === 'problem' || s.includes('fail') || s.includes('problem') || s.includes('rejected') || s.includes('conflict') || s.includes('missing') || s.includes('unconfigured')) {
             badgeClass = 'bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border-[var(--sf-danger)]/20';
-        } else if (s.includes('wait') || s.includes('pending') || s.includes('review') || s.includes('hold') || s.includes('progress') || s.includes('unassigned') || s.includes('required')) {
+        } else if (tone === 'waiting' || s.includes('wait') || s.includes('pending') || s.includes('review') || s.includes('hold') || s.includes('progress') || s.includes('unassigned') || s.includes('required')) {
             badgeClass = 'bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border-[var(--sf-warning)]/20';
+        } else if (s.includes('ready') || s.includes('accepted') || s.includes('passed') || s.includes('done') || s.includes('published') || s.includes('operational')) {
+            badgeClass = 'bg-[var(--sf-success-bg)] text-[var(--sf-success)] border-[var(--sf-success)]/20';
         }
 
         return (
             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${badgeClass}`}>
-                {status}
+                {displayStatus || rawStatus}
             </span>
         );
     };
@@ -84,7 +83,7 @@ export default function WorkQueue({
                             type="button"
                             onClick={onToggleSideRail}
                             className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-sf-divider bg-sf-inset text-sf-muted hover:bg-sf-hover transition-colors whitespace-nowrap shadow-sm"
-                            title={sideRailCollapsed ? "Show side notes panel" : "Expand table to full width"}
+                            title={sideRailCollapsed ? t('dashboard.workQueue.showNotesPanel', 'Show side notes panel') : t('dashboard.workQueue.expandFullWidth', 'Expand table to full width')}
                         >
                             <PanelRightClose className={`w-3.5 h-3.5 transition-transform ${sideRailCollapsed ? 'rotate-180 text-sf-primary' : 'text-sf-muted'}`} />
                             <span>{sideRailCollapsed ? t('dashboard.workQueue.showNotes', 'Show Notes') : t('dashboard.workQueue.fullWidth', 'Full Width')}</span>
@@ -119,7 +118,7 @@ export default function WorkQueue({
                                         : 'text-sf-muted hover:bg-sf-hover'
                                 }`}
                             >
-                                <span>{q.label}</span>
+                                <span>{q.labelKey ? t(q.labelKey, q.label) : (q.key ? t('dashboard.metrics.' + q.key, q.label) : q.label)}</span>
                                 {q.count !== undefined && (
                                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                                         isSelected ? 'bg-black/20 text-white' : 'bg-sf-surface border border-sf-divider text-sf-muted'
@@ -190,18 +189,22 @@ export default function WorkQueue({
                                                 )}
                                                 {row.context && (
                                                     <span className="font-medium text-sf-muted">
-                                                        {row.context}
+                                                        {row.contextKey ? t(row.contextKey, row.contextParams || {}, row.context) : t('dashboard.workQueue.context.' + row.context, row.context)}
                                                     </span>
                                                 )}
                                             </div>
                                             {row.note && (
                                                 <div className="text-[11px] text-sf-muted mt-1 italic line-clamp-2">
-                                                    {row.note}
+                                                    {row.noteKey ? t(row.noteKey, row.noteParams || {}, row.note) : t('dashboard.workQueue.notes.' + row.note, row.note)}
                                                 </div>
                                             )}
                                         </td>
                                         <td className="py-3 px-3 whitespace-nowrap">
-                                            {getStatusBadge(row.status)}
+                                            {getStatusBadge(
+                                                row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : ''),
+                                                row.status,
+                                                row.tone
+                                            )}
                                         </td>
                                         <td className="py-3 px-3 text-right whitespace-nowrap">
                                             <span className="font-bold text-sf-text text-sm">
@@ -209,7 +212,7 @@ export default function WorkQueue({
                                             </span>
                                             {row.unit && (
                                                 <span className="text-sf-muted ml-1 text-xs">
-                                                    {row.unit}
+                                                    {row.unitKey ? t(row.unitKey, { count: row.count !== undefined ? row.count : 1 }, row.unit) : t('dashboard.units.' + row.unit, { count: row.count !== undefined ? row.count : 1 }, row.unit)}
                                                 </span>
                                             )}
                                         </td>
@@ -219,7 +222,7 @@ export default function WorkQueue({
                                                     to={row.route}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sf-primary bg-[var(--sf-selected)] hover:bg-sf-hover border border-sf-divider transition-colors shadow-sm"
                                                 >
-                                                    <span>{row.action || t('dashboard.workQueue.open', 'Open')}</span>
+                                                    <span>{row.actionKey ? t(row.actionKey, row.action) : (row.action ? t('dashboard.workQueue.action.' + row.action, row.action) : t('dashboard.workQueue.open', 'Open'))}</span>
                                                     <ArrowUpRight className="w-3.5 h-3.5" />
                                                 </Link>
                                             ) : (

@@ -134,4 +134,43 @@ describe('Navigation Order & Laboratory Journey Contract (#115)', () => {
         expect(paths).toContain('/admin');
         expect(paths).toContain('/users');
     });
+
+    test('6. Projects placed second and Data Results placed between QA and Reports for authorized roles (#115)', () => {
+        const managerUser = { id: 'u-mgr', role: 'LAB_MANAGER', labId: 'lab-1' };
+        const managerItems = extractNavItemsForRole(managerUser);
+        const managerPaths = managerItems.map(i => i.path);
+
+        expect(managerPaths[0]).toBe('/');
+        expect(managerPaths[1]).toBe('/projects');
+
+        const qaIdx = managerPaths.indexOf('/qa');
+        const dataResultsIdx = managerPaths.indexOf('/data-results');
+        const reportsIdx = managerPaths.indexOf('/result-reports');
+
+        expect(qaIdx).toBeGreaterThan(0);
+        expect(dataResultsIdx).toBeGreaterThan(qaIdx);
+        expect(reportsIdx).toBeGreaterThan(dataResultsIdx);
+
+        // Also check SUPER_ADMIN
+        const adminUser = { id: 'u-admin', role: 'SUPER_ADMIN' };
+        const adminItems = extractNavItemsForRole(adminUser);
+        const adminPaths = adminItems.map(i => i.path);
+        expect(adminPaths[1]).toBe('/projects');
+        expect(adminPaths.indexOf('/data-results')).toBeGreaterThan(adminPaths.indexOf('/qa'));
+        expect(adminPaths.indexOf('/result-reports')).toBeGreaterThan(adminPaths.indexOf('/data-results'));
+    });
+
+    test('7. Role-specific Workbench and MyLab are preserved without removing required workflows (#115)', () => {
+        const techUser = { id: 'u-tech', role: 'LAB_TECHNICIAN', labId: 'lab-1' };
+        const techItems = extractNavItemsForRole(techUser);
+        const techPaths = techItems.map(i => i.path);
+        expect(techPaths).toContain('/workbench');
+        expect(techPaths).toContain('/my-work');
+
+        const managerUser = { id: 'u-mgr', role: 'LAB_MANAGER', labId: 'lab-1' };
+        const managerItems = extractNavItemsForRole(managerUser);
+        const myLabItem = managerItems.find(i => i.path && i.path.startsWith('/admin/labs'));
+        expect(myLabItem).toBeDefined();
+        expect(myLabItem.path).toBe('/admin/labs?labId=lab-1');
+    });
 });
