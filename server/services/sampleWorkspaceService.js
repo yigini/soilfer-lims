@@ -39,46 +39,54 @@ class SampleWorkspaceService {
     }
 
     static async getWorkspace(sampleId, user) {
-        // 1. Fetch sample with all relations
-        const sample = await prisma.sample.findFirst({
-            where: {
-                OR: [
-                    { id: sampleId },
-                    { originalId: sampleId },
-                    { labId: sampleId }
-                ]
-            },
-            include: {
-                project: true,
-                workItems: {
-                    include: {
-                        assignee: { select: { id: true, username: true, name: true, role: true } },
-                        manager: { select: { id: true, username: true, name: true } },
-                        methodology: true,
-                        batch: {
-                            include: {
-                                qcItems: true
-                            }
-                        },
-                        spectralScans: true,
-                        draft: true,
-                        workAttempts: true
-                    }
-                },
-                results: {
-                    where: { isCurrent: true }
-                },
-                orderRevisions: {
-                    include: {
-                        lines: true
+        // 1. Fetch sample with all relations (canonical id match takes precedence over labId/originalId aliases)
+        const sampleInclude = {
+            project: true,
+            workItems: {
+                include: {
+                    assignee: { select: { id: true, username: true, name: true, role: true } },
+                    manager: { select: { id: true, username: true, name: true } },
+                    methodology: true,
+                    batch: {
+                        include: {
+                            qcItems: true
+                        }
                     },
-                    orderBy: { version: 'desc' }
-                },
-                amendments: {
-                    orderBy: { createdAt: 'desc' }
+                    spectralScans: true,
+                    draft: true,
+                    workAttempts: true
                 }
+            },
+            results: {
+                where: { isCurrent: true }
+            },
+            orderRevisions: {
+                include: {
+                    lines: true
+                },
+                orderBy: { version: 'desc' }
+            },
+            amendments: {
+                orderBy: { createdAt: 'desc' }
             }
+        };
+
+        let sample = await prisma.sample.findUnique({
+            where: { id: String(sampleId) },
+            include: sampleInclude
         });
+
+        if (!sample) {
+            sample = await prisma.sample.findFirst({
+                where: {
+                    OR: [
+                        { originalId: String(sampleId) },
+                        { labId: String(sampleId) }
+                    ]
+                },
+                include: sampleInclude
+            });
+        }
 
         if (!sample) {
             const err = new Error(`Sample ${sampleId} not found`);

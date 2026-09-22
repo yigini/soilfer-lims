@@ -146,7 +146,7 @@ function cleanupDisposableDatabase(runnerDir) {
         try {
             const cleanerScript = `
                 let attempts = 0;
-                const target = process.argv[1];
+                const target = process.argv[2] || process.argv[1];
                 const interval = setInterval(() => {
                     try {
                         if (!require('fs').existsSync(target)) {

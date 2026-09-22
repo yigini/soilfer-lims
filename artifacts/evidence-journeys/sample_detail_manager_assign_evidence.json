@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-09-22T09:38:38.127Z",
+  "status": "PASS",
+  "environment": {
+    "node": "v24.13.0",
+    "database": "disposable_journey_sample_assignment.db",
+    "isolationRefusalGuard": "ACTIVE"
+  },
+  "checks": {
+    "methodFiltering": {
+      "filteredRoute": "/manager-queue?lane=assign&analysis=PH_H2O",
+      "bannerVerified": true,
+      "clearedFilterViaButton": true,
+      "status": "PASS"
+    },
+    "superAdminQueueAggregation": {
+      "s005Tasks": 15,
+      "s004Tasks": 11,
+      "w001Tasks": 12,
+      "totalQueueTasks": 38,
+      "status": "PASS"
+    },
+    "cardClickNavigation": {
+      "clickedCard": "S005 Assign Tech",
+      "navigatedToUrl": "http://127.0.0.1:55901/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
+      "targetRoute": "/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
+      "resolvedCanonicalId": true,
+      "resolvedDisplayId": true,
+      "status": "PASS"
+    },
+    "referenceErrorResolved": {
+      "arrowRightDefined": true,
+      "applicationError": false,
+      "primaryButtonText": "Assign 15 unassigned task(s) to technician",
+      "buttonHasSvgIcon": true,
+      "status": "PASS"
+    },
+    "backClickNavigation": {
+      "backButtonLabel": "Back to queue",
+      "clickedBackButton": true,
+      "navigatedBackToUrl": "http://127.0.0.1:55901/manager-queue?lane=assign",
+      "returnedToQueue": true,
+      "status": "PASS"
+    }
+  },
+  "artifacts": {
+    "screenshot": "sample_detail_manager_assign_route.png"
+  }
+}
