@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -6,12 +7,14 @@ import {
     RefreshCw, Filter, ShieldCheck, Sparkles, Building2
 } from 'lucide-react';
 
-const getUrlLabId = () => {
-    if (typeof window === 'undefined' || !window.location || !window.location.search) {
-        return null;
+const getUrlLabId = (searchString) => {
+    let search = searchString;
+    if (search === undefined && typeof window !== 'undefined' && window.location) {
+        search = window.location.search;
     }
+    if (!search) return null;
     try {
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(search);
         return params.get('labId') || null;
     } catch {
         return null;
@@ -22,17 +25,23 @@ const LabMethods = () => {
     const { user } = useAuth();
     const { t } = useLanguage();
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
+
+    // Reactive URL lab scope from router searchParams / location, with fallback to window.location
+    const routerSearch = location?.search || (typeof window !== 'undefined' && window.location?.search) || '';
+    const currentUrlLabId = searchParams?.get('labId') || getUrlLabId(routerSearch);
+
     const [labs, setLabs] = useState([]);
     const [selectedLabId, setSelectedLabId] = useState(() => {
-        const urlLab = getUrlLabId();
-        if (urlLab) return urlLab;
+        if (currentUrlLabId) return currentUrlLabId;
         if (user?.labId) return user.labId;
         return '';
     });
     const [defaults, setDefaults] = useState([]);
     const [loadedLabId, setLoadedLabId] = useState(null);
     const [loadError, setLoadError] = useState(false);
-    const [loading, setLoading] = useState(() => Boolean(getUrlLabId() || user?.labId));
+    const [loading, setLoading] = useState(() => Boolean(currentUrlLabId || user?.labId));
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
     const [filterMatrix, setFilterMatrix] = useState('ALL');
@@ -46,20 +55,40 @@ const LabMethods = () => {
         selectedLabIdRef.current = selectedLabId;
     }, [selectedLabId]);
 
-    // Handle lab dropdown change with safe URL reflection
+    // Synchronize incoming reactive URL navigation on same mounted instance
+    const prevUrlLabIdRef = useRef(currentUrlLabId);
+    if (prevUrlLabIdRef.current !== currentUrlLabId) {
+        prevUrlLabIdRef.current = currentUrlLabId;
+        const targetId = currentUrlLabId || user?.labId || (labs.length > 0 ? labs[0].id : 'LAB-DEFAULT');
+        if (targetId && targetId !== selectedLabId) {
+            setSelectedLabId(targetId);
+        }
+    }
+
+    // Handle lab dropdown change with reactive router params and preserved history state
     const handleLabChange = (newLabId) => {
+        prevUrlLabIdRef.current = newLabId;
         setSelectedLabId(newLabId);
+
+        const nextParams = new URLSearchParams(searchParams);
+        if (newLabId && newLabId !== 'LAB-DEFAULT') {
+            nextParams.set('labId', newLabId);
+        } else {
+            nextParams.delete('labId');
+        }
+
+        if (typeof setSearchParams === 'function') {
+            setSearchParams(nextParams, {
+                replace: true,
+                state: location?.state
+            });
+        }
+
         if (typeof window !== 'undefined' && window.history?.replaceState && window.location) {
             try {
-                const searchParams = new URLSearchParams(window.location.search || '');
-                if (newLabId && newLabId !== 'LAB-DEFAULT') {
-                    searchParams.set('labId', newLabId);
-                } else {
-                    searchParams.delete('labId');
-                }
-                const newSearch = searchParams.toString();
-                const newUrl = (window.location.pathname || '') + (newSearch ? `?${newSearch}` : '');
-                window.history.replaceState(null, '', newUrl);
+                const searchStr = nextParams.toString();
+                const newUrl = (window.location.pathname || '') + (searchStr ? `?${searchStr}` : '');
+                window.history.replaceState(location?.state || window.history.state || null, '', newUrl);
             } catch {
                 // Ignore environment limitations with history API
             }
@@ -123,11 +152,19 @@ const LabMethods = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            // Guard against out-of-order race conditions
-            if (activeRequestIdRef.current !== requestId) return;
+            // Guard against out-of-order race conditions (headers arrival)
+            if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                return;
+            }
 
             if (res.ok) {
                 const data = await res.json();
+
+                // Revalidate generation and current target after body resolution and before state commits
+                if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                    return;
+                }
+
                 setDefaults(data);
                 setLoadedLabId(labId);
                 setLoadError(false);
@@ -143,7 +180,9 @@ const LabMethods = () => {
             }
         } catch (err) {
             // Guard against out-of-order error handling
-            if (activeRequestIdRef.current !== requestId) return;
+            if (activeRequestIdRef.current !== requestId || selectedLabIdRef.current !== labId) {
+                return;
+            }
             console.error('Failed to load defaults:', err);
             setDefaults([]);
             setLoadedLabId(null);
@@ -151,7 +190,7 @@ const LabMethods = () => {
             setIsWizardOpen(false);
             setMessage({ type: 'error', text: 'Failed to load laboratory methodology defaults.' });
         } finally {
-            if (activeRequestIdRef.current === requestId) {
+            if (activeRequestIdRef.current === requestId && selectedLabIdRef.current === labId) {
                 setLoading(false);
             }
         }
@@ -161,6 +200,10 @@ const LabMethods = () => {
         if (selectedLabId) {
             loadLabDefaults(selectedLabId);
         }
+        return () => {
+            // Invalidate obsolete in-flight requests on target change or unmount
+            activeRequestIdRef.current += 1;
+        };
     }, [selectedLabId]);
 
     const handleMethodChange = (analysisCode, methodologyId) => {
