@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-09-22T09:23:17.241Z",
+  "status": "PASS",
+  "environment": {
+    "node": "v24.13.0",
+    "database": "disposable_journey_sample_assignment.db",
+    "isolationRefusalGuard": "ACTIVE"
+  },
+  "checks": {
+    "superAdminQueueAggregation": {
+      "s005Tasks": 15,
+      "s004Tasks": 11,
+      "w001Tasks": 12,
+      "totalQueueTasks": 38,
+      "status": "PASS"
+    },
+    "canonicalSampleResolution": {
+      "canonicalSampleId": "GTM-LAB1",
+      "displayLabCode": "S005",
+      "route": "/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
+      "resolvedCanonicalId": true,
+      "resolvedDisplayId": true,
+      "status": "PASS"
+    },
+    "referenceErrorResolved": {
+      "arrowRightDefined": true,
+      "applicationError": false,
+      "primaryButtonText": "Assign 15 unassigned task(s) to technician",
+      "buttonHasSvgIcon": true,
+      "status": "PASS"
+    },
+    "navigationContext": {
+      "backButtonLabel": "Back to queue",
+      "expectedLabel": "Back to queue",
+      "status": "PASS"
+    }
+  },
+  "artifacts": {
+    "screenshot": "sample_detail_manager_assign_route.png"
+  }
+}

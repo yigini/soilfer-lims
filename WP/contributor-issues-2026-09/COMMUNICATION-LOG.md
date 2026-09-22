@@ -89,3 +89,8 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 ### 2026-09-22 08:37 UTC — #119 released queue review and sample-render blocker
 - Comment: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5773592562
 - Live7516f0e SUPER_ADMIN queue S00515/S00411/W00112 totals38; S005 assignment route crashes (ArrowRight missing import in SampleDetail.jsx:540). Focused fix/regression request queued to Agy. No production mutation. OPEN; no closure date.
+
+### 2026-09-22 08:57 UTC — PR130 independent focused review
+- PR130 head bd44d08eef0b04801b4dbad5e51c31ec2f569f70:17focused tests independently passed; CI35706965182 successful. Bounded QC display corrections accepted locally.
+- Review comment: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5773801579
+- Not released; production7516f0e. #119 live crash correction active in Agy. #118/#119 OPEN; no closures.
