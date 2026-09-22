@@ -9,13 +9,143 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispositionSuccess }) {
+export function getDispositionInfo(disposition) {
+    if (!disposition || !disposition.decision) return null;
+    const dec = String(disposition.decision).trim();
+
+    switch (dec) {
+        case 'PROCEED_WITH_WARNING':
+            return {
+                type: 'WARNING_OVERRIDE',
+                title: 'PROCEED WITH WARNING',
+                badgeText: 'Override Logged',
+                badgeStyle: 'bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700',
+                bannerStyle: 'bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200',
+                titleColor: 'text-amber-700 dark:text-amber-400',
+                boxStyle: 'bg-amber-100/60 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800',
+                noteColor: 'text-amber-700 dark:text-amber-400',
+                note: 'Analytical release is authorized under recorded manager justification. Control measurement failure remains permanently recorded in audit history.'
+            };
+        case 'REANALYZE_BATCH':
+            return {
+                type: 'REANALYSIS_REQUIRED',
+                title: 'RE-ANALYZE BATCH',
+                badgeText: 'Re-analysis Required',
+                badgeStyle: 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700',
+                bannerStyle: 'bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200',
+                titleColor: 'text-rose-700 dark:text-rose-400',
+                boxStyle: 'bg-rose-100/60 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
+                noteColor: 'text-rose-700 dark:text-rose-400',
+                note: 'Batch results rejected by laboratory management. Associated sample work items are flagged for repeat preparation and re-analysis. Sample approval and report release remain blocked.'
+            };
+        case 'REJECT_REANALYSIS':
+            return {
+                type: 'LEGACY_REJECT_REANALYSIS',
+                title: 'REJECTED FOR RE-ANALYSIS (Legacy)',
+                badgeText: 'Legacy Rejection: REJECT_REANALYSIS',
+                badgeStyle: 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700',
+                bannerStyle: 'bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200',
+                titleColor: 'text-rose-700 dark:text-rose-400',
+                boxStyle: 'bg-rose-100/60 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
+                noteColor: 'text-rose-700 dark:text-rose-400',
+                note: 'Persisted legacy manager disposition recorded as rejected for re-analysis by laboratory management. Rendered read-only for historical audit and supervisory review.'
+            };
+        case 'REJECT_BATCH':
+            return {
+                type: 'REJECTED',
+                title: 'BATCH REJECTED',
+                badgeText: 'Batch Rejected',
+                badgeStyle: 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700',
+                bannerStyle: 'bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200',
+                titleColor: 'text-rose-700 dark:text-rose-400',
+                boxStyle: 'bg-rose-100/60 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
+                noteColor: 'text-rose-700 dark:text-rose-400',
+                note: 'Batch results rejected by laboratory management. Action recorded in audit history for supervisory review.'
+            };
+        case 'ACCEPT':
+            return {
+                type: 'CUSTOM_OR_UNSUPPORTED',
+                title: 'RECORDED LEGACY ACCEPT (Under Review)',
+                badgeText: 'Legacy Decision: ACCEPT',
+                badgeStyle: 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700',
+                bannerStyle: 'bg-slate-50 dark:bg-slate-950/50 border-2 border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-200',
+                titleColor: 'text-slate-700 dark:text-slate-400',
+                boxStyle: 'bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800',
+                noteColor: 'text-slate-700 dark:text-slate-400',
+                note: 'Recorded legacy ACCEPT decision in database history. Not a recognized automated override; preserved read-only for technical and supervisory review.'
+            };
+        default:
+            return {
+                type: 'CUSTOM_OR_UNSUPPORTED',
+                title: dec,
+                badgeText: `Recorded: ${dec}`,
+                badgeStyle: 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700',
+                bannerStyle: 'bg-slate-50 dark:bg-slate-950/50 border-2 border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-200',
+                titleColor: 'text-slate-700 dark:text-slate-400',
+                boxStyle: 'bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800',
+                noteColor: 'text-slate-700 dark:text-slate-400',
+                note: 'Persisted disposition decision recorded in database. Rendered read-only for technical review.'
+            };
+    }
+}
+
+function parseFiniteNumber(val) {
+    if (typeof val === 'number') {
+        return Number.isFinite(val) ? val : null;
+    }
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (trimmed === '') return null;
+        const num = Number(trimmed);
+        return Number.isFinite(num) ? num : null;
+    }
+    return null;
+}
+
+export function formatBlankLimit(b, t = (k, def) => def) {
+    if (!b) return t('common.notRecorded', 'Not recorded');
+    const recordedLimit = (b.limit !== undefined && b.limit !== null)
+        ? b.limit
+        : (b.upperLimit !== undefined && b.upperLimit !== null)
+            ? b.upperLimit
+            : null;
+    if (recordedLimit !== null) {
+        if (typeof recordedLimit === 'number' && Number.isFinite(recordedLimit)) {
+            return String(recordedLimit);
+        }
+        if (typeof recordedLimit === 'string' && recordedLimit.trim() !== '') {
+            return recordedLimit.trim();
+        }
+    }
+    return t('common.notRecorded', 'Not recorded');
+}
+
+export function evaluateBlankStatus(b) {
+    if (!b) return null;
+    if (b.status) return b.status;
+    const rawLimit = (b.limit !== undefined && b.limit !== null)
+        ? b.limit
+        : (b.upperLimit !== undefined && b.upperLimit !== null)
+            ? b.upperLimit
+            : null;
+    const rawMeasured = b.measured !== undefined ? b.measured : b.value !== undefined ? b.value : null;
+
+    const parsedLimit = parseFiniteNumber(rawLimit);
+    const parsedMeasured = parseFiniteNumber(rawMeasured);
+
+    if (parsedLimit !== null && parsedMeasured !== null) {
+        return parsedMeasured <= parsedLimit ? 'PASS' : 'FAIL';
+    }
+    return null;
+}
+
+export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispositionSuccess, initialBatch = null }) {
     const { token, user } = useAuth();
     const { t } = useLanguage();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [batch, setBatch] = useState(null);
+    const [batch, setBatch] = useState(initialBatch);
     const [runProfile, setRunProfile] = useState(null);
 
     // Disposition form state
@@ -37,9 +167,6 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
             });
             setBatch(res.data.data);
             setRunProfile(res.data.runProfile);
-            if (res.data.data?.disposition?.reason) {
-                setReason(res.data.data.disposition.reason);
-            }
         } catch (err) {
             console.error('[BatchInspectionModal] Error fetching batch:', err);
             setError(err.response?.data?.error || err.message || 'Failed to load QC batch');
@@ -53,12 +180,12 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
             fetchBatch();
             setDispositionError(null);
         } else {
-            setBatch(null);
+            setBatch(initialBatch);
             setRunProfile(null);
             setReason('');
             setDispositionError(null);
         }
-    }, [isOpen, batchId, fetchBatch]);
+    }, [isOpen, batchId, fetchBatch, initialBatch]);
 
     // Handle ESC key
     useEffect(() => {
@@ -106,7 +233,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
 
     const isFailed = batch && (batch.status === 'QC_FAIL' || batch.status === 'FAILED');
     const disposition = batch?.disposition;
-    const hasProceedOverride = disposition && disposition.decision === 'PROCEED_WITH_WARNING';
+    const dispInfo = getDispositionInfo(disposition);
 
     // QC measurements from qcResults or qcItems
     const qcResults = batch?.qcResults || {};
@@ -178,7 +305,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                     ) : batch ? (
                         <>
                             {/* Prominent QC Status / Disposition Banner */}
-                            {isFailed && !disposition && (
+                            {isFailed && !dispInfo && (
                                 <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200 space-y-1">
                                     <div className="flex items-center gap-2 font-bold text-sm text-rose-700 dark:text-rose-400">
                                         <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -190,30 +317,34 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                 </div>
                             )}
 
-                            {isFailed && hasProceedOverride && (
-                                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 space-y-2">
+                            {dispInfo && (
+                                <div className={`p-4 rounded-xl ${dispInfo.bannerStyle} space-y-2`}>
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 font-bold text-sm text-amber-700 dark:text-amber-400">
+                                        <div className={`flex items-center gap-2 font-bold text-sm ${dispInfo.titleColor}`}>
                                             <ShieldAlert className="w-5 h-5 shrink-0" />
-                                            <span>QC FAILED — Manager Disposition Active: PROCEED WITH WARNING</span>
+                                            <span>
+                                                {isFailed ? 'QC FAILED — Manager Disposition Active: ' : 'Manager Disposition Active: '}
+                                                {dispInfo.title}
+                                            </span>
                                         </div>
-                                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded font-bold">
-                                            Override Logged
+                                        <span className={`text-[10px] uppercase font-mono px-2.5 py-0.5 rounded font-bold ${dispInfo.badgeStyle}`}>
+                                            {dispInfo.badgeText}
                                         </span>
                                     </div>
-                                    <p className="text-xs">
-                                        <strong>Authorized by:</strong> {disposition.by} on {new Date(disposition.at).toLocaleString()}
-                                    </p>
-                                    <div className="p-2.5 bg-amber-100/60 dark:bg-amber-900/40 rounded-lg text-xs font-mono border border-amber-200 dark:border-amber-800">
-                                        <strong>Justification:</strong> {disposition.reason}
+                                    <div className="text-xs">
+                                        <strong>{t('qcInspection.recordedBy', 'Recorded by')}:</strong> {disposition.by || 'Unknown'}
+                                        {disposition.at && ` on ${new Date(disposition.at).toLocaleString()}`}
                                     </div>
-                                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
-                                        Note: Analytical release is authorized under recorded manager justification. Control measurement failure remains permanently recorded in audit history.
+                                    <div className={`p-2.5 rounded-lg text-xs font-mono border ${dispInfo.boxStyle} whitespace-pre-wrap`}>
+                                        <strong>{t('qcInspection.justification', 'Justification')}:</strong> {disposition.reason || 'No justification text recorded'}
+                                    </div>
+                                    <p className={`text-[11px] ${dispInfo.noteColor}`}>
+                                        {dispInfo.note}
                                     </p>
                                 </div>
                             )}
 
-                            {batch.status === 'QC_PASS' && (
+                            {batch.status === 'QC_PASS' && !dispInfo && (
                                 <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 flex items-center gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                     <div>
@@ -277,21 +408,41 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-sf-divider">
-                                                {(blanks.length > 0 ? blanks : typedBlanks).map((b, idx) => (
-                                                    <tr key={idx} className="hover:bg-sf-raised/50">
-                                                        <td className="py-2 px-4 font-mono">{b.position || b.details || `Slot ${idx + 1}`}</td>
-                                                        <td className="py-2 px-4">{b.label || 'Reagent Blank'}</td>
-                                                        <td className="py-2 px-4 font-mono font-bold">{b.measured !== undefined ? b.measured : b.value !== undefined ? b.value : '—'}</td>
-                                                        <td className="py-2 px-4 font-mono text-sf-muted">{b.limit !== undefined ? b.limit : b.expected !== undefined ? b.expected : '≤ 0.05'}</td>
-                                                        <td className="py-2 px-4 text-right">
-                                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                                b.status === 'PASS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                                                            }`}>
-                                                                {b.status || (Number(b.measured || b.value || 0) <= Number(b.limit || 0.05) ? 'PASS' : 'FAIL')}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {(blanks.length > 0 ? blanks : typedBlanks).map((b, idx) => {
+                                                    const limitText = formatBlankLimit(b, t);
+                                                    const evalStatus = evaluateBlankStatus(b);
+                                                    const measuredVal = b.measured !== undefined ? b.measured : b.value !== undefined ? b.value : null;
+
+                                                    return (
+                                                        <tr key={idx} className="hover:bg-sf-raised/50">
+                                                            <td className="py-2 px-4 font-mono">{b.position || b.details || `Slot ${idx + 1}`}</td>
+                                                            <td className="py-2 px-4">{b.label || 'Reagent Blank'}</td>
+                                                            <td className="py-2 px-4 font-mono font-bold">{measuredVal !== null ? measuredVal : '—'}</td>
+                                                            <td className="py-2 px-4 font-mono text-sf-muted">
+                                                                {limitText === 'Not recorded' ? (
+                                                                    <span className="italic text-sf-muted">{limitText}</span>
+                                                                ) : (
+                                                                    limitText
+                                                                )}
+                                                            </td>
+                                                            <td className="py-2 px-4 text-right">
+                                                                {evalStatus ? (
+                                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                                        evalStatus === 'PASS'
+                                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                                                                    }`}>
+                                                                        {evalStatus}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sf-canvas border border-sf-divider text-sf-muted">
+                                                                        {t('common.notEvaluated', 'Not evaluated')}
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     ) : (
@@ -474,8 +625,8 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                 )}
                             </div>
 
-                            {/* Manager Disposition Action Form */}
-                            {isManager && isFailed && (
+                            {/* Manager Disposition Action Form (Only when failed and no disposition has been recorded) */}
+                            {isManager && isFailed && !dispInfo && (
                                 <form onSubmit={handleDispositionSubmit} className="p-4 bg-sf-canvas rounded-xl border border-indigo-200 dark:border-indigo-900/60 space-y-4">
                                     <div className="flex items-center justify-between border-b border-sf-divider pb-2">
                                         <div className="flex items-center gap-2 font-bold text-sm text-sf-text">
@@ -579,6 +730,42 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                     </div>
                                 </form>
                             )}
+
+                            {/* Recorded Manager Disposition (Read-Only) */}
+                            {dispInfo && (
+                                <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider space-y-3">
+                                    <div className="flex items-center justify-between border-b border-sf-divider pb-2">
+                                        <div className="flex items-center gap-2 font-bold text-sm text-sf-text">
+                                            <ShieldCheck className="w-4 h-4 text-sf-muted" />
+                                            <span>Manager QC Disposition (Recorded — Read Only)</span>
+                                        </div>
+                                        <span className="text-[10px] text-sf-muted uppercase font-bold tracking-wider">
+                                            Recorded Audit Entry
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div>
+                                            <span className="text-[10px] font-semibold text-sf-muted uppercase tracking-wider block">Decision</span>
+                                            <span className="font-mono font-bold text-sf-text">{disposition.decision}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] font-semibold text-sf-muted uppercase tracking-wider block">Recorded By</span>
+                                            <span className="font-medium text-sf-text">
+                                                {disposition.by || 'Unknown'} {disposition.at && `on ${new Date(disposition.at).toLocaleString()}`}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-semibold text-sf-muted uppercase tracking-wider block mb-1">Documented Technical Justification</span>
+                                        <div className="p-2.5 bg-sf-surface rounded-lg text-xs font-mono border border-sf-divider whitespace-pre-wrap text-sf-text">
+                                            {disposition.reason || 'No justification recorded'}
+                                        </div>
+                                    </div>
+                                    <p className="text-[11px] text-sf-muted">
+                                        Recorded manager QC dispositions are preserved in audit history and cannot be overwritten through this interface.
+                                    </p>
+                                </div>
+                            )}
                         </>
                     ) : null}
                 </div>
@@ -586,7 +773,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                 {/* Modal Footer */}
                 <div className="px-6 py-3 border-t border-sf-divider bg-sf-canvas flex justify-between items-center">
                     <div className="text-[11px] text-sf-muted">
-                        ISO 17025 Compliance: QC records and manager dispositions are immutable and audited.
+                        Recorded QC batch evaluations and manager dispositions are preserved in audit history.
                     </div>
                     <button
                         type="button"

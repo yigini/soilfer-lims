@@ -1,0 +1,49 @@
+{
+  "suite": "QC Batch Inspection Display & Legacy Limits Browser Evidence (#118)",
+  "executedAt": "2026-09-22T08:38:22.403Z",
+  "browser": "Google Chrome Headless (CDP)",
+  "targetBatch": "BATCH-GTM-2026-P-01",
+  "url": "http://127.0.0.1:49170/qa?batchId=BATCH-GTM-2026-P-01",
+  "summary": {
+    "totalSteps": 5,
+    "passedSteps": 5,
+    "allPassed": true
+  },
+  "databaseIsolation": {
+    "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790066295197_xnz99h",
+    "isolatedDbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790066295197_xnz99h\\disposable_journey_xnz99h.db",
+    "isDisposable": true
+  },
+  "steps": [
+    {
+      "stepName": "Modal Root Render",
+      "passed": true,
+      "details": "Modal loaded batch header: BATCH-GTM-2026-P-01",
+      "timestamp": "2026-09-22T08:38:21.617Z"
+    },
+    {
+      "stepName": "Prominent Legacy Rejection Banner",
+      "passed": true,
+      "details": "Banner Title: true, Author (mgr_gtm): true, Justification displayed: true, Reanalysis Note: true",
+      "timestamp": "2026-09-22T08:38:21.618Z"
+    },
+    {
+      "stepName": "Blank Limit Display & Evaluation (#118)",
+      "passed": true,
+      "details": "Found blank row: true, Measured 0.03: true, Upper Limit renders \"Not recorded\": true (invented 0: false, invented 0.05: false), Status: true",
+      "timestamp": "2026-09-22T08:38:21.620Z"
+    },
+    {
+      "stepName": "Action Form Suppression on Recorded Disposition",
+      "passed": true,
+      "details": "Form suppressed: true (form present: false, radio count: 0, editable textarea: false)",
+      "timestamp": "2026-09-22T08:38:21.620Z"
+    },
+    {
+      "stepName": "Read-Only Disposition Card & Factual History Notice",
+      "passed": true,
+      "details": "Card header: true, Audit badge: true, Decision REJECT_REANALYSIS: true, History Statement: true",
+      "timestamp": "2026-09-22T08:38:21.621Z"
+    }
+  ]
+}

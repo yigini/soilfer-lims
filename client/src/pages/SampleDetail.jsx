@@ -21,6 +21,8 @@ import EvidenceInspectionModal from '../components/sample/EvidenceInspectionModa
 
 import {
     ArrowLeft,
+    ArrowRight,
+    Eye,
     Printer,
     Map,
     Sliders,
@@ -41,7 +43,7 @@ import {
     RotateCcw
 } from 'lucide-react';
 
-const SampleDetail = () => {
+const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const getAnalysisDisplayName = useAnalysisNames();
     const { id } = useParams();
     const navigate = useNavigate();
@@ -52,12 +54,12 @@ const SampleDetail = () => {
     const { t } = useLanguage();
 
     // Data State
-    const [workspace, setWorkspace] = useState(null);
-    const [sample, setSample] = useState(null);
-    const [workItems, setWorkItems] = useState([]);
+    const [workspace, setWorkspace] = useState(initialWorkspace);
+    const [sample, setSample] = useState(initialSample);
+    const [workItems, setWorkItems] = useState(initialWorkspace?.workItems || []);
     const [history, setHistory] = useState([]);
     const [existingReport, setExistingReport] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialWorkspace);
     const [refreshing, setRefreshing] = useState(false);
 
     // Active Workspace Tab: 'work', 'review', 'request', 'reports', 'history'
