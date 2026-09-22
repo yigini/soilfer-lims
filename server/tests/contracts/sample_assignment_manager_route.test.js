@@ -127,18 +127,23 @@ function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanage
 describe('Contract & Component Regression: Manager Queue Assignment Route (#119)', () => {
     let superAdminToken, mgrGtmToken, mgrCloToken;
 
-    // Identities distinguishing canonical sample ID from display lab code / field ID
-    const sampleS005CanonicalId = 'GTM-LAB1'; // Canonical sample ID as reported in live finding
-    const sampleS005DisplayLabId = 'S005';     // Display lab code / badge
-    const sampleS005FieldId = 'FIELD-GTM-S005';
+    // Suite-isolated identities distinguishing canonical sample ID from display lab code / field ID
+    const sampleS005CanonicalId = 'GTM-LAB1';           // Canonical sample ID as reported in live finding
+    const sampleS005DisplayLabId = 'S005-ROUTE';        // Suite-owned isolated display alias preventing collision with sequential reception tests
+    const sampleS005FieldId = 'FIELD-GTM-S005-ROUTE';
 
-    const sampleS004CanonicalId = 'SMP-S004-GTM';
-    const sampleS004DisplayLabId = 'S004';
-    const sampleS004FieldId = 'FIELD-GTM-S004';
+    const sampleS004CanonicalId = 'SMP-S004-GTM-ROUTE';
+    const sampleS004DisplayLabId = 'S004-ROUTE';
+    const sampleS004FieldId = 'FIELD-GTM-S004-ROUTE';
 
-    const sampleW001CanonicalId = 'SMP-W001-CLO';
-    const sampleW001DisplayLabId = 'W001';
-    const sampleW001FieldId = 'FIELD-CLO-W001';
+    const sampleW001CanonicalId = 'SMP-W001-CLO-ROUTE';
+    const sampleW001DisplayLabId = 'W001-ROUTE';
+    const sampleW001FieldId = 'FIELD-CLO-W001-ROUTE';
+
+    // Suite-owned decoy fixture to explicitly test the canonical-vs-display collision regression
+    // (Decoy sample has labId matching canonical ID 'GTM-LAB1')
+    const sampleCollisionDecoyId = 'SMP-DECOY-COLLISION-ROUTE';
+    const sampleCollisionDecoyFieldId = 'FIELD-DECOY-COLLISION-ROUTE';
 
     const s005Analyses = [
         'DRYING', 'PREPARATION', 'PH_H2O', 'EC_1_5', 'OC',
@@ -162,7 +167,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
         mgrCloToken = await getAuthToken('LAB_MANAGER', 'LAB-CLO', ['HND'], ['SOILFER-US']);
 
         // Clean up any pre-existing records for these test identities
-        const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId];
+        const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId, sampleCollisionDecoyId];
         await prisma.workItem.deleteMany({ where: { sampleId: { in: allSampleIds } } });
         await prisma.sample.deleteMany({ where: { id: { in: allSampleIds } } });
 
@@ -242,7 +247,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             });
         }
 
-        // 3. Seed W001: canonical ID 'SMP-W001-CLO', display code 'W001', in LAB-CLO
+        // 3. Seed W001: canonical ID 'SMP-W001-CLO-ROUTE', display code 'W001-ROUTE', in LAB-CLO
         await prisma.sample.create({
             data: {
                 id: sampleW001CanonicalId,
@@ -273,10 +278,41 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
                 }
             });
         }
+
+        // 4. Seed Collision Decoy: sample whose labId intentionally matches canonical ID 'GTM-LAB1'
+        // This explicitly exercises the canonical-vs-display collision regression.
+        await prisma.sample.create({
+            data: {
+                id: sampleCollisionDecoyId,
+                labId: sampleS005CanonicalId, // 'GTM-LAB1'
+                originalId: sampleCollisionDecoyFieldId,
+                assignedLab: 'LAB-GTM',
+                country: 'GTM',
+                projectCode: 'SOILFER-US',
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(),
+                dryingStatus: 'PENDING',
+                preparationStatus: 'PENDING',
+                requiredAnalyses: JSON.stringify(['PH_H2O'])
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: 'WI-DECOY-COLLISION-1',
+                sampleId: sampleCollisionDecoyId,
+                labId: 'LAB-GTM',
+                assignedLab: 'LAB-GTM',
+                analysis: 'PH_H2O',
+                category: 'Wet Chemistry',
+                status: 'NOT_ASSIGNED',
+                assignedTo: null
+            }
+        });
     });
 
     afterAll(async () => {
-        const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId];
+        const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId, sampleCollisionDecoyId];
         await prisma.workItem.deleteMany({ where: { sampleId: { in: allSampleIds } } });
         await prisma.sample.deleteMany({ where: { id: { in: allSampleIds } } });
     });
@@ -466,6 +502,30 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             expect(httpRes.status).toBe(200);
             expect(httpRes.body.identity.id).toBe(sampleS005CanonicalId);
             expect(httpRes.body.workItems).toHaveLength(15);
+        });
+
+        test('canonical ID query takes strict precedence over cross-column labId alias collision', async () => {
+            // Decoy sample has labId equal to sampleS005CanonicalId ('GTM-LAB1').
+            // Querying by sampleS005CanonicalId ('GTM-LAB1') MUST resolve the canonical sample (15 tasks),
+            // and NOT the decoy sample (1 task).
+            const ws = await sampleWorkspaceService.getSampleWorkspace(sampleS005CanonicalId, {
+                role: 'SUPER_ADMIN',
+                labId: 'LAB-GTM'
+            });
+
+            expect(ws).toBeDefined();
+            expect(ws.identity.id).toBe(sampleS005CanonicalId); // 'GTM-LAB1'
+            expect(ws.workItems).toHaveLength(15);
+            expect(ws.identity.id).not.toBe(sampleCollisionDecoyId);
+
+            // Direct query for decoy canonical ID resolves decoy
+            const decoyWs = await sampleWorkspaceService.getSampleWorkspace(sampleCollisionDecoyId, {
+                role: 'SUPER_ADMIN',
+                labId: 'LAB-GTM'
+            });
+            expect(decoyWs).toBeDefined();
+            expect(decoyWs.identity.id).toBe(sampleCollisionDecoyId);
+            expect(decoyWs.workItems).toHaveLength(1);
         });
 
         test('S004 resolves strictly to its own 11 tasks', async () => {

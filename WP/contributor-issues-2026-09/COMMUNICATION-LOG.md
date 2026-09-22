@@ -94,3 +94,7 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - PR130 head bd44d08eef0b04801b4dbad5e51c31ec2f569f70:17focused tests independently passed; CI35706965182 successful. Bounded QC display corrections accepted locally.
 - Review comment: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5773801579
 - Not released; production7516f0e. #119 live crash correction active in Agy. #118/#119 OPEN; no closures.
+
+### 2026-09-22 09:31 UTC — PR130 cbe6ab1 CI blocker
+- Review: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5774223676
+- Missing icon imports corrected; CI35710437095 fails display-alias identity assertion (1failed/1202passed). Agy instructed to diagnose/fix deterministically and verify real navigation evidence. No new release.118/119OPEN; no closures.

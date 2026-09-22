@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T09:23:17.241Z",
+  "timestamp": "2026-09-22T09:38:38.127Z",
   "status": "PASS",
   "environment": {
     "node": "v24.13.0",
@@ -7,6 +7,12 @@
     "isolationRefusalGuard": "ACTIVE"
   },
   "checks": {
+    "methodFiltering": {
+      "filteredRoute": "/manager-queue?lane=assign&analysis=PH_H2O",
+      "bannerVerified": true,
+      "clearedFilterViaButton": true,
+      "status": "PASS"
+    },
     "superAdminQueueAggregation": {
       "s005Tasks": 15,
       "s004Tasks": 11,
@@ -14,10 +20,10 @@
       "totalQueueTasks": 38,
       "status": "PASS"
     },
-    "canonicalSampleResolution": {
-      "canonicalSampleId": "GTM-LAB1",
-      "displayLabCode": "S005",
-      "route": "/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
+    "cardClickNavigation": {
+      "clickedCard": "S005 Assign Tech",
+      "navigatedToUrl": "http://127.0.0.1:55901/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
+      "targetRoute": "/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign",
       "resolvedCanonicalId": true,
       "resolvedDisplayId": true,
       "status": "PASS"
@@ -29,9 +35,11 @@
       "buttonHasSvgIcon": true,
       "status": "PASS"
     },
-    "navigationContext": {
+    "backClickNavigation": {
       "backButtonLabel": "Back to queue",
-      "expectedLabel": "Back to queue",
+      "clickedBackButton": true,
+      "navigatedBackToUrl": "http://127.0.0.1:55901/manager-queue?lane=assign",
+      "returnedToQueue": true,
       "status": "PASS"
     }
   },

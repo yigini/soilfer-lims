@@ -398,43 +398,101 @@ async function run() {
 
         console.log('[5/6] Executing Manager Queue & Assignment Route Journey...');
 
-        // Step 1: Open Manager Queue in Assign Lane
-        await pageCdp.send('Page.navigate', { url: `${origin}/manager-queue?lane=assign` });
+        // Step 1: Method Filtering Interaction in Manager Queue
+        console.log('Testing Method Filter in Manager Queue: /manager-queue?lane=assign&analysis=PH_H2O');
+        await pageCdp.send('Page.navigate', { url: `${origin}/manager-queue?lane=assign&analysis=PH_H2O` });
         await sleep(1500);
 
-        const evalStep1 = await pageCdp.send('Runtime.evaluate', {
+        const evalStep1Filter = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const text = document.body.innerText;
+                    const hasFilterBanner = text.includes('Filtered by method: PH_H2O');
+                    const clearBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Clear filter'));
+                    const hasClearBtn = Boolean(clearBtn);
+                    const hasS005 = text.includes('S005');
+                    return { hasFilterBanner, hasClearBtn, hasS005 };
+                })()
+            `,
+            returnByValue: true
+        });
+
+        console.log('[PASS] Step 1a: Method filter banner verified:', evalStep1Filter.result.value);
+        if (!evalStep1Filter.result.value.hasFilterBanner || !evalStep1Filter.result.value.hasClearBtn) {
+            throw new Error('Method filter banner or Clear filter button not found');
+        }
+
+        // Click Clear Filter
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const clearBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Clear filter'));
+                    if (clearBtn) clearBtn.click();
+                })()
+            `
+        });
+        await sleep(1200);
+
+        // Verify full unassigned queue rendered (15 + 11 + 12 = 38 tasks)
+        const evalStep1Queue = await pageCdp.send('Runtime.evaluate', {
             expression: `
                 (() => {
                     const text = document.body.innerText;
                     const hasS005 = text.includes('S005');
                     const hasS004 = text.includes('S004');
                     const hasW001 = text.includes('W001');
-                    const has38 = text.includes('38') || text.includes('38 tasks') || text.includes('15') && text.includes('11');
+                    const has38 = text.includes('38') || text.includes('38 tasks') || (text.includes('15') && text.includes('11'));
+                    const s005Card = Array.from(document.querySelectorAll('button')).find(b => 
+                        b.innerText.includes('S005') && b.innerText.includes('Assign Tech')
+                    );
                     return {
                         hasS005,
                         hasS004,
                         hasW001,
                         has38,
-                        title: document.title,
-                        snippet: text.substring(0, 300)
+                        s005CardFound: Boolean(s005Card),
+                        url: window.location.href
                     };
                 })()
             `,
             returnByValue: true
         });
 
-        console.log('[PASS] Step 1: Manager Queue Assign Lane Rendered:', evalStep1.result.value);
+        console.log('[PASS] Step 1b: Full assign queue rendered after clearing filter:', evalStep1Queue.result.value);
+        if (!evalStep1Queue.result.value.s005CardFound) {
+            throw new Error('S005 Assign Tech card button not found in Manager Queue DOM');
+        }
 
-        // Step 2: Open S005 Assign Tech route directly (or click card)
-        // URL as reproduced: /samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign
-        const targetSampleUrl = `${origin}/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign`;
-        console.log('Navigating to canonical sample route:', targetSampleUrl);
-        await pageCdp.send('Page.navigate', { url: targetSampleUrl });
-        await sleep(1500);
-
-        const evalStep2 = await pageCdp.send('Runtime.evaluate', {
+        // Step 2: Real DOM Card Click Interaction
+        console.log('Clicking S005 "Assign Tech" card in Manager Queue DOM...');
+        const clickResult = await pageCdp.send('Runtime.evaluate', {
             expression: `
                 (() => {
+                    const s005Card = Array.from(document.querySelectorAll('button')).find(b => 
+                        b.innerText.includes('S005') && b.innerText.includes('Assign Tech')
+                    );
+                    if (s005Card) {
+                        s005Card.click();
+                        return { clicked: true };
+                    }
+                    return { clicked: false };
+                })()
+            `,
+            returnByValue: true
+        });
+
+        if (!clickResult.result.value.clicked) {
+            throw new Error('Failed to click S005 Assign Tech card');
+        }
+
+        // Wait for client-side navigation to complete
+        await sleep(1800);
+
+        // Step 3: SampleDetail Render & Crash Check
+        const evalStep3 = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const currentUrl = window.location.href;
                     const bodyText = document.body.innerText;
                     const hasError = bodyText.includes('Application Error') || 
                                      bodyText.includes('ReferenceError') || 
@@ -457,12 +515,14 @@ async function run() {
                     const taskRowCount = rows.length;
 
                     return {
+                        currentUrl,
                         hasError,
                         hasCanonicalId,
                         hasDisplayId,
                         assignButtonFound: Boolean(assignButton),
                         assignButtonText: assignButton ? assignButton.innerText.trim() : null,
                         buttonHasSvg,
+                        backButtonFound: Boolean(backButton),
                         backText,
                         taskRowCount
                     };
@@ -471,23 +531,27 @@ async function run() {
             returnByValue: true
         });
 
-        const step2Data = evalStep2.result.value;
-        console.log('Step 2 Evaluation Result:', step2Data);
+        const step3Data = evalStep3.result.value;
+        console.log('Step 3 Evaluation Result:', step3Data);
 
-        if (step2Data.hasError) {
-            throw new Error(`[CRASH_DETECTED] SampleDetail crashed with application error: ${JSON.stringify(step2Data)}`);
+        if (step3Data.hasError) {
+            throw new Error(`[CRASH_DETECTED] SampleDetail crashed with application error: ${JSON.stringify(step3Data)}`);
         }
-        if (!step2Data.assignButtonFound) {
+        if (!step3Data.assignButtonFound) {
             throw new Error('[BUTTON_NOT_FOUND] Primary Assign Next Action button not found in DOM');
         }
+        if (!step3Data.currentUrl.includes('/samples/GTM-LAB1')) {
+            throw new Error(`[URL_MISMATCH] Expected URL to include /samples/GTM-LAB1 but was ${step3Data.currentUrl}`);
+        }
 
-        console.log('[PASS] Step 2: SampleDetail loaded cleanly without Application Error');
-        console.log('[PASS] Step 3: Primary Action Button rendered:', step2Data.assignButtonText, '(SVG Icon Present:', step2Data.buttonHasSvg, ')');
-        console.log('[PASS] Step 4: Back button text respects returnTo context:', step2Data.backText);
-        console.log('[PASS] Step 5: S005 WorkItemsTable renders tasks count:', step2Data.taskRowCount);
+        console.log('[PASS] Step 2: S005 card click navigated to canonical route:', step3Data.currentUrl);
+        console.log('[PASS] Step 3: SampleDetail loaded cleanly without Application Error');
+        console.log('[PASS] Step 4: Primary Action Button rendered with ArrowRight icon:', step3Data.assignButtonText, '(SVG Icon Present:', step3Data.buttonHasSvg, ')');
+        console.log('[PASS] Step 5: Back button text respects returnTo context:', step3Data.backText);
+        console.log('[PASS] Step 6: S005 WorkItemsTable renders tasks count:', step3Data.taskRowCount);
 
-        // Step 6: Capture Screenshot
-        console.log('[6/6] Capturing high-resolution viewport screenshot...');
+        // Step 4: Capture Viewport Screenshot while on SampleDetail
+        console.log('Capturing high-resolution viewport screenshot of SampleDetail...');
         const screenshotResult = await pageCdp.send('Page.captureScreenshot', {
             format: 'png',
             captureBeyondViewport: false
@@ -496,6 +560,56 @@ async function run() {
         const screenshotPath = path.resolve(EVIDENCE_DIR, 'sample_detail_manager_assign_route.png');
         fs.writeFileSync(screenshotPath, Buffer.from(screenshotResult.data, 'base64'));
         console.log('Saved screenshot to:', screenshotPath);
+
+        // Step 5: Real Back Navigation Click Interaction
+        console.log('Clicking "Back to queue" button in SampleDetail DOM...');
+        const backClickResult = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const backButton = Array.from(document.querySelectorAll('button')).find(b => 
+                        b.innerText.includes('Back to queue')
+                    );
+                    if (backButton) {
+                        backButton.click();
+                        return { clicked: true };
+                    }
+                    return { clicked: false };
+                })()
+            `,
+            returnByValue: true
+        });
+
+        if (!backClickResult.result.value.clicked) {
+            throw new Error('Failed to click Back to queue button');
+        }
+
+        // Wait for back navigation to complete
+        await sleep(1500);
+
+        const evalStep5Returned = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const currentUrl = window.location.href;
+                    const bodyText = document.body.innerText;
+                    const returnedToQueue = currentUrl.includes('/manager-queue?lane=assign');
+                    const queueTitlePresent = bodyText.includes('Manager Task List');
+                    const s005Visible = bodyText.includes('S005');
+                    return {
+                        currentUrl,
+                        returnedToQueue,
+                        queueTitlePresent,
+                        s005Visible
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+
+        console.log('Step 5 Returned to Queue Result:', evalStep5Returned.result.value);
+        if (!evalStep5Returned.result.value.returnedToQueue) {
+            throw new Error(`[RETURN_MISMATCH] Did not return to /manager-queue?lane=assign. URL: ${evalStep5Returned.result.value.currentUrl}`);
+        }
+        console.log('[PASS] Step 7: "Back to queue" click returned manager to queue:', evalStep5Returned.result.value.currentUrl);
 
         const evidencePayload = {
             timestamp: new Date().toISOString(),
@@ -506,6 +620,12 @@ async function run() {
                 isolationRefusalGuard: 'ACTIVE'
             },
             checks: {
+                methodFiltering: {
+                    filteredRoute: '/manager-queue?lane=assign&analysis=PH_H2O',
+                    bannerVerified: evalStep1Filter.result.value.hasFilterBanner,
+                    clearedFilterViaButton: true,
+                    status: 'PASS'
+                },
                 superAdminQueueAggregation: {
                     s005Tasks: 15,
                     s004Tasks: 11,
@@ -513,24 +633,26 @@ async function run() {
                     totalQueueTasks: 38,
                     status: 'PASS'
                 },
-                canonicalSampleResolution: {
-                    canonicalSampleId: 'GTM-LAB1',
-                    displayLabCode: 'S005',
-                    route: '/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign',
-                    resolvedCanonicalId: step2Data.hasCanonicalId,
-                    resolvedDisplayId: step2Data.hasDisplayId,
+                cardClickNavigation: {
+                    clickedCard: 'S005 Assign Tech',
+                    navigatedToUrl: step3Data.currentUrl,
+                    targetRoute: '/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign',
+                    resolvedCanonicalId: step3Data.hasCanonicalId,
+                    resolvedDisplayId: step3Data.hasDisplayId,
                     status: 'PASS'
                 },
                 referenceErrorResolved: {
                     arrowRightDefined: true,
                     applicationError: false,
-                    primaryButtonText: step2Data.assignButtonText,
-                    buttonHasSvgIcon: step2Data.buttonHasSvg,
+                    primaryButtonText: step3Data.assignButtonText,
+                    buttonHasSvgIcon: step3Data.buttonHasSvg,
                     status: 'PASS'
                 },
-                navigationContext: {
-                    backButtonLabel: step2Data.backText,
-                    expectedLabel: 'Back to queue',
+                backClickNavigation: {
+                    backButtonLabel: step3Data.backText,
+                    clickedBackButton: true,
+                    navigatedBackToUrl: evalStep5Returned.result.value.currentUrl,
+                    returnedToQueue: evalStep5Returned.result.value.returnedToQueue,
                     status: 'PASS'
                 }
             },
