@@ -26,17 +26,20 @@ exports.getDisplayName = getDisplayName;
  *    - For 'msg-assign-':
  *      - Subject must match /^(?:📋\s*)?New Work Assigned:\s*.+/i
  *      - Body must start with 'You have been assigned a new analysis task.'
- *      - Footer line must match /(?:^|\n)Assigned by:\s*(.+)$/m
+ *      - Targets ONLY the verified final generated footer: /\n\nAssigned by:\s*([^\r\n]+)\s*$/
  *    - For 'msg-reassign-':
  *      - Subject must match /^(?:📋\s*)?Work Reassigned:\s*.+/i
  *      - Body must start with 'A work item has been reassigned to you.'
- *      - Footer line must match /(?:^|\n)Reassigned by:\s*(.+)$/m
+ *      - Targets ONLY the verified final generated footer: /\n\nReassigned by:\s*([^\r\n]+)\s*$/
  * 3. Matching stable sender attribution:
- *    - The captured attribution in the footer must match the sender's stable identity (sender.username)
- *      or already match the sender's proper name.
- * 4. Safe fallback:
+ *    - sender.username must be present and non-empty (fail closed if missing or empty).
+ *    - The captured attribution in the final footer must match sender.username (or already sender.name).
+ * 4. Literal replacement semantics:
+ *    - Uses a replacement callback function to prevent string replacement tokens ($&, $', etc.)
+ *      from expanding when user.name contains literal dollar signs or special characters.
+ * 5. Safe fallback:
  *    - If sender has a proper name (sender.name.trim()), update footer with proper name.
- *    - If sender has no proper name, sender is missing, or attribution does not match, return body unchanged.
+ *    - If sender has no proper name, attribution does not match, or username is absent, return body unchanged.
  */
 const formatAssignmentBody = (body, sender, subject, messageId) => {
     if (!body || typeof body !== 'string') return body;
@@ -50,7 +53,18 @@ const formatAssignmentBody = (body, sender, subject, messageId) => {
         return body;
     }
 
-    // 2. Strict subject and template verification
+    // Stable username is required for attribution verification; fail closed if absent
+    if (!sender || typeof sender !== 'object') {
+        return body;
+    }
+    const stableUsername = (typeof sender.username === 'string' && sender.username.trim()) ? sender.username.trim() : null;
+    if (!stableUsername) {
+        return body;
+    }
+
+    const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+
+    // 2. Strict subject and template verification targeting only the verified final generated footer
     if (isAssign) {
         if (!subject || typeof subject !== 'string' || !/^(?:📋\s*)?New Work Assigned:\s*.+/i.test(subject.trim())) {
             return body;
@@ -58,28 +72,25 @@ const formatAssignmentBody = (body, sender, subject, messageId) => {
         if (!body.startsWith('You have been assigned a new analysis task.')) {
             return body;
         }
-        const footerMatch = body.match(/(^|\n)(Assigned by:\s*)([^\r\n]+)$/m);
+
+        // Anchor strictly to the final generated footer at the end of the body
+        const finalAssignPattern = /\n\nAssigned by:\s*([^\r\n]+)\s*$/;
+        const footerMatch = body.match(finalAssignPattern);
         if (!footerMatch) {
             return body;
         }
 
-        // 3. Sender verification and matching stable identity
-        if (!sender || typeof sender !== 'object') {
-            return body;
-        }
-        const currentAttribution = footerMatch[3].trim();
-        const stableUsername = sender.username ? String(sender.username).trim() : '';
-        const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+        const currentAttribution = footerMatch[1].trim();
 
-        // Verify that the current footer matches sender's username (or already the proper name)
-        if (stableUsername && currentAttribution !== stableUsername && currentAttribution !== properName) {
+        // 3. Verify that the final footer matches sender's stable username (or already proper name)
+        if (currentAttribution !== stableUsername && currentAttribution !== properName) {
             // Attribution does not match sender; fail closed to avoid misattribution
             return body;
         }
 
-        // If proper name exists and differs from current attribution, format footer with proper name
+        // 4. Literal replacement semantics via callback to prevent $ token expansion
         if (properName && currentAttribution !== properName) {
-            return body.replace(/(^|\n)(Assigned by:\s*)([^\r\n]+)$/m, `$1$2${properName}`);
+            return body.replace(finalAssignPattern, () => `\n\nAssigned by: ${properName}`);
         }
 
         return body;
@@ -92,26 +103,24 @@ const formatAssignmentBody = (body, sender, subject, messageId) => {
         if (!body.startsWith('A work item has been reassigned to you.')) {
             return body;
         }
-        const footerMatch = body.match(/(^|\n)(Reassigned by:\s*)([^\r\n]+)$/m);
+
+        // Anchor strictly to the final generated footer at the end of the body
+        const finalReassignPattern = /\n\nReassigned by:\s*([^\r\n]+)\s*$/;
+        const footerMatch = body.match(finalReassignPattern);
         if (!footerMatch) {
             return body;
         }
 
-        // 3. Sender verification and matching stable identity
-        if (!sender || typeof sender !== 'object') {
-            return body;
-        }
-        const currentAttribution = footerMatch[3].trim();
-        const stableUsername = sender.username ? String(sender.username).trim() : '';
-        const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+        const currentAttribution = footerMatch[1].trim();
 
-        // Verify that the current footer matches sender's username (or already the proper name)
-        if (stableUsername && currentAttribution !== stableUsername && currentAttribution !== properName) {
+        // 3. Verify that the final footer matches sender's stable username (or already proper name)
+        if (currentAttribution !== stableUsername && currentAttribution !== properName) {
             return body;
         }
 
+        // 4. Literal replacement semantics via callback to prevent $ token expansion
         if (properName && currentAttribution !== properName) {
-            return body.replace(/(^|\n)(Reassigned by:\s*)([^\r\n]+)$/m, `$1$2${properName}`);
+            return body.replace(finalReassignPattern, () => `\n\nReassigned by: ${properName}`);
         }
 
         return body;
