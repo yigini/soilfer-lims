@@ -98,3 +98,12 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 ### 2026-09-22 09:31 UTC — PR130 cbe6ab1 CI blocker
 - Review: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5774223676
 - Missing icon imports corrected; CI35710437095 fails display-alias identity assertion (1failed/1202passed). Agy instructed to diagnose/fix deterministically and verify real navigation evidence. No new release.118/119OPEN; no closures.
+
+### 2026-09-22 09:49 UTC — PR130 final bounded review
+- https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5774455837
+- Head5ad5012cfebc524309d380d700471b3451a57caa:10assignment checks independently passed; QC17prior checks unchanged; CI35711730061green. Ready for release decision, not deployed/closed. User authorization requested for this follow-up; earlier authority covered PR129 only.118/119OPEN.
+
+### 2026-09-22 10:07 UTC — #124 live version-filter residual
+- Public comment: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5774742771 . OPEN; no closure.
+- Released7516f0e Chrome SUPER_ADMIN: submitted client/sample search works, but sample GTM26-0002 + Superseded displays unrelated GTM26-0003. Effect resets query and competes with status request; stale responses unguarded. No production mutation. Detailed independent evidence: work/issue124-live-review-7516f0e.md in monitor directory.
+- Sent one bounded implementation/regression request to Agy, separate follow-up preserving frozen PR130head5ad5012 pending release approval. No duplicate approval request or unchanged test rerun.

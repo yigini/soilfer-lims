@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-09-22T10:41:32.668Z",
+  "status": "PASS",
+  "issue": "#124 Residual Fix",
+  "environment": {
+    "node": "v24.13.0",
+    "database": "disposable_journey_result_reports.db",
+    "isolationRefusalGuard": "ACTIVE"
+  },
+  "verifiedSteps": {
+    "step1_initialPublishedRender": {
+      "tabActive": "PUBLISHED",
+      "publishedCount": 3,
+      "status": "PASS"
+    },
+    "step2_allVersionsRender": {
+      "tabActive": "ALL",
+      "totalCount": 5,
+      "status": "PASS"
+    },
+    "step3_searchFilterSubmit": {
+      "searchedQuery": "GTM26-0002",
+      "matchingCount": 1,
+      "status": "PASS"
+    },
+    "step4_exactTransitionSupersededTruthfulNoMatch": {
+      "activeTab": "SUPERSEDED",
+      "retainedSearchInput": "GTM26-0002",
+      "noReportsFoundText": true,
+      "reportedZeroCount": true,
+      "unrelated0003Suppressed": true,
+      "screenshot": "artifacts/evidence-journeys/result_reports_filter_lifecycle_transition.png",
+      "status": "PASS"
+    },
+    "step5_returnToAllVersions": {
+      "retainedSearchInput": "GTM26-0002",
+      "matchingCount": 1,
+      "status": "PASS"
+    },
+    "step6_clearSearchRestoration": {
+      "inputResetEmpty": true,
+      "totalCountRestored": 5,
+      "status": "PASS"
+    },
+    "step7_sameInstanceProjectScopeSynchronization": {
+      "switchedToPilotProject": true,
+      "preservedSearchAcrossScopeSwitch": true,
+      "renderedTruthfulNoMatchWithoutLeak": true,
+      "status": "PASS"
+    }
+  }
+}
