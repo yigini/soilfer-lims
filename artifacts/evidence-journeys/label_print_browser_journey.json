@@ -1,0 +1,140 @@
+{
+  "timestamp": "2026-09-22T19:13:27.462Z",
+  "suite": "Issue #121 Headless Chrome CDP Print & Date Verification",
+  "browser": "Google Chrome Headless (Windows)",
+  "totalChecks": 11,
+  "passedChecks": 11,
+  "parts": {
+    "part1_fixtureCardLayoutAndCssChecks": [
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 1: Single S004 Standard Label (101x54mm)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-S004",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 2: Single S004 Compact Vial Label (50x25mm)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-S004",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 3: Batch 3-Label Standard (101x54mm)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Labels-Batch-3",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 4: Batch 3-Label Compact Vial (50x25mm)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Labels-Batch-3",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 5: Reception Intake Card (Standard)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-LAB-INTAKE-NEW",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 6: Reception Intake Card (Compact)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-LAB-INTAKE-NEW",
+        "passed": true
+      }
+    ],
+    "part2_mountedRouteDialogJourneys": [
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.1: Mounted SampleDetail Route Single Standard Label Lifecycle",
+        "format": "STANDARD",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.2: Mounted SampleDetail Format Switch to Compact (50x25mm)",
+        "format": "COMPACT",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.3: Authentic Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.4: Authentic Reception Route Immediate Print Lifecycle (Standard & Compact)",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.5: Provenance Truthfulness on DRAFT (Null Intake) & Custody Handover Records",
+        "passed": true
+      }
+    ]
+  },
+  "outstandingVerification": {
+    "safariPrintPreview": "PENDING_PHYSICAL_OR_MACOS_ENVIRONMENT",
+    "physicalThermalPrinterHardware": "PENDING_PHYSICAL_HARDWARE"
+  }
+}
