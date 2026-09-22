@@ -1,0 +1,241 @@
+{
+  "title": "CDP Headless Browser Journey: Navigation Order & Spanish Dashboard Localization (#115, #116)",
+  "executedAt": "2026-09-22T12:39:09.216Z",
+  "locale": "es",
+  "role": "LAB_MANAGER",
+  "databaseIsolation": {
+    "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790080737186_mk476r\\disposable_journey_mk476r.db",
+    "cleanRunnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790080737186_mk476r"
+  },
+  "results": [
+    {
+      "stepName": "Sidebar Projects Position (#115)",
+      "passed": true,
+      "details": "Projects is at index 1 (immediately after Dashboard). Nav sequence: / -> /projects -> /reception -> /samples",
+      "timestamp": "2026-09-22T12:39:07.058Z"
+    },
+    {
+      "stepName": "Sidebar Data Results Position (#115)",
+      "passed": true,
+      "details": "QA (5) -> Data Results (6) -> Reports (7)",
+      "timestamp": "2026-09-22T12:39:07.058Z"
+    },
+    {
+      "stepName": "Sidebar Collapse Localized (#116)",
+      "passed": true,
+      "details": "Collapse button text: \"Plegar\" (expected \"Plegar\" or \"Contraer\", no raw English \"Collapse\")",
+      "timestamp": "2026-09-22T12:39:07.059Z"
+    },
+    {
+      "stepName": "Header Help Button Localized (#116)",
+      "passed": true,
+      "details": "Help button visible text: \"Ayuda\" (expected \"Ayuda\", no raw English \"Help\"). aria-label: \"Ayuda con esta página\"",
+      "timestamp": "2026-09-22T12:39:07.061Z"
+    },
+    {
+      "stepName": "Dashboard Metric Labels Localized (#116)",
+      "passed": true,
+      "details": "Translated labels found: Decision=true, Submitted=true, Approval=true, Assign=true, Intake=true",
+      "timestamp": "2026-09-22T12:39:07.063Z"
+    },
+    {
+      "stepName": "Zero Raw English In Metric Cards (#116)",
+      "passed": true,
+      "details": "Raw English metric titles absent: true",
+      "timestamp": "2026-09-22T12:39:07.063Z"
+    },
+    {
+      "stepName": "Work Queue Context Localized (#116)",
+      "passed": true,
+      "details": "Context rendered: \"Puerta operativa\" / \"Método analítico\" (found: true)",
+      "timestamp": "2026-09-22T12:39:09.079Z"
+    },
+    {
+      "stepName": "Work Queue Status Badge Localized (#116)",
+      "passed": true,
+      "details": "Status badge rendered: \"Sin asignar\" (found: true)",
+      "timestamp": "2026-09-22T12:39:09.079Z"
+    },
+    {
+      "stepName": "Work Queue Action Button Localized (#116)",
+      "passed": true,
+      "details": "Action button rendered: \"Asignar por método\" (found: true)",
+      "timestamp": "2026-09-22T12:39:09.079Z"
+    },
+    {
+      "stepName": "Work Queue Notes Localized (#116)",
+      "passed": true,
+      "details": "Row note rendered with Spanish pluralization (found: true)",
+      "timestamp": "2026-09-22T12:39:09.079Z"
+    },
+    {
+      "stepName": "Zero Raw English in Work Queue Table (#116)",
+      "passed": true,
+      "details": "Raw English queue strings absent: true",
+      "timestamp": "2026-09-22T12:39:09.079Z"
+    }
+  ],
+  "sidebarNav": [
+    {
+      "text": "Panel de control",
+      "href": "/"
+    },
+    {
+      "text": "Proyectos",
+      "href": "/projects"
+    },
+    {
+      "text": "Recepción de muestras",
+      "href": "/reception"
+    },
+    {
+      "text": "Muestras",
+      "href": "/samples"
+    },
+    {
+      "text": "Lista de tareas",
+      "href": "/manager-queue"
+    },
+    {
+      "text": "Panel de QA",
+      "href": "/qa"
+    },
+    {
+      "text": "Resultados de datos",
+      "href": "/data-results"
+    },
+    {
+      "text": "Informes",
+      "href": "/result-reports"
+    },
+    {
+      "text": "Biblioteca espectral",
+      "href": "/spectral-library"
+    },
+    {
+      "text": "Inventario",
+      "href": "/inventory"
+    },
+    {
+      "text": "Equipo",
+      "href": "/equipment"
+    },
+    {
+      "text": "Personal del laboratorio",
+      "href": "/users"
+    },
+    {
+      "text": "Mi Laboratorio",
+      "href": "/admin/labs?labId=LAB-GTM-1790080740503_kz337"
+    },
+    {
+      "text": "Panel de administración",
+      "href": "/admin"
+    },
+    {
+      "text": "Acerca de SoilFER",
+      "href": "/about"
+    },
+    {
+      "text": "Panel de control",
+      "href": "/"
+    },
+    {
+      "text": "Lista de tareas",
+      "href": "/manager-queue"
+    },
+    {
+      "text": "Scan",
+      "href": "/scan"
+    },
+    {
+      "text": "Muestras",
+      "href": "/samples"
+    }
+  ],
+  "headerHelpButton": {
+    "found": true,
+    "visibleText": "Ayuda",
+    "ariaLabel": "Ayuda con esta página",
+    "title": "Ayuda con esta página"
+  },
+  "metricCards": [
+    {
+      "text": "1\nexcepción\nNecesita una decisión\nREQUIERE ATENCIÓN",
+      "spans": [
+        "1",
+        "excepción"
+      ],
+      "divs": [
+        "1\nexcepción",
+        "Necesita una decisión\nREQUIERE ATENCIÓN",
+        "Necesita una decisión",
+        "REQUIERE ATENCIÓN"
+      ]
+    },
+    {
+      "text": "0\nmuestras\nTrabajo enviado",
+      "spans": [
+        "0",
+        "muestras"
+      ],
+      "divs": [
+        "0\nmuestras",
+        "Trabajo enviado",
+        "Trabajo enviado"
+      ]
+    },
+    {
+      "text": "0\nmuestras\nAprobación final",
+      "spans": [
+        "0",
+        "muestras"
+      ],
+      "divs": [
+        "0\nmuestras",
+        "Aprobación final",
+        "Aprobación final"
+      ]
+    },
+    {
+      "text": "2\ntareas\nAsignar trabajo",
+      "spans": [
+        "2",
+        "tareas"
+      ],
+      "divs": [
+        "2\ntareas",
+        "Asignar trabajo",
+        "Asignar trabajo"
+      ]
+    },
+    {
+      "text": "1\nmuestra\nAceptación de ingreso",
+      "spans": [
+        "1",
+        "muestra"
+      ],
+      "divs": [
+        "1\nmuestra",
+        "Aceptación de ingreso",
+        "Aceptación de ingreso"
+      ]
+    }
+  ],
+  "workQueueRows": [
+    {
+      "title": "DRYING\nDRYING\nPuerta operativa\n1 elemento de trabajo sin asignar listo para su distribución a analistas de mesa.",
+      "state": "Sin asignar",
+      "count": "1lista de control",
+      "action": "Asignar por método"
+    },
+    {
+      "title": "PH\nPH\nMétodo analítico\n1 elemento de trabajo sin asignar listo para su distribución a analistas de mesa.",
+      "state": "Sin asignar",
+      "count": "1determinación",
+      "action": "Asignar por método"
+    }
+  ],
+  "screenshot": "artifacts/evidence-journeys/dashboard_nav_i18n_spanish_verified.png",
+  "status": "SUCCESS"
+}

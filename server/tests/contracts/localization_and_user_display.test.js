@@ -144,6 +144,140 @@ describe('Localization & Multilingual Integrity Contract (#116)', () => {
         expect(translationData['es'].inventory.lowUncertain).toBe('BAJO? (INCIERTO)');
         expect(translationData['fr'].inventory.lowUncertain).toBe('BAS ? (INCERTAIN)');
     });
+
+    test('8. Dashboard manager metric labels are localized across all 5 locales (#116)', () => {
+        const managerKeys = [
+            'managerExceptions',
+            'managerReview',
+            'managerFinalApproval',
+            'managerAssign',
+            'managerIntake'
+        ];
+
+        LOCALES.forEach(locale => {
+            const metrics = translationData[locale].dashboard?.metrics;
+            expect(metrics).toBeDefined();
+            managerKeys.forEach(k => {
+                expect(metrics[k]).toBeDefined();
+                expect(typeof metrics[k]).toBe('string');
+                expect(metrics[k].trim().length).toBeGreaterThan(0);
+            });
+        });
+
+        // Exact verified Spanish translations matching issue 116 live review
+        expect(translationData['es'].dashboard.metrics.managerExceptions).toBe('Necesita una decisión');
+        expect(translationData['es'].dashboard.metrics.managerReview).toBe('Trabajo enviado');
+        expect(translationData['es'].dashboard.metrics.managerFinalApproval).toBe('Aprobación final');
+        expect(translationData['es'].dashboard.metrics.managerAssign).toBe('Asignar trabajo');
+        expect(translationData['es'].dashboard.metrics.managerIntake).toBe('Aceptación de ingreso');
+
+        // Latin America Spanish
+        expect(translationData['es-419'].dashboard.metrics.managerExceptions).toBe('Necesita una decisión');
+        expect(translationData['es-419'].dashboard.metrics.managerReview).toBe('Trabajo enviado');
+
+        // French
+        expect(translationData['fr'].dashboard.metrics.managerExceptions).toBe('Nécessite une décision');
+        expect(translationData['fr'].dashboard.metrics.managerReview).toBe('Travail soumis');
+
+        // Portuguese
+        expect(translationData['pt'].dashboard.metrics.managerExceptions).toBe('Precisa de uma decisão');
+        expect(translationData['pt'].dashboard.metrics.managerReview).toBe('Trabalho enviado');
+    });
+
+    test('9. Dashboard unit keys support pluralization across all 5 locales (#116)', () => {
+        const units = ['samples', 'tasks', 'exceptions', 'batches', 'reports', 'checklists', 'determinations'];
+
+        LOCALES.forEach(locale => {
+            const unitSection = translationData[locale].dashboard?.units;
+            expect(unitSection).toBeDefined();
+            units.forEach(u => {
+                expect(unitSection[u]).toBeDefined();
+                expect(unitSection[u]).toContain('plural');
+                expect(unitSection[u]).toContain('one');
+                expect(unitSection[u]).toContain('other');
+            });
+        });
+
+        // Verified Spanish unit patterns
+        expect(translationData['es'].dashboard.units.samples).toContain('muestras');
+        expect(translationData['es'].dashboard.units.tasks).toContain('tareas');
+        expect(translationData['es'].dashboard.units.exceptions).toContain('excepciones');
+        expect(translationData['es'].dashboard.units.checklists).toContain('listas de control');
+        expect(translationData['es'].dashboard.units.determinations).toContain('determinaciones');
+    });
+
+    test('10. Work queue statuses, actions, contexts, and notes are localized (#116)', () => {
+        // Statuses
+        LOCALES.forEach(locale => {
+            const status = translationData[locale].dashboard?.workQueue?.status;
+            expect(status).toBeDefined();
+            expect(status.unassigned).toBeTruthy();
+            expect(status.readyForReview).toBeTruthy();
+            expect(status.readyForFinalCheck).toBeTruthy();
+            expect(status.awaitingAcceptance).toBeTruthy();
+            expect(status.qcFailed).toBeTruthy();
+        });
+
+        expect(translationData['es'].dashboard.workQueue.status.unassigned).toBe('Sin asignar');
+        expect(translationData['es'].dashboard.workQueue.status.readyForReview).toBe('Listo para revisión');
+        expect(translationData['es'].dashboard.workQueue.status.readyForFinalCheck).toBe('Listo para verificación final');
+        expect(translationData['es'].dashboard.workQueue.status.awaitingAcceptance).toBe('En espera de aceptación');
+        expect(translationData['es'].dashboard.workQueue.status.qcFailed).toBe('Control de calidad fallido');
+
+        // Actions
+        expect(translationData['es'].dashboard.workQueue.action.assignByMethod).toBe('Asignar por método');
+        expect(translationData['es'].dashboard.workQueue.action.review).toBe('Revisar');
+        expect(translationData['es'].dashboard.workQueue.action.openFinalReview).toBe('Abrir revisión final');
+        expect(translationData['es'].dashboard.workQueue.action.inspectIntake).toBe('Inspeccionar ingreso');
+        expect(translationData['es'].dashboard.workQueue.action.inspectQc).toBe('Inspeccionar CC');
+
+        // Contexts
+        expect(translationData['es'].dashboard.workQueue.context.operationalGate).toBe('Puerta operativa');
+        expect(translationData['es'].dashboard.workQueue.context.analyticalMethod).toBe('Método analítico');
+        expect(translationData['es'].dashboard.workQueue.context.affectedWorkItems).toContain('elementos');
+        expect(translationData['es'].dashboard.workQueue.context.allAnalysesAccepted).toContain('aceptados');
+
+        // Notes
+        expect(translationData['es'].dashboard.workQueue.notes.unassignedAllocation).toContain('sin asignar');
+        expect(translationData['es'].dashboard.workQueue.notes.inspectSubmittedEvidence).toContain('Inspeccionar');
+        expect(translationData['es'].dashboard.workQueue.notes.finalApprovalAuthorize).toContain('aprobación final');
+    });
+
+    test('11. Sidebar collapse labels are localized across all 5 locales (#116)', () => {
+        LOCALES.forEach(locale => {
+            const nav = translationData[locale].nav;
+            expect(nav.collapse).toBeDefined();
+            expect(nav.expandSidebar).toBeDefined();
+            expect(nav.collapseSidebar).toBeDefined();
+        });
+
+        expect(translationData['en'].nav.collapse).toBe('Collapse');
+        expect(translationData['es'].nav.collapse).toBe('Plegar');
+        expect(translationData['es-419'].nav.collapse).toBe('Plegar');
+        expect(translationData['fr'].nav.collapse).toBe('Réduire');
+        expect(translationData['pt'].nav.collapse).toBe('Recolher');
+    });
+
+    test('12. Global header Help button labels are localized across all 5 locales (#116)', () => {
+        LOCALES.forEach(locale => {
+            const help = translationData[locale].help;
+            expect(help).toBeDefined();
+            expect(help.help).toBeTruthy();
+            expect(help.context).toBeTruthy();
+        });
+
+        expect(translationData['en'].help.help).toBe('Help');
+        expect(translationData['es'].help.help).toBe('Ayuda');
+        expect(translationData['es-419'].help.help).toBe('Ayuda');
+        expect(translationData['fr'].help.help).toBe('Aide');
+        expect(translationData['pt'].help.help).toBe('Ajuda');
+
+        expect(translationData['en'].help.context).toBe('Help with this page');
+        expect(translationData['es'].help.context).toBe('Ayuda con esta página');
+        expect(translationData['es-419'].help.context).toBe('Ayuda con esta página');
+        expect(translationData['fr'].help.context).toBe('Aide pour cette page');
+        expect(translationData['pt'].help.context).toBe('Ajuda para esta página');
+    });
 });
 
 describe('User Display Name Resolution & Audit Integrity Contract (#126)', () => {

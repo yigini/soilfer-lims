@@ -142,10 +142,10 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'reception.attention', label: 'Needs attention', value: attentionCount, unit: 'samples', availability: 'available', queueKey: 'reception.attention', tone: attentionCount > 0 ? 'problem' : '' },
-            { key: 'reception.drafts', label: 'My drafts', value: draftsCount, unit: 'drafts', availability: 'available', queueKey: 'reception.drafts' },
-            { key: 'reception.expected', label: 'Expected samples', value: expectedCount, unit: 'samples', availability: 'available', queueKey: 'reception.expected', hint: 'Field records awaiting receipt; not a processing backlog' },
-            { key: 'reception.receivedToday', label: 'Received today', value: receivedTodayCount, unit: 'samples', availability: 'available', queueKey: 'reception.receivedToday', hint: 'Physical receipts in lab local day' }
+            { key: 'reception.attention', label: 'Needs attention', labelKey: 'dashboard.metrics.receptionAttention', value: attentionCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'reception.attention', tone: attentionCount > 0 ? 'problem' : '' },
+            { key: 'reception.drafts', label: 'My drafts', labelKey: 'dashboard.metrics.receptionDrafts', value: draftsCount, unit: 'drafts', unitKey: 'dashboard.units.drafts', availability: 'available', queueKey: 'reception.drafts' },
+            { key: 'reception.expected', label: 'Expected samples', labelKey: 'dashboard.metrics.receptionExpected', value: expectedCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'reception.expected', hint: 'Field records awaiting receipt; not a processing backlog' },
+            { key: 'reception.receivedToday', label: 'Received today', labelKey: 'dashboard.metrics.receptionReceivedToday', value: receivedTodayCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'reception.receivedToday', hint: 'Physical receipts in lab local day' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -228,11 +228,11 @@ async function getDashboardHome(user, options = {}) {
         });
 
         metrics = [
-            { key: 'bench.returned', label: 'Returned', value: returnedCount, unit: 'determinations', availability: 'available', queueKey: 'bench.returned', tone: returnedCount > 0 ? 'problem' : '' },
-            { key: 'bench.continue', label: 'Continue', value: continueCount > 0 ? 1 : 0, unit: 'runs', availability: 'available', queueKey: 'bench.continue' },
-            { key: 'bench.ready', label: 'Ready work', value: readyTotal, unit: 'tasks', availability: 'available', queueKey: 'bench.ready', hint: `${readyAnalyticalCount} determinations, ${readyOperationalCount} checklists` },
-            { key: 'bench.toSubmit', label: 'To submit', value: toSubmitCount, unit: 'determinations', availability: 'available', queueKey: 'bench.toSubmit' },
-            { key: 'bench.waiting', label: 'Waiting', value: waitingCount, unit: 'tasks', availability: 'available', queueKey: 'bench.waiting', hint: 'Prerequisites (drying/preparation) pending' }
+            { key: 'bench.returned', label: 'Returned', labelKey: 'dashboard.metrics.benchReturned', value: returnedCount, unit: 'determinations', unitKey: 'dashboard.units.determinations', availability: 'available', queueKey: 'bench.returned', tone: returnedCount > 0 ? 'problem' : '' },
+            { key: 'bench.continue', label: 'Continue', labelKey: 'dashboard.metrics.benchContinue', value: continueCount > 0 ? 1 : 0, unit: 'runs', unitKey: 'dashboard.units.runs', availability: 'available', queueKey: 'bench.continue' },
+            { key: 'bench.ready', label: 'Ready work', labelKey: 'dashboard.metrics.benchReady', value: readyTotal, unit: 'tasks', unitKey: 'dashboard.units.tasks', availability: 'available', queueKey: 'bench.ready', hint: `${readyAnalyticalCount} determinations, ${readyOperationalCount} checklists` },
+            { key: 'bench.toSubmit', label: 'To submit', labelKey: 'dashboard.metrics.benchToSubmit', value: toSubmitCount, unit: 'determinations', unitKey: 'dashboard.units.determinations', availability: 'available', queueKey: 'bench.toSubmit' },
+            { key: 'bench.waiting', label: 'Waiting', labelKey: 'dashboard.metrics.benchWaiting', value: waitingCount, unit: 'tasks', unitKey: 'dashboard.units.tasks', availability: 'available', queueKey: 'bench.waiting', hint: 'Prerequisites (drying/preparation) pending' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -319,11 +319,11 @@ async function getDashboardHome(user, options = {}) {
         });
 
         metrics = [
-            { key: 'manager.exceptions', label: 'Needs a decision', value: exceptionBatchCount, unit: 'exceptions', availability: 'available', queueKey: 'manager.exceptions', tone: exceptionBatchCount > 0 ? 'problem' : '' },
-            { key: 'manager.review', label: 'Submitted work', value: reviewCount, unit: 'samples', availability: 'available', queueKey: 'manager.review' },
-            { key: 'manager.finalApproval', label: 'Final approval', value: approvalEligibleCount, unit: 'samples', availability: 'available', queueKey: 'manager.finalApproval' },
-            { key: 'manager.assign', label: 'Assign work', value: unassignedTasksCount, unit: 'tasks', availability: 'available', queueKey: 'manager.assign' },
-            { key: 'manager.intake', label: 'Intake acceptance', value: pendingIntakeCount, unit: 'samples', availability: 'available', queueKey: 'manager.intake' }
+            { key: 'manager.exceptions', label: 'Needs a decision', labelKey: 'dashboard.metrics.managerExceptions', value: exceptionBatchCount, unit: 'exceptions', unitKey: 'dashboard.units.exceptions', availability: 'available', queueKey: 'manager.exceptions', tone: exceptionBatchCount > 0 ? 'problem' : '' },
+            { key: 'manager.review', label: 'Submitted work', labelKey: 'dashboard.metrics.managerReview', value: reviewCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'manager.review' },
+            { key: 'manager.finalApproval', label: 'Final approval', labelKey: 'dashboard.metrics.managerFinalApproval', value: approvalEligibleCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'manager.finalApproval' },
+            { key: 'manager.assign', label: 'Assign work', labelKey: 'dashboard.metrics.managerAssign', value: unassignedTasksCount, unit: 'tasks', unitKey: 'dashboard.units.tasks', availability: 'available', queueKey: 'manager.assign' },
+            { key: 'manager.intake', label: 'Intake acceptance', labelKey: 'dashboard.metrics.managerIntake', value: pendingIntakeCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'manager.intake' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -353,9 +353,9 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'master.exceptions', label: 'Needs attention', value: exceptionsCount, unit: 'laboratories', availability: 'available', queueKey: 'master.exceptions', tone: exceptionsCount > 0 ? 'problem' : '' },
-            { key: 'master.active', label: 'Active work', value: activeSamplesCount, unit: 'samples', availability: 'available', queueKey: 'master.active' },
-            { key: 'master.released', label: 'Released reports', value: releasedReportsCount, unit: 'reports', availability: 'available', queueKey: 'master.released' }
+            { key: 'master.exceptions', label: 'Needs attention', labelKey: 'dashboard.metrics.masterExceptions', value: exceptionsCount, unit: 'laboratories', unitKey: 'dashboard.units.laboratories', availability: 'available', queueKey: 'master.exceptions', tone: exceptionsCount > 0 ? 'problem' : '' },
+            { key: 'master.active', label: 'Active work', labelKey: 'dashboard.metrics.masterActive', value: activeSamplesCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'master.active' },
+            { key: 'master.released', label: 'Released reports', labelKey: 'dashboard.metrics.masterReleased', value: releasedReportsCount, unit: 'reports', unitKey: 'dashboard.units.reports', availability: 'available', queueKey: 'master.released' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -398,10 +398,10 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'project.attention', label: 'Needs follow-up', value: attentionCount, unit: 'samples', availability: 'available', queueKey: 'project.attention', tone: attentionCount > 0 ? 'problem' : '' },
-            { key: 'project.active', label: 'At the laboratory', value: activeCount, unit: 'samples', availability: 'available', queueKey: 'project.active' },
-            { key: 'project.expected', label: 'Not received', value: expectedCount, unit: 'samples', availability: 'available', queueKey: 'project.expected' },
-            { key: 'project.released', label: 'Published reports', value: releasedCount, unit: 'reports', availability: 'available', queueKey: 'project.released' }
+            { key: 'project.attention', label: 'Needs follow-up', labelKey: 'dashboard.metrics.projectAttention', value: attentionCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'project.attention', tone: attentionCount > 0 ? 'problem' : '' },
+            { key: 'project.active', label: 'At the laboratory', labelKey: 'dashboard.metrics.projectActive', value: activeCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'project.active' },
+            { key: 'project.expected', label: 'Not received', labelKey: 'dashboard.metrics.projectExpected', value: expectedCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'project.expected' },
+            { key: 'project.released', label: 'Published reports', labelKey: 'dashboard.metrics.projectReleased', value: releasedCount, unit: 'reports', unitKey: 'dashboard.units.reports', availability: 'available', queueKey: 'project.released' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -428,9 +428,9 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'audit.exceptions', label: 'Evidence exceptions', value: exceptionsCount, unit: 'samples', availability: 'available', queueKey: 'audit.exceptions', tone: exceptionsCount > 0 ? 'problem' : '' },
-            { key: 'audit.qc', label: 'QC requiring attention', value: qcFailedCount, unit: 'batches', availability: 'available', queueKey: 'audit.qc', tone: qcFailedCount > 0 ? 'problem' : '' },
-            { key: 'audit.history', label: 'Recent amendments', value: amendmentsCount, unit: 'amendments', availability: 'available', queueKey: 'audit.history' }
+            { key: 'audit.exceptions', label: 'Evidence exceptions', labelKey: 'dashboard.metrics.auditExceptions', value: exceptionsCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'audit.exceptions', tone: exceptionsCount > 0 ? 'problem' : '' },
+            { key: 'audit.qc', label: 'QC requiring attention', labelKey: 'dashboard.metrics.auditQc', value: qcFailedCount, unit: 'batches', unitKey: 'dashboard.units.batches', availability: 'available', queueKey: 'audit.qc', tone: qcFailedCount > 0 ? 'problem' : '' },
+            { key: 'audit.history', label: 'Recent amendments', labelKey: 'dashboard.metrics.auditHistory', value: amendmentsCount, unit: 'amendments', unitKey: 'dashboard.units.amendments', availability: 'available', queueKey: 'audit.history' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -470,9 +470,9 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'surveyor.incomplete', label: 'Details to complete', value: incompleteCount, unit: 'records', availability: 'available', queueKey: 'surveyor.incomplete', tone: incompleteCount > 0 ? 'problem' : '' },
-            { key: 'surveyor.expected', label: 'Awaiting receipt', value: expectedCount, unit: 'samples', availability: 'available', queueKey: 'surveyor.expected' },
-            { key: 'surveyor.received', label: 'Receipt confirmed', value: receivedCount, unit: 'samples', availability: 'available', queueKey: 'surveyor.received' }
+            { key: 'surveyor.incomplete', label: 'Details to complete', labelKey: 'dashboard.metrics.surveyorIncomplete', value: incompleteCount, unit: 'records', unitKey: 'dashboard.units.records', availability: 'available', queueKey: 'surveyor.incomplete', tone: incompleteCount > 0 ? 'problem' : '' },
+            { key: 'surveyor.expected', label: 'Awaiting receipt', labelKey: 'dashboard.metrics.surveyorExpected', value: expectedCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'surveyor.expected' },
+            { key: 'surveyor.received', label: 'Receipt confirmed', labelKey: 'dashboard.metrics.surveyorReceived', value: receivedCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'surveyor.received' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -496,7 +496,7 @@ async function getDashboardHome(user, options = {}) {
         });
 
         metrics = [
-            { key: 'external.released', label: 'Available reports', value: releasedCount, unit: 'reports', availability: 'available', queueKey: 'external.released' }
+            { key: 'external.released', label: 'Available reports', labelKey: 'dashboard.metrics.externalReleased', value: releasedCount, unit: 'reports', unitKey: 'dashboard.units.reports', availability: 'available', queueKey: 'external.released' }
         ];
 
         recommendedQueue = 'external.released';
@@ -527,9 +527,9 @@ async function getDashboardHome(user, options = {}) {
         ]);
 
         metrics = [
-            { key: 'viewer.active', label: 'In laboratory work', value: activeCount, unit: 'samples', availability: 'available', queueKey: 'viewer.active' },
-            { key: 'viewer.expected', label: 'Not received', value: expectedCount, unit: 'samples', availability: 'available', queueKey: 'viewer.expected' },
-            { key: 'viewer.released', label: 'Published reports', value: releasedCount, unit: 'reports', availability: 'available', queueKey: 'viewer.released' }
+            { key: 'viewer.active', label: 'In laboratory work', labelKey: 'dashboard.metrics.viewerActive', value: activeCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'viewer.active' },
+            { key: 'viewer.expected', label: 'Not received', labelKey: 'dashboard.metrics.viewerExpected', value: expectedCount, unit: 'samples', unitKey: 'dashboard.units.samples', availability: 'available', queueKey: 'viewer.expected' },
+            { key: 'viewer.released', label: 'Published reports', labelKey: 'dashboard.metrics.viewerReleased', value: releasedCount, unit: 'reports', unitKey: 'dashboard.units.reports', availability: 'available', queueKey: 'viewer.released' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -551,9 +551,9 @@ async function getDashboardHome(user, options = {}) {
         const totalAudit = await prisma.auditLog.count();
 
         metrics = [
-            { key: 'admin.configuration', label: 'Configuration issues', value: invalidTzCount, unit: 'issues', availability: 'available', queueKey: 'admin.configuration', tone: invalidTzCount > 0 ? 'problem' : '' },
-            { key: 'admin.labs', label: 'Laboratories', value: totalLabs, unit: 'laboratories', availability: 'available', queueKey: 'admin.labs' },
-            { key: 'admin.activity', label: 'Configuration changes', value: totalAudit, unit: 'events', availability: 'available', queueKey: 'admin.activity' }
+            { key: 'admin.configuration', label: 'Configuration issues', labelKey: 'dashboard.metrics.adminConfiguration', value: invalidTzCount, unit: 'issues', unitKey: 'dashboard.units.issues', availability: 'available', queueKey: 'admin.configuration', tone: invalidTzCount > 0 ? 'problem' : '' },
+            { key: 'admin.labs', label: 'Laboratories', labelKey: 'dashboard.metrics.adminLabs', value: totalLabs, unit: 'laboratories', unitKey: 'dashboard.units.laboratories', availability: 'available', queueKey: 'admin.labs' },
+            { key: 'admin.activity', label: 'Configuration changes', labelKey: 'dashboard.metrics.adminActivity', value: totalAudit, unit: 'events', unitKey: 'dashboard.units.events', availability: 'available', queueKey: 'admin.activity' }
         ];
 
         recommendedQueue = priorityQueues.find(q => {
@@ -978,17 +978,26 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             unit: 'tasks',
             rows: items.map(item => {
                 const meta = catMap[item.analysis] || { name: item.analysis };
-                const reason = item.sample?.dryingStatus !== 'DONE' && isDryingApplicable ? 'Waiting for drying' : 'Waiting for preparation';
+                const isDrying = item.sample?.dryingStatus !== 'DONE' && isDryingApplicable;
+                const reason = isDrying ? 'Waiting for drying' : 'Waiting for preparation';
+                const reasonKey = isDrying ? 'dashboard.workQueue.status.waitingForDrying' : 'dashboard.workQueue.status.waitingForPrep';
+                const sampleDisplay = item.sample?.labId || item.sample?.originalId;
                 return {
                     key: item.id,
                     title: meta.name,
-                    context: `${item.sample?.labId || item.sample?.originalId} · SOP revision ${item.methodRevision || 1}`,
+                    context: `${sampleDisplay} · SOP revision ${item.methodRevision || 1}`,
+                    contextKey: 'dashboard.workQueue.context.sopRevisionWithSample',
+                    contextParams: { sampleId: sampleDisplay, revision: item.methodRevision || 1 },
                     status: reason,
+                    statusKey: reasonKey,
                     count: 1,
                     unit: 'determination',
+                    unitKey: 'dashboard.units.determination',
                     action: 'See dependency',
+                    actionKey: 'dashboard.workQueue.action.seeDependency',
                     route: `/workbench?analysis=${item.analysis}&queue=bench.waiting`,
                     note: 'Worksheet locked until operational preparation gate completes.',
+                    noteKey: 'dashboard.workQueue.notes.worksheetLockedPrep',
                     tone: 'waiting'
                 };
             }),
@@ -1023,16 +1032,23 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'exceptions',
+            unitKey: 'dashboard.units.exceptions',
             rows: batches.map(b => ({
                 key: b.id,
                 title: `Batch ${b.id}`,
                 context: `${b.workItems.length} affected work items`,
+                contextKey: 'dashboard.workQueue.context.affectedWorkItems',
+                contextParams: { count: b.workItems.length },
                 status: 'QC failed',
+                statusKey: 'dashboard.workQueue.status.qcFailed',
                 count: 1,
                 unit: 'exception',
+                unitKey: 'dashboard.units.exception',
                 action: 'Inspect QC',
+                actionKey: 'dashboard.workQueue.action.inspectQc',
                 route: `/manager-queue?lane=review&batchId=${b.id}`,
                 note: 'Review actual QC control values and disposition before accepting work.',
+                noteKey: 'dashboard.workQueue.notes.reviewQcDisposition',
                 tone: 'problem'
             })),
             total,
@@ -1101,6 +1117,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'samples',
+            unitKey: 'dashboard.units.samples',
             rows: Array.from(groups.values()).map(g => {
                 const displayTitle = g.labId || g.originalId || g.sampleId;
                 return {
@@ -1112,12 +1129,18 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                     projectCode: g.projectCode,
                     title: displayTitle,
                     context: `${g.projectCode ? g.projectCode + ' · ' : ''}${g.types.join(', ')} · Submitted by ${g.submittedBy}`,
+                    contextKey: g.projectCode ? 'dashboard.workQueue.context.projectSubmissionBy' : 'dashboard.workQueue.context.submissionBy',
+                    contextParams: { project: g.projectCode, types: g.types.join(', '), submittedBy: g.submittedBy },
                     status: 'Ready for review',
+                    statusKey: 'dashboard.workQueue.status.readyForReview',
                     count: 1,
                     unit: 'sample',
+                    unitKey: 'dashboard.units.sample',
                     action: 'Review',
+                    actionKey: 'dashboard.workQueue.action.review',
                     route: `/samples/${g.sampleId}?tab=review&submissionId=${g.submissions[0]?.id}&returnTo=${encodeURIComponent('/manager-queue?lane=review')}`,
                     note: 'Inspect submitted determination results and linked QC evidence.',
+                    noteKey: 'dashboard.workQueue.notes.inspectSubmittedEvidence',
                     tone: ''
                 };
             }),
@@ -1157,6 +1180,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'samples',
+            unitKey: 'dashboard.units.samples',
             rows: pagedSamples.map(s => {
                 const displayTitle = s.labId || s.originalId || s.id;
                 return {
@@ -1168,12 +1192,18 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                     projectCode: s.projectCode,
                     title: displayTitle,
                     context: `${s.projectCode || 'Project'} · All ordered analyses accepted`,
+                    contextKey: 'dashboard.workQueue.context.allAnalysesAccepted',
+                    contextParams: { project: s.projectCode || 'Project' },
                     status: 'Ready for final check',
+                    statusKey: 'dashboard.workQueue.status.readyForFinalCheck',
                     count: 1,
                     unit: 'sample',
+                    unitKey: 'dashboard.units.sample',
                     action: 'Open final review',
+                    actionKey: 'dashboard.workQueue.action.openFinalReview',
                     route: `/samples/${s.id}?tab=review&returnTo=${encodeURIComponent('/manager-queue?lane=approve')}`,
                     note: 'Final approval authorizes completion. Report release is a distinct subsequent action.',
+                    noteKey: 'dashboard.workQueue.notes.finalApprovalAuthorize',
                     tone: ''
                 };
             }),
@@ -1214,18 +1244,26 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'tasks',
+            unitKey: 'dashboard.units.tasks',
             rows: paged.map(g => {
                 const meta = catMap[g.analysis] || { name: g.analysis };
+                const isGate = g.isGate;
                 return {
                     key: g.analysis,
                     title: meta.name,
-                    context: g.isGate ? 'Operational gate' : 'Analytical method',
+                    context: isGate ? 'Operational gate' : 'Analytical method',
+                    contextKey: isGate ? 'dashboard.workQueue.context.operationalGate' : 'dashboard.workQueue.context.analyticalMethod',
                     status: 'Unassigned',
+                    statusKey: 'dashboard.workQueue.status.unassigned',
                     count: g.count,
-                    unit: g.isGate ? 'checklists' : 'determinations',
+                    unit: isGate ? 'checklists' : 'determinations',
+                    unitKey: isGate ? 'dashboard.units.checklists' : 'dashboard.units.determinations',
                     action: 'Assign by method',
+                    actionKey: 'dashboard.workQueue.action.assignByMethod',
                     route: `/manager-queue?lane=assign&analysis=${g.analysis}`,
                     note: `${g.count} unassigned work items ready for allocation to bench technicians.`,
+                    noteKey: 'dashboard.workQueue.notes.unassignedAllocation',
+                    noteParams: { count: g.count },
                     tone: ''
                 };
             }),
@@ -1251,16 +1289,23 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'samples',
+            unitKey: 'dashboard.units.samples',
             rows: samples.map(s => ({
                 key: s.id,
                 title: s.labId || s.originalId,
                 context: `${s.projectCode || 'Project'} · Received ${s.receptionDate ? new Date(s.receptionDate).toLocaleDateString() : ''}`,
+                contextKey: 'dashboard.workQueue.context.receivedWithDate',
+                contextParams: { project: s.projectCode || 'Project', date: s.receptionDate ? new Date(s.receptionDate).toLocaleDateString() : '' },
                 status: 'Awaiting acceptance',
+                statusKey: 'dashboard.workQueue.status.awaitingAcceptance',
                 count: 1,
                 unit: 'sample',
+                unitKey: 'dashboard.units.sample',
                 action: 'Inspect intake',
+                actionKey: 'dashboard.workQueue.action.inspectIntake',
                 route: `/manager-queue?lane=intake&sampleId=${s.id}`,
                 note: 'Verify sample condition and accept intake to generate laboratory work items.',
+                noteKey: 'dashboard.workQueue.notes.verifyIntakeCondition',
                 tone: 'waiting'
             })),
             total,

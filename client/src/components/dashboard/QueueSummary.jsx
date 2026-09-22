@@ -61,14 +61,14 @@ export default function QueueSummary({
                             </span>
                             {metric.unit && (
                                 <span className="text-xs font-medium text-sf-muted truncate">
-                                    {metric.unit}
+                                    {metric.unitKey ? t(metric.unitKey, { count: displayValue }, metric.unit) : t('dashboard.units.' + metric.unit, { count: displayValue }, metric.unit)}
                                 </span>
                             )}
                         </div>
 
                         <div className="mt-2.5">
                             <div className="text-xs font-semibold text-sf-muted leading-snug">
-                                {metric.label}
+                                {metric.labelKey ? t(metric.labelKey, metric.label) : (metric.key ? t('dashboard.metrics.' + metric.key, metric.label) : metric.label)}
                             </div>
                             {metric.tone === 'problem' && displayValue > 0 && (
                                 <div className="mt-1 inline-flex items-center text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
