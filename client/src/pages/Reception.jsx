@@ -2631,12 +2631,15 @@ const Reception = () => {
                     id: result.id,
                     labId: result.labId,
                     originalId: result.originalId || sampleData?.originalId,
-                    assignedLab: user?.labId,
-                    projectCode: sessionProject || sampleData?.projectCode,
+                    assignedLab: result.assignedLab || user?.labId,
+                    projectCode: result.projectCode || sessionProject || sampleData?.projectCode,
                     samplingDetails: sampling,
-                    status: 'ACCEPTED',
-                    receptionDate: result.receptionDate || result.sample?.receptionDate || result.createdAt || new Date().toISOString(),
-                    createdAt: result.createdAt || result.sample?.createdAt
+                    status: result.status || 'ACCEPTED',
+                    receptionDate: result.receptionDate || result.sample?.receptionDate || result.custodyHandoverAt || result.sample?.custodyHandoverAt || null,
+                    custodyHandoverAt: result.custodyHandoverAt || result.sample?.custodyHandoverAt || null,
+                    collectionDate: result.collectionDate || result.sample?.collectionDate || sampleData?.collectionDate || sampling?.date || null,
+                    fieldMetadata: result.fieldMetadata || result.sample?.fieldMetadata || null,
+                    receptionData: result.receptionData || result.sample?.receptionData || null
                 } : null}
             />
         </div>

@@ -628,7 +628,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
                                 {/* Print Label */}
                                 <button
-                                    onClick={() => setPrintTarget(sample || { id, labId: identity?.labSampleCode, originalId: identity?.fieldId, receptionDate: sample?.receptionDate, createdAt: sample?.createdAt })}
+                                    onClick={() => setPrintTarget(sample || { id, labId: identity?.labSampleCode, originalId: identity?.fieldId, receptionDate: sample?.receptionDate || sample?.custodyHandoverAt || null, custodyHandoverAt: sample?.custodyHandoverAt || null, collectionDate: sample?.collectionDate || identity?.collectionDate || null, status: sample?.status })}
                                     className="px-3 py-2 rounded-xl text-xs font-semibold border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center gap-1.5 transition-colors"
                                 >
                                     <Printer size={14} className="text-sf-primary" />

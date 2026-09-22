@@ -224,5 +224,105 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         };
         expect(resolveIntakeDate(sampleNoDates)).toBeNull();
         expect(resolveCollectionDate(sampleNoDates)).toBeNull();
+
+        // G. Creation-only records (DRAFT, COLLECTED): must never promote createdAt to intake date
+        const sampleDraft = {
+            status: 'DRAFT',
+            createdAt: '2026-01-02T09:00:00Z',
+            receptionDate: null
+        };
+        expect(resolveIntakeDate(sampleDraft)).toBeNull();
+
+        const sampleCollected = {
+            status: 'COLLECTED',
+            createdAt: '2026-01-02T09:00:00Z',
+            receptionDate: null
+        };
+        expect(resolveIntakeDate(sampleCollected)).toBeNull();
+
+        // H. Chain of custody timestamp (custodyHandoverAt) resolved when receptionDate is absent
+        const sampleCustody = {
+            status: 'ACCEPTED',
+            custodyHandoverAt: '2026-09-01T10:00:00Z',
+            receptionDate: null
+        };
+        expect(resolveIntakeDate(sampleCustody)).toBe('2026-09-01');
+
+        // I. Chain of custody timestamp in receptionData JSON resolved
+        const sampleCustodyJson = {
+            status: 'ACCEPTED',
+            receptionData: JSON.stringify({ custodyHandoverAt: '2026-09-01T15:00:00Z' })
+        };
+        expect(resolveIntakeDate(sampleCustodyJson)).toBe('2026-09-01');
+
+        // J. Reception.jsx immediate label mapping expression: respects recorded custody and never substitutes render clock
+        const receptionSource = fs.readFileSync(path.resolve(__dirname, '../../../client/src/pages/Reception.jsx'), 'utf8');
+        const exprMatch = receptionSource.match(/receptionDate: (result\.receptionDate[^\r\n]+)/);
+        expect(exprMatch).toBeTruthy();
+        const expr = exprMatch[1].replace(/,$/, '');
+
+        const FixedDate = class extends Date {
+            constructor(v) {
+                super(v === undefined ? '2030-12-31T12:00:00Z' : v);
+            }
+        };
+
+        const labelDateCustody = vm.runInNewContext(expr, {
+            result: { custodyHandoverAt: '2026-09-01T10:00:00Z' },
+            Date: FixedDate
+        });
+        expect(labelDateCustody).toBe('2026-09-01T10:00:00Z');
+        expect(resolveIntakeDate({ receptionDate: labelDateCustody })).toBe('2026-09-01');
+
+        const labelDateEmpty = vm.runInNewContext(expr, {
+            result: {},
+            Date: FixedDate
+        });
+        expect(labelDateEmpty).toBeNull();
+        expect(resolveIntakeDate({ receptionDate: labelDateEmpty })).toBeNull();
+    });
+
+    test('8. POST /api/reception/intake returns persisted receptionDate and custodyHandoverAt', async () => {
+        const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
+        const testIntakeSampleId = `SMP-INTAKE-DATES-${Date.now()}`;
+        const testOriginalId = `FIELD-INTAKE-${Date.now()}`;
+        await prisma.sample.create({
+            data: {
+                id: testIntakeSampleId,
+                originalId: testOriginalId,
+                assignedLab: 'LAB-GTM',
+                country: 'GTM',
+                projectCode: 'SOILFER-US',
+                status: 'EXPECTED',
+                fieldMetadata: JSON.stringify({ collectionDate: '2026-09-18' })
+            }
+        });
+
+        const custodyTime = '2026-09-20T10:00:00.000Z';
+        const res = await request(app)
+            .post('/api/reception/intake')
+            .set('Authorization', `Bearer ${receptionToken}`)
+            .send({
+                originalId: testOriginalId,
+                decision: 'ACCEPTED',
+                receivedMass: 500,
+                custodyHandoverAt: custodyTime,
+                checklist: {
+                    container: 'PASS',
+                    label: 'PASS',
+                    quantity: 'PASS',
+                    condition: 'PASS',
+                    coc: 'PASS'
+                }
+            });
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.receptionDate).toBeDefined();
+        expect(typeof res.body.receptionDate).toBe('string');
+        expect(res.body.custodyHandoverAt).toBeDefined();
+        expect(res.body.collectionDate).toBe('2026-09-18');
+
+        await prisma.sample.delete({ where: { id: testIntakeSampleId } }).catch(() => {});
     });
 });

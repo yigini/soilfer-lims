@@ -1,101 +1,136 @@
 {
-  "timestamp": "2026-09-22T15:44:47.894Z",
+  "timestamp": "2026-09-22T18:08:03.009Z",
   "suite": "Issue #121 Headless Chrome CDP Print & Date Verification",
   "browser": "Google Chrome Headless (Windows)",
-  "totalCases": 6,
-  "passedCases": 6,
-  "results": [
-    {
-      "testName": "Samples Journey: Single S004 Standard Label (101x54mm)",
-      "format": "STANDARD",
-      "sampleCount": 1,
-      "cssMode": "PATCHED",
-      "expectedPages": 1,
-      "actualPages": 1,
-      "pageCountPassed": true,
-      "renderedTitle": "Label-S004",
-      "expectedTitle": "Label-S004",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    },
-    {
-      "testName": "Samples Journey: Single S004 Compact Vial Label (50x25mm)",
-      "format": "COMPACT",
-      "sampleCount": 1,
-      "cssMode": "PATCHED",
-      "expectedPages": 1,
-      "actualPages": 1,
-      "pageCountPassed": true,
-      "renderedTitle": "Label-S004",
-      "expectedTitle": "Label-S004",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    },
-    {
-      "testName": "Samples Journey: Batch 3-Label Standard (101x54mm)",
-      "format": "STANDARD",
-      "sampleCount": 3,
-      "cssMode": "PATCHED",
-      "expectedPages": 3,
-      "actualPages": 3,
-      "pageCountPassed": true,
-      "renderedTitle": "Labels-Batch-3",
-      "expectedTitle": "Labels-Batch-3",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    },
-    {
-      "testName": "Samples Journey: Batch 3-Label Compact Vial (50x25mm)",
-      "format": "COMPACT",
-      "sampleCount": 3,
-      "cssMode": "PATCHED",
-      "expectedPages": 3,
-      "actualPages": 3,
-      "pageCountPassed": true,
-      "renderedTitle": "Labels-Batch-3",
-      "expectedTitle": "Labels-Batch-3",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    },
-    {
-      "testName": "Reception Journey: Immediate Print after Intake (Standard)",
-      "format": "STANDARD",
-      "sampleCount": 1,
-      "cssMode": "PATCHED",
-      "expectedPages": 1,
-      "actualPages": 1,
-      "pageCountPassed": true,
-      "renderedTitle": "Label-LAB-INTAKE-NEW",
-      "expectedTitle": "Label-LAB-INTAKE-NEW",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    },
-    {
-      "testName": "Reception Journey: Immediate Print after Intake (Compact)",
-      "format": "COMPACT",
-      "sampleCount": 1,
-      "cssMode": "PATCHED",
-      "expectedPages": 1,
-      "actualPages": 1,
-      "pageCountPassed": true,
-      "renderedTitle": "Label-LAB-INTAKE-NEW",
-      "expectedTitle": "Label-LAB-INTAKE-NEW",
-      "titlePassed": true,
-      "dateChecksPassed": true,
-      "failedDateReasons": [],
-      "passed": true
-    }
-  ],
+  "totalChecks": 11,
+  "passedChecks": 11,
+  "parts": {
+    "part1_fixtureCardLayoutAndCssChecks": [
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 1: Single S004 Standard Label (101x54mm)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-S004",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 2: Single S004 Compact Vial Label (50x25mm)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-S004",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 3: Batch 3-Label Standard (101x54mm)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Labels-Batch-3",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 4: Batch 3-Label Compact Vial (50x25mm)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Labels-Batch-3",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 5: Reception Intake Card (Standard)",
+        "format": "STANDARD",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-LAB-INTAKE-NEW",
+        "passed": true
+      },
+      {
+        "category": "Fixture Card Layout & Print CSS",
+        "testName": "Fixture 6: Reception Intake Card (Compact)",
+        "format": "COMPACT",
+        "cssMode": "PATCHED",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "dateChecksPassed": true,
+        "failedReasons": [],
+        "docTitle": "Label-LAB-INTAKE-NEW",
+        "passed": true
+      }
+    ],
+    "part2_mountedRouteDialogJourneys": [
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.1: Mounted SampleDetail Route Single Standard Label Lifecycle",
+        "format": "STANDARD",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.2: Mounted SampleDetail Format Switch to Compact (50x25mm)",
+        "format": "COMPACT",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.3: Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)",
+        "expectedPages": 3,
+        "actualPages": 3,
+        "pagePass": true,
+        "titleSwapPass": true,
+        "titleRestorePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.4: Reception Route Immediate Print API & Caller Projection Lifecycle",
+        "expectedPages": 1,
+        "actualPages": 1,
+        "pagePass": true,
+        "passed": true
+      },
+      {
+        "category": "Mounted Route Dialog Journey",
+        "testName": "Journey 2.5: Provenance Truthfulness on DRAFT (Null Intake) & Custody Handover Records",
+        "passed": true
+      }
+    ]
+  },
   "outstandingVerification": {
     "safariPrintPreview": "PENDING_PHYSICAL_OR_MACOS_ENVIRONMENT",
     "physicalThermalPrinterHardware": "PENDING_PHYSICAL_HARDWARE"

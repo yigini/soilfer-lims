@@ -113,31 +113,41 @@ Status Key:
     4. Label format specifications match thermal printer physical dimensions (Standard: 101×54mm, Compact: 50×25mm).
     5. Sanitizes sample identifier for `document.title` print naming isolation (`Label-${sanitizedSampleId}`).
     6. Print CSS prevents blank extra page with last-child break suppression (`.sample-label-page:not(:last-child)` break-after: page; `:last-child` break-after: auto) and auto body height (`height: auto !important; min-height: 0 !important`).
-    7. Truthful date binding contract: binds persisted `receptionDate` and `collectionDate` without inventing current clock (`new Date()`).
-  - **Headless Chrome CDP Browser & Print-to-PDF Journey Suite (`server/scripts/verify_issue121_label_print.cjs`, 6/6 passed)**:
-    - Standard Label (101×54mm) Single Sample `S004`: exactly **1 page** PDF stream; suggested title `Label-S004`; truthful intake date `2026-09-05` and truthful receipt date `Rec: 2026-09-05` (current clock NOT invented).
-    - Compact Cryovial Label (50×25mm) Single Sample `S004`: exactly **1 page** PDF stream; suggested title `Label-S004`; truthful receipt date `LAB-GTM • REC: 2026-09-05`.
-    - Standard Label (101×54mm) Batch 3 Samples: exactly **3 pages** PDF stream (zero blank 4th page); suggested title `Labels-Batch-3`; Sample 1 (`Coll: 2026-08-25`, `Intake: 2026-09-01`), Sample 2 (`Rec: 2026-09-05`, `Intake: 2026-09-05`), Sample 3 with missing dates (`Coll: —`, `Intake: —`).
-    - Compact Cryovial Label (50×25mm) Batch 3 Samples: exactly **3 pages** PDF stream (zero blank 4th page); suggested title `Labels-Batch-3`.
-    - Reception Journey Immediate Print (Standard): exactly **1 page** PDF stream; truthful reception timestamp (`2026-09-22`, `Coll: 2026-09-20`).
-    - Reception Journey Immediate Print (Compact): exactly **1 page** PDF stream; truthful reception timestamp (`LAB-GTM • REC: 2026-09-22`).
+    7. Truthful date binding contract: binds persisted `receptionDate`, `custodyHandoverAt`, and `collectionDate` without inventing current clock (`new Date()`); rejects DRAFT/COLLECTED `createdAt` promotion (returns null); verifies Reception prop mapping respects recorded custody without render clock.
+    8. `POST /api/reception/intake` returns persisted `receptionDate`, `custodyHandoverAt`, and `collectionDate` in its JSON response for immediate caller consumption.
+  - **Headless Chrome CDP Browser & Print-to-PDF Journey Suite (`server/scripts/verify_issue121_label_print.cjs`, 11/11 passed across Part 1 & Part 2)**:
+    - **Part 1: Fixture-Level Card Layout & Print CSS Output Checks (Isolated HTML Stream, 6/6 passed)**:
+      - Standard Label (101×54mm) Single Sample `S004`: exactly **1 page** PDF stream; suggested title `Label-S004`; truthful intake date `2026-09-05` and truthful receipt date `Rec: 2026-09-05` (current clock NOT invented).
+      - Compact Cryovial Label (50×25mm) Single Sample `S004`: exactly **1 page** PDF stream; suggested title `Label-S004`; truthful receipt date `LAB-GTM • REC: 2026-09-05`.
+      - Standard Label (101×54mm) Batch 3 Samples: exactly **3 pages** PDF stream (zero blank 4th page); suggested title `Labels-Batch-3`; Sample 1 (`Coll: 2026-08-25`, `Intake: 2026-09-01`), Sample 2 (`Rec: 2026-09-05`, `Intake: 2026-09-05`), Sample 3 with missing dates (`Coll: —`, `Intake: —`).
+      - Compact Cryovial Label (50×25mm) Batch 3 Samples: exactly **3 pages** PDF stream (zero blank 4th page); suggested title `Labels-Batch-3`.
+      - Reception Journey Immediate Print (Standard): exactly **1 page** PDF stream; truthful reception timestamp (`2026-09-22`, `Coll: 2026-09-20`).
+      - Reception Journey Immediate Print (Compact): exactly **1 page** PDF stream; truthful reception timestamp (`LAB-GTM • REC: 2026-09-22`).
+    - **Part 2: Mounted Route & Component Dialog Lifecycle Journeys (Real React Portals, Caller Projections & Print Streams, 5/5 passed)**:
+      - Journey 2.1: Mounted SampleDetail Route (`/samples/SMP-S004-GTM`) Single Standard Label Lifecycle: clicks "Print label"; confirms real React portal (`#label-print-portal`) mounted to `document.body`; generates offline QR; binds truthful dates (`2026-09-05`, `Rec: 2026-09-05`); updates title to `Label-S004`; generates exact **1 page** PDF stream; restores title to `SoilFER LIMS` on `afterprint`.
+      - Journey 2.2: Mounted SampleDetail Format Switch to Compact (50×25mm): toggles format; verifies compact card in `#label-print-portal`; generates exact **1 page** PDF stream; unmounts portal on dialog close.
+      - Journey 2.3: Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact): mounts 3 sample batch; updates title to `Labels-Batch-3`; Standard print stream: exact **3 pages** (0 blank 4th page); title restored on `afterprint`; Compact print stream: exact **3 pages** (0 blank 4th page).
+      - Journey 2.4: Reception Route Immediate Print API & Caller Projection Lifecycle: executes physical intake via `POST /api/reception/intake` with recorded `custodyHandoverAt`; verifies response includes persisted `receptionDate`, `custodyHandoverAt`, `collectionDate`; verifies Reception caller projection preserves persisted dates and excludes `createdAt`; print stream: exact **1 page**.
+      - Journey 2.5: Provenance Truthfulness on DRAFT & Custody Records: DRAFT `createdAt` rejected as intake (returns `null`, renders `'—'`); recorded `custodyHandoverAt` honored as intake when `receptionDate` is null (renders `'2026-09-01'`); zero render-time clock substitutions.
     - Evidence report: `artifacts/evidence-journeys/label_print_browser_journey.json`.
 - **Outstanding Verification & Boundaries**:
   - Browser Print Preview: Headless Chrome CDP Save-as-PDF and print preview layout verified 100%.
   - Safari Print Preview: **PENDING** physical or macOS Safari environment.
   - Physical Thermal Printer: **PENDING** real continuous thermal printer hardware testing.
-- **Client Implementation**:
+- **Client & Server Implementation**:
   - `client/src/components/common/LabelPrintDialog.jsx`:
     - Portal rendering to `#label-print-portal` at `document.body` outside modal tree with `@media print` CSS isolation.
     - Suppressed extra blank page by replacing unconditional page breaks with `.sample-label-page:not(:last-child) { page-break-after: always !important; break-after: page !important; }` and `.sample-label-page:last-child, .sample-label-page:last-of-type { page-break-after: auto !important; break-after: auto !important; }`.
     - Set `html, body { height: auto !important; min-height: 0 !important; }` in `@media print` to prevent 100% viewport container overflow.
     - Added `max-width`, `max-height`, and `overflow-hidden` with `shadow-none` on printed cards.
-    - Replaced `new Date()` calls with `resolveIntakeDate(sample)` and `resolveCollectionDate(sample)` extracting recorded dates or honest `—`.
+    - Replaced `new Date()` calls with pure resolvers: `resolveIntakeDate(sample)` binds persisted `receptionDate`, `receivedDate`, `intakeDate`, `custodyHandoverAt`, and `receptionData` JSON; strictly returns `null` for creation-only records (`DRAFT`/`COLLECTED`).
     - 100% offline QR code generation via `qrcode` (no third-party network dependency).
     - Dual format toggle: Standard (101×54mm / 4"×2") and Vial/Tube Compact (50×25mm).
     - Dynamic print title management (`Label-${sanitizedSampleId}` or `Labels-Batch-${count}`) restored on `afterprint`.
-  - `client/src/pages/Reception.jsx`: passed `receptionDate` and `createdAt` to `LabelPrintDialog` for immediate intake print.
-  - `client/src/pages/SampleDetail.jsx`: preserved `receptionDate` and `createdAt` on fallback `printTarget`.
+  - `server/controllers/receptionController.js`:
+    - `processIntake` JSON response returns persisted `receptionDate`, `custodyHandoverAt`, `collectionDate`, `status`, `assignedLab`, `projectCode`, `fieldMetadata`, and `receptionData` for immediate caller consumption.
+  - `client/src/pages/Reception.jsx`: passed persisted `receptionDate`, `custodyHandoverAt`, and `collectionDate` from `processIntake` result to `LabelPrintDialog`, eliminating `createdAt` and current clock fallbacks.
+  - `client/src/pages/SampleDetail.jsx`: preserved `receptionDate`, `custodyHandoverAt`, and `collectionDate` on fallback `printTarget`, eliminating `createdAt`.
 
 ### Phase 2: Issue #122 Lab Methodology Defaults & Isolation
 - **Tests Executed**:

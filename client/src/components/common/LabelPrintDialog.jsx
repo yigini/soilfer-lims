@@ -537,18 +537,15 @@ export const resolveIntakeDate = (sample) => {
 
     const rd = parseJsonSafely(sample.receptionData);
     if (rd) {
-        const rdDate = rd.intakeDate || rd.receptionDate || rd.receivedDate;
+        const rdDate = rd.intakeDate || rd.receptionDate || rd.receivedDate || rd.custodyHandoverAt || rd.coc?.handoverAt || rd.coc?.date;
         if (rdDate) {
             const formatted = formatLabelDate(rdDate);
             if (formatted) return formatted;
         }
     }
 
-    if (sample.status && sample.status !== 'EXPECTED' && sample.createdAt) {
-        const formatted = formatLabelDate(sample.createdAt);
-        if (formatted) return formatted;
-    }
-
+    // Persisted receipt or custody timestamps only.
+    // Record creation time (createdAt) or render clock must never be promoted to intake/receipt date.
     return null;
 };
 

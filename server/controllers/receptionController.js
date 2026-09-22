@@ -1095,12 +1095,30 @@ exports.processIntake = async (req, res) => {
             }
         }
 
+        const resolvedCollectionDate = (function() {
+            try {
+                const fm = updated.fieldMetadata ? (typeof updated.fieldMetadata === 'string' ? JSON.parse(updated.fieldMetadata) : updated.fieldMetadata) : null;
+                return fm?.collectionDate || fm?.samplingDate || fm?.collection_date || fm?.date || null;
+            } catch {
+                return null;
+            }
+        })();
+
         console.log(`[INTAKE] Successfully processed ${sample.id}`);
         res.json({
             success: true,
             id: updated.id,
             originalId: updated.originalId,
             labId: updated.labId,
+            status: updated.status,
+            receptionDate: updated.receptionDate ? (updated.receptionDate instanceof Date ? updated.receptionDate.toISOString() : updated.receptionDate) : null,
+            custodyHandoverAt: updated.custodyHandoverAt ? (updated.custodyHandoverAt instanceof Date ? updated.custodyHandoverAt.toISOString() : updated.custodyHandoverAt) : null,
+            collectionDate: resolvedCollectionDate,
+            assignedLab: updated.assignedLab || user.labId || null,
+            projectCode: updated.projectCode || null,
+            projectId: updated.projectId || null,
+            fieldMetadata: updated.fieldMetadata || null,
+            receptionData: updated.receptionData || null,
             message: 'Intake recorded.'
         });
 
