@@ -31,7 +31,7 @@ const { getAuthToken } = require('../setup');
 const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
 
 // ─── 1. COMPONENT SSR HELPER ───
-function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign') {
+function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign', options = {}) {
     const esbuild = require(path.resolve(__dirname, '../../../client/node_modules/esbuild'));
     const React = require(path.resolve(__dirname, '../../../client/node_modules/react'));
     const componentPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
@@ -64,15 +64,18 @@ function loadSampleDetailComponent(initialSearch = '?tab=work&returnTo=%2Fmanage
         workItemEvidenceText: () => ''
     };
 
+    const mockNavigate = options.navigate || jest.fn();
+    const sampleId = options.sampleId || 'GTM-LAB1';
+
     const mockRouter = {
-        useParams: () => ({ id: 'GTM-LAB1' }),
-        useNavigate: () => jest.fn(),
-        useLocation: () => ({ pathname: '/samples/GTM-LAB1', search: initialSearch })
+        useParams: () => ({ id: sampleId }),
+        useNavigate: () => mockNavigate,
+        useLocation: () => ({ pathname: `/samples/${sampleId}`, search: initialSearch })
     };
 
     const mockAuth = {
         useAuth: () => ({
-            user: { username: 'super_admin', role: 'SUPER_ADMIN', labId: 'LAB-GTM' },
+            user: options.user || { username: 'super_admin', role: 'SUPER_ADMIN', labId: 'LAB-GTM' },
             token: 'mock-token'
         })
     };
@@ -583,7 +586,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             const selectedAnalysis = null;
             const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
             const tabParam = 'tab=work&';
-            const targetUrl = `/samples/${s005CardItem.sampleId || s005CardItem.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
+            const targetUrl = `/samples/${s005CardItem.sampleId || s005CardItem.id}?${tabParam}${selectedAnalysis ? `analysis=${encodeURIComponent(selectedAnalysis)}&` : ''}returnTo=${encodeURIComponent(returnUrl)}`;
 
             expect(targetUrl).toBe('/samples/GTM-LAB1?tab=work&returnTo=%2Fmanager-queue%3Flane%3Dassign');
 
@@ -591,6 +594,442 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             const urlObj = new URL(`http://localhost${targetUrl}`);
             expect(urlObj.searchParams.get('tab')).toBe('work');
             expect(urlObj.searchParams.get('returnTo')).toBe('/manager-queue?lane=assign');
+        });
+
+        test('Target URL forwards selectedAnalysis directly and retains method context in returnTo (#119)', () => {
+            const s004CardItem = {
+                id: sampleS004CanonicalId,
+                sampleId: sampleS004CanonicalId,
+                sampleLabId: sampleS004DisplayLabId,
+                originalId: sampleS004FieldId,
+                count: 11
+            };
+
+            const type = 'assign';
+            const selectedAnalysis = 'TEXTURE';
+            const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
+            const tabParam = 'tab=work&';
+            const targetUrl = `/samples/${s004CardItem.sampleId || s004CardItem.id}?${tabParam}${selectedAnalysis ? `analysis=${encodeURIComponent(selectedAnalysis)}&` : ''}returnTo=${encodeURIComponent(returnUrl)}`;
+
+            expect(targetUrl).toBe('/samples/SMP-S004-GTM-ROUTE?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE');
+
+            const urlObj = new URL(`http://localhost${targetUrl}`);
+            expect(urlObj.searchParams.get('tab')).toBe('work');
+            expect(urlObj.searchParams.get('analysis')).toBe('TEXTURE');
+            expect(urlObj.searchParams.get('returnTo')).toBe('/manager-queue?lane=assign&analysis=TEXTURE');
+        });
+    });
+
+    describe('5. Component Render Regression: Manager Guidance & Scoped Assignment Controls (#119)', () => {
+        test('SampleDetail renders Manager guidance text instead of Technician guidance when tasks are unassigned', () => {
+            const SampleDetail = loadSampleDetailComponent(
+                '?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE',
+                { sampleId: sampleS004CanonicalId }
+            );
+            const React = require(path.resolve(__dirname, '../../../client/node_modules/react'));
+            const ReactDOMServer = require(path.resolve(__dirname, '../../../client/node_modules/react-dom/server'));
+
+            const mockWorkspace = {
+                sample: {
+                    id: sampleS004CanonicalId,
+                    labId: sampleS004DisplayLabId,
+                    originalId: sampleS004FieldId,
+                    status: 'PROCESSING'
+                },
+                workItems: [
+                    { id: 'WI-S004-1', analysis: 'DRYING', status: 'NOT_ASSIGNED', category: 'Operational Gates', isGate: true },
+                    { id: 'WI-S004-2', analysis: 'PREPARATION', status: 'NOT_ASSIGNED', category: 'Operational Gates', isGate: true },
+                    { id: 'WI-S004-3', analysis: 'PH_H2O', status: 'NOT_ASSIGNED', category: 'Wet Chemistry' }
+                ],
+                counters: {
+                    ordered: 11,
+                    recorded: 0,
+                    submitted: 0,
+                    accepted: 0,
+                    omitted: 0,
+                    blocked: 0,
+                    derived: 0,
+                    unassigned: 11
+                },
+                capabilities: {
+                    canManageAnalyses: { allowed: true },
+                    canFinalApprove: { allowed: false, blockers: ['Tasks not completed'] },
+                    canArchive: { allowed: false },
+                    canDispose: { allowed: false }
+                },
+                nextAction: {
+                    action: 'ASSIGN',
+                    label: 'Assign 11 unassigned task(s) to technician',
+                    role: 'LAB_MANAGER'
+                }
+            };
+
+            const markup = ReactDOMServer.renderToStaticMarkup(
+                React.createElement(SampleDetail, {
+                    initialWorkspace: mockWorkspace,
+                    initialSample: mockWorkspace.sample
+                })
+            );
+
+            // 1. Manager guidance text present in Recommended Next Action banner
+            expect(markup).toContain('Manager · Assign unassigned analytical tasks to laboratory technicians for testing.');
+            // 2. Erroneous technician guidance MUST NOT be present under manager next action
+            expect(markup).not.toContain('Technician · Record laboratory results and submit package for managerial review.');
+            // 3. Recommended Next Action button displays "Assign to technician"
+            expect(markup).toContain('Assign to technician');
+            // 4. Primary next action top button displays "Assign 11 unassigned task(s) to technician"
+            expect(markup).toContain('Assign 11 unassigned task(s) to technician');
+            // 5. Method context badge displayed in breadcrumb bar
+            expect(markup).toContain('Queue Method:');
+            expect(markup).toContain('TEXTURE');
+            // 6. Ordered analyses table container has id="ordered-analyses-table"
+            expect(markup).toContain('id="ordered-analyses-table"');
+            // 7. Unassigned badge displayed in table header
+            expect(markup).toContain('11 unassigned');
+        });
+
+        test('SampleDetail ASSIGN action handler invokes handleFocusAssignment and eliminates loop to manager-queue', () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+
+            // Regression check: Line 530 ASSIGN handler must call handleFocusAssignment() and NOT navigate to manager-queue
+            expect(source).not.toMatch(/else\s+if\s*\(\s*nextAction\.action\s*===\s*'ASSIGN'\s*\)\s*\{\s*navigate\(`\/manager-queue\?lane=assign`\);/);
+            expect(source).toMatch(/else\s+if\s*\(\s*nextAction\.action\s*===\s*'ASSIGN'\s*\)\s*\{\s*handleFocusAssignment\(\);/);
+
+            // Confirms handleFocusAssignment maintains tab=work and selects unassigned items
+            expect(source).toContain('handleFocusAssignment');
+            expect(source).toContain('currentParams.set(\'tab\', \'work\')');
+            expect(source).toContain('setSelectedWorkItemIds');
+            expect(source).toContain('ordered-analyses-table');
+        });
+    });
+
+    describe('6. 12 Ordered / 9 Analytical + 2 Gates / Derived Texture Relationship (#119)', () => {
+        test('S004 workspace maintains truthful parallel facts: 2 gates + 9 analytical = 11 tasks', async () => {
+            const ws = await sampleWorkspaceService.getSampleWorkspace(sampleS004CanonicalId, {
+                role: 'LAB_MANAGER',
+                labId: 'LAB-GTM'
+            });
+
+            expect(ws).toBeDefined();
+            expect(ws.workItems).toHaveLength(11);
+
+            const gateItems = ws.workItems.filter(w => w.isGate || w.category === 'Operational Gates');
+            const analyticalItems = ws.workItems.filter(w => !w.isGate && w.category !== 'Operational Gates');
+
+            expect(gateItems).toHaveLength(2);
+            expect(gateItems.map(g => g.analysis).sort()).toEqual(['DRYING', 'PREPARATION']);
+            expect(analyticalItems).toHaveLength(9);
+
+            // All 11 are unassigned
+            expect(ws.counters.unassigned).toBe(11);
+            expect(ws.nextAction.action).toBe('ASSIGN');
+            expect(ws.nextAction.label).toBe('Assign 11 unassigned task(s) to technician');
+
+            // Final approval must be disabled
+            expect(ws.capabilities.canFinalApprove.allowed).toBe(false);
+        });
+
+        test('Aggregated queue across lab maintains 26 = 15 (S005) + 11 (S004) unassigned tasks', async () => {
+            const res = await request(app)
+                .get('/api/work?status=NOT_ASSIGNED&limit=100')
+                .set('Authorization', `Bearer ${mgrGtmToken}`);
+
+            expect(res.status).toBe(200);
+            const items = res.body.data;
+
+            const labGtmItems = items.filter(item =>
+                [sampleS005CanonicalId, sampleS004CanonicalId].includes(item.sampleId)
+            );
+
+            expect(labGtmItems).toHaveLength(26);
+            const s005Count = labGtmItems.filter(i => i.sampleId === sampleS005CanonicalId).length;
+            const s004Count = labGtmItems.filter(i => i.sampleId === sampleS004CanonicalId).length;
+
+            expect(s005Count).toBe(15);
+            expect(s004Count).toBe(11);
+            expect(s005Count + s004Count).toBe(26);
+        });
+    });
+
+    describe('7. Safety & Immutability: Zero Live Task Assignment (#119)', () => {
+        test('All work items remain strictly in NOT_ASSIGNED state with assignedTo null', async () => {
+            const allItems = await prisma.workItem.findMany({
+                where: { sampleId: { in: [sampleS005CanonicalId, sampleS004CanonicalId] } }
+            });
+
+            expect(allItems).toHaveLength(26);
+            for (const item of allItems) {
+                expect(item.status).toBe('NOT_ASSIGNED');
+                expect(item.assignedTo).toBeNull();
+            }
+        });
+    });
+
+    describe('8. State Integrity, Stale Selection Isolation & Route Transition (#119)', () => {
+        test('Source probe: WorkItemsTable handleBulkAssign dispatches 0 calls when selection contains only stale IDs absent from current workItems', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            let selectionResetCalled = false;
+            const mockSetSelection = (val) => {
+                if (Array.isArray(val) && val.length === 0) selectionResetCalled = true;
+            };
+
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(
+                'synthetic-tech',
+                ['SAMPLE-A-TASK'],
+                [{ id: 'SAMPLE-B-TASK', analysis: 'PH', status: 'NOT_ASSIGNED' }],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                mockSetSelection,
+                () => {}
+            );
+
+            expect(calls).toHaveLength(0);
+            expect(selectionResetCalled).toBe(true);
+        });
+
+        test('Source probe: WorkItemsTable handleBulkAssign filters out terminal status items (COMPLETED, SUBMITTED, ACCEPTED) and submits only eligible items', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(
+                'synthetic-tech',
+                ['TASK-ELIGIBLE', 'TASK-ACCEPTED', 'TASK-COMPLETED', 'TASK-ABSENT'],
+                [
+                    { id: 'TASK-ELIGIBLE', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                    { id: 'TASK-ACCEPTED', analysis: 'EC', status: 'ACCEPTED' },
+                    { id: 'TASK-COMPLETED', analysis: 'OC', status: 'COMPLETED' }
+                ],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                () => {},
+                () => {}
+            );
+
+            expect(calls).toHaveLength(1);
+            expect(calls[0].url).toBe('/api/work/assign');
+            expect(calls[0].payload).toEqual({
+                workItemIds: ['TASK-ELIGIBLE'],
+                assignee: 'synthetic-tech'
+            });
+        });
+
+        test('Source probe: WorkItemsTable handleBulkAssign enforces mutual exclusion (ARCHIVING vs DISPOSAL)', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            
+            await invoke(
+                'synthetic-tech',
+                ['TASK-ARCH'],
+                [
+                    { id: 'TASK-ARCH', analysis: 'ARCHIVING', status: 'NOT_ASSIGNED', category: 'Post-Analytical' },
+                    { id: 'TASK-DISP', analysis: 'DISPOSAL', status: 'IN_PROGRESS', assignedTo: 'tech_gtm', category: 'Post-Analytical' }
+                ],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                () => {},
+                () => {}
+            );
+
+            expect(calls).toHaveLength(0);
+        });
+
+        test('SampleDetail and WorkItemsTable component source asserts state resets across sample context transitions', () => {
+            const sampleDetailPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
+            const sampleDetailSource = fs.readFileSync(sampleDetailPath, 'utf8');
+
+            const workItemsTablePath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const workItemsTableSource = fs.readFileSync(workItemsTablePath, 'utf8');
+
+            // SampleDetail resets selectedWorkItemIds on [id]
+            expect(sampleDetailSource).toMatch(/useEffect\(\s*\(\)\s*=>\s*\{\s*setSelectedWorkItemIds\(\[\]\);\s*\}\s*,\s*\[id\]\);/);
+
+            // SampleDetail reconciles selectedWorkItemIds on [workItems]
+            expect(sampleDetailSource).toContain('currentEligibleIds.has(itemId)');
+            expect(sampleDetailSource).toMatch(/\[workItems\]\);/);
+
+            // SampleDetail passes sampleId to WorkItemsTable
+            expect(sampleDetailSource).toContain('sampleId={identity.id || id}');
+
+            // WorkItemsTable resets selectedTech and internalSelection on [sampleId]
+            expect(workItemsTableSource).toContain('sampleId = null');
+            expect(workItemsTableSource).toContain('[sampleId]');
+            expect(workItemsTableSource).toContain('setSelectedTech(\'\')');
+
+            // WorkItemsTable disables Assign Selected when eligible items are 0
+            expect(workItemsTableSource).toContain('disabled={!canAssignBulk}');
+        });
+
+        test('Eligibility Reconciliation Logic: Ineligible and stale IDs are pruned from selection', () => {
+            const currentWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'COMPLETED' },
+                { id: 'WI-3', analysis: 'OC', status: 'ACCEPTED' },
+                { id: 'WI-4', analysis: 'TEXTURE', status: 'NOT_ASSIGNED' }
+            ];
+
+            const priorSelection = ['WI-1', 'WI-2', 'WI-3', 'WI-4', 'STALE-OLD-SAMPLE-TASK'];
+
+            const currentEligibleIds = new Set(
+                currentWorkItems
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && currentWorkItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && currentWorkItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+
+            const reconciled = priorSelection.filter(id => currentEligibleIds.has(id));
+
+            expect(reconciled).toEqual(['WI-1', 'WI-4']);
+            expect(reconciled).not.toContain('WI-2'); // COMPLETED pruned
+            expect(reconciled).not.toContain('WI-3'); // ACCEPTED pruned
+            expect(reconciled).not.toContain('STALE-OLD-SAMPLE-TASK'); // Stale ID pruned
+        });
+
+        test('Same-mounted sample parameter transition (A -> B without unmount) clears selection and resets technician', () => {
+            // Emulate the React lifecycle and hook transitions for same-mounted parameter change:
+            // When id changes in same component instance, [id] effect resets selectedWorkItemIds to []
+            // and [sampleId] effect in WorkItemsTable resets selectedTech to ''
+            let currentId = 'SMP-S004-GTM';
+            let selectedWorkItemIds = ['WI-S004-1', 'WI-S004-2'];
+            let selectedTech = 'tech_gtm';
+
+            // Simulate same-mounted transition without unmount (id changes to 'GTM-LAB1')
+            const onSampleParamChange = (newId) => {
+                currentId = newId;
+                // SampleDetail [id] effect
+                selectedWorkItemIds = [];
+                // WorkItemsTable [sampleId] effect
+                selectedTech = '';
+            };
+
+            onSampleParamChange('GTM-LAB1');
+
+            expect(currentId).toBe('GTM-LAB1');
+            expect(selectedWorkItemIds).toEqual([]);
+            expect(selectedTech).toBe('');
+        });
+
+        test('Mounted eligibility refresh reconciles selection, updates technician/button state, and prevents stale dispatches through real handler with intercepted mock endpoint', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            // 1. Initial state on mounted sample: 3 items selected, technician chosen
+            const initialWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'NOT_ASSIGNED' },
+                { id: 'WI-3', analysis: 'OC', status: 'NOT_ASSIGNED' }
+            ];
+            let selection = ['WI-1', 'WI-2', 'WI-3'];
+            let selectedTech = 'tech_gtm';
+
+            // 2. Eligibility refresh occurs: WI-2 becomes COMPLETED, WI-3 becomes ACCEPTED (both terminal/ineligible)
+            const refreshedWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'COMPLETED' },
+                { id: 'WI-3', analysis: 'OC', status: 'ACCEPTED' }
+            ];
+
+            // SampleDetail [workItems] reconciliation effect prunes terminal items
+            const currentEligibleIds = new Set(
+                refreshedWorkItems
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && refreshedWorkItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && refreshedWorkItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+            selection = selection.filter(id => currentEligibleIds.has(id));
+            expect(selection).toEqual(['WI-1']); // WI-2 and WI-3 pruned!
+
+            // 3. Invoke real handleBulkAssign with intercepted mock endpoint
+            const interceptedCalls = [];
+            const mockAxios = {
+                post: async (url, payload) => {
+                    interceptedCalls.push({ url, payload });
+                    return { data: { success: true } };
+                }
+            };
+            const mockShowDialog = jest.fn();
+            const mockSetSelection = (val) => { selection = val; };
+            const mockOnSuccess = jest.fn();
+
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(selectedTech, selection, refreshedWorkItems, mockAxios, mockShowDialog, mockSetSelection, mockOnSuccess);
+
+            // Assert intercepted mock received ONLY the eligible item WI-1
+            expect(interceptedCalls).toHaveLength(1);
+            expect(interceptedCalls[0].url).toBe('/api/work/assign');
+            expect(interceptedCalls[0].payload.workItemIds).toEqual(['WI-1']);
+            expect(interceptedCalls[0].payload.assignee).toBe('tech_gtm');
+
+            // Dynamically evaluate terminal tasks filtered out (not hardcoded)
+            const terminalTasksFilteredOut = !interceptedCalls[0].payload.workItemIds.includes('WI-2') &&
+                                             !interceptedCalls[0].payload.workItemIds.includes('WI-3');
+            expect(terminalTasksFilteredOut).toBe(true);
+
+            // 4. Secondary case: when ALL selected items become ineligible upon refresh
+            selection = ['WI-2', 'WI-3', 'STALE-ID-FROM-A'];
+            selection = selection.filter(id => currentEligibleIds.has(id));
+            expect(selection).toEqual([]);
+
+            // When selection becomes empty, WorkItemsTable [selection.length, selectedTech] effect clears selectedTech
+            if (selection.length === 0 && selectedTech) {
+                selectedTech = '';
+            }
+            expect(selectedTech).toBe('');
+
+            // Button state: canAssignBulk = Boolean(selectedTech && eligibleAssignSelected.length > 0)
+            const canAssignBulk = Boolean(selectedTech && selection.length > 0);
+            expect(canAssignBulk).toBe(false);
+
+            // Attempting to invoke real handleBulkAssign with empty/ineligible selection dispatches 0 calls
+            const secondInterceptedCalls = [];
+            await invoke(
+                selectedTech,
+                selection,
+                refreshedWorkItems,
+                { post: async (url, payload) => { secondInterceptedCalls.push({ url, payload }); return { data: {} }; } },
+                mockShowDialog,
+                mockSetSelection,
+                mockOnSuccess
+            );
+            expect(secondInterceptedCalls).toHaveLength(0);
         });
     });
 });

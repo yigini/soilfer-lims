@@ -71,6 +71,72 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
         const queryParams = new URLSearchParams(location.search);
         return queryParams.get('submissionId') || null;
     });
+    const [selectedWorkItemIds, setSelectedWorkItemIds] = useState([]);
+
+    // Clear selections when transitioning across samples or contexts
+    useEffect(() => {
+        setSelectedWorkItemIds([]);
+    }, [id]);
+
+    // Reconcile selections against current workItems and assignment eligibility
+    useEffect(() => {
+        setSelectedWorkItemIds(prev => {
+            if (!prev || prev.length === 0) return prev;
+            const currentEligibleIds = new Set(
+                (workItems || [])
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && workItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && workItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+            const reconciled = prev.filter(itemId => currentEligibleIds.has(itemId));
+            if (reconciled.length === prev.length && reconciled.every((v, i) => v === prev[i])) {
+                return prev;
+            }
+            return reconciled;
+        });
+    }, [workItems]);
+
+    // Extract active method context from searchParams or returnTo
+    const searchParams = new URLSearchParams(location.search);
+    const directAnalysis = searchParams.get('analysis') || searchParams.get('method');
+    const returnTo = searchParams.get('returnTo');
+    let returnAnalysis = null;
+    if (returnTo) {
+        try {
+            const parsedUrl = new URL(returnTo, window.location.origin);
+            returnAnalysis = parsedUrl.searchParams.get('analysis') || parsedUrl.searchParams.get('method');
+        } catch (e) {
+            const match = returnTo.match(/[?&](?:analysis|method)=([^&]+)/);
+            if (match) returnAnalysis = decodeURIComponent(match[1]);
+        }
+    }
+    const activeMethodContext = directAnalysis || returnAnalysis || null;
+
+    // Focus & open scoped sample assignment controls without leaving sample page (#119)
+    const handleFocusAssignment = () => {
+        setActiveTab('work');
+        const currentParams = new URLSearchParams(location.search);
+        currentParams.set('tab', 'work');
+        navigate({ search: `?${currentParams.toString()}` }, { replace: true });
+
+        const unassigned = workItems
+            .filter(w => !w.assignedTo && ['NOT_ASSIGNED', 'PENDING', 'UNASSIGNED'].includes(w.status))
+            .map(w => w.id);
+
+        if (unassigned.length > 0) {
+            setSelectedWorkItemIds(unassigned);
+        }
+
+        setTimeout(() => {
+            const el = document.getElementById('ordered-analyses-table');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 60);
+    };
 
     // Sync tab and submissionId from external/browser navigation
     useEffect(() => {
@@ -473,6 +539,11 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                         <span>Sample workspace</span>
                     </div>
                     <div className="flex items-center gap-3">
+                        {activeMethodContext && (
+                            <span className="inline-flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800 text-xs">
+                                Queue Method: <strong>{getAnalysisDisplayName(activeMethodContext)}</strong>
+                            </span>
+                        )}
                         {refreshing && <RefreshCw size={13} className="animate-spin text-sf-primary" />}
                         <span className="font-semibold text-sf-muted bg-sf-raised px-2.5 py-1 rounded-full border border-sf-divider">
                             {roleBadgeText}
@@ -527,7 +598,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                             if (nextAction.action === 'RECEIVE') setReceiveModalOpen(true);
                                             else if (nextAction.action === 'ACCEPT_INTAKE') setAcceptIntakeModalOpen(true);
                                             else if (nextAction.action === 'ASSIGN') {
-                                                navigate(`/manager-queue?lane=assign`);
+                                                handleFocusAssignment();
                                             }
                                             else if (nextAction.action === 'REVIEW') {
                                                 setActiveTab('review');
@@ -797,6 +868,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                              counters.submitted > 0 ? 'Manager · Inspect submitted evidence and QC before accepting.' :
                              identity.status === 'EXPECTED' ? 'Reception · Confirm physical specimen condition, label, and requested methods.' :
                              currentReleasedReport ? 'Report v' + (currentReleasedReport.version || 1) + ' is the released record. Subsequent changes require an amendment.' :
+                             (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) ? 'Manager · Assign unassigned analytical tasks to laboratory technicians for testing.' :
                              'Technician · Record laboratory results and submit package for managerial review.'}
                         </p>
                     </div>
@@ -807,6 +879,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                             else if (identity.status === 'EXPECTED' || identity.status === 'RECEIVED') setActiveTab('request');
                             else if (currentReleasedReport) handleViewReport();
                             else if (counters.accepted >= counters.ordered && counters.ordered > 0) setActiveTab('reports');
+                            else if (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) handleFocusAssignment();
                             else setActiveTab('work');
                         }}
                         className="px-5 py-2.5 bg-sf-primary text-sf-on-primary hover:brightness-95 rounded-xl text-xs font-bold shadow-sm transition-all flex-shrink-0"
@@ -816,6 +889,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                          identity.status === 'EXPECTED' ? 'Review intake' :
                          currentReleasedReport ? 'View report' :
                          counters.accepted >= counters.ordered && counters.ordered > 0 ? 'Preview report' :
+                         (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) ? 'Assign to technician' :
                          'Open worksheet'}
                     </button>
                 </div>
@@ -954,7 +1028,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                         </div>
 
                         {/* Ordered Analyses Table */}
-                        <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
+                        <div id="ordered-analyses-table" className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
                             <div className="p-4 border-b border-sf-divider flex flex-wrap items-center justify-between gap-3">
                                 <h3 className="font-bold text-sf-text text-sm flex items-center gap-2">
                                     <span>Ordered Analyses ({counters.ordered ?? workItems.filter(w => !w.isGate && w.category !== 'Operational Gates').length})</span>
@@ -963,9 +1037,19 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                             (+{counters.derived} derived fraction{counters.derived > 1 ? 's' : ''})
                                         </span>
                                     )}
+                                    {activeMethodContext && (
+                                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                                            Queue Context: {getAnalysisDisplayName(activeMethodContext)}
+                                        </span>
+                                    )}
                                 </h3>
-                                <div className="text-xs text-sf-muted">
-                                    {isTech ? 'Showing all analyses (assigned highlighted)' : 'All analytical tasks visible'}
+                                <div className="text-xs text-sf-muted flex items-center gap-2">
+                                    {counters.unassigned > 0 && (
+                                        <span className="text-amber-600 font-semibold bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                                            {counters.unassigned} unassigned
+                                        </span>
+                                    )}
+                                    <span>{isTech ? 'Showing all analyses (assigned highlighted)' : 'All analytical tasks visible'}</span>
                                 </div>
                             </div>
 
@@ -976,6 +1060,10 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 onAssignmentSuccess={() => fetchWorkspaceData(true)}
                                 onReview={handleReviewItem}
                                 onReviewBulk={handleReviewBulk}
+                                selectedWorkItemIds={selectedWorkItemIds}
+                                onSelectionChange={setSelectedWorkItemIds}
+                                methodContext={activeMethodContext}
+                                sampleId={identity.id || id}
                             />
                         </div>
 
