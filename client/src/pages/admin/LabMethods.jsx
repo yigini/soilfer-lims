@@ -83,16 +83,6 @@ const LabMethods = () => {
                 state: location?.state
             });
         }
-
-        if (typeof window !== 'undefined' && window.history?.replaceState && window.location) {
-            try {
-                const searchStr = nextParams.toString();
-                const newUrl = (window.location.pathname || '') + (searchStr ? `?${searchStr}` : '');
-                window.history.replaceState(location?.state || window.history.state || null, '', newUrl);
-            } catch {
-                // Ignore environment limitations with history API
-            }
-        }
     };
 
     // Fetch labs list if user has access to multiple labs

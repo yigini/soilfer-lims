@@ -137,7 +137,7 @@ Status Key:
     4. Unauthorized role without `MANAGE_ANALYSES` cannot modify lab defaults (HTTP 403 `FORBIDDEN`).
     5. Supplying an unavailable or mismatched methodology ID is rejected (HTTP 400).
     6. Fresh lab with no overrides exhibits honest empty state without cross-lab leakage.
-  - React 18 Mounted Synthetic Test Suite (`issue122-mounted-verification.cjs`, 6/6 suites passed):
+  - React 18 Mounted Synthetic Test Suite (`issue122-mounted-verification.cjs`, 7/7 suites passed):
     1. URL Lab Scope (?labId=LAB-A) with Failed GET:
        - `SUPER_ADMIN` without `user.labId` mounts with `?labId=LAB-A`.
        - Initial selection strictly honors URL scope (`selectedLabId === 'LAB-A'`), issuing GET `/api/config/lab-defaults/LAB-A`.
@@ -161,6 +161,11 @@ Status Key:
        - Initial request headers arrive for SLOW lab, but JSON body is delayed.
        - Dropdown switched to FAST lab, which completes and renders FAST analyses with Save enabled.
        - Delayed SLOW body resolves: post-body generation/target revalidation discards SLOW payload; FAST rows remain displayed; Save remains enabled for FAST and dispatches FAST payload.
+    7. Real MemoryRouter + Non-Null History State ({usr, key, idx}) Envelope Preservation:
+       - Initialized with non-null history state (`{ returnTo: '/admin/labs' }`) inside React Router's `{ usr, key, idx }` envelope.
+       - Incoming URL transition A -> B maintains mounted instance, updates selection, requests B defaults.
+       - Dropdown navigation back to A calls `setSearchParams(..., { replace: true, state: location?.state })`.
+       - Eliminates redundant raw `window.history.replaceState`: preserves React Router's internal `{ usr, key, idx }` envelope and location state in memory without clobbering history position.
 - **Defects Reproduced at `c5ed62e` & `bd4e577`**:
   - Initial defects reproduced via `C:\Users\yigin\Documents\Codex\2026-09-21\se\work\issue122-mounted-review.cjs`:
     1. `selectedLabId` initialized to `'LAB-DEFAULT'`, requested `LAB-DEFAULT`, and on `/api/labs` response silently overwrote selection with first listed `LAB-B`, ignoring `?labId=LAB-A`.
@@ -168,10 +173,12 @@ Status Key:
   - Additional lifecycle findings reproduced via `C:\Users\yigin\Documents\Codex\2026-09-21\se\work\pr134-independent-probes.cjs`:
     1. Incoming same-mounted URL transition A->B with rerender left A selected because `getUrlLabId` was initialization-only.
     2. Request guard before `await res.json()` only allowed delayed body to overwrite displayed rows after FAST loaded.
+  - Integration defect reproduced via `C:\Users\yigin\Documents\Codex\2026-09-21\se\work\pr134-router-review.cjs`:
+    - `handleLabChange` called raw `window.history.replaceState(location?.state || window.history.state)` after `setSearchParams`. With non-null `location.state`, this clobbered React Router's `{ usr, key, idx }` envelope with bare `{ returnTo: '/admin/labs' }`, losing history `.idx` and `.usr` structure.
 - **Client Implementation (`client/src/pages/admin/LabMethods.jsx`)**:
   - Reactive URL scope integration via `useSearchParams` and `useLocation` from `react-router-dom`.
   - In-render incoming URL synchronization (`prevUrlLabIdRef`) updating `selectedLabId` on same mounted instance navigation.
-  - Dropdown selection updates router search params with `replace: true` and preserves `location.state` and `window.history.state`.
+  - Dropdown selection delegates entirely to router `setSearchParams(nextParams, { replace: true, state: location?.state })`, eliminating redundant raw `window.history.replaceState` and preserving React Router's internal `{ usr, key, idx }` history envelope.
   - `fetchLabs` preserves existing selection (`selectedLabId`) and does not overwrite with `data[0].id`.
   - Clears `defaults`, `loadedLabId`, and `isWizardOpen` on target change and on load failure.
   - Post-body resolution revalidation: checks `activeRequestIdRef.current === requestId && selectedLabIdRef.current === labId` after `await res.json()` and before committing to state.
