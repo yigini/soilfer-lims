@@ -151,6 +151,30 @@ router.get('/directory', async (req, res) => {
     }
 });
 
+// ─── GET /api/labs/:id ─── Laboratory Directory Profile Entry (#114)
+// DIRECTORY-ACCESS POLICY:
+// Returns public directory-level laboratory profile fields ({ id, code, name, location, country, city, isActive }).
+// Accessible to any authenticated user to allow client components (Reception, LocationPicker, profile view)
+// to resolve laboratory coordinates, name, and operational status without leaking sensitive data.
+// SCOPED AUTHORIZATION NOTE:
+// Authentication grants access to this directory lookup only. Operational authority and sensitive data
+// (workspaces via GET /:id/workspace, staff rosters via GET /:id/staff, lifecycle transitions via POST /:id/lifecycle,
+// and method editing via PUT /:id) remain strictly scoped to assigned laboratory managers, authorized national users,
+// or SUPER_ADMIN. Directory access does NOT grant operational authority over the laboratory.
+router.get('/:id', async (req, res) => {
+    try {
+        const lab = await prisma.lab.findUnique({
+            where: { id: req.params.id },
+            select: { id: true, code: true, name: true, location: true, country: true, city: true, isActive: true }
+        });
+        if (!lab) return res.status(404).json({ error: 'Lab not found' });
+        res.json(lab);
+    } catch (e) {
+        console.error(`[GET /api/labs/${req.params.id}]`, e);
+        res.status(500).json({ error: 'Failed to fetch laboratory configuration' });
+    }
+});
+
 // ─── GET /api/labs/:id/staff ─── Staff roster for a specific lab
 router.get('/:id/staff', async (req, res) => {
     const isSuperAdmin = req.user.role === 'SUPER_ADMIN';

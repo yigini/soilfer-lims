@@ -46,6 +46,16 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
         await prisma.analysis.delete({ where: { code: testAnalysisCode } }).catch(() => {});
     });
 
+    const validChecklist = {
+        items: {
+            container: { status: 'PASS' },
+            label: { status: 'PASS' },
+            quantity: { status: 'PASS' },
+            condition: { status: 'PASS' },
+            coc: { status: 'PASS' }
+        }
+    };
+
     test('RC-01: Mass shortfall without acknowledgement returns HTTP 400 with deficit breakdown', async () => {
         const payload = {
             originalId: testSampleId,
@@ -53,7 +63,8 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
             receivedMass: 120.0, // 120g received < 80g analytical + 100g retention = 180g required
             massWarningAcknowledged: false,
             requiredAnalyses: [testAnalysisCode],
-            submitterDetails: { name: 'John Doe', phone: '+123456789' }
+            submitterDetails: { name: 'John Doe', phone: '+123456789' },
+            checklist: validChecklist
         };
 
         const res = await request(app)
@@ -77,7 +88,8 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
             receivedMass: 120.0,
             massWarningAcknowledged: true, // Explicit operator override
             requiredAnalyses: [testAnalysisCode],
-            submitterDetails: { name: 'John Doe', phone: '+123456789' }
+            submitterDetails: { name: 'John Doe', phone: '+123456789' },
+            checklist: validChecklist
         };
 
         const res = await request(app)
@@ -110,7 +122,8 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
             moistureOnArrival: 'WET',
             foreignMaterial: foreignMat,
             requiredAnalyses: [testAnalysisCode],
-            submitterDetails: { name: 'Maria Santos', phone: '+502123456' }
+            submitterDetails: { name: 'Maria Santos', phone: '+502123456' },
+            checklist: validChecklist
         };
 
         const res = await request(app)
@@ -166,7 +179,8 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
                 isWalkIn: true,
                 receivedMass: 300.0,
                 requiredAnalyses: [testAnalysisCode],
-                submitterDetails: { name: 'Alpha Farm', phone: '+999' }
+                submitterDetails: { name: 'Alpha Farm', phone: '+999' },
+                checklist: validChecklist
             });
         expect(intake1.status).toBe(200);
 

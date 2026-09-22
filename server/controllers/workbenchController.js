@@ -8,6 +8,7 @@ const validationService = require('../services/workbenchValidationService');
 const readinessService = require('../services/workbenchReadinessService');
 const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
+const scopeGuard = require('../utils/scopeGuard');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -17,12 +18,252 @@ const { broadcastToLab } = require('../wsServer');
 // ─────────────────────────────────────────────────────────────────────────────
 exports.getQueue = async (req, res) => {
     const user = req.user;
-    const { view } = req.query || {}; // 'my_work' | 'ready_to_submit' | 'submitted' | 'completed'
+    const { view, workItemId, sampleId, search, q } = req.query || {}; // 'my_work' | 'ready_to_submit' | 'submitted' | 'completed'
 
     try {
+        let targetScopedItem = null;
+        let canonicalSampleTarget = null;
+
+        if (workItemId) {
+            const target = await prisma.workItem.findUnique({
+                where: { id: String(workItemId) },
+                include: {
+                    sample: {
+                        select: {
+                            id: true,
+                            originalId: true,
+                            labId: true,
+                            projectCode: true,
+                            country: true,
+                            status: true,
+                            dryingStatus: true,
+                            preparationStatus: true,
+                            assignedLab: true
+                        }
+                    }
+                }
+            });
+
+            if (!target) {
+                return res.status(404).json({
+                    error: 'WORK_ITEM_NOT_FOUND',
+                    message: `Work item '${workItemId}' not found.`
+                });
+            }
+
+            // Central Scope & Authorization MUST precede contradictory diagnostics:
+            // 1. Fail closed for inactive / restricted accounts
+            if (user.isActive === false || user.status === 'INACTIVE') {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'User account is inactive.'
+                });
+            }
+
+            // 2. Strict technician assignment check: technician cannot access another technician's work item
+            if (user.role === 'LAB_TECHNICIAN' && target.assignedTo !== user.username) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to work item assigned to another technician.'
+                });
+            }
+
+            // 3. Central scope validation on the work item
+            if (!scopeGuard.canAccessEntity(user, target, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to work item in another laboratory.'
+                });
+            }
+
+            // 4. Central scope validation on the associated sample (including country grants for MASTER_USER)
+            if (target.sample && !scopeGuard.canAccessEntity(user, target.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to sample outside authorized scope.'
+                });
+            }
+
+            // 5. Conflicting sample/work-item laboratories check
+            const targetLab = target.labId || target.assignedLab;
+            const sampleLab = target.sample?.assignedLab || target.sample?.labId;
+            if (targetLab && sampleLab && targetLab !== sampleLab) {
+                if (!scopeGuard.hasGlobalAccess(user) && (!user.labId || (user.labId !== targetLab || user.labId !== sampleLab))) {
+                    return res.status(403).json({
+                        error: 'FORBIDDEN',
+                        message: 'Access denied: conflicting work item and sample laboratories outside authorized scope.'
+                    });
+                }
+            }
+
+            // 6. AFTER authorization, check contradictory identifiers when sampleId is also provided
+            if (sampleId) {
+                const sid = String(sampleId).trim();
+                const matchedSamples = await prisma.sample.findMany({
+                    where: {
+                        OR: [
+                            { id: sid },
+                            { labId: sid },
+                            { originalId: sid }
+                        ]
+                    }
+                });
+
+                if (matchedSamples.length === 0) {
+                    return res.status(404).json({
+                        error: 'SAMPLE_NOT_FOUND',
+                        message: `Sample '${sampleId}' not found.`
+                    });
+                }
+
+                if (matchedSamples.length > 1) {
+                    return res.status(400).json({
+                        error: 'AMBIGUOUS_SAMPLE_IDENTIFIER',
+                        message: `Identifier '${sampleId}' matches multiple samples across identifier columns.`
+                    });
+                }
+
+                const resolvedSample = matchedSamples[0];
+                if (!scopeGuard.canAccessEntity(user, resolvedSample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                    return res.status(403).json({
+                        error: 'FORBIDDEN',
+                        message: 'Access denied to sample outside authorized scope.'
+                    });
+                }
+
+                if (target.sampleId !== resolvedSample.id && target.sample?.id !== resolvedSample.id) {
+                    return res.status(400).json({
+                        error: 'CONTRADICTORY_IDENTIFIERS',
+                        message: `Work item '${workItemId}' does not belong to sample '${sampleId}'.`
+                    });
+                }
+            }
+
+            targetScopedItem = target;
+        } else if (sampleId) {
+            const sid = String(sampleId).trim();
+            const matchedSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: sid },
+                        { labId: sid },
+                        { originalId: sid }
+                    ]
+                }
+            });
+
+            if (matchedSamples.length === 0) {
+                return res.status(404).json({
+                    error: 'SAMPLE_NOT_FOUND',
+                    message: `Sample '${sampleId}' not found.`
+                });
+            }
+
+            if (matchedSamples.length > 1) {
+                return res.status(400).json({
+                    error: 'AMBIGUOUS_SAMPLE_IDENTIFIER',
+                    message: `Identifier '${sampleId}' matches multiple samples across identifier columns.`
+                });
+            }
+
+            const targetSample = matchedSamples[0];
+
+            if (user.isActive === false || user.status === 'INACTIVE') {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'User account is inactive.'
+                });
+            }
+
+            if (!scopeGuard.canAccessEntity(user, targetSample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                return res.status(403).json({
+                    error: 'FORBIDDEN',
+                    message: 'Access denied to sample in another laboratory.'
+                });
+            }
+
+            canonicalSampleTarget = targetSample;
+        }
+
+        const searchTerm = (search || q || '').trim();
+        let matchingAnalyses = [];
+        if (searchTerm) {
+            const matched = await prisma.analysis.findMany({
+                where: {
+                    OR: [
+                        { code: { contains: searchTerm } },
+                        { name: { contains: searchTerm } }
+                    ]
+                },
+                select: { code: true }
+            });
+            matchingAnalyses = matched.map(m => m.code);
+        }
+
+        const isGlobal = scopeGuard.hasGlobalAccess(user);
+
+        if (!isGlobal && !user.labId) {
+            return res.json({
+                groups: [],
+                stats: {
+                    totalPending: 0,
+                    totalInProgress: 0,
+                    totalReanalysis: 0,
+                    totalDrafts: 0,
+                    totalGroups: 0,
+                    totalItems: 0,
+                    myWorkCount: 0,
+                    readyToSubmitCount: 0,
+                    submittedCount: 0,
+                    completedCount: 0
+                },
+                targetScopedItem: null
+            });
+        }
+
+        const labScopeCondition = !isGlobal ? {
+            AND: [
+                // 1. Work item must not be explicitly assigned to another lab
+                {
+                    OR: [
+                        { labId: user.labId },
+                        { labId: null }
+                    ]
+                },
+                {
+                    OR: [
+                        { assignedLab: user.labId },
+                        { assignedLab: null }
+                    ]
+                },
+                // 2. Work item must have local lab association
+                {
+                    OR: [
+                        { labId: user.labId },
+                        { assignedLab: user.labId },
+                        { AND: [{ labId: null }, { assignedLab: null }] }
+                    ]
+                },
+                // 3. Linked sample must belong to this lab and must not have conflicting cross-lab assignment
+                {
+                    sample: {
+                        OR: [
+                            { assignedLab: user.labId },
+                            { AND: [{ assignedLab: null }, { labId: user.labId }] },
+                            { AND: [{ assignedLab: null }, { labId: null }] }
+                        ]
+                    }
+                }
+            ]
+        } : null;
+
         let whereClause = {
             assignedTo: user.username
         };
+
+        if (labScopeCondition) {
+            whereClause.AND = [labScopeCondition];
+        }
 
         if (view === 'ready_to_submit') {
             whereClause.status = 'COMPLETED';
@@ -37,7 +278,19 @@ exports.getQueue = async (req, res) => {
             whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] };
         }
 
-        const items = await prisma.workItem.findMany({
+        if (searchTerm) {
+            whereClause.OR = [
+                { id: { contains: searchTerm } },
+                { analysis: { contains: searchTerm } },
+                ...(matchingAnalyses.length > 0 ? [{ analysis: { in: matchingAnalyses } }] : []),
+                { sample: { labId: { contains: searchTerm } } },
+                { sample: { originalId: { contains: searchTerm } } },
+                { sample: { id: { contains: searchTerm } } },
+                { sample: { projectCode: { contains: searchTerm } } }
+            ];
+        }
+
+        let items = await prisma.workItem.findMany({
             where: whereClause,
             include: {
                 sample: {
@@ -46,6 +299,7 @@ exports.getQueue = async (req, res) => {
                         originalId: true,
                         labId: true,
                         projectCode: true,
+                        country: true,
                         status: true,
                         dryingStatus: true,
                         preparationStatus: true,
@@ -59,17 +313,80 @@ exports.getQueue = async (req, res) => {
             ]
         });
 
-        // Fetch user's active drafts
-        const userDrafts = await prisma.workItemDraft.findMany({
-            where: { userId: user.username }
+        // Filter out stale cross-lab assignments and ensure full scope compliance (R2)
+        items = items.filter(item => {
+            if (user.role === 'LAB_TECHNICIAN') {
+                if (item.assignedTo !== user.username && item.assignedTo !== user.id) {
+                    return false;
+                }
+            }
+            if (isGlobal) return true;
+
+            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+                return false;
+            }
+            if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                return false;
+            }
+            const itemLab = item.labId || item.assignedLab;
+            const sampleLab = item.sample?.assignedLab || item.sample?.labId;
+            if (itemLab && itemLab !== user.labId) return false;
+            if (sampleLab && sampleLab !== user.labId) return false;
+
+            return true;
         });
+
+        if (targetScopedItem) {
+            const alreadyInItems = items.some(i => i.id === targetScopedItem.id);
+            if (!alreadyInItems) {
+                items.unshift(targetScopedItem);
+            }
+        } else if (canonicalSampleTarget && !workItemId) {
+            // Use resolved canonical sample ID and enforce same scope
+            const sampleWorkItems = await prisma.workItem.findMany({
+                where: {
+                    sampleId: canonicalSampleTarget.id,
+                    ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {}),
+                    ...(labScopeCondition ? labScopeCondition : {})
+                },
+                include: {
+                    sample: {
+                        select: {
+                            id: true,
+                            originalId: true,
+                            labId: true,
+                            projectCode: true,
+                            country: true,
+                            status: true,
+                            dryingStatus: true,
+                            preparationStatus: true,
+                            assignedLab: true
+                        }
+                    }
+                }
+            });
+            for (const swi of sampleWorkItems) {
+                if (scopeGuard.canAccessEntity(user, swi, { entityType: 'WorkItem' })) {
+                    const swiLab = swi.labId || swi.assignedLab;
+                    const swiSampleLab = swi.sample?.assignedLab || swi.sample?.labId;
+                    if (isGlobal || ((!swiLab || swiLab === user.labId) && (!swiSampleLab || swiSampleLab === user.labId))) {
+                        if (!items.some(i => i.id === swi.id)) {
+                            items.push(swi);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fetch user's active drafts within authorized lab scope via canonical draftService
+        const userDrafts = await draftService.getDrafts(user);
         const draftMap = {};
         userDrafts.forEach(d => {
             draftMap[d.workItemId] = {
                 id: d.id,
                 value: d.value,
-                values: d.values ? JSON.parse(d.values) : null,
-                checks: d.checks ? JSON.parse(d.checks) : null,
+                values: d.values,
+                checks: d.checks,
                 basis: d.basis,
                 replicateNo: d.replicateNo,
                 instrumentId: d.instrumentId,
@@ -289,12 +606,17 @@ exports.getQueue = async (req, res) => {
             return a.analysisName.localeCompare(b.analysisName);
         });
 
-        // Compute multi-view counts for tabs
+        // Compute multi-view counts for tabs with matching lab scope
+        const baseCountWhere = { assignedTo: user.username };
+        if (labScopeCondition) {
+            baseCountWhere.AND = [labScopeCondition];
+        }
+
         const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
-            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: 'SUBMITTED' } }),
-            prisma.workItem.count({ where: { assignedTo: user.username, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'SUBMITTED' } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
         ]);
 
         // Stats
@@ -311,7 +633,7 @@ exports.getQueue = async (req, res) => {
             completedCount
         };
 
-        res.json({ groups, stats });
+        res.json({ groups, stats, targetScopedItem: targetScopedItem?.id || null });
     } catch (error) {
         console.error('[workbench.getQueue] Error:', error);
         res.status(500).json({ error: 'Failed to fetch workbench queue' });
@@ -1263,12 +1585,12 @@ exports.clearDrafts = async (req, res) => {
     const user = req.user;
 
     try {
-        const userDrafts = await prisma.workItemDraft.findMany({
-            where: {
-                userId: user.username,
-                ...(analysis && analysis !== 'all' ? { analysis } : {})
-            }
-        });
+        const allUserDrafts = await draftService.getDrafts(user);
+        const userDrafts = allUserDrafts.filter(d => (!analysis || analysis === 'all') ? true : d.analysis === analysis);
+
+        if (userDrafts.length === 0) {
+            return res.json({ success: true, message: `No authorized drafts found for ${analysis}`, count: 0 });
+        }
 
         const workItemIds = userDrafts.map(d => d.workItemId);
 
@@ -1324,7 +1646,8 @@ exports.discardDraft = async (req, res) => {
         const result = await draftService.discardDraft(user, workItemId);
         res.json(result);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        const status = err.status || err.statusCode || 400;
+        res.status(status).json({ error: err.message });
     }
 };
 
@@ -1341,7 +1664,8 @@ exports.resolveConflict = async (req, res) => {
         const result = await draftService.resolveConflict(user, workItemId, { resolution, reason });
         res.json(result);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        const status = err.status || err.statusCode || 400;
+        res.status(status).json({ error: err.message });
     }
 };
 

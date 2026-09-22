@@ -75,6 +75,124 @@ const humanize = (tx, lotNumber, itemName) => {
     return map[tx.actionType] || `${who} performed ${tx.actionType} on ${item}${lot}`;
 };
 
+/**
+ * Authoritative stock aggregation logic across lots for an item (#125).
+ * - Distinguishes usable (AVAILABLE and not expired) stock from expired stock.
+ * - Handles missing quantities (null/undefined) faithfully: missing is NOT zero.
+ * - Enforces reorder threshold: isLowStock is true when usableStock <= reorderPoint (and > 0).
+ * - Out of stock: usableLots.length === 0 || usableStock === 0.
+ * - Prevents precedence hiding: an item can be both out of stock (or low stock) AND have expired lots.
+ */
+function computeItemStockAggregation(item, now = new Date()) {
+    const lots = Array.isArray(item.lots) ? item.lots : [];
+    const nowDate = now instanceof Date ? now : new Date(now);
+
+    const isExpiredLot = (lot) => {
+        if (!lot) return false;
+        if (lot.status === 'EXPIRED') return true;
+        if (lot.expiryDate && new Date(lot.expiryDate) <= nowDate) return true;
+        return false;
+    };
+
+    const isUsableLot = (lot) => {
+        if (!lot) return false;
+        return lot.status === 'AVAILABLE' && !isExpiredLot(lot);
+    };
+
+    const usableLots = lots.filter(isUsableLot);
+    const expiredLots = lots.filter(isExpiredLot);
+    const quarantinedLots = lots.filter(l => l.status === 'QUARANTINED' && !isExpiredLot(l));
+
+    let hasMissingQuantity = false;
+    let missingQuantityLotCount = 0;
+    let usableNumericLots = 0;
+    let usableMissingQuantityLotCount = 0;
+    let usableSum = 0;
+
+    for (const lot of lots) {
+        if (lot.currentQuantity === null || lot.currentQuantity === undefined || isNaN(lot.currentQuantity)) {
+            hasMissingQuantity = true;
+            missingQuantityLotCount++;
+        }
+    }
+
+    for (const lot of usableLots) {
+        if (lot.currentQuantity !== null && lot.currentQuantity !== undefined && !isNaN(lot.currentQuantity)) {
+            usableSum += Number(lot.currentQuantity);
+            usableNumericLots++;
+        } else {
+            usableMissingQuantityLotCount++;
+        }
+    }
+
+    let expiredSum = 0;
+    for (const lot of expiredLots) {
+        if (lot.currentQuantity !== null && lot.currentQuantity !== undefined && !isNaN(lot.currentQuantity)) {
+            expiredSum += Number(lot.currentQuantity);
+        }
+    }
+
+    // Usable stock:
+    // If there are no usable lots: 0
+    // If there are usable lots but NONE have a numeric quantity: null (unknown/missing, NOT zero)
+    // If at least one usable lot has numeric quantity: usableSum (known subtotal if other usable lots are missing)
+    let usableStock = 0;
+    let isUsableStockSubtotal = false;
+    if (usableLots.length > 0) {
+        if (usableNumericLots === 0) {
+            usableStock = null;
+        } else {
+            usableStock = usableSum;
+            if (usableMissingQuantityLotCount > 0) {
+                isUsableStockSubtotal = true;
+            }
+        }
+    }
+
+    const expiredStock = expiredSum;
+    const totalStock = usableStock; // maintain totalStock as usableStock for backwards compatibility
+
+    // Expiry dates among usable lots
+    const nearestExpiry = usableLots
+        .filter(l => l.expiryDate)
+        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0]?.expiryDate || null;
+
+    const isExpiringSoon = nearestExpiry && (new Date(nearestExpiry) - nowDate) <= 30 * 24 * 60 * 60 * 1000;
+    const hasQuarantined = quarantinedLots.length > 0;
+    const hasExpired = expiredLots.length > 0;
+    const hasExpiredLots = hasExpired;
+
+    // Out of stock can only be asserted if there are zero usable lots OR
+    // all usable lots have known quantities and sum to zero without any missing quantities
+    const isOutOfStock = usableLots.length === 0 || (usableStock === 0 && usableMissingQuantityLotCount === 0);
+    const reorderPoint = Number(item.reorderPoint) || 0;
+    const isLowStock = usableStock !== null && usableStock > 0 && reorderPoint > 0 && usableStock <= reorderPoint;
+
+    return {
+        ...item,
+        usableStock,
+        totalStock,
+        expiredStock,
+        lotCount: lots.length,
+        availableLotCount: usableLots.length,
+        expiredLotCount: expiredLots.length,
+        quarantinedLotCount: quarantinedLots.length,
+        hasMissingQuantity,
+        missingQuantityLotCount,
+        usableMissingQuantityLotCount,
+        hasMissingQuantityInUsableLots: usableMissingQuantityLotCount > 0,
+        isUsableStockSubtotal,
+        nearestExpiry,
+        isOutOfStock,
+        isLowStock,
+        isExpiringSoon: Boolean(isExpiringSoon),
+        hasQuarantined,
+        hasExpired,
+        hasExpiredLots
+    };
+}
+exports.computeItemStockAggregation = computeItemStockAggregation;
+
 // ═══════════════════════════════════════════════════════════════════
 // ITEMS (catalog)
 // ═══════════════════════════════════════════════════════════════════
@@ -109,30 +227,8 @@ exports.getItems = async (req, res) => {
             orderBy: { name: 'asc' }
         });
 
-        // Compute aggregate fields
-        const enriched = items.map(item => {
-            const availableLots = item.lots.filter(l => l.status === 'AVAILABLE');
-            const totalStock = availableLots.reduce((sum, l) => sum + l.currentQuantity, 0);
-            const nearestExpiry = availableLots
-                .filter(l => l.expiryDate)
-                .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0]?.expiryDate || null;
-            const isLowStock = totalStock < item.reorderPoint && item.reorderPoint > 0;
-            const isExpiringSoon = nearestExpiry && (new Date(nearestExpiry) - new Date()) < 30 * 24 * 60 * 60 * 1000;
-            const hasQuarantined = item.lots.some(l => l.status === 'QUARANTINED');
-            const hasExpired = item.lots.some(l => l.status === 'EXPIRED');
-
-            return {
-                ...item,
-                totalStock,
-                lotCount: item.lots.length,
-                availableLotCount: availableLots.length,
-                nearestExpiry,
-                isLowStock,
-                isExpiringSoon,
-                hasQuarantined,
-                hasExpired
-            };
-        });
+        const now = new Date();
+        const enriched = items.map(item => computeItemStockAggregation(item, now));
 
         res.json(enriched);
     } catch (e) {
@@ -162,7 +258,8 @@ exports.getItem = async (req, res) => {
             return res.status(403).json({ error: 'Access denied for this lab scope' });
         }
 
-        res.json(item);
+        const enriched = computeItemStockAggregation(item);
+        res.json(enriched);
     } catch (e) {
         console.error('[INVENTORY] getItem error:', e);
         res.status(500).json({ error: e.message });
@@ -762,32 +859,51 @@ exports.getAlerts = async (req, res) => {
         const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
         const alerts = [];
 
-        for (const item of items) {
-            const availableLots = item.lots.filter(l => l.status === 'AVAILABLE');
-            const totalStock = availableLots.reduce((sum, l) => sum + l.currentQuantity, 0);
+        for (const rawItem of items) {
+            const item = computeItemStockAggregation(rawItem, now);
 
-            // Low stock
-            if (item.reorderPoint > 0 && totalStock < item.reorderPoint) {
+            // Out of stock
+            if (item.isOutOfStock && item.lotCount > 0) {
+                alerts.push({
+                    type: 'OUT_OF_STOCK', severity: 'error',
+                    itemId: item.id, itemName: item.name,
+                    message: `${item.name}: Out of usable stock (${item.expiredStock > 0 ? `${item.expiredStock} ${item.unitOfMeasure} expired` : '0 available'})`,
+                    currentStock: item.usableStock, reorderPoint: item.reorderPoint
+                });
+            } else if (item.isLowStock) {
+                // Low stock
                 alerts.push({
                     type: 'LOW_STOCK', severity: 'warning',
                     itemId: item.id, itemName: item.name,
-                    message: `${item.name}: ${totalStock} ${item.unitOfMeasure} remaining (reorder at ${item.reorderPoint})`,
-                    currentStock: totalStock, reorderPoint: item.reorderPoint
+                    message: `${item.name}: ${item.usableStock} ${item.unitOfMeasure} remaining (reorder threshold: ${item.reorderPoint})`,
+                    currentStock: item.usableStock, reorderPoint: item.reorderPoint
                 });
             }
 
-            // Expiring lots
-            for (const lot of availableLots) {
-                if (lot.expiryDate) {
+            // Missing quantities
+            if (item.hasMissingQuantity) {
+                alerts.push({
+                    type: 'MISSING_QUANTITY', severity: 'warning',
+                    itemId: item.id, itemName: item.name,
+                    message: `${item.name} has ${item.missingQuantityLotCount} lot(s) with missing quantity`,
+                    missingCount: item.missingQuantityLotCount
+                });
+            }
+
+            // Expired lots
+            for (const lot of (item.lots || [])) {
+                const isExp = lot.status === 'EXPIRED' || (lot.expiryDate && new Date(lot.expiryDate) <= now);
+                if (isExp) {
+                    const expStr = lot.expiryDate ? new Date(lot.expiryDate).toISOString().split('T')[0] : 'undated';
+                    alerts.push({
+                        type: 'EXPIRED', severity: 'error',
+                        itemId: item.id, itemName: item.name, lotId: lot.id, lotNumber: lot.lotNumber,
+                        message: `${item.name} (Lot ${lot.lotNumber}) expired on ${expStr}`,
+                        expiryDate: lot.expiryDate
+                    });
+                } else if (lot.status === 'AVAILABLE' && lot.expiryDate) {
                     const exp = new Date(lot.expiryDate);
-                    if (exp <= now) {
-                        alerts.push({
-                            type: 'EXPIRED', severity: 'error',
-                            itemId: item.id, itemName: item.name, lotId: lot.id, lotNumber: lot.lotNumber,
-                            message: `${item.name} (Lot ${lot.lotNumber}) expired on ${exp.toISOString().split('T')[0]}`,
-                            expiryDate: lot.expiryDate
-                        });
-                    } else if (exp <= thirtyDays) {
+                    if (exp <= thirtyDays) {
                         const daysLeft = Math.ceil((exp - now) / (24 * 60 * 60 * 1000));
                         alerts.push({
                             type: 'EXPIRING_SOON', severity: 'warning',
@@ -800,7 +916,7 @@ exports.getAlerts = async (req, res) => {
             }
 
             // Quarantined lots
-            const quarantinedLots = item.lots.filter(l => l.status === 'QUARANTINED');
+            const quarantinedLots = (item.lots || []).filter(l => l.status === 'QUARANTINED');
             for (const lot of quarantinedLots) {
                 alerts.push({
                     type: 'QUARANTINED', severity: 'info',
@@ -810,24 +926,9 @@ exports.getAlerts = async (req, res) => {
             }
         }
 
-        // Also auto-expire lots that have passed their expiry date
-        const expiredLots = await prisma.inventoryLot.findMany({
-            where: {
-                ...labScope(user),
-                status: 'AVAILABLE',
-                expiryDate: { lt: now }
-            }
-        });
-        if (expiredLots.length > 0) {
-            for (const lot of expiredLots) {
-                await prisma.inventoryLot.update({
-                    where: { id: lot.id },
-                    data: { status: 'EXPIRED' }
-                });
-            }
-        }
+        // NOTE: Strictly NO DB updates on GET requests. Removed prisma.inventoryLot.update mutation.
 
-        // Sort: errors first, then warnings
+        // Sort: errors first, then warnings, then info
         alerts.sort((a, b) => {
             const order = { error: 0, warning: 1, info: 2 };
             return (order[a.severity] || 3) - (order[b.severity] || 3);
@@ -838,11 +939,13 @@ exports.getAlerts = async (req, res) => {
                 total: alerts.length,
                 expired: alerts.filter(a => a.type === 'EXPIRED').length,
                 expiringSoon: alerts.filter(a => a.type === 'EXPIRING_SOON').length,
-                lowStock: alerts.filter(a => a.type === 'LOW_STOCK').length,
-                quarantined: alerts.filter(a => a.type === 'QUARANTINED').length
+                lowStock: alerts.filter(a => a.type === 'LOW_STOCK' || a.type === 'OUT_OF_STOCK').length,
+                quarantined: alerts.filter(a => a.type === 'QUARANTINED').length,
+                missingQuantity: alerts.filter(a => a.type === 'MISSING_QUANTITY').length
             }
         });
     } catch (e) {
+        console.error('[INVENTORY] getAlerts error:', e);
         res.status(500).json({ error: e.message });
     }
 };
@@ -855,6 +958,7 @@ exports.getAlerts = async (req, res) => {
 exports.getFEFO = async (req, res) => {
     try {
         const user = req.user;
+        const now = new Date();
         const lots = await prisma.inventoryLot.findMany({
             where: {
                 ...labScope(user),
@@ -869,10 +973,13 @@ exports.getFEFO = async (req, res) => {
             ]
         });
 
+        // Filter out expired lots (expiryDate <= now) so expired lots are NEVER recommended for consumption
+        const nonExpiredLots = lots.filter(l => !l.expiryDate || new Date(l.expiryDate) > now);
+
         // Nulls last: lots without expiry at end
         const sorted = [
-            ...lots.filter(l => l.expiryDate),
-            ...lots.filter(l => !l.expiryDate)
+            ...nonExpiredLots.filter(l => l.expiryDate),
+            ...nonExpiredLots.filter(l => !l.expiryDate)
         ];
 
         res.json(sorted);

@@ -101,7 +101,7 @@ export default function WorkspaceHeader({
                         <span>{t('projects.pageGuide', 'Page guide')}</span>
                     </button>
 
-                    {capabilities.canManage || isManager ? (
+                    {(capabilities.canManage || capabilities.canEditPlan || capabilities.canManageAccess || capabilities.canTransition) ? (
                         <button
                             onClick={onOpenActions}
                             className="px-3 py-2 rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-text text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm"

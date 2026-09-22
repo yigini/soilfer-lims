@@ -7,6 +7,7 @@ const adminBoundaries = require('../data/adminBoundaries.json');
 const crypto = require('crypto');
 const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
+const projectPolicyService = require('../services/projectPolicyService');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -97,6 +98,161 @@ function resolveAnalysisGroup(requestedId, analysisGroups) {
 }
 exports.resolveAnalysisGroup = resolveAnalysisGroup;
 
+/**
+ * Evaluates reception compliance checklist criteria (#117, #113).
+ * Standard criteria:
+ * - container: Container Intact / Sealed (required, N/A not allowed)
+ * - label: Label Legible & Matches ID (required, N/A not allowed)
+ * - quantity: Sample Quantity Sufficient (required, N/A not allowed)
+ * - condition: Sample Condition (required, N/A not allowed)
+ * - coc: Chain of Custody Present (allowed N/A for walk-in / ad-hoc dropoff)
+ */
+function evaluateChecklistCompliance(checklist, options = {}) {
+    const isWalkIn = Boolean(options.isWalkIn);
+    const standardKeys = ['container', 'label', 'quantity', 'condition', 'coc'];
+
+    if (!checklist || typeof checklist !== 'object') {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
+    }
+
+    const items = checklist.items !== undefined ? checklist.items : checklist;
+    if (!items || typeof items !== 'object') {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
+    }
+
+    const itemKeys = Object.keys(items);
+    const isExplicitNC = Boolean(checklist.nonConformance);
+
+    if (itemKeys.length === 0 && !isExplicitNC) {
+        return {
+            isProvided: false,
+            isComplete: false,
+            isPassed: false,
+            failedItems: [],
+            unansweredItems: [...standardKeys],
+            invalidNAItems: [],
+            unknownItems: []
+        };
+    }
+
+    // Recognized aliases per criterion
+    const ALIAS_MAP = {
+        container: ['container', 'containerIntact', 'bagIntact'],
+        label: ['label', 'labelLegible'],
+        quantity: ['quantity', 'quantitySufficient', 'massAdequate'],
+        condition: ['condition', 'conditionGood', 'noLeakage'],
+        coc: ['coc', 'cocPresent']
+    };
+
+    const allRecognizedAliases = new Set([
+        ...Object.values(ALIAS_MAP).flat(),
+        'reason', 'nonConformance', 'notes', 'photos'
+    ]);
+
+    const unknownItems = itemKeys.filter(k => !allRecognizedAliases.has(k));
+
+    const resolvedItems = {};
+    const failedItems = [];
+    const unansweredItems = [];
+    const invalidNAItems = [];
+
+    for (const key of standardKeys) {
+        const aliases = ALIAS_MAP[key];
+        const evaluatedStatuses = [];
+        let note = '';
+
+        for (const alias of aliases) {
+            const val = items[alias];
+            if (val === undefined || val === null) continue;
+
+            if (typeof val === 'boolean') {
+                evaluatedStatuses.push(val ? 'PASS' : 'FAIL');
+            } else if (typeof val === 'string') {
+                const s = val.trim().toUpperCase();
+                if (s === 'PASS' || s === 'OK') evaluatedStatuses.push('PASS');
+                else if (s === 'FAIL') evaluatedStatuses.push('FAIL');
+                else if (s === 'NA' || s === 'N/A') evaluatedStatuses.push('NA');
+            } else if (typeof val === 'object') {
+                if (val.status) {
+                    const s = String(val.status).trim().toUpperCase();
+                    if (s === 'PASS' || s === 'OK') evaluatedStatuses.push('PASS');
+                    else if (s === 'FAIL') evaluatedStatuses.push('FAIL');
+                    else if (s === 'NA' || s === 'N/A') evaluatedStatuses.push('NA');
+                }
+                if (val.note) note = String(val.note);
+            }
+        }
+
+        if (evaluatedStatuses.length === 0) {
+            unansweredItems.push(key);
+            resolvedItems[key] = { status: undefined };
+        } else {
+            // If any alias failed, fail closed!
+            let finalStatus;
+            if (evaluatedStatuses.includes('FAIL')) {
+                finalStatus = 'FAIL';
+            } else if (evaluatedStatuses.includes('NA')) {
+                finalStatus = 'NA';
+            } else if (evaluatedStatuses.every(s => s === 'PASS')) {
+                finalStatus = 'PASS';
+            } else {
+                finalStatus = 'FAIL';
+            }
+
+            resolvedItems[key] = { status: finalStatus, note };
+
+            if (finalStatus === 'FAIL') {
+                failedItems.push({ key, note });
+            } else if (finalStatus === 'NA') {
+                // N/A policy:
+                // coc is permitted N/A ONLY if isWalkIn === true
+                if (key === 'coc') {
+                    if (!isWalkIn) {
+                        invalidNAItems.push('coc');
+                    }
+                } else {
+                    invalidNAItems.push(key);
+                }
+            }
+        }
+    }
+
+    if (isExplicitNC && failedItems.length === 0) {
+        failedItems.push({ key: 'general', note: checklist.reason || 'General non-conformance flagged' });
+    }
+
+    const isComplete = unansweredItems.length === 0 && unknownItems.length === 0;
+    const isPassed = isComplete && failedItems.length === 0 && invalidNAItems.length === 0;
+
+    return {
+        isProvided: true,
+        isComplete,
+        isPassed,
+        failedItems,
+        unansweredItems,
+        invalidNAItems,
+        unknownItems,
+        resolvedItems
+    };
+}
+exports.evaluateChecklistCompliance = evaluateChecklistCompliance;
+
 exports.processIntake = async (req, res) => {
     const {
         originalId,
@@ -139,27 +295,34 @@ exports.processIntake = async (req, res) => {
             // Authoritative: Existing sample's persisted project governs admission policy
             const persistedProjectId = sample.projectId || sample.projectCode;
             if (persistedProjectId) {
-                const existingProject = await prisma.project.findFirst({
-                    where: {
-                        OR: [
-                            { id: String(persistedProjectId) },
-                            { code: String(persistedProjectId) }
-                        ]
-                    }
-                });
-                if (existingProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(existingProject.status)) {
-                    return res.status(422).json({
-                        error: 'PROJECT_ADMISSIONS_PAUSED',
-                        message: `Cannot receive sample: Admissions for project ${existingProject.code || existingProject.id} are ${existingProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
+                const existingResolved = await projectPolicyService.resolveProject(persistedProjectId, prisma);
+                const existingProject = existingResolved?.project;
+                if (existingProject) {
+                    const admission = projectPolicyService.canAdmitSample({
+                        project: existingProject,
+                        channel: 'PHYSICAL_RECEIPT',
+                        actor: user,
+                        labId: user.labId
                     });
+                    if (!admission.allowed) {
+                        return res.status(422).json({
+                            error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
+                            message: admission.reason
+                        });
+                    }
                 }
 
                 // Check for contradictory request projectId override
-                if (projectId && String(projectId) !== String(sample.projectId) && String(projectId) !== String(sample.projectCode)) {
-                    return res.status(400).json({
-                        error: 'CROSS_PROJECT_CONFLICT',
-                        message: `Sample ${originalId} is already registered to project ${sample.projectId || sample.projectCode}. Direct project reassignment via intake is not permitted.`
-                    });
+                if (projectId) {
+                    const reqResolved = await projectPolicyService.resolveProject(projectId, prisma);
+                    const reqCode = reqResolved?.code || String(projectId);
+                    const reqId = reqResolved?.id || String(projectId);
+                    if (reqCode !== sample.projectCode && reqId !== sample.projectId) {
+                        return res.status(400).json({
+                            error: 'CROSS_PROJECT_CONFLICT',
+                            message: `Sample ${originalId} is already registered to project ${sample.projectCode || sample.projectId}. Direct project reassignment via intake is not permitted.`
+                        });
+                    }
                 }
             }
         } else {
@@ -167,75 +330,148 @@ exports.processIntake = async (req, res) => {
             isNewlyCreatedDeskSample = true;
             const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
 
+            let resolvedTargetProject = null;
             if (candidateProjectId) {
-                const targetProject = await prisma.project.findFirst({
-                    where: {
-                        OR: [
-                            { id: String(candidateProjectId) },
-                            { code: String(candidateProjectId) }
-                        ]
-                    }
+                resolvedTargetProject = await projectPolicyService.resolveProject(candidateProjectId, prisma);
+            }
+
+            const targetProjectObj = resolvedTargetProject ? resolvedTargetProject.project : null;
+            const targetSampleId = req.body.id || req.body.sampleId || req.body.originalId || null;
+            const intakeChannel = isWalkIn ? 'WALK_IN' : 'DESK';
+            const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: req.body.exceptionRecord,
+                rawExceptionReason: req.body.exceptionReason,
+                authorizer: req.body.authorizer,
+                approvalId: req.body.approvalId || req.body.approvalToken,
+                actor: user,
+                project: targetProjectObj,
+                labId: user.labId,
+                sampleId: targetSampleId,
+                channel: intakeChannel,
+                prismaClient: prisma
+            });
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: targetProjectObj,
+                channel: isWalkIn ? 'WALK_IN' : 'DESK',
+                actor: user,
+                labId: user.labId,
+                hasException,
+                exceptionRecord
+            });
+
+            if (!admission.allowed) {
+                return res.status(422).json({
+                    error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
+                    message: admission.reason,
+                    exceptionRequired: Boolean(admission.exceptionRequired)
                 });
-                if (targetProject && ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
-                    return res.status(422).json({
-                        error: 'PROJECT_ADMISSIONS_PAUSED',
-                        message: `Cannot receive sample: Admissions for project ${targetProject.code || targetProject.id} are ${targetProject.status.toLowerCase()}. New sample intake is currently paused or closed.`
+            }
+        }
+
+        const isReject = decision === 'REJECTED' || decision === 'REJECT';
+        const isDraft = Boolean(req.body.isDraft);
+        const isFinalAcceptance = !isReject && !isDraft;
+
+        let compliance = null;
+        let complianceExceptionRecord = null;
+
+        if (isFinalAcceptance) {
+            compliance = evaluateChecklistCompliance(checklist, { isWalkIn: Boolean(isWalkIn) });
+
+            if (compliance.invalidNAItems.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INVALID_CHECKLIST_NA',
+                    code: 'INVALID_CHECKLIST_NA',
+                    message: `Not Applicable (N/A) is not permitted for criteria: ${compliance.invalidNAItems.join(', ')}.`,
+                    invalidItems: compliance.invalidNAItems
+                });
+            }
+
+            if (!compliance.isComplete) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    code: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
+                    message: `Unanswered compliance checklist items: ${compliance.unansweredItems.join(', ')}. All items must be assessed before final acceptance.`,
+                    unansweredItems: compliance.unansweredItems
+                });
+            }
+
+            if (!compliance.isPassed) {
+                // Checklist has failed criteria: routine acceptance is strictly blocked.
+                // An authorized manager exception is mandatory.
+                const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
+                const targetProjectObj = sample ? (sample.project || (sample.projectId ? (await projectPolicyService.resolveProject(sample.projectId, prisma))?.project : null)) : (candidateProjectId ? (await projectPolicyService.resolveProject(candidateProjectId, prisma))?.project : null);
+
+                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                    rawExceptionRecord: req.body.exceptionRecord,
+                    rawExceptionReason: req.body.exceptionReason || (checklist && checklist.reason),
+                    authorizer: req.body.authorizer,
+                    approvalId: req.body.approvalId || req.body.approvalToken,
+                    actor: user,
+                    project: targetProjectObj,
+                    labId: user.labId,
+                    sampleId: sample ? sample.id : (originalId || null),
+                    channel: isWalkIn ? 'WALK_IN' : 'PHYSICAL_RECEIPT',
+                    prismaClient: prisma
+                });
+
+                if (!hasException || !exceptionRecord?.isStoredApprovalVerified) {
+                    return res.status(403).json({
+                        success: false,
+                        error: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        code: 'COMPLIANCE_FAILURE_EXCEPTION_REQUIRED',
+                        message: 'Sample has failed compliance checks. Acceptance requires laboratory manager authorization.',
+                        failedChecks: compliance.failedItems,
+                        exceptionRequired: true
                     });
                 }
+
+                complianceExceptionRecord = exceptionRecord;
             }
         }
 
         if (!sample) {
-            let finalProjectId = null;
-            let idPrefix = 'W';
+            const candidateProjectId = projectId || (isWalkIn ? null : (user.projects && user.projects.length > 0 ? (typeof user.projects === 'string' ? JSON.parse(user.projects)[0] : user.projects[0]) : null));
+            const resolvedTargetProject = candidateProjectId ? await projectPolicyService.resolveProject(candidateProjectId, prisma) : null;
 
-            if (projectId) {
-                finalProjectId = projectId;
-                // Use first letter of project ID/code
-                idPrefix = String(projectId).charAt(0).toUpperCase();
-            } else if (isWalkIn) {
-                finalProjectId = null;
-                // Use submitter initials as prefix if available
-                if (submitterDetails && submitterDetails.name) {
-                    const initials = submitterDetails.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 3);
-                    if (initials) idPrefix = initials;
-                }
-            } else if (user.projects && user.projects.length > 0) {
-                const userProjects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
-                finalProjectId = userProjects[0];
-                idPrefix = String(finalProjectId).charAt(0).toUpperCase();
+            let idPrefix = 'W';
+            if (resolvedTargetProject) {
+                idPrefix = resolvedTargetProject.code.charAt(0).toUpperCase();
+            } else if (isWalkIn && submitterDetails && submitterDetails.name) {
+                const initials = submitterDetails.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 3);
+                if (initials) idPrefix = initials;
             }
 
             // Generate a professional Original ID if the current one is temporary
             let finalOriginalId = String(originalId);
             if (finalOriginalId.startsWith('EXT-') || finalOriginalId.startsWith('S-') || !finalOriginalId) {
                 const prefix = samplingDetails?.sampleType === 'PT' ? 'P' : 'W'; // Default W, unless PT
-                finalOriginalId = await idGenerator.generateWalkInOriginalId(projectId ? idPrefix : prefix);
+                finalOriginalId = await idGenerator.generateWalkInOriginalId(resolvedTargetProject ? idPrefix : prefix);
             }
 
-            // For Manual Entry (Walk-in or New Project Sample), we use the short ID as the primary DB ID too
             const sampleId = finalOriginalId;
-            console.log(`[INTAKE] Creating new sample: ${sampleId} linked to Project: ${finalProjectId}`);
+            console.log(`[INTAKE] Creating new sample: ${sampleId} linked to Project: ${resolvedTargetProject?.code || 'WALK-IN'}`);
 
-            // Validate projectId FK before create
-            if (finalProjectId) {
-                const projExists = await prisma.project.findFirst({ where: { id: finalProjectId } });
-                if (!projExists) {
-                    console.warn(`[INTAKE] projectId '${finalProjectId}' not found in Project table, clearing FK.`);
-                    finalProjectId = null;
-                }
-            }
+            const hasException = Boolean(req.body.hasException || req.body.exceptionRecord || req.body.exceptionReason);
+            const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? { reason: req.body.exceptionReason, authorizer: user.username, authorizedAt: new Date().toISOString() } : null);
 
-            const isWalkInDeskSample = !finalProjectId && isWalkIn;
+            const isWalkInDeskSample = !resolvedTargetProject && isWalkIn;
+            const initialMetadata = isWalkInDeskSample
+                ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN }
+                : (hasException ? { exceptionRecord, origin: 'DESK_EXCEPTION' } : {});
+
             sample = await prisma.sample.create({
                 data: {
                     id: sampleId,
                     originalId: finalOriginalId,
                     status: 'EXPECTED',
-                    projectCode: finalProjectId || null,
-                    projectId: finalProjectId || null,
+                    projectCode: resolvedTargetProject ? resolvedTargetProject.code : null,
+                    projectId: resolvedTargetProject ? resolvedTargetProject.id : null,
                     assignedLab: user.labId,
-                    metadata: JSON.stringify(isWalkInDeskSample ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN } : {}),
+                    metadata: JSON.stringify(initialMetadata),
                     history: JSON.stringify([])
                 }
             });
@@ -303,6 +539,18 @@ exports.processIntake = async (req, res) => {
                 receivingOfficerId,
                 receivingOfficerName,
                 receivingOfficerSignature,
+                receptionData: JSON.stringify({
+                    checklist,
+                    notes,
+                    ncReason: ncReason || null,
+                    rejectionReason: ncReason || null,
+                    receivedBy,
+                    labLocation: labId,
+                    at: now,
+                    coc: req.body.coc,
+                    photos: photosList,
+                    isWalkIn: isWalkIn || false
+                }),
                 metadata: JSON.stringify({
                     nonConformance: {
                         reason: ncReason,
@@ -459,6 +707,15 @@ exports.processIntake = async (req, res) => {
         }
 
         // Final Acceptance Processing
+        if (complianceExceptionRecord) {
+            history.push({
+                status: 'ADMITTED_WITH_EXCEPTION',
+                changedBy: receivedBy,
+                timestamp: now,
+                note: `Admitted under manager exception: ${complianceExceptionRecord.reason || 'Manager authorized compliance exception'} (Authorized by: ${complianceExceptionRecord.verifiedAuthorizer})`
+            });
+        }
+
         if (analysisRemovals && analysisRemovals.length > 0 && !justification) {
             return res.status(400).json({ success: false, message: 'Justification is mandatory when removing analyses.' });
         }
@@ -705,6 +962,12 @@ exports.processIntake = async (req, res) => {
             ? intakePhotos
             : (Array.isArray(req.body.photos) ? req.body.photos : []);
 
+        const existingMetadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        const updatedMetadata = {
+            ...existingMetadata,
+            ...(complianceExceptionRecord ? { complianceException: complianceExceptionRecord } : {})
+        };
+
         const updateData = {
             status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
             labId: assignedLabId,
@@ -714,6 +977,7 @@ exports.processIntake = async (req, res) => {
             acceptedAt: assignedLabId ? now : null,
             dryingStatus: assignedLabId ? 'PENDING' : null,
             preparationStatus: assignedLabId ? 'PENDING' : null,
+            metadata: JSON.stringify(updatedMetadata),
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
             analysisGroupIds: JSON.stringify([...new Set(canonicalGroupIds)]),
             fieldMetadata: JSON.stringify(currentFieldMeta),
@@ -764,6 +1028,7 @@ exports.processIntake = async (req, res) => {
                 moistureOnArrival,
                 foreignMaterial,
                 massDeficitInfo,
+                complianceException: complianceExceptionRecord || null,
                 positionalUncertaintyM: uncertaintyM,
                 locationSource: samplingDetails?.locationSource || samplingDetails?.captureMethod,
                 compositeRadiusM: compRadius,
@@ -816,6 +1081,19 @@ exports.processIntake = async (req, res) => {
                 sampleId: String(sample.id)
             }
         });
+
+        // Mark stored exception approval as CONSUMED to enforce single-use consumption semantics
+        const effectiveApprovalId = (req.body.exceptionRecord && (req.body.exceptionRecord.approvalId || req.body.exceptionRecord.amendmentId)) || req.body.approvalId || req.body.approvalToken;
+        if (effectiveApprovalId) {
+            try {
+                await prisma.sampleAmendment.update({
+                    where: { id: String(effectiveApprovalId) },
+                    data: { resolution: 'CONSUMED' }
+                });
+            } catch (e) {
+                // Stored approval might be a token or mock in tests
+            }
+        }
 
         console.log(`[INTAKE] Successfully processed ${sample.id}`);
         res.json({
@@ -1423,21 +1701,43 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         }
 
         if (projectRefs.size > 0) {
-            const blockedProjects = await prisma.project.findMany({
+            const allReferencedProjects = await prisma.project.findMany({
                 where: {
                     OR: [
                         { id: { in: Array.from(projectRefs) } },
                         { code: { in: Array.from(projectRefs) } }
-                    ],
-                    status: { in: ['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'] }
+                    ]
                 }
             });
-            if (blockedProjects.length > 0) {
-                const bp = blockedProjects[0];
-                return res.status(422).json({
-                    error: 'PROJECT_ADMISSIONS_PAUSED',
-                    message: `Cannot receive consignment: Admissions for project ${bp.code || bp.id} are ${bp.status.toLowerCase()}. New sample intake is currently paused or closed.`
+
+            for (const proj of allReferencedProjects) {
+                const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                    rawExceptionRecord: req.body.exceptionRecord,
+                    rawExceptionReason: req.body.exceptionReason,
+                    authorizer: req.body.authorizer,
+                    approvalId: req.body.approvalId || req.body.approvalToken,
+                    actor: user,
+                    project: proj,
+                    labId: userLab,
+                    channel: 'MANIFEST',
+                    prismaClient: prisma
                 });
+
+                const admission = projectPolicyService.canAdmitSample({
+                    project: proj,
+                    channel: 'MANIFEST',
+                    actor: user,
+                    labId: userLab,
+                    hasException,
+                    exceptionRecord
+                });
+                if (!admission.allowed) {
+                    return res.status(422).json({
+                        error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
+                        message: `Cannot receive consignment: ${admission.reason}`,
+                        exceptionRequired: Boolean(admission.exceptionRequired)
+                    });
+                }
             }
         }
 
@@ -1472,6 +1772,44 @@ exports.processBatchConsignmentIntake = async (req, res) => {
             if (!selected.valid) return res.status(400).json({ error: selected.error, message: selected.error, row: index + 1, issues: selected.issues });
         }
 
+        // Canonical project resolution (F11)
+        const candidateConsignmentProject = csgInput.projectCode || csgInput.projectId;
+        const resolvedConsignmentProject = candidateConsignmentProject
+            ? await projectPolicyService.resolveProject(candidateConsignmentProject, prisma)
+            : null;
+
+        // Gate consignment intake through centralized admission policy
+        if (resolvedConsignmentProject) {
+            const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+                rawExceptionRecord: req.body.exceptionRecord,
+                rawExceptionReason: req.body.exceptionReason,
+                authorizer: req.body.authorizer,
+                approvalId: req.body.approvalId || req.body.approvalToken,
+                actor: user,
+                project: resolvedConsignmentProject.project,
+                labId: userLab,
+                channel: 'MANIFEST',
+                prismaClient: prisma
+            });
+
+            const admission = projectPolicyService.canAdmitSample({
+                project: resolvedConsignmentProject.project,
+                channel: 'MANIFEST',
+                actor: user,
+                labId: userLab,
+                hasException,
+                exceptionRecord
+            });
+
+            if (!admission.allowed) {
+                return res.status(422).json({
+                    error: (admission.code === 'PROJECT_CLOSED' || admission.code === 'PROJECT_PAUSED') ? 'PROJECT_ADMISSIONS_PAUSED' : (admission.code || 'PROJECT_ADMISSIONS_BLOCKED'),
+                    message: admission.reason,
+                    exceptionRequired: Boolean(admission.exceptionRequired)
+                });
+            }
+        }
+
         // 4. Atomic transaction across consignment and all samples
         const result = await prisma.$transaction(async (tx) => {
             // A. Create Consignment Record (RC-12)
@@ -1480,7 +1818,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     id: crypto.randomUUID(),
                     code: consignmentCode,
                     labId: userLab,
-                    projectCode: csgInput.projectCode || null,
+                    projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (csgInput.projectCode || null),
                     submitterName: csgInput.submitterName || csgInput.submitter?.name || null,
                     submitterOrg: csgInput.submitterOrg || csgInput.submitter?.organization || null,
                     submitterPhone: csgInput.submitterPhone || csgInput.submitter?.phone || null,
@@ -1581,8 +1919,8 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     labId,
                     status,
                     assignedLab: userLab,
-                    projectCode: consignment.projectCode || (existing?.projectCode || null),
-                    projectId: consignment.projectCode || (existing?.projectId || null),
+                    projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (consignment.projectCode || (existing?.projectCode || null)),
+                    projectId: resolvedConsignmentProject ? resolvedConsignmentProject.id : (existing?.projectId || null),
                     receptionDate: now,
                     receivedBy,
                     acceptedBy: isRejected ? null : receivedBy,

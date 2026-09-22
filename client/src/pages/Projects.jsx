@@ -84,18 +84,23 @@ export default function Projects() {
             let dueText = t('projects.attention.noImmediateAction', 'No immediate action');
             let isAttention = false;
 
+            const isOverdue = p.deliveryDeadline && new Date(p.deliveryDeadline) < new Date();
             if (isDraft) {
                 dueText = t('projects.attention.completeSetup', 'Choose an analysis plan');
                 isAttention = true;
             } else if (isPaused) {
                 dueText = t('projects.attention.admissionsPaused', 'Admissions paused');
                 isAttention = true;
+            } else if (isOverdue && p.status === 'ACTIVE') {
+                if (counts.awaitingArrival > 0) {
+                    dueText = t('projects.attention.samplesOverdue', { count: counts.awaitingArrival }, '{{count}} expected samples overdue');
+                } else {
+                    dueText = t('projects.attention.deliveryOverdue', 'Delivery deadline reached');
+                }
+                isAttention = true;
             } else if (counts.awaitingArrival > 0) {
-                dueText = t('projects.attention.samplesExpected', { count: counts.awaitingArrival }, '{{count}} expected samples overdue');
-                isAttention = true;
-            } else if (p.deliveryDeadline && new Date(p.deliveryDeadline) < new Date() && p.status === 'ACTIVE') {
-                dueText = t('projects.attention.deliveryOverdue', 'Delivery deadline reached');
-                isAttention = true;
+                dueText = t('projects.attention.awaitingArrival', { count: counts.awaitingArrival }, '{{count}} awaiting arrival');
+                isAttention = false;
             }
 
             return {

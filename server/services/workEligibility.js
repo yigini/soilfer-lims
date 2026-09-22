@@ -9,6 +9,15 @@
 
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
 const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
+const TEXTURE_ALIASES = new Set([
+    'TEXTURE',
+    'SOIL_PSD_TEXTURE',
+    'SOIL_TEXTURE',
+    'PSA',
+    'pSA',
+    'Particle Size Analysis'
+]);
+const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 
 /**
  * Evaluates whether a work item is ready for result/checklist entry by the technician.
@@ -179,6 +188,33 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         blockers.push('ALREADY_APPROVED: Sample is already approved');
     }
 
+    // 2b. Operational gate prerequisites
+    const gateWorkItems = workItems.filter(w => GATE_ANALYSES.includes(w.analysis));
+    const dryingItem = gateWorkItems.find(w => w.analysis === 'DRYING');
+    const prepItem = gateWorkItems.find(w => w.analysis === 'PREPARATION');
+
+    const SATISFIED_GATE_STATUSES = ['DONE', 'COMPLETED', 'ACCEPTED', 'SKIPPED', 'WAIVED', 'NOT_APPLICABLE'];
+
+    // Evaluate Drying gate independently:
+    const isDryingRequired = Boolean(dryingItem) || (sample.dryingStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.dryingStatus));
+    if (isDryingRequired) {
+        const sampleDryingSatisfied = SATISFIED_GATE_STATUSES.includes(sample.dryingStatus);
+        const itemDryingSatisfied = dryingItem && SATISFIED_GATE_STATUSES.includes(dryingItem.status);
+        if (!sampleDryingSatisfied && !itemDryingSatisfied) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Drying gate has not been completed');
+        }
+    }
+
+    // Evaluate Preparation gate independently:
+    const isPrepRequired = Boolean(prepItem) || (sample.preparationStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.preparationStatus));
+    if (isPrepRequired) {
+        const samplePrepSatisfied = SATISFIED_GATE_STATUSES.includes(sample.preparationStatus);
+        const itemPrepSatisfied = prepItem && SATISFIED_GATE_STATUSES.includes(prepItem.status);
+        if (!samplePrepSatisfied && !itemPrepSatisfied) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Sample Preparation gate has not been completed');
+        }
+    }
+
     // 3. Analytical items check (must have ordered analytical work; gate-only work does NOT qualify)
     const analyticalItems = workItems.filter(w => !NON_ANALYTICAL.includes(w.analysis));
     if (analyticalItems.length === 0) {
@@ -198,23 +234,76 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         blockers.push('ALL_WORK_OMITTED: All ordered analyses were omitted/cancelled; requires formal administrative closure, not analytical approval');
     }
 
-    // 6. Active order lines parity
+    // 6. Active order lines parity / required analyses completeness
+    let requiredAnalysesToCheck = [];
     if (Array.isArray(orderLines) && orderLines.length > 0) {
-        const activeLines = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false);
-        for (const line of activeLines) {
-            const linked = analyticalItems.find(w => w.analysis === line.analysis);
-            if (!linked || linked.status !== 'ACCEPTED') {
-                blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${line.analysis} is not accepted`);
+        requiredAnalysesToCheck = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false).map(l => l.analysis);
+    } else if (sample.requiredAnalyses) {
+        try {
+            const parsed = typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses;
+            if (Array.isArray(parsed)) {
+                requiredAnalysesToCheck = parsed.filter(code => !GATE_ANALYSES.includes(code));
+            }
+        } catch (e) {}
+    }
+
+    if (requiredAnalysesToCheck.length > 0) {
+        for (const reqCode of requiredAnalysesToCheck) {
+            // Check direct match
+            const linked = analyticalItems.find(w => w.analysis === reqCode);
+            if (linked) {
+                if (!['ACCEPTED', 'WAIVED'].includes(linked.status)) {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} is not accepted (status: ${linked.status})`);
+                }
+            } else if (TEXTURE_ALIASES.has(reqCode)) {
+                // If TEXTURE was required, check if TEXTURE or all 3 fractions (SAND, SILT, CLAY) are accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied
+                } else {
+                    const fractionItems = analyticalItems.filter(w => DERIVED_TEXTURE_FRACTIONS.includes(w.analysis));
+                    const allFractionsAccepted = DERIVED_TEXTURE_FRACTIONS.every(frac => {
+                        const fi = fractionItems.find(w => w.analysis === frac);
+                        return fi && ['ACCEPTED', 'WAIVED'].includes(fi.status);
+                    });
+                    if (!allFractionsAccepted) {
+                        blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or derived texture fractions) is not accepted`);
+                    }
+                }
+            } else if (DERIVED_TEXTURE_FRACTIONS.includes(reqCode)) {
+                // If individual fraction was required, check if that fraction OR composite TEXTURE is accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied by composite TEXTURE
+                } else {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or composite TEXTURE) is not accepted`);
+                }
+            } else {
+                blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} has no corresponding laboratory work item`);
             }
         }
     }
 
     // 7. QC Batch resolution
     const qcBatches = options.qcBatches || [];
-    const failedQc = qcBatches.find(b => b.status === 'FAILED');
-    const pendingQc = qcBatches.find(b => b.status === 'PENDING');
+    const failedQc = qcBatches.find(b => {
+        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
+        if (!isFailedStatus) return false;
+        let hasValidDisposition = false;
+        if (b.disposition) {
+            try {
+                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
+                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
+                    hasValidDisposition = true;
+                }
+            } catch (e) {}
+        }
+        return !hasValidDisposition;
+    });
+
+    const pendingQc = qcBatches.find(b => ['OPEN', 'RUNNING', 'PENDING'].includes(b.status));
     if (failedQc) {
-        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed`);
+        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed quality control and lacks an authorized manager disposition override`);
     }
     if (pendingQc) {
         blockers.push(`QC_BATCH_PENDING: Linked QC batch ${pendingQc.batchNumber || pendingQc.id} has not been evaluated`);
@@ -239,21 +328,46 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
 /**
  * Evaluates whether an official report can be released / published.
  */
-function canPublish(sample, report, user) {
+function canPublish(sample, report, user, options = {}) {
     if (!user || !['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(user.role)) {
-        return { allowed: false, reason: 'Report publication requires laboratory manager authority (AUDIT_USER is strictly read-only)' };
+        return { allowed: false, code: 'PERMISSION_DENIED', reason: 'Report publication requires laboratory manager authority (AUDIT_USER is strictly read-only)' };
     }
 
     if (!sample) {
-        return { allowed: false, reason: 'Sample record not found' };
+        return { allowed: false, code: 'NOT_FOUND', reason: 'Sample record not found' };
+    }
+
+    // QC Release Gate: unresolved failed QC strictly blocks report publication
+    const qcBatches = options.qcBatches || [];
+    const failedQc = qcBatches.find(b => {
+        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
+        if (!isFailedStatus) return false;
+        let hasValidDisposition = false;
+        if (b.disposition) {
+            try {
+                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
+                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
+                    hasValidDisposition = true;
+                }
+            } catch (e) {}
+        }
+        return !hasValidDisposition;
+    });
+
+    if (failedQc) {
+        return {
+            allowed: false,
+            code: 'QC_BATCH_FAILED',
+            reason: `Cannot publish report: Linked QC batch ${failedQc.id} failed quality control without an authorized manager disposition override.`
+        };
     }
 
     if (!['APPROVED', 'PUBLISHED', 'COMPLETED', 'SUBMITTED_FULL'].includes(sample.status)) {
-        return { allowed: false, reason: `Sample must be in approved or completed status before publishing (current: ${sample.status})` };
+        return { allowed: false, code: 'SAMPLE_NOT_APPROVED', reason: `Sample must be in approved or completed status before publishing (current: ${sample.status})` };
     }
 
     if (['DISPOSED', 'ARCHIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
-        return { allowed: false, reason: 'Sample is closed, archived or rejected' };
+        return { allowed: false, code: 'SAMPLE_CLOSED', reason: 'Sample is closed, archived or rejected' };
     }
 
     return { allowed: true, reason: null };

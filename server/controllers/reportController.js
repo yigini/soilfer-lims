@@ -17,6 +17,50 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+/**
+ * Shared Report Authorization Validator
+ * Enforces shared precedence across list, detail, and counts:
+ * 1. Global access (SUPER_ADMIN) is always allowed.
+ * 2. Inactive / unauthenticated users are always denied.
+ * 3. If a linked sample exists, the sample's scope is STRICTLY AUTHORITATIVE.
+ *    Stale/contradictory report metadata (labId, projectCode) never overrides linked sample scope.
+ * 4. If no linked sample exists (orphaned report), falls back to report metadata.
+ * 5. Avoids treating sampleLabId (human sample identifier) as a laboratory authority.
+ */
+function isReportAuthorized(user, report, sample) {
+    if (!user || user.isActive === false || user.status === 'INACTIVE') return false;
+    const scopeGuard = require('../utils/scopeGuard');
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+
+    if (sample) {
+        return scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' });
+    }
+
+    // Orphaned report fallback: evaluate against report metadata
+    return scopeGuard.canAccessEntity(user, report, { labField: 'labId', altLabField: 'assignedLab' });
+}
+
+const reportSelectFields = {
+    id: true,
+    sampleId: true,
+    sampleLabId: true,
+    labId: true,
+    version: true,
+    status: true,
+    firstName: true,
+    surname: true,
+    phone: true,
+    projectCode: true,
+    projectName: true,
+    generatedBy: true,
+    generatedAt: true,
+    publishedAt: true,
+    shareLinks: {
+        where: { isRevoked: false },
+        select: { id: true, expiresAt: true }
+    }
+};
+
 // ─── INTERNAL ENDPOINTS ──────────────────────────────────
 
 /**
@@ -39,11 +83,21 @@ async function generateReport(req, res) {
             return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
-        // R1: Enforce publication authority & sample approval state
+        // S06: Query linked QC batches for QC release gate
+        const qcBatches = await prisma.batch.findMany({
+            where: {
+                workItems: {
+                    some: { sampleId: String(sampleId) }
+                }
+            }
+        });
+
+        // R1: Enforce publication authority, sample approval state, and QC release gate
         const { canPublish } = require('../services/workEligibility');
-        const publishCheck = canPublish(sample, null, req.user);
+        const publishCheck = canPublish(sample, null, req.user, { qcBatches });
         if (!publishCheck.allowed) {
-            return res.status(403).json({ error: publishCheck.reason, code: 'PUBLISH_DENIED' });
+            const statusCode = publishCheck.code === 'QC_BATCH_FAILED' ? 409 : 403;
+            return res.status(statusCode).json({ error: publishCheck.reason, code: publishCheck.code || 'PUBLISH_DENIED' });
         }
 
         // S13: Find max historical version across ALL reports for this sample to ensure strictly monotonic versioning
@@ -133,10 +187,9 @@ async function getReport(req, res) {
             return res.status(404).json({ error: 'Report not found' });
         }
 
-        // S24: Lab Scope Check
-        const scopeGuard = require('../utils/scopeGuard');
-        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
-        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+        // Shared authoritative Report Scope Check
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
             return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
         }
 
@@ -207,89 +260,225 @@ async function getReportBySample(req, res) {
  */
 async function searchReports(req, res) {
     try {
-        const { q, status, page = 1, limit = 25, projectId } = req.query;
+        const { q, status, page = 1, limit = 25, projectId, sampleId, client } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const where = {};
 
-        // R-9 & R1: Scoping — non-admin users only see reports in their authorized scope
-        const userRole = req.user?.role;
-        const userLab = req.user?.labId;
-        const userProjects = req.user?.projects ? (typeof req.user.projects === 'string' ? JSON.parse(req.user.projects) : req.user.projects) : [];
+        const scopeGuard = require('../utils/scopeGuard');
+        const projectPolicyService = require('../services/projectPolicyService');
+        const isGlobal = scopeGuard.hasGlobalAccess(req.user);
 
-        if (userLab && !['SUPER_ADMIN', 'MASTER_USER'].includes(userRole)) {
-            where.labId = userLab;
+        // Fail-closed for inactive or missing user
+        if (!req.user || req.user.isActive === false || req.user.status === 'INACTIVE') {
+            return res.json({ reports: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } });
         }
 
-        // R1: External and general viewers strictly view PUBLISHED reports for authorized projects
+        const userRole = req.user.role;
+        const userLab = req.user.labId;
+        const userProjects = req.user.projects ? (typeof req.user.projects === 'string' ? JSON.parse(req.user.projects) : req.user.projects) : [];
+        const userCountries = req.user.countries ? (typeof req.user.countries === 'string' ? JSON.parse(req.user.countries) : req.user.countries) : [];
+
+        // Status filter: External viewers are locked to PUBLISHED reports
         if (['EXTERNAL_VIEWER', 'VIEWER'].includes(userRole)) {
             where.status = 'PUBLISHED';
-            if (userProjects.length > 0) {
-                where.projectCode = { in: userProjects };
-            } else if (!userLab) {
-                return res.json({ reports: [], pagination: { total: 0, page: 1, limit: parseInt(limit), pages: 0 } });
-            }
         } else if (status) {
-            where.status = status;
+            if (status === 'ALL' || status === '*') {
+                // Discover all report versions (PUBLISHED, SUPERSEDED, DRAFT, etc.)
+                delete where.status;
+            } else {
+                where.status = status;
+            }
         } else {
             where.status = 'PUBLISHED'; // Default to published
         }
 
+        const andClauses = [];
+
         if (projectId) {
-            where.projectCode = String(projectId);
+            const childCodes = projectPolicyService.getProgrammeChildProjectCodes(projectId);
+            const candidateCodes = childCodes.length > 0 ? [String(projectId), ...childCodes] : [String(projectId)];
+
+            // Resolve matching project codes/IDs without invalid relation references on Report
+            const matchingProjects = await prisma.project.findMany({
+                where: {
+                    OR: [
+                        { id: { in: candidateCodes } },
+                        { code: { in: candidateCodes } }
+                    ]
+                },
+                select: { id: true, code: true }
+            });
+
+            const allCodes = new Set(candidateCodes);
+            matchingProjects.forEach(p => {
+                if (p.code) allCodes.add(p.code);
+                if (p.id) allCodes.add(p.id);
+            });
+            const codesList = Array.from(allCodes);
+
+            const matchingSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { projectCode: { in: codesList } },
+                        { projectId: { in: codesList } }
+                    ]
+                },
+                select: { id: true }
+            });
+            const matchingSampleIds = matchingSamples.map(s => s.id);
+
+            andClauses.push({
+                OR: [
+                    { projectCode: { in: codesList } },
+                    ...(matchingSampleIds.length > 0 ? [{ sampleId: { in: matchingSampleIds } }] : [])
+                ]
+            });
         }
 
-        // Full-text search across denormalized keys
+        if (sampleId) {
+            const sid = String(sampleId).trim();
+            const matchingSamples = await prisma.sample.findMany({
+                where: {
+                    OR: [
+                        { id: sid },
+                        { labId: sid },
+                        { originalId: sid }
+                    ]
+                },
+                select: { id: true, labId: true }
+            });
+            const sids = [sid, ...matchingSamples.map(s => s.id)];
+            const labIds = [sid, ...matchingSamples.map(s => s.labId).filter(Boolean)];
+            andClauses.push({
+                OR: [
+                    { sampleId: { in: sids } },
+                    { sampleLabId: { in: labIds } }
+                ]
+            });
+        }
+
+        if (client && client.trim()) {
+            const cTerm = client.trim();
+            andClauses.push({
+                OR: [
+                    { firstName: { contains: cTerm } },
+                    { surname: { contains: cTerm } }
+                ]
+            });
+        }
+
+        // Full-text search across denormalized keys and sample originalId
         if (q && q.trim()) {
             const term = q.trim();
-            // Digits-only? Search phone
             const isPhone = /^\d+$/.test(term.replace(/[+\-\s()]/g, ''));
 
-            where.OR = [
+            // Check if term matches any original field ID on sample
+            const origSamples = await prisma.sample.findMany({
+                where: { originalId: { contains: term } },
+                select: { id: true }
+            });
+            const origSampleIds = origSamples.map(s => s.id);
+
+            const qOr = [
                 { firstName: { contains: term } },
                 { surname: { contains: term } },
                 { projectCode: { contains: term } },
                 { projectName: { contains: term } },
                 { sampleLabId: { contains: term } },
-                { sampleId: { contains: term } }
+                { sampleId: { contains: term } },
+                ...(origSampleIds.length > 0 ? [{ sampleId: { in: origSampleIds } }] : [])
             ];
 
             if (isPhone) {
-                where.OR.push({ phoneNorm: { contains: term.replace(/\D/g, '') } });
+                qOr.push({ phoneNorm: { contains: term.replace(/\D/g, '') } });
             } else {
-                where.OR.push({ phone: { contains: term } });
+                qOr.push({ phone: { contains: term } });
             }
+            andClauses.push({ OR: qOr });
         }
 
-        const [reports, total] = await Promise.all([
-            prisma.report.findMany({
-                where,
-                select: {
-                    id: true,
-                    sampleId: true,
-                    sampleLabId: true,
-                    labId: true,
-                    version: true,
-                    status: true,
-                    firstName: true,
-                    surname: true,
-                    phone: true,
-                    projectCode: true,
-                    projectName: true,
-                    generatedBy: true,
-                    generatedAt: true,
-                    publishedAt: true,
-                    shareLinks: {
-                        where: { isRevoked: false },
-                        select: { id: true, expiresAt: true }
-                    }
-                },
-                orderBy: { generatedAt: 'desc' },
-                skip,
-                take: parseInt(limit)
-            }),
-            prisma.report.count({ where })
-        ]);
+        if (andClauses.length > 0) {
+            where.AND = andClauses;
+        }
+
+        // Global administrators query database directly
+        if (isGlobal) {
+            const [reports, total] = await Promise.all([
+                prisma.report.findMany({
+                    where,
+                    select: reportSelectFields,
+                    orderBy: { generatedAt: 'desc' },
+                    skip,
+                    take: parseInt(limit)
+                }),
+                prisma.report.count({ where })
+            ]);
+
+            return res.json({
+                reports,
+                pagination: {
+                    total,
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    pages: Math.ceil(total / parseInt(limit))
+                }
+            });
+        }
+
+        // Non-global users: Validate role scope presence (fail-closed if no scope assigned)
+        const isNationalRole = userRole === 'MASTER_USER' || userRole === 'COUNTRY_ADMIN';
+        const isProjectRole = userRole === 'PROJECT_MANAGER' || userRole === 'EXTERNAL_VIEWER' || userRole === 'VIEWER';
+        const hasScope = (isNationalRole && Array.isArray(userCountries) && userCountries.length > 0) ||
+                         (isProjectRole && Array.isArray(userProjects) && userProjects.length > 0) ||
+                         Boolean(userLab);
+
+        if (!hasScope) {
+            return res.json({
+                reports: [],
+                pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 }
+            });
+        }
+
+        // Fetch candidate reports matching user filters
+        const candidateReports = await prisma.report.findMany({
+            where,
+            select: {
+                id: true,
+                sampleId: true,
+                labId: true,
+                projectCode: true,
+                generatedAt: true
+            },
+            orderBy: { generatedAt: 'desc' }
+        });
+
+        const candidateSampleIds = [...new Set(candidateReports.map(r => r.sampleId).filter(Boolean))];
+
+        // Authoritative linked sample resolution: sample scope determines report access
+        const candidateSamples = candidateSampleIds.length > 0
+            ? await prisma.sample.findMany({
+                where: { id: { in: candidateSampleIds } }
+            })
+            : [];
+        const sampleMap = new Map(candidateSamples.map(s => [s.id, s]));
+
+        // Filter: every report is authorized via the exact same authoritative helper isReportAuthorized(req.user, r, sample)
+        const authorizedReports = candidateReports.filter(r => {
+            const sample = r.sampleId ? sampleMap.get(r.sampleId) || null : null;
+            return isReportAuthorized(req.user, r, sample);
+        });
+
+        const total = authorizedReports.length;
+        const pagedIds = authorizedReports.slice(skip, skip + parseInt(limit)).map(r => r.id);
+
+        const reports = pagedIds.length > 0
+            ? await prisma.report.findMany({
+                where: { id: { in: pagedIds } },
+                select: reportSelectFields,
+                orderBy: { generatedAt: 'desc' }
+            })
+            : [];
 
         res.json({
             reports,
@@ -325,6 +514,12 @@ async function createShareLink(req, res) {
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
+
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        }
+
         if (report.status !== 'PUBLISHED') {
             return res.status(400).json({ error: 'Only published reports can be shared' });
         }
@@ -385,6 +580,16 @@ async function createShareLink(req, res) {
 async function listShareLinks(req, res) {
     try {
         const { reportId } = req.params;
+        const report = await prisma.report.findUnique({ where: { id: reportId } });
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
+            return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+        }
+
         const links = await prisma.reportShareLink.findMany({
             where: { reportId },
             orderBy: { createdAt: 'desc' },
@@ -421,6 +626,14 @@ async function revokeShareLink(req, res) {
         }
         if (link.isRevoked) {
             return res.status(400).json({ error: 'Link already revoked' });
+        }
+
+        const report = await prisma.report.findUnique({ where: { id: link.reportId } });
+        if (report) {
+            const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+            if (!isReportAuthorized(req.user, report, sample)) {
+                return res.status(403).json({ error: 'Access denied: Report not in your Lab scope' });
+            }
         }
 
         await prisma.reportShareLink.update({
@@ -575,9 +788,8 @@ async function getReportPdf(req, res) {
         }
 
         // Scope and published check
-        const scopeGuard = require('../utils/scopeGuard');
-        const sample = await prisma.sample.findUnique({ where: { id: report.sampleId } });
-        if (sample && !scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+        const sample = report.sampleId ? await prisma.sample.findUnique({ where: { id: report.sampleId } }) : null;
+        if (!isReportAuthorized(req.user, report, sample)) {
             return res.status(403).json({ error: 'Access denied: Report not in your scope' });
         }
 

@@ -71,6 +71,16 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         techBlueToken = generateToken(techBlue);
     });
 
+    const goldenChecklist = {
+        items: {
+            container: { status: 'PASS' },
+            label: { status: 'PASS' },
+            quantity: { status: 'PASS' },
+            condition: { status: 'PASS' },
+            coc: { status: 'PASS' }
+        }
+    };
+
     /**
      * SCENARIO A: Project Sample Full Lifecycle
      */
@@ -89,7 +99,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 labId: 'LAB-GOLD',
                 requiredAnalyses: ['PH_H2O', 'EC', 'SOC'],
                 projectCode: 'GOLD-PROJ',
-                isWalkIn: false
+                isWalkIn: false,
+                checklist: goldenChecklist
             });
         expect(receiveRes.status).toBe(200);
         const sampleId = receiveRes.body.id;
@@ -171,7 +182,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 receivedBy: mgrSilverUsername,
                 labId: 'LAB-SILVER',
                 requiredAnalyses: ['PH_H2O'],
-                isWalkIn: true
+                isWalkIn: true,
+                checklist: goldenChecklist
             });
         const sampleId = intakeRes.body.id;
 
@@ -219,7 +231,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 receivedBy: mgrRedUsername,
                 labId: 'LAB-RED',
                 requiredAnalyses: ['PH_H2O'],
-                isWalkIn: false
+                isWalkIn: false,
+                checklist: goldenChecklist
             });
         const sampleId = intakeRes.body.id;
 
@@ -261,7 +274,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 receivedBy: mgrBlueUsername,
                 labId: 'LAB-BLUE',
                 requiredAnalyses: ['PH_H2O'], // No Spectral
-                isWalkIn: false
+                isWalkIn: false,
+                checklist: goldenChecklist
             });
         const sampleId = intakeRes.body.id;
 
@@ -308,7 +322,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
                 labId: 'LAB-GOLD',
                 requiredAnalyses: ['SPEC_MIR'],
                 projectCode: 'GOLD-SPEC-PROJ',
-                isWalkIn: false
+                isWalkIn: false,
+                checklist: goldenChecklist
             });
         if (receiveRes.status !== 200) {
             console.log('DEBUG Scenario E Intake Failure:', receiveRes.body);

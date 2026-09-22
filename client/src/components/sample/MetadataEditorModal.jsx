@@ -1,10 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Save, MapPin } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import LocationPicker from '../reception/LocationPicker';
 
 const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
+    const { user } = useAuth();
     if (!isOpen || !sample) return null;
+
+    const labCoordinates = user?.labCoordinates || (user?.labId === 'LAB-ZWE-01' || user?.labId === 'HARARE' ? [-17.8292, 31.0522] : null);
 
     const [formData, setFormData] = useState({});
 
@@ -144,6 +148,7 @@ const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
                                     accuracy: formData.gpsAccuracy,
                                     description: formData.locationDescription
                                 }}
+                                labCoordinates={labCoordinates}
                                 onChange={handleLocationChange}
                             />
                         </div>

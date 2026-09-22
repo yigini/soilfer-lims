@@ -16,6 +16,7 @@ export default function ProjectActionsModal({
     onClose,
     project,
     counts,
+    capabilities = {},
     onSuccess,
     initialActionType = 'menu'
 }) {
@@ -23,6 +24,10 @@ export default function ProjectActionsModal({
     const { t } = useLanguage();
     const { user, hasPermission } = useAuth();
     const actorId = user?.id || 'anonymous';
+
+    const canEditPlan = Boolean(capabilities?.canEditPlan ?? project?.capabilities?.canEditPlan);
+    const canManageAccess = Boolean(capabilities?.canManageAccess ?? project?.capabilities?.canManageAccess);
+    const canTransition = Boolean(capabilities?.canTransition ?? project?.capabilities?.canTransition);
 
     const [submitting, setSubmitting] = useState(false);
     const [actionType, setActionType] = useState(initialActionType); // 'menu' | 'edit' | 'pause' | 'archive' | 'delete' | 'lab-access'
@@ -702,93 +707,101 @@ export default function ProjectActionsModal({
 
                         <div className="space-y-2">
                             {/* Option 0: Edit Settings & Plan */}
-                            <button
-                                onClick={() => {
-                                    setActionType('edit');
-                                    setEditName(project.name || '');
-                                    setEditClient(project.client || '');
-                                    setEditDescription(project.description || '');
-                                    setEditExpectedCount(project.expectedSampleCount || '');
-                                    setEditDeadline(project.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
-                                    setEditBundle(project.defaultAnalysisBundle || '');
-                                    setEditStatus(project.status || 'ACTIVE');
-                                    setErrorMessage('');
-                                }}
-                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
-                            >
-                                <Settings className="w-5 h-5 text-sf-primary mt-0.5" />
-                                <div>
-                                    <div className="font-bold text-xs text-sf-text">
-                                        {t('projects.actions.editSettingsBtn', 'Edit project settings & analysis plan')}
+                            {canEditPlan && (
+                                <button
+                                    onClick={() => {
+                                        setActionType('edit');
+                                        setEditName(project.name || '');
+                                        setEditClient(project.client || '');
+                                        setEditDescription(project.description || '');
+                                        setEditExpectedCount(project.expectedSampleCount || '');
+                                        setEditDeadline(project.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
+                                        setEditBundle(project.defaultAnalysisBundle || '');
+                                        setEditStatus(project.status || 'ACTIVE');
+                                        setErrorMessage('');
+                                    }}
+                                    className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                                >
+                                    <Settings className="w-5 h-5 text-sf-primary mt-0.5" />
+                                    <div>
+                                        <div className="font-bold text-xs text-sf-text">
+                                            {t('projects.actions.editSettingsBtn', 'Edit project settings & analysis plan')}
+                                        </div>
+                                        <div className="text-[11px] text-sf-muted mt-0.5">
+                                            {t('projects.actions.editSettingsSub', 'Update metadata, client organization, deadlines, and default analysis package from the catalogue.')}
+                                        </div>
                                     </div>
-                                    <div className="text-[11px] text-sf-muted mt-0.5">
-                                        {t('projects.actions.editSettingsSub', 'Update metadata, client organization, deadlines, and default analysis package from the catalogue.')}
-                                    </div>
-                                </div>
-                            </button>
+                                </button>
+                            )}
 
                             {/* Option: Manage Servicing Laboratories & Access */}
-                            <button
-                                onClick={() => {
-                                    setActionType('lab-access');
-                                    const active = findActiveOp();
-                                    setLabAccessReason(active?.action === 'lab-access' ? active.snapshot?.reason || '' : '');
-                                }}
-                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
-                            >
-                                <Building2 className="w-5 h-5 text-sf-primary mt-0.5" />
-                                <div>
-                                    <div className="font-bold text-xs text-sf-text">
-                                        {t('projects.actions.manageLabAccessBtn', 'Manage servicing laboratories & access')}
+                            {canManageAccess && (
+                                <button
+                                    onClick={() => {
+                                        setActionType('lab-access');
+                                        const active = findActiveOp();
+                                        setLabAccessReason(active?.action === 'lab-access' ? active.snapshot?.reason || '' : '');
+                                    }}
+                                    className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                                >
+                                    <Building2 className="w-5 h-5 text-sf-primary mt-0.5" />
+                                    <div>
+                                        <div className="font-bold text-xs text-sf-text">
+                                            {t('projects.actions.manageLabAccessBtn', 'Manage servicing laboratories & access')}
+                                        </div>
+                                        <div className="text-[11px] text-sf-muted mt-0.5">
+                                            {t('projects.actions.manageLabAccessSub', 'Configure authorized partner laboratories, review active work blockers, and update servicing scope.')}
+                                        </div>
                                     </div>
-                                    <div className="text-[11px] text-sf-muted mt-0.5">
-                                        {t('projects.actions.manageLabAccessSub', 'Configure authorized partner laboratories, review active work blockers, and update servicing scope.')}
-                                    </div>
-                                </div>
-                            </button>
+                                </button>
+                            )}
 
                             {/* Option 1: Pause / Resume */}
-                            <button
-                                onClick={() => {
-                                    setActionType('pause');
-                                    const active = findActiveOp();
-                                    setReason(active?.action === 'pause' ? active.snapshot?.reason || '' : '');
-                                }}
-                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
-                            >
-                                {isPaused ? <Play className="w-5 h-5 text-emerald-600 mt-0.5" /> : <Pause className="w-5 h-5 text-amber-600 mt-0.5" />}
-                                <div>
-                                    <div className="font-bold text-xs text-sf-text">
-                                        {isPaused ? t('projects.actions.resumeBtn', 'Resume new admissions') : t('projects.actions.pauseBtn', 'Pause new admissions')}
+                            {canTransition && (
+                                <button
+                                    onClick={() => {
+                                        setActionType('pause');
+                                        const active = findActiveOp();
+                                        setReason(active?.action === 'pause' ? active.snapshot?.reason || '' : '');
+                                    }}
+                                    className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                                >
+                                    {isPaused ? <Play className="w-5 h-5 text-emerald-600 mt-0.5" /> : <Pause className="w-5 h-5 text-amber-600 mt-0.5" />}
+                                    <div>
+                                        <div className="font-bold text-xs text-sf-text">
+                                            {isPaused ? t('projects.actions.resumeBtn', 'Resume new admissions') : t('projects.actions.pauseBtn', 'Pause new admissions')}
+                                        </div>
+                                        <div className="text-[11px] text-sf-muted mt-0.5">
+                                            {t('projects.actions.pauseSub', 'Existing received samples continue through routine laboratory checks.')}
+                                        </div>
                                     </div>
-                                    <div className="text-[11px] text-sf-muted mt-0.5">
-                                        {t('projects.actions.pauseSub', 'Existing received samples continue through routine laboratory checks.')}
-                                    </div>
-                                </div>
-                            </button>
+                                </button>
+                            )}
 
                             {/* Option 2: Archive Readiness */}
-                            <button
-                                onClick={() => {
-                                    setActionType('archive');
-                                    const active = findActiveOp();
-                                    setReason(active?.action === 'archive' ? active.snapshot?.reason || '' : '');
-                                }}
-                                className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
-                            >
-                                <Archive className="w-5 h-5 text-sf-muted mt-0.5" />
-                                <div>
-                                    <div className="font-bold text-xs text-sf-text">
-                                        {t('projects.actions.archiveBtn', 'Review archival readiness')}
+                            {canTransition && (
+                                <button
+                                    onClick={() => {
+                                        setActionType('archive');
+                                        const active = findActiveOp();
+                                        setReason(active?.action === 'archive' ? active.snapshot?.reason || '' : '');
+                                    }}
+                                    className="w-full text-left p-3.5 rounded-xl border border-sf-divider bg-sf-inset hover:bg-sf-hover transition-colors flex items-start gap-3"
+                                >
+                                    <Archive className="w-5 h-5 text-sf-muted mt-0.5" />
+                                    <div>
+                                        <div className="font-bold text-xs text-sf-text">
+                                            {t('projects.actions.archiveBtn', 'Review archival readiness')}
+                                        </div>
+                                        <div className="text-[11px] text-sf-muted mt-0.5">
+                                            {t('projects.actions.archiveSub', 'Verify unresolved samples, active work, and external sync before closing.')}
+                                        </div>
                                     </div>
-                                    <div className="text-[11px] text-sf-muted mt-0.5">
-                                        {t('projects.actions.archiveSub', 'Verify unresolved samples, active work, and external sync before closing.')}
-                                    </div>
-                                </div>
-                            </button>
+                                </button>
+                            )}
 
                             {/* Option 3: Delete Empty (only if 0 samples) */}
-                            {totalRegistered === 0 && (
+                            {canTransition && totalRegistered === 0 && (
                                 <button
                                     onClick={() => { setActionType('delete'); setReason(''); }}
                                     className="w-full text-left p-3.5 rounded-xl border border-red-200 dark:border-red-950 bg-red-50/50 dark:bg-red-950/20 hover:bg-red-100/50 transition-colors flex items-start gap-3 text-red-700 dark:text-red-300"
@@ -809,7 +822,15 @@ export default function ProjectActionsModal({
                 )}
 
                 {/* Subview: Edit Settings & Plan */}
-                {actionType === 'edit' && (
+                {actionType === 'edit' && !canEditPlan && (
+                    <div className="p-6 text-center text-xs text-sf-muted space-y-3">
+                        <p>{t('projects.actions.unauthorizedAction', 'You do not have permission to edit this project plan or settings.')}</p>
+                        <button type="button" onClick={() => setActionType('menu')} className="btn-secondary text-xs">
+                            {t('common.back', 'Back')}
+                        </button>
+                    </div>
+                )}
+                {actionType === 'edit' && canEditPlan && (
                     <form onSubmit={handleSaveSettings} className="space-y-3.5 pt-1">
                         <div>
                             <label className="block text-xs font-semibold text-sf-text mb-1">
@@ -932,7 +953,15 @@ export default function ProjectActionsModal({
                 )}
 
                 {/* Subview: Pause / Resume Admissions */}
-                {actionType === 'pause' && (
+                {actionType === 'pause' && !canTransition && (
+                    <div className="p-6 text-center text-xs text-sf-muted space-y-3">
+                        <p>{t('projects.actions.unauthorizedTransition', 'You do not have permission to transition project status.')}</p>
+                        <button type="button" onClick={() => setActionType('menu')} className="btn-secondary text-xs">
+                            {t('common.back', 'Back')}
+                        </button>
+                    </div>
+                )}
+                {actionType === 'pause' && canTransition && (
                     <div className="space-y-4 pt-1">
                         <div className="p-3.5 rounded-xl bg-sf-inset border border-sf-divider text-xs text-sf-muted space-y-1">
                             <strong className="text-sf-text font-semibold block">
@@ -977,7 +1006,15 @@ export default function ProjectActionsModal({
                 )}
 
                 {/* Subview: Archival Readiness */}
-                {actionType === 'archive' && (
+                {actionType === 'archive' && !canTransition && (
+                    <div className="p-6 text-center text-xs text-sf-muted space-y-3">
+                        <p>{t('projects.actions.unauthorizedTransition', 'You do not have permission to transition project status.')}</p>
+                        <button type="button" onClick={() => setActionType('menu')} className="btn-secondary text-xs">
+                            {t('common.back', 'Back')}
+                        </button>
+                    </div>
+                )}
+                {actionType === 'archive' && canTransition && (
                     <div className="space-y-4 pt-1">
                         {!canArchive ? (
                             <div className="space-y-3">
@@ -1065,7 +1102,15 @@ export default function ProjectActionsModal({
                 )}
 
                 {/* Subview: Delete Empty Project */}
-                {actionType === 'delete' && (
+                {actionType === 'delete' && !canTransition && (
+                    <div className="p-6 text-center text-xs text-sf-muted space-y-3">
+                        <p>{t('projects.actions.unauthorizedTransition', 'You do not have permission to transition project status.')}</p>
+                        <button type="button" onClick={() => setActionType('menu')} className="btn-secondary text-xs">
+                            {t('common.back', 'Back')}
+                        </button>
+                    </div>
+                )}
+                {actionType === 'delete' && canTransition && (
                     <div className="space-y-4 pt-1">
                         <div className="p-3.5 rounded-xl border border-red-300 bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-200 text-xs">
                             <strong className="font-bold block">
@@ -1095,7 +1140,15 @@ export default function ProjectActionsModal({
                 )}
 
                 {/* Subview: Servicing Laboratories & Access */}
-                {actionType === 'lab-access' && (
+                {actionType === 'lab-access' && !canManageAccess && (
+                    <div className="p-6 text-center text-xs text-sf-muted space-y-3">
+                        <p>{t('projects.actions.unauthorizedAccess', 'You do not have permission to manage servicing laboratories.')}</p>
+                        <button type="button" onClick={() => setActionType('menu')} className="btn-secondary text-xs">
+                            {t('common.back', 'Back')}
+                        </button>
+                    </div>
+                )}
+                {actionType === 'lab-access' && canManageAccess && (
                     <div className="space-y-4 pt-1">
                         {labAccessLoading ? (
                             <div className="p-8 flex flex-col items-center justify-center gap-3 text-sf-muted text-xs">

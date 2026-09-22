@@ -248,10 +248,11 @@ async function getDashboardHome(user, options = {}) {
         priorityQueues = ['manager.exceptions', 'manager.review', 'manager.finalApproval', 'manager.assign', 'manager.intake'];
         capabilities = { openManagerQueue: true, approveResults: true, assignWork: true, manageAnalyses: true };
 
-        // 1. Exceptions (QC batches failed/pending in lab)
+        // 1. Exceptions (QC batches failed/pending in lab without disposition)
         const exceptionBatchCount = await prisma.batch.count({
             where: {
                 status: { in: ['QC_FAIL', 'FAILED'] },
+                disposition: null,
                 ...(actorScope.activeLabId ? {
                     OR: [
                         { labId: actorScope.activeLabId },
@@ -339,7 +340,7 @@ async function getDashboardHome(user, options = {}) {
         capabilities = { viewLaboratories: true, viewReports: true, chooseLaboratory: true };
 
         const [exceptionsCount, activeSamplesCount, releasedReportsCount] = await Promise.all([
-            prisma.batch.count({ where: { status: { in: ['QC_FAIL', 'FAILED'] } } }),
+            prisma.batch.count({ where: { status: { in: ['QC_FAIL', 'FAILED'] }, disposition: null } }),
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
                     status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] },
@@ -421,7 +422,7 @@ async function getDashboardHome(user, options = {}) {
                 where: scopedWhere(sampleWhere, { status: 'APPROVED', results: { none: {} } })
             }),
             prisma.batch.count({
-                where: { status: { in: ['QC_FAIL', 'FAILED', 'PENDING'] } }
+                where: { status: { in: ['QC_FAIL', 'FAILED', 'PENDING'] }, disposition: null }
             }),
             prisma.sampleAmendment.count()
         ]);
@@ -1002,6 +1003,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     if (queueKey === 'manager.exceptions') {
         const batchWhere = {
             status: { in: ['QC_FAIL', 'FAILED'] },
+            disposition: null,
             ...(actorScope.activeLabId ? {
                 OR: [
                     { labId: actorScope.activeLabId },
@@ -1029,7 +1031,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                 count: 1,
                 unit: 'exception',
                 action: 'Inspect QC',
-                route: `/manager-queue?lane=review&queue=manager.exceptions`,
+                route: `/manager-queue?lane=review&batchId=${b.id}`,
                 note: 'Review actual QC control values and disposition before accepting work.',
                 tone: 'problem'
             })),
@@ -1066,13 +1068,24 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             orderBy: { submittedAt: 'desc' }
         });
 
+        // Query corresponding samples for accurate sample labId and originalId
+        const samples = await prisma.sample.findMany({
+            where: { id: { in: pagedSampleIds } },
+            select: { id: true, labId: true, originalId: true, projectCode: true }
+        });
+        const sampleMap = new Map(samples.map(s => [s.id, s]));
+
         // Group by sampleId
         const groups = new Map();
         for (const sub of submissions) {
+            const sample = sampleMap.get(sub.sampleId);
             if (!groups.has(sub.sampleId)) {
                 groups.set(sub.sampleId, {
                     sampleId: sub.sampleId,
-                    labId: sub.labId,
+                    labId: sample?.labId || null,
+                    originalId: sample?.originalId || null,
+                    projectCode: sample?.projectCode || null,
+                    submittedLabId: sub.labId,
                     submittedBy: sub.submittedBy,
                     submittedAt: sub.submittedAt,
                     types: [sub.type],
@@ -1088,18 +1101,26 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'samples',
-            rows: Array.from(groups.values()).map(g => ({
-                key: g.sampleId,
-                title: g.labId || g.sampleId,
-                context: `${g.types.join(', ')} · Submitted by ${g.submittedBy}`,
-                status: 'Ready for review',
-                count: 1,
-                unit: 'sample',
-                action: 'Review',
-                route: `/samples/${g.sampleId}?tab=review&submissionId=${g.submissions[0]?.id}`,
-                note: 'Inspect submitted determination results and linked QC evidence.',
-                tone: ''
-            })),
+            rows: Array.from(groups.values()).map(g => {
+                const displayTitle = g.labId || g.originalId || g.sampleId;
+                return {
+                    key: g.sampleId,
+                    sampleId: g.sampleId,
+                    labId: g.labId,
+                    originalId: g.originalId,
+                    sampleDisplayId: displayTitle,
+                    projectCode: g.projectCode,
+                    title: displayTitle,
+                    context: `${g.projectCode ? g.projectCode + ' · ' : ''}${g.types.join(', ')} · Submitted by ${g.submittedBy}`,
+                    status: 'Ready for review',
+                    count: 1,
+                    unit: 'sample',
+                    action: 'Review',
+                    route: `/samples/${g.sampleId}?tab=review&submissionId=${g.submissions[0]?.id}&returnTo=${encodeURIComponent('/manager-queue?lane=review')}`,
+                    note: 'Inspect submitted determination results and linked QC evidence.',
+                    tone: ''
+                };
+            }),
             total,
             page,
             pageSize,
@@ -1136,18 +1157,26 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         return {
             queueKey,
             unit: 'samples',
-            rows: pagedSamples.map(s => ({
-                key: s.id,
-                title: s.labId || s.originalId,
-                context: `${s.projectCode || 'Project'} · All ordered analyses accepted`,
-                status: 'Ready for final check',
-                count: 1,
-                unit: 'sample',
-                action: 'Open final review',
-                route: `/samples/${s.id}?tab=review`,
-                note: 'Final approval authorizes completion. Report release is a distinct subsequent action.',
-                tone: ''
-            })),
+            rows: pagedSamples.map(s => {
+                const displayTitle = s.labId || s.originalId || s.id;
+                return {
+                    key: s.id,
+                    sampleId: s.id,
+                    labId: s.labId,
+                    originalId: s.originalId,
+                    sampleDisplayId: displayTitle,
+                    projectCode: s.projectCode,
+                    title: displayTitle,
+                    context: `${s.projectCode || 'Project'} · All ordered analyses accepted`,
+                    status: 'Ready for final check',
+                    count: 1,
+                    unit: 'sample',
+                    action: 'Open final review',
+                    route: `/samples/${s.id}?tab=review&returnTo=${encodeURIComponent('/manager-queue?lane=approve')}`,
+                    note: 'Final approval authorizes completion. Report release is a distinct subsequent action.',
+                    tone: ''
+                };
+            }),
             total,
             page,
             pageSize,
@@ -1451,7 +1480,8 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             prisma.batch.count({
                 where: {
                     ...batchWhere,
-                    status: { in: ['QC_FAIL', 'FAILED'] }
+                    status: { in: ['QC_FAIL', 'FAILED'] },
+                    disposition: null
                 }
             }),
             prisma.batch.findMany({
@@ -1482,7 +1512,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                     count: b._count?.workItems || 0,
                     unit: 'samples',
                     action: 'Inspect batch',
-                    route: `/manager-queue?batchId=${b.id}`,
+                    route: `/qa?tab=qc&batchId=${b.id}`,
                     note: b.notes || (isFailed ? 'Batch failed QC thresholds; review required.' : 'Batch within acceptable tolerances.'),
                     tone: isFailed ? 'problem' : ''
                 };
@@ -1651,5 +1681,6 @@ async function getQueueRows(user, queueKey, options = {}) {
 module.exports = {
     ALLOWED_ROLE_QUEUES,
     getDashboardHome,
-    getQueueRows
+    getQueueRows,
+    getQueueData: getQueueRows
 };

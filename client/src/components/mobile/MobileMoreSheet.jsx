@@ -163,7 +163,7 @@ export const MobileMoreSheet = ({ isOpen, onClose }) => {
                                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sf-text hover:bg-sf-hover font-medium"
                             >
                                 <ShieldAlert size={18} className="text-sf-muted" />
-                                <span>{t('nav.managerQueue', 'Manager Queue')}</span>
+                                <span>{t('nav.managerQueue', 'Manager Task List')}</span>
                             </Link>
                         )}
                         {['AUDIT_USER', 'LAB_MANAGER', 'SUPER_ADMIN'].includes(user?.role) && (

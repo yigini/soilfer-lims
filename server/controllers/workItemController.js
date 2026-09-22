@@ -465,25 +465,41 @@ exports.getWorkItems = async (req, res) => {
                 where,
                 skip,
                 take: limitNum,
+                include: {
+                    sample: {
+                        select: {
+                            id: true,
+                            labId: true,
+                            originalId: true,
+                            projectCode: true
+                        }
+                    }
+                },
                 orderBy: { createdAt: 'desc' }
             }),
             prisma.workItem.count({ where })
         ]);
 
-        // Parse history JSON
+        // Parse history JSON and enrich with sample metadata
         const enrichedItems = items.map(i => ({
             ...i,
+            sampleLabId: i.sample?.labId || null,
+            originalId: i.sample?.originalId || null,
+            projectCode: i.sample?.projectCode || null,
             history: typeof i.history === 'string' ? JSON.parse(i.history) : (i.history || [])
         }));
 
+        const pagination = {
+            total,
+            page: pageNum,
+            limit: limitNum,
+            totalPages: Math.ceil(total / limitNum)
+        };
+
         res.json({
             data: enrichedItems,
-            meta: {
-                total,
-                page: pageNum,
-                limit: limitNum,
-                totalPages: Math.ceil(total / limitNum)
-            }
+            meta: pagination,
+            pagination
         });
     } catch (error) {
         console.error('[getWorkItems] Error:', error);

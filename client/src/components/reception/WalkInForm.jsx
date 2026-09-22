@@ -4,7 +4,7 @@ import LocationPicker from './LocationPicker';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
-const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [] }) => {
+const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null }) => {
     const { t } = useLanguage();
 
     const STATIC_PURPOSES = [
@@ -376,6 +376,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     uncertaintyReason={sampling.locationUncertaintyReason}
                     onUncertaintyReasonChange={(v) => handleChange('sampling', 'locationUncertaintyReason', v)}
                     errors={errors}
+                    labCoordinates={labCoordinates}
                     onChange={async (val) => {
                         let locationDesc = val.description || sampling.location;
 

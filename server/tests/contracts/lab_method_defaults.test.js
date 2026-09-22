@@ -109,4 +109,62 @@ describe('WP-20: Per-Lab Methodology Defaults & Isolation', () => {
         // Lab B got Walkley-Black global recommendation
         expect(socWiB.methodologyId).toBe(defaultMethodId);
     });
+
+    test('3. Cross-lab access: Lab A manager cannot view or modify Lab B defaults (403)', async () => {
+        // GET Lab B defaults as Lab A manager -> 403
+        const getRes = await request(app)
+            .get(`/api/config/lab-defaults/${labBId}`)
+            .set('Authorization', `Bearer ${labAMgrToken}`);
+        expect(getRes.status).toBe(403);
+        expect(getRes.body.error).toMatch(/Cannot view another laboratory/i);
+
+        // PUT Lab B defaults as Lab A manager -> 403
+        const putRes = await request(app)
+            .put(`/api/config/lab-defaults/${labBId}`)
+            .set('Authorization', `Bearer ${labAMgrToken}`)
+            .send({
+                defaults: [{ analysisCode: 'SOC', methodologyId: 'ISO_10694_DRY_COMB' }]
+            });
+        expect(putRes.status).toBe(403);
+        expect(putRes.body.error).toMatch(/Cannot modify another laboratory/i);
+    });
+
+    test('4. Unauthorized role without MANAGE_ANALYSES cannot modify defaults (403)', async () => {
+        const techToken = await getAuthToken('LAB_TECHNICIAN', labAId, ['GTM'], ['ENTER_RESULTS']);
+        const putRes = await request(app)
+            .put(`/api/config/lab-defaults/${labAId}`)
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({
+                defaults: [{ analysisCode: 'SOC', methodologyId: 'ISO_10694_DRY_COMB' }]
+            });
+        expect(putRes.status).toBe(403);
+    });
+
+    test('5. Supplying an unavailable or mismatched methodology is rejected (400)', async () => {
+        // Non-existent methodology ID
+        const putRes = await request(app)
+            .put(`/api/config/lab-defaults/${labAId}`)
+            .set('Authorization', `Bearer ${labAMgrToken}`)
+            .send({
+                defaults: [{ analysisCode: 'SOC', methodologyId: 'NON_EXISTENT_METHOD_XYZ' }]
+            });
+        expect(putRes.status).toBe(400);
+        expect(putRes.body.error).toBeDefined();
+    });
+
+    test('6. Fresh lab with no overrides exhibits honest empty state without cross-lab leakage', async () => {
+        const freshLabId = 'LAB-FRESH-' + Date.now();
+        const res = await request(app)
+            .get(`/api/config/lab-defaults/${freshLabId}`)
+            .set('Authorization', `Bearer ${superAdminToken}`);
+
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        const socItem = res.body.find(i => i.analysisCode === 'SOC');
+        expect(socItem).toBeDefined();
+        // Crucial: Must NOT inherit Lab A's Dumas override
+        expect(socItem.isOverridden).toBe(false);
+        expect(socItem.chosenMethodologyId).toBeNull();
+        expect(socItem.effectiveMethodologyId).toBe(defaultMethodId);
+    });
 });

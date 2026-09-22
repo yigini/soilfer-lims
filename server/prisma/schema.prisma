@@ -73,6 +73,14 @@ model Project {
   labId                  String?   // Legacy: Single lab (kept for backward compatibility)
   countries              String?   // Legacy JSON list
   assignedLabIds         String?   // Legacy JSON string: Array of lab IDs for Global projects
+  templateId             String?   @default("GENERIC_OPEN_INTAKE")
+  templateVersion        String?   @default("1.0.0")
+  policyConfig           String?   // JSON: { allowedChannels, requiresExceptionForDesk, requiresExceptionForManifest, ... }
+  programmeCode          String?   // Aggregate programme grouping code, e.g. 'SOILFER-US', 'SOILFER-JPN'
+  parentProjectId        String?
+  parentProject          Project?  @relation("ProgrammeChildProjects", fields: [parentProjectId], references: [id])
+  childProjects          Project[] @relation("ProgrammeChildProjects")
+
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 

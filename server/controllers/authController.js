@@ -14,6 +14,8 @@ const sanitizeUser = (user) => {
     const { password: _, ...safeUser } = user;
     return {
         ...safeUser,
+        lab: user.lab || null,
+        labLocation: user.labLocation || null,
         themePreference: user.themePreference || 'light',
         countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
         projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
@@ -42,6 +44,21 @@ exports.login = async (req, res) => {
         // Check if account is active
         if (user.isActive === false) {
             return error(res, 401, 'AUTH.ACCOUNT_DEACTIVATED', 'This account has been deactivated. Please contact your administrator.');
+        }
+
+        // Resolve laboratory profile if assigned
+        if (user.labId) {
+            try {
+                const lab = await prisma.lab.findUnique({
+                    where: { id: user.labId },
+                    select: { id: true, code: true, name: true, location: true, country: true, city: true, isActive: true }
+                });
+                user.lab = lab || null;
+                user.labLocation = lab?.location || null;
+            } catch (labErr) {
+                user.lab = null;
+                user.labLocation = null;
+            }
         }
 
         // Generate Token

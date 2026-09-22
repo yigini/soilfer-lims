@@ -1,0 +1,61 @@
+{
+  "suite": "Reception Isolated Browser Journey",
+  "executedAt": "2026-09-21T19:05:31.350Z",
+  "browser": "Google Chrome Headless (CDP)",
+  "url": "http://127.0.0.1:49160/reception",
+  "summary": {
+    "totalSteps": 6,
+    "passedSteps": 6,
+    "allPassed": true
+  },
+  "databaseIsolation": {
+    "priorRunAudit": {
+      "priorRunDbResolved": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+      "priorRunRiskIdentified": "Unsafe default fallback to working dev.db when DATABASE_PATH was unset",
+      "remediation": "Enforced isolated disposable database copy in runner-owned directory with validateDisposableDbPath refusal guard before importing Prisma/app"
+    },
+    "currentRun": {
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790017509649_1j3x5q",
+      "isolatedDbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790017509649_1j3x5q\\disposable_journey_1j3x5q.db",
+      "isDisposable": true
+    }
+  },
+  "steps": [
+    {
+      "stepName": "Reception First Render & TDZ Prevention",
+      "passed": true,
+      "details": "Rendered without checklistData ReferenceError; Modes visible: true",
+      "timestamp": "2026-09-21T19:05:15.965Z"
+    },
+    {
+      "stepName": "Parent & Child Integration",
+      "passed": true,
+      "details": "WalkInForm and ComplianceChecklist child components mounted together in Reception parent",
+      "timestamp": "2026-09-21T19:05:16.071Z"
+    },
+    {
+      "stepName": "Walk-in CoC N/A Permitted",
+      "passed": true,
+      "details": "CoC N/A enabled: true, aria-checked=true: true",
+      "timestamp": "2026-09-21T19:05:16.483Z"
+    },
+    {
+      "stepName": "Mode-Switch Cleanup Effect Execution",
+      "passed": true,
+      "details": "inProjectMode confirmed: true, useEffect executed and cleared prohibited CoC N/A (aria-checked=false): true",
+      "timestamp": "2026-09-21T19:05:18.364Z"
+    },
+    {
+      "stepName": "Checklist Fail & Correction Lifecycle",
+      "passed": true,
+      "details": "Fail and note asserted before correction: true, Correction back to OK cleared note: true",
+      "timestamp": "2026-09-21T19:05:19.541Z"
+    },
+    {
+      "stepName": "Synthetic Draft Restore & Rehydration",
+      "passed": true,
+      "details": "10s autosave observed: true, Restore modal accepted: true, Persisted state restored in DOM: true",
+      "timestamp": "2026-09-21T19:05:31.254Z"
+    }
+  ]
+}

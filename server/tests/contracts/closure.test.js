@@ -31,9 +31,9 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
 
         workItemId = acceptRes.body.workItems[0].id;
 
-        // Complete Gates
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE' });
-        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE' });
+        // Complete Gates with procedural checklist
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
     });
 
     test('Scenario 1: Approve Blocked on Pending/Submitted Work', async () => {

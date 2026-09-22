@@ -50,17 +50,34 @@ function buildSisWhere(sisAuth, query = {}) {
     }
 
     // 3. Project scoping - Intersect key permissions with query parameters
+    const projectPolicyService = require('../services/projectPolicyService');
     const keyProjects = sisAuth?.projects || [];
     const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
 
+    const expandedKeyProjects = new Set();
+    for (const kp of keyProjects) {
+        expandedKeyProjects.add(kp);
+        const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+        children.forEach(c => expandedKeyProjects.add(c));
+    }
+    const authorizedProjectList = Array.from(expandedKeyProjects);
+
     if (query.project) {
-        if (hasGlobalProject || keyProjects.includes(query.project)) {
-            where.projectCode = query.project;
+        const queryChildren = projectPolicyService.getProgrammeChildProjectCodes(query.project);
+        const targetProjects = queryChildren.length > 0 ? [query.project, ...queryChildren] : [query.project];
+
+        if (hasGlobalProject) {
+            where.projectCode = targetProjects.length === 1 ? targetProjects[0] : { in: targetProjects };
         } else {
-            where.projectCode = { in: [] }; // Deny: requested project outside authorized key scope
+            const allowed = targetProjects.filter(p => authorizedProjectList.includes(p));
+            if (allowed.length > 0) {
+                where.projectCode = allowed.length === 1 ? allowed[0] : { in: allowed };
+            } else {
+                where.projectCode = { in: [] }; // Deny: requested project outside authorized key scope
+            }
         }
     } else if (!hasGlobalProject) {
-        where.projectCode = { in: keyProjects };
+        where.projectCode = { in: authorizedProjectList };
     }
 
     // 4. Lab scoping (SL-22: API keys without explicit lab access are strictly DENIED)
@@ -980,3 +997,5 @@ exports.revokeApiKey = async (req, res) => {
         res.status(500).json({ error: 'Failed to revoke API Key.' });
     }
 };
+
+exports.buildSisWhere = buildSisWhere;

@@ -122,7 +122,7 @@ export default function AnalysisPlanTab({
                                     {t('projects.plan.currentBadge', 'Active bundle')}
                                 </span>
                             )}
-                            {capabilities.canManage && onOpenConfigurePlan && (
+                            {capabilities.canEditPlan && onOpenConfigurePlan && (
                                 <button
                                     onClick={onOpenConfigurePlan}
                                     className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border border-sf-border bg-sf-inset hover:bg-sf-hover text-sf-primary transition-colors"
@@ -173,7 +173,7 @@ export default function AnalysisPlanTab({
                                     {t('projects.plan.emptyDesc', 'This project does not define an automatic analysis package. Incoming samples will receive tests assigned individually or specified upon physical receipt.')}
                                 </p>
                             </div>
-                            {capabilities.canManage && onOpenConfigurePlan ? (
+                            {capabilities.canEditPlan && onOpenConfigurePlan ? (
                                 <div className="flex items-center justify-center gap-2 pt-2">
                                     <button
                                         onClick={onOpenConfigurePlan}
@@ -257,7 +257,7 @@ export default function AnalysisPlanTab({
 
                     {isManager ? (
                         <div className="flex items-center gap-2 flex-wrap">
-                            {capabilities.canManage && onOpenConfigurePlan && (
+                            {capabilities.canEditPlan && onOpenConfigurePlan && (
                                 <button
                                     onClick={onOpenConfigurePlan}
                                     className="text-xs font-semibold px-4 py-2 rounded-lg border border-sf-primary bg-sf-primary/10 hover:bg-sf-primary/20 text-sf-primary transition-colors inline-flex items-center gap-1.5"

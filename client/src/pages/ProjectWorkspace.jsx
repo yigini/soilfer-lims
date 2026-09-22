@@ -279,8 +279,13 @@ export default function ProjectWorkspace() {
     };
 
     const capabilities = {
-        canManage: project?.capabilities?.canManage ?? (labAccess?.canManage ?? false),
-        canImport: project?.capabilities?.canImport ?? true,
+        canManage: Boolean(project?.capabilities?.canEditPlan || project?.capabilities?.canManageAccess || project?.capabilities?.canTransition),
+        canEditPlan: Boolean(project?.capabilities?.canEditPlan),
+        canManageAccess: Boolean(project?.capabilities?.canManageAccess),
+        canManageConnections: Boolean(project?.capabilities?.canManageConnections),
+        canTransition: Boolean(project?.capabilities?.canTransition),
+        canImport: Boolean(project?.capabilities?.canImport),
+        canAuthorizeException: Boolean(project?.capabilities?.canAuthorizeException),
         isScopedOnly: !['SUPER_ADMIN', 'ADMIN', 'MASTER_USER'].includes(user?.role) && Boolean(user?.labId)
     };
 
@@ -380,6 +385,7 @@ export default function ProjectWorkspace() {
                 onClose={() => setActionsModalOpen(false)}
                 project={project}
                 counts={counts}
+                capabilities={capabilities}
                 initialActionType={actionsModalInitialAction}
                 onSuccess={() => fetchWorkspaceData()}
             />

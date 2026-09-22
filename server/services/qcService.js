@@ -299,28 +299,115 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         try { parsedDisp = JSON.parse(parsedDisp); } catch (e) { parsedDisp = null; }
     }
 
-    const isOverridden = parsedDisp && parsedDisp.decision === 'PROCEED_WITH_WARNING';
-    const results = await prismaClient.result.findMany({ where: { batchId } });
+    const decision = parsedDisp?.decision || null;
+    const isProceedWarning = decision === 'PROCEED_WITH_WARNING';
+    const isReanalyze = decision === 'REANALYZE_BATCH';
+    const isReject = decision === 'REJECT_BATCH';
+
+    const results = await prismaClient.result.findMany({
+        where: { batchId },
+        include: { sample: { select: { id: true, status: true } } }
+    });
     let count = 0;
 
+    let publishedSampleIds = new Set();
+    if (prismaClient.report && typeof prismaClient.report.findMany === 'function') {
+        const sampleIds = results.map(r => r.sampleId).filter(Boolean);
+        if (sampleIds.length > 0) {
+            const pubReports = await prismaClient.report.findMany({
+                where: {
+                    sampleId: { in: sampleIds },
+                    status: { in: ['PUBLISHED', 'SUPERSEDED'] }
+                },
+                select: { sampleId: true }
+            });
+            publishedSampleIds = new Set(pubReports.map(pr => pr.sampleId));
+        }
+    }
+
+    const QC_OWNED_FLAGS = ['QC_BATCH_FAILED', 'QC_WARNING_OVERRIDDEN', 'QC_BATCH_REANALYZE_REQUESTED', 'QC_BATCH_REJECTED'];
+    const PROVENANCE_INVALID_FLAGS = ['ORIGINALLY_INVALID', 'UNFLAGGED_INVALID', 'MALFORMED_FLAGS_INVALID'];
+
     for (const res of results) {
-        let flags = [];
-        try {
-            flags = typeof res.flags === 'string' ? JSON.parse(res.flags) : (res.flags || []);
-        } catch (e) {
-            flags = [];
+        // Protection for terminal, published, and superseded records: immutable history
+        const isSampleTerminal = res.sample && ['RELEASED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(res.sample.status);
+        const isPublished = publishedSampleIds.has(res.sampleId) || res.isPublished;
+        const isSuperseded = res.isCurrent === false || Boolean(res.supersededBy);
+        if (isSampleTerminal || isPublished || isSuperseded) {
+            continue;
         }
 
+        let flags = [];
+        let isMalformedFlags = false;
+        try {
+            if (typeof res.flags === 'string') {
+                flags = JSON.parse(res.flags);
+                if (!Array.isArray(flags)) {
+                    flags = [];
+                    isMalformedFlags = true;
+                }
+            } else if (Array.isArray(res.flags)) {
+                flags = [...res.flags];
+            } else if (res.flags) {
+                flags = [];
+                isMalformedFlags = true;
+            }
+        } catch (e) {
+            flags = [];
+            isMalformedFlags = true;
+        }
+
+        const wasInitiallyValid = Boolean(res.isValid);
+        const initialFlags = Array.isArray(flags) ? [...flags] : [];
+        const hadQcBatchFailed = initialFlags.includes('QC_BATCH_FAILED');
+        const hadPriorProvenanceInvalid = initialFlags.some(f => PROVENANCE_INVALID_FLAGS.includes(f));
+        const hadPriorRejection = initialFlags.includes('QC_BATCH_REJECTED') || initialFlags.includes('QC_BATCH_REANALYZE_REQUESTED');
+        const nonQcFlags = initialFlags.filter(f => !QC_OWNED_FLAGS.includes(f) && !PROVENANCE_INVALID_FLAGS.includes(f));
+
         if (status === 'QC_FAIL') {
-            if (isOverridden) {
-                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+            if (isProceedWarning) {
+                // Strip QC failure/rejection flags
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_BATCH_REJECTED' && f !== 'QC_BATCH_REANALYZE_REQUESTED');
                 if (!flags.includes('QC_WARNING_OVERRIDDEN')) flags.push('QC_WARNING_OVERRIDDEN');
+
+                // Preserve independent validity:
+                // If it was already valid, it stays valid.
+                // If it was invalid, it ONLY becomes valid if QC_BATCH_FAILED was the sole cause of invalidity.
+                let isValid = false;
+                if (wasInitiallyValid) {
+                    isValid = true;
+                } else if (hadQcBatchFailed && !hadPriorProvenanceInvalid && !isMalformedFlags && nonQcFlags.length === 0 && !hadPriorRejection) {
+                    isValid = true;
+                }
+
                 await prismaClient.result.update({
                     where: { id: res.id },
-                    data: { isValid: true, flags: JSON.stringify(flags) }
+                    data: { isValid, flags: JSON.stringify(flags) }
+                });
+            } else if (isReanalyze) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_WARNING_OVERRIDDEN');
+                if (!flags.includes('QC_BATCH_REANALYZE_REQUESTED')) flags.push('QC_BATCH_REANALYZE_REQUESTED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: false, flags: JSON.stringify(flags) }
+                });
+            } else if (isReject) {
+                flags = flags.filter(f => f !== 'QC_BATCH_FAILED' && f !== 'QC_WARNING_OVERRIDDEN');
+                if (!flags.includes('QC_BATCH_REJECTED')) flags.push('QC_BATCH_REJECTED');
+                await prismaClient.result.update({
+                    where: { id: res.id },
+                    data: { isValid: false, flags: JSON.stringify(flags) }
                 });
             } else {
                 if (!flags.includes('QC_BATCH_FAILED')) flags.push('QC_BATCH_FAILED');
+
+                // Preserve provenance if the result was already invalid independently before this QC failure
+                if ((!wasInitiallyValid && !hadQcBatchFailed) || isMalformedFlags) {
+                    if (!flags.includes('ORIGINALLY_INVALID')) {
+                        flags.push('ORIGINALLY_INVALID');
+                    }
+                }
+
                 await prismaClient.result.update({
                     where: { id: res.id },
                     data: { isValid: false, flags: JSON.stringify(flags) }
@@ -328,14 +415,24 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
             }
             count++;
         } else if (status === 'QC_PASS') {
-            if (flags.includes('QC_BATCH_FAILED')) {
-                flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
-                await prismaClient.result.update({
-                    where: { id: res.id },
-                    data: { isValid: true, flags: JSON.stringify(flags) }
-                });
-                count++;
+            flags = flags.filter(f => f !== 'QC_BATCH_FAILED');
+
+            // Preserve independent validity:
+            // If it was already valid, it stays valid.
+            // If it was invalid, it ONLY becomes valid if QC_BATCH_FAILED was present, it was NOT originally invalid for other reasons,
+            // had no non-QC flags, was not malformed, and had no prior rejection.
+            let isValid = false;
+            if (wasInitiallyValid) {
+                isValid = true;
+            } else if (hadQcBatchFailed && !hadPriorProvenanceInvalid && !isMalformedFlags && nonQcFlags.length === 0 && !hadPriorRejection) {
+                isValid = true;
             }
+
+            await prismaClient.result.update({
+                where: { id: res.id },
+                data: { isValid, flags: JSON.stringify(flags) }
+            });
+            count++;
         }
     }
 

@@ -28,10 +28,15 @@ jobs:
         run: npm install
         working-directory: client
 
+      - name: Build client production bundle
+        run: npm run build
+        working-directory: client
+
       - name: Setup test database and generate Prisma client
         run: |
           npx prisma generate
           npx prisma db push --accept-data-loss
+          node seeds/profile.js
           node seeds/units.js
           node seeds/references.js
           node seeds/catalogue.js --confirm
@@ -47,10 +52,6 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-12345
-
-      - name: Build client production bundle
-        run: npm run build
-        working-directory: client
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

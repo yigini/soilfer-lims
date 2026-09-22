@@ -4,29 +4,20 @@
 
 ---
 
-## Setting Up the Connection
+## Setting Up a Connection
 
-1. Go to **Settings → KoboToolbox** in your LIMS
-2. Enter your KoboToolbox **server URL**:
-   - For the free humanitarian server: `https://kf.kobotoolbox.org`
-   - For self-hosted instances: your server's URL
-3. Enter your **API token** (found in KoboToolbox under Account → Security → API Key)
-4. Click **Connect** — the system will verify the connection
+KoboToolbox data connections are configured on a per-project, per-laboratory basis:
 
----
+1. Navigate to **Projects** and select the target project to open its **Project Workspace**.
+2. Switch to the **Data Connections** tab.
+3. In the KoboToolbox Data Connection card, authorized users (Administrators, or Laboratory Managers for their servicing laboratory) can configure or manage the link:
+   - **Server URL**: e.g., `https://kf.kobotoolbox.org` (humanitarian server) or a self-hosted instance.
+   - **Form / Asset ID**: The unique Kobo asset identifier used by field collection teams.
+   - **API Token**: User API token generated from your KoboToolbox account settings.
+   - **Destination Laboratory**: The specific servicing laboratory that receives submissions from this form.
+4. When saved, SoilFER-LIMS tests the connection and establishes the explicit mapping between the laboratory, project, and Kobo asset.
 
-## Linking a Form to a Project
-
-Once connected, you can link specific KoboToolbox forms to LIMS projects:
-
-1. Go to your project in SoilFER-LIMS
-2. Click **KoboToolbox Settings**
-3. Select the form that field teams use for sample collection
-4. Set the **sync interval** (how often LIMS checks for new submissions):
-   - Every 15 minutes
-   - Every hour
-   - Manual only (you click "Sync Now" when needed)
-5. Save
+Connections can also be established during initial project onboarding using the **Create Project** modal when selecting `KOBO_LINKED` or `SOILFER_V1` project types.
 
 ---
 

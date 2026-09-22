@@ -23,6 +23,7 @@ export default function WorksheetArea({
     activeGroup,
     allGroups = [],
     initialSampleId = null,
+    initialWorkItemId = null,
     onSelectGroup,
     onDraftChange,
     onUpdateItemMeta,
@@ -38,6 +39,10 @@ export default function WorksheetArea({
     const getAnalysisDisplayName = useAnalysisNames();
     const items = activeGroup?.items || [];
     const [selectedItemId, setSelectedItemId] = useState(() => {
+        if (initialWorkItemId && items.length > 0) {
+            const matchWi = items.find(i => i.id === initialWorkItemId || i.workItemId === initialWorkItemId);
+            if (matchWi) return matchWi.workItemId || matchWi.id;
+        }
         if (initialSampleId && items.length > 0) {
             const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId || i.labId === initialSampleId || i.sampleDisplayId === initialSampleId);
             if (found) return found.workItemId;
@@ -51,11 +56,18 @@ export default function WorksheetArea({
     const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768) ? 'single' : 'table');
 
     useEffect(() => {
+        if (initialWorkItemId && items.length > 0) {
+            const matchWi = items.find(i => i.id === initialWorkItemId || i.workItemId === initialWorkItemId);
+            if (matchWi) {
+                setSelectedItemId(matchWi.workItemId || matchWi.id);
+                return;
+            }
+        }
         if (initialSampleId && items.length > 0) {
             const found = items.find(i => i.sampleId === initialSampleId || i.originalId === initialSampleId || i.labId === initialSampleId || i.sampleDisplayId === initialSampleId);
             if (found) setSelectedItemId(found.workItemId);
         }
-    }, [initialSampleId, items]);
+    }, [initialWorkItemId, initialSampleId, items]);
 
     const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(activeGroup?.analysis) || activeGroup?.items?.some(i => i.editorKind === 'TEXTURE');
     const isOperationalGate = activeGroup?.category === 'Operational Gates';

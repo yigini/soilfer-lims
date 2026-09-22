@@ -10,8 +10,10 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
+import BatchInspectionModal from '../components/qc/BatchInspectionModal';
 
 const QUEUE_Tabs = {
+    EXCEPTIONS: 'exceptions',
     INTAKE: 'intake',
     ASSIGN: 'assign',
     REVIEW: 'review',
@@ -43,6 +45,29 @@ const ManagerQueue = () => {
     const initialTab = Object.values(QUEUE_Tabs).includes(laneParam) ? laneParam : QUEUE_Tabs.INTAKE;
     const [activeTab, setActiveTab] = useState(initialTab);
     const [userSelected, setUserSelected] = useState(Boolean(laneParam));
+    const selectedAnalysis = searchParams.get('analysis') || '';
+
+    // Batch inspection modal support for ?batchId=
+    const batchIdParam = searchParams.get('batchId');
+    const [selectedBatchId, setSelectedBatchId] = useState(batchIdParam);
+    const [isInspectionOpen, setIsInspectionOpen] = useState(Boolean(batchIdParam));
+
+    useEffect(() => {
+        if (batchIdParam) {
+            setSelectedBatchId(batchIdParam);
+            setIsInspectionOpen(true);
+        }
+    }, [batchIdParam]);
+
+    const handleCloseInspection = () => {
+        setIsInspectionOpen(false);
+        setSelectedBatchId(null);
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('batchId');
+            return next;
+        }, { replace: true });
+    };
 
     // Data States
     const [data, setData] = useState([]);
@@ -59,14 +84,30 @@ const ManagerQueue = () => {
     const handleTabChange = (newTab) => {
         setActiveTab(newTab);
         setUserSelected(true);
-        setSearchParams({ lane: newTab }, { replace: true });
+        const next = { lane: newTab };
+        if (newTab === QUEUE_Tabs.ASSIGN && selectedAnalysis) {
+            next.analysis = selectedAnalysis;
+        }
+        setSearchParams(next, { replace: true });
+    };
+
+    const handleClearAnalysisFilter = () => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('analysis');
+            return next;
+        }, { replace: true });
     };
 
     // If unparameterized, prioritize highest actionable lane once live data arrives
     useEffect(() => {
         if (!laneParam && !userSelected && liveData?.kpis) {
             const { awaitingReview, unassignedTasks, pendingIntakes, pendingApproval } = liveData.kpis;
-            if (pendingApproval > 0) {
+            const exceptions = liveData?.kpis?.exceptionsCount || liveData?.kpis?.exceptionBatchCount || liveData?.metrics?.find(m => m.key === 'manager.exceptions')?.value || 0;
+            if (exceptions > 0) {
+                setActiveTab(QUEUE_Tabs.EXCEPTIONS);
+                setUserSelected(true);
+            } else if (pendingApproval > 0) {
                 setActiveTab(QUEUE_Tabs.APPROVE);
                 setUserSelected(true);
             } else if (awaitingReview > 0) {
@@ -91,6 +132,9 @@ const ManagerQueue = () => {
             let params = { page, limit: 20 };
 
             switch (activeTab) {
+                case QUEUE_Tabs.EXCEPTIONS:
+                    endpoint = '/api/dashboard/queues/manager.exceptions';
+                    break;
                 case QUEUE_Tabs.INTAKE:
                     endpoint = '/api/samples';
                     params.status = 'RECEIVED,COLLECTED';
@@ -98,6 +142,10 @@ const ManagerQueue = () => {
                 case QUEUE_Tabs.ASSIGN:
                     endpoint = '/api/work';
                     params.status = 'NOT_ASSIGNED';
+                    params.limit = 100;
+                    if (selectedAnalysis) {
+                        params.analysis = selectedAnalysis;
+                    }
                     break;
                 case QUEUE_Tabs.REVIEW:
                     endpoint = '/api/submissions';
@@ -109,17 +157,25 @@ const ManagerQueue = () => {
 
             const res = await axios.get(endpoint, { params });
 
-            if (res.data.rows && activeTab === QUEUE_Tabs.APPROVE) {
+            if (res.data.rows && (activeTab === QUEUE_Tabs.APPROVE || activeTab === QUEUE_Tabs.EXCEPTIONS)) {
                 const total = res.data.total || res.data.rows.length;
                 const limit = params.limit || 20;
                 setData(res.data.rows.map(r => ({
-                    id: r.sampleId || r.key,
+                    ...r,
+                    id: r.id || r.batchId || r.key,
+                    batchId: r.batchId || r.id,
                     sampleId: r.sampleId || r.key,
-                    labId: r.title,
-                    originalId: r.key,
-                    analysis: r.context,
+                    labId: r.labId || null,
+                    originalId: r.originalId || null,
+                    sampleDisplayId: r.sampleDisplayId || r.title,
+                    projectCode: r.projectCode || null,
+                    analysis: r.context || r.analysis,
                     status: r.status,
-                    createdAt: new Date().toISOString()
+                    dryingStatus: r.dryingStatus,
+                    preparationStatus: r.preparationStatus,
+                    isEligibleForFinalApproval: r.isEligibleForFinalApproval,
+                    notes: r.notes || r.reason,
+                    createdAt: r.createdAt || new Date().toISOString()
                 })));
                 setMeta({
                     page,
@@ -132,9 +188,14 @@ const ManagerQueue = () => {
 
             const result = res.data.data ? res.data : { data: res.data, meta: { page: 1, limit: 100, total: res.data.length, totalPages: 1 } };
 
-            // Client-side filtering logic
+            // Client-side filtering logic: use server eligibility and allow skipped/waived operational gates
             if (activeTab === QUEUE_Tabs.APPROVE) {
-                result.data = result.data.filter(s => s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE');
+                const isGatePassed = (status) => !status || ['DONE', 'SKIPPED', 'WAIVED', 'NOT_APPLICABLE', 'N/A', 'COMPLETED', 'PASSED'].includes(status);
+                result.data = result.data.filter(s => {
+                    if (s.isEligibleForFinalApproval !== undefined) return s.isEligibleForFinalApproval;
+                    if (s.status === 'Ready for final check') return true;
+                    return isGatePassed(s.dryingStatus) && isGatePassed(s.preparationStatus);
+                });
             }
             if (activeTab === QUEUE_Tabs.REVIEW) {
                 result.data = result.data.filter(s => s.status === 'PENDING_REVIEW');
@@ -145,6 +206,11 @@ const ManagerQueue = () => {
                     if (!groups[sId]) {
                         groups[sId] = {
                             ...sub,
+                            id: sId,
+                            sampleId: sId,
+                            labId: sub.sampleLabId || null,
+                            originalId: sub.originalId || null,
+                            projectCode: sub.projectCode || null,
                             submissionIds: [sub.id],
                             taskCount: sub.workItemCount || 0,
                             isAggregated: true,
@@ -171,33 +237,50 @@ const ManagerQueue = () => {
             if (activeTab === QUEUE_Tabs.ASSIGN) {
                 const groups = {};
                 finalData.forEach(item => {
-                    if (!groups[item.sampleId]) {
-                        groups[item.sampleId] = {
+                    const sId = item.sampleId;
+                    if (!groups[sId]) {
+                        groups[sId] = {
                             ...item,
+                            id: sId,
+                            sampleId: sId,
+                            labId: item.sampleLabId || item.sample?.labId || null,
+                            originalId: item.originalId || item.sample?.originalId || null,
+                            projectCode: item.projectCode || item.sample?.projectCode || null,
                             analyses: [item.analysis],
                             itemIds: [item.id],
                             count: 1,
                             isAggregated: true
                         };
                     } else {
-                        groups[item.sampleId].analyses.push(item.analysis);
-                        groups[item.sampleId].itemIds.push(item.id);
-                        groups[item.sampleId].count++;
+                        groups[sId].analyses.push(item.analysis);
+                        groups[sId].itemIds.push(item.id);
+                        groups[sId].count++;
                     }
                 });
                 finalData = Object.values(groups);
             }
 
             setData(finalData);
-            // Recalculate meta from filtered/grouped data for accurate pagination
-            const correctedTotal = finalData.length;
-            const correctedTotalPages = Math.max(1, Math.ceil(correctedTotal / 20));
-            setMeta({
-                ...(result.meta || { page, limit: 20 }),
-                page,
-                total: correctedTotal,
-                totalPages: correctedTotalPages
-            });
+            // Preserve authoritative server pagination / honest units
+            if (result.meta && (activeTab === QUEUE_Tabs.ASSIGN || activeTab === QUEUE_Tabs.REVIEW)) {
+                setMeta({
+                    page: result.meta.page || page,
+                    limit: result.meta.limit || 20,
+                    total: result.meta.total ?? finalData.length,
+                    totalPages: result.meta.totalPages ?? Math.max(1, Math.ceil((result.meta.total || finalData.length) / (result.meta.limit || 20))),
+                    cardCount: finalData.length
+                });
+            } else if (result.meta) {
+                setMeta(result.meta);
+            } else {
+                const total = finalData.length;
+                setMeta({
+                    page,
+                    limit: 20,
+                    total,
+                    totalPages: Math.max(1, Math.ceil(total / 20))
+                });
+            }
 
         } catch (e) {
             console.error("Queue fetch failed", e);
@@ -205,7 +288,7 @@ const ManagerQueue = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab]);
+    }, [activeTab, selectedAnalysis]);
 
     useEffect(() => {
         fetchQueueData(1);
@@ -240,10 +323,11 @@ const ManagerQueue = () => {
 
     // Tab badge counts from live data
     const tabCounts = {
+        exceptions: liveData?.kpis?.exceptionsCount || liveData?.kpis?.exceptionBatchCount || liveData?.metrics?.find(m => m.key === 'manager.exceptions')?.value || 0,
         intake: liveData?.kpis?.pendingIntakes || 0,
         assign: liveData?.kpis?.unassignedTasks || 0,
         review: liveData?.kpis?.awaitingReview || 0,
-        approve: 0, // we don't track this in live endpoint currently
+        approve: liveData?.kpis?.pendingApproval || 0,
     };
 
     const TabButton = ({ id, icon: Icon, label }) => {
@@ -274,8 +358,8 @@ const ManagerQueue = () => {
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8" data-tour="manager-queue-container">
             <header className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Queue')}</h1>
-                    <p className="text-gray-500">{t('queue.subtitle', 'Operational Dashboard')}</p>
+                    <h1 className="text-3xl font-bold text-sf-text">{t('queue.title', 'Manager Task List')}</h1>
+                    <p className="text-gray-500">{t('queue.subtitle', 'Pending Actionable Items & QC Exceptions')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
@@ -288,6 +372,7 @@ const ManagerQueue = () => {
             <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden min-h-[600px] flex flex-col">
                 {/* TABS */}
                 <div className="flex border-b border-sf-divider overflow-x-auto">
+                    <TabButton id={QUEUE_Tabs.EXCEPTIONS} icon={AlertTriangle} label={t('queue.tabExceptions', 'QC Exceptions')} />
                     <TabButton id={QUEUE_Tabs.INTAKE} icon={AlertOctagon} label={t('queue.tabIntake', 'New (Intake)')} />
                     <TabButton id={QUEUE_Tabs.ASSIGN} icon={UserPlus} label={t('queue.tabAssign', 'Assign Work')} />
                     <TabButton id={QUEUE_Tabs.REVIEW} icon={FileText} label={t('queue.tabReview', 'Review Submissions')} />
@@ -308,6 +393,21 @@ const ManagerQueue = () => {
                         </div>
                     )}
 
+                    {selectedAnalysis && activeTab === QUEUE_Tabs.ASSIGN && (
+                        <div className="mb-4 flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold border border-indigo-200 dark:border-indigo-800">
+                            <div className="flex items-center gap-2">
+                                <Microscope size={16} />
+                                <span>{t('queue.filteredByMethod', 'Filtered by method: {method}', { method: selectedAnalysis })}</span>
+                            </div>
+                            <button
+                                onClick={handleClearAnalysisFilter}
+                                className="px-2 py-1 hover:bg-indigo-200 dark:hover:bg-indigo-900 rounded-lg transition-colors cursor-pointer"
+                            >
+                                {t('queue.clearFilter', 'Clear filter')}
+                            </button>
+                        </div>
+                    )}
+
                     {!loading && data.length === 0 && (
                         <div className="h-64 flex flex-col items-center justify-center text-sf-muted italic">
                             <CheckCircle size={48} className="mb-4 text-sf-muted/40" />
@@ -317,7 +417,18 @@ const ManagerQueue = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.map(item => (
-                            <QueueCard key={item.id} item={item} type={activeTab} navigate={navigate} t={t} />
+                            <QueueCard
+                                key={item.id}
+                                item={item}
+                                type={activeTab}
+                                navigate={navigate}
+                                t={t}
+                                selectedAnalysis={selectedAnalysis}
+                                onInspectBatch={(batchId) => {
+                                    setSelectedBatchId(batchId);
+                                    setIsInspectionOpen(true);
+                                }}
+                            />
                         ))}
                     </div>
                 </div>
@@ -326,7 +437,7 @@ const ManagerQueue = () => {
                 {meta && meta.totalPages > 1 && (
                     <div className="px-6 py-4 border-t border-sf-divider bg-sf-surface flex items-center justify-between">
                         <span className="text-sm text-gray-500">
-                            Page {meta.page} of {meta.totalPages} ({meta.total} items)
+                            {t('common.pagination', 'Page {page} of {totalPages}', { page: meta.page, totalPages: meta.totalPages })} ({meta.total} {activeTab === QUEUE_Tabs.EXCEPTIONS ? t('queue.batches', 'QC batches') : (activeTab === QUEUE_Tabs.ASSIGN ? t('queue.tasks', 'tasks') : (activeTab === QUEUE_Tabs.REVIEW ? t('queue.submissions', 'submissions') : t('queue.samples', 'samples')))}{meta.cardCount && meta.cardCount !== meta.total ? ` ${t('queue.acrossSamples', 'across {count} samples', { count: meta.cardCount })}` : ''})
                         </span>
                         <div className="flex gap-2">
                             <button
@@ -347,14 +458,31 @@ const ManagerQueue = () => {
                     </div>
                 )}
             </div>
+
+            <BatchInspectionModal
+                batchId={selectedBatchId}
+                isOpen={isInspectionOpen}
+                onClose={handleCloseInspection}
+                onDispositionSuccess={() => {
+                    fetchQueueData(meta.page);
+                    refreshLive();
+                }}
+            />
         </div>
     );
 };
 
 // Internal Component for Card Rendering
-const QueueCard = ({ item, type, navigate, t }) => {
+const QueueCard = ({ item, type, navigate, t, selectedAnalysis, onInspectBatch }) => {
     const getAnalysisDisplayName = useAnalysisNames();
     const config = {
+        exceptions: {
+            icon: AlertTriangle,
+            color: 'text-amber-600',
+            bg: 'bg-amber-100 dark:bg-amber-900/40',
+            label: t('queue.cardQcException', 'QC Exception'),
+            action: t('queue.cardInspectBatch', 'Inspect Batch')
+        },
         intake: {
             icon: FlaskConical,
             color: 'text-blue-600',
@@ -383,28 +511,49 @@ const QueueCard = ({ item, type, navigate, t }) => {
             label: t('queue.cardFinalApproval', 'Final Approval'),
             action: t('queue.cardApprove', 'Approve')
         }
-    }[type];
+    }[type] || {
+        icon: AlertTriangle,
+        color: 'text-gray-600',
+        bg: 'bg-gray-100',
+        label: 'Item',
+        action: 'View'
+    };
 
     const Icon = config.icon;
 
-    const title = (type === 'assign' || type === 'review')
-        ? `Sample ${item.sampleId || item.id}`
-        : (item.labId || (String(item.originalId) || item.type));
-    const subtitle = type === 'assign'
-        ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
-        : (type === 'review' && item.isAggregated)
-            ? `${item.types?.map(t => getAnalysisDisplayName(t)).join('/') || ''} ${t('queue.cardReview', 'Review')}`
-            : (item.clientName || (item.analysis ? getAnalysisDisplayName(item.analysis) : t('queue.unknownClient', 'Unknown Client')));
+    const title = type === 'exceptions'
+        ? (item.sampleDisplayId || item.batchId || item.id || `QC Batch`)
+        : (type === 'assign' || type === 'review')
+            ? (item.labId || item.originalId || `Sample ${item.sampleId || item.id}`)
+            : (item.labId || item.originalId || item.sampleId || item.id);
+
+    const subtitle = type === 'exceptions'
+        ? (item.analysis ? getAnalysisDisplayName(item.analysis) : (item.notes || 'Unresolved QC Batch Exception'))
+        : type === 'assign'
+            ? (item.analyses ? item.analyses.map(a => getAnalysisDisplayName(a)).join(', ') : t('queue.noAnalyses', 'No analyses'))
+            : (type === 'review' && item.isAggregated)
+                ? `${item.types?.map(t => getAnalysisDisplayName(t)).join('/') || ''} ${t('queue.cardReview', 'Review')}`
+                : (item.clientName || (item.analysis ? getAnalysisDisplayName(item.analysis) : t('queue.unknownClient', 'Unknown Client')));
     const date = new Date(item.createdAt || item.receptionDate).toLocaleDateString();
 
     const isUrgent = item.priority === 'URGENT' || (item.tags && item.tags.includes('URGENT'));
-    const targetUrl = type === 'review'
-        ? `/samples/${item.sampleId || item.id}?tab=review`
-        : `/samples/${item.sampleId || item.id}`;
+    const returnUrl = `/manager-queue?lane=${type}${selectedAnalysis ? `&analysis=${selectedAnalysis}` : ''}`;
+    let tabParam = '';
+    if (type === 'assign') tabParam = 'tab=work&';
+    else if (type === 'review') tabParam = 'tab=review&';
+    const targetUrl = `/samples/${item.sampleId || item.id}?${tabParam}returnTo=${encodeURIComponent(returnUrl)}`;
+
+    const handleCardClick = () => {
+        if (type === 'exceptions') {
+            onInspectBatch?.(item.batchId || item.id);
+            return;
+        }
+        navigate(targetUrl);
+    };
 
     return (
         <button
-            onClick={() => navigate(targetUrl)}
+            onClick={handleCardClick}
             className="group bg-sf-surface rounded-xl border border-sf-divider shadow-sm hover:shadow-md hover:border-sf-emerald transition-all cursor-pointer flex flex-col relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-sf-emerald"
             aria-label={`${config.label}: ${title}`}
         >
@@ -424,11 +573,33 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
                 <div className="mb-4">
                     <h3 className="font-bold text-sf-text text-lg truncate leading-tight" title={title}>{title}</h3>
-                    {(item.originalId || item.sampleId) && (
-                        <div className="text-[10px] text-sf-muted font-mono mt-0.5 uppercase tracking-tighter">
-                            ID: {item.originalId || item.sampleId}
+                    
+                    {/* Explicit disambiguated identifiers */}
+                    <div className="space-y-0.5 text-[11px] font-mono mt-1.5 text-sf-muted">
+                        {item.labId && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-sf-muted/80">Lab ID:</span>
+                                <span className="font-semibold text-sf-text">{item.labId}</span>
+                            </div>
+                        )}
+                        {item.originalId && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-sf-muted/80">Field ID:</span>
+                                <span className="font-semibold text-sf-text">{item.originalId}</span>
+                            </div>
+                        )}
+                        {item.projectCode && (
+                            <div className="flex items-center gap-1.5 text-[10px] text-sf-muted">
+                                <span className="uppercase font-bold">Project:</span>
+                                <span>{item.projectCode}</span>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-1.5 text-[10px] text-sf-muted/60">
+                            <span className="uppercase font-bold">UUID:</span>
+                            <span className="truncate max-w-[170px]" title={item.sampleId || item.id}>{item.sampleId || item.id}</span>
                         </div>
-                    )}
+                    </div>
+
                     <div className="text-[11px] text-sf-muted font-bold mt-2 min-h-[1.5rem] line-clamp-2">
                         {subtitle}
                     </div>
@@ -441,8 +612,12 @@ const QueueCard = ({ item, type, navigate, t }) => {
 
                 {type === 'approve' && (
                     <div className="flex gap-2 mb-4">
-                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">DRY: OK</span>
-                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">PREP: OK</span>
+                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">
+                            DRY: {item.dryingStatus ? (item.dryingStatus === 'DONE' ? 'OK' : item.dryingStatus) : 'OK'}
+                        </span>
+                        <span className="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded font-bold border border-green-100 dark:border-green-800">
+                            PREP: {item.preparationStatus ? (item.preparationStatus === 'DONE' ? 'OK' : item.preparationStatus) : 'OK'}
+                        </span>
                     </div>
                 )}
 

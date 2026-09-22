@@ -68,6 +68,7 @@ export default function WorkbenchShell({
     const [activeAnalysis, setActiveAnalysis] = useState(initialAnalysis);
     const [activeSampleId, setActiveSampleId] = useState(initialSampleId);
     const [isLoading, setIsLoading] = useState(true);
+    const [queueSearchQuery, setQueueSearchQuery] = useState('');
 
     // Save & sync state
     const [syncStatus, setSyncStatus] = useState('saved'); // saving | saved | conflict | offline
@@ -83,15 +84,31 @@ export default function WorkbenchShell({
 
     const debounceTimers = useRef({});
     const hasResolvedDeepLink = useRef(false);
+    const activeTargetRef = useRef({
+        workItemId: initialWorkItemId,
+        sampleId: initialSampleId
+    });
+
+    useEffect(() => {
+        activeTargetRef.current = {
+            workItemId: initialWorkItemId,
+            sampleId: initialSampleId
+        };
+        hasResolvedDeepLink.current = false;
+    }, [initialWorkItemId, initialSampleId]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Queue & Draft Fetching
     // ─────────────────────────────────────────────────────────────────────────
-    const fetchQueue = useCallback(async (viewToFetch = queueView) => {
+    const fetchQueue = useCallback(async (viewToFetch = queueView, bypassDeepLink = false) => {
         try {
-            const res = await axios.get('/api/workbench/queue', {
-                params: { view: viewToFetch }
-            });
+            const params = { view: viewToFetch };
+            const target = activeTargetRef.current;
+            if (!bypassDeepLink && (target.workItemId || target.sampleId)) {
+                if (target.workItemId) params.workItemId = target.workItemId;
+                if (target.sampleId) params.sampleId = target.sampleId;
+            }
+            const res = await axios.get('/api/workbench/queue', { params });
             const fetchedGroups = res.data.groups || [];
 
             // Rehydrate with durable offline local drafts if present
@@ -126,10 +143,8 @@ export default function WorkbenchShell({
             setGroups(fetchedGroups);
             setStats(res.data.stats || {});
 
-            // Set active analysis default if not set
-            if (!activeAnalysis && fetchedGroups.length > 0) {
-                setActiveAnalysis(fetchedGroups[0].analysis);
-            }
+            // Set active analysis default if not set (functional update to prevent dependency loop)
+            setActiveAnalysis(prev => prev || (fetchedGroups.length > 0 ? fetchedGroups[0].analysis : null));
 
             // Count conflicts
             let conflicts = 0;
@@ -146,11 +161,37 @@ export default function WorkbenchShell({
             }
         } catch (err) {
             console.error('[workbench] Failed to fetch queue:', err);
+            const status = err.response?.status;
+            const errData = err.response?.data;
+
+            // Only fallback once for failed targeted requests
+            const hadActiveTarget = Boolean(activeTargetRef.current.workItemId || activeTargetRef.current.sampleId);
+            if (!bypassDeepLink && hadActiveTarget) {
+                activeTargetRef.current = { workItemId: null, sampleId: null };
+                hasResolvedDeepLink.current = true;
+                setSyncStatus('saved');
+
+                if (status === 400 && errData?.error === 'CONTRADICTORY_IDENTIFIERS') {
+                    addToast(errData.message || `Contradictory identifiers: work item '${initialWorkItemId}' does not belong to sample '${initialSampleId}'`, 'error');
+                } else if (status === 403) {
+                    addToast(errData?.message || 'Access denied: requested item belongs to another laboratory.', 'error');
+                } else if (status === 404) {
+                    addToast(errData?.message || `Requested item '${initialWorkItemId || initialSampleId}' was not found.`, 'error');
+                } else {
+                    addToast(errData?.message || 'Failed to load requested deep-link item.', 'error');
+                }
+
+                fetchQueue(viewToFetch, true);
+                return;
+            }
+
+            // Normal queue failure or persistent error after fallback: show stable error without re-fetching
             setSyncStatus('offline');
+            addToast(errData?.message || 'Failed to load workbench queue.', 'error');
         } finally {
             setIsLoading(false);
         }
-    }, [activeAnalysis, queueView]);
+    }, [addToast, initialSampleId, initialWorkItemId, queueView, user?.id]);
 
     const fetchReceipts = useCallback(async () => {
         try {
@@ -681,8 +722,8 @@ export default function WorkbenchShell({
                             setSelectedSpectralItem(item);
                             setIsSpectralModalOpen(true);
                         }}
-                        searchQuery=""
-                        onSearchChange={() => {}}
+                        searchQuery={queueSearchQuery}
+                        onSearchChange={setQueueSearchQuery}
                     />
                 )}
 
@@ -691,6 +732,7 @@ export default function WorkbenchShell({
                         activeGroup={currentGroup}
                         allGroups={groups}
                         initialSampleId={activeSampleId || initialSampleId}
+                        initialWorkItemId={initialWorkItemId}
                         onSelectGroup={(analysis) => setActiveAnalysis(analysis)}
                         onDraftChange={handleDraftChange}
                         onUpdateItemMeta={handleUpdateItemMeta}

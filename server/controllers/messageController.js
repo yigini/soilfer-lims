@@ -2,7 +2,14 @@ const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const { broadcastToUser } = require('../wsServer');
 
-const getDisplayName = (user) => user ? (user.name || user.username) : 'Unknown';
+const getDisplayName = (user) => {
+    if (!user) return 'Unknown';
+    if (typeof user === 'string') return user;
+    if (typeof user.name === 'string' && user.name.trim()) return user.name.trim();
+    if (typeof user.username === 'string' && user.username.trim()) return user.username.trim();
+    return 'Unknown';
+};
+exports.getDisplayName = getDisplayName;
 
 // Helpers
 const createNotification = async (recipientId, type, title, message, link, senderId, options = {}) => {

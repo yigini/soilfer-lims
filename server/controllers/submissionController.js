@@ -249,7 +249,24 @@ exports.listSubmissions = async (req, res) => {
             orderBy: { submittedAt: 'desc' }
         });
 
-        res.json(submissions);
+        const sampleIds = [...new Set(submissions.map(s => s.sampleId).filter(Boolean))];
+        const samples = await prisma.sample.findMany({
+            where: { id: { in: sampleIds } },
+            select: { id: true, labId: true, originalId: true, projectCode: true }
+        });
+        const sampleMap = new Map(samples.map(s => [s.id, s]));
+
+        const enriched = submissions.map(sub => {
+            const s = sampleMap.get(sub.sampleId);
+            return {
+                ...sub,
+                sampleLabId: s?.labId || null,
+                originalId: s?.originalId || null,
+                projectCode: s?.projectCode || null
+            };
+        });
+
+        res.json(enriched);
     } catch (error) {
         console.error('[listSubmissions] Error:', error);
         res.status(500).json({ error: 'Failed to list submissions' });

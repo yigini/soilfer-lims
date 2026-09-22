@@ -22,11 +22,14 @@ const SamplesFilterBar = ({
     activeFilters, onToggleQuickFilter,
     onOpenAdvanced, onReset,
     totalResults, facets,
-    page, pages, onPageChange
+    page, pages, onPageChange,
+    view = 'daily', onViewChange, views: propViews
 }) => {
     const { t } = useLanguage();
     const [localSearch, setLocalSearch] = useState(search);
     const [animatingId, setAnimatingId] = useState(null);
+
+    const views = propViews || facets?.views || {};
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -56,9 +59,70 @@ const SamplesFilterBar = ({
 
     return (
         <div className="sticky top-0 z-20 bg-sf-surface/95 backdrop-blur-md border-b border-sf-divider py-3 mb-4 shadow-sm px-4">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
 
-                <div className="flex flex-1 items-center gap-4 w-full md:w-auto">
+                {/* Operational Views Navigation (#120) */}
+                <div className="flex bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
+                    <button
+                        type="button"
+                        onClick={() => onViewChange?.('daily')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                            view === 'daily'
+                                ? 'bg-emerald-600 text-white shadow-sm'
+                                : 'text-sf-muted hover:text-sf-text hover:bg-sf-raised'
+                        }`}
+                        title={t('samplesSection.views.dailyTooltip', 'Physically received & active laboratory samples')}
+                    >
+                        <span>{t('samplesSection.views.daily', 'Active Lab Work')}</span>
+                        {views.daily !== undefined && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black tabular-nums leading-none ${
+                                view === 'daily' ? 'bg-emerald-700 text-white' : 'bg-sf-surface text-sf-muted border border-sf-divider'
+                            }`}>
+                                {views.daily}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onViewChange?.('expected')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                            view === 'expected'
+                                ? 'bg-indigo-600 text-white shadow-sm'
+                                : 'text-sf-muted hover:text-sf-text hover:bg-sf-raised'
+                        }`}
+                        title={t('samplesSection.views.expectedTooltip', 'Registered field samples awaiting physical arrival')}
+                    >
+                        <span>{t('samplesSection.views.expected', 'Expected Arrivals')}</span>
+                        {views.expected !== undefined && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black tabular-nums leading-none ${
+                                view === 'expected' ? 'bg-indigo-700 text-white' : 'bg-sf-surface text-sf-muted border border-sf-divider'
+                            }`}>
+                                {views.expected}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onViewChange?.('registry')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                            view === 'registry'
+                                ? 'bg-slate-700 text-white shadow-sm'
+                                : 'text-sf-muted hover:text-sf-text hover:bg-sf-raised'
+                        }`}
+                        title={t('samplesSection.views.registryTooltip', 'Full field registry across all lifecycle stages')}
+                    >
+                        <span>{t('samplesSection.views.registry', 'Field Registry')}</span>
+                        {views.registry !== undefined && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black tabular-nums leading-none ${
+                                view === 'registry' ? 'bg-slate-800 text-white' : 'bg-sf-surface text-sf-muted border border-sf-divider'
+                            }`}>
+                                {views.registry}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
+                <div className="flex flex-1 items-center gap-3 w-full lg:w-auto">
                     {/* Search */}
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-sf-muted" size={16} />

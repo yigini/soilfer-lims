@@ -12,7 +12,8 @@ const ComplianceChecklist = ({
     photos = [],
     onUploadPhoto,
     onRemovePhoto,
-    uploadingPhoto = false
+    uploadingPhoto = false,
+    isWalkIn = false
 }) => {
     const { t } = useLanguage();
 
@@ -49,26 +50,51 @@ const ComplianceChecklist = ({
         }
     ];
 
+    // Helper: N/A is strictly prohibited for standard criteria, and permitted for CoC only when isWalkIn is true
+    const isNAAllowed = (key) => key === 'coc' && Boolean(isWalkIn);
+
     // value = { items: { container: { status: 'PASS'|'FAIL'|'NA'|undefined, note: '' } }, nonConformance: false, reason: '' }
 
     const setStatus = (key, status) => {
-        const newItems = {
-            ...value?.items,
-            [key]: { ...value?.items?.[key], status }
-        };
-        const newValue = { ...value, items: newItems };
-        onChange(newValue);
-
-        // Auto-flag NC if any FAIL
-        if (status === 'FAIL') {
-            onNonConformance(true);
+        if (status === 'NA' && !isNAAllowed(key)) {
+            console.warn(`[ComplianceChecklist] N/A is not permitted for criterion: ${key}`);
+            return;
         }
+
+        const currentItems = value?.items || {};
+        const newItems = {
+            ...currentItems,
+            [key]: { ...currentItems[key], status }
+        };
+        const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
+        const wasFailBefore = Object.values(currentItems).some(it => it?.status === 'FAIL');
+
+        // Atomically determine non-conformance flag:
+        // If any item is FAIL, nonConformance must be true.
+        // If an item was corrected from FAIL and now zero items fail:
+        // preserve nonConformance only if user supplied a custom reason / general non-conformance.
+        let newNC = Boolean(value?.nonConformance);
+        if (anyFail) {
+            newNC = true;
+        } else if (wasFailBefore && !anyFail) {
+            newNC = Boolean(value?.reason?.trim());
+        }
+
+        const newValue = {
+            ...value,
+            items: newItems,
+            nonConformance: newNC
+        };
+
+        // Single atomic state update to prevent stale-closure parent overwrite (#117, #113)
+        onChange(newValue);
     };
 
     const updateNote = (key, note) => {
+        const currentItems = value?.items || {};
         const newItems = {
-            ...value?.items,
-            [key]: { ...value?.items?.[key], note }
+            ...currentItems,
+            [key]: { ...currentItems[key], note }
         };
         onChange({ ...value, items: newItems });
     };
@@ -171,15 +197,29 @@ const ComplianceChecklist = ({
                                         }`}>
                                         {item.label}
                                     </span>
+                                    {isFail && (
+                                        <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                            <X size={10} strokeWidth={3} /> Fail
+                                        </span>
+                                    )}
+                                    {isPass && (
+                                        <span className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                            <Check size={10} strokeWidth={3} /> OK
+                                        </span>
+                                    )}
                                     <InfoTooltip text={item.tooltip} />
                                 </div>
 
                                 {/* Action buttons */}
-                                <div className="flex items-center gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 flex-shrink-0" role="radiogroup" aria-label={item.label}>
                                     <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isPass}
+                                        aria-label={`${item.label}: OK`}
                                         onClick={() => setStatus(item.key, 'PASS')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isPass
-                                            ? 'bg-emerald-600 text-white shadow-sm'
+                                            ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400'
                                             : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
                                             }`}
                                         title="Mark as Pass"
@@ -187,9 +227,13 @@ const ComplianceChecklist = ({
                                         <Check size={12} strokeWidth={3} /> OK
                                     </button>
                                     <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isFail}
+                                        aria-label={`${item.label}: Fail`}
                                         onClick={() => setStatus(item.key, 'FAIL')}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${isFail
-                                            ? 'bg-red-600 text-white shadow-sm'
+                                            ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-400'
                                             : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30'
                                             }`}
                                         title="Mark as Fail"
@@ -197,12 +241,24 @@ const ComplianceChecklist = ({
                                         <X size={12} strokeWidth={3} /> Fail
                                     </button>
                                     <button
-                                        onClick={() => setStatus(item.key, 'NA')}
-                                        className={`px-1.5 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isNA
-                                            ? 'bg-gray-500 text-white shadow-sm'
-                                            : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-sf-divider hover:text-sf-text'
-                                            }`}
-                                        title="Not Applicable"
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isNA}
+                                        aria-label={`${item.label}: N/A`}
+                                        disabled={!isNAAllowed(item.key)}
+                                        onClick={() => isNAAllowed(item.key) && setStatus(item.key, 'NA')}
+                                        className={`px-1.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            !isNAAllowed(item.key)
+                                                ? 'opacity-30 cursor-not-allowed bg-sf-surface border border-sf-divider text-sf-muted'
+                                                : isNA
+                                                    ? 'bg-gray-500 text-white shadow-sm ring-2 ring-gray-400 active:scale-95'
+                                                    : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-sf-divider hover:text-sf-text active:scale-95'
+                                        }`}
+                                        title={!isNAAllowed(item.key)
+                                            ? (item.key === 'coc'
+                                                ? t('reception.cocNAShipmentDisabled', 'Chain of Custody N/A is permitted only for informal walk-in drop-offs')
+                                                : t('reception.naNotPermitted', 'N/A is not permitted for mandatory reception criteria'))
+                                            : 'Not Applicable'}
                                     >
                                         N/A
                                     </button>
@@ -233,7 +289,8 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { ...value?.items?.[item.key], status: 'PASS' };
                         });
-                        onChange({ ...value, items: newItems });
+                        const newNC = Boolean(value?.reason?.trim());
+                        onChange({ ...value, items: newItems, nonConformance: newNC });
                     }}
                     className="text-xs text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 rounded hover:bg-emerald-50 transition-colors"
                 >
@@ -245,7 +302,7 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { status: undefined, note: '' };
                         });
-                        onChange({ ...value, items: newItems });
+                        onChange({ ...value, items: newItems, nonConformance: false, reason: '' });
                     }}
                     className="text-xs text-sf-muted hover:text-sf-text font-bold px-2 py-1 rounded hover:bg-sf-canvas transition-colors"
                 >
@@ -262,8 +319,19 @@ const ComplianceChecklist = ({
                     <input
                         type="checkbox"
                         checked={value?.nonConformance || false}
-                        onChange={(e) => onNonConformance(e.target.checked)}
-                        className="w-5 h-5 accent-red-600 rounded"
+                        onChange={(e) => {
+                            const anyFail = Object.values(value?.items || {}).some(it => it?.status === 'FAIL');
+                            const newNC = anyFail ? true : e.target.checked;
+                            const newValue = {
+                                ...value,
+                                nonConformance: newNC
+                            };
+                            onChange(newValue);
+                            if (onNonConformance) {
+                                onNonConformance(newNC);
+                            }
+                        }}
+                        className="w-5 h-5 accent-red-600 rounded cursor-pointer"
                     />
                     <div className="flex-1">
                         <span className={`font-bold text-sm ${value?.nonConformance ? 'text-red-700 dark:text-red-400' : 'text-sf-muted'}`}>

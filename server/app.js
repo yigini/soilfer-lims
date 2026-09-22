@@ -106,17 +106,26 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-if (process.env.NODE_ENV !== 'test') {
+// Background Schedulers Lifecycle Management
+let backupScheduleInterval = null;
+
+function startBackgroundSchedulers() {
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_BACKGROUND_JOBS === 'true' || process.env.ENABLE_BACKGROUND_JOBS === 'false') {
+        return;
+    }
+
     // Automated Daily Database Backup Schedule (runs every 24h)
     try {
-        const { performBackup } = require('./scripts/backup_db');
-        const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-        setInterval(() => {
-            performBackup()
-                .then(p => p && console.log(`[BACKUP_SCHEDULE] Completed: ${p}`))
-                .catch(e => console.error('[BACKUP_SCHEDULE] Error:', e.message));
-        }, ONE_DAY_MS);
-        console.log('[BACKUP_SCHEDULE] Backup interval active (24h)');
+        if (!backupScheduleInterval) {
+            const { performBackup } = require('./scripts/backup_db');
+            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+            backupScheduleInterval = setInterval(() => {
+                performBackup()
+                    .then(p => p && console.log(`[BACKUP_SCHEDULE] Completed: ${p}`))
+                    .catch(e => console.error('[BACKUP_SCHEDULE] Error:', e.message));
+            }, ONE_DAY_MS);
+            console.log('[BACKUP_SCHEDULE] Backup interval active (24h)');
+        }
     } catch (e) {
         console.warn('[BACKUP_SCHEDULE] Could not initialize automated backup interval:', e.message);
     }
@@ -129,6 +138,22 @@ if (process.env.NODE_ENV !== 'test') {
         console.warn('[KOBO_SCHEDULER] Could not start Kobo scheduler:', e.message);
     }
 }
+
+function stopBackgroundSchedulers() {
+    if (backupScheduleInterval) {
+        clearInterval(backupScheduleInterval);
+        backupScheduleInterval = null;
+    }
+    try {
+        const { stopScheduler } = require('./services/koboScheduler');
+        stopScheduler();
+    } catch (_) {}
+}
+
+startBackgroundSchedulers();
+
+app.startBackgroundSchedulers = startBackgroundSchedulers;
+app.stopBackgroundSchedulers = stopBackgroundSchedulers;
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/', (req, res) => {
@@ -941,8 +966,8 @@ if (!fs.existsSync(intakeUploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
-// ─── Production: Serve React client ───
-if (process.env.NODE_ENV === 'production') {
+// ─── Production / Standalone: Serve React client ───
+if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true') {
     const clientDist = path.join(__dirname, '..', 'client', 'dist');
     app.use(express.static(clientDist));
 

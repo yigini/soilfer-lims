@@ -210,6 +210,9 @@ exports.getProjects = async (req, res) => {
                 ? p.assignedLabIds
                 : (labList.length > 0 ? JSON.stringify(labList) : null);
 
+            const allMemberLabs = Array.from(new Set([p.labId, ...labList].filter(Boolean)));
+            const capabilities = projectPolicyService.getProjectCapabilities(user, p, { memberLabIds: allMemberLabs });
+
             return {
                 ...p,
                 receivedCount: counts.everPhysicallyReceived,
@@ -218,7 +221,8 @@ exports.getProjects = async (req, res) => {
                 assignedLabs: labList,
                 assignedLabIds: resolvedAssignedLabIds,
                 isGlobal: !p.labId,
-                isLocked: user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN' && !p.labId
+                isLocked: user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN' && !p.labId,
+                capabilities
             };
         }));
 
@@ -251,12 +255,10 @@ exports.getProject = async (req, res) => {
             return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access denied: You do not have permission to view this project.');
         }
 
-        const capabilities = {
-            canEditPlan: projectPolicyService.canEditProjectPlan(req.user, project),
-            canManageAccess: projectPolicyService.canManageProjectAccess(req.user, project),
-            canTransition: projectPolicyService.canTransitionProject(req.user, project),
-            canImport: projectPolicyService.canImportProjectSamples(req.user, project)
-        };
+        const capabilities = projectPolicyService.getProjectCapabilities(req.user, project, {
+            memberLabIds: allMemberLabIds,
+            labCountries
+        });
 
         const resolvedAssignedLabIds = (project.assignedLabIds && project.assignedLabIds !== '[]')
             ? project.assignedLabIds
@@ -289,10 +291,24 @@ exports.createProject = async (req, res) => {
         return error(res, 400, 'MISSING_FIELDS', 'Code, Name, and Project Type are required', { fields: 'code, name, projectType' });
     }
 
-    // KOBO_LINKED validation: require Kobo credentials
-    if (projectType === 'KOBO_LINKED') {
-        if (!req.body.koboFormId || !req.body.koboApiToken) {
+    // KOBO_LINKED and Kobo connection validation
+    let validatedTargetKoboLab = null;
+    const isKoboRequested = projectType === 'KOBO_LINKED' || Boolean(req.body.koboFormId && req.body.koboApiToken);
+    if (isKoboRequested) {
+        if (projectType === 'KOBO_LINKED' && (!req.body.koboFormId || !req.body.koboApiToken)) {
             return error(res, 400, 'KOBO_CREDENTIALS_REQUIRED', 'Kobo Form ID and API Token are required for Kobo-linked projects');
+        }
+        const candidateLabId = req.body.destinationLabId || req.body.koboLabId || (req.user.role === 'LAB_MANAGER' ? req.user.labId : req.body.labId);
+        if (projectType === 'KOBO_LINKED' && !candidateLabId) {
+            return error(res, 400, 'DESTINATION_LAB_REQUIRED', 'Destination laboratory is required for Kobo data connection');
+        }
+        if (candidateLabId) {
+            validatedTargetKoboLab = await prisma.lab.findFirst({
+                where: { OR: [{ id: candidateLabId }, { code: candidateLabId }] }
+            });
+            if (!validatedTargetKoboLab || !validatedTargetKoboLab.isActive) {
+                return error(res, 400, 'INVALID_DESTINATION_LAB', `Destination laboratory '${candidateLabId}' does not exist or is inactive.`);
+            }
         }
     }
 
@@ -348,8 +364,28 @@ exports.createProject = async (req, res) => {
             ? 'DRAFT'
             : ((projectType === 'TEMPLATE_PREDEFINED_IDS' && !hasSampleIds) ? 'PENDING_MANIFEST' : 'ACTIVE');
 
-        // Atomic Project Creation Transaction
-        const newProject = await prisma.$transaction(async (tx) => {
+        const clientOrganization = req.body.client ? String(req.body.client).trim() : null;
+
+        // Pre-test remote Kobo connection if credentials provided
+        let isConnectionVerified = true;
+        let connectionErrorMsg = null;
+        const koboServerUrl = req.body.koboServerUrl || 'https://kf.kobotoolbox.org';
+        if (validatedTargetKoboLab && req.body.koboFormId && req.body.koboApiToken) {
+            const koboService = require('../services/koboService');
+            try {
+                const testResult = await koboService.testConnection(koboServerUrl, req.body.koboFormId, req.body.koboApiToken);
+                if (testResult && testResult.success === false) {
+                    isConnectionVerified = false;
+                    connectionErrorMsg = testResult.message || testResult.error || 'Failed remote form verification';
+                }
+            } catch (testErr) {
+                isConnectionVerified = false;
+                connectionErrorMsg = testErr.message;
+            }
+        }
+
+        // Atomic Project and Kobo Connection Creation Transaction
+        const { proj: newProject, newConfig } = await prisma.$transaction(async (tx) => {
             const proj = await tx.project.create({
                 data: {
                     id: uppercaseCode,
@@ -357,6 +393,7 @@ exports.createProject = async (req, res) => {
                     name,
                     description,
                     notes,
+                    client: clientOrganization,
                     projectType,
                     expectedSampleCount: parseInt(expectedSampleCount) || 0,
                     deliveryDeadline: deliveryDeadline ? new Date(deliveryDeadline) : null,
@@ -386,6 +423,22 @@ exports.createProject = async (req, res) => {
                 });
             }
 
+            // Create KoboConfig entry atomically inside transaction
+            let createdConfig = null;
+            if (validatedTargetKoboLab && req.body.koboFormId && req.body.koboApiToken) {
+                createdConfig = await tx.koboConfig.create({
+                    data: {
+                        labId: validatedTargetKoboLab.id,
+                        labName: validatedTargetKoboLab.name || name,
+                        projectCode: uppercaseCode,
+                        koboServerUrl,
+                        formId: req.body.koboFormId,
+                        apiToken: req.body.koboApiToken,
+                        isActive: isConnectionVerified
+                    }
+                });
+            }
+
             // If created by PROJECT_MANAGER, grant explicit creator access in user.projects
             if (userRole === 'PROJECT_MANAGER') {
                 const curProjects = projectPolicyService.parseArray(req.user.projects);
@@ -409,43 +462,31 @@ exports.createProject = async (req, res) => {
                 }
             });
 
-            return proj;
+            return { proj, newConfig: createdConfig };
         });
 
-        // KOBO_LINKED: Create KoboConfig entry linked to this project
-        if (projectType === 'KOBO_LINKED' && labId) {
-            try {
-                const koboServerUrl = req.body.koboServerUrl || 'https://kf.kobotoolbox.org';
-                const koboService = require('../services/koboService');
+        let koboConnectionOutcome = null;
+        if (newConfig) {
+            koboConnectionOutcome = {
+                configured: true,
+                configId: newConfig.id,
+                formId: req.body.koboFormId,
+                destinationLabId: validatedTargetKoboLab.id,
+                isActive: isConnectionVerified,
+                warning: isConnectionVerified ? null : `Kobo connection saved as unverified: ${connectionErrorMsg}`
+            };
 
-                const testResult = await koboService.testConnection(koboServerUrl, req.body.koboFormId, req.body.koboApiToken);
-
-                const newConfig = await prisma.koboConfig.create({
-                    data: {
-                        labId,
-                        labName: newProject.name,
-                        projectCode: uppercaseCode,
-                        koboServerUrl,
-                        formId: req.body.koboFormId,
-                        apiToken: req.body.koboApiToken,
-                        isActive: testResult.success !== false
+            if (isConnectionVerified) {
+                const koboController = require('./koboController');
+                Promise.resolve().then(async () => {
+                    try {
+                        const freshConfig = await prisma.koboConfig.findUnique({ where: { id: newConfig.id } });
+                        if (!freshConfig) return;
+                        await koboController._syncLabSubmissions(freshConfig, req.user?.username || 'AUTO_SYNC');
+                    } catch (syncErr) {
+                        console.error(`[KOBO] Auto-sync failed for ${uppercaseCode}:`, syncErr.message);
                     }
                 });
-
-                if (testResult.success !== false) {
-                    const koboController = require('./koboController');
-                    Promise.resolve().then(async () => {
-                        try {
-                            const freshConfig = await prisma.koboConfig.findUnique({ where: { id: newConfig.id } });
-                            if (!freshConfig) return;
-                            await koboController._syncLabSubmissions(freshConfig, req.user?.username || 'AUTO_SYNC');
-                        } catch (syncErr) {
-                            console.error(`[KOBO] Auto-sync failed for ${uppercaseCode}:`, syncErr.message);
-                        }
-                    });
-                }
-            } catch (koboErr) {
-                console.error(`[KOBO] Failed to create KoboConfig for ${uppercaseCode}:`, koboErr.message);
             }
         }
 
@@ -649,12 +690,21 @@ exports.updateProject = async (req, res) => {
         // KOBO CONFIG UPDATE
         const effectiveProjectType = updates.projectType || project.projectType;
         if (['SUPER_ADMIN', 'MASTER_USER', 'ADMIN', 'LAB_MANAGER'].includes(req.user.role) && effectiveProjectType === 'KOBO_LINKED') {
-            const { koboServerUrl, koboFormId, koboApiToken } = updates;
+            const { koboServerUrl, koboFormId, koboApiToken, koboConfigId, destinationLabId, koboLabId } = updates;
             if (koboServerUrl || koboFormId || koboApiToken) {
                 try {
-                    const existingConfig = await prisma.koboConfig.findFirst({
-                        where: { projectCode: project.code }
-                    });
+                    let existingConfig = null;
+                    if (koboConfigId) {
+                        existingConfig = await prisma.koboConfig.findUnique({ where: { id: koboConfigId } });
+                    }
+                    if (!existingConfig) {
+                        const targetLab = destinationLabId || koboLabId || (req.user.role === 'LAB_MANAGER' ? req.user.labId : project.labId);
+                        if (targetLab) {
+                            existingConfig = await prisma.koboConfig.findFirst({
+                                where: { projectCode: project.code, labId: targetLab }
+                            });
+                        }
+                    }
 
                     if (existingConfig) {
                         const koboData = {};
@@ -667,7 +717,7 @@ exports.updateProject = async (req, res) => {
                             data: koboData
                         });
                     } else if (koboFormId && koboApiToken) {
-                        const targetLabId = project.labId || req.user.labId;
+                        const targetLabId = destinationLabId || koboLabId || project.labId || req.user.labId;
                         if (targetLabId) {
                             await prisma.koboConfig.create({
                                 data: {
@@ -787,11 +837,33 @@ exports.uploadManifest = async (req, res) => {
             return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
         }
 
-        // Admissions status check
-        if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'DELETED'].includes(project.status)) {
+        // Admissions status check (F08: Centralized lifecycle admission check)
+        const { hasException, exceptionRecord } = await projectPolicyService.resolveAndVerifyExceptionRecord({
+            rawExceptionRecord: req.body.exceptionRecord,
+            rawExceptionReason: req.body.exceptionReason,
+            authorizer: req.body.authorizer,
+            approvalId: req.body.approvalId || req.body.approvalToken,
+            actor: req.user,
+            project,
+            labId: targetLabId,
+            sampleIds: req.body.sampleIds || (Array.isArray(req.body.samples) ? req.body.samples.map(s => s.id || s.sampleId || s.code).filter(Boolean) : null),
+            channel: 'MANIFEST',
+            prismaClient: prisma
+        });
+
+        const admission = projectPolicyService.canAdmitSample({
+            project,
+            channel: 'MANIFEST',
+            actor: req.user,
+            labId: targetLabId,
+            hasException,
+            exceptionRecord
+        });
+        if (!admission.allowed) {
             return res.status(422).json({
-                error: 'PROJECT_ADMISSIONS_PAUSED',
-                message: `Cannot register or import samples into project '${project.code}' while status is ${project.status}. Admissions are paused.`
+                error: admission.code || 'PROJECT_ADMISSIONS_PAUSED',
+                message: admission.reason || `Cannot register or import samples into project '${project.code}'. Admissions are paused.`,
+                exceptionRequired: Boolean(admission.exceptionRequired)
             });
         }
 
@@ -931,6 +1003,18 @@ exports.uploadManifest = async (req, res) => {
                 await tx.auditLog.create({ data: auditData });
             }
 
+            const effectiveApprovalId = (req.body.exceptionRecord && (req.body.exceptionRecord.approvalId || req.body.exceptionRecord.amendmentId)) || req.body.approvalId || req.body.approvalToken;
+            if (effectiveApprovalId) {
+                try {
+                    await tx.sampleAmendment.update({
+                        where: { id: String(effectiveApprovalId) },
+                        data: { resolution: 'CONSUMED' }
+                    });
+                } catch (e) {
+                    // Stored approval might be mock/not present
+                }
+            }
+
             if (idempotencyKey) {
                 await commandReceiptService.recordReceipt(tx, {
                     idempotencyKey,
@@ -982,6 +1066,19 @@ exports.previewImport = async (req, res) => {
 
         if (!projectPolicyService.canImportProjectSamples(req.user, project, destinationLabId)) {
             return error(res, 403, 'ACCESS_DENIED_PROJECT', 'Access Denied: You are not authorized to import samples for this project.');
+        }
+
+        const admission = projectPolicyService.canAdmitSample({
+            project,
+            channel: 'MANIFEST',
+            actor: req.user,
+            labId: destinationLabId
+        });
+        if (!admission.allowed) {
+            return res.status(422).json({
+                error: admission.code || 'PROJECT_ADMISSIONS_PAUSED',
+                message: admission.reason || `Cannot import samples into project '${project.code}'. Admissions are paused.`
+            });
         }
 
         const crypto = require('crypto');
@@ -1573,12 +1670,14 @@ exports.getProjectKoboConfig = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: Project belongs to another laboratory scope' });
         }
 
-        if (project.projectType !== 'KOBO_LINKED') {
-            return res.json({ configured: false });
-        }
-
+        // F02 FIX: Query configurations by projectCode or projectId directly
         const configs = await prisma.koboConfig.findMany({
-            where: { projectCode: project.code }
+            where: {
+                OR: [
+                    { projectCode: project.code },
+                    { projectCode: project.id }
+                ]
+            }
         });
 
         if (configs.length === 0) {
@@ -1647,6 +1746,16 @@ exports.getProjectKoboConfig = async (req, res) => {
                 return res.json({
                     configured: false,
                     ambiguous: true,
+                    configs: matchingLabConfigs.map(c => ({
+                        configId: c.id,
+                        labId: c.labId,
+                        labName: c.labName,
+                        formId: c.formId,
+                        koboFormId: c.formId,
+                        isActive: c.isActive,
+                        status: c.isActive ? 'ACTIVE' : 'DISABLED',
+                        lastSyncAt: c.lastSyncAt
+                    })),
                     message: 'Multiple configurations exist for the specified laboratory. Explicit configId required.'
                 });
             }
@@ -1664,6 +1773,16 @@ exports.getProjectKoboConfig = async (req, res) => {
                     return res.json({
                         configured: false,
                         ambiguous: true,
+                        configs: ownConfigs.map(c => ({
+                            configId: c.id,
+                            labId: c.labId,
+                            labName: c.labName,
+                            formId: c.formId,
+                            koboFormId: c.formId,
+                            isActive: c.isActive,
+                            status: c.isActive ? 'ACTIVE' : 'DISABLED',
+                            lastSyncAt: c.lastSyncAt
+                        })),
                         message: 'Multiple active Kobo configurations exist for your laboratory in this project. Explicit configId required.'
                     });
                 } else if (isOwnerManager || isAdmin) {
@@ -1674,6 +1793,16 @@ exports.getProjectKoboConfig = async (req, res) => {
                         return res.json({
                             configured: false,
                             ambiguous: true,
+                            configs: ownerConfigs.map(c => ({
+                                configId: c.id,
+                                labId: c.labId,
+                                labName: c.labName,
+                                formId: c.formId,
+                                koboFormId: c.formId,
+                                isActive: c.isActive,
+                                status: c.isActive ? 'ACTIVE' : 'DISABLED',
+                                lastSyncAt: c.lastSyncAt
+                            })),
                             message: 'Multiple configurations exist for the coordinating laboratory. Explicit configId required.'
                         });
                     } else {
@@ -1690,6 +1819,16 @@ exports.getProjectKoboConfig = async (req, res) => {
                     return res.json({
                         configured: false,
                         ambiguous: true,
+                        configs: eligibleConfigs.map(c => ({
+                            configId: c.id,
+                            labId: c.labId,
+                            labName: c.labName,
+                            formId: c.formId,
+                            koboFormId: c.formId,
+                            isActive: c.isActive,
+                            status: c.isActive ? 'ACTIVE' : 'DISABLED',
+                            lastSyncAt: c.lastSyncAt
+                        })),
                         message: 'Multiple Kobo configurations exist for this project across participating laboratories. Explicit labId or configId required.'
                     });
                 }
@@ -1701,11 +1840,17 @@ exports.getProjectKoboConfig = async (req, res) => {
         }
 
         // Redact credentials: never return stored secrets or tokens in responses (LG-13, P28)
+        // F06 FIX: Return both formId and koboFormId, destination labId and labName, configId and status
         res.json({
             configured: true,
             koboServerUrl: config.koboServerUrl,
             koboFormId: config.formId,
+            formId: config.formId,
+            labId: config.labId,
+            labName: config.labName,
+            configId: config.id,
             isActive: config.isActive,
+            status: config.isActive ? 'ACTIVE' : 'DISABLED',
             lastSyncAt: config.lastSyncAt,
             canEdit: isAdmin || isOwnerManager
         });
@@ -1784,5 +1929,331 @@ exports.getProjectOperationReceipt = async (req, res) => {
     } catch (err) {
         console.error('[getProjectOperationReceipt] Error:', err);
         return error(res, 500, 'RECEIPT_FETCH_ERROR', 'Failed to retrieve operation receipt');
+    }
+};
+
+exports.listProjectKoboConnections = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        const memberLabs = await prisma.lab.findMany({
+            where: { id: { in: allMemberLabIds } },
+            select: { id: true, country: true }
+        });
+        const labCountries = {};
+        memberLabs.forEach(m => { labCountries[m.id] = m.country; });
+
+        if (!projectPolicyService.canReadProject(req.user, project, { memberLabIds: allMemberLabIds, labCountries })) {
+            return res.status(403).json({ error: 'Access denied: Project belongs to another laboratory scope' });
+        }
+
+        const configs = await prisma.koboConfig.findMany({
+            where: {
+                OR: [
+                    { projectCode: project.code },
+                    { projectCode: project.id }
+                ]
+            }
+        });
+
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.role);
+        const isOwnerManager = req.user?.role === 'LAB_MANAGER' && project.labId === req.user?.labId;
+        const isProjectManager = req.user?.role === 'PROJECT_MANAGER';
+        const isNationalAdmin = ['MASTER_USER', 'COUNTRY_ADMIN'].includes(req.user?.role);
+
+        let eligibleConfigs = [];
+        if (isAdmin || isOwnerManager) {
+            eligibleConfigs = configs;
+        } else if (isProjectManager) {
+            const userProjects = projectPolicyService.parseArray(req.user?.projects);
+            if (userProjects.includes(project.code) || userProjects.includes(project.id)) {
+                eligibleConfigs = configs;
+            }
+        } else if (isNationalAdmin) {
+            const actorCountries = projectPolicyService.parseArray(req.user?.countries);
+            eligibleConfigs = configs.filter(c => labCountries[c.labId] && actorCountries.includes(labCountries[c.labId]));
+        } else if (req.user?.labId) {
+            eligibleConfigs = configs.filter(c => c.labId === req.user.labId);
+        }
+
+        return res.json({
+            projectCode: project.code,
+            connections: eligibleConfigs.map(c => ({
+                id: c.id,
+                configId: c.id,
+                labId: c.labId,
+                labName: c.labName,
+                formId: c.formId,
+                koboFormId: c.formId,
+                koboServerUrl: c.koboServerUrl,
+                isActive: c.isActive,
+                status: c.isActive ? 'ACTIVE' : 'DISABLED',
+                lastSyncAt: c.lastSyncAt
+            }))
+        });
+    } catch (err) {
+        console.error('[listProjectKoboConnections] Error:', err);
+        res.status(500).json({ error: 'Failed to list project Kobo connections' });
+    }
+};
+
+exports.createProjectKoboConnection = async (req, res) => {
+    const { id } = req.params;
+    const { destinationLabId, labId: reqLabId, formId, apiToken, koboServerUrl = 'https://kf.kobotoolbox.org' } = req.body;
+
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found' });
+
+        const targetLabId = destinationLabId || reqLabId || (req.user.role === 'LAB_MANAGER' ? req.user.labId : project.labId);
+        if (!targetLabId) {
+            return res.status(400).json({ error: 'DESTINATION_LAB_REQUIRED', message: 'Destination laboratory is required.' });
+        }
+
+        if (!formId || !apiToken) {
+            return res.status(400).json({ error: 'FORM_AND_TOKEN_REQUIRED', message: 'Form ID and API Token are required.' });
+        }
+
+        const { allMemberLabIds } = await projectMembershipService.resolveProjectLabs(project);
+        if (!allMemberLabIds.includes(targetLabId)) {
+            return res.status(400).json({
+                error: 'LAB_NOT_PROJECT_MEMBER',
+                message: `Laboratory '${targetLabId}' is not an authorized servicing laboratory for project '${project.code}'.`
+            });
+        }
+
+        // Scope check: SUPER_ADMIN, ADMIN, or owner LAB_MANAGER can manage all; servicing LAB_MANAGER only within their own lab
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
+        const isTargetLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === targetLabId;
+        if (!isAdmin && !isOwnerManager && !isTargetLabManager) {
+            return res.status(403).json({
+                error: 'FORBIDDEN_CONNECTION_SCOPE',
+                message: 'You can only manage Kobo connections for your own laboratory.'
+            });
+        }
+
+        const destLab = await prisma.lab.findFirst({
+            where: { OR: [{ id: targetLabId }, { code: targetLabId }] }
+        });
+        if (!destLab || !destLab.isActive) {
+            return res.status(400).json({ error: 'INVALID_DESTINATION_LAB', message: `Destination laboratory '${targetLabId}' is inactive or does not exist.` });
+        }
+
+        const koboService = require('../services/koboService');
+        let isConnectionVerified = true;
+        let warning = null;
+        try {
+            const testResult = await koboService.testConnection(koboServerUrl, formId, apiToken);
+            if (testResult && testResult.success === false) {
+                isConnectionVerified = false;
+                warning = `Kobo connection saved as unverified: ${testResult.message || testResult.error || 'Failed remote form verification'}`;
+            }
+        } catch (testErr) {
+            isConnectionVerified = false;
+            warning = `Kobo connection saved as unverified: ${testErr.message}`;
+        }
+
+        const config = await prisma.koboConfig.create({
+            data: {
+                id: `kobo-cfg-${Date.now()}`,
+                labId: targetLabId,
+                labName: destLab.name || project.name,
+                projectCode: project.code,
+                koboServerUrl,
+                formId,
+                apiToken,
+                isActive: isConnectionVerified
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-kobo-create-${Date.now()}`,
+                entity: 'KOBO_CONFIG',
+                entityId: config.id,
+                action: 'KOBO_CONNECTION_CREATED',
+                details: `Created Kobo connection for project ${project.code} to lab ${targetLabId} (form: ${formId})`,
+                performedBy: req.user.username,
+                timestamp: new Date()
+            }
+        });
+
+        return res.status(201).json({
+            id: config.id,
+            configId: config.id,
+            labId: config.labId,
+            projectCode: config.projectCode,
+            formId: config.formId,
+            koboServerUrl: config.koboServerUrl,
+            isActive: config.isActive,
+            warning
+        });
+    } catch (err) {
+        console.error('[createProjectKoboConnection] Error:', err);
+        return res.status(500).json({ error: 'Failed to create Kobo connection: ' + err.message });
+    }
+};
+
+exports.updateProjectKoboConnection = async (req, res) => {
+    const { id, configId } = req.params;
+    const { formId, apiToken, koboServerUrl, isActive } = req.body;
+
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found' });
+
+        const config = await prisma.koboConfig.findUnique({ where: { id: configId } });
+        if (!config || (config.projectCode !== project.code && config.projectCode !== project.id)) {
+            return res.status(404).json({ error: 'CONFIG_NOT_FOUND', message: 'Kobo configuration not found for this project.' });
+        }
+
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
+        const isTargetLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === config.labId;
+        if (!isAdmin && !isOwnerManager && !isTargetLabManager) {
+            return res.status(403).json({
+                error: 'FORBIDDEN_CONNECTION_SCOPE',
+                message: 'You can only update Kobo connections for your own laboratory.'
+            });
+        }
+
+        const data = {};
+        if (formId) data.formId = formId;
+        if (apiToken) data.apiToken = apiToken;
+        if (koboServerUrl) data.koboServerUrl = koboServerUrl;
+        if (isActive !== undefined) data.isActive = Boolean(isActive);
+
+        const updated = await prisma.koboConfig.update({
+            where: { id: configId },
+            data
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-kobo-update-${Date.now()}`,
+                entity: 'KOBO_CONFIG',
+                entityId: config.id,
+                action: 'KOBO_CONNECTION_UPDATED',
+                details: `Updated Kobo connection ${configId} for project ${project.code}`,
+                performedBy: req.user.username,
+                timestamp: new Date()
+            }
+        });
+
+        return res.json({
+            id: updated.id,
+            configId: updated.id,
+            labId: updated.labId,
+            projectCode: updated.projectCode,
+            formId: updated.formId,
+            koboServerUrl: updated.koboServerUrl,
+            isActive: updated.isActive
+        });
+    } catch (err) {
+        console.error('[updateProjectKoboConnection] Error:', err);
+        return res.status(500).json({ error: 'Failed to update Kobo connection: ' + err.message });
+    }
+};
+
+exports.toggleProjectKoboConnection = async (req, res) => {
+    const { id, configId } = req.params;
+
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found' });
+
+        const config = await prisma.koboConfig.findUnique({ where: { id: configId } });
+        if (!config || (config.projectCode !== project.code && config.projectCode !== project.id)) {
+            return res.status(404).json({ error: 'CONFIG_NOT_FOUND', message: 'Kobo configuration not found for this project.' });
+        }
+
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
+        const isTargetLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === config.labId;
+        if (!isAdmin && !isOwnerManager && !isTargetLabManager) {
+            return res.status(403).json({
+                error: 'FORBIDDEN_CONNECTION_SCOPE',
+                message: 'You can only toggle Kobo connections for your own laboratory.'
+            });
+        }
+
+        const updated = await prisma.koboConfig.update({
+            where: { id: configId },
+            data: { isActive: !config.isActive }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-kobo-toggle-${Date.now()}`,
+                entity: 'KOBO_CONFIG',
+                entityId: config.id,
+                action: 'KOBO_CONNECTION_TOGGLED',
+                details: `Toggled Kobo connection ${configId} for project ${project.code} to ${updated.isActive ? 'ACTIVE' : 'DISABLED'}`,
+                performedBy: req.user.username,
+                timestamp: new Date()
+            }
+        });
+
+        return res.json({
+            id: updated.id,
+            configId: updated.id,
+            labId: updated.labId,
+            projectCode: updated.projectCode,
+            formId: updated.formId,
+            isActive: updated.isActive
+        });
+    } catch (err) {
+        console.error('[toggleProjectKoboConnection] Error:', err);
+        return res.status(500).json({ error: 'Failed to toggle Kobo connection: ' + err.message });
+    }
+};
+
+exports.syncProjectKoboConnection = async (req, res) => {
+    const { id, configId } = req.params;
+
+    try {
+        const project = await prisma.project.findFirst({
+            where: { OR: [{ id: String(id) }, { code: String(id) }] }
+        });
+        if (!project) return res.status(404).json({ error: 'PROJECT_NOT_FOUND', message: 'Project not found' });
+
+        const config = await prisma.koboConfig.findUnique({ where: { id: configId } });
+        if (!config || (config.projectCode !== project.code && config.projectCode !== project.id)) {
+            return res.status(404).json({ error: 'CONFIG_NOT_FOUND', message: 'Kobo configuration not found for this project.' });
+        }
+
+        const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user.role);
+        const isOwnerManager = req.user.role === 'LAB_MANAGER' && project.labId === req.user.labId;
+        const isTargetLabManager = req.user.role === 'LAB_MANAGER' && req.user.labId === config.labId;
+        if (!isAdmin && !isOwnerManager && !isTargetLabManager) {
+            return res.status(403).json({
+                error: 'FORBIDDEN_CONNECTION_SCOPE',
+                message: 'You can only trigger sync for your own laboratory connection.'
+            });
+        }
+
+        const koboController = require('./koboController');
+        const syncResult = await koboController._syncLabSubmissions(config, req.user.username);
+
+        return res.json({
+            success: true,
+            configId: config.id,
+            ...syncResult
+        });
+    } catch (err) {
+        console.error('[syncProjectKoboConnection] Error:', err);
+        return res.status(500).json({ error: 'Failed to sync Kobo connection: ' + err.message });
     }
 };

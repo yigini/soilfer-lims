@@ -63,17 +63,21 @@ const verifyToken = async (req, res, next) => {
 
         const user = decision.user;
 
-        // Resolve lab operational status without blocking basic authentication (IR-10)
-        if (user.labId && user.role !== 'SUPER_ADMIN') {
+        // Resolve lab operational status and profile without blocking basic authentication (IR-10)
+        if (user.labId) {
             try {
                 const lab = await prisma.lab.findUnique({
                     where: { id: user.labId },
-                    select: { isActive: true }
+                    select: { id: true, code: true, name: true, location: true, country: true, city: true, isActive: true }
                 });
                 user.labIsActive = lab ? lab.isActive : true;
+                user.lab = lab || null;
+                user.labLocation = lab?.location || null;
             } catch (labErr) {
                 console.warn(`[AUTH] Could not resolve lab status for ${user.labId}: ${labErr.message}`);
                 user.labIsActive = true;
+                user.lab = null;
+                user.labLocation = null;
             }
         }
 
@@ -94,6 +98,8 @@ const verifyToken = async (req, res, next) => {
         req.actor = decoded.act || null;
         req.user = {
             ...safeUser,
+            lab: user.lab || null,
+            labLocation: user.labLocation || null,
             themePreference: user.themePreference || 'light',
             isImpersonated: !!decoded.act,
             countries: safeJsonParse(user.countries),
