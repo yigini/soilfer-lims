@@ -11,6 +11,116 @@ const getDisplayName = (user) => {
 };
 exports.getDisplayName = getDisplayName;
 
+/**
+ * Safely resolves attribution in server-generated assignment message bodies for display.
+ * 
+ * In-memory presentation only: does NOT mutate database records or audit trails.
+ * Fails closed for any user-authored message, uncertain sender, or unexpected structure.
+ * 
+ * Verification criteria:
+ * 1. Server-generated message identity: messageId must strictly match known server-generated assignment prefixes:
+ *    - 'msg-assign-' (created by workItemController.assignWork)
+ *    - 'msg-reassign-' (created by workItemController.reassignWorkItem)
+ *    (User-authored messages use UUID format v4 and fail closed immediately).
+ * 2. Strict known template:
+ *    - For 'msg-assign-':
+ *      - Subject must match /^(?:📋\s*)?New Work Assigned:\s*.+/i
+ *      - Body must start with 'You have been assigned a new analysis task.'
+ *      - Footer line must match /(?:^|\n)Assigned by:\s*(.+)$/m
+ *    - For 'msg-reassign-':
+ *      - Subject must match /^(?:📋\s*)?Work Reassigned:\s*.+/i
+ *      - Body must start with 'A work item has been reassigned to you.'
+ *      - Footer line must match /(?:^|\n)Reassigned by:\s*(.+)$/m
+ * 3. Matching stable sender attribution:
+ *    - The captured attribution in the footer must match the sender's stable identity (sender.username)
+ *      or already match the sender's proper name.
+ * 4. Safe fallback:
+ *    - If sender has a proper name (sender.name.trim()), update footer with proper name.
+ *    - If sender has no proper name, sender is missing, or attribution does not match, return body unchanged.
+ */
+const formatAssignmentBody = (body, sender, subject, messageId) => {
+    if (!body || typeof body !== 'string') return body;
+    if (!messageId || typeof messageId !== 'string') return body;
+
+    const isAssign = messageId.startsWith('msg-assign-');
+    const isReassign = messageId.startsWith('msg-reassign-');
+
+    // 1. Server-generated identity guard: fail closed for non-assignment or user-authored messages (e.g. UUID)
+    if (!isAssign && !isReassign) {
+        return body;
+    }
+
+    // 2. Strict subject and template verification
+    if (isAssign) {
+        if (!subject || typeof subject !== 'string' || !/^(?:📋\s*)?New Work Assigned:\s*.+/i.test(subject.trim())) {
+            return body;
+        }
+        if (!body.startsWith('You have been assigned a new analysis task.')) {
+            return body;
+        }
+        const footerMatch = body.match(/(^|\n)(Assigned by:\s*)([^\r\n]+)$/m);
+        if (!footerMatch) {
+            return body;
+        }
+
+        // 3. Sender verification and matching stable identity
+        if (!sender || typeof sender !== 'object') {
+            return body;
+        }
+        const currentAttribution = footerMatch[3].trim();
+        const stableUsername = sender.username ? String(sender.username).trim() : '';
+        const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+
+        // Verify that the current footer matches sender's username (or already the proper name)
+        if (stableUsername && currentAttribution !== stableUsername && currentAttribution !== properName) {
+            // Attribution does not match sender; fail closed to avoid misattribution
+            return body;
+        }
+
+        // If proper name exists and differs from current attribution, format footer with proper name
+        if (properName && currentAttribution !== properName) {
+            return body.replace(/(^|\n)(Assigned by:\s*)([^\r\n]+)$/m, `$1$2${properName}`);
+        }
+
+        return body;
+    }
+
+    if (isReassign) {
+        if (!subject || typeof subject !== 'string' || !/^(?:📋\s*)?Work Reassigned:\s*.+/i.test(subject.trim())) {
+            return body;
+        }
+        if (!body.startsWith('A work item has been reassigned to you.')) {
+            return body;
+        }
+        const footerMatch = body.match(/(^|\n)(Reassigned by:\s*)([^\r\n]+)$/m);
+        if (!footerMatch) {
+            return body;
+        }
+
+        // 3. Sender verification and matching stable identity
+        if (!sender || typeof sender !== 'object') {
+            return body;
+        }
+        const currentAttribution = footerMatch[3].trim();
+        const stableUsername = sender.username ? String(sender.username).trim() : '';
+        const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+
+        // Verify that the current footer matches sender's username (or already the proper name)
+        if (stableUsername && currentAttribution !== stableUsername && currentAttribution !== properName) {
+            return body;
+        }
+
+        if (properName && currentAttribution !== properName) {
+            return body.replace(/(^|\n)(Reassigned by:\s*)([^\r\n]+)$/m, `$1$2${properName}`);
+        }
+
+        return body;
+    }
+
+    return body;
+};
+exports.formatAssignmentBody = formatAssignmentBody;
+
 // Helpers
 const createNotification = async (recipientId, type, title, message, link, senderId, options = {}) => {
     try {
@@ -74,7 +184,8 @@ exports.getMessages = async (req, res) => {
         const enriched = messages.map(m => ({
             ...m,
             senderName: getDisplayName(m.sender),
-            recipientName: getDisplayName(m.recipient)
+            recipientName: getDisplayName(m.recipient),
+            body: formatAssignmentBody(m.body, m.sender, m.subject, m.id)
         }));
 
         res.json(enriched);
@@ -182,7 +293,8 @@ exports.getThread = async (req, res) => {
             ...m,
             senderName: getDisplayName(m.sender),
             recipientName: getDisplayName(m.recipient),
-            isMe: String(m.senderId) === userId
+            isMe: String(m.senderId) === userId,
+            body: formatAssignmentBody(m.body, m.sender, m.subject, m.id)
         }));
 
         res.json(enriched);
