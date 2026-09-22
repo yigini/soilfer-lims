@@ -765,4 +765,157 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             }
         });
     });
+
+    describe('8. State Integrity, Stale Selection Isolation & Route Transition (#119)', () => {
+        test('Source probe: WorkItemsTable handleBulkAssign dispatches 0 calls when selection contains only stale IDs absent from current workItems', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            let selectionResetCalled = false;
+            const mockSetSelection = (val) => {
+                if (Array.isArray(val) && val.length === 0) selectionResetCalled = true;
+            };
+
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(
+                'synthetic-tech',
+                ['SAMPLE-A-TASK'],
+                [{ id: 'SAMPLE-B-TASK', analysis: 'PH', status: 'NOT_ASSIGNED' }],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                mockSetSelection,
+                () => {}
+            );
+
+            expect(calls).toHaveLength(0);
+            expect(selectionResetCalled).toBe(true);
+        });
+
+        test('Source probe: WorkItemsTable handleBulkAssign filters out terminal status items (COMPLETED, SUBMITTED, ACCEPTED) and submits only eligible items', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(
+                'synthetic-tech',
+                ['TASK-ELIGIBLE', 'TASK-ACCEPTED', 'TASK-COMPLETED', 'TASK-ABSENT'],
+                [
+                    { id: 'TASK-ELIGIBLE', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                    { id: 'TASK-ACCEPTED', analysis: 'EC', status: 'ACCEPTED' },
+                    { id: 'TASK-COMPLETED', analysis: 'OC', status: 'COMPLETED' }
+                ],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                () => {},
+                () => {}
+            );
+
+            expect(calls).toHaveLength(1);
+            expect(calls[0].url).toBe('/api/work/assign');
+            expect(calls[0].payload).toEqual({
+                workItemIds: ['TASK-ELIGIBLE'],
+                assignee: 'synthetic-tech'
+            });
+        });
+
+        test('Source probe: WorkItemsTable handleBulkAssign enforces mutual exclusion (ARCHIVING vs DISPOSAL)', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            const calls = [];
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            
+            await invoke(
+                'synthetic-tech',
+                ['TASK-ARCH'],
+                [
+                    { id: 'TASK-ARCH', analysis: 'ARCHIVING', status: 'NOT_ASSIGNED', category: 'Post-Analytical' },
+                    { id: 'TASK-DISP', analysis: 'DISPOSAL', status: 'IN_PROGRESS', assignedTo: 'tech_gtm', category: 'Post-Analytical' }
+                ],
+                {
+                    post: async (url, payload) => {
+                        calls.push({ url, payload });
+                        return { data: {} };
+                    }
+                },
+                () => {},
+                () => {},
+                () => {}
+            );
+
+            expect(calls).toHaveLength(0);
+        });
+
+        test('SampleDetail and WorkItemsTable component source asserts state resets across sample context transitions', () => {
+            const sampleDetailPath = path.resolve(__dirname, '../../../client/src/pages/SampleDetail.jsx');
+            const sampleDetailSource = fs.readFileSync(sampleDetailPath, 'utf8');
+
+            const workItemsTablePath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const workItemsTableSource = fs.readFileSync(workItemsTablePath, 'utf8');
+
+            // SampleDetail resets selectedWorkItemIds on [id]
+            expect(sampleDetailSource).toMatch(/useEffect\(\s*\(\)\s*=>\s*\{\s*setSelectedWorkItemIds\(\[\]\);\s*\}\s*,\s*\[id\]\);/);
+
+            // SampleDetail reconciles selectedWorkItemIds on [workItems]
+            expect(sampleDetailSource).toContain('currentEligibleIds.has(itemId)');
+            expect(sampleDetailSource).toMatch(/\[workItems\]\);/);
+
+            // SampleDetail passes sampleId to WorkItemsTable
+            expect(sampleDetailSource).toContain('sampleId={identity.id || id}');
+
+            // WorkItemsTable resets selectedTech and internalSelection on [sampleId]
+            expect(workItemsTableSource).toContain('sampleId = null');
+            expect(workItemsTableSource).toContain('[sampleId]');
+            expect(workItemsTableSource).toContain('setSelectedTech(\'\')');
+
+            // WorkItemsTable disables Assign Selected when eligible items are 0
+            expect(workItemsTableSource).toContain('disabled={!canAssignBulk}');
+        });
+
+        test('Eligibility Reconciliation Logic: Ineligible and stale IDs are pruned from selection', () => {
+            const currentWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'COMPLETED' },
+                { id: 'WI-3', analysis: 'OC', status: 'ACCEPTED' },
+                { id: 'WI-4', analysis: 'TEXTURE', status: 'NOT_ASSIGNED' }
+            ];
+
+            const priorSelection = ['WI-1', 'WI-2', 'WI-3', 'WI-4', 'STALE-OLD-SAMPLE-TASK'];
+
+            const currentEligibleIds = new Set(
+                currentWorkItems
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && currentWorkItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && currentWorkItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+
+            const reconciled = priorSelection.filter(id => currentEligibleIds.has(id));
+
+            expect(reconciled).toEqual(['WI-1', 'WI-4']);
+            expect(reconciled).not.toContain('WI-2'); // COMPLETED pruned
+            expect(reconciled).not.toContain('WI-3'); // ACCEPTED pruned
+            expect(reconciled).not.toContain('STALE-OLD-SAMPLE-TASK'); // Stale ID pruned
+        });
+    });
 });

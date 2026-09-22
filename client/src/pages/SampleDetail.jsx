@@ -73,6 +73,32 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     });
     const [selectedWorkItemIds, setSelectedWorkItemIds] = useState([]);
 
+    // Clear selections when transitioning across samples or contexts
+    useEffect(() => {
+        setSelectedWorkItemIds([]);
+    }, [id]);
+
+    // Reconcile selections against current workItems and assignment eligibility
+    useEffect(() => {
+        setSelectedWorkItemIds(prev => {
+            if (!prev || prev.length === 0) return prev;
+            const currentEligibleIds = new Set(
+                (workItems || [])
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && workItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && workItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+            const reconciled = prev.filter(itemId => currentEligibleIds.has(itemId));
+            if (reconciled.length === prev.length && reconciled.every((v, i) => v === prev[i])) {
+                return prev;
+            }
+            return reconciled;
+        });
+    }, [workItems]);
+
     // Extract active method context from searchParams or returnTo
     const searchParams = new URLSearchParams(location.search);
     const directAnalysis = searchParams.get('analysis') || searchParams.get('method');
@@ -1037,6 +1063,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 selectedWorkItemIds={selectedWorkItemIds}
                                 onSelectionChange={setSelectedWorkItemIds}
                                 methodContext={activeMethodContext}
+                                sampleId={identity.id || id}
                             />
                         </div>
 

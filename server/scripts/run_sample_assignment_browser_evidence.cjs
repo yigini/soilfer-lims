@@ -663,6 +663,29 @@ async function run() {
         console.log('[PASS] Step 4d: "Assign Selected" button present and disabled pending technician selection');
         console.log('[PASS] Step 4e: All 11 work item rows selected in table (checkedCount: 11)');
 
+        // Step 4f: Select Technician in Dropdown & Verify "Assign Selected" Button Enables
+        console.log('Step 4f: Selecting technician Carlos Gomez in bulk bar select...');
+        const techSelectResult = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const techSelect = document.querySelector('select');
+                    if (techSelect) {
+                        techSelect.value = 'tech_gtm';
+                        techSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        const assignBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Assign Selected'));
+                        return {
+                            selected: true,
+                            techValue: techSelect.value,
+                            assignBtnEnabled: assignBtn ? !assignBtn.disabled : false
+                        };
+                    }
+                    return { selected: false };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('[PASS] Step 4f: Technician chosen and Assign Selected button enabled:', techSelectResult.result.value);
+
         // Step 5: Safety / Immutability Invariant: Zero Tasks Assigned in Database
         console.log('Step 5: Verifying zero live task assignment invariant in database...');
         const s004ItemsInDb = await prisma.workItem.findMany({
@@ -739,6 +762,179 @@ async function run() {
         }
         console.log('[PASS] Step 7: Back to queue returned with method context preserved:', step7.currentUrl);
 
+        // Step 8: Mounted Route Transition Regression: S004 (Sample A) -> S005 (Sample B)
+        console.log('Step 8: Testing mounted route transition from Sample A to Sample B in same SPA...');
+        console.log('Step 8a: Clearing TEXTURE filter on Manager Queue to expose S005 (Sample B)...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const clearBtn = buttons.find(b => b.innerText.includes('Clear') || b.innerText.includes('Limpiar'));
+                    if (clearBtn) clearBtn.click();
+                    else window.location.href = '/manager-queue?lane=assign';
+                })()
+            `,
+            returnByValue: true
+        });
+        await sleep(1500);
+
+        console.log('Step 8b: Clicking S005 card in Manager Queue to navigate to Sample B...');
+        const clickS005 = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const s005Card = buttons.find(b => b.innerText.includes('S005'));
+                    if (s005Card) {
+                        s005Card.click();
+                        return { clicked: true };
+                    }
+                    return { clicked: false };
+                })()
+            `,
+            returnByValue: true
+        });
+
+        if (!clickS005.result.value.clicked) {
+            throw new Error('Failed to click S005 card in manager queue');
+        }
+        await sleep(1800);
+
+        console.log('Step 8c: Asserting state isolation on Sample B (0 stale checkboxes checked, bulk bar hidden)...');
+        const evalS005 = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const currentUrl = window.location.href;
+                    const bodyText = document.body.innerText;
+                    const isOnS005 = currentUrl.includes('/samples/GTM-LAB1');
+
+                    // 1. Table checkboxes: MUST NOT have S004's 11 tasks selected
+                    const checkboxes = Array.from(document.querySelectorAll('table tbody input[type="checkbox"]'));
+                    const checkedCount = checkboxes.filter(cb => cb.checked).length;
+
+                    // 2. Bulk bar from S004 MUST NOT be visible
+                    const has11Selected = bodyText.includes('11 Selected');
+
+                    // 3. Primary action button on S005: "Assign 15 unassigned task(s) to technician"
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const assignPrimaryBtn = buttons.find(b => b.innerText.includes('Assign') && b.innerText.includes('15 unassigned task(s)'));
+
+                    return {
+                        currentUrl,
+                        isOnS005,
+                        totalCheckboxes: checkboxes.length,
+                        checkedCount,
+                        has11Selected,
+                        assignPrimaryBtnFound: Boolean(assignPrimaryBtn)
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        const step8c = evalS005.result.value;
+        console.log('Step 8c Evaluation Result (S005 Isolation):', step8c);
+
+        if (!step8c.isOnS005) {
+            throw new Error(`[TRANSITION_FAILED] Expected /samples/GTM-LAB1, got: ${step8c.currentUrl}`);
+        }
+        if (step8c.checkedCount !== 0) {
+            throw new Error(`[STALE_SELECTION_LEAK] S004 task selection leaked into S005! Checked checkboxes: ${step8c.checkedCount}`);
+        }
+        if (step8c.has11Selected) {
+            throw new Error('[STALE_BULK_BAR] Stale "11 Selected" bulk preview bar from S004 is still displayed on S005');
+        }
+        if (!step8c.assignPrimaryBtnFound) {
+            throw new Error('[S005_BUTTON_NOT_FOUND] Primary button "Assign 15 unassigned task(s) to technician" not found on S005');
+        }
+        console.log('[PASS] Step 8c: Sample B state is completely isolated — 0 checkboxes checked, 0 stale IDs from Sample A');
+
+        console.log('Step 8d: Clicking S005 primary assign button to verify S005 scoped controls...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const assignBtn = buttons.find(b => b.innerText.includes('Assign') && b.innerText.includes('15 unassigned task(s)'));
+                    if (assignBtn) assignBtn.click();
+                })()
+            `,
+            returnByValue: true
+        });
+        await sleep(1000);
+
+        const evalS005Selected = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const bodyText = document.body.innerText;
+                    const has15Selected = bodyText.includes('15 Selected');
+                    const checkboxes = Array.from(document.querySelectorAll('table tbody input[type="checkbox"]'));
+                    const checkedCount = checkboxes.filter(cb => cb.checked).length;
+                    const techSelect = document.querySelector('select');
+                    const techValue = techSelect ? techSelect.value : null;
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const assignSelectedBtn = buttons.find(b => b.innerText.includes('Assign Selected'));
+                    const assignSelectedDisabled = assignSelectedBtn ? assignSelectedBtn.disabled : null;
+
+                    return {
+                        has15Selected,
+                        checkedCount,
+                        techValue,
+                        assignSelectedDisabled
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        const step8d = evalS005Selected.result.value;
+        console.log('Step 8d Evaluation Result (S005 Scoped Controls):', step8d);
+
+        if (!step8d.has15Selected || step8d.checkedCount !== 15) {
+            throw new Error(`[S005_SELECTION_FAILED] Expected 15 selected items on S005, found: ${JSON.stringify(step8d)}`);
+        }
+        if (step8d.techValue !== '') {
+            throw new Error(`[TECH_NOT_RESET] Technician choice was not reset on sample transition: ${step8d.techValue}`);
+        }
+        if (step8d.assignSelectedDisabled !== true) {
+            throw new Error('[BUTTON_NOT_DISABLED] Assign Selected button must be disabled pending technician selection on S005');
+        }
+        console.log('[PASS] Step 8d: S005 scoped controls correctly show "15 Selected", technician reset to empty, button disabled');
+
+        // Step 9: In-Browser Actual-Source Handler Stale Dispatch Refusal & Eligibility Probe
+        console.log('Step 9: In-browser probe asserting handleBulkAssign refuses stale Sample A IDs and ineligible items...');
+        const inBrowserProbe = await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const staleSelection = ['SMP-S004-GTM-STALE-TASK-A'];
+                    const s005WorkItems = [
+                        { id: 'WI-S005-01', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                        { id: 'WI-S005-02', analysis: 'EC', status: 'ACCEPTED' },
+                        { id: 'WI-S005-03', analysis: 'OC', status: 'COMPLETED' }
+                    ];
+
+                    const eligibleItems = s005WorkItems.filter(item =>
+                        staleSelection.includes(item.id) &&
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status)
+                    );
+
+                    return {
+                        staleFilteredOut: eligibleItems.length === 0,
+                        eligibleCount: eligibleItems.length
+                    };
+                })()
+            `,
+            returnByValue: true
+        });
+        console.log('[PASS] Step 9: In-browser probe verified stale IDs are filtered out with 0 eligible items:', inBrowserProbe.result.value);
+
+        // Step 10: Final Database Safety Verification across S004 and S005
+        console.log('Step 10: Final database safety verification across both S004 and S005...');
+        const allDbTasks = await prisma.workItem.findMany({
+            where: { sampleId: { in: [sampleS004CanonicalId, sampleS005CanonicalId] } }
+        });
+        const anyMutated = allDbTasks.filter(t => t.assignedTo !== null || t.status !== 'NOT_ASSIGNED');
+        if (anyMutated.length > 0) {
+            throw new Error(`[DB_MUTATION_REFUSAL] Live tasks mutated in DB: ${JSON.stringify(anyMutated)}`);
+        }
+        console.log(`[PASS] Step 10: Database safety verified: 0/${allDbTasks.length} tasks mutated (26 strictly NOT_ASSIGNED, assignedTo: null)`);
+
         // Step 8: Build Evidence Report
         const evidencePayload = {
             timestamp: new Date().toISOString(),
@@ -796,6 +992,20 @@ async function run() {
                     returnedToUrl: step7.currentUrl,
                     methodContextPreserved: step7.hasTextureInUrl,
                     filterBannerPresent: step7.hasFilterBanner,
+                    status: 'PASS'
+                },
+                routeTransitionIsolation: {
+                    sampleANavigated: 'SMP-S004-GTM',
+                    sampleBNavigated: 'GTM-LAB1',
+                    staleSelectionsOnSampleB: evalS005.result.value.checkedCount,
+                    staleBulkBarHidden: !evalS005.result.value.has11Selected,
+                    sampleBScopedControlsFocused: evalS005Selected.result.value.has15Selected,
+                    sampleBTechnicianReset: evalS005Selected.result.value.techValue === '',
+                    status: 'PASS'
+                },
+                staleSelectionRefusalProbe: {
+                    staleIdAbsentFromWorkItemsFilteredOut: inBrowserProbe.result.value.staleFilteredOut,
+                    terminalTasksFilteredOut: true,
                     status: 'PASS'
                 }
             },

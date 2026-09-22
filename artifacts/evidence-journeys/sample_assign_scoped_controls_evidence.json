@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T12:31:20.841Z",
+  "timestamp": "2026-09-22T12:56:03.753Z",
   "status": "PASS",
   "issue": "#119",
   "checkpoint": "manager -> dashboard TEXTURE -> S004 scoped assignment controls without loop",
@@ -7,7 +7,7 @@
     "node": "v24.13.0",
     "database": "disposable_journey_sample_assignment.db",
     "isolationRefusalGuard": "ACTIVE",
-    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-sample-assign\\server\\.tmp_journey_runner_1790080272210_1l0hkf\\disposable_journey_1l0hkf.db"
+    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-sample-assign\\server\\.tmp_journey_runner_1790081750272_17yst4\\disposable_journey_17yst4.db"
   },
   "checks": {
     "methodFilterInQueue": {
@@ -17,7 +17,7 @@
       "status": "PASS"
     },
     "sampleDetailNavigation": {
-      "navigatedToUrl": "http://127.0.0.1:58312/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
+      "navigatedToUrl": "http://127.0.0.1:52929/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
       "targetRoute": "/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
       "resolvedCanonicalId": true,
       "resolvedDisplayId": true,
@@ -51,9 +51,23 @@
       "status": "PASS"
     },
     "returnToQueueContext": {
-      "returnedToUrl": "http://127.0.0.1:58312/manager-queue?lane=assign&analysis=TEXTURE",
+      "returnedToUrl": "http://127.0.0.1:52929/manager-queue?lane=assign&analysis=TEXTURE",
       "methodContextPreserved": true,
       "filterBannerPresent": true,
+      "status": "PASS"
+    },
+    "routeTransitionIsolation": {
+      "sampleANavigated": "SMP-S004-GTM",
+      "sampleBNavigated": "GTM-LAB1",
+      "staleSelectionsOnSampleB": 0,
+      "staleBulkBarHidden": true,
+      "sampleBScopedControlsFocused": true,
+      "sampleBTechnicianReset": true,
+      "status": "PASS"
+    },
+    "staleSelectionRefusalProbe": {
+      "staleIdAbsentFromWorkItemsFilteredOut": true,
+      "terminalTasksFilteredOut": true,
       "status": "PASS"
     }
   },

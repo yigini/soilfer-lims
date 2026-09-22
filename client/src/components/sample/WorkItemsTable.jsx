@@ -20,7 +20,8 @@ const WorkItemsTable = ({
     onReviewBulk,
     selectedWorkItemIds,
     onSelectionChange,
-    methodContext
+    methodContext,
+    sampleId = null
 }) => {
     const navigate = useNavigate();
     const getAnalysisDisplayName = useAnalysisNames();
@@ -108,6 +109,19 @@ const WorkItemsTable = ({
     };
     const [selectedTech, setSelectedTech] = useState('');
 
+    // Reset technician and internal selection when transitioning across samples
+    useEffect(() => {
+        if (typeof setSelectedTech === 'function') setSelectedTech('');
+        setInternalSelection([]);
+    }, [sampleId]);
+
+    // If selection becomes empty, clear technician choice
+    useEffect(() => {
+        if (selection.length === 0 && selectedTech) {
+            setSelectedTech('');
+        }
+    }, [selection.length, selectedTech]);
+
     // Workflow Calculations
     const nonPostAnalyses = workItems.filter(w => w.category !== 'Post-Analytical');
     const isDryingComplete = workItems.some(w => w.analysis === 'DRYING' && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(w.status));
@@ -120,7 +134,10 @@ const WorkItemsTable = ({
 
     const toggleSelectAll = (e) => {
         if (e.target.checked) setSelection(workItems.map(i => i.id));
-        else setSelection([]);
+        else {
+            setSelection([]);
+            if (typeof setSelectedTech === 'function') setSelectedTech('');
+        }
     };
 
     const toggleSelect = (id) => {
@@ -129,17 +146,34 @@ const WorkItemsTable = ({
     };
 
     const handleBulkAssign = async () => {
-        if (!selectedTech || selection.length === 0) return;
+        // Intersect and validate selection against current workItems and assignment eligibility
+        const eligibleItems = (workItems || []).filter(item => {
+            if (!item || !selection.includes(item.id)) return false;
+            if (['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status)) return false;
+            if (item.analysis === 'ARCHIVING' && workItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) return false;
+            if (item.analysis === 'DISPOSAL' && workItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo)) return false;
+            return true;
+        });
+        const eligibleItemIds = eligibleItems.map(i => i.id);
+
+        if (!selectedTech || eligibleItemIds.length === 0) {
+            if (selection.length > 0 && eligibleItemIds.length === 0) {
+                setSelection([]);
+                if (typeof setSelectedTech === 'function') setSelectedTech('');
+            }
+            return;
+        }
+
         try {
             const res = await axios.post('/api/work/assign', {
-                workItemIds: selection,
+                workItemIds: eligibleItemIds,
                 assignee: selectedTech
             });
 
             // Specific message for post-analytical
-            let msg = `Assigned ${selection.length} items to ${selectedTech}.`;
-            if (selection.length === 1) {
-                const item = workItems.find(i => i.id === selection[0]);
+            let msg = `Assigned ${eligibleItemIds.length} items to ${selectedTech}.`;
+            if (eligibleItemIds.length === 1) {
+                const item = eligibleItems[0];
                 if (item?.analysis === 'ARCHIVING') msg = `Archiving task assigned to ${selectedTech}.`;
                 if (item?.analysis === 'DISPOSAL') msg = `Disposal task assigned to ${selectedTech}.`;
             }
@@ -151,6 +185,7 @@ const WorkItemsTable = ({
             });
 
             setSelection([]);
+            if (typeof setSelectedTech === 'function') setSelectedTech('');
             if (onAssignmentSuccess) onAssignmentSuccess();
         } catch (e) {
             showDialog({
@@ -299,81 +334,98 @@ const WorkItemsTable = ({
             </div>
 
             {/* BULK ACTIONS BAR (Sticky) */}
-            {selection.length > 0 && isManager && (
-                <div className="sticky top-0 left-0 right-0 bg-blue-50 dark:bg-blue-900/40 p-2 z-20 flex items-center gap-4 px-4 border-b border-blue-100 dark:border-blue-800 animate-in slide-in-from-top-2 shadow-md">
-                    <span className="font-bold text-sm text-blue-800 dark:text-blue-200">{selection.length} Selected</span>
+            {selection.length > 0 && isManager && (() => {
+                const eligibleAssignSelected = selection.filter(id => {
+                    const it = (workItems || []).find(w => w.id === id);
+                    if (!it) return false;
+                    if (['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(it.status)) return false;
+                    if (it.analysis === 'ARCHIVING' && workItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) return false;
+                    if (it.analysis === 'DISPOSAL' && workItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo)) return false;
+                    return true;
+                });
+                const canAssignBulk = Boolean(selectedTech && eligibleAssignSelected.length > 0);
 
-                    <div className="flex items-center gap-2 ml-auto">
-                        <select
-                            value={selectedTech}
-                            onChange={e => setSelectedTech(e.target.value)}
-                            className="text-xs p-1.5 rounded border border-sf-divider dark:bg-gray-800 shadow-sm"
-                        >
-                            <option value="">Assign to...</option>
-                            {technicians.map(t => <option key={t.id} value={t.username}>{t.name || t.username}</option>)}
-                        </select>
-                        <button
-                            onClick={handleBulkAssign}
-                            disabled={!selectedTech}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded disabled:opacity-50 transition-colors shadow-sm"
-                        >
-                            Assign Selected
-                        </button>
-                        <button
-                            onClick={() => setSelection([])}
-                            className="text-gray-500 hover:text-gray-700 text-xs font-medium px-2"
-                        >
-                            Cancel
-                        </button>
-                        <div className="w-px h-4 bg-gray-300 mx-2"></div>
-                        {(() => {
-                            const submittedItems = selection.filter(id => {
-                                const it = workItems.find(w => w.id === id);
-                                const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
-                                return it && (it.status === 'SUBMITTED' || it.status === 'COMPLETED' || isClosure);
-                            });
-                            const hasUnsubmitted = selection.some(id => {
-                                const it = workItems.find(w => w.id === id);
-                                const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
-                                return it && !isClosure && it.status !== 'SUBMITTED' && it.status !== 'COMPLETED';
-                            });
+                return (
+                    <div className="sticky top-0 left-0 right-0 bg-blue-50 dark:bg-blue-900/40 p-2 z-20 flex items-center gap-4 px-4 border-b border-blue-100 dark:border-blue-800 animate-in slide-in-from-top-2 shadow-md">
+                        <span className="font-bold text-sm text-blue-800 dark:text-blue-200">
+                            {selection.length} Selected{eligibleAssignSelected.length !== selection.length ? ` (${eligibleAssignSelected.length} assignable)` : ''}
+                        </span>
 
-                            return (
-                                <button
-                                    onClick={async () => {
-                                        if (hasUnsubmitted) {
-                                            showDialog({
-                                                title: 'Cannot Approve Uncompleted Analysis',
-                                                message: 'One or more selected analyses have not been completed and submitted by a technician. Only submitted analyses can be approved.',
-                                                type: 'alert'
-                                            });
-                                            return;
-                                        }
-                                        if (!confirm(`Approve ${submittedItems.length} submitted item(s)?`)) return;
-                                        if (onReviewBulk) {
-                                            await onReviewBulk(submittedItems, 'ACCEPTED');
-                                        } else {
-                                            for (const id of submittedItems) {
-                                                await onReview(id, 'ACCEPTED');
+                        <div className="flex items-center gap-2 ml-auto">
+                            <select
+                                value={selectedTech}
+                                onChange={e => setSelectedTech(e.target.value)}
+                                className="text-xs p-1.5 rounded border border-sf-divider dark:bg-gray-800 shadow-sm"
+                            >
+                                <option value="">Assign to...</option>
+                                {technicians.map(t => <option key={t.id} value={t.username}>{t.name || t.username}</option>)}
+                            </select>
+                            <button
+                                onClick={handleBulkAssign}
+                                disabled={!canAssignBulk}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded disabled:opacity-50 transition-colors shadow-sm"
+                            >
+                                Assign Selected
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setSelection([]);
+                                    if (typeof setSelectedTech === 'function') setSelectedTech('');
+                                }}
+                                className="text-gray-500 hover:text-gray-700 text-xs font-medium px-2"
+                            >
+                                Cancel
+                            </button>
+                            <div className="w-px h-4 bg-gray-300 mx-2"></div>
+                            {(() => {
+                                const submittedItems = selection.filter(id => {
+                                    const it = workItems.find(w => w.id === id);
+                                    const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
+                                    return it && (it.status === 'SUBMITTED' || it.status === 'COMPLETED' || isClosure);
+                                });
+                                const hasUnsubmitted = selection.some(id => {
+                                    const it = workItems.find(w => w.id === id);
+                                    const isClosure = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(it?.analysis);
+                                    return it && !isClosure && it.status !== 'SUBMITTED' && it.status !== 'COMPLETED';
+                                });
+
+                                return (
+                                    <button
+                                        onClick={async () => {
+                                            if (hasUnsubmitted) {
+                                                showDialog({
+                                                    title: 'Cannot Approve Uncompleted Analysis',
+                                                    message: 'One or more selected analyses have not been completed and submitted by a technician. Only submitted analyses can be approved.',
+                                                    type: 'alert'
+                                                });
+                                                return;
                                             }
-                                        }
-                                        setSelection([]);
-                                    }}
-                                    disabled={submittedItems.length === 0 || hasUnsubmitted}
-                                    title={hasUnsubmitted ? 'Cannot approve: selected items include uncompleted/unsubmitted analyses' : `Approve ${submittedItems.length} submitted analyses`}
-                                    className={`text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm transition-colors ${
-                                        submittedItems.length === 0 || hasUnsubmitted
-                                            ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                            : 'bg-green-600 hover:bg-green-700'
-                                    }`}
-                                >
-                                    Approve Selected ({submittedItems.length})
-                                </button>
-                            );
-                        })()}
+                                            if (!confirm(`Approve ${submittedItems.length} submitted item(s)?`)) return;
+                                            if (onReviewBulk) {
+                                                await onReviewBulk(submittedItems, 'ACCEPTED');
+                                            } else {
+                                                for (const id of submittedItems) {
+                                                    await onReview(id, 'ACCEPTED');
+                                                }
+                                            }
+                                            setSelection([]);
+                                        }}
+                                        disabled={submittedItems.length === 0 || hasUnsubmitted}
+                                        title={hasUnsubmitted ? 'Cannot approve: selected items include uncompleted/unsubmitted analyses' : `Approve ${submittedItems.length} submitted analyses`}
+                                        className={`text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm transition-colors ${
+                                            submittedItems.length === 0 || hasUnsubmitted
+                                                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                                : 'bg-green-600 hover:bg-green-700'
+                                        }`}
+                                    >
+                                        Approve Selected ({submittedItems.length})
+                                    </button>
+                                );
+                            })()}
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             <div className="overflow-auto max-h-[70vh]"> {/* Scrollable Container */}
                 <table className="w-full text-left border-collapse relative min-w-[800px]">
