@@ -395,7 +395,8 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                                 margin: 0 !important;
                                 padding: 0 !important;
                                 background: white !important;
-                                height: 100% !important;
+                                height: auto !important;
+                                min-height: 0 !important;
                             }
                             /* Hide all standard web content */
                             #root, #app, .no-print, nav, header, aside, .modal-backdrop {
@@ -404,17 +405,33 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
                             #label-print-portal, .print-only {
                                 display: block !important;
                                 visibility: visible !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                border: none !important;
                             }
                             .sample-label-page {
-                                page-break-after: always !important;
-                                break-after: page !important;
                                 width: ${format === 'STANDARD' ? '101mm' : '50mm'} !important;
                                 height: ${format === 'STANDARD' ? '54mm' : '25mm'} !important;
+                                max-width: ${format === 'STANDARD' ? '101mm' : '50mm'} !important;
+                                max-height: ${format === 'STANDARD' ? '54mm' : '25mm'} !important;
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
                                 overflow: hidden !important;
                                 display: flex !important;
                                 align-items: center !important;
                                 justify-content: center !important;
                                 box-sizing: border-box !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                            }
+                            .sample-label-page:not(:last-child) {
+                                page-break-after: always !important;
+                                break-after: page !important;
+                            }
+                            .sample-label-page:last-child,
+                            .sample-label-page:last-of-type {
+                                page-break-after: auto !important;
+                                break-after: auto !important;
                             }
                         }
                     ` }} />
@@ -449,22 +466,114 @@ const LabelPrintDialog = ({ isOpen, onClose, sample, samples, autoPrint = false 
     );
 };
 
+const parseJsonSafely = (val) => {
+    if (!val) return null;
+    if (typeof val === 'object') return val;
+    if (typeof val === 'string') {
+        try {
+            return JSON.parse(val);
+        } catch {
+            return null;
+        }
+    }
+    return null;
+};
+
+export const formatLabelDate = (val) => {
+    if (!val) return null;
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (!trimmed || trimmed === 'N/A' || trimmed === '—' || trimmed === '-' || trimmed.toLowerCase() === 'null' || trimmed.toLowerCase() === 'undefined') {
+            return null;
+        }
+        const isoMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (isoMatch) return isoMatch[1];
+    }
+    try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return null;
+        return d.toISOString().split('T')[0];
+    } catch {
+        return null;
+    }
+};
+
+export const resolveCollectionDate = (sample) => {
+    if (!sample) return null;
+    const direct = sample.collectionDate || sample.samplingDate || sample.samplingDetails?.date || sample.samplingDetails?.collectionDate;
+    if (direct) {
+        const formatted = formatLabelDate(direct);
+        if (formatted) return formatted;
+    }
+
+    const fm = parseJsonSafely(sample.fieldMetadata);
+    if (fm) {
+        const fmDate = fm.collectionDate || fm.samplingDate || fm.collection_date || fm.sampling_date || fm.date || fm.samplingDetails?.date;
+        if (fmDate) {
+            const formatted = formatLabelDate(fmDate);
+            if (formatted) return formatted;
+        }
+    }
+
+    const meta = parseJsonSafely(sample.metadata);
+    if (meta) {
+        const metaDate = meta.collectionDate || meta.samplingDate || meta.collection_date || meta.sampling_date || meta.date || meta.samplingDetails?.date;
+        if (metaDate) {
+            const formatted = formatLabelDate(metaDate);
+            if (formatted) return formatted;
+        }
+    }
+
+    return null;
+};
+
+export const resolveIntakeDate = (sample) => {
+    if (!sample) return null;
+    const direct = sample.receptionDate || sample.receivedDate || sample.intakeDate || sample.custodyHandoverAt;
+    if (direct) {
+        const formatted = formatLabelDate(direct);
+        if (formatted) return formatted;
+    }
+
+    const rd = parseJsonSafely(sample.receptionData);
+    if (rd) {
+        const rdDate = rd.intakeDate || rd.receptionDate || rd.receivedDate;
+        if (rdDate) {
+            const formatted = formatLabelDate(rdDate);
+            if (formatted) return formatted;
+        }
+    }
+
+    if (sample.status && sample.status !== 'EXPECTED' && sample.createdAt) {
+        const formatted = formatLabelDate(sample.createdAt);
+        if (formatted) return formatted;
+    }
+
+    return null;
+};
+
 /**
  * Standard 101mm x 54mm (4" x 2") Sample / Bag Label
  */
-const StandardLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => {
+export const StandardLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => {
     const isExpected = sample.status === 'EXPECTED';
     const labId = isExpected ? 'Pending' : (sample.labId || 'PENDING');
     const originalId = sample.originalId || 'N/A';
-    const collectionDate = sample.samplingDetails?.date || sample.metadata?.date || sample.collectionDate || 'N/A';
     const assignedLab = sample.assignedLab || 'Global Lab';
     const projectCode = sample.projectCode || sample.projectId || 'Walk-in';
 
+    const collectionDate = resolveCollectionDate(sample);
+    const intakeDate = resolveIntakeDate(sample);
+
+    const dateFooterText = collectionDate
+        ? `Coll: ${collectionDate}`
+        : (intakeDate ? `Rec: ${intakeDate}` : 'Coll: —');
+
     return (
         <div
-            className={`w-[101mm] h-[54mm] bg-white text-slate-900 p-3.5 border border-slate-300 shadow-sm flex flex-col font-sans select-none ${
-                isPrint ? 'border-none p-2' : 'rounded'
-            }`}
+            className={`w-[101mm] h-[54mm] ${
+                isPrint ? 'max-w-[101mm] max-h-[54mm] border-none p-2 shadow-none' : 'border border-slate-300 shadow-sm rounded p-3.5'
+            } bg-white text-slate-900 flex flex-col font-sans select-none overflow-hidden`}
             style={{ boxSizing: 'border-box' }}
         >
             {/* Header */}
@@ -482,7 +591,7 @@ const StandardLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => 
                         Intake
                     </div>
                     <div className="text-[9px] font-mono font-bold text-slate-600 mt-0.5">
-                        {new Date().toISOString().split('T')[0]}
+                        {intakeDate || '—'}
                     </div>
                 </div>
             </div>
@@ -516,7 +625,7 @@ const StandardLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => 
             {/* Footer */}
             <div className="mt-auto pt-1 border-t border-dashed border-slate-300 flex justify-between items-end text-[8px]">
                 <div className="font-bold text-slate-500">
-                    {collectionDate !== 'N/A' ? `Coll: ${collectionDate}` : `Rec: ${new Date().toLocaleDateString()}`}
+                    {dateFooterText}
                 </div>
                 <div className="font-black text-slate-900 uppercase">
                     {assignedLab}
@@ -529,17 +638,21 @@ const StandardLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => 
 /**
  * Compact 50mm x 25mm (2" x 1") Cryovial / Small Tube Label
  */
-const CompactLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => {
+export const CompactLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => {
     const isExpected = sample.status === 'EXPECTED';
     const labId = isExpected ? 'Pending' : (sample.labId || 'PENDING');
     const originalId = sample.originalId || 'N/A';
     const assignedLab = sample.assignedLab || 'Lab';
 
+    const collectionDate = resolveCollectionDate(sample);
+    const intakeDate = resolveIntakeDate(sample);
+    const dateText = intakeDate ? `Rec: ${intakeDate}` : (collectionDate ? `Coll: ${collectionDate}` : '—');
+
     return (
         <div
-            className={`w-[50mm] h-[25mm] bg-white text-slate-900 p-1.5 border border-slate-300 shadow-sm flex items-center gap-2 font-sans select-none ${
-                isPrint ? 'border-none p-1' : 'rounded'
-            }`}
+            className={`w-[50mm] h-[25mm] ${
+                isPrint ? 'max-w-[50mm] max-h-[25mm] border-none p-1 shadow-none' : 'border border-slate-300 shadow-sm rounded p-1.5'
+            } bg-white text-slate-900 flex items-center gap-2 font-sans select-none overflow-hidden`}
             style={{ boxSizing: 'border-box' }}
         >
             {/* QR Code */}
@@ -565,7 +678,7 @@ const CompactLabelCard = ({ sample, branding, qrDataUrl, isPrint = false }) => {
                     </div>
                 </div>
                 <div className="text-[6.5px] font-bold text-slate-400 uppercase truncate leading-none">
-                    {assignedLab} • {new Date().toISOString().split('T')[0]}
+                    {assignedLab} • {dateText}
                 </div>
             </div>
         </div>

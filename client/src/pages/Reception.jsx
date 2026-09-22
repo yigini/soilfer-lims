@@ -2634,7 +2634,9 @@ const Reception = () => {
                     assignedLab: user?.labId,
                     projectCode: sessionProject || sampleData?.projectCode,
                     samplingDetails: sampling,
-                    status: 'ACCEPTED'
+                    status: 'ACCEPTED',
+                    receptionDate: result.receptionDate || result.sample?.receptionDate || result.createdAt || new Date().toISOString(),
+                    createdAt: result.createdAt || result.sample?.createdAt
                 } : null}
             />
         </div>

@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-09-22T15:44:47.894Z",
+  "suite": "Issue #121 Headless Chrome CDP Print & Date Verification",
+  "browser": "Google Chrome Headless (Windows)",
+  "totalCases": 6,
+  "passedCases": 6,
+  "results": [
+    {
+      "testName": "Samples Journey: Single S004 Standard Label (101x54mm)",
+      "format": "STANDARD",
+      "sampleCount": 1,
+      "cssMode": "PATCHED",
+      "expectedPages": 1,
+      "actualPages": 1,
+      "pageCountPassed": true,
+      "renderedTitle": "Label-S004",
+      "expectedTitle": "Label-S004",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    },
+    {
+      "testName": "Samples Journey: Single S004 Compact Vial Label (50x25mm)",
+      "format": "COMPACT",
+      "sampleCount": 1,
+      "cssMode": "PATCHED",
+      "expectedPages": 1,
+      "actualPages": 1,
+      "pageCountPassed": true,
+      "renderedTitle": "Label-S004",
+      "expectedTitle": "Label-S004",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    },
+    {
+      "testName": "Samples Journey: Batch 3-Label Standard (101x54mm)",
+      "format": "STANDARD",
+      "sampleCount": 3,
+      "cssMode": "PATCHED",
+      "expectedPages": 3,
+      "actualPages": 3,
+      "pageCountPassed": true,
+      "renderedTitle": "Labels-Batch-3",
+      "expectedTitle": "Labels-Batch-3",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    },
+    {
+      "testName": "Samples Journey: Batch 3-Label Compact Vial (50x25mm)",
+      "format": "COMPACT",
+      "sampleCount": 3,
+      "cssMode": "PATCHED",
+      "expectedPages": 3,
+      "actualPages": 3,
+      "pageCountPassed": true,
+      "renderedTitle": "Labels-Batch-3",
+      "expectedTitle": "Labels-Batch-3",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    },
+    {
+      "testName": "Reception Journey: Immediate Print after Intake (Standard)",
+      "format": "STANDARD",
+      "sampleCount": 1,
+      "cssMode": "PATCHED",
+      "expectedPages": 1,
+      "actualPages": 1,
+      "pageCountPassed": true,
+      "renderedTitle": "Label-LAB-INTAKE-NEW",
+      "expectedTitle": "Label-LAB-INTAKE-NEW",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    },
+    {
+      "testName": "Reception Journey: Immediate Print after Intake (Compact)",
+      "format": "COMPACT",
+      "sampleCount": 1,
+      "cssMode": "PATCHED",
+      "expectedPages": 1,
+      "actualPages": 1,
+      "pageCountPassed": true,
+      "renderedTitle": "Label-LAB-INTAKE-NEW",
+      "expectedTitle": "Label-LAB-INTAKE-NEW",
+      "titlePassed": true,
+      "dateChecksPassed": true,
+      "failedDateReasons": [],
+      "passed": true
+    }
+  ],
+  "outstandingVerification": {
+    "safariPrintPreview": "PENDING_PHYSICAL_OR_MACOS_ENVIRONMENT",
+    "physicalThermalPrinterHardware": "PENDING_PHYSICAL_HARDWARE"
+  }
+}
