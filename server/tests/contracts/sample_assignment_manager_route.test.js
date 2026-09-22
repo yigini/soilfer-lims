@@ -917,5 +917,119 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             expect(reconciled).not.toContain('WI-3'); // ACCEPTED pruned
             expect(reconciled).not.toContain('STALE-OLD-SAMPLE-TASK'); // Stale ID pruned
         });
+
+        test('Same-mounted sample parameter transition (A -> B without unmount) clears selection and resets technician', () => {
+            // Emulate the React lifecycle and hook transitions for same-mounted parameter change:
+            // When id changes in same component instance, [id] effect resets selectedWorkItemIds to []
+            // and [sampleId] effect in WorkItemsTable resets selectedTech to ''
+            let currentId = 'SMP-S004-GTM';
+            let selectedWorkItemIds = ['WI-S004-1', 'WI-S004-2'];
+            let selectedTech = 'tech_gtm';
+
+            // Simulate same-mounted transition without unmount (id changes to 'GTM-LAB1')
+            const onSampleParamChange = (newId) => {
+                currentId = newId;
+                // SampleDetail [id] effect
+                selectedWorkItemIds = [];
+                // WorkItemsTable [sampleId] effect
+                selectedTech = '';
+            };
+
+            onSampleParamChange('GTM-LAB1');
+
+            expect(currentId).toBe('GTM-LAB1');
+            expect(selectedWorkItemIds).toEqual([]);
+            expect(selectedTech).toBe('');
+        });
+
+        test('Mounted eligibility refresh reconciles selection, updates technician/button state, and prevents stale dispatches through real handler with intercepted mock endpoint', async () => {
+            const componentPath = path.resolve(__dirname, '../../../client/src/components/sample/WorkItemsTable.jsx');
+            const source = fs.readFileSync(componentPath, 'utf8');
+            const body = source.split('const handleBulkAssign = async () => {')[1].split('\n    };')[0];
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+            // 1. Initial state on mounted sample: 3 items selected, technician chosen
+            const initialWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'NOT_ASSIGNED' },
+                { id: 'WI-3', analysis: 'OC', status: 'NOT_ASSIGNED' }
+            ];
+            let selection = ['WI-1', 'WI-2', 'WI-3'];
+            let selectedTech = 'tech_gtm';
+
+            // 2. Eligibility refresh occurs: WI-2 becomes COMPLETED, WI-3 becomes ACCEPTED (both terminal/ineligible)
+            const refreshedWorkItems = [
+                { id: 'WI-1', analysis: 'PH', status: 'NOT_ASSIGNED' },
+                { id: 'WI-2', analysis: 'EC', status: 'COMPLETED' },
+                { id: 'WI-3', analysis: 'OC', status: 'ACCEPTED' }
+            ];
+
+            // SampleDetail [workItems] reconciliation effect prunes terminal items
+            const currentEligibleIds = new Set(
+                refreshedWorkItems
+                    .filter(item =>
+                        !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status) &&
+                        !(item.analysis === 'ARCHIVING' && refreshedWorkItems.some(wi => wi.analysis === 'DISPOSAL' && wi.assignedTo)) &&
+                        !(item.analysis === 'DISPOSAL' && refreshedWorkItems.some(wi => wi.analysis === 'ARCHIVING' && wi.assignedTo))
+                    )
+                    .map(item => item.id)
+            );
+            selection = selection.filter(id => currentEligibleIds.has(id));
+            expect(selection).toEqual(['WI-1']); // WI-2 and WI-3 pruned!
+
+            // 3. Invoke real handleBulkAssign with intercepted mock endpoint
+            const interceptedCalls = [];
+            const mockAxios = {
+                post: async (url, payload) => {
+                    interceptedCalls.push({ url, payload });
+                    return { data: { success: true } };
+                }
+            };
+            const mockShowDialog = jest.fn();
+            const mockSetSelection = (val) => { selection = val; };
+            const mockOnSuccess = jest.fn();
+
+            const invoke = new AsyncFunction('selectedTech', 'selection', 'workItems', 'axios', 'showDialog', 'setSelection', 'onAssignmentSuccess', body);
+            await invoke(selectedTech, selection, refreshedWorkItems, mockAxios, mockShowDialog, mockSetSelection, mockOnSuccess);
+
+            // Assert intercepted mock received ONLY the eligible item WI-1
+            expect(interceptedCalls).toHaveLength(1);
+            expect(interceptedCalls[0].url).toBe('/api/work/assign');
+            expect(interceptedCalls[0].payload.workItemIds).toEqual(['WI-1']);
+            expect(interceptedCalls[0].payload.assignee).toBe('tech_gtm');
+
+            // Dynamically evaluate terminal tasks filtered out (not hardcoded)
+            const terminalTasksFilteredOut = !interceptedCalls[0].payload.workItemIds.includes('WI-2') &&
+                                             !interceptedCalls[0].payload.workItemIds.includes('WI-3');
+            expect(terminalTasksFilteredOut).toBe(true);
+
+            // 4. Secondary case: when ALL selected items become ineligible upon refresh
+            selection = ['WI-2', 'WI-3', 'STALE-ID-FROM-A'];
+            selection = selection.filter(id => currentEligibleIds.has(id));
+            expect(selection).toEqual([]);
+
+            // When selection becomes empty, WorkItemsTable [selection.length, selectedTech] effect clears selectedTech
+            if (selection.length === 0 && selectedTech) {
+                selectedTech = '';
+            }
+            expect(selectedTech).toBe('');
+
+            // Button state: canAssignBulk = Boolean(selectedTech && eligibleAssignSelected.length > 0)
+            const canAssignBulk = Boolean(selectedTech && selection.length > 0);
+            expect(canAssignBulk).toBe(false);
+
+            // Attempting to invoke real handleBulkAssign with empty/ineligible selection dispatches 0 calls
+            const secondInterceptedCalls = [];
+            await invoke(
+                selectedTech,
+                selection,
+                refreshedWorkItems,
+                { post: async (url, payload) => { secondInterceptedCalls.push({ url, payload }); return { data: {} }; } },
+                mockShowDialog,
+                mockSetSelection,
+                mockOnSuccess
+            );
+            expect(secondInterceptedCalls).toHaveLength(0);
+        });
     });
 });

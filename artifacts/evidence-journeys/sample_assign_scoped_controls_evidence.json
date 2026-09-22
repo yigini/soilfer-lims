@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T12:56:03.753Z",
+  "timestamp": "2026-09-22T13:18:29.050Z",
   "status": "PASS",
   "issue": "#119",
   "checkpoint": "manager -> dashboard TEXTURE -> S004 scoped assignment controls without loop",
@@ -7,7 +7,7 @@
     "node": "v24.13.0",
     "database": "disposable_journey_sample_assignment.db",
     "isolationRefusalGuard": "ACTIVE",
-    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-sample-assign\\server\\.tmp_journey_runner_1790081750272_17yst4\\disposable_journey_17yst4.db"
+    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-sample-assign\\server\\.tmp_journey_runner_1790083089469_qcoq9n\\disposable_journey_qcoq9n.db"
   },
   "checks": {
     "methodFilterInQueue": {
@@ -17,7 +17,7 @@
       "status": "PASS"
     },
     "sampleDetailNavigation": {
-      "navigatedToUrl": "http://127.0.0.1:52929/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
+      "navigatedToUrl": "http://127.0.0.1:63734/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
       "targetRoute": "/samples/SMP-S004-GTM?tab=work&analysis=TEXTURE&returnTo=%2Fmanager-queue%3Flane%3Dassign%26analysis%3DTEXTURE",
       "resolvedCanonicalId": true,
       "resolvedDisplayId": true,
@@ -45,29 +45,57 @@
       "assignSelectedBtnDisabled": true,
       "status": "PASS"
     },
+    "technicianSelectionBeforeTransition": {
+      "verified": true,
+      "selectedTech": "tech_gtm",
+      "assignBtnEnabled": true,
+      "status": "PASS"
+    },
     "safetyAndZeroMutation": {
       "s004TasksChecked": 11,
+      "totalTasksChecked": 26,
       "tasksAssignedInDatabase": 0,
       "status": "PASS"
     },
-    "returnToQueueContext": {
-      "returnedToUrl": "http://127.0.0.1:52929/manager-queue?lane=assign&analysis=TEXTURE",
-      "methodContextPreserved": true,
-      "filterBannerPresent": true,
-      "status": "PASS"
-    },
-    "routeTransitionIsolation": {
+    "sameMountedTransitionWithoutUnmount": {
+      "journey": "SMP-S004-GTM -> GTM-LAB1 (direct parameter change without unmount)",
+      "componentUnmountPrevented": true,
+      "windowMarkerPreserved": true,
+      "domMarkerPreserved": true,
       "sampleANavigated": "SMP-S004-GTM",
       "sampleBNavigated": "GTM-LAB1",
       "staleSelectionsOnSampleB": 0,
       "staleBulkBarHidden": true,
+      "sampleBTechnicianReset": true,
+      "interceptedStaleDispatches": 0,
+      "status": "PASS"
+    },
+    "mountedEligibilityRefreshAndActualHandler": {
+      "actualHandlerExecuted": true,
+      "mockEndpointIntercepted": true,
+      "capturedCallCount": 1,
+      "dispatchedEligibleIds": [
+        "WI-S005-01"
+      ],
+      "staleIdAbsentFromWorkItemsFilteredOut": true,
+      "terminalTasksFilteredOut": true,
+      "onlyEligibleSubmitted": true,
+      "ineligibleDispatchesCount": 0,
+      "selectionResetAfterIneligible": true,
+      "status": "PASS"
+    },
+    "queueMediatedNavigationJourney": {
+      "journey": "A -> Manager Queue -> B (unmount/remount cycle)",
+      "returnedToUrl": "http://127.0.0.1:63734/manager-queue?lane=assign&analysis=TEXTURE",
+      "methodContextPreserved": true,
+      "filterBannerPresent": true,
+      "sampleBStateIsolated": true,
       "sampleBScopedControlsFocused": true,
       "sampleBTechnicianReset": true,
       "status": "PASS"
     },
-    "staleSelectionRefusalProbe": {
-      "staleIdAbsentFromWorkItemsFilteredOut": true,
-      "terminalTasksFilteredOut": true,
+    "syntheticReferenceFilterProbe": {
+      "description": "Synthetic reference filter comparison (legacy probe reference)",
       "status": "PASS"
     }
   },
