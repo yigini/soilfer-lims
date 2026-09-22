@@ -107,3 +107,58 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - Public comment: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5774742771 . OPEN; no closure.
 - Released7516f0e Chrome SUPER_ADMIN: submitted client/sample search works, but sample GTM26-0002 + Superseded displays unrelated GTM26-0003. Effect resets query and competes with status request; stale responses unguarded. No production mutation. Detailed independent evidence: work/issue124-live-review-7516f0e.md in monitor directory.
 - Sent one bounded implementation/regression request to Agy, separate follow-up preserving frozen PR130head5ad5012 pending release approval. No duplicate approval request or unchanged test rerun.
+
+### 2026-09-22 10:30 UTC — PR131 independent lifecycle review
+- PR13189e8b692fc38ab9b7e576d23cc7e435f5544d9ab / CI35715947163green; independently reran16focused checks, all pass on isolated DB. Original124transition improved, not released.
+- Review: https://github.com/yigini/soilfer-lims/pull/131#issuecomment-5774981284 . StrictMode development effect replay aborts sole initial request; same-mounted project URL change does not refetch. Actual-source synthetic lifecycle probes reproduce both; submitted hook harness lacks cleanup behavior, so not true mounted React evidence.
+- Bounded corrections sent once to Agy in separate worktree/PR131. PR130head5ad5012 remains frozen pending existing user release decision. #124 OPEN, no closure.
+
+### 2026-09-22 11:07 UTC — PR131 bounded correction accepted
+- Candidate efc2b9cb0f9857f9d1ceee14ba3f857324a0a274, CI35717552974green. Independently passed18focused checks and both source-effect probes; lifecycle findings resolved. Implementer browser evidence reviewed separately; no invented live/StrictMode browser acceptance.
+- Final PR review: https://github.com/yigini/soilfer-lims/pull/131#issuecomment-5775378283
+- Issue124 progress: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5775381812 . OPEN; no closure.
+- PR130 frozen5ad5012 and PR131 ready for release decision; no approval/deploy/migration inferred. Production remains7516f0e. Review work/pr131-final-review-efc2b9c.md in monitor directory.
+
+### 2026-09-22 11:24 UTC — released115/116 acceptance gaps
+- #115: https://github.com/yigini/soilfer-lims/issues/115#issuecomment-5775612226 . Menu still puts Projects after Equipment and Data Results after Projects, contrary to reporter placements. OPEN; no closure.
+- #116: https://github.com/yigini/soilfer-lims/issues/116#issuecomment-5775612449 . Existing live Spanish LAB_MANAGER session reproduces original English dashboard labels/units/actions. OPEN; no closure.
+- Read-only browser/source review; no account/language changes. One bounded separate follow-up request sent to Agy for order and dynamic API-populated label translation, preserving scientific/history text and frozen130/131candidates. Evidence work/issues115-116-live-review-7516f0e.md in monitor directory.
+
+### 2026-09-22 11:34 UTC — user authorizes release of130+131
+- Explicit "ok please go ahead" authorizes merge/deploy of reviewedPR1305ad5012 andPR131efc2b9c, then live verification and individual closure. Handoff queued once to Agy; no production changes claimed yet. No migration needed; preserve concurrent115/116work separately and this communication log.
+
+## 2026-09-22 — v3.5.18 / 2032617 production verification
+- PR130/131 merged and deployed by Agy after explicit user approval. MainCI35723028210 passed; Codex independently verified final runtime, fresh backup/live10-domain content conservation and live LAB_MANAGER Spanish workflows. Detailed local evidence: production-release-review-2032617.md / production-review-2032617.jsonl in monitor work directory.
+- #118 CLOSED completed2026-09-22. Legacy rejection/history/actual-limit display and pending counters verified; earlier isolated disposition/auth checks retained. https://github.com/yigini/soilfer-lims/issues/118#issuecomment-5776124568
+- #124 CLOSED completed2026-09-22. Client, project name/code, sample search; version transitions/clear/no-match; superseded viewer verified. https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5776176422
+- #119 OPEN. Reopened premature merge auto-closure: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5775933451 . Live partial success + remaining assignment-loop correction: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5776093112 . One bounded request queued to Agy without interruption; no production assignments or additional release authorized.
+
+## 2026-09-22 — PR132 candidate review
+- #115 candidate navigation order independently checked (7role/navigation checks; implementer Spanish manager browser evidence reviewed). Not released. https://github.com/yigini/soilfer-lims/issues/115#issuecomment-5776480361
+- #116 dynamic localization improved; independent24combined checks and450ICUformats passed. Visible Help translation still missing, confirmed in candidate screenshot/source. Correction queued once without interrupting119implementation. https://github.com/yigini/soilfer-lims/issues/116#issuecomment-5776480778
+- PR132 head0aea809 review https://github.com/yigini/soilfer-lims/pull/132#issuecomment-5776466285 . CIgreen; no new release/closure.
+
+## 2026-09-22 — candidate follow-up reviews
+- #116 Help correction inPR1320a7cbde acceptedaftertargetedtest+updatedbrowser evidence. No release/closure. https://github.com/yigini/soilfer-lims/issues/116#issuecomment-5776769797 ; review https://github.com/yigini/soilfer-lims/pull/132#issuecomment-5776758092
+- #119 PR1334a6139e happy-path loopfix passes16checks/CI, but stalecontrolledselectionuncheckeddispatchconfirmedbyactualsourceprobe. Correction requestedonce withmountedtransitionregression; no productionmutation. https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5776769313 ; review https://github.com/yigini/soilfer-lims/pull/133#issuecomment-5776758354
+
+### 2026-09-22 13:02 UTC — PR133 assignment correction
+- PR133 head4387d49:21 focused checks independently pass; actual-handler stale-ID reproduction now produces no dispatch. CI35730255492 success.
+- Remaining evidence correction requested once: distinguish queue remount journey from same-mounted sample change; cover eligibility refresh through actual component/handler rather than copied filter. Agy active. No new release or issue closure.
+- Independent review: https://github.com/yigini/soilfer-lims/pull/133#issuecomment-5777082275
+
+### 2026-09-22 13:24 UTC — PR133 final candidate acceptance
+- Head b69ab453729bda0503513719cb99ff2f8d50fd5b; CI35732734520 green. Codex mounted actual sample/table components with real effects and bulk click under React18 test renderer: same-instance sample switch and partial/all-ineligible refresh passed with mocked API only. Earlier21focused checks unchanged. No live mutation.
+- Accepted review: https://github.com/yigini/soilfer-lims/pull/133#issuecomment-5777387685
+- Issue119 release-ready progress: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5777392230
+- Combined PR132/133 release decision pending. Production2032617 unchanged;115/116/119 remain open. No closures this checkpoint.
+
+### 2026-09-22 13:44 UTC — release132/133 approved
+User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7cbde/b69ab45 checked unchanged, both CIgreen/MERGEABLE. Authority delivered once to Agy; Codex independently verifies live115/116/119 before closure. Release not yet claimed.
+
+### 2026-09-22 14:01 UTC — release132/133 and verified closures
+- v3.5.19 c5ed62ebbe27fbd59147c77de5fedce8d773fe1d live; mainCI35735896020successful. Independentreleaseidentity/source/data-conservationchecks passed, no migration or production scientific test mutations.
+- #115 navigation closed14:00:48UTC: https://github.com/yigini/soilfer-lims/issues/115#issuecomment-5777888265
+- #116 reportedDashboardtranslations closed14:00:58UTC: https://github.com/yigini/soilfer-lims/issues/116#issuecomment-5777891149
+- #119 assignmentworkflow closed14:01:12UTC: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5777893938
+- VerifiedliveSpanishLAB_MANAGER; methods/filter/context/canonicalcards/counts andbulkpreview/cancel checkedwithoutactualassignment. Detailedindependentreview inmonitorwork/production-release-review-c5ed62e.md. Total5of18closed;13open. No additionalreleasepending.
