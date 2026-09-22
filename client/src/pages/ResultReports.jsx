@@ -11,7 +11,12 @@ import {
     Eye, Trash2, Plus, Printer
 } from 'lucide-react';
 
-const ResultReports = () => {
+const ResultReports = ({
+    initialReports = null,
+    initialPagination = null,
+    initialQuery = '',
+    initialStatus = null
+} = {}) => {
     const { user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
@@ -19,17 +24,29 @@ const ResultReports = () => {
     const paramReportId = searchParams.get('reportId');
     const paramProjectId = searchParams.get('projectId');
     const paramStatus = searchParams.get('status');
+    const paramQuery = searchParams.get('q') || searchParams.get('query') || '';
 
-    const [reports, setReports] = useState([]);
+    const defaultStatus = initialStatus || paramStatus || 'PUBLISHED';
+    const defaultQuery = initialQuery || paramQuery || '';
+
+    const [reports, setReports] = useState(initialReports || []);
     const [loading, setLoading] = useState(false);
-    const [query, setQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState(paramStatus || 'PUBLISHED');
-    const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1, limit: 25 });
+    const [query, setQuery] = useState(defaultQuery);
+    const [appliedQuery, setAppliedQuery] = useState(defaultQuery);
+    const [statusFilter, setStatusFilter] = useState(defaultStatus);
+    const [pagination, setPagination] = useState(initialPagination || { total: initialReports ? initialReports.length : 0, page: 1, pages: 1, limit: 25 });
     const [selectedReport, setSelectedReport] = useState(null);
     const [shareModal, setShareModal] = useState(null); // reportId for share dialog
     const [shareLinks, setShareLinks] = useState([]);
     const [shareLoading, setShareLoading] = useState(false);
     const [expiryDays, setExpiryDays] = useState(30);
+
+    const requestIdRef = useRef(0);
+    const abortControllerRef = useRef(null);
+    const appliedQueryRef = useRef(appliedQuery);
+    appliedQueryRef.current = appliedQuery;
+    const statusFilterRef = useRef(statusFilter);
+    statusFilterRef.current = statusFilter;
 
     // Escape key listener for active modals
     useEffect(() => {
@@ -48,30 +65,67 @@ const ResultReports = () => {
 
     // ─── Search & Fetch ──────────────────────────────────
 
-    const fetchReports = useCallback(async (page = 1, search = query, currentStatus = statusFilter) => {
+    const fetchReports = useCallback(async (
+        page = 1,
+        search = appliedQueryRef.current,
+        currentStatus = statusFilterRef.current
+    ) => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        const requestId = ++requestIdRef.current;
+
         setLoading(true);
         try {
             const params = {
-                q: search,
+                q: typeof search === 'string' ? search.trim() : '',
                 page,
                 limit: pagination.limit
             };
             if (paramProjectId) params.projectId = paramProjectId;
             if (currentStatus) params.status = currentStatus;
 
-            const res = await axios.get('/api/reports/search', { params });
+            const res = await axios.get('/api/reports/search', {
+                params,
+                signal: controller.signal
+            });
+
+            // Discard stale responses if a newer request was dispatched
+            if (requestId !== requestIdRef.current) {
+                return;
+            }
+
             setReports(res.data.reports || []);
             setPagination(res.data.pagination || { total: 0, page: 1, pages: 1, limit: 25 });
         } catch (e) {
-            console.error('Report search failed:', e);
+            if (axios.isCancel(e) || e.name === 'CanceledError' || e.name === 'AbortError') {
+                return;
+            }
+            if (requestId === requestIdRef.current) {
+                console.error('Report search failed:', e);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === requestIdRef.current) {
+                setLoading(false);
+            }
         }
-    }, [query, pagination.limit, paramProjectId, statusFilter]);
+    }, [pagination.limit, paramProjectId]);
 
+    // Initial mount fetch
+    const hasMountedRef = useRef(false);
     useEffect(() => {
-        fetchReports(1, '', statusFilter);
-    }, [fetchReports, statusFilter]);
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            if (!initialReports) {
+                fetchReports(1, defaultQuery, defaultStatus);
+            }
+        }
+        return () => {
+            abortControllerRef.current?.abort();
+        };
+    }, []);
 
     // Load exact report if reportId is passed in URL
     useEffect(() => {
@@ -85,8 +139,26 @@ const ResultReports = () => {
     }, [paramReportId]);
 
     const handleSearch = (e) => {
-        e.preventDefault();
-        fetchReports(1, query, statusFilter);
+        if (e) e.preventDefault();
+        const trimmed = query.trim();
+        setAppliedQuery(trimmed);
+        fetchReports(1, trimmed, statusFilter);
+    };
+
+    const handleClearSearch = () => {
+        setQuery('');
+        setAppliedQuery('');
+        fetchReports(1, '', statusFilter);
+    };
+
+    const handleStatusFilterChange = (newStatus) => {
+        if (statusFilter === newStatus) return;
+        setStatusFilter(newStatus);
+        fetchReports(1, appliedQuery, newStatus);
+    };
+
+    const handlePageChange = (newPage) => {
+        fetchReports(newPage, appliedQuery, statusFilter);
     };
 
     // ─── Share Link Management ───────────────────────────
@@ -182,8 +254,19 @@ const ResultReports = () => {
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             placeholder={t('resultReports.searchPlaceholder', 'Search by name, phone, project, sample ID, or lab ID...')}
-                            className="w-full pl-12 pr-4 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
+                            className="w-full pl-12 pr-28 py-3 bg-sf-surface border border-sf-divider rounded-xl shadow-sm focus:ring-2 focus:ring-sf-emerald focus:border-sf-emerald outline-none text-sm"
                         />
+                        {query && (
+                            <button
+                                type="button"
+                                onClick={handleClearSearch}
+                                className="absolute right-24 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors"
+                                title={t('common.clear', 'Clear')}
+                                aria-label="Clear search"
+                            >
+                                <XCircle size={16} />
+                            </button>
+                        )}
                         <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sf-emerald text-white rounded-lg text-sm font-bold hover:bg-sf-emerald-hover transition-colors">
                             {t('common.search', 'Search')}
                         </button>
@@ -200,10 +283,7 @@ const ResultReports = () => {
                         <button
                             key={tab.id}
                             type="button"
-                            onClick={() => {
-                                setStatusFilter(tab.id);
-                                fetchReports(1, query, tab.id);
-                            }}
+                            onClick={() => handleStatusFilterChange(tab.id)}
                             className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors border ${
                                 statusFilter === tab.id
                                     ? 'bg-sf-emerald text-white border-sf-emerald shadow-sm'
@@ -315,14 +395,14 @@ const ResultReports = () => {
                                 </span>
                                 <div className="flex gap-1">
                                     <button
-                                        onClick={() => fetchReports(pagination.page - 1, query, statusFilter)}
+                                        onClick={() => handlePageChange(pagination.page - 1)}
                                         disabled={pagination.page <= 1}
                                         className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >
                                         <ChevronLeft size={16} />
                                     </button>
                                     <button
-                                        onClick={() => fetchReports(pagination.page + 1, query, statusFilter)}
+                                        onClick={() => handlePageChange(pagination.page + 1)}
                                         disabled={pagination.page >= pagination.pages}
                                         className="p-1.5 rounded-lg hover:bg-sf-raised disabled:opacity-30 transition-colors"
                                     >

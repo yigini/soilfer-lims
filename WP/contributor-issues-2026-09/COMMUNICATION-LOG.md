@@ -71,3 +71,39 @@ Local 3e0dead/cd1fa7c reviewed; no release. Progress/remaining acceptance commen
 - Latest GitHub CI 35649079609 FAILED: 130 suites / 1166 tests passed, one positive own-scope lab-isolation test failed. Local full-suite pass must not be presented as CI pass.
 - #124 progress comment posted as yigini: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5766842022 . Remains open. No release/closure verified.
 - Detailed retest delivered to LIMS Dev: C:\Users\yigin\Documents\Codex\2026-09-21\se\work\candidate-retest-2010.md.
+
+## 2026-09-21 22:23 UTC — PR release rehearsal verification
+- PR129 bounded independent verification: https://github.com/yigini/soilfer-lims/pull/129#issuecomment-5768353874
+- Tested rehearsal head8025ea0520b5c691d40017ac0237e83c63286bf7; application codefe02e7589205bb6a8d085b93be573982f13ec45d. Independent isolated dual-artifact upgrade/backup/restore run passed. CI green. No production release or issue closures claimed. Authorized running-artifact identification/retention remains operational prerequisite.
+
+## 2026-09-22 — verified release and #118 live follow-up (Codex)
+- PR129 merged and deployed at7516f0e408c258a6ee7ffb08b7298e04fe373e09; main CI35699348098 passed. Independent public health/source parity/backup/data conservation checks passed. Fresh Chrome SUPER_ADMIN QC inspection verified; no blanket issue acceptance.
+- #118: https://github.com/yigini/soilfer-lims/issues/118#issuecomment-5772846542 — released Inspect route works, but legacy rejection display and blank-limit inconsistency remain; focused corrections sent to Agy. Issue remains OPEN; no closure date.
+- Independent detail: C:\Users\yigin\Documents\Codex\2026-09-21\se\work\production-release-review-7516f0e.md. All production checks read-only; historical records preserved.
+- PR129 release verification: https://github.com/yigini/soilfer-lims/pull/129#issuecomment-5772897124 — merged/live7516f0e, independent bounded data/source/health checks; individual issues remain pending acceptance.
+
+### 2026-09-22 08:18 UTC — #118 focused follow-up review
+- Comment: https://github.com/yigini/soilfer-lims/issues/118#issuecomment-5773358240
+- Local legacy/missing-limit display evidence reviewed;13focused tests independently passed. Remaining invalid-measurement inference and overstated SSR coverage returned to Agy with bounded corrections. Follow-up not yet released; production7516f0e. Issue OPEN; no closure.
+
+### 2026-09-22 08:37 UTC — #119 released queue review and sample-render blocker
+- Comment: https://github.com/yigini/soilfer-lims/issues/119#issuecomment-5773592562
+- Live7516f0e SUPER_ADMIN queue S00515/S00411/W00112 totals38; S005 assignment route crashes (ArrowRight missing import in SampleDetail.jsx:540). Focused fix/regression request queued to Agy. No production mutation. OPEN; no closure date.
+
+### 2026-09-22 08:57 UTC — PR130 independent focused review
+- PR130 head bd44d08eef0b04801b4dbad5e51c31ec2f569f70:17focused tests independently passed; CI35706965182 successful. Bounded QC display corrections accepted locally.
+- Review comment: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5773801579
+- Not released; production7516f0e. #119 live crash correction active in Agy. #118/#119 OPEN; no closures.
+
+### 2026-09-22 09:31 UTC — PR130 cbe6ab1 CI blocker
+- Review: https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5774223676
+- Missing icon imports corrected; CI35710437095 fails display-alias identity assertion (1failed/1202passed). Agy instructed to diagnose/fix deterministically and verify real navigation evidence. No new release.118/119OPEN; no closures.
+
+### 2026-09-22 09:49 UTC — PR130 final bounded review
+- https://github.com/yigini/soilfer-lims/pull/130#issuecomment-5774455837
+- Head5ad5012cfebc524309d380d700471b3451a57caa:10assignment checks independently passed; QC17prior checks unchanged; CI35711730061green. Ready for release decision, not deployed/closed. User authorization requested for this follow-up; earlier authority covered PR129 only.118/119OPEN.
+
+### 2026-09-22 10:07 UTC — #124 live version-filter residual
+- Public comment: https://github.com/yigini/soilfer-lims/issues/124#issuecomment-5774742771 . OPEN; no closure.
+- Released7516f0e Chrome SUPER_ADMIN: submitted client/sample search works, but sample GTM26-0002 + Superseded displays unrelated GTM26-0003. Effect resets query and competes with status request; stale responses unguarded. No production mutation. Detailed independent evidence: work/issue124-live-review-7516f0e.md in monitor directory.
+- Sent one bounded implementation/regression request to Agy, separate follow-up preserving frozen PR130head5ad5012 pending release approval. No duplicate approval request or unchanged test rerun.

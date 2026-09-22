@@ -29,7 +29,7 @@ Status Key:
 | **#122** | 2 | LabMethods defaults failing or silently falling back across labs | Reproduced & Implemented Locally | `1ed46ef` | `lab_method_defaults.test.js` (6/6), client build (`vite build` clean in 7.26s) | Pending | Scoped loading/saving for target lab; honest empty states without cross-lab leakage; cross-lab modification and viewing rejected with 403; unauthorized roles without MANAGE_ANALYSES rejected with 403; unavailable or mismatched methodologies rejected with 400. Work item generation reflects per-lab override. | Requires lab manager or global admin role. | Implemented locally (Local Tests Passing; Independent Codex Review Pending) |
 | **#128** | 2 | Workbench deep links broken for specific workItemId and sampleId | Reproduced & Implemented Locally | `1ed46ef` | `workbench_deep_link.test.js` (13/13), client build (`vite build` clean in 7.26s) | Pending | Central authorization precedes diagnostic checks; canonical sample ID resolution across column collisions; rejects contradictory cross-column sample collisions with 400 CONTRADICTORY_IDENTIFIERS; technician assignment validation (fail closed); outside-default-page status resolution (COMPLETED); cross-lab access rejected with 403 without leaking details; non-existent items/samples return 404; `WorkbenchShell` `activeTargetRef` retains target context across subsequent fetches without recursive retry loops; `WorksheetArea` highlights selected work item. | Forbidden items return 403 without leaking other labs' data. | Implemented locally (Local Tests Passing; Independent Codex Review Pending) |
 | **#123** | 2 | Workbench search input and pagination issues | Reproduced & Implemented Locally | `1ed46ef` | `workbench_search.test.js` (8/8), client build (`vite build` clean in 7.26s) | Pending | Multi-field search across canonical UUID, sample lab ID, original field ID, analysis code, and analysis display name (e.g. "Soil Organic Carbon" -> SOC); truthful no-match state; clearing search restores full authorized queue; cross-lab search isolation strictly excludes other labs' items. | Server/client dual search filters. | Implemented locally (Local Tests Passing; Independent Codex Review Pending) |
-| **#124** | 2 | Result reports search failing across client, project, sample queries | Reproduced & Implemented Locally | `1ed46ef` | `report_search.test.js` (7/7), client build (`vite build` clean in 7.26s) | Pending | Fixed Prisma schema relation crash on `projectId` search; multi-field search across client first/surname, project code/name, and sample identifiers (canonical UUID, lab ID, and field original ID); discoverable superseded report versions with `status=SUPERSEDED` and `status=ALL` while defaulting to `PUBLISHED`; UI status filter pills with distinct superseded badge; cross-lab access isolation. | Scoped to authorized projects/labs. | Implemented locally (Local Tests Passing; Independent Codex Review Pending) |
+| **#124** | 2 | Result reports search failing across client, project, sample queries; residual query/filter lifecycle race on status tab transition | Reproduced & Implemented Locally | `1ed46ef` + `a563969` (residual) | `report_search.test.js` (7/7), `result_reports_filter_lifecycle.test.js` (16/16), local browser CDP evidence (`run_result_reports_browser_evidence.cjs` exit code 0), client build (`vite build` clean in 7.24s) | Pending | Fixed Prisma schema relation crash on `projectId` search; multi-field search across client first/surname, project code/name, and sample identifiers (canonical UUID, lab ID, and field original ID); discoverable superseded report versions with `status=SUPERSEDED` and `status=ALL` while defaulting to `PUBLISHED`; UI status filter pills with distinct superseded badge; cross-lab access isolation. Residual fix: separated draft search input from applied query state; stable `fetchReports` referencing stable refs without re-creation loops; single mount-only effect preventing duplicate/empty requests; `AbortController` in-flight cancellation; sequence-based stale-response guard (`requestIdRef`) dropping out-of-order delayed responses; strictly preserves applied query across status tab and page changes (`GTM26-0002` + Superseded -> 0 reports, suppressing unrelated `GTM26-0003`); real CDP browser journey (7/7 passed). | Scoped to authorized projects/labs; zero production or database schema mutations; backend authorization and share links preserved. | Implemented locally (16/16 Contract Tests & Headless Chrome CDP Verified; Codex Review Pending) |
 | **#125** | 3 | Inventory aggregation anomalies, expired lots vs usable stock confusion | Reproduced & Implemented Locally | `278d32b` + working tree | `inventory_aggregation.test.js` (12/12 passed), `localization_and_user_display.test.js` (13/13 passed), client build (`vite build` clean in 13.31s) | Pending | Usable stock strictly aggregates available, non-expired lots; expired lots tracked separately without precedence masking; items at or below reorder threshold flagged as low stock; missing quantities represented truthfully as null (not 0); usableMissingQuantityLotCount tracked so mixed known/unknown lots treat usable stock as a subtotal (`≥ X`, `SUBTOTAL` badge) and distinguish confirmed low stock (`LOW`) from uncertainty (`LOW? (UNCERTAIN)` / `COUNT NEEDED`); GET /api/inventory/alerts is 100% pure (zero DB mutations); FEFO strictly excludes expired lots. UI displays OUT OF STOCK, EXPIRED, and SUBTOTAL badges without mutual masking; inventory subtotal and uncertainty badges localized across all 5 locales (#116). | Display/aggregation fix; zero schema changes. | Implemented locally (Local Tests Passing; Independent Codex Review Pending) |
 | **#117** | 3 | Failed reception criterion not persisting or reflecting in UI; Reception TDZ runtime crash before first render | Reproduced & Implemented Locally | `81487b1` | `reception_compliance.test.js` (18/18 passed), `reception_compliance_component.test.js` (12/12 passed), `reception_route_smoke.test.js` (6/6 passed including release prerequisite), isolated Headless Chrome CDP browser journey (6/6 passed, `reception_browser_journey.json`), client build (`vite build` clean) | Pending | Authoritative saved state reflects OK/N/A/FAIL with visible badge indicators; atomic single-event state update in ComplianceChecklist (`onChange(newValue)`) prevents stale-closure overwrite in parent Reception; non-conformance flag auto-syncs with failed checklist items and clears upon correction back to PASS unless custom reason supplied; rejected sample intake persists checklist and ncReason in receptionData and metadata.nonConformance, transitioning to RECEIVED_REJECTED; inspecting or resuming draft rehydrates checklistData truthfully. Resolved P1 TDZ ReferenceError by relocating mode-cleanup effect below checklistData useState declaration; verified in real isolated Headless Chrome (CDP) parent and child together (`reception_browser_journey_verified.png`), including fail selection, note entry, correction back to OK, and synthetic draft rehydration; route smoke tests enforce client/dist release prerequisite as explicit non-silent assertion. | Non-conformance requires explanation note. | Implemented locally (Verified in Headless Chrome & Contract Tests; Codex Review Pending) |
 | **#113** | 3 | Reception compliance checklist and redundant/unauthorized dispositions | Reproduced & Implemented Locally | `81487b1` | `reception_compliance.test.js` (18/18 passed), `reception_compliance_component.test.js` (12/12 passed), `reception_route_smoke.test.js` (6/6 passed), isolated Headless Chrome CDP browser journey (6/6 passed, `reception_browser_journey.json`), client build (`vite build` clean) | Pending | Reception compliance checklist evaluation enforced upfront before sample creation, guaranteeing zero DB mutations on 400 rejection: all-pass admits sample routinely without redundant gates; permitted N/A (CoC strictly on walk-in) accepted; prohibited N/A (formal shipment CoC, or container/label/condition/quantity) rejected with 400 INVALID_CHECKLIST_NA and disabled in UI; incomplete, empty, or omitted checklist rejected with 400 INCOMPLETE_COMPLIANCE_CHECKLIST; legacy alias normalization fails closed on conflicting aliases and tracks unknown keys; failed check blocks routine acceptance for reception staff (403 COMPLIANCE_FAILURE_EXCEPTION_REQUIRED); staff self-authorization strictly prohibited; manager exception required to admit with ADMITTED_WITH_EXCEPTION in history. In real browser journey, verified Walk-in mode enables CoC N/A (`aria-checked="true"`), and switching Walk-in to Project mode triggers useEffect interactive cleanup resetting prohibited CoC N/A to undefined (`aria-checked="false"`). | Manager or admin exception required to admit failed compliance items. | Implemented locally (Verified in Headless Chrome & Contract Tests; Codex Review Pending) |
@@ -576,6 +576,76 @@ Status Key:
   - **Owned Disposable Fixtures**:
     - Fixture lifecycle strictly owned via `journey_db_isolation.cjs` (`.tmp_journey_runner_*`), preventing concurrent test interference.
 
+---
 
+### Issue #124 Residual Follow-Up: Result Reports Query/Filter Lifecycle & Truthful No-Match
 
+#### Context & Live Reproduction on 7516f0e
+Following production release `7516f0e`, Codex live verification by `SUPER_ADMIN` on `/result-reports` identified a residual query/filter state desynchronization:
+- **Reproduction**:
+  1. Submitted sample search `GTM26-0002` in "All Versions" -> returned 1 correct report (v1 `PUBLISHED`).
+  2. With `GTM26-0002` visibly remaining in the search input, clicked the "Superseded" status tab.
+  3. Instead of returning 0 reports (as `GTM26-0002` has no superseded version), the table rendered the unrelated `GTM26-0003` superseded v1 report (1 report found).
+- **Root Cause in `client/src/pages/ResultReports.jsx`**:
+  1. `fetchReports` depended on `[query, pagination.limit, paramProjectId, statusFilter]`.
+  2. Every keystroke updated `query`, re-creating `fetchReports`.
+  3. An effect `useEffect(() => { fetchReports(1, '', statusFilter); }, [fetchReports, statusFilter])` was tied to `fetchReports` and `statusFilter`. Consequently, typing a query triggered an unfiltered request that restored all four rows before submission.
+  4. Clicking a status tab (`onClick`) called `fetchReports(1, query, tab.id)` while `setStatusFilter(tab.id)` simultaneously triggered the effect to call `fetchReports(1, '', tab.id)`, launching two competing requests.
+  5. Without a cancellation or stale-response guard, the unfiltered request (`q=''`) overrode the filtered request, surfacing `GTM26-0003` superseded v1.
 
+#### Implementation Fix (`client/src/pages/ResultReports.jsx`)
+1. **Separation of Draft Input vs. Applied Query**:
+   - `query` tracks the active typing draft inside the search input.
+   - `appliedQuery` tracks the explicitly submitted search term.
+   - Typing into the input updates only `query` and never dispatches network requests or alters the displayed results.
+   - Form submission (`handleSearch`) trims `query`, updates `appliedQuery`, and dispatches a search at page 1.
+2. **Stable Lifecycle & Request Runner**:
+   - `fetchReports` uses stable `useRef` handles (`appliedQueryRef`, `statusFilterRef`), depending strictly on `[pagination.limit, paramProjectId]`.
+   - Initial mount runs exactly once via a mount-only `useEffect`.
+   - Tab switching (`handleStatusFilterChange`) updates `statusFilter` and dispatches `fetchReports(1, appliedQuery, newStatus)`, guaranteeing the applied search (`GTM26-0002`) is strictly preserved.
+   - Pagination (`handlePageChange`) dispatches `fetchReports(newPage, appliedQuery, statusFilter)`.
+   - Search clear button (`handleClearSearch`) clears both `query` and `appliedQuery`, dispatching an unfiltered search (`q=''`).
+3. **In-Flight Cancellation & Stale Response Guard**:
+   - Each request increments an internal sequence counter (`requestIdRef.current`).
+   - Active in-flight requests are aborted using an `AbortController` signal before a new request begins.
+   - When a response resolves, it verifies `requestId === requestIdRef.current`. Stale or delayed responses arriving out of order are dropped immediately without modifying component state or loading flags.
+
+#### Automated Contract & Component Tests (`server/tests/contracts/result_reports_filter_lifecycle.test.js`)
+Executed `cmd.exe /c "npx jest tests/contracts/result_reports_filter_lifecycle.test.js"` in `server`:
+- **16/16 tests passed** in 3.949s:
+  1. `[PASS]` `Renders page header, search input, and 3 filter tabs with Published active by default` (SSR).
+  2. `[PASS]` `Renders clear button when initialQuery is provided` (SSR).
+  3. `[PASS]` `Renders populated reports table rows with version and client badges` (SSR).
+  4. `[PASS]` `Renders truthful empty state when initialReports is empty` (SSR).
+  5. `[PASS]` `Initial mount executes exactly 1 query with default PUBLISHED and empty search`.
+  6. `[PASS]` `Typing in search input updates draft query WITHOUT dispatching requests or resetting table`.
+  7. `[PASS]` `Submitting search form dispatches request with trimmed query and sets applied query`.
+  8. `[PASS]` `Exact transition: clicking Superseded tab retains applied query and does NOT fire empty-string request` (`q='GTM26-0002'&status='SUPERSEDED'`).
+  9. `[PASS]` `Clicking All Versions tab retains applied query and dispatches status ALL`.
+  10. `[PASS]` `Clear button resets draft query, resets applied query, and dispatches unfiltered search`.
+  11. `[PASS]` `Pagination preserves applied query and status filter on page change`.
+  12. `[PASS]` `Aborts in-flight request and drops delayed stale response arriving out of order`.
+  13. `[PASS]` `GTM26-0002 in All Versions returns exactly 1 report (v1 PUBLISHED)`.
+  14. `[PASS]` `GTM26-0002 in Superseded strictly returns 0 reports (truthful no-match)`.
+  15. `[PASS]` `Unfiltered status=SUPERSEDED returns GTM26-0003 v1 (demonstrating why empty query was a bug)`.
+  16. `[PASS]` `GTM26-0003 in All Versions returns both v1 and v2`.
+
+#### Isolated Headless Chrome CDP Browser Journey (`server/scripts/run_result_reports_browser_evidence.cjs`)
+Executed against a disposable synthetic SQLite database with active `DB_ISOLATION_REFUSAL` guard:
+- **7/7 steps passed (Exit 0)**:
+  1. `[PASS]` `Step 1: /result-reports rendered with Published tab active (3 published reports)`.
+  2. `[PASS]` `Step 2: "All Versions" tab active with all 5 reports displayed`.
+  3. `[PASS]` `Step 3: Search for "GTM26-0002" filtered to exactly 1 report`.
+  4. `[PASS]` `Step 4: Exact Transition: Retained "GTM26-0002" input, strictly displayed 0 reports ("No reports found"), and GTM26-0003 did NOT appear`.
+  5. `[PASS]` `Step 5: "All Versions" tab restored 1 report matching "GTM26-0002"`.
+  6. `[PASS]` `Step 6: Search cleared, input reset to empty, and all 5 reports restored`.
+  7. `[PASS]` `Step 7: Saved evidence JSON and high-resolution viewport screenshot`.
+- **Evidence Artifacts**:
+  - Screenshot: `artifacts/evidence-journeys/result_reports_filter_lifecycle_transition.png`
+  - Evidence JSON: `artifacts/evidence-journeys/result_reports_filter_lifecycle_evidence.json`
+
+#### Invariants & Constraints Maintained
+- **Zero Production Database Mutations**: Production database (`46.19.33.37`) and local `dev.db` untouched.
+- **Backend Integrity**: No backend authorization, report contents, report history, or share links modified.
+- **PR #130 Candidate Unmodified**: PR #130 head `5ad5012` remains completely frozen and undeployed.
+- **Issue Governance**: Issue #124 residual documented; Codex handles public issue communication and closure.
