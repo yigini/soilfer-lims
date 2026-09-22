@@ -287,6 +287,32 @@ Status Key:
     - `ItemDrawer` displays distinct usable stock, expired stock, and missing quantity labels.
     - `AlertBanner` renders missing quantity count alongside low stock and expired counts.
 
+### Phase 3 Follow-Up: Issue #125 Summary Warning & Row Badge Rule Alignment
+- **Root Cause & Production Finding**:
+  - Production v3.5.21 live audit revealed 126 active items displaying `OUT OF STOCK` in the table, while the top alert banner reported only `2 low / out of stock`.
+  - Diagnosis: In `getAlerts`, `if (item.isOutOfStock && item.lotCount > 0)` gated `OUT_OF_STOCK` alert creation behind having at least one lot, excluding the 124 active items with 0 lots. `getItems` and the table rows, conversely, declared any item with `usableLots.length === 0` as `OUT OF STOCK`.
+  - Secondary Defect: Clicking the `LOW_STOCK` banner filter filtered by `item.isLowStock`, excluding items where `item.isOutOfStock` was true (displaying 0 rows when clicking on "low / out of stock").
+- **Bounded Backend Fix (`server/controllers/inventoryController.js`)**:
+  - Removed `&& item.lotCount > 0` guard from `item.isOutOfStock` branch in `getAlerts`. Items with 0 lots now generate `OUT_OF_STOCK` alerts with `0 available` message.
+  - Added `outOfStock` count to `getAlerts` response alongside backwards-compatible `lowStock` (`alerts.filter(a => a.type === 'LOW_STOCK' || a.type === 'OUT_OF_STOCK').length`).
+  - Defaulted `where.isActive = true` in `getItems` when `active` is undefined, guaranteeing `getItems` and `getAlerts` evaluate the identical active item catalog by default.
+- **Client Alignment (`client/src/pages/Inventory.jsx`)**:
+  - Made `AlertBanner` chips interactive button controls with dedicated filters (`LOW_STOCK`, `EXPIRED`, `EXPIRING_SOON`, `QUARANTINED`, `MISSING_QUANTITY`).
+  - Aligned `LOW_STOCK` filter predicate to `Boolean(item.isLowStock || item.isOutOfStock)`, so clicking "126 low / out of stock" displays all 126 items.
+  - Updated `COUNT NEEDED` row badge condition to `(item.usableStock === 0 || item.usableStock === null) && item.hasMissingQuantityInUsableLots` so uncounted usable lots show `COUNT NEEDED`.
+- **Contract Tests (`server/tests/contracts/inventory_aggregation.test.js`)**:
+  - Expanded suite from 12 to 17 passing tests (0.33s):
+    - Test 10: `getAlerts` includes no-lot items as `OUT_OF_STOCK` and counts them in `lowStock`.
+    - Test 11: Expired lots produce both `OUT_OF_STOCK` and `EXPIRED` alerts without masking.
+    - Test 12: Missing quantities produce `MISSING_QUANTITY` alerts without false `OUT_OF_STOCK`.
+    - Test 13: Exact production replica (124 no-lot items + 2 expired-lot items) confirms `getItems` returns 126 `isOutOfStock` items and `getAlerts` returns `counts.lowStock: 126`, `counts.outOfStock: 126`, `counts.expired: 2` (100% agreement between row badges and summary counts).
+    - Test 14: Lab scoping verified.
+- **Read-Only Browser Verification (`WP/contributor-issues-2026-09/verify_inventory_alerts_browser.cjs`)**:
+  - Headless Chrome test executed against production-built client and ephemeral SQLite database:
+    - `inventory_summary_126_matched.png`: Banner reports `🔴 2 expired  📦 126 low / out of stock`; table displays 126 rows with `OUT OF STOCK` badges.
+    - `inventory_filtered_low_stock.png`: Banner filter bar displays `Showing: Low / Out of Stock Items` with all 126 items displayed.
+    - `inventory_filtered_expired.png`: Banner filter bar displays `Showing: Expired Items` with exactly the 2 expired items displayed.
+
 ### Phase 3: Issue #117 & #113 Reception Non-Conformance & Compliance Checklist Gate
 - **Tests Executed**:
   - `server/tests/contracts/reception_compliance.test.js` (18/18 passed):

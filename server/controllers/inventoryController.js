@@ -205,7 +205,11 @@ exports.getItems = async (req, res) => {
 
         const where = labScope(user);
         if (type && type !== 'ALL') where.itemType = type;
-        if (active !== undefined) where.isActive = active === 'true';
+        if (active !== undefined && active !== 'all') {
+            where.isActive = active === 'true';
+        } else if (active === undefined) {
+            where.isActive = true;
+        }
         if (search) {
             where.OR = [
                 { name: { contains: search } },
@@ -863,11 +867,11 @@ exports.getAlerts = async (req, res) => {
             const item = computeItemStockAggregation(rawItem, now);
 
             // Out of stock
-            if (item.isOutOfStock && item.lotCount > 0) {
+            if (item.isOutOfStock) {
                 alerts.push({
                     type: 'OUT_OF_STOCK', severity: 'error',
                     itemId: item.id, itemName: item.name,
-                    message: `${item.name}: Out of usable stock (${item.expiredStock > 0 ? `${item.expiredStock} ${item.unitOfMeasure} expired` : '0 available'})`,
+                    message: `${item.name}: Out of usable stock (${item.expiredStock > 0 ? `${item.expiredStock} ${item.unitOfMeasure || 'units'} expired` : '0 available'})`,
                     currentStock: item.usableStock, reorderPoint: item.reorderPoint
                 });
             } else if (item.isLowStock) {
@@ -875,7 +879,7 @@ exports.getAlerts = async (req, res) => {
                 alerts.push({
                     type: 'LOW_STOCK', severity: 'warning',
                     itemId: item.id, itemName: item.name,
-                    message: `${item.name}: ${item.usableStock} ${item.unitOfMeasure} remaining (reorder threshold: ${item.reorderPoint})`,
+                    message: `${item.name}: ${item.usableStock} ${item.unitOfMeasure || 'units'} remaining (reorder threshold: ${item.reorderPoint})`,
                     currentStock: item.usableStock, reorderPoint: item.reorderPoint
                 });
             }
@@ -940,6 +944,7 @@ exports.getAlerts = async (req, res) => {
                 expired: alerts.filter(a => a.type === 'EXPIRED').length,
                 expiringSoon: alerts.filter(a => a.type === 'EXPIRING_SOON').length,
                 lowStock: alerts.filter(a => a.type === 'LOW_STOCK' || a.type === 'OUT_OF_STOCK').length,
+                outOfStock: alerts.filter(a => a.type === 'OUT_OF_STOCK').length,
                 quarantined: alerts.filter(a => a.type === 'QUARANTINED').length,
                 missingQuantity: alerts.filter(a => a.type === 'MISSING_QUANTITY').length
             }

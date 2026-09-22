@@ -31,19 +31,46 @@ const STATUS_BADGES = {
 };
 
 // ─── Alert Banner ────────────────────────────────────────────────
-const AlertBanner = ({ alerts, onViewAlerts }) => {
+const AlertBanner = ({ alerts, alertFilter, onSelectFilter, onViewAlerts }) => {
     if (!alerts || alerts.total === 0) return null;
     return (
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-gradient-to-r from-red-50 to-amber-50 dark:from-red-900/20 dark:to-amber-900/20 border border-red-200 dark:border-red-800/40">
             <Bell size={16} className="text-red-500 animate-pulse" />
-            <div className="flex gap-4 text-sm font-medium flex-1">
-                {alerts.expired > 0 && <span className="text-red-600 dark:text-red-400">🔴 {alerts.expired} expired</span>}
-                {alerts.expiringSoon > 0 && <span className="text-amber-600 dark:text-amber-400">🟡 {alerts.expiringSoon} expiring soon</span>}
-                {alerts.lowStock > 0 && <span className="text-orange-600 dark:text-orange-400">📦 {alerts.lowStock} low / out of stock</span>}
-                {alerts.quarantined > 0 && <span className="text-yellow-600 dark:text-yellow-400">🔒 {alerts.quarantined} quarantined</span>}
-                {alerts.missingQuantity > 0 && <span className="text-purple-600 dark:text-purple-400">⚠️ {alerts.missingQuantity} missing quantity</span>}
+            <div className="flex gap-4 text-sm font-medium flex-1 flex-wrap">
+                {alerts.expired > 0 && (
+                    <button type="button" onClick={() => onSelectFilter(alertFilter === 'EXPIRED' ? null : 'EXPIRED')}
+                        className={`text-red-600 dark:text-red-400 hover:underline ${alertFilter === 'EXPIRED' ? 'font-bold underline' : ''}`}>
+                        🔴 {alerts.expired} expired
+                    </button>
+                )}
+                {alerts.expiringSoon > 0 && (
+                    <button type="button" onClick={() => onSelectFilter(alertFilter === 'EXPIRING_SOON' ? null : 'EXPIRING_SOON')}
+                        className={`text-amber-600 dark:text-amber-400 hover:underline ${alertFilter === 'EXPIRING_SOON' ? 'font-bold underline' : ''}`}>
+                        🟡 {alerts.expiringSoon} expiring soon
+                    </button>
+                )}
+                {alerts.lowStock > 0 && (
+                    <button type="button" onClick={() => onSelectFilter(alertFilter === 'LOW_STOCK' ? null : 'LOW_STOCK')}
+                        className={`text-orange-600 dark:text-orange-400 hover:underline ${alertFilter === 'LOW_STOCK' ? 'font-bold underline' : ''}`}>
+                        📦 {alerts.lowStock} low / out of stock
+                    </button>
+                )}
+                {alerts.quarantined > 0 && (
+                    <button type="button" onClick={() => onSelectFilter(alertFilter === 'QUARANTINED' ? null : 'QUARANTINED')}
+                        className={`text-yellow-600 dark:text-yellow-400 hover:underline ${alertFilter === 'QUARANTINED' ? 'font-bold underline' : ''}`}>
+                        🔒 {alerts.quarantined} quarantined
+                    </button>
+                )}
+                {alerts.missingQuantity > 0 && (
+                    <button type="button" onClick={() => onSelectFilter(alertFilter === 'MISSING_QUANTITY' ? null : 'MISSING_QUANTITY')}
+                        className={`text-purple-600 dark:text-purple-400 hover:underline ${alertFilter === 'MISSING_QUANTITY' ? 'font-bold underline' : ''}`}>
+                        ⚠️ {alerts.missingQuantity} missing quantity
+                    </button>
+                )}
             </div>
-            <button onClick={onViewAlerts} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">View All</button>
+            <button onClick={onViewAlerts} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                {alertFilter ? 'Clear Filter' : 'View All'}
+            </button>
         </div>
     );
 };
@@ -640,12 +667,23 @@ const Inventory = () => {
                 </div>
             </div>
 
-            <AlertBanner alerts={alertCounts} onViewAlerts={() => setAlertFilter(alertFilter ? null : 'LOW_STOCK')} />
+            <AlertBanner
+                alerts={alertCounts}
+                alertFilter={alertFilter}
+                onSelectFilter={setAlertFilter}
+                onViewAlerts={() => setAlertFilter(alertFilter ? null : 'LOW_STOCK')}
+            />
             {alertFilter && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 text-sm">
                     <Filter size={14} className="text-orange-500" />
-                    <span className="text-orange-700 dark:text-orange-300 font-medium">{t('inventory.lowStock', 'Showing: Low Stock Items')}</span>
-                    <button onClick={() => setAlertFilter(null)} className="ml-auto p-0.5 rounded hover:bg-orange-100 dark:hover:bg-orange-800/40 text-orange-500"><X size={14} /></button>
+                    <span className="text-orange-700 dark:text-orange-300 font-medium">
+                        {alertFilter === 'LOW_STOCK' && t('inventory.showingLowOrOutOfStock', 'Showing: Low / Out of Stock Items')}
+                        {alertFilter === 'EXPIRED' && t('inventory.showingExpired', 'Showing: Expired Items')}
+                        {alertFilter === 'EXPIRING_SOON' && t('inventory.showingExpiringSoon', 'Showing: Expiring Soon Items')}
+                        {alertFilter === 'QUARANTINED' && t('inventory.showingQuarantined', 'Showing: Quarantined Items')}
+                        {alertFilter === 'MISSING_QUANTITY' && t('inventory.showingMissingQuantity', 'Showing: Missing Quantity Items')}
+                    </span>
+                    <button onClick={() => setAlertFilter(null)} className="ml-auto p-0.5 rounded hover:bg-orange-100 dark:hover:bg-orange-800/40 text-orange-500" aria-label="Clear filter"><X size={14} /></button>
                 </div>
             )}
 
@@ -688,7 +726,15 @@ const Inventory = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y dark:divide-gray-700">
-                            {items.filter(item => !alertFilter || (alertFilter === 'LOW_STOCK' && item.isLowStock)).map(item => (
+                            {items.filter(item => {
+                                if (!alertFilter) return true;
+                                if (alertFilter === 'LOW_STOCK') return Boolean(item.isLowStock || item.isOutOfStock);
+                                if (alertFilter === 'EXPIRED') return Boolean(item.hasExpired);
+                                if (alertFilter === 'EXPIRING_SOON') return Boolean(item.isExpiringSoon);
+                                if (alertFilter === 'QUARANTINED') return Boolean(item.hasQuarantined);
+                                if (alertFilter === 'MISSING_QUANTITY') return Boolean(item.hasMissingQuantity);
+                                return true;
+                            }).map(item => (
                                 <tr key={item.id} onClick={() => openItem(item)} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 cursor-pointer transition-colors group">
                                     <td className="px-4 py-3">
                                         <div className="font-bold text-sf-text group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
@@ -726,7 +772,7 @@ const Inventory = () => {
                                     <td className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
                                             {item.isOutOfStock && <span title="Out of usable stock (confirmed)" className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">{t('inventory.outOfStock', 'OUT OF STOCK')}</span>}
-                                            {item.usableStock === 0 && item.hasMissingQuantityInUsableLots && (
+                                            {(item.usableStock === 0 || item.usableStock === null) && item.hasMissingQuantityInUsableLots && (
                                                 <span title={t('inventory.countNeededTitle', '0 known usable quantity, but contains uncounted usable lots')} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 flex items-center gap-0.5">
                                                     <AlertTriangle size={10} /> {t('inventory.countNeeded', 'COUNT NEEDED')}
                                                 </span>
