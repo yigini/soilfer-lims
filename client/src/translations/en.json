@@ -1659,6 +1659,7 @@
     }
   },
   "help": {
+    "help": "Help",
     "centre": "Help Centre",
     "faq": "Common Questions (FAQs)",
     "faqSubtitle": "Concise answers and resolutions for daily laboratory work.",

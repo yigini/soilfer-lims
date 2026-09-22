@@ -404,6 +404,29 @@ async function runDashboardJourney() {
         recordStep('Sidebar Collapse Localized (#116)', isCollapseLocalized,
             `Collapse button text: "${collapseText}" (expected "Plegar" or "Contraer", no raw English "Collapse")`);
 
+        // Check 4: Visible header Help button localized (#116)
+        const helpButtonEvaluation = await cdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const btn = document.querySelector('#sf-help-trigger-btn');
+                    if (!btn) return { found: false };
+                    const span = btn.querySelector('span');
+                    return {
+                        found: true,
+                        visibleText: span ? span.innerText.trim() : btn.innerText.trim(),
+                        ariaLabel: btn.getAttribute('aria-label') || '',
+                        title: btn.getAttribute('title') || ''
+                    };
+                })()
+            `,
+            returnByValue: true
+        }, sessionId);
+
+        const helpData = helpButtonEvaluation.result?.value || {};
+        const isHelpLocalized = helpData.found && helpData.visibleText === 'Ayuda';
+        recordStep('Header Help Button Localized (#116)', isHelpLocalized,
+            `Help button visible text: "${helpData.visibleText}" (expected "Ayuda", no raw English "Help"). aria-label: "${helpData.ariaLabel}"`);
+
         // 2. Verify Metric Cards Localization (#116)
         const metricsEvaluation = await cdp.send('Runtime.evaluate', {
             expression: `
@@ -507,6 +530,7 @@ async function runDashboardJourney() {
             },
             results: journeyResults,
             sidebarNav: navItems,
+            headerHelpButton: helpData,
             metricCards,
             workQueueRows: rows,
             screenshot: 'artifacts/evidence-journeys/dashboard_nav_i18n_spanish_verified.png',

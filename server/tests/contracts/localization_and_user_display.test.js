@@ -257,6 +257,27 @@ describe('Localization & Multilingual Integrity Contract (#116)', () => {
         expect(translationData['fr'].nav.collapse).toBe('Réduire');
         expect(translationData['pt'].nav.collapse).toBe('Recolher');
     });
+
+    test('12. Global header Help button labels are localized across all 5 locales (#116)', () => {
+        LOCALES.forEach(locale => {
+            const help = translationData[locale].help;
+            expect(help).toBeDefined();
+            expect(help.help).toBeTruthy();
+            expect(help.context).toBeTruthy();
+        });
+
+        expect(translationData['en'].help.help).toBe('Help');
+        expect(translationData['es'].help.help).toBe('Ayuda');
+        expect(translationData['es-419'].help.help).toBe('Ayuda');
+        expect(translationData['fr'].help.help).toBe('Aide');
+        expect(translationData['pt'].help.help).toBe('Ajuda');
+
+        expect(translationData['en'].help.context).toBe('Help with this page');
+        expect(translationData['es'].help.context).toBe('Ayuda con esta página');
+        expect(translationData['es-419'].help.context).toBe('Ayuda con esta página');
+        expect(translationData['fr'].help.context).toBe('Aide pour cette page');
+        expect(translationData['pt'].help.context).toBe('Ajuda para esta página');
+    });
 });
 
 describe('User Display Name Resolution & Audit Integrity Contract (#126)', () => {

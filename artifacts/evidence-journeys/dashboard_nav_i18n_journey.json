@@ -1,72 +1,78 @@
 {
   "title": "CDP Headless Browser Journey: Navigation Order & Spanish Dashboard Localization (#115, #116)",
-  "executedAt": "2026-09-22T12:08:14.584Z",
+  "executedAt": "2026-09-22T12:39:09.216Z",
   "locale": "es",
   "role": "LAB_MANAGER",
   "databaseIsolation": {
-    "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790078883072_f1xtr7\\disposable_journey_f1xtr7.db",
-    "cleanRunnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790078883072_f1xtr7"
+    "disposableDb": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790080737186_mk476r\\disposable_journey_mk476r.db",
+    "cleanRunnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims-nav-i18n\\server\\.tmp_journey_runner_1790080737186_mk476r"
   },
   "results": [
     {
       "stepName": "Sidebar Projects Position (#115)",
       "passed": true,
       "details": "Projects is at index 1 (immediately after Dashboard). Nav sequence: / -> /projects -> /reception -> /samples",
-      "timestamp": "2026-09-22T12:08:12.472Z"
+      "timestamp": "2026-09-22T12:39:07.058Z"
     },
     {
       "stepName": "Sidebar Data Results Position (#115)",
       "passed": true,
       "details": "QA (5) -> Data Results (6) -> Reports (7)",
-      "timestamp": "2026-09-22T12:08:12.472Z"
+      "timestamp": "2026-09-22T12:39:07.058Z"
     },
     {
       "stepName": "Sidebar Collapse Localized (#116)",
       "passed": true,
       "details": "Collapse button text: \"Plegar\" (expected \"Plegar\" or \"Contraer\", no raw English \"Collapse\")",
-      "timestamp": "2026-09-22T12:08:12.473Z"
+      "timestamp": "2026-09-22T12:39:07.059Z"
+    },
+    {
+      "stepName": "Header Help Button Localized (#116)",
+      "passed": true,
+      "details": "Help button visible text: \"Ayuda\" (expected \"Ayuda\", no raw English \"Help\"). aria-label: \"Ayuda con esta página\"",
+      "timestamp": "2026-09-22T12:39:07.061Z"
     },
     {
       "stepName": "Dashboard Metric Labels Localized (#116)",
       "passed": true,
       "details": "Translated labels found: Decision=true, Submitted=true, Approval=true, Assign=true, Intake=true",
-      "timestamp": "2026-09-22T12:08:12.475Z"
+      "timestamp": "2026-09-22T12:39:07.063Z"
     },
     {
       "stepName": "Zero Raw English In Metric Cards (#116)",
       "passed": true,
       "details": "Raw English metric titles absent: true",
-      "timestamp": "2026-09-22T12:08:12.475Z"
+      "timestamp": "2026-09-22T12:39:07.063Z"
     },
     {
       "stepName": "Work Queue Context Localized (#116)",
       "passed": true,
       "details": "Context rendered: \"Puerta operativa\" / \"Método analítico\" (found: true)",
-      "timestamp": "2026-09-22T12:08:14.493Z"
+      "timestamp": "2026-09-22T12:39:09.079Z"
     },
     {
       "stepName": "Work Queue Status Badge Localized (#116)",
       "passed": true,
       "details": "Status badge rendered: \"Sin asignar\" (found: true)",
-      "timestamp": "2026-09-22T12:08:14.493Z"
+      "timestamp": "2026-09-22T12:39:09.079Z"
     },
     {
       "stepName": "Work Queue Action Button Localized (#116)",
       "passed": true,
       "details": "Action button rendered: \"Asignar por método\" (found: true)",
-      "timestamp": "2026-09-22T12:08:14.493Z"
+      "timestamp": "2026-09-22T12:39:09.079Z"
     },
     {
       "stepName": "Work Queue Notes Localized (#116)",
       "passed": true,
       "details": "Row note rendered with Spanish pluralization (found: true)",
-      "timestamp": "2026-09-22T12:08:14.493Z"
+      "timestamp": "2026-09-22T12:39:09.079Z"
     },
     {
       "stepName": "Zero Raw English in Work Queue Table (#116)",
       "passed": true,
       "details": "Raw English queue strings absent: true",
-      "timestamp": "2026-09-22T12:08:14.493Z"
+      "timestamp": "2026-09-22T12:39:09.079Z"
     }
   ],
   "sidebarNav": [
@@ -120,7 +126,7 @@
     },
     {
       "text": "Mi Laboratorio",
-      "href": "/admin/labs?labId=LAB-GTM-1790078885924_72dum"
+      "href": "/admin/labs?labId=LAB-GTM-1790080740503_kz337"
     },
     {
       "text": "Panel de administración",
@@ -147,6 +153,12 @@
       "href": "/samples"
     }
   ],
+  "headerHelpButton": {
+    "found": true,
+    "visibleText": "Ayuda",
+    "ariaLabel": "Ayuda con esta página",
+    "title": "Ayuda con esta página"
+  },
   "metricCards": [
     {
       "text": "1\nexcepción\nNecesita una decisión\nREQUIERE ATENCIÓN",

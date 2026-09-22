@@ -1659,6 +1659,7 @@
     }
   },
   "help": {
+    "help": "Ayuda",
     "centre": "Centro de ayuda",
     "faq": "Preguntas frecuentes (FAQ)",
     "faqSubtitle": "Respuestas y resoluciones concisas para el trabajo diario en el laboratorio.",
