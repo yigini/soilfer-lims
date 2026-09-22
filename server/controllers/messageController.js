@@ -11,6 +11,125 @@ const getDisplayName = (user) => {
 };
 exports.getDisplayName = getDisplayName;
 
+/**
+ * Safely resolves attribution in server-generated assignment message bodies for display.
+ * 
+ * In-memory presentation only: does NOT mutate database records or audit trails.
+ * Fails closed for any user-authored message, uncertain sender, or unexpected structure.
+ * 
+ * Verification criteria:
+ * 1. Server-generated message identity: messageId must strictly match known server-generated assignment prefixes:
+ *    - 'msg-assign-' (created by workItemController.assignWork)
+ *    - 'msg-reassign-' (created by workItemController.reassignWorkItem)
+ *    (User-authored messages use UUID format v4 and fail closed immediately).
+ * 2. Strict known template:
+ *    - For 'msg-assign-':
+ *      - Subject must match /^(?:📋\s*)?New Work Assigned:\s*.+/i
+ *      - Body must start with 'You have been assigned a new analysis task.'
+ *      - Targets ONLY the verified final generated footer: /\n\nAssigned by:\s*([^\r\n]+)\s*$/
+ *    - For 'msg-reassign-':
+ *      - Subject must match /^(?:📋\s*)?Work Reassigned:\s*.+/i
+ *      - Body must start with 'A work item has been reassigned to you.'
+ *      - Targets ONLY the verified final generated footer: /\n\nReassigned by:\s*([^\r\n]+)\s*$/
+ * 3. Matching stable sender attribution:
+ *    - sender.username must be present and non-empty (fail closed if missing or empty).
+ *    - The captured attribution in the final footer must match sender.username (or already sender.name).
+ * 4. Literal replacement semantics:
+ *    - Uses a replacement callback function to prevent string replacement tokens ($&, $', etc.)
+ *      from expanding when user.name contains literal dollar signs or special characters.
+ * 5. Safe fallback:
+ *    - If sender has a proper name (sender.name.trim()), update footer with proper name.
+ *    - If sender has no proper name, attribution does not match, or username is absent, return body unchanged.
+ */
+const formatAssignmentBody = (body, sender, subject, messageId) => {
+    if (!body || typeof body !== 'string') return body;
+    if (!messageId || typeof messageId !== 'string') return body;
+
+    const isAssign = messageId.startsWith('msg-assign-');
+    const isReassign = messageId.startsWith('msg-reassign-');
+
+    // 1. Server-generated identity guard: fail closed for non-assignment or user-authored messages (e.g. UUID)
+    if (!isAssign && !isReassign) {
+        return body;
+    }
+
+    // Stable username is required for attribution verification; fail closed if absent
+    if (!sender || typeof sender !== 'object') {
+        return body;
+    }
+    const stableUsername = (typeof sender.username === 'string' && sender.username.trim()) ? sender.username.trim() : null;
+    if (!stableUsername) {
+        return body;
+    }
+
+    const properName = (typeof sender.name === 'string' && sender.name.trim()) ? sender.name.trim() : null;
+
+    // 2. Strict subject and template verification targeting only the verified final generated footer
+    if (isAssign) {
+        if (!subject || typeof subject !== 'string' || !/^(?:📋\s*)?New Work Assigned:\s*.+/i.test(subject.trim())) {
+            return body;
+        }
+        if (!body.startsWith('You have been assigned a new analysis task.')) {
+            return body;
+        }
+
+        // Anchor strictly to the final generated footer at the end of the body
+        const finalAssignPattern = /\n\nAssigned by:\s*([^\r\n]+)\s*$/;
+        const footerMatch = body.match(finalAssignPattern);
+        if (!footerMatch) {
+            return body;
+        }
+
+        const currentAttribution = footerMatch[1].trim();
+
+        // 3. Verify that the final footer matches sender's stable username (or already proper name)
+        if (currentAttribution !== stableUsername && currentAttribution !== properName) {
+            // Attribution does not match sender; fail closed to avoid misattribution
+            return body;
+        }
+
+        // 4. Literal replacement semantics via callback to prevent $ token expansion
+        if (properName && currentAttribution !== properName) {
+            return body.replace(finalAssignPattern, () => `\n\nAssigned by: ${properName}`);
+        }
+
+        return body;
+    }
+
+    if (isReassign) {
+        if (!subject || typeof subject !== 'string' || !/^(?:📋\s*)?Work Reassigned:\s*.+/i.test(subject.trim())) {
+            return body;
+        }
+        if (!body.startsWith('A work item has been reassigned to you.')) {
+            return body;
+        }
+
+        // Anchor strictly to the final generated footer at the end of the body
+        const finalReassignPattern = /\n\nReassigned by:\s*([^\r\n]+)\s*$/;
+        const footerMatch = body.match(finalReassignPattern);
+        if (!footerMatch) {
+            return body;
+        }
+
+        const currentAttribution = footerMatch[1].trim();
+
+        // 3. Verify that the final footer matches sender's stable username (or already proper name)
+        if (currentAttribution !== stableUsername && currentAttribution !== properName) {
+            return body;
+        }
+
+        // 4. Literal replacement semantics via callback to prevent $ token expansion
+        if (properName && currentAttribution !== properName) {
+            return body.replace(finalReassignPattern, () => `\n\nReassigned by: ${properName}`);
+        }
+
+        return body;
+    }
+
+    return body;
+};
+exports.formatAssignmentBody = formatAssignmentBody;
+
 // Helpers
 const createNotification = async (recipientId, type, title, message, link, senderId, options = {}) => {
     try {
@@ -74,7 +193,8 @@ exports.getMessages = async (req, res) => {
         const enriched = messages.map(m => ({
             ...m,
             senderName: getDisplayName(m.sender),
-            recipientName: getDisplayName(m.recipient)
+            recipientName: getDisplayName(m.recipient),
+            body: formatAssignmentBody(m.body, m.sender, m.subject, m.id)
         }));
 
         res.json(enriched);
@@ -182,7 +302,8 @@ exports.getThread = async (req, res) => {
             ...m,
             senderName: getDisplayName(m.sender),
             recipientName: getDisplayName(m.recipient),
-            isMe: String(m.senderId) === userId
+            isMe: String(m.senderId) === userId,
+            body: formatAssignmentBody(m.body, m.sender, m.subject, m.id)
         }));
 
         res.json(enriched);

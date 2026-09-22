@@ -41,6 +41,7 @@ const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const { createNotification } = require('./notificationController');
 const { getAnalysisName, getAnalysisCategory } = require('../services/analysisService');
+const { getDisplayName } = require('./messageController');
 const wsServer = require('../wsServer');
 
 // Helper to get effective analysis list for a sample
@@ -667,7 +668,7 @@ exports.assignWork = async (req, res) => {
                 techUser.id,
                 'INFO',
                 `New Assignment: ${analysis}`,
-                `${user.username} assigned you "${analysis}" for sample ${item.labId || item.sampleId}.`,
+                `${getDisplayName(user)} assigned you "${analysis}" for sample ${item.labId || item.sampleId}.`,
                 `/samples/${item.sampleId}`
             );
 
@@ -678,7 +679,7 @@ exports.assignWork = async (req, res) => {
                     senderId: user.id,
                     recipientId: techUser.id,
                     subject: `📋 New Work Assigned: ${analysis}`,
-                    body: `You have been assigned a new analysis task.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Priority:** ${priority || item.priority || 'NORMAL'}\n${dueDate ? `**Due:** ${new Date(dueDate).toLocaleDateString()}\n` : ''}\nPlease complete this task in a timely manner.\n\nAssigned by: ${user.username}`,
+                    body: `You have been assigned a new analysis task.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Priority:** ${priority || item.priority || 'NORMAL'}\n${dueDate ? `**Due:** ${new Date(dueDate).toLocaleDateString()}\n` : ''}\nPlease complete this task in a timely manner.\n\nAssigned by: ${getDisplayName(user)}`,
                     status: 'SENT',
                     folderSender: 'SENT',
                     folderRecipient: 'INBOX',
@@ -848,7 +849,7 @@ exports.reassignWork = async (req, res) => {
             techUser.id,
             'INFO',
             `📋 Reassigned: ${analysis}`,
-            `${user.username} reassigned "${analysis}" for sample ${item.labId || item.sampleId} to you.`,
+            `${getDisplayName(user)} reassigned "${analysis}" for sample ${item.labId || item.sampleId} to you.`,
             `/samples/${item.sampleId}`
         );
 
@@ -858,7 +859,7 @@ exports.reassignWork = async (req, res) => {
                 senderId: user.id,
                 recipientId: techUser.id,
                 subject: `📋 Work Reassigned: ${analysis}`,
-                body: `A work item has been reassigned to you.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Reason:** ${reason}\n${previousAssignee ? `**Previously assigned to:** ${previousAssignee}\n` : ''}\nPlease complete this task in a timely manner.\n\nReassigned by: ${user.username}`,
+                body: `A work item has been reassigned to you.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Reason:** ${reason}\n${previousAssignee ? `**Previously assigned to:** ${previousAssignee}\n` : ''}\nPlease complete this task in a timely manner.\n\nReassigned by: ${getDisplayName(user)}`,
                 status: 'SENT',
                 folderSender: 'SENT',
                 folderRecipient: 'INBOX',
