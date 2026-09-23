@@ -1381,7 +1381,39 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
   - Machine-readable evidence: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 6/6 findings passed).
   - Recorded screenshots: `manager_queue_scoped_gtm_verified.png`, `manager_queue_scoped_hnd_verified.png`.
 
-#### 11. Issue Status
+#### 11. Review Feedback Resolution: Bounded Delayed-Response Race Protection & Catch/Finally Request Guards (PR #141 / Comment 5803213112)
+- **Problem & Reproduction**:
+  - Review at head `a746a8b68a461df9eb891561de15a8b275d39737` noted that `useRealtimeData` lacked a request generation/URL guard. If a request for `LAB-A` is dispatched, scope changes to `LAB-B` (which resolves `pendingIntakes=2`), and then the delayed `LAB-A` response arrives with `pendingIntakes=91`, the delayed response overwrote the `LAB-B` badge counts.
+  - In `ManagerQueue.jsx`, the `catch` and `finally` blocks lacked the request generation guard present in the success path: a late `LAB-A` failure set the component's `error` state, and late `LAB-A` completion could end the `loading` spinner prematurely for `LAB-B`.
+  - Deterministic React reproduction: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr141-live-race-review.cjs`.
+- **Bounded Remediation**:
+  1. `client/src/hooks/useRealtimeData.js`:
+     - Added `activeRequestIdRef` counter and `currentUrlRef` tracking.
+     - Implemented render-level scope transition guard: when `prevUrl !== url`, `setPrevUrl(url)`, `setData(null)`, `setDataHash('')`, `setLoading(true)`, `setError(null)`, `setIsStale(false)`, and `activeRequestIdRef.current++` immediately clears and withholds previous-scope counts during transition.
+     - Added unmount lifecycle tracking: `mountedRef.current = false` and `activeRequestIdRef.current++` upon unmount, clearing pending intervals and timeouts.
+     - In `fetchData`:
+       - Success path checks `if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) return;`
+       - Diff detection uses `dataHashRef.current` to prevent stale closure dependencies and unnecessary interval resets.
+       - Catch block guards error updates: `if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) return;`
+       - Finally block guards loading completion: `if (mountedRef.current && requestId === activeRequestIdRef.current && isInitial) setLoading(false);`
+       - Live indicator timeout is guarded by active request generation and mounted status.
+       - Same-scope `refresh()` preserves current data while fetching and updates on response.
+  2. `client/src/pages/ManagerQueue.jsx`:
+     - Added `isMountedRef` with unmount cleanup (`isMountedRef.current = false; activeRequestIdRef.current++;`).
+     - Success path checks `if (!isMountedRef.current || requestId !== activeRequestIdRef.current) return;`
+     - Catch block checks `if (!isMountedRef.current || requestId !== activeRequestIdRef.current) return;` so delayed cross-lab network errors never trigger error alerts on a newer active scope.
+     - Finally block checks `if (isMountedRef.current && requestId === activeRequestIdRef.current) setLoading(false);` so delayed cross-lab completions never terminate the active scope's loading spinner.
+- **Verification**:
+  - Independent reproduction script `work/pr141-live-race-review.cjs` passed cleanly: `afterNewResponse` and `afterLateOldResponse` both report `{ lab: "LAB-B", kpis: { pendingIntakes: 2 } }`.
+  - Independent mounted component test `work/pr141-scope-mounted-review.cjs` passed 100%.
+  - Dedicated mounted race suite `work/pr141-race-mounted-suite.cjs` passed **10/10 tests** covering:
+    - `useRealtimeData`: delayed A success after B success, delayed A error after B success, delayed A success while B is pending, delayed A error while B is pending, and unmount cleanup.
+    - `ManagerQueue`: delayed A error while B is in flight, delayed A error after B success, delayed A success after B success, delayed A completion loading guard, and unmount cleanup.
+  - Focused HTTP contracts: `server/tests/contracts/manager_dashboard_overview.test.js` (12/12) and `dashboard_manager_views.test.js` (10/10) passed **22/22** in 16.26s.
+  - Browser CDP suite `run_manager_dashboard_tasklist_side_by_side.cjs`: passed all 6 steps with verified scope retention, same-mounted switch, queue refresh, and back-forward navigation.
+  - Production client build `npm run build`: built cleanly in 15.05s.
+
+#### 12. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

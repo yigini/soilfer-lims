@@ -48,6 +48,16 @@ const ManagerQueue = () => {
     const selectedAnalysis = searchParams.get('analysis') || '';
     const selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim();
     const activeRequestIdRef = useRef(0);
+    const isMountedRef = useRef(true);
+
+    // Track component mount status and cancel pending requests on unmount
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+            activeRequestIdRef.current++;
+        };
+    }, []);
 
     // Batch inspection modal support for ?batchId=
     const batchIdParam = searchParams.get('batchId');
@@ -168,8 +178,8 @@ const ManagerQueue = () => {
 
             const res = await axios.get(endpoint, { params });
 
-            // Invalidate stale in-flight responses if a newer request was dispatched
-            if (requestId !== activeRequestIdRef.current) {
+            // Invalidate stale in-flight responses if a newer request was dispatched or unmounted
+            if (!isMountedRef.current || requestId !== activeRequestIdRef.current) {
                 return;
             }
 
@@ -299,10 +309,15 @@ const ManagerQueue = () => {
             }
 
         } catch (e) {
+            if (!isMountedRef.current || requestId !== activeRequestIdRef.current) {
+                return;
+            }
             console.error("Queue fetch failed", e);
             setError(t('queue.loadError', 'Failed to load queue. Please try again.'));
         } finally {
-            setLoading(false);
+            if (isMountedRef.current && requestId === activeRequestIdRef.current) {
+                setLoading(false);
+            }
         }
     }, [activeTab, selectedAnalysis, selectedLabId]);
  

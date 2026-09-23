@@ -457,6 +457,27 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Client Build: Production build (`npm run build`) passed cleanly in 16.09s.
 - Ready to commit and push updated head to PR #141. Issue #120 remains strictly **OPEN**; candidate is unmerged and undeployed; production hold maintained.
 
+## 23 September 2026 — 23:36 CEST: Bounded Delayed-Response Race Protection & Catch/Finally Request Guards Resolved
+- Context: Independent review at actual head `a746a8b68a461df9eb891561de15a8b275d39737` noted that `useRealtimeData` accepted late responses from previous URL scopes (reproduced via `work/pr141-live-race-review.cjs`), and `ManagerQueue.jsx` `catch`/`finally` lacked the request-id guard.
+- Remediation:
+  - `client/src/hooks/useRealtimeData.js`:
+    - Added `activeRequestIdRef`, `currentUrlRef`, and unmount cleanup.
+    - Implemented render-level scope transition guard (`prevUrl !== url`) clearing/withholding previous scope counts during transition (`setData(null)`, `setDataHash('')`, `setLoading(true)`, `setError(null)`).
+    - Guarded `fetchData` success, error, finally, and live timeout paths with request ID and current URL matching.
+    - Preserved diff detection and same-scope `refresh()`.
+  - `client/src/pages/ManagerQueue.jsx`:
+    - Added `isMountedRef` with unmount cleanup.
+    - Guarded `catch` block (`if (!isMountedRef.current || requestId !== activeRequestIdRef.current) return;`) preventing late cross-lab errors from altering queue error state.
+    - Guarded `finally` block (`if (isMountedRef.current && requestId === activeRequestIdRef.current) setLoading(false);`) preventing late cross-lab completions from prematurely clearing the active scope's loading spinner.
+- Verification:
+  - Reproduction `pr141-live-race-review.cjs`: 100% PASS (`afterNewResponse` and `afterLateOldResponse` both `{ lab: "LAB-B", kpis: { pendingIntakes: 2 } }`).
+  - Mounted component test `pr141-scope-mounted-review.cjs`: 100% PASS.
+  - Dedicated mounted race suite `pr141-race-mounted-suite.cjs`: 10/10 tests PASS (delayed A success after B success, delayed A error after B success, delayed A success while B is pending, delayed A error while B is pending, unmount cleanup, queue error guard, queue loading guard).
+  - Contract test suites: 22/22 passed in 16.26s.
+  - Browser CDP suite: 6/6 journeys passed.
+  - Production client build: built in 15.05s.
+- Ready to commit and push updated head to PR #141. Issue #120 remains strictly **OPEN** (`Refs #120`); release remains held until acceptance; no production mutation.
+
 
 
 
