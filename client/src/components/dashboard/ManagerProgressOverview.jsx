@@ -33,13 +33,19 @@ export default function ManagerProgressOverview({
         totalSamples: 0
     };
 
+    const buildRoute = (baseRoute) => {
+        if (!activeLabId) return baseRoute;
+        const separator = baseRoute.includes('?') ? '&' : '?';
+        return `${baseRoute}${separator}labId=${encodeURIComponent(activeLabId)}`;
+    };
+
     const stages = [
         {
             key: 'intake',
             label: t('dashboard.manager.stageIntake', 'Intake Acceptance'),
             count: stageCounts.pendingIntake ?? 0,
             unit: t('dashboard.units.samples', { count: stageCounts.pendingIntake ?? 0 }, 'samples'),
-            route: '/manager-queue?lane=intake',
+            route: buildRoute('/manager-queue?lane=intake'),
             color: 'border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300'
         },
         {
@@ -47,7 +53,7 @@ export default function ManagerProgressOverview({
             label: t('dashboard.manager.stageInAnalysis', 'In Analysis'),
             count: stageCounts.inProgress ?? 0,
             unit: t('dashboard.units.samples', { count: stageCounts.inProgress ?? 0 }, 'samples'),
-            route: '/samples?view=daily',
+            route: buildRoute('/samples?view=daily'),
             color: 'border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300'
         },
         {
@@ -55,7 +61,7 @@ export default function ManagerProgressOverview({
             label: t('dashboard.manager.stageAwaitingReview', 'Awaiting Review'),
             count: stageCounts.awaitingReview ?? 0,
             unit: t('dashboard.units.samples', { count: stageCounts.awaitingReview ?? 0 }, 'samples'),
-            route: '/manager-queue?lane=review',
+            route: buildRoute('/manager-queue?lane=review'),
             color: 'border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
         },
         {
@@ -63,7 +69,7 @@ export default function ManagerProgressOverview({
             label: t('dashboard.manager.stageFinalApproval', 'Final Approval'),
             count: stageCounts.finalApproval ?? 0,
             unit: t('dashboard.units.samples', { count: stageCounts.finalApproval ?? 0 }, 'samples'),
-            route: '/manager-queue?lane=approve',
+            route: buildRoute('/manager-queue?lane=approve'),
             color: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
         },
         {
@@ -74,7 +80,7 @@ export default function ManagerProgressOverview({
                 ? t('dashboard.manager.approvedTodayCount', '{count} approved today', { count: stageCounts.approvedToday })
                 : null,
             unit: t('dashboard.units.samples', { count: stageCounts.completed ?? stageCounts.approved ?? stageCounts.completedToday ?? 0 }, 'samples'),
-            route: '/samples?status=APPROVED',
+            route: buildRoute('/samples?status=APPROVED'),
             color: 'border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20 text-teal-700 dark:text-teal-300'
         }
     ];
@@ -249,7 +255,7 @@ export default function ManagerProgressOverview({
                                 </div>
                             </div>
                             <Link
-                                to="/manager-queue?lane=assign"
+                                to={buildRoute('/manager-queue?lane=assign')}
                                 className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors shrink-0 shadow-sm"
                             >
                                 <span>{t('dashboard.manager.assignInTaskList', 'Assign')}</span>
@@ -363,7 +369,7 @@ export default function ManagerProgressOverview({
                         </button>
                     )}
                     <Link
-                        to="/manager-queue"
+                        to={buildRoute('/manager-queue')}
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-sf-primary text-sf-on-primary hover:brightness-95 transition-all shadow-sm"
                     >
                         <span>{t('dashboard.manager.openTaskList', 'Open Manager Task List')}</span>

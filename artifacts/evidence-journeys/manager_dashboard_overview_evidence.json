@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-23T19:35:10.435Z",
+  "timestamp": "2026-09-23T20:36:12.974Z",
   "status": "VERIFIED",
   "findings": {
     "managerDashboardOperationalOverview": {
@@ -51,7 +51,15 @@
       "details": {
         "h1": "System administrator dashboard",
         "hasAnalysisProgress": true,
-        "hasTechWorkload": true
+        "hasTechWorkload": true,
+        "stage1Link": "/manager-queue?lane=intake&labId=LAB-GTM",
+        "stage2Link": "/samples?view=daily&labId=LAB-GTM",
+        "stage5Link": "/samples?status=APPROVED&labId=LAB-GTM",
+        "taskListLink": "/manager-queue?labId=LAB-GTM",
+        "preservesLabIdInStage1Link": true,
+        "preservesLabIdInStage2Link": true,
+        "preservesLabIdInStage5Link": true,
+        "preservesLabIdInTaskListLink": true
       }
     },
     "stage5DestinationPopulation": {
@@ -62,7 +70,8 @@
         "hasSample5": true,
         "omitsSampleSubFull": true,
         "omitsSampleComp": true,
-        "omitsSampleRec": true
+        "omitsSampleRec": true,
+        "omitsForeignLabSample": true
       }
     }
   },

@@ -304,10 +304,12 @@ async function getDashboardHome(user, options = {}) {
         let approvalEligibleCount = 0;
         let stageAwaitingReviewCount = 0;
         let stageInProgressCount = 0;
+        const candidateEvals = new Map();
 
         for (const s of candidates) {
             const orderLines = s.orderRevisions?.[0]?.lines || [];
             const evalResult = canFinalApprove(s, s.workItems, orderLines, user);
+            candidateEvals.set(s.id, evalResult);
             const isApprovalEligible = evalResult.allowed;
             const hasSubmittedWork = reviewSampleIds.has(s.id) || (s.workItems || []).some(w => w.status === 'SUBMITTED');
 
@@ -353,28 +355,45 @@ async function getDashboardHome(user, options = {}) {
         // 6. Build Progress & Bottleneck Overview for Manager Dashboard (Issue #120)
         const oversight = candidates
             .map(s => {
-                // Denominator excludes all NON_ANALYTICAL methods (DRYING, PREPARATION, ARCHIVING, DISPOSAL, etc.)
-                const analyticalWork = (s.workItems || []).filter(w => !NON_ANALYTICAL.includes(w.analysis));
-                const total = analyticalWork.length;
-                // Determination is complete at the bench if SUBMITTED, COMPLETED, or ACCEPTED
-                const completed = analyticalWork.filter(w => ['SUBMITTED', 'COMPLETED', 'ACCEPTED'].includes(w.status)).length;
-                const accepted = analyticalWork.filter(w => w.status === 'ACCEPTED').length;
+                const orderLines = s.orderRevisions?.[0]?.lines || [];
+                let requiredAnalysesToCheck = [];
+                if (Array.isArray(orderLines) && orderLines.length > 0) {
+                    requiredAnalysesToCheck = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false).map(l => l.analysis);
+                } else if (s.requiredAnalyses) {
+                    try {
+                        const parsed = typeof s.requiredAnalyses === 'string' ? JSON.parse(s.requiredAnalyses) : s.requiredAnalyses;
+                        if (Array.isArray(parsed)) {
+                            requiredAnalysesToCheck = parsed;
+                        }
+                    } catch (e) {}
+                }
+                requiredAnalysesToCheck = requiredAnalysesToCheck.filter(code => !NON_ANALYTICAL.includes(code) && !GATE_ANALYSES.includes(code));
+
+                // Denominator excludes all NON_ANALYTICAL methods and gate analyses
+                const analyticalWork = (s.workItems || []).filter(w => !NON_ANALYTICAL.includes(w.analysis) && !GATE_ANALYSES.includes(w.analysis));
+                const allAnalyticalCodes = new Set([...requiredAnalysesToCheck, ...analyticalWork.map(w => w.analysis)]);
+                const total = Math.max(analyticalWork.length, allAnalyticalCodes.size);
+
+                // Determination is complete at the bench if SUBMITTED, COMPLETED, ACCEPTED, or WAIVED
+                const completed = analyticalWork.filter(w => ['SUBMITTED', 'COMPLETED', 'ACCEPTED', 'WAIVED'].includes(w.status)).length;
+                const accepted = analyticalWork.filter(w => ['ACCEPTED', 'WAIVED'].includes(w.status)).length;
                 const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-                const isAllAccepted = total > 0 && accepted === total;
-                const isAllDone = total > 0 && completed === total;
+                const evalResult = candidateEvals.get(s.id) || canFinalApprove(s, s.workItems, orderLines, user);
+                const isApprovalEligible = evalResult.allowed;
+                const hasPendingWork = (s.workItems || []).some(w => ['SUBMITTED', 'COMPLETED'].includes(w.status));
 
-                // Determine lifecycle readiness state:
-                // - READY_FOR_APPROVAL: all determinations accepted, review is finished
-                // - READY_FOR_REVIEW: all determinations submitted/done, awaiting manager review
+                // Determine lifecycle readiness state reusing canonical eligibility:
                 // - APPROVED: sample already authorized/approved
-                // - IN_ANALYSIS: determinations actively underway
+                // - READY_FOR_APPROVAL: canonical final approval eligibility satisfied (all required work accepted/waived, gates passed)
+                // - READY_FOR_REVIEW: all determinations submitted/done at bench, awaiting manager review
+                // - IN_ANALYSIS: determinations actively underway or blocked by pending gates/missing required work
                 let readiness = 'IN_ANALYSIS';
                 if (['COMPLETED', 'APPROVED'].includes(s.status)) {
                     readiness = 'APPROVED';
-                } else if (isAllAccepted) {
+                } else if (isApprovalEligible) {
                     readiness = 'READY_FOR_APPROVAL';
-                } else if (isAllDone) {
+                } else if (total > 0 && completed === total && hasPendingWork) {
                     readiness = 'READY_FOR_REVIEW';
                 }
 
@@ -389,7 +408,7 @@ async function getDashboardHome(user, options = {}) {
                     accepted,
                     progress,
                     readiness,
-                    isReady: isAllDone || isAllAccepted
+                    isReady: isApprovalEligible || readiness === 'READY_FOR_REVIEW' || readiness === 'APPROVED'
                 };
             })
             .filter(s => s.total > 0)

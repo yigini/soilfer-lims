@@ -394,5 +394,36 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
     - Production build (`npm run build`) passed cleanly in 27.90s.
 - Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
 
+### 2026-09-23 20:35 UTC — PR #141 review remediation: Canonical eligibility for readiness & scoped continuation links
+- Independent review on PR #141 at `be30853` ([comment 5801965350](https://github.com/yigini/soilfer-lims/pull/141#issuecomment-5801965350)) consolidated two remaining overview correctness gaps:
+  1. *Canonical final-approval eligibility for readiness*: Distinguish bench completion from operational readiness by reusing canonical `canFinalApprove` so missing ordered work or pending prerequisite gates cannot show `Ready for Approval`; cover accepted-plus-waived work items.
+  2. *Scoped-admin continuation link lab preservation*: Preserve selected lab in actual rendered continuation links and honor it at destinations, including scoped admin; replace tests that describe invented destination URLs with real-link checks; verify destination behavior with a second-lab approved sample.
+- Remediations:
+  - `server/services/dashboardService.js`:
+    - Cached `canFinalApprove` evaluation during candidate partition loop.
+    - In `oversight`, expanded progress denominator to include missing ordered analyses from `orderLines` and `requiredAnalyses` (`Math.max(analyticalWork.length, allAnalyticalCodes.size)`).
+    - Counted `WAIVED` work items in completed determinations (`['SUBMITTED', 'COMPLETED', 'ACCEPTED', 'WAIVED'].includes(w.status)`).
+    - Reused canonical `canFinalApprove` (`isApprovalEligible`): `readiness = 'READY_FOR_APPROVAL'` strictly when `isApprovalEligible` is true (all prerequisite gates complete, all required analyses accepted or waived).
+    - Kept specimens with pending gates or missing ordered work at `readiness = 'IN_ANALYSIS'` (`isReady: false`).
+  - `client/src/components/dashboard/ManagerProgressOverview.jsx`: Added `buildRoute` helper appending `labId=${encodeURIComponent(activeLabId)}` when `activeLabId` is present across all 5 stage cards, the unassigned tasks alert, and the task list button.
+  - `client/src/components/dashboard/DashboardShell.jsx`: Preserved `selectedLabId` on header task list button.
+  - `client/src/pages/ManagerQueue.jsx`: Preserved `labId` across tab switching (`handleTabChange`) and included `params.labId` across all queue queries.
+  - `server/controllers/workItemController.js` & `server/controllers/submissionController.js`: Added `labId` filtering for scoped admins.
+  - `server/tests/contracts/manager_dashboard_overview.test.js`:
+    - Added `stageLab2` (Honduras) and `sampleOtherLabApproved` (second-lab approved specimen).
+    - Added `sampleMissingRequired` (accepted pH, missing required EC, pending drying gate) and `sampleAcceptedWaived` (accepted pH + waived EC, completed gates).
+    - Added Test 5b testing canonical eligibility probe (`sampleMissingRequired` blocked with `PREREQUISITE_GATE_INCOMPLETE` and `ORDER_LINE_INCOMPLETE`, `sampleAcceptedWaived` allowed).
+    - Updated Test 6, 7, 8, 9 with real component rendered links and assertions verifying strict lab isolation.
+    - Added Test 10 validating route builder preserving `activeLabId` when scoped and clean paths when unparameterized.
+    - 11/11 contract tests passed in 9.40s.
+  - `server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`:
+    - Added `LAB-HND` and `SMP-HND-001` fixtures.
+    - Step 4 verified Scoped Admin renders continuation links with `labId=LAB-GTM` (Stage 1, Stage 2, Stage 5, and Task List).
+    - Step 5 verified Stage 5 destination displays Guatemala approved samples and omits Honduras sample `SMP-HND-001` (`omitsForeignLabSample: true`).
+    - All 5 steps passed; refreshed screenshots and evidence JSON.
+  - Client Build: Production build (`npm run build`) passed cleanly in 15.38s.
+- Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed; production hold maintained.
+
+
 
 

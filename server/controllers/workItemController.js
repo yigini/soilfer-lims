@@ -459,7 +459,15 @@ exports.getWorkItems = async (req, res) => {
         if (assignedTo) where.assignedTo = assignedTo;
         if (analysis) where.analysis = analysis;
         if (sampleId) where.sampleId = String(sampleId);
-        if (labId) where.labId = labId;
+        if (labId) {
+            if (!where.AND) where.AND = [];
+            where.AND.push({
+                OR: [
+                    { labId: String(labId) },
+                    { assignedLab: String(labId) }
+                ]
+            });
+        }
 
         const [items, total] = await Promise.all([
             prisma.workItem.findMany({

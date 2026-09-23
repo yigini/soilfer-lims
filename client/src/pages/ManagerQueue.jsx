@@ -85,6 +85,8 @@ const ManagerQueue = () => {
         setActiveTab(newTab);
         setUserSelected(true);
         const next = { lane: newTab };
+        const labId = searchParams.get('labId') || searchParams.get('labs');
+        if (labId) next.labId = labId;
         if (newTab === QUEUE_Tabs.ASSIGN && selectedAnalysis) {
             next.analysis = selectedAnalysis;
         }
@@ -130,6 +132,10 @@ const ManagerQueue = () => {
         try {
             let endpoint = '';
             let params = { page, limit: 20 };
+            const labId = searchParams.get('labId') || searchParams.get('labs');
+            if (labId) {
+                params.labId = labId;
+            }
 
             switch (activeTab) {
                 case QUEUE_Tabs.EXCEPTIONS:

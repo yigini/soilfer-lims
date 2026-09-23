@@ -116,6 +116,12 @@ async function main() {
             create: { id: 'LAB-GTM', name: 'SoilFER Guatemala Lab', code: 'LAB-GTM', country: 'GTM', isActive: true }
         });
 
+        await prisma.lab.upsert({
+            where: { id: 'LAB-HND' },
+            update: { name: 'SoilFER Honduras Lab', code: 'LAB-HND', country: 'HND', isActive: true },
+            create: { id: 'LAB-HND', name: 'SoilFER Honduras Lab', code: 'LAB-HND', country: 'HND', isActive: true }
+        });
+
         await prisma.project.upsert({
             where: { code: 'SOILFER-GTM' },
             update: { name: 'Soil Fertility Guatemala', status: 'ACTIVE' },
@@ -411,6 +417,21 @@ async function main() {
             }
         });
 
+        // sHndApproved: Approved sample in foreign laboratory (LAB-HND) -> strictly isolated from LAB-GTM manager & scoped admin
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-HND-001',
+                originalId: 'FIELD-HND-001',
+                labId: 'HND-2026-0001',
+                assignedLab: 'LAB-HND',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                receptionDate: new Date('2026-09-19T08:00:00Z'),
+                approvedAt: new Date(),
+                updatedAt: new Date()
+            }
+        });
+
         console.log('[2/6] Starting application server...');
         server = http.createServer(app);
         await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -620,10 +641,30 @@ async function main() {
                     const pageText = document.body.innerText;
                     const hasAnalysisProgress = pageText.includes('Analysis Progress') || pageText.includes('Progreso de análisis');
                     const hasTechWorkload = pageText.includes('Technician Workload') || pageText.includes('Carga técnica');
+
+                    // Verify continuation links preserve activeLabId
+                    const stage1Link = document.querySelector('a[href*="/manager-queue?lane=intake"]')?.getAttribute('href') || '';
+                    const stage2Link = document.querySelector('a[href*="/samples?view=daily"]')?.getAttribute('href') || '';
+                    const stage5Link = document.querySelector('a[href*="/samples?status=APPROVED"]')?.getAttribute('href') || '';
+                    const taskListLink = document.querySelector('main a[href*="/manager-queue"]:not([href*="lane"])')?.getAttribute('href') || '';
+
+                    const preservesLabIdInStage1Link = stage1Link.includes('labId=LAB-GTM');
+                    const preservesLabIdInStage2Link = stage2Link.includes('labId=LAB-GTM');
+                    const preservesLabIdInStage5Link = stage5Link.includes('labId=LAB-GTM');
+                    const preservesLabIdInTaskListLink = taskListLink.includes('labId=LAB-GTM');
+
                     return {
                         h1,
                         hasAnalysisProgress,
-                        hasTechWorkload
+                        hasTechWorkload,
+                        stage1Link,
+                        stage2Link,
+                        stage5Link,
+                        taskListLink,
+                        preservesLabIdInStage1Link,
+                        preservesLabIdInStage2Link,
+                        preservesLabIdInStage5Link,
+                        preservesLabIdInTaskListLink
                     };
                 })()
             `
@@ -660,13 +701,15 @@ async function main() {
                     const omitsSampleSubFull = !pageText.includes('SMP-GTM-SFULL');
                     const omitsSampleComp = !pageText.includes('SMP-GTM-COMP');
                     const omitsSampleRec = !pageText.includes('SMP-GTM-REC');
+                    const omitsForeignLabSample = !pageText.includes('SMP-HND-001') && !pageText.includes('HND-2026-0001');
                     return {
                         url: window.location.pathname + window.location.search,
                         hasSample4,
                         hasSample5,
                         omitsSampleSubFull,
                         omitsSampleComp,
-                        omitsSampleRec
+                        omitsSampleRec,
+                        omitsForeignLabSample
                     };
                 })()
             `
@@ -695,11 +738,11 @@ async function main() {
                     details: taskListResult
                 },
                 scopedSystemAdminOverview: {
-                    verified: adminScopedResult.hasAnalysisProgress && adminScopedResult.hasTechWorkload,
+                    verified: adminScopedResult.hasAnalysisProgress && adminScopedResult.hasTechWorkload && adminScopedResult.preservesLabIdInStage5Link && adminScopedResult.preservesLabIdInStage1Link,
                     details: adminScopedResult
                 },
                 stage5DestinationPopulation: {
-                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5 && samplesNavResult.omitsSampleSubFull && samplesNavResult.omitsSampleComp && samplesNavResult.omitsSampleRec,
+                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5 && samplesNavResult.omitsSampleSubFull && samplesNavResult.omitsSampleComp && samplesNavResult.omitsSampleRec && samplesNavResult.omitsForeignLabSample,
                     details: samplesNavResult
                 }
             },

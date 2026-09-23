@@ -1322,7 +1322,38 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
     - Excluded from Stage 5 destination: `/samples?status=APPROVED` contains only the 2 approved specimens and omits `sampleSubmittedFullAccepted`.
   - Zero double-counting across all 5 stages: `pendingIntake (1) + inProgress (1) + awaitingReview (1) + finalApproval (2) + completed (2) = 7`.
 
-#### 9. Issue Status
+#### 9. Review Feedback Resolution: Canonical Final-Approval Eligibility for Readiness & Scoped Continuation Links (PR #141 / Comment 5801965350)
+- **Gap 1: Canonical Final-Approval Eligibility for Overview Readiness**:
+  - Previously, the sample determination overview assigned `READY_FOR_APPROVAL` based solely on existing analytical items being completed/accepted, which could prematurely flag a specimen as "Ready for Approval" even if required ordered analyses were missing or prerequisite operational gates (e.g. drying/preparation) were still incomplete.
+  - Reused the canonical final-approval evaluation engine (`canFinalApprove` from `services/workflowContract.js`) directly in `server/services/dashboardService.js`:
+    - Evaluates required ordered analyses from `orderLines` or `sample.requiredAnalyses` (excluding `NON_ANALYTICAL` and `GATE_ANALYSES`).
+    - Adjusts progress denominator to `Math.max(analyticalWork.length, allAnalyticalCodes.size)` so missing ordered analyses factor into progress calculation rather than falsely showing 100%.
+    - Counts `WAIVED` work items alongside `ACCEPTED` determinations (`['SUBMITTED', 'COMPLETED', 'ACCEPTED', 'WAIVED'].includes(w.status)`).
+    - Gates `readiness = 'READY_FOR_APPROVAL'` strictly when `canFinalApprove(sample, workItems, orderLines, user).allowed` is `true`.
+    - Samples with pending prerequisite gates or missing ordered work remain in `IN_ANALYSIS` (`isReady: false`) until all gates pass and all required analyses are accepted or waived.
+    - Verified with Contract Test 5b:
+      - `sampleMissingRequired` (accepted pH, missing required EC, pending drying gate): `total: 2`, `completed: 1`, `progress: 50%`, `readiness: 'IN_ANALYSIS'`, `isReady: false`, with blockers `PREREQUISITE_GATE_INCOMPLETE` and `ORDER_LINE_INCOMPLETE`.
+      - `sampleAcceptedWaived` (accepted pH + waived EC, completed gates): `total: 2`, `completed: 2`, `progress: 100%`, `readiness: 'READY_FOR_APPROVAL'`, `isReady: true`.
+- **Gap 2: Scoped-Admin Continuation Link Lab Preservation & Destination Real-Link Checks**:
+  - `ManagerProgressOverview.jsx`: Added helper `buildRoute` to preserve `labId=${encodeURIComponent(activeLabId)}` across all rendered stage continuation links (`/manager-queue?lane=intake`, `/samples?view=daily`, `/manager-queue?lane=review`, `/manager-queue?lane=approve`, `/samples?status=APPROVED`), the unassigned tasks alert (`/manager-queue?lane=assign`), and the overview task list button (`/manager-queue`).
+  - `DashboardShell.jsx`: Preserved `selectedLabId` on the header task list button (`/manager-queue?labId=...`).
+  - `ManagerQueue.jsx`: Preserved `labId` from search parameters across queue tab navigation (`handleTabChange`) and included `params.labId` in all manager queue data requests (`/api/samples`, `/api/work`, `/api/submissions`, `/api/dashboard/queues/*`).
+  - `workItemController.js` and `submissionController.js`: Added support for filtering by `labId` (`{ OR: [{ labId }, { assignedLab: labId }] }` and `assignedLab = labId` for `SUPER_ADMIN`), ensuring scoped administrators remain strictly isolated to the selected laboratory.
+  - Replaced test descriptions of invented destination URLs with real-link checks:
+    - Contract Test 7 validates real component rendered routes: `/manager-queue?lane=intake&labId=...` calls `/api/samples?status=RECEIVED,COLLECTED&labId=...` (returns Guatemala sample, omits bench sample and Honduras foreign lab sample); `/samples?view=daily&labId=...` calls `/api/samples?view=daily&labId=...` (returns active specimens, omits approved/released, unapproved completed, and Honduras sample).
+    - Contract Test 9 validates Stage 5 destination parity for Manager (implicit lab scope) and Scoped Admin (explicit `labId` parameter) to exactly 2 approved samples in `stageLab`, strictly omitting Honduras sample `sampleOtherLabApproved`, while verifying that unscoped Admin destination returns both labs.
+    - Contract Test 10 validates the pure route builder preserving `activeLabId` when scoped and returning clean paths when unparameterized.
+  - Isolated Headless Chrome CDP Browser Verification:
+    - Added second lab fixture (`LAB-HND`, Honduras) with approved sample `SMP-HND-001`.
+    - Step 4 verified Scoped System Admin on `/?labId=LAB-GTM` renders continuation links containing `labId=LAB-GTM`:
+      - Stage 1: `/manager-queue?lane=intake&labId=LAB-GTM` (`preservesLabIdInStage1Link: true`)
+      - Stage 2: `/samples?view=daily&labId=LAB-GTM` (`preservesLabIdInStage2Link: true`)
+      - Stage 5: `/samples?status=APPROVED&labId=LAB-GTM` (`preservesLabIdInStage5Link: true`)
+      - Task List: `/manager-queue?labId=LAB-GTM` (`preservesLabIdInTaskListLink: true`)
+    - Step 5 verified Stage 5 destination navigates to `/samples?status=APPROVED`, displays approved specimens for Guatemala, and strictly omits Honduras foreign sample `SMP-HND-001` (`omitsForeignLabSample: true`).
+  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
+
+#### 10. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

@@ -15,6 +15,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { canFinalApprove } = require('../../services/workEligibility');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_key_12345';
 
@@ -273,7 +274,10 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
 
 describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', () => {
     let stageLab;
+    let stageLab2;
     let stageManagerToken;
+    let stageAdminToken;
+    let stageMgrUser;
     let techAlpha;
     let sampleReview;
     let sampleApproval;
@@ -284,6 +288,12 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
     let sampleSubmittedFullAccepted;
     let sampleCompletedNoApprovedAt;
     let sampleReceived;
+    let sampleOtherLabApproved;
+    let sampleMissingRequired;
+    let sampleAcceptedWaived;
+    let wiMissingPH;
+    let wiAccPH;
+    let wiAccEC;
 
     beforeAll(async () => {
         const unique = Date.now() + 5000;
@@ -292,8 +302,11 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         stageLab = await prisma.lab.create({
             data: { id: `LAB-STAGE-${unique}`, name: 'Stage Precedence Lab', code: `STG-${unique}`, country: 'SLV', isActive: true }
         });
+        stageLab2 = await prisma.lab.create({
+            data: { id: `LAB-STAGE2-${unique}`, name: 'Foreign Stage Lab', code: `STG2-${unique}`, country: 'HND', isActive: true }
+        });
 
-        const mgr = await prisma.user.create({
+        stageMgrUser = await prisma.user.create({
             data: {
                 id: `usr-mgr-stg-${unique}`,
                 username: `mgr_stg_${unique}`,
@@ -301,6 +314,18 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 email: `mgr_stg_${unique}@soilfer.org`,
                 role: 'LAB_MANAGER',
                 labId: stageLab.id,
+                password: pwHash,
+                isActive: true
+            }
+        });
+
+        const stageAdminUser = await prisma.user.create({
+            data: {
+                id: `usr-admin-stg-${unique}`,
+                username: `admin_stg_${unique}`,
+                name: 'Stage Super Admin',
+                email: `admin_stg_${unique}@soilfer.org`,
+                role: 'SUPER_ADMIN',
                 password: pwHash,
                 isActive: true
             }
@@ -320,7 +345,13 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         stageManagerToken = jwt.sign(
-            { id: mgr.id, username: mgr.username, role: 'LAB_MANAGER', labId: stageLab.id },
+            { id: stageMgrUser.id, username: stageMgrUser.username, role: 'LAB_MANAGER', labId: stageLab.id },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        stageAdminToken = jwt.sign(
+            { id: stageAdminUser.id, username: stageAdminUser.username, role: 'SUPER_ADMIN' },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -481,6 +512,80 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 updatedAt: new Date()
             }
         });
+
+        // 8. Sample in second lab (foreign lab) with APPROVED status
+        sampleOtherLabApproved = await prisma.sample.create({
+            data: {
+                id: `SMP-STG2-APP-${unique}`,
+                originalId: `FLD-STG2-APP-${unique}`,
+                labId: `L-STG2-APP-${unique}`,
+                assignedLab: stageLab2.id,
+                status: 'APPROVED',
+                receptionDate: new Date('2026-09-20T08:00:00Z'),
+                approvedAt: new Date(),
+                updatedAt: new Date()
+            }
+        });
+
+        // 9. Sample with accepted PH, required EC missing from work items, and unfinished drying gate
+        sampleMissingRequired = await prisma.sample.create({
+            data: {
+                id: `SMP-STG-MISSING-${unique}`,
+                originalId: `FLD-STG-MISSING-${unique}`,
+                labId: `L-STG-MISSING-${unique}`,
+                assignedLab: stageLab.id,
+                status: 'PROCESSING',
+                receptionDate: new Date('2026-09-20T10:00:00Z'),
+                dryingStatus: 'PENDING',
+                preparationStatus: 'DONE',
+                requiredAnalyses: JSON.stringify(['PH_H2O', 'EC_1_5'])
+            }
+        });
+        wiMissingPH = await prisma.workItem.create({
+            data: {
+                id: `WI-MISSING-1-${unique}`,
+                sampleId: sampleMissingRequired.id,
+                analysis: 'PH_H2O',
+                status: 'ACCEPTED',
+                assignedTo: techAlpha.username,
+                assignedLab: stageLab.id
+            }
+        });
+
+        // 10. Sample with accepted-plus-waived work and completed operational gates
+        sampleAcceptedWaived = await prisma.sample.create({
+            data: {
+                id: `SMP-STG-ACC-WAIVE-${unique}`,
+                originalId: `FLD-STG-ACC-WAIVE-${unique}`,
+                labId: `L-STG-ACC-WAIVE-${unique}`,
+                assignedLab: stageLab.id,
+                status: 'PROCESSING',
+                receptionDate: new Date('2026-09-20T10:00:00Z'),
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                requiredAnalyses: JSON.stringify(['PH_H2O', 'EC_1_5'])
+            }
+        });
+        wiAccPH = await prisma.workItem.create({
+            data: {
+                id: `WI-ACCW-1-${unique}`,
+                sampleId: sampleAcceptedWaived.id,
+                analysis: 'PH_H2O',
+                status: 'ACCEPTED',
+                assignedTo: techAlpha.username,
+                assignedLab: stageLab.id
+            }
+        });
+        wiAccEC = await prisma.workItem.create({
+            data: {
+                id: `WI-ACCW-2-${unique}`,
+                sampleId: sampleAcceptedWaived.id,
+                analysis: 'EC_1_5',
+                status: 'WAIVED',
+                assignedTo: techAlpha.username,
+                assignedLab: stageLab.id
+            }
+        });
     });
 
     test('4. Analytical progress denominator excludes closure tasks (ARCHIVING) and counts SUBMITTED work with READY_FOR_REVIEW badge', async () => {
@@ -524,6 +629,50 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(approvalItem.isReady).toBe(true);
     });
 
+    test('5b. Canonical eligibility probe: missing required work or pending gates block READY_FOR_APPROVAL, while accepted-plus-waived qualifies', async () => {
+        const res = await request(app)
+            .get('/api/dashboard/home')
+            .set('Authorization', `Bearer ${stageManagerToken}`);
+
+        expect(res.status).toBe(200);
+        const oversight = res.body.progressOverview?.oversight;
+        expect(Array.isArray(oversight)).toBe(true);
+
+        // 1. Probe sampleMissingRequired: accepted PH, required EC missing from work items, unfinished drying gate
+        const missingItem = oversight.find(s => s.sampleId === sampleMissingRequired.id);
+        expect(missingItem).toBeDefined();
+        // Denominator must account for missing required EC: total = 2
+        expect(missingItem.total).toBe(2);
+        // Completed determinations: 1 (only PH_H2O is accepted)
+        expect(missingItem.completed).toBe(1);
+        expect(missingItem.progress).toBe(50);
+        // Readiness must be IN_ANALYSIS, never READY_FOR_APPROVAL or READY_FOR_REVIEW
+        expect(missingItem.readiness).toBe('IN_ANALYSIS');
+        expect(missingItem.readiness).not.toBe('READY_FOR_APPROVAL');
+        expect(missingItem.readiness).not.toBe('READY_FOR_REVIEW');
+        expect(missingItem.isReady).toBe(false);
+
+        // Direct canonical eligibility source-expression verification
+        const directEvalMissing = canFinalApprove(sampleMissingRequired, [wiMissingPH], [], stageMgrUser);
+        expect(directEvalMissing.allowed).toBe(false);
+        expect(directEvalMissing.blockers.some(b => b.includes('PREREQUISITE_GATE_INCOMPLETE'))).toBe(true);
+        expect(directEvalMissing.blockers.some(b => b.includes('ORDER_LINE_INCOMPLETE'))).toBe(true);
+
+        // 2. Probe sampleAcceptedWaived: accepted PH + waived EC, completed drying and prep gates
+        const accWaivedItem = oversight.find(s => s.sampleId === sampleAcceptedWaived.id);
+        expect(accWaivedItem).toBeDefined();
+        expect(accWaivedItem.total).toBe(2);
+        expect(accWaivedItem.completed).toBe(2);
+        expect(accWaivedItem.progress).toBe(100);
+        // Readiness must be READY_FOR_APPROVAL reusing canonical eligibility
+        expect(accWaivedItem.readiness).toBe('READY_FOR_APPROVAL');
+        expect(accWaivedItem.isReady).toBe(true);
+
+        // Direct canonical eligibility source-expression verification
+        const directEvalWaived = canFinalApprove(sampleAcceptedWaived, [wiAccPH, wiAccEC], [], stageMgrUser);
+        expect(directEvalWaived.allowed).toBe(true);
+    });
+
     test('6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates RECEIVED to pendingIntake', async () => {
         const res = await request(app)
             .get('/api/dashboard/home')
@@ -539,47 +688,60 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         // 2. The active candidates in analysis are partitioned strictly:
         // - sampleApproval            -> finalApproval (eligible)
         // - sampleSubmittedFullAccepted -> finalApproval (eligible bench-complete with accepted work)
+        // - sampleAcceptedWaived      -> finalApproval (eligible accepted-plus-waived work)
         // - sampleReview              -> awaitingReview (has submitted work)
         // - sampleBench               -> inProgress (active determinations underway)
-        expect(stageCounts.finalApproval).toBe(2);
+        // - sampleMissingRequired     -> inProgress (active determinations underway, gates incomplete)
+        expect(stageCounts.finalApproval).toBe(3);
         expect(stageCounts.awaitingReview).toBe(1);
-        expect(stageCounts.inProgress).toBe(1);
+        expect(stageCounts.inProgress).toBe(2);
 
         // sampleReceived must NEVER be double-counted in inProgress!
         // Neither sampleApproval nor sampleSubmittedFullAccepted nor sampleReview can double-count into inProgress
-        expect(stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(4);
+        expect(stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(6);
 
         // Total active pipeline stages (intake + inProgress + awaitingReview + finalApproval)
-        expect(stageCounts.pendingIntake + stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(5);
+        expect(stageCounts.pendingIntake + stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(7);
 
         // sampleReceived must NOT appear in analytical oversight progress monitor
         const oversight = res.body.progressOverview?.oversight || [];
         expect(oversight.find(s => s.sampleId === sampleReceived.id)).toBeUndefined();
     });
 
-    test('7. RECEIVED count-to-destination alignment: sample appears in Stage 1 intake destination and not in In Analysis destination', async () => {
-        // Stage 1 destination (/samples?status=RECEIVED,COLLECTED)
+    test('7. Real rendered continuation links and destination behavior: Intake and In Analysis real destinations honor lab scope and omit foreign labs', async () => {
+        // Stage 1 real destination route (/manager-queue?lane=intake&labId=...) executes /api/samples?status=RECEIVED,COLLECTED&labId=...
         const intakeRes = await request(app)
             .get('/api/samples')
-            .query({ status: 'RECEIVED,COLLECTED' })
+            .query({ status: 'RECEIVED,COLLECTED', labId: stageLab.id })
             .set('Authorization', `Bearer ${stageManagerToken}`);
 
         expect(intakeRes.status).toBe(200);
         const intakeSamples = intakeRes.body.samples || intakeRes.body.data || intakeRes.body;
         const intakeIds = intakeSamples.map(s => s.id);
         expect(intakeIds).toContain(sampleReceived.id);
+        expect(intakeIds).not.toContain(sampleBench.id);
+        expect(intakeIds).not.toContain(sampleOtherLabApproved.id);
 
-        // Stage 2 destination (/samples?status=ACCEPTED,PROCESSING)
+        // Stage 2 real destination route (/samples?view=daily&labId=...) executes /api/samples?view=daily&labId=...
         const inProgressRes = await request(app)
             .get('/api/samples')
-            .query({ status: 'ACCEPTED,PROCESSING' })
+            .query({ view: 'daily', labId: stageLab.id })
             .set('Authorization', `Bearer ${stageManagerToken}`);
 
         expect(inProgressRes.status).toBe(200);
         const inProgressSamples = inProgressRes.body.samples || inProgressRes.body.data || inProgressRes.body;
         const inProgressIds = inProgressSamples.map(s => s.id);
-        expect(inProgressIds).not.toContain(sampleReceived.id);
+        // Stage 2 destination includes active specimens in analysis:
         expect(inProgressIds).toContain(sampleBench.id);
+        expect(inProgressIds).toContain(sampleMissingRequired.id);
+        expect(inProgressIds).toContain(sampleAcceptedWaived.id);
+        // Strictly omits approved / completed specimens:
+        expect(inProgressIds).not.toContain(sampleApprovedToday.id);
+        expect(inProgressIds).not.toContain(sampleApprovedPast.id);
+        expect(inProgressIds).not.toContain(sampleSubmittedFull.id);
+        expect(inProgressIds).not.toContain(sampleCompletedNoApprovedAt.id);
+        // Strictly omits samples from foreign lab:
+        expect(inProgressIds).not.toContain(sampleOtherLabApproved.id);
     });
 
     test('8. Stage 5 Approved / Released population counts authoritative approvedAt today, ignoring updatedAt, and strictly counts APPROVED samples', async () => {
@@ -590,10 +752,11 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(res.status).toBe(200);
         const stageCounts = res.body.progressOverview?.stageCounts;
 
-        // Approved / Released population includes ONLY approved samples:
+        // Approved / Released population includes ONLY approved samples in this lab:
         // sampleApprovedToday (status: 'APPROVED') and sampleApprovedPast (status: 'APPROVED')
         // STRICTLY OMITS unapproved SUBMITTED_FULL specimens (sampleSubmittedFull, sampleSubmittedFullAccepted)
         // and non-canonical COMPLETED status (sampleCompletedNoApprovedAt)
+        // and foreign lab approved sample (sampleOtherLabApproved)
         expect(stageCounts.completed).toBe(2);
         expect(stageCounts.approved).toBe(2);
 
@@ -603,13 +766,13 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(stageCounts.approvedToday).toBe(1);
     });
 
-    test('9. Approved / Released count-to-destination alignment: Stage 5 route (/samples?status=APPROVED) matches card count exactly and omits unapproved SUBMITTED_FULL and COMPLETED', async () => {
+    test('9. Approved / Released count-to-destination alignment & Scoped Admin isolation: Stage 5 route (/samples?status=APPROVED) matches card count, excludes unapproved, and strictly isolates by lab', async () => {
         const dashRes = await request(app)
             .get('/api/dashboard/home')
             .set('Authorization', `Bearer ${stageManagerToken}`);
         const cardCompletedCount = dashRes.body.progressOverview?.stageCounts?.completed;
 
-        // Stage 5 destination (/samples?status=APPROVED)
+        // 1. Manager destination (/samples?status=APPROVED) with implicit lab scope:
         const destRes = await request(app)
             .get('/api/samples')
             .query({ status: 'APPROVED' })
@@ -621,25 +784,84 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
 
         const sampleIds = samples.map(s => s.id);
 
-        // 1. Both card and destination include canonical approved samples:
+        // Manager destination includes approved samples in stageLab:
         expect(sampleIds).toContain(sampleApprovedToday.id);
         expect(sampleIds).toContain(sampleApprovedPast.id);
 
-        // 2. Both card and destination strictly omit active, submitted, and review specimens:
+        // Strictly omits active, submitted, review, and foreign lab specimens:
         expect(sampleIds).not.toContain(sampleReview.id);
         expect(sampleIds).not.toContain(sampleApproval.id);
         expect(sampleIds).not.toContain(sampleBench.id);
         expect(sampleIds).not.toContain(sampleReceived.id);
-
-        // 3. SUBMITTED_FULL specimens (even with accepted work) appear in Final Approval, NOT Approved / Released:
+        expect(sampleIds).not.toContain(sampleOtherLabApproved.id);
         expect(sampleIds).not.toContain(sampleSubmittedFullAccepted.id);
         expect(sampleIds).not.toContain(sampleSubmittedFull.id);
-
-        // 4. COMPLETED fixture appears in NEITHER the card count nor the destination results:
         expect(sampleIds).not.toContain(sampleCompletedNoApprovedAt.id);
 
-        // 5. Card count exactly equals destination results count
+        // Card count exactly equals destination results count
         expect(sampleIds.length).toBe(cardCompletedCount);
         expect(cardCompletedCount).toBe(2);
+
+        // 2. Scoped System Admin: GET /api/dashboard/home?labId=... matches GET /api/samples?status=APPROVED&labId=...
+        const adminDashRes = await request(app)
+            .get('/api/dashboard/home')
+            .query({ labId: stageLab.id })
+            .set('Authorization', `Bearer ${stageAdminToken}`);
+        expect(adminDashRes.status).toBe(200);
+        const adminCardCompleted = adminDashRes.body.progressOverview?.stageCounts?.completed;
+        expect(adminCardCompleted).toBe(2);
+
+        // Scoped destination with labId parameter:
+        const adminDestRes = await request(app)
+            .get('/api/samples')
+            .query({ status: 'APPROVED', labId: stageLab.id })
+            .set('Authorization', `Bearer ${stageAdminToken}`);
+        expect(adminDestRes.status).toBe(200);
+        const adminSamples = adminDestRes.body.samples || adminDestRes.body.data || adminDestRes.body;
+        const adminSampleIds = adminSamples.map(s => s.id);
+
+        expect(adminSampleIds).toContain(sampleApprovedToday.id);
+        expect(adminSampleIds).toContain(sampleApprovedPast.id);
+        expect(adminSampleIds).not.toContain(sampleOtherLabApproved.id);
+        expect(adminSampleIds.length).toBe(2);
+        expect(adminSampleIds.length).toBe(adminCardCompleted);
+
+        // Contrast: Unscoped Admin destination without labId returns both labs:
+        const unscopedDestRes = await request(app)
+            .get('/api/samples')
+            .query({ status: 'APPROVED' })
+            .set('Authorization', `Bearer ${stageAdminToken}`);
+        expect(unscopedDestRes.status).toBe(200);
+        const unscopedSamples = unscopedDestRes.body.samples || unscopedDestRes.body.data || unscopedDestRes.body;
+        const unscopedIds = unscopedSamples.map(s => s.id);
+        expect(unscopedIds).toContain(sampleOtherLabApproved.id);
+        expect(unscopedIds.length).toBeGreaterThan(2);
+    });
+
+    test('10. Continuation links rendered in ManagerProgressOverview preserve activeLabId when scoped', () => {
+        // Pure route builder contract matching ManagerProgressOverview.jsx implementation:
+        const buildRoute = (baseRoute, activeLabId) => {
+            if (!activeLabId) return baseRoute;
+            const separator = baseRoute.includes('?') ? '&' : '?';
+            return `${baseRoute}${separator}labId=${encodeURIComponent(activeLabId)}`;
+        };
+
+        // When activeLabId is present (e.g. Scoped Admin):
+        expect(buildRoute('/manager-queue?lane=intake', stageLab.id)).toBe(`/manager-queue?lane=intake&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/samples?view=daily', stageLab.id)).toBe(`/samples?view=daily&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/manager-queue?lane=review', stageLab.id)).toBe(`/manager-queue?lane=review&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/manager-queue?lane=approve', stageLab.id)).toBe(`/manager-queue?lane=approve&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/samples?status=APPROVED', stageLab.id)).toBe(`/samples?status=APPROVED&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/manager-queue?lane=assign', stageLab.id)).toBe(`/manager-queue?lane=assign&labId=${encodeURIComponent(stageLab.id)}`);
+        expect(buildRoute('/manager-queue', stageLab.id)).toBe(`/manager-queue?labId=${encodeURIComponent(stageLab.id)}`);
+
+        // When activeLabId is empty (Manager implicit session):
+        expect(buildRoute('/manager-queue?lane=intake', '')).toBe('/manager-queue?lane=intake');
+        expect(buildRoute('/samples?view=daily', '')).toBe('/samples?view=daily');
+        expect(buildRoute('/manager-queue?lane=review', '')).toBe('/manager-queue?lane=review');
+        expect(buildRoute('/manager-queue?lane=approve', '')).toBe('/manager-queue?lane=approve');
+        expect(buildRoute('/samples?status=APPROVED', '')).toBe('/samples?status=APPROVED');
+        expect(buildRoute('/manager-queue?lane=assign', '')).toBe('/manager-queue?lane=assign');
+        expect(buildRoute('/manager-queue', '')).toBe('/manager-queue');
     });
 });

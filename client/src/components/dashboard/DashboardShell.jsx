@@ -173,7 +173,7 @@ export default function DashboardShell({
                     </div>
 
                     <Link
-                        to="/manager-queue"
+                        to={selectedLabId ? `/manager-queue?labId=${encodeURIComponent(selectedLabId)}` : '/manager-queue'}
                         className="text-xs font-bold text-sf-primary hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
                     >
                         <span>{t('dashboard.manager.openTaskList', 'Open Manager Task List')}</span>
